@@ -1,0 +1,340 @@
+deutschmann@tocai:~/SCAM> ./bin/SCAM ./doc/example/Example1/sc_main.cpp -ITL
+Creating Model
+----------------------
+Creating module: Example1
+----------------------
+-I- Example1: no states found. Adding default state run 
+----------------------
+Error: Translation of Stmts for module Example1
+----------------------
+- std::cout << "@Example1: " << success << " succ_cnt:" << succ_cnt  << " frames_ok: " << frames_ok << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- wait(SC_ZERO_TIME)
+	-E- wait() is not a supported method!
+----------------------
+Create Paths:3
+Add communication: 9
+Deleted 2 duplicated paths
+Deleted 0 unreachable paths
+Comm to Comm: 6
+Deleted 0 duplicated paths
+Value Propagation:6
+Deleted 0 duplicated paths
+Deleted 0 unreachable paths
+Clean-up: 6
+Optimized conditions
+Optimized datapath
+Optimization: 6
+----------------------
+Creating module: Stimuli
+----------------------
+-I- Stimuli: no states found. Adding default state run 
+----------------------
+Error: Translation of Stmts for module Stimuli
+----------------------
+- std::cout << "@Stimuli: success:" << success << " succ_cnt:" << succ_cnt << " frames_ok:" << frames_ok  << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- wait(SC_ZERO_TIME)
+	-E- wait() is not a supported method!
+----------------------
+Create Paths:3
+Add communication: 11
+Deleted 4 duplicated paths
+Deleted 1 unreachable paths
+Comm to Comm: 7
+Deleted 0 duplicated paths
+Value Propagation:7
+Deleted 0 duplicated paths
+Deleted 0 unreachable paths
+Clean-up: 7
+Optimized conditions
+Optimized datapath
+Optimization: 7
+
+----------------------
+ITL: Example1
+----------------------
+State-map(unoptimized):6 operations created
+State-map(optimized):6 operations created
+----------------------
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+macro block_in_notify :  boolean  := end macro; 
+macro block_in_sync   :  boolean  := end macro; 
+macro block_out_notify :  boolean  := end macro; 
+macro block_out_sync   :  boolean  := end macro; 
+
+
+-- DP SIGNALS -- 
+macro block_in_sig : int := end macro; 
+macro block_out_sig : int := end macro; 
+macro share_out_sig : bool := end macro; 
+
+
+--CONSTRAINTS-- 
+constraint no_reset := rst = '0'; end constraint; 
+
+
+-- VISIBLE REGISTERS --
+macro succ_cnt : int := end macro; 
+
+
+-- STATES -- 
+macro run_0 : boolean := true end macro;
+macro run_1 : boolean := true end macro;
+
+
+--Operations -- 
+property reset is
+assume:
+	 reset_sequence;
+prove:
+	 at t: run_0;
+	 at t: share_out_sig = false;
+	 at t: succ_cnt = 0;
+	 at t: block_in_notify = true;
+	 at t: block_out_notify = false;
+end property;
+
+
+property run_0_read_0 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	share_out_sig_at_t = share_out_sig@t;
+assume: 
+	 at t: run_0;
+	 at t: (block_in_sig <= 10);
+	 at t: block_in_sync;
+prove:
+	 at t_end: run_0;
+	 at t_end: share_out_sig = share_out_sig_at_t;
+	 at t_end: succ_cnt = 0;
+	 during[t+1, t_end-1]: block_in_notify = false;
+	 at t_end: block_in_notify = true;
+	 during[t+1, t_end]: block_out_notify = false;
+end property;
+
+property run_0_read_1 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	share_out_sig_at_t = share_out_sig@t,
+	succ_cnt_at_t = succ_cnt@t;
+assume: 
+	 at t: run_0;
+	 at t: (block_in_sig >= 11);
+	 at t: block_in_sync;
+prove:
+	 at t_end: run_1;
+	 at t_end: block_out_sig = (1 + succ_cnt_at_t);
+	 at t_end: share_out_sig = share_out_sig_at_t;
+	 at t_end: succ_cnt = (1 + succ_cnt_at_t);
+	 during[t+1, t_end]: block_in_notify = false;
+	 during[t+1, t_end-1]: block_out_notify = false;
+	 at t_end: block_out_notify = true;
+end property;
+
+property run_1_write_2 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	block_out_sync_at_t = block_out_sync@t,
+	succ_cnt_at_t = succ_cnt@t;
+assume: 
+	 at t: run_1;
+	 at t: block_out_sync;
+prove:
+	 at t_end: run_0;
+	 at t_end: share_out_sig = block_out_sync_at_t;
+	 at t_end: succ_cnt = succ_cnt_at_t;
+	 during[t+1, t_end-1]: block_in_notify = false;
+	 at t_end: block_in_notify = true;
+	 during[t+1, t_end]: block_out_notify = false;
+end property;
+
+property run_1_write_3 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	succ_cnt_at_t = succ_cnt@t;
+assume: 
+	 at t: run_1;
+	 at t: not(block_out_sync);
+prove:
+	 at t_end: run_0;
+	 at t_end: share_out_sig = false;
+	 at t_end: succ_cnt = succ_cnt_at_t;
+	 during[t+1, t_end-1]: block_in_notify = false;
+	 at t_end: block_in_notify = true;
+	 during[t+1, t_end]: block_out_notify = false;
+end property;
+
+property wait_run_0 is
+dependencies: no_reset;
+freeze:
+	share_out_sig_at_t = share_out_sig@t,
+	succ_cnt_at_t = succ_cnt@t;
+assume: 
+	 at t: run_0;
+	 at t: not(block_in_sync);
+prove:
+	 at t+1: run_0;
+	 at t+1: share_out_sig = share_out_sig_at_t;
+	 at t+1: succ_cnt = succ_cnt_at_t;
+	 at t+1: block_in_notify = true;
+	 at t+1: block_out_notify = false;
+	 at t+1: block_in_notify = true;
+end property;
+----------------------
+ITL: Stimuli
+----------------------
+State-map(unoptimized):7 operations created
+State-map(optimized):7 operations created
+----------------------
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+macro block_in_notify :  boolean  := end macro; 
+macro block_in_sync   :  boolean  := end macro; 
+macro block_out_notify :  boolean  := end macro; 
+macro block_out_sync   :  boolean  := end macro; 
+
+
+-- DP SIGNALS -- 
+macro block_in_sig : int := end macro; 
+macro block_out_sig : int := end macro; 
+macro share_in_sig : bool := end macro; 
+
+
+--CONSTRAINTS-- 
+constraint no_reset := rst = '0'; end constraint; 
+
+
+-- VISIBLE REGISTERS --
+macro frames_ok : int := end macro; 
+
+
+-- STATES -- 
+macro run_0 : boolean := true end macro;
+macro run_1 : boolean := true end macro;
+
+
+--Operations -- 
+property reset is
+assume:
+	 reset_sequence;
+prove:
+	 at t: run_0;
+	 at t: block_out_sig = 10;
+	 at t: frames_ok = 10;
+	 at t: block_in_notify = false;
+	 at t: block_out_notify = true;
+end property;
+
+
+property run_0_write_0 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	frames_ok_at_t = frames_ok@t;
+assume: 
+	 at t: run_0;
+	 at t: block_out_sync;
+prove:
+	 at t_end: run_1;
+	 at t_end: frames_ok = frames_ok_at_t;
+	 during[t+1, t_end-1]: block_in_notify = false;
+	 at t_end: block_in_notify = true;
+	 during[t+1, t_end]: block_out_notify = false;
+end property;
+
+property run_1_read_1 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	frames_ok_at_t = frames_ok@t;
+assume: 
+	 at t: run_1;
+	 at t: (((7 * frames_ok) / 5) <= 97);
+	 at t: block_in_sync;
+prove:
+	 at t_end: run_0;
+	 at t_end: block_out_sig = (3 + ((7 * frames_ok_at_t) / 5));
+	 at t_end: frames_ok = (3 + ((7 * frames_ok_at_t) / 5));
+	 during[t+1, t_end]: block_in_notify = false;
+	 during[t+1, t_end-1]: block_out_notify = false;
+	 at t_end: block_out_notify = true;
+end property;
+
+property run_1_read_2 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	frames_ok_at_t = frames_ok@t;
+assume: 
+	 at t: run_1;
+	 at t: (((7 * frames_ok) / 5) <= 97);
+	 at t: not(block_in_sync);
+prove:
+	 at t_end: run_0;
+	 at t_end: block_out_sig = (3 + ((7 * frames_ok_at_t) / 5));
+	 at t_end: frames_ok = (3 + ((7 * frames_ok_at_t) / 5));
+	 during[t+1, t_end]: block_in_notify = false;
+	 during[t+1, t_end-1]: block_out_notify = false;
+	 at t_end: block_out_notify = true;
+end property;
+
+property run_1_read_3 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+assume: 
+	 at t: run_1;
+	 at t: (((7 * frames_ok) / 5) >= 98);
+	 at t: block_in_sync;
+prove:
+	 at t_end: run_0;
+	 at t_end: block_out_sig = 1;
+	 at t_end: frames_ok = 1;
+	 during[t+1, t_end]: block_in_notify = false;
+	 during[t+1, t_end-1]: block_out_notify = false;
+	 at t_end: block_out_notify = true;
+end property;
+
+property run_1_read_4 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+assume: 
+	 at t: run_1;
+	 at t: (((7 * frames_ok) / 5) >= 98);
+	 at t: not(block_in_sync);
+prove:
+	 at t_end: run_0;
+	 at t_end: block_out_sig = 1;
+	 at t_end: frames_ok = 1;
+	 during[t+1, t_end]: block_in_notify = false;
+	 during[t+1, t_end-1]: block_out_notify = false;
+	 at t_end: block_out_notify = true;
+end property;
+
+property wait_run_0 is
+dependencies: no_reset;
+freeze:
+	frames_ok_at_t = frames_ok@t;
+assume: 
+	 at t: run_0;
+	 at t: not(block_out_sync);
+prove:
+	 at t+1: run_0;
+	 at t+1: block_out_sig = frames_ok_at_t;
+	 at t+1: frames_ok = frames_ok_at_t;
+	 at t+1: block_in_notify = false;
+	 at t+1: block_out_notify = true;
+	 at t+1: block_out_notify = true;
+end property;

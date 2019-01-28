@@ -1,0 +1,71 @@
+#!/bin/bash
+SCAM_HOME="$HOME/SCAM"
+CMAKE_BIN="/usr/bin/cmake"
+PYTHON3="/usr/bin/python3"
+
+echo -e "\e[30;48;5;82mUnpacking files\e[0m"
+(unzip install_new.zip  -d tmp && echo "\e[30;48;5;82m Unpacked files") || echo "\e[41mError unpacking file install_new.zip" ;
+cd tmp;
+mkdir build
+
+echo -e "\e[30;48;5;82mInstalling LLVM/CLANG\e[0m";
+(cd $SCAM_HOME/install/tmp/build/ &&
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$SCAM_HOME/install/tmp/files/llv ../
+make &&
+make install &&
+cd ../ &&
+rm -r ./build/* &&
+echo -e "\e[30;48;5;82mInstalled LLVM/Clang!\e[0m") || echo -e "\e[41mError installing LLVM ... see logs\e[0m" ;
+
+echo -e "\e[30;48;5;82mInstalling Z3\e[0m";
+(cd $SCAM_HOME/install/tmp/z3 &&
+ $PYTHON3 scripts/mk_make.py --prefix $SCAM_HOME/install/tmp/files/z3 &&
+cd build &&
+make &&
+make install && 
+echo -e "\e[30;48;5;82mInstalled Z3\e[0m" ) || echo -e "\e[41mError installing z3 ... see logs\e[0m" ;
+
+
+echo "\e[30;48;5;82mInstalling SystemC...\e[0m";
+(cd $SCAM_HOME/install/tmp/build &&
+../systemc-2.3.1/configure --prefix $SCAM_HOME/install/tmp/files/SystemC &&
+make &&
+make install &&
+cd ../ && 
+rm -r ./build/* && 
+echo -e "\e[30;48;5;82mInstalled SystemC!\e[0m") || echo -e "\e[41mError installing SystemC ... see logs\e[0m" ;
+
+echo "Moving files"
+cd $SCAM_HOME
+mkdir include/
+mkdir lib/
+
+cp -r $SCAM_HOME/install/tmp/files/SystemC/include/* ./include
+cp -r $SCAM_HOME/install/tmp/files/llvm/include/* ./include
+cp -r $SCAM_HOME/install/tmp/files/z3/include/* ./include
+
+cp -r $SCAM_HOME/install/tmp/files/SystemC/lib-linux64/* ./lib
+cp -r $SCAM_HOME/install/tmp/files/llvm/lib/* ./lib
+cp -r $SCAM_HOME/install/tmp/files/z3/lib/* ./lib
+
+
+echo -e "\e[30;48;5;82mInstalling SCAM ...\e[0m";
+(cd $SCAM_HOME/install/tmp/build/ &&
+$CMAKE_BIN ../../../ &&
+make SCAM &&
+make install &&
+echo -e "Installed SCAM!" ) || echo -e "\e[41mError installing SCAM ... see logs\e[0m";
+
+
+
+
+
+
+
+
+
+
+
+
+
+

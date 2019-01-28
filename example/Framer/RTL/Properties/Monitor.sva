@@ -1,0 +1,201 @@
+// required terminology
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+// end of ipc_sva
+
+import scam_model_types::*;
+
+module Monitor_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge top.monitor_comp.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function frame_pulse_sync;
+	frame_pulse_sync = top.monitor_comp.frame_pulse;
+endfunction
+
+// DP SIGNALS //
+function int config_in_sig_LOFreset;
+	config_in_sig_LOFreset = top.monitor_comp.lof_reset;
+endfunction
+function int config_in_sig_LOFset;
+	config_in_sig_LOFset = top.monitor_comp.lof_set;
+endfunction
+function bool frame_pulse_sig;
+	frame_pulse_sig = top.monitor_comp.frame_pulse;
+endfunction
+function bool lof_sig;
+	lof_sig = top.monitor_comp.lof;
+endfunction
+function bool oof_sig;
+	oof_sig = !top.monitor_comp.synchronized;
+endfunction
+
+// VISIBLE REGISTERS //
+function int cnt;
+	if(N_LOF_1()) begin
+		return top.monitor_comp.oof_cnt;
+	end else begin
+		return top.monitor_comp.if_cnt;
+	end
+endfunction
+
+// STATES //
+function LOF_0;
+	LOF_0 = top.monitor_comp.lof;
+endfunction
+function N_LOF_1;
+	N_LOF_1 = !top.monitor_comp.lof;
+endfunction
+
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+sequence reset_sequence;
+	(top.monitor_comp.reset_n == 0);//DISGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+property reset_p;
+	reset_sequence |=>
+	t ##0 N_LOF_1() and
+	t ##0 cnt() == 0 and
+	t ##0 lof_sig() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+property LOF_0_read_0_p(o);
+int cnt_0;
+bool lof_sig_0;
+// hold
+	t ##0 hold(cnt_0, cnt()) and
+	t ##0 hold(lof_sig_0, lof_sig()) and
+// Conceptual State
+	t ##0 LOF_0() and
+// trigger
+	t ##0 !(frame_pulse_sync())
+implies
+	t_end(o) ##0 LOF_0() and
+	t_end(o) ##0 cnt() == cnt_0 and
+	t_end(o) ##0 lof_sig() == lof_sig_0;
+endproperty;
+LOF_0_read_0_a: assert property (disable iff (reset) LOF_0_read_0_p(1));// ASSIGN t_end offset here
+
+property LOF_0_read_1_p(o);
+// Conceptual State
+	t ##0 LOF_0() and
+// trigger
+	t ##0 frame_pulse_sync() and
+	t ##0 oof_sig() and
+	t ##0 frame_pulse_sync()
+implies
+	t_end(o) ##0 LOF_0() and
+	t_end(o) ##0 cnt() == 0 and
+	t_end(o) ##0 lof_sig() == 1;
+endproperty;
+LOF_0_read_1_a: assert property (disable iff (reset) LOF_0_read_1_p(1));// ASSIGN t_end offset here
+
+property LOF_0_read_2_p(o);
+int cnt_0;
+// hold
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State
+	t ##0 LOF_0() and
+// trigger
+	t ##0 frame_pulse_sync() and
+	t ##0 !(oof_sig()) and
+	t ##0 !((config_in_sig_LOFreset() <= cnt())) and
+	t ##0 frame_pulse_sync()
+implies
+	t_end(o) ##0 LOF_0() and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 lof_sig() == 1;
+endproperty;
+LOF_0_read_2_a: assert property (disable iff (reset) LOF_0_read_2_p(1));// ASSIGN t_end offset here
+
+property LOF_0_read_3_p(o);
+// Conceptual State
+	t ##0 LOF_0() and
+// trigger
+	t ##0 frame_pulse_sync() and
+	t ##0 !(oof_sig()) and
+	t ##0 (config_in_sig_LOFreset() <= cnt()) and
+	t ##0 frame_pulse_sync()
+implies
+	t_end(o) ##0 N_LOF_1() and
+	t_end(o) ##0 cnt() == 0 and
+	t_end(o) ##0 lof_sig() == 0;
+endproperty;
+LOF_0_read_3_a: assert property (disable iff (reset) LOF_0_read_3_p(1));// ASSIGN t_end offset here
+
+property N_LOF_1_read_4_p(o);
+// Conceptual State
+	t ##0 N_LOF_1() and
+// trigger
+	t ##0 frame_pulse_sync() and
+	t ##0 oof_sig() and
+	t ##0 (config_in_sig_LOFset() <= cnt()) and
+	t ##0 frame_pulse_sync()
+implies
+	t_end(o) ##0 LOF_0() and
+	t_end(o) ##0 cnt() == 0 and
+	t_end(o) ##0 lof_sig() == 1;
+endproperty;
+N_LOF_1_read_4_a: assert property (disable iff (reset) N_LOF_1_read_4_p(1));// ASSIGN t_end offset here
+
+property N_LOF_1_read_5_p(o);
+int cnt_0;
+bool lof_sig_0;
+// hold
+	t ##0 hold(cnt_0, cnt()) and
+	t ##0 hold(lof_sig_0, lof_sig()) and
+// Conceptual State
+	t ##0 N_LOF_1() and
+// trigger
+	t ##0 !(frame_pulse_sync())
+implies
+	t_end(o) ##0 N_LOF_1() and
+	t_end(o) ##0 cnt() == cnt_0 and
+	t_end(o) ##0 lof_sig() == lof_sig_0;
+endproperty;
+N_LOF_1_read_5_a: assert property (disable iff (reset) N_LOF_1_read_5_p(1));// ASSIGN t_end offset here
+
+property N_LOF_1_read_6_p(o);
+// Conceptual State
+	t ##0 N_LOF_1() and
+// trigger
+	t ##0 frame_pulse_sync() and
+	t ##0 !(oof_sig()) and
+	t ##0 frame_pulse_sync()
+implies
+	t_end(o) ##0 N_LOF_1() and
+	t_end(o) ##0 cnt() == 0 and
+	t_end(o) ##0 lof_sig() == 0;
+endproperty;
+N_LOF_1_read_6_a: assert property (disable iff (reset) N_LOF_1_read_6_p(1));// ASSIGN t_end offset here
+
+property N_LOF_1_read_7_p(o);
+int cnt_0;
+// hold
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State
+	t ##0 N_LOF_1() and
+// trigger
+	t ##0 frame_pulse_sync() and
+	t ##0 oof_sig() and
+	t ##0 !((config_in_sig_LOFset() <= cnt())) and
+	t ##0 frame_pulse_sync()
+implies
+	t_end(o) ##0 N_LOF_1() and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 lof_sig() == 0;
+endproperty;
+N_LOF_1_read_7_a: assert property (disable iff (reset) N_LOF_1_read_7_p(1));// ASSIGN t_end offset here
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind monitor_comp Monitor_verification inst (.*, .reset(!(top.monitor_comp.reset_n)));

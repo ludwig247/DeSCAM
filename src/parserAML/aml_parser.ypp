@@ -1,0 +1,993 @@
+
+%skeleton "lalr1.cc" //C++
+%require "3.0.4"
+%defines
+%define parser_class_name {aml_parser}
+%define api.token.constructor
+%define api.value.type variant
+%define parse.assert
+
+%code requires {
+ #include <string>
+ #include <map>
+ #include <vector>
+ class aml_driver;
+ #include "Model.h"
+ #include "IntegerValue.h"
+ #include "VariableOperand.h"
+ #include "Assignment.h"
+ #include "UnaryExpr.h"
+ #include "Relational.h"
+ #include "Logical.h"
+ #include "If.h"
+ #include "SectionOperand.h"
+ #include "BoolValue.h"
+ #include "SectionValue.h"
+ #include "ITE.h"
+ #include "Branch.h"
+ #include "Arithmetic.h"
+ #include "EnumValue.h"
+ #include "Read.h"
+ #include "Write.h"
+ #include "NBRead.h"
+ #include "NBWrite.h"
+}
+
+// The parsing context.
+%param { aml_driver& driver }
+
+%locations
+%initial-action
+{
+  // Initialize the initial location.
+  @$.begin.filename = &driver.filename;
+  @$.end.filename = &driver.filename;
+};
+
+%define parse.trace
+%define parse.error verbose
+
+%code
+{
+#include "aml_driver.h"
+}
+
+%define api.token.prefix {TOK_}
+%token  <std::string> NAME "identifier"
+%token  <int> NUM "number"
+%token  <bool> BOOLVAL "boolean value"
+
+%token
+  END 0 "end of file"
+  SYSTEM "system"
+  MODULE "module"
+  IN "in"
+  OUT "out"
+  FSM "fsm"
+  CONNECT "connect"
+  BLOCKING "blocking"
+  SHARED "shared"
+  SECTIONS "sections"
+  NEXTSECTION "nextsection"
+  INIT "init"
+  ENUM "enum"
+  CONST "const"
+  FUNC "func"
+  BOOL "bool"
+  INT "int"
+  COMPOUND "compound"
+  IF "if"
+  ELSE "else"
+  READ "read"
+  WRITE "write"
+  NBREAD "nb_read"
+  NBWRITE "nb_write"
+  GET "get"
+  SET "set"
+  REQ "req"
+  ASSIGNMENT "="
+  INCREMENT "++"
+  DECREMENT "--"
+  AT "@"
+  LPAREN "("
+  RPAREN ")"
+  LCURLY "{"
+  RCURLY "}"
+  COLON ":"
+  SEMICOLON ";"
+  PUNKT "."
+  COMMA ","
+  ARROW "->"
+  XNOR "xnor"
+  XOR "xor"
+  NOR "nor"
+  NAND "nand"
+  OR "or"
+  AND "and"
+  BITOR "bitor"
+  BITXOR "bitxor"
+  BITAND "bitand"
+  EQ "=="
+  NEQ "!="
+  MORE ">"
+  LESS "<"
+  MOREEQ ">="
+  LESSEQ "<="
+  SHIFTL "<<"
+  SHIFTR ">>"
+  MINUS "-"
+  PLUS "+"
+  MULTIPLY "*"
+  DIVIDE "/"
+  REMAINDER "%"
+  NOT "not"
+  BITNOT "bitnot"
+  UMIN
+;
+
+/* Precedence (higher=later), and associativity */
+%precedence ","
+%right "="
+%left "xnor"
+%left "xor"
+%left "nor"
+%left "nand"
+%left "or"
+%left "and"
+%left "bitor"
+%left "bitxor"
+%left "bitand"
+%left "==" "!="
+%left ">" "<" ">=" "<="
+%left "<<" ">>"
+%left "-" "+"
+%left "*" "/" "%"
+%right "not" "bitnot" UMIN "++" "--"
+%precedence "."
+
+
+%type <std::string> name_header;
+%type <std::string> name_header_list
+%type <std::string> name_header_el
+
+%type <SCAM::DataType*> datatype;
+%type <std::string> blocking_key;
+%type <std::string> direction_key;
+
+%type <SCAM::Port*> port_decl;
+
+%type <std::vector<std::string>> name_list_comma;
+%type <std::map<std::string,SCAM::Variable*>> var_list_comma;
+
+%type < std::map<std::string,std::vector<SCAM::Stmt*>> > sections
+
+
+
+
+%type < std::vector<SCAM::Stmt*> > statements;
+%type < std::vector<SCAM::Stmt*> > statement;
+%type < std::vector<SCAM::Stmt*> > assign_statement;
+%type <SCAM::Read*> read_statement;
+%type <SCAM::Write*> write_statement;
+%type <SCAM::NBRead*> nb_read_statement;
+%type <SCAM::NBWrite*> nb_write_statement;
+%type <SCAM::NBRead*> get_statement;
+%type <SCAM::NBWrite*> set_statement;
+%type <SCAM::Read*> req_statement;
+
+%type <SCAM::ITE*> if_statement;
+%type < std::vector<SCAM::Stmt*> > opt_else;
+
+
+
+
+%type <SCAM::VariableOperand*> var_ref;
+%type <SCAM::VariableOperand*> var_ref_parent;
+%type <SCAM::VariableOperand*> var_ref_child;
+
+%type <std::vector<SCAM::Expr*>> opt_init;
+%type <std::vector<SCAM::Expr*>> expr_list_comma;
+%type <SCAM::Expr*> expr;
+
+
+/*
+%printer   { yyoutput << "hei";} statements
+%printer   { yyoutput << $$; } <*>
+*/
+%%
+
+
+
+
+
+
+
+%start themodel;
+
+themodel    : all_elements
+{/*MODEL PARSED SUCCESSFULLY*/
+};
+
+all_elements: top_element
+            | all_elements top_element
+            ;
+
+top_element : enum_def
+            | compound_def
+            | const_def
+            | func_def
+            | system_def
+            | module_def
+            ;
+
+
+enum_def    : "enum" NAME "=" "{" name_list_comma "}" ";"
+{
+  if ( SCAM::DataTypes::isDataType($2) ) {
+    error(@2,"The identifier " + $2 + " is already used and cannot be re-defined");
+    YYERROR;
+  }
+  SCAM::DataType* dt = new SCAM::DataType($2);
+  //add symbolic values
+  std::vector<std::string>::iterator itSymVal;
+  for (itSymVal=$5.begin(); itSymVal!=$5.end(); ++itSymVal) {
+    if (SCAM::DataTypes::isEnumValue(*itSymVal)) {
+      error(@4,"The identifier " + *itSymVal + " is already used and cannot be re-defined");
+      YYERROR;
+    }
+    dt->addEnumValue(*itSymVal);
+  }
+  SCAM::DataTypes::addDataType(dt);
+};
+
+compound_def    : "compound" NAME "=" "{" var_list_comma "}" ";"
+{
+  if (SCAM::DataTypes::isDataType($2)) {
+    error(@2,"A data type " + $2 + " was already defined");
+    YYERROR;
+  }
+  //var_list_comma should not be empty
+  if ($5.empty()) {
+    error(@5,"The identifier " + $2 + " is already used and cannot be re-defined");
+    YYERROR;
+  }
+  SCAM::DataType* dt = new SCAM::DataType($2);
+  //add subVars
+  std::map<std::string,SCAM::Variable*>::iterator itSubVar;
+  for (itSubVar=$5.begin(); itSubVar!=$5.end(); ++itSubVar) {
+    dt->addSubVar(itSubVar->first, itSubVar->second->getDataType());
+  }
+  SCAM::DataTypes::addDataType(dt);
+
+};
+
+
+const_def   : "const" datatype NAME "=" NUM ";"       {}
+            | "const" datatype NAME "=" BOOLVAL ";"  {}
+            | "const" datatype NAME "=" NAME ";"      {};
+
+func_def : "func" "<" datatype ">" NAME "(" var_list_comma ")" "{" func_vars statements "}" ";"
+
+func_vars : /*empty*/
+          | func_vars datatype NAME ";"
+
+
+system_def  : "system" name_header "{" system_ports connect_decl "}" ";" {};
+
+system_ports : system_port
+             | system_ports system_port
+             ;
+system_port   : port_decl
+              | submod_decl
+              ;
+connect_decl   : "connect" "{" connections "}" {};
+
+connections : connection
+            | connections connection
+            ;
+connection      : NAME  "." NAME "->" NAME "." NAME ";"
+{}
+/*connection*/  | NAME "->" NAME ";"
+{}
+/*connection*/  | NAME "." NAME "->" NAME ";"
+{}
+/*connection*/  | NAME "->" NAME "." NAME ";"
+{};
+
+
+
+// module_def
+// is split to enable first declaring ports, variables and states, and then check statements with these registered as identifiers
+// module_def : "module" name_header "{" "fsm" "{" "sections" "=" "{" name_list_comma  "}" ";"    module_vars     "@" "init" ":" statements sections "}" "}" ";"
+module_def : module_header module_body
+
+
+module_header  : "module" name_header "{"
+{
+  bool ok;
+  ok = driver.addModule( new SCAM::Module($2) );
+  if (!ok) {
+    error(@2,"A module named " + $2 + " is already defined");
+    YYERROR;
+  }
+};
+module_body    : module_ports "fsm" "{" section_var module_vars  sections "}" "}" ";"
+{
+  //module_ports, adds ports to currentModule in rule
+  //section_var, adds sectionVariable (with new enum DataType) to currentModule in rule
+  //module_vars, adds variables to currentModule in rule
+
+  //sections, returns a sectionMap, added here to currentModule
+
+  //SCAM::FSM* fsm = new SCAM::FSM;
+   driver.module->getFSM()->setSectionMap($6);
+  //fsm->setSectionMap($6);
+  //driver.module->setFSM(fsm);
+};
+
+
+module_ports      : port_decl
+{
+  driver.module->addPort($1);
+}
+/*module_ports*/  | module_ports port_decl
+{
+  //check name against the names of the already defined ones
+  if (driver.module->isPort($2->getName())) {
+    error(@2,"A port named " + $2->getName() + " is already defined");
+    YYERROR;
+  }
+  driver.module->addPort($2);
+};
+
+// returns std::vector<SCAM::Expr*>
+opt_init  : /*empty*/ {}
+          | "=" expr  { $$.push_back($2);}
+          | "=" "{" expr_list_comma "}" {std::swap($$,$3);}
+          ;
+
+
+//split needed, because opt_init requires the sectionlist to be in the datastruct
+section_var : section_var_decl opt_init ";"
+{
+  if ($2.size() == 1) {
+    // must be a name from the sections list
+    if (driver.module->getFSM()->getSectionVariable()->getDataType() != $2.at(0)->getDataType()) {
+      error(@2, "expected a section name");
+      YYERROR;
+    } {
+      SCAM::SectionValue* initval = new SCAM::SectionValue((dynamic_cast<SCAM::SectionValue*>($2.at(0)))->getValue(), driver.module->getFSM()->getSectionVariable()->getDataType());
+      driver.module->getFSM()->getSectionVariable()->setInitialValue(initval);
+      driver.module->getFSM()->getNextSectionVariable()->setInitialValue(initval);
+    }
+
+  } else {
+    if ($2.size() > 1) {
+      error(@2, "initialization of section must be a scalar type");
+      YYERROR;
+    }
+  }
+}
+
+section_var_decl   :  "sections" "{" name_list_comma  "}"
+{
+
+  SCAM::DataType* sectionDataType = new SCAM::DataType(driver.module->getName()+"_SECTIONS");
+  //add symbolic values
+  std::vector<std::string>::iterator itSymVal;
+  for (itSymVal=$3.begin(); itSymVal!=$3.end(); ++itSymVal) {
+    if (SCAM::DataTypes::isEnumValue(*itSymVal)) {
+      error(@3, "identifier " + *itSymVal + " is already in use"); YYERROR;
+    }
+    sectionDataType->addEnumValue(*itSymVal);
+  }
+
+  driver.module->getFSM()->setSections(sectionDataType);
+}
+
+
+
+module_vars : /*empty*/
+            | module_vars datatype NAME opt_init ";"
+{
+  //check name against the names of the already defined ones
+  if (driver.module->isVariable($3)) {
+    error(@3,"A variable named " + $3 + " is already defined");  YYERROR;
+  }
+  //check the name agains enum values
+  if (SCAM::DataTypes::isEnumValue($3)) {
+    error(@3,"identifier " + $3 + " is already used as enum value");  YYERROR;
+  }
+  //check against all section names
+  if (driver.module->getFSM()->isSectionValue($3) ) {
+    error(@3,"identifier " + $3 + " is already used as section name");  YYERROR;
+  }
+  SCAM::Variable* variable = new SCAM::Variable($3,$2);
+  driver.module->addVariable( variable );
+
+
+  // scalar type initialization
+  if ($4.size() == 1) {
+    //datatype should be the same
+    if ($4.at(0)->getDataType() != $2) {
+      error(@4, "datatype of initialization does not match the datatype of the variable");
+      YYERROR;
+    }
+    //init must be (reducable to) a constant
+    if (!driver.isConstExpr($4.at(0))) { //should actually not be reachable since no variable are declared yet
+      error(@4, "initialization value must be constant");  YYERROR;
+    }
+    variable->setInitialValue(driver.reduzeToConstValue($4.at(0)));
+  }
+
+  // Compound type initialization
+  if ($4.size() > 1) {
+    //variable must be a compound  and list size must match
+    if (! $2->isCompoundType() || $2->getSubVarMap().size() != $4.size()) {
+      error(@4, "datatype of initialization does not match the datatype of the variable");  YYERROR;
+    }
+
+    std::vector<SCAM::Expr*>::const_iterator initexpr = $4.begin();
+    for (auto &&subvar : variable->getSubVarList()) {
+
+      //all datatypes must match
+      if ( (*initexpr)->getDataType() != (*subvar).getDataType() ) {
+        error(@4, "datatype of initialization does not match the datatype of the variable");  YYERROR;
+      }
+
+      //if enum (no need to reduce)
+      if ((*initexpr)->getDataType()->isEnumType() ) {
+        (*subvar).setInitialValue(dynamic_cast<SCAM::EnumValue*>(*initexpr));
+      } else {
+        //expression must (reduce to) be constant
+        if (!driver.isConstExpr(*initexpr)) {
+          error(@4, "initialization values must be constant");  YYERROR;
+        }
+        (*subvar).setInitialValue(driver.reduzeToConstValue(*initexpr));
+      }
+      ++initexpr;
+    }
+
+  }
+};
+
+
+// return map<string,vector<Stmt*>>
+sections :            "@" NAME ":" statements    {                  $$[$2] = $4;}
+         | sections   "@" NAME ":" statements    {std::swap($$,$1); $$[$3] = $5;}
+         ;
+
+/*name_header
+used instead of NAME to allow special characters (see name_header_el)
+Allowed in module and system names to enable "a simple template" feature implementable through preprocessing directives
+(can now make a module, FIFO<WHATEVERDATATYPE(S)> )
+*/
+name_header : NAME                           {$$=$1;}
+            | NAME "<" name_header_list ">"  {$$= $1 + "<" + $3 + ">";}
+            ;
+name_header_list  : name_header_el  {$$ = $1; }
+                  | name_header_list  name_header_el {$$ = $1 + $2;}
+                  ;
+name_header_el  : NAME   {$$ = $1; }
+                | "int"  {$$ = "int"; }
+                | "bool" {$$ = "bool"; }
+                | "["    {$$ = "["; }
+                | "]"    {$$ = "]"; }
+                | ","    {$$ = ","; }
+                ;
+                
+
+
+
+blocking_key : /*empty*/      {$$ = "blocking";}
+             | "blocking"     {$$ = "blocking";}
+             | "shared" {$$ = "shared";};
+
+direction_key : "in"  {$$ = "in";}
+              | "out" {$$ = "out";};
+
+
+port_decl     : blocking_key direction_key "<" datatype ">" NAME ";"
+{
+  $$ = new SCAM::Port($6, new SCAM::Interface($1, $2), $4);
+};
+
+
+
+name_list_comma   : /*empty*/                  {}
+                  | NAME                       {$$.push_back($1);}
+                  | name_list_comma "," NAME
+{
+  std::swap($$, $1);
+  //check name against the names of the already defined ones
+  if (std::find($$.begin(), $$.end(), $3) != $$.end()) {
+    error(@3,"An identifier with name " + $3 + " is already defined in this scope");
+    YYERROR;
+  }
+  $$.push_back($3);
+};
+
+var_list_comma   : /*empty*/      {}
+                 | datatype NAME  {$$[$2] = new SCAM::Variable($2, $1);}
+                 | var_list_comma "," datatype NAME
+{
+  std::swap($$, $1);
+  //check name against the names of the already defined ones
+  if ($$.find($4) != $$.end()) {
+    error(@4,"An identifier with name " + $4 + " is already defined in this scope");
+    YYERROR;
+  }
+  $$[$4] = new SCAM::Variable($4, $3);
+};
+
+
+// return DataType*
+datatype     : "int"  { $$ = SCAM::DataTypes::getDataType("int");  }
+             | "bool" { $$ = SCAM::DataTypes::getDataType("bool"); }
+             | NAME
+{
+  //check that $1 is a valid datatype
+  if (!SCAM::DataTypes::isDataType($1)) {
+    error(@1,"\"" + $1 + "\" is not a valid datatype");
+    YYERROR;
+  }
+  $$ = SCAM::DataTypes::getDataType($1);
+};
+
+submod_decl  : "module" "<" name_header ">" NAME ";"   {}
+             | "system" "<" name_header ">" NAME ";"   {};
+
+
+// return SCAM::VariableOperand*
+var_ref   : var_ref_parent {$$=$1;}
+          | var_ref_child  {$$=$1;}
+          ;
+
+// return SCAM::VariableOperand*
+var_ref_parent       : NAME
+{
+  //search for $1 in list of variables
+  if (!driver.module->isVariable($1)) {
+    error(@1,"expected identifier for a variable, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::VariableOperand(driver.module->getVariable($1));
+}
+
+// return SCAM::VariableOperand*
+var_ref_child : NAME "." NAME
+{
+  if (!driver.module->isVariable($1)) {
+    error(@1,"expected an identifier for a variable, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Variable* parent = driver.module->getVariable($1);
+  if (!parent->isCompoundType() || !parent->hasSubVar($3)) {
+    error(@3, $1 + "does not have a member named \"" + $3 + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::VariableOperand(parent->getSubVar($3));
+};
+
+
+
+// returns std::vector<SCAM::Stmt*>
+statements : statement              {std::swap($$,$1);}
+           | statements statement   {std::swap($$,$1);  $$.insert($$.end(), $2.begin(), $2.end());} //appends $2
+           ;
+
+// returns std::vector<SCAM::Stmt*>
+statement    : assign_statement ";"   {std::swap($$,$1);}
+             | if_statement           {$$.push_back($1);}
+             | write_statement ";"    {$$.push_back($1);}
+             | read_statement ";"     {$$.push_back($1);}
+             | nb_write_statement ";" {$$.push_back($1);}
+             | nb_read_statement ";"  {$$.push_back($1);}
+             | get_statement ";"      {$$.push_back($1);}
+             | set_statement ";"      {$$.push_back($1);}
+             | req_statement ";"      {$$.push_back($1);}
+             ;
+
+// returns std::vector<SCAM::Stmt*>  (a vector is needed to "unroll" in case of a compound assignment)
+assign_statement   : var_ref "=" expr
+{
+  if ($1->getDataType() != $3->getDataType()) { error(@2, "data type missmatch in assignment"); YYERROR; }
+  $$.push_back(new SCAM::Assignment($1, $3));
+}
+/*assign_statement*/  | var_ref "=" nb_read_statement
+{
+  if (! $1->isDataType("bool")) { error(@2, "data type missmatch in assignment"); YYERROR; }
+  $$.push_back(new SCAM::Assignment($1, $3));
+}
+/*assign_statement*/  | var_ref "=" nb_write_statement
+{
+  if (! $1->isDataType("bool")) { error(@1, "expected a boolean variable"); YYERROR; }
+  $$.push_back(new SCAM::Assignment($1, $3));
+}
+/*assign_statement*/  | "++" var_ref
+{
+  $$.push_back(new SCAM::Assignment($2, new SCAM::Arithmetic($2,"+",new SCAM::IntegerValue(1)) ));
+}
+/*assign_statement*/  | "--" var_ref
+{
+  if (! $2->isDataType("int") ) { error(@2, "expected an integer type operand"); YYERROR; }
+  $$.push_back(new SCAM::Assignment($2, new SCAM::Arithmetic($2,"-",new SCAM::IntegerValue(1)) ));
+}
+/*assign_statement*/  | "nextsection" "=" expr
+{
+  if ($3->getDataType() != driver.module->getFSM()->getSectionVariable()->getDataType()) {
+    error(@3, "expected a section name");
+    YYERROR;
+  }
+  $$.push_back(new SCAM::Assignment( new SCAM::SectionOperand(driver.module->getFSM()->getSectionVariable()), $3));
+}
+/*assign_statement*/  | var_ref "=" "{" expr_list_comma "}"
+{
+  if (! $1->getDataType()->isCompoundType()) {
+    error(@2, "cannot assign a compound expression to a non-compound variable");
+    YYERROR;
+  }
+  //list size must be the same as number of sub-variables
+  if ($1->getDataType()->getSubVarMap().size() != $4.size()) {
+    error(@2, "compound expression type does not match compound variable type");
+    YYERROR;
+  }
+  //the datatype of the expression list, must match the data type of the sub-var list
+  std::vector<SCAM::Expr*>::const_iterator itExpr = $4.begin();
+  std::map<std::string,SCAM::DataType*>::const_iterator itVar;
+  for (itVar = $1->getDataType()->getSubVarMap().begin(); itVar != $1->getDataType()->getSubVarMap().end(); ++itVar) {
+    if (itVar->second != (*itExpr)->getDataType()) {
+      error(@2, "compound expression type does not match compound variable type");
+      YYERROR;
+    }
+
+    SCAM::VariableOperand* subOperand = new SCAM::VariableOperand( driver.module->getVariable($1->getOperandName() + "." + itVar->first ) );
+    $$.push_back(new SCAM::Assignment(subOperand, *itExpr));
+
+    ++itExpr;
+  }
+}
+
+// returns SCAM::Read*
+read_statement     : NAME "." "read" "(" var_ref ")"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "in"  || port->getInterface()->getInterface() != "blocking") {
+    error(@1,"expected a blocking input port");
+    YYERROR;
+  }
+  if (port->getDataType() != $5->getDataType()) {
+      error(@5, "data type of variable \"" + $5->getOperandName() + "\" does not match data type of input port \"" + port->getName() + "\"");
+      YYERROR;
+  }
+  $$ = new SCAM::Read(port, $5);
+};
+
+// returns SCAM::NBRead*
+nb_read_statement  : NAME "." "nb_read" "(" var_ref ")"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "blocking") {
+    error(@1,"expected a blocking input port");
+    YYERROR;
+  }
+  if (port->getDataType() != $5->getDataType()) {
+    error(@5, "data type of variable \"" + $5->getOperandName() + "\" does not match data type of input port \"" + port->getName() + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::NBRead(port, $5);
+};
+
+// returns SCAM::Write*
+write_statement    : NAME "." "write" "(" expr ")"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "out"  || port->getInterface()->getInterface() != "blocking") {
+    error(@1,"expected a blocking output port");
+    YYERROR;
+  }
+  if (port->getDataType() != $5->getDataType()) {
+    error(@5, "data type of write argument does not match data type of output port \"" + port->getName() + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::Write(port, $5);
+};
+
+// returns SCAM::NBWrite*
+nb_write_statement : NAME "." "nb_write" "(" expr ")"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "out" || port->getInterface()->getInterface() != "blocking") {
+    error(@1,"expected a blocking output port");
+    YYERROR;
+  }
+  if (port->getDataType() != $5->getDataType()) {
+    error(@5, "data type of nb_write argument does not match data type of output port \"" + port->getName() + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::NBWrite(port, $5);
+};
+
+
+// returns SCAM::GET*
+get_statement : NAME "." "get" "(" var_ref ")"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "shared") {
+    error(@1,"expected a shared input port");
+    YYERROR;
+  }
+  if (port->getDataType() != $5->getDataType()) {
+    error(@5, "data type of variable \"" + $5->getOperandName() + "\" does not match data type of input port \"" + port->getName() + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::NBRead(port, $5);
+};
+
+
+// returns SCAM::SET*
+set_statement : NAME "." "set" "(" expr ")"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "out" || port->getInterface()->getInterface() != "shared") {
+    error(@1,"expected a blocking output port");
+    YYERROR;
+  }
+  if (port->getDataType() != $5->getDataType()) {
+    error(@5, "data type of set argument does not match data type of output port \"" + port->getName() + "\"");
+    YYERROR;
+  }
+  $$ = new SCAM::NBWrite(port, $5);
+};
+
+
+// returns SCAM::REQ*
+//ADDED BY TOBI
+req_statement : NAME "." "req"
+{
+  //use name to find a PortOperand
+  if (!driver.module->isPort($1)) {
+    error(@1,"expected identifier for a port, found \"" + $1 + "\"");
+    YYERROR;
+  }
+  SCAM::Port* port = driver.module->getPort($1);
+  if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "synch"  ) {
+    error(@1,"expected a blocking input port");
+    YYERROR;
+  }
+  $$ = new SCAM::Read(port,nullptr);
+};
+
+
+
+// returns SCAM::ITE*
+if_statement : "if" "(" expr ")" "{" statements  "}"  opt_else
+{
+  //check that $3 is a Boolean Expression
+  if (! $3->isDataType("bool")) {
+    error(@3, "expected a Boolean logic expression as if condition");
+    YYERROR;
+  }
+  $$ = new SCAM::ITE($3);
+  $$->setIfList($6);
+
+  if (! $8.empty() ) {
+    $$->setElseList($8);
+  }
+};
+
+// returns vector<Stmt*> (empty if empty, else : a real list, elsif: a list containing 1 ITE Stmt
+opt_else      : /*empty*/                 {}
+/*opt_else*/  | "else" "{" statements "}" {std::swap($$,$3);}
+/*opt_else*/  | "else" if_statement       {$$.push_back($2);}
+              ;
+
+
+// return std::vector<SCAM::Expression*>
+expr_list_comma : /*empty*/             {}
+             | expr                     {$$.push_back($1);}
+             | expr_list_comma "," expr {std::swap($$,$1); $$.push_back($3);};
+
+func_ref : NAME "(" expr_list_comma ")"  {};
+
+
+
+// returns SCAM::Expr*
+expr         : BOOLVAL            {$$ = new SCAM::BoolValue($1);}
+/*expr*/     | NUM                {$$ = new SCAM::IntegerValue($1);}
+/*expr*/     | NAME
+{
+  //should be an identifier for a variable (return VariableOperand*)
+  //or for an EnumValue (return EnumValue*)
+  //or for a section name
+
+  if (driver.module->isVariable($1)) {
+    $$ = new SCAM::VariableOperand(driver.module->getVariable($1));
+  } else if (SCAM::DataTypes::isEnumValue($1)) {
+    $$ = new SCAM::EnumValue($1, SCAM::DataTypes::getEnumValueType($1));
+  } else if (driver.module->getFSM()->isSectionValue($1)) {
+      $$ = new SCAM::SectionValue($1, driver.module->getFSM()->getSectionVariable()->getDataType() );
+  } else {
+    error(@1, "expected an identifier found, \"" + $1 + "\"");
+    YYERROR;
+  }
+
+}
+/*expr*/     |"(" expr ")"        {$$ = $2;}
+/*expr*/     | func_ref {error(@1,"functions are not yet supported"); YYERROR; } //todo
+/*expr*/     | var_ref_child  {$$ = $1;}
+
+
+
+
+/*expr*/     | expr "+" expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression");  YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression");  YYERROR; }
+  $$ = new SCAM::Arithmetic($1, "+", $3);
+}
+/*expr*/     | expr "-" expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression");  YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression");  YYERROR; }
+  $$ = new SCAM::Arithmetic($1, "-", $3);
+}
+/*expr*/     | expr "*" expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression");  YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression");  YYERROR; }
+  $$ = new SCAM::Arithmetic($1, "*", $3);
+}
+/*expr*/     | expr "/" expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression");  YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression");  YYERROR; }
+  $$ = new SCAM::Arithmetic($1, "/", $3);
+}
+/*expr*/     | expr "%" expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression");  YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression");  YYERROR; }
+  $$ = new SCAM::Arithmetic($1, "%", $3);
+}
+/*expr*/     | "-" expr %prec UMIN
+{
+  if (! $2->isDataType("int")) { error(@2, "expected an integer type expression");  YYERROR; }
+  $$ = new SCAM::UnaryExpr("-", $2);
+}
+
+/*expr*/     | expr "bitand"  expr {error(@1,"functions are not yet supported"); YYERROR;}
+/*expr*/     | expr "bitor"  expr {error(@1,"functions are not yet supported"); YYERROR;}
+/*expr*/     | expr "bitxor"  expr {error(@1,"functions are not yet supported"); YYERROR;}
+/*expr*/     | expr "<<"  expr {error(@1,"functions are not yet supported"); YYERROR;}
+/*expr*/     | expr ">>"  expr {error(@1,"functions are not yet supported"); YYERROR;}
+/*expr*/     |      "bitnot"  expr     {error(@1,"functions are not yet supported"); YYERROR;}
+
+/*expr*/     | expr "=="  expr
+{
+  //not same data type
+  if ($1->getDataType() !=  $3->getDataType()) { error(@2, "data type missmatch in expression"); YYERROR; }
+  //not compound
+  if ( $1->getDataType()->isCompoundType() ) { error(@2, "operator \"==\" not supported for compound types "); YYERROR; }
+  $$ = new SCAM::Relational($1, "==", $3);
+}
+/*expr*/     | expr "!="  expr
+{
+  //not same data type
+  if ($1->getDataType() !=  $3->getDataType()) { error(@2, "data type missmatch in expression"); YYERROR; }
+  //not compound
+  if ( $1->getDataType()->isCompoundType() ) { error(@2, "operator \"!=\" not supported for compound types "); YYERROR; }
+  $$ = new SCAM::Relational($1, "!=", $3);
+}
+
+/*expr*/     | expr ">"  expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Relational($1, ">", $3);
+}
+/*expr*/     | expr ">="  expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Relational($1, ">=", $3);
+}
+/*expr*/     | expr "<"  expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Relational($1, "<", $3);
+}
+/*expr*/     | expr "<="  expr
+{
+  if (!$1->isDataType("int")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("int")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Relational($1, "<=", $3);
+}
+
+
+/*expr*/     | expr "and"  expr
+{
+  if (!$1->isDataType("bool")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("bool")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Logical($1, "and", $3);
+}
+/*expr*/     | expr "or"  expr
+{
+  if (!$1->isDataType("bool")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("bool")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Logical($1, "or", $3);
+}
+/*expr*/     | expr "nor"  expr
+{
+  if (!$1->isDataType("bool")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("bool")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Logical($1, "nor", $3);
+}
+/*expr*/     | expr "nand"  expr
+{
+  if (!$1->isDataType("bool")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("bool")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Logical($1, "nand", $3);
+}
+/*expr*/     | expr "xor"  expr
+{
+  if (!$1->isDataType("bool")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("bool")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Logical($1, "xor", $3);
+}
+/*expr*/     | expr "xnor"  expr
+{
+  if (!$1->isDataType("bool")) { error(@1, "expected an integer type expression"); YYERROR; }
+  if (!$3->isDataType("bool")) { error(@3, "expected an integer type expression"); YYERROR; }
+  $$ = new SCAM::Logical($1, "xnor", $3);
+}
+/*expr*/     |      "not"  expr
+{
+  if (! $2->isDataType("bool")) {
+    error(@2, "expected a bool type expression");
+    YYERROR;
+  }
+  $$ = new SCAM::UnaryExpr("not", $2);
+};
+
+%%
+
+
+
+
+void yy::aml_parser::error(const yy::aml_parser::location_type& l, const std::string& m)
+{
+  driver.error(l, m);
+}
+

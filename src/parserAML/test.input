@@ -1,0 +1,52 @@
+//a "till the end of the line" comment
+
+/* Comment over
+   several lines
+*/
+
+enum myenum_t = {symbolic1, symbolic2, symbolic3, symbolic4};
+compound mydata_t = {int a, myenum_t b, bool c};
+
+
+module mymodule
+{
+
+  in <int> inport;
+  blocking out <bool> outport;
+  shared in <mydata_t> nonblkinport;
+
+
+FSM {
+  sections {mode1, mode2, mode3} = mode2;
+  bool boolvar = 10 < 11; //true xor false;
+  int somevar = (3+1+1+1)*(4*3); //no init value is set explicitly, 0 is chosen (default for enum)
+  mydata_t acomplexvar = {1 , symbolic4, true or false}; //init does not yet work
+
+  @mode1:
+    inport.read(somevar);
+    nonblkinport.get(acomplexvar);
+    if (somevar > 7 || acomplexvar.b == symbolic3) {
+      nextsection = mode2;
+    } else if (somevar < 2) {
+      ++somevar;
+    } else if (somevar == 5) {
+      --somevar;
+      acomplexvar = {42, symbolic2, false};
+    } else {
+      somevar = 0;
+      acomplexvar.b = symbolic1;
+    }
+
+  @mode2:
+    boolvar = outport.nb_write(true xor boolvar);
+    if (boolvar) {
+      boolvar = false;
+    }
+    somevar = 3;
+    outport.write(true);
+    nextsection = mode1;
+}
+
+
+};
+

@@ -1,0 +1,125 @@
+// required terminology 
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+sequence hold(l, e);
+	(l===e, l=e);
+endsequence
+
+sequence t;
+	##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_end(offset);
+	t ##offset 1'b1;
+endsequence
+
+sequence next(timepoint, offset);
+	timepoint ##offset 1'b1;
+endsequence
+
+property during(t1, t2, se);
+	(t1 ##0 se[*0:$] intersect t2) or
+	(t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_limited(t1, t2, off, se);
+	(t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+	(next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_o(t1, o1, t2, o2, se);
+	if (o2 >= 0)
+		during(next(t1, o1), next(t2, (o2<0) ? 0 : o2), se)
+	else
+		during_limited(next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+// end of ipc_sva
+
+import scam_model_types::*;
+
+module Environment_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge Environment.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function data_word_notify;
+	data_word_notify = ;
+endfunction
+
+// DP SIGNALS //
+function int config_out_sig_LOFreset;
+	config_out_sig_LOFreset = ;
+endfunction
+function int config_out_sig_LOFset;
+	config_out_sig_LOFset = ;
+endfunction
+function bool data_word_sig_isMarker;
+	data_word_sig_isMarker = ;
+endfunction
+function int data_word_sig_markerAlignment;
+	data_word_sig_markerAlignment = ;
+endfunction
+
+// VISIBLE REGISTERS //
+function bool data_word_tmp_isMarker;
+	data_word_tmp_isMarker = ;
+endfunction
+function int data_word_tmp_markerAlignment;
+	data_word_tmp_markerAlignment = ;
+endfunction
+
+// STATES //
+function run_0;
+	run_0 = ;
+endfunction
+
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+sequence reset_sequence;
+//DISGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+property reset_p;
+	reset_sequence |=>
+	t ##0 run_0() and
+	t ##0 config_out_sig_LOFreset() == 8 and
+	t ##0 config_out_sig_LOFset() == 8 and
+	t ##0 data_word_sig_isMarker() == 0 and
+	t ##0 data_word_sig_markerAlignment() == 0 and
+	t ##0 data_word_tmp_isMarker() == 0 and
+	t ##0 data_word_tmp_markerAlignment() == 0 and
+	t ##0 data_word_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+property run_0_write_0_p(o);
+bool data_word_tmp_isMarker_0;
+int data_word_tmp_markerAlignment_0;
+// hold
+	t ##0 hold(data_word_tmp_isMarker_0, data_word_tmp_isMarker()) and
+	t ##0 hold(data_word_tmp_markerAlignment_0, data_word_tmp_markerAlignment()) and
+// Conceptual State
+	t ##0 run_0() and
+// tri
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 config_out_sig_LOFreset() == 8 and
+	t_end(o) ##0 config_out_sig_LOFset() == 8 and
+	t_end(o) ##0 data_word_sig_isMarker() == data_word_tmp_isMarker_0 and
+	t_end(o) ##0 data_word_sig_markerAlignment() == data_word_tmp_markerAlignment_0 and
+	t_end(o) ##0 data_word_tmp_isMarker() == data_word_tmp_isMarker_0 and
+	t_end(o) ##0 data_word_tmp_markerAlignment() == data_word_tmp_markerAlignment_0 and
+	during_o (t, 1, t_end(o) , -1, data_word_notify() == 0) and
+	t_end(o) ##0 data_word_notify() == 1;
+endproperty;
+run_0_write_0_a: assert property (disable iff (reset) run_0_write_0_p(1));// ASSIGN t_end offset here
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind Environment Environment_verification inst (.*, .reset());
+

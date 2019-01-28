@@ -1,0 +1,102 @@
+
+struct marker_t {bool isMarker, int markerAlignment};
+
+
+module framer
+{
+
+in<marker_t> data_word;
+
+out<void> frm_pulse;
+
+shared in <int> max_miss_uP;
+shared out <bool> oof;
+
+fsm {
+   sections {SEARCH, FIND_SYNC, SYNC, MISS} = SEARCH;
+   int align;
+   int missCnt;
+   int frmcnt = 0;
+
+   marker_t data_word_tmp;
+   int max_miss_uP_tmp;
+
+   oof.set(true); //I know this doesnt work yet, but also global variables need a reset value..
+   //Maybe, in the future we change syntax a bit (to something more similar to promela and systemc), where we create instances of channels and global variables and then we connect the portst to these (instead of as we do know where ports are connected to other ports)
+    //(would have the advantage that the global variables would have a "natural" syntax to set init value..
+   // TOBI: I don't think that's an issues. Just introduce a new section "INITIALISE" all shareds can be set.
+   //       We will not generate a new state for this section because there is no blocking transaction.
+   //       The tool will automaticly add those values to the reset sequence, because I'm automatically search for the first communication reachable after reset.
+   //       Everything else is part of reset
+   @SEARCH:
+
+     data_word.read(data_word_tmp);
+     frmcnt = ++frmcnt % WORDS_IN_FRAME;
+     if (data_word_tmp.isMarker) {
+       align = data_word_tmp.markerAlignment;
+       frm_cnt = 0;
+       nextsection = FIND_SYNC;
+     } else {
+       if (frmcnt==FRM_PULSE_POS) {
+         frm_pulse.nb_write(void); //should set frm_pulse_notify active for 1 cycle (independent of frm_pulse_sync)
+       }
+     }
+
+   @FIND_SYNC:
+
+     data_word.read(data_word_tmp);
+     frmcnt = ++frmcnt % WORDS_IN_FRAME;
+     if (frmcnt==FRM_PULSE_POS) {
+       frm_pulse.write(void); //should set frm_pulse_notify active for 1 cycle (independent of frm_pulse_sync)
+     }
+
+     if (frm_cnt==0) {
+       if (data_word_tmp.isMarker && align==data_word_tmp.markerAlignment) {
+         nextsection = SYNC;
+         missCnt=0;
+         oof.set(false);
+       } else {
+         nextsection = SEARCH;
+       }
+     }
+
+
+   @SYNC:
+
+     data_word.read(data_word_tmp);
+     frmcnt = ++frmcnt % WORDS_IN_FRAME;
+     if (frmcnt==FRM_PULSE_POS) {
+       frm_pulse.nb_write(void); //should set frm_pulse_notify active for 1 cycle (independent of frm_pulse_sync)
+     }
+
+     if (frm_cnt==0) {
+       if (data_word_tmp.isMarker && align==data_word_tmp.markerAlignment) {
+         nextsection = SYNC;
+       } else {
+         nextsection = MISS;
+         missCnt = 1;
+       }
+     }
+
+   @MISS:
+
+     data_word.read(data_word_tmp);
+     frmcnt = ++frmcnt % WORDS_IN_FRAME;
+     if (frmcnt==FRM_PULSE_POS) {
+       frm_pulse.nb_write(void); //should set frm_pulse_notify active for 1 cycle (independent of frm_pulse_sync)
+     }
+
+     if (frm_cnt==0) {
+       max_miss_uP_tmp = max_miss_uP.get();
+       if (data_word_tmp.isMarker && align==data_word_tmp.markerAlignment) {
+         nextsection = SYNC;
+       } else if (missCnt >= max_miss_uP_tmp) {
+         nextsection = SEARCH;
+         oof.set(true);
+       } else {
+         ++missCnt;
+       }
+     }
+}
+
+};

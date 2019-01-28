@@ -1,0 +1,173 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Testing without TLM bridge~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Initial core state:
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Memory Content (Hex):
+-----------------------------------------------------------------------------------------------------------------------------------------------
+MEM[000]   0x37   MEM[001]   0x1    MEM[002]   0x1    MEM[003]   0x0    MEM[004]   0xef   MEM[005]   0x0    MEM[006]   0x80   MEM[007]   0x10   
+MEM[008]   0x73   MEM[009]   0x0    MEM[00a]   0x10   MEM[00b]   0x0    MEM[00c]   0x13   MEM[00d]   0x1    MEM[00e]   0x1    MEM[00f]   0xfd   
+MEM[010]   0x23   MEM[011]   0x26   MEM[012]   0x81   MEM[013]   0x2    MEM[014]   0x13   MEM[015]   0x4    MEM[016]   0x1    MEM[017]   0x3    
+MEM[018]   0x23   MEM[019]   0x2e   MEM[01a]   0xa4   MEM[01b]   0xfc   MEM[01c]   0x23   MEM[01d]   0x2c   MEM[01e]   0xb4   MEM[01f]   0xfc   
+MEM[020]   0x93   MEM[021]   0x7    MEM[022]   0x10   MEM[023]   0x0    MEM[024]   0x23   MEM[025]   0x26   MEM[026]   0xf4   MEM[027]   0xfe   
+MEM[028]   0x3    MEM[029]   0x27   MEM[02a]   0xc4   MEM[02b]   0xfe   MEM[02c]   0x83   MEM[02d]   0x27   MEM[02e]   0x84   MEM[02f]   0xfd   
+MEM[030]   0x63   MEM[031]   0x56   MEM[032]   0xf7   MEM[033]   0xc    MEM[034]   0x23   MEM[035]   0x24   MEM[036]   0x4    MEM[037]   0xfe   
+MEM[038]   0x3    MEM[039]   0x27   MEM[03a]   0x84   MEM[03b]   0xfd   MEM[03c]   0x83   MEM[03d]   0x27   MEM[03e]   0xc4   MEM[03f]   0xfe   
+MEM[040]   0xb3   MEM[041]   0x7    MEM[042]   0xf7   MEM[043]   0x40   MEM[044]   0x3    MEM[045]   0x27   MEM[046]   0x84   MEM[047]   0xfe   
+MEM[048]   0x63   MEM[049]   0x52   MEM[04a]   0xf7   MEM[04b]   0xa    MEM[04c]   0x83   MEM[04d]   0x27   MEM[04e]   0x84   MEM[04f]   0xfe   
+MEM[050]   0x93   MEM[051]   0x97   MEM[052]   0x27   MEM[053]   0x0    MEM[054]   0x3    MEM[055]   0x27   MEM[056]   0xc4   MEM[057]   0xfd   
+MEM[058]   0xb3   MEM[059]   0x7    MEM[05a]   0xf7   MEM[05b]   0x0    MEM[05c]   0x3    MEM[05d]   0xa7   MEM[05e]   0x7    MEM[05f]   0x0    
+MEM[060]   0x83   MEM[061]   0x27   MEM[062]   0x84   MEM[063]   0xfe   MEM[064]   0x93   MEM[065]   0x87   MEM[066]   0x17   MEM[067]   0x0    
+MEM[068]   0x93   MEM[069]   0x97   MEM[06a]   0x27   MEM[06b]   0x0    MEM[06c]   0x83   MEM[06d]   0x26   MEM[06e]   0xc4   MEM[06f]   0xfd   
+MEM[070]   0xb3   MEM[071]   0x87   MEM[072]   0xf6   MEM[073]   0x0    MEM[074]   0x83   MEM[075]   0xa7   MEM[076]   0x7    MEM[077]   0x0    
+MEM[078]   0x63   MEM[079]   0xd2   MEM[07a]   0xe7   MEM[07b]   0x6    MEM[07c]   0x83   MEM[07d]   0x27   MEM[07e]   0x84   MEM[07f]   0xfe   
+MEM[080]   0x93   MEM[081]   0x97   MEM[082]   0x27   MEM[083]   0x0    MEM[084]   0x3    MEM[085]   0x27   MEM[086]   0xc4   MEM[087]   0xfd   
+MEM[088]   0xb3   MEM[089]   0x7    MEM[08a]   0xf7   MEM[08b]   0x0    MEM[08c]   0x83   MEM[08d]   0xa7   MEM[08e]   0x7    MEM[08f]   0x0    
+MEM[090]   0x23   MEM[091]   0x22   MEM[092]   0xf4   MEM[093]   0xfe   MEM[094]   0x83   MEM[095]   0x27   MEM[096]   0x84   MEM[097]   0xfe   
+MEM[098]   0x93   MEM[099]   0x87   MEM[09a]   0x17   MEM[09b]   0x0    MEM[09c]   0x93   MEM[09d]   0x97   MEM[09e]   0x27   MEM[09f]   0x0    
+MEM[0a0]   0x3    MEM[0a1]   0x27   MEM[0a2]   0xc4   MEM[0a3]   0xfd   MEM[0a4]   0x33   MEM[0a5]   0x7    MEM[0a6]   0xf7   MEM[0a7]   0x0    
+MEM[0a8]   0x83   MEM[0a9]   0x27   MEM[0aa]   0x84   MEM[0ab]   0xfe   MEM[0ac]   0x93   MEM[0ad]   0x97   MEM[0ae]   0x27   MEM[0af]   0x0    
+MEM[0b0]   0x83   MEM[0b1]   0x26   MEM[0b2]   0xc4   MEM[0b3]   0xfd   MEM[0b4]   0xb3   MEM[0b5]   0x87   MEM[0b6]   0xf6   MEM[0b7]   0x0    
+MEM[0b8]   0x3    MEM[0b9]   0x27   MEM[0ba]   0x7    MEM[0bb]   0x0    MEM[0bc]   0x23   MEM[0bd]   0xa0   MEM[0be]   0xe7   MEM[0bf]   0x0    
+MEM[0c0]   0x83   MEM[0c1]   0x27   MEM[0c2]   0x84   MEM[0c3]   0xfe   MEM[0c4]   0x93   MEM[0c5]   0x87   MEM[0c6]   0x17   MEM[0c7]   0x0    
+MEM[0c8]   0x93   MEM[0c9]   0x97   MEM[0ca]   0x27   MEM[0cb]   0x0    MEM[0cc]   0x3    MEM[0cd]   0x27   MEM[0ce]   0xc4   MEM[0cf]   0xfd   
+MEM[0d0]   0xb3   MEM[0d1]   0x7    MEM[0d2]   0xf7   MEM[0d3]   0x0    MEM[0d4]   0x3    MEM[0d5]   0x27   MEM[0d6]   0x44   MEM[0d7]   0xfe   
+MEM[0d8]   0x23   MEM[0d9]   0xa0   MEM[0da]   0xe7   MEM[0db]   0x0    MEM[0dc]   0x83   MEM[0dd]   0x27   MEM[0de]   0x84   MEM[0df]   0xfe   
+MEM[0e0]   0x93   MEM[0e1]   0x87   MEM[0e2]   0x17   MEM[0e3]   0x0    MEM[0e4]   0x23   MEM[0e5]   0x24   MEM[0e6]   0xf4   MEM[0e7]   0xfe   
+MEM[0e8]   0x6f   MEM[0e9]   0xf0   MEM[0ea]   0x1f   MEM[0eb]   0xf5   MEM[0ec]   0x83   MEM[0ed]   0x27   MEM[0ee]   0xc4   MEM[0ef]   0xfe   
+MEM[0f0]   0x93   MEM[0f1]   0x87   MEM[0f2]   0x17   MEM[0f3]   0x0    MEM[0f4]   0x23   MEM[0f5]   0x26   MEM[0f6]   0xf4   MEM[0f7]   0xfe   
+MEM[0f8]   0x6f   MEM[0f9]   0xf0   MEM[0fa]   0x1f   MEM[0fb]   0xf3   MEM[0fc]   0x13   MEM[0fd]   0x0    MEM[0fe]   0x0    MEM[0ff]   0x0    
+MEM[100]   0x3    MEM[101]   0x24   MEM[102]   0xc1   MEM[103]   0x2    MEM[104]   0x13   MEM[105]   0x1    MEM[106]   0x1    MEM[107]   0x3    
+MEM[108]   0x67   MEM[109]   0x80   MEM[10a]   0x0    MEM[10b]   0x0    MEM[10c]   0x13   MEM[10d]   0x1    MEM[10e]   0x1    MEM[10f]   0xfe   
+MEM[110]   0x23   MEM[111]   0x2e   MEM[112]   0x11   MEM[113]   0x0    MEM[114]   0x23   MEM[115]   0x2c   MEM[116]   0x81   MEM[117]   0x0    
+MEM[118]   0x23   MEM[119]   0x2a   MEM[11a]   0x91   MEM[11b]   0x0    MEM[11c]   0x13   MEM[11d]   0x4    MEM[11e]   0x1    MEM[11f]   0x2    
+MEM[120]   0x13   MEM[121]   0x5    MEM[122]   0x1    MEM[123]   0x0    MEM[124]   0x93   MEM[125]   0x4    MEM[126]   0x5    MEM[127]   0x0    
+MEM[128]   0x13   MEM[129]   0x5    MEM[12a]   0x40   MEM[12b]   0x1f   MEM[12c]   0x23   MEM[12d]   0x24   MEM[12e]   0xa4   MEM[12f]   0xfe   
+MEM[130]   0x3    MEM[131]   0x25   MEM[132]   0x84   MEM[133]   0xfe   MEM[134]   0x13   MEM[135]   0x5    MEM[136]   0xf5   MEM[137]   0xff   
+MEM[138]   0x23   MEM[139]   0x22   MEM[13a]   0xa4   MEM[13b]   0xfe   MEM[13c]   0x93   MEM[13d]   0x8    MEM[13e]   0x5    MEM[13f]   0x0    
+MEM[140]   0x93   MEM[141]   0x88   MEM[142]   0x18   MEM[143]   0x0    MEM[144]   0x13   MEM[145]   0x83   MEM[146]   0x8    MEM[147]   0x0    
+MEM[148]   0x93   MEM[149]   0x3    MEM[14a]   0x0    MEM[14b]   0x0    MEM[14c]   0x93   MEM[14d]   0x58   MEM[14e]   0xb3   MEM[14f]   0x1    
+MEM[150]   0x13   MEM[151]   0x97   MEM[152]   0x53   MEM[153]   0x0    MEM[154]   0x33   MEM[155]   0xe7   MEM[156]   0xe8   MEM[157]   0x0    
+MEM[158]   0x93   MEM[159]   0x16   MEM[15a]   0x53   MEM[15b]   0x0    MEM[15c]   0x13   MEM[15d]   0x7    MEM[15e]   0x5    MEM[15f]   0x0    
+MEM[160]   0x13   MEM[161]   0x7    MEM[162]   0x17   MEM[163]   0x0    MEM[164]   0x93   MEM[165]   0x5    MEM[166]   0x7    MEM[167]   0x0    
+MEM[168]   0x13   MEM[169]   0x6    MEM[16a]   0x0    MEM[16b]   0x0    MEM[16c]   0x13   MEM[16d]   0xd7   MEM[16e]   0xb5   MEM[16f]   0x1    
+MEM[170]   0x13   MEM[171]   0x18   MEM[172]   0x56   MEM[173]   0x0    MEM[174]   0x33   MEM[175]   0x68   MEM[176]   0x7    MEM[177]   0x1    
+MEM[178]   0x93   MEM[179]   0x97   MEM[17a]   0x55   MEM[17b]   0x0    MEM[17c]   0x93   MEM[17d]   0x7    MEM[17e]   0x5    MEM[17f]   0x0    
+MEM[180]   0x93   MEM[181]   0x87   MEM[182]   0x17   MEM[183]   0x0    MEM[184]   0x93   MEM[185]   0x97   MEM[186]   0x27   MEM[187]   0x0    
+MEM[188]   0x93   MEM[189]   0x87   MEM[18a]   0x37   MEM[18b]   0x0    MEM[18c]   0x93   MEM[18d]   0x87   MEM[18e]   0xf7   MEM[18f]   0x0    
+MEM[190]   0x93   MEM[191]   0xd7   MEM[192]   0x47   MEM[193]   0x0    MEM[194]   0x93   MEM[195]   0x97   MEM[196]   0x47   MEM[197]   0x0    
+MEM[198]   0x33   MEM[199]   0x1    MEM[19a]   0xf1   MEM[19b]   0x40   MEM[19c]   0x93   MEM[19d]   0x7    MEM[19e]   0x1    MEM[19f]   0x0    
+MEM[1a0]   0x93   MEM[1a1]   0x87   MEM[1a2]   0x37   MEM[1a3]   0x0    MEM[1a4]   0x93   MEM[1a5]   0xd7   MEM[1a6]   0x27   MEM[1a7]   0x0    
+MEM[1a8]   0x93   MEM[1a9]   0x97   MEM[1aa]   0x27   MEM[1ab]   0x0    MEM[1ac]   0x23   MEM[1ad]   0x20   MEM[1ae]   0xf4   MEM[1af]   0xfe   
+MEM[1b0]   0x23   MEM[1b1]   0x26   MEM[1b2]   0x4    MEM[1b3]   0xfe   MEM[1b4]   0x3    MEM[1b5]   0x27   MEM[1b6]   0xc4   MEM[1b7]   0xfe   
+MEM[1b8]   0x83   MEM[1b9]   0x27   MEM[1ba]   0x84   MEM[1bb]   0xfe   MEM[1bc]   0x63   MEM[1bd]   0x5a   MEM[1be]   0xf7   MEM[1bf]   0x2    
+MEM[1c0]   0x3    MEM[1c1]   0x27   MEM[1c2]   0x84   MEM[1c3]   0xfe   MEM[1c4]   0x83   MEM[1c5]   0x27   MEM[1c6]   0xc4   MEM[1c7]   0xfe   
+MEM[1c8]   0x33   MEM[1c9]   0x7    MEM[1ca]   0xf7   MEM[1cb]   0x40   MEM[1cc]   0x83   MEM[1cd]   0x26   MEM[1ce]   0x4    MEM[1cf]   0xfe   
+MEM[1d0]   0x83   MEM[1d1]   0x27   MEM[1d2]   0xc4   MEM[1d3]   0xfe   MEM[1d4]   0x93   MEM[1d5]   0x97   MEM[1d6]   0x27   MEM[1d7]   0x0    
+MEM[1d8]   0xb3   MEM[1d9]   0x87   MEM[1da]   0xf6   MEM[1db]   0x0    MEM[1dc]   0x23   MEM[1dd]   0xa0   MEM[1de]   0xe7   MEM[1df]   0x0    
+MEM[1e0]   0x83   MEM[1e1]   0x27   MEM[1e2]   0xc4   MEM[1e3]   0xfe   MEM[1e4]   0x93   MEM[1e5]   0x87   MEM[1e6]   0x17   MEM[1e7]   0x0    
+MEM[1e8]   0x23   MEM[1e9]   0x26   MEM[1ea]   0xf4   MEM[1eb]   0xfe   MEM[1ec]   0x6f   MEM[1ed]   0xf0   MEM[1ee]   0x9f   MEM[1ef]   0xfc   
+MEM[1f0]   0x83   MEM[1f1]   0x27   MEM[1f2]   0x4    MEM[1f3]   0xfe   MEM[1f4]   0x83   MEM[1f5]   0x25   MEM[1f6]   0x84   MEM[1f7]   0xfe   
+MEM[1f8]   0x13   MEM[1f9]   0x85   MEM[1fa]   0x7    MEM[1fb]   0x0    MEM[1fc]   0xef   MEM[1fd]   0xf0   MEM[1fe]   0x1f   MEM[1ff]   0xe1   
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Register File Content (Hex):
+-----------------------------------------------------------------------------------------------------------------------------------------------
+RF[00] 0x0        RF[01] 0x0        RF[02] 0x0        RF[03] 0x0        RF[04] 0x0        RF[05] 0x0        RF[06] 0x0        RF[07] 0x0
+RF[08] 0x0        RF[09] 0x0        RF[10] 0x0        RF[11] 0x0        RF[12] 0x0        RF[13] 0x0        RF[14] 0x0        RF[15] 0x0
+RF[16] 0x0        RF[17] 0x0        RF[18] 0x0        RF[19] 0x0        RF[20] 0x0        RF[21] 0x0        RF[22] 0x0        RF[23] 0x0
+RF[24] 0x0        RF[25] 0x0        RF[26] 0x0        RF[27] 0x0        RF[28] 0x0        RF[29] 0x0        RF[30] 0x0        RF[31] 0x0
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Register File Content (Dec):
+-----------------------------------------------------------------------------------------------------------------------------------------------
+RF[00]   0        RF[01]   0        RF[02]   0        RF[03]   0        RF[04]   0        RF[05]   0        RF[06]   0        RF[07]   0
+RF[08]   0        RF[09]   0        RF[10]   0        RF[11]   0        RF[12]   0        RF[13]   0        RF[14]   0        RF[15]   0
+RF[16]   0        RF[17]   0        RF[18]   0        RF[19]   0        RF[20]   0        RF[21]   0        RF[22]   0        RF[23]   0
+RF[24]   0        RF[25]   0        RF[26]   0        RF[27]   0        RF[28]   0        RF[29]   0        RF[30]   0        RF[31]   0
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+Info: /OSCI/SystemC: Simulation stopped by user.
+
+Final core state:
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Memory Content (Hex):
+-----------------------------------------------------------------------------------------------------------------------------------------------
+MEM[000]   0x37   MEM[001]   0x1    MEM[002]   0x1    MEM[003]   0x0    MEM[004]   0xef   MEM[005]   0x0    MEM[006]   0x80   MEM[007]   0x10   
+MEM[008]   0x73   MEM[009]   0x0    MEM[00a]   0x10   MEM[00b]   0x0    MEM[00c]   0x13   MEM[00d]   0x1    MEM[00e]   0x1    MEM[00f]   0xfd   
+MEM[010]   0x23   MEM[011]   0x26   MEM[012]   0x81   MEM[013]   0x2    MEM[014]   0x13   MEM[015]   0x4    MEM[016]   0x1    MEM[017]   0x3    
+MEM[018]   0x23   MEM[019]   0x2e   MEM[01a]   0xa4   MEM[01b]   0xfc   MEM[01c]   0x23   MEM[01d]   0x2c   MEM[01e]   0xb4   MEM[01f]   0xfc   
+MEM[020]   0x93   MEM[021]   0x7    MEM[022]   0x10   MEM[023]   0x0    MEM[024]   0x23   MEM[025]   0x26   MEM[026]   0xf4   MEM[027]   0xfe   
+MEM[028]   0x3    MEM[029]   0x27   MEM[02a]   0xc4   MEM[02b]   0xfe   MEM[02c]   0x83   MEM[02d]   0x27   MEM[02e]   0x84   MEM[02f]   0xfd   
+MEM[030]   0x63   MEM[031]   0x56   MEM[032]   0xf7   MEM[033]   0xc    MEM[034]   0x23   MEM[035]   0x24   MEM[036]   0x4    MEM[037]   0xfe   
+MEM[038]   0x3    MEM[039]   0x27   MEM[03a]   0x84   MEM[03b]   0xfd   MEM[03c]   0x83   MEM[03d]   0x27   MEM[03e]   0xc4   MEM[03f]   0xfe   
+MEM[040]   0xb3   MEM[041]   0x7    MEM[042]   0xf7   MEM[043]   0x40   MEM[044]   0x3    MEM[045]   0x27   MEM[046]   0x84   MEM[047]   0xfe   
+MEM[048]   0x63   MEM[049]   0x52   MEM[04a]   0xf7   MEM[04b]   0xa    MEM[04c]   0x83   MEM[04d]   0x27   MEM[04e]   0x84   MEM[04f]   0xfe   
+MEM[050]   0x93   MEM[051]   0x97   MEM[052]   0x27   MEM[053]   0x0    MEM[054]   0x3    MEM[055]   0x27   MEM[056]   0xc4   MEM[057]   0xfd   
+MEM[058]   0xb3   MEM[059]   0x7    MEM[05a]   0xf7   MEM[05b]   0x0    MEM[05c]   0x3    MEM[05d]   0xa7   MEM[05e]   0x7    MEM[05f]   0x0    
+MEM[060]   0x83   MEM[061]   0x27   MEM[062]   0x84   MEM[063]   0xfe   MEM[064]   0x93   MEM[065]   0x87   MEM[066]   0x17   MEM[067]   0x0    
+MEM[068]   0x93   MEM[069]   0x97   MEM[06a]   0x27   MEM[06b]   0x0    MEM[06c]   0x83   MEM[06d]   0x26   MEM[06e]   0xc4   MEM[06f]   0xfd   
+MEM[070]   0xb3   MEM[071]   0x87   MEM[072]   0xf6   MEM[073]   0x0    MEM[074]   0x83   MEM[075]   0xa7   MEM[076]   0x7    MEM[077]   0x0    
+MEM[078]   0x63   MEM[079]   0xd2   MEM[07a]   0xe7   MEM[07b]   0x6    MEM[07c]   0x83   MEM[07d]   0x27   MEM[07e]   0x84   MEM[07f]   0xfe   
+MEM[080]   0x93   MEM[081]   0x97   MEM[082]   0x27   MEM[083]   0x0    MEM[084]   0x3    MEM[085]   0x27   MEM[086]   0xc4   MEM[087]   0xfd   
+MEM[088]   0xb3   MEM[089]   0x7    MEM[08a]   0xf7   MEM[08b]   0x0    MEM[08c]   0x83   MEM[08d]   0xa7   MEM[08e]   0x7    MEM[08f]   0x0    
+MEM[090]   0x23   MEM[091]   0x22   MEM[092]   0xf4   MEM[093]   0xfe   MEM[094]   0x83   MEM[095]   0x27   MEM[096]   0x84   MEM[097]   0xfe   
+MEM[098]   0x93   MEM[099]   0x87   MEM[09a]   0x17   MEM[09b]   0x0    MEM[09c]   0x93   MEM[09d]   0x97   MEM[09e]   0x27   MEM[09f]   0x0    
+MEM[0a0]   0x3    MEM[0a1]   0x27   MEM[0a2]   0xc4   MEM[0a3]   0xfd   MEM[0a4]   0x33   MEM[0a5]   0x7    MEM[0a6]   0xf7   MEM[0a7]   0x0    
+MEM[0a8]   0x83   MEM[0a9]   0x27   MEM[0aa]   0x84   MEM[0ab]   0xfe   MEM[0ac]   0x93   MEM[0ad]   0x97   MEM[0ae]   0x27   MEM[0af]   0x0    
+MEM[0b0]   0x83   MEM[0b1]   0x26   MEM[0b2]   0xc4   MEM[0b3]   0xfd   MEM[0b4]   0xb3   MEM[0b5]   0x87   MEM[0b6]   0xf6   MEM[0b7]   0x0    
+MEM[0b8]   0x3    MEM[0b9]   0x27   MEM[0ba]   0x7    MEM[0bb]   0x0    MEM[0bc]   0x23   MEM[0bd]   0xa0   MEM[0be]   0xe7   MEM[0bf]   0x0    
+MEM[0c0]   0x83   MEM[0c1]   0x27   MEM[0c2]   0x84   MEM[0c3]   0xfe   MEM[0c4]   0x93   MEM[0c5]   0x87   MEM[0c6]   0x17   MEM[0c7]   0x0    
+MEM[0c8]   0x93   MEM[0c9]   0x97   MEM[0ca]   0x27   MEM[0cb]   0x0    MEM[0cc]   0x3    MEM[0cd]   0x27   MEM[0ce]   0xc4   MEM[0cf]   0xfd   
+MEM[0d0]   0xb3   MEM[0d1]   0x7    MEM[0d2]   0xf7   MEM[0d3]   0x0    MEM[0d4]   0x3    MEM[0d5]   0x27   MEM[0d6]   0x44   MEM[0d7]   0xfe   
+MEM[0d8]   0x23   MEM[0d9]   0xa0   MEM[0da]   0xe7   MEM[0db]   0x0    MEM[0dc]   0x83   MEM[0dd]   0x27   MEM[0de]   0x84   MEM[0df]   0xfe   
+MEM[0e0]   0x93   MEM[0e1]   0x87   MEM[0e2]   0x17   MEM[0e3]   0x0    MEM[0e4]   0x23   MEM[0e5]   0x24   MEM[0e6]   0xf4   MEM[0e7]   0xfe   
+MEM[0e8]   0x6f   MEM[0e9]   0xf0   MEM[0ea]   0x1f   MEM[0eb]   0xf5   MEM[0ec]   0x83   MEM[0ed]   0x27   MEM[0ee]   0xc4   MEM[0ef]   0xfe   
+MEM[0f0]   0x93   MEM[0f1]   0x87   MEM[0f2]   0x17   MEM[0f3]   0x0    MEM[0f4]   0x23   MEM[0f5]   0x26   MEM[0f6]   0xf4   MEM[0f7]   0xfe   
+MEM[0f8]   0x6f   MEM[0f9]   0xf0   MEM[0fa]   0x1f   MEM[0fb]   0xf3   MEM[0fc]   0x13   MEM[0fd]   0x0    MEM[0fe]   0x0    MEM[0ff]   0x0    
+MEM[100]   0x3    MEM[101]   0x24   MEM[102]   0xc1   MEM[103]   0x2    MEM[104]   0x13   MEM[105]   0x1    MEM[106]   0x1    MEM[107]   0x3    
+MEM[108]   0x67   MEM[109]   0x80   MEM[10a]   0x0    MEM[10b]   0x0    MEM[10c]   0x13   MEM[10d]   0x1    MEM[10e]   0x1    MEM[10f]   0xfe   
+MEM[110]   0x23   MEM[111]   0x2e   MEM[112]   0x11   MEM[113]   0x0    MEM[114]   0x23   MEM[115]   0x2c   MEM[116]   0x81   MEM[117]   0x0    
+MEM[118]   0x23   MEM[119]   0x2a   MEM[11a]   0x91   MEM[11b]   0x0    MEM[11c]   0x13   MEM[11d]   0x4    MEM[11e]   0x1    MEM[11f]   0x2    
+MEM[120]   0x13   MEM[121]   0x5    MEM[122]   0x1    MEM[123]   0x0    MEM[124]   0x93   MEM[125]   0x4    MEM[126]   0x5    MEM[127]   0x0    
+MEM[128]   0x13   MEM[129]   0x5    MEM[12a]   0x40   MEM[12b]   0x1f   MEM[12c]   0x23   MEM[12d]   0x24   MEM[12e]   0xa4   MEM[12f]   0xfe   
+MEM[130]   0x3    MEM[131]   0x25   MEM[132]   0x84   MEM[133]   0xfe   MEM[134]   0x13   MEM[135]   0x5    MEM[136]   0xf5   MEM[137]   0xff   
+MEM[138]   0x23   MEM[139]   0x22   MEM[13a]   0xa4   MEM[13b]   0xfe   MEM[13c]   0x93   MEM[13d]   0x8    MEM[13e]   0x5    MEM[13f]   0x0    
+MEM[140]   0x93   MEM[141]   0x88   MEM[142]   0x18   MEM[143]   0x0    MEM[144]   0x13   MEM[145]   0x83   MEM[146]   0x8    MEM[147]   0x0    
+MEM[148]   0x93   MEM[149]   0x3    MEM[14a]   0x0    MEM[14b]   0x0    MEM[14c]   0x93   MEM[14d]   0x58   MEM[14e]   0xb3   MEM[14f]   0x1    
+MEM[150]   0x13   MEM[151]   0x97   MEM[152]   0x53   MEM[153]   0x0    MEM[154]   0x33   MEM[155]   0xe7   MEM[156]   0xe8   MEM[157]   0x0    
+MEM[158]   0x93   MEM[159]   0x16   MEM[15a]   0x53   MEM[15b]   0x0    MEM[15c]   0x13   MEM[15d]   0x7    MEM[15e]   0x5    MEM[15f]   0x0    
+MEM[160]   0x13   MEM[161]   0x7    MEM[162]   0x17   MEM[163]   0x0    MEM[164]   0x93   MEM[165]   0x5    MEM[166]   0x7    MEM[167]   0x0    
+MEM[168]   0x13   MEM[169]   0x6    MEM[16a]   0x0    MEM[16b]   0x0    MEM[16c]   0x13   MEM[16d]   0xd7   MEM[16e]   0xb5   MEM[16f]   0x1    
+MEM[170]   0x13   MEM[171]   0x18   MEM[172]   0x56   MEM[173]   0x0    MEM[174]   0x33   MEM[175]   0x68   MEM[176]   0x7    MEM[177]   0x1    
+MEM[178]   0x93   MEM[179]   0x97   MEM[17a]   0x55   MEM[17b]   0x0    MEM[17c]   0x93   MEM[17d]   0x7    MEM[17e]   0x5    MEM[17f]   0x0    
+MEM[180]   0x93   MEM[181]   0x87   MEM[182]   0x17   MEM[183]   0x0    MEM[184]   0x93   MEM[185]   0x97   MEM[186]   0x27   MEM[187]   0x0    
+MEM[188]   0x93   MEM[189]   0x87   MEM[18a]   0x37   MEM[18b]   0x0    MEM[18c]   0x93   MEM[18d]   0x87   MEM[18e]   0xf7   MEM[18f]   0x0    
+MEM[190]   0x93   MEM[191]   0xd7   MEM[192]   0x47   MEM[193]   0x0    MEM[194]   0x93   MEM[195]   0x97   MEM[196]   0x47   MEM[197]   0x0    
+MEM[198]   0x33   MEM[199]   0x1    MEM[19a]   0xf1   MEM[19b]   0x40   MEM[19c]   0x93   MEM[19d]   0x7    MEM[19e]   0x1    MEM[19f]   0x0    
+MEM[1a0]   0x93   MEM[1a1]   0x87   MEM[1a2]   0x37   MEM[1a3]   0x0    MEM[1a4]   0x93   MEM[1a5]   0xd7   MEM[1a6]   0x27   MEM[1a7]   0x0    
+MEM[1a8]   0x93   MEM[1a9]   0x97   MEM[1aa]   0x27   MEM[1ab]   0x0    MEM[1ac]   0x23   MEM[1ad]   0x20   MEM[1ae]   0xf4   MEM[1af]   0xfe   
+MEM[1b0]   0x23   MEM[1b1]   0x26   MEM[1b2]   0x4    MEM[1b3]   0xfe   MEM[1b4]   0x3    MEM[1b5]   0x27   MEM[1b6]   0xc4   MEM[1b7]   0xfe   
+MEM[1b8]   0x83   MEM[1b9]   0x27   MEM[1ba]   0x84   MEM[1bb]   0xfe   MEM[1bc]   0x63   MEM[1bd]   0x5a   MEM[1be]   0xf7   MEM[1bf]   0x2    
+MEM[1c0]   0x3    MEM[1c1]   0x27   MEM[1c2]   0x84   MEM[1c3]   0xfe   MEM[1c4]   0x83   MEM[1c5]   0x27   MEM[1c6]   0xc4   MEM[1c7]   0xfe   
+MEM[1c8]   0x33   MEM[1c9]   0x7    MEM[1ca]   0xf7   MEM[1cb]   0x40   MEM[1cc]   0x83   MEM[1cd]   0x26   MEM[1ce]   0x4    MEM[1cf]   0xfe   
+MEM[1d0]   0x83   MEM[1d1]   0x27   MEM[1d2]   0xc4   MEM[1d3]   0xfe   MEM[1d4]   0x93   MEM[1d5]   0x97   MEM[1d6]   0x27   MEM[1d7]   0x0    
+MEM[1d8]   0xb3   MEM[1d9]   0x87   MEM[1da]   0xf6   MEM[1db]   0x0    MEM[1dc]   0x23   MEM[1dd]   0xa0   MEM[1de]   0xe7   MEM[1df]   0x0    
+MEM[1e0]   0x83   MEM[1e1]   0x27   MEM[1e2]   0xc4   MEM[1e3]   0xfe   MEM[1e4]   0x93   MEM[1e5]   0x87   MEM[1e6]   0x17   MEM[1e7]   0x0    
+MEM[1e8]   0x23   MEM[1e9]   0x26   MEM[1ea]   0xf4   MEM[1eb]   0xfe   MEM[1ec]   0x6f   MEM[1ed]   0xf0   MEM[1ee]   0x9f   MEM[1ef]   0xfc   
+MEM[1f0]   0x83   MEM[1f1]   0x27   MEM[1f2]   0x4    MEM[1f3]   0xfe   MEM[1f4]   0x83   MEM[1f5]   0x25   MEM[1f6]   0x84   MEM[1f7]   0xfe   
+MEM[1f8]   0x13   MEM[1f9]   0x85   MEM[1fa]   0x7    MEM[1fb]   0x0    MEM[1fc]   0xef   MEM[1fd]   0xf0   MEM[1fe]   0x1f   MEM[1ff]   0xe1   
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Register File Content (Hex):
+-----------------------------------------------------------------------------------------------------------------------------------------------
+RF[00] 0x0        RF[01] 0x8        RF[02] 0x10000    RF[03] 0x0        RF[04] 0x0        RF[05] 0x0        RF[06] 0x1f4      RF[07] 0x0
+RF[08] 0x0        RF[09] 0x0        RF[10] 0x0        RF[11] 0x1f4      RF[12] 0x0        RF[13] 0xf800     RF[14] 0xf800     RF[15] 0x0
+RF[16] 0x0        RF[17] 0x0        RF[18] 0x1eb      RF[19] 0x1ec      RF[20] 0x1ed      RF[21] 0x1ee      RF[22] 0x1ef      RF[23] 0x1f0
+RF[24] 0x1f1      RF[25] 0x1f2      RF[26] 0x1f3      RF[27] 0x1f4      RF[28] 0x0        RF[29] 0x0        RF[30] 0x0        RF[31] 0x0
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Register File Content (Dec):
+-----------------------------------------------------------------------------------------------------------------------------------------------
+RF[00]   0        RF[01]   8        RF[02]   65536    RF[03]   0        RF[04]   0        RF[05]   0        RF[06]   500      RF[07]   0
+RF[08]   0        RF[09]   0        RF[10]   0        RF[11]   500      RF[12]   0        RF[13]   63488    RF[14]   63488    RF[15]   0
+RF[16]   0        RF[17]   0        RF[18]   491      RF[19]   492      RF[20]   493      RF[21]   494      RF[22]   495      RF[23]   496
+RF[24]   497      RF[25]   498      RF[26]   499      RF[27]   500      RF[28]   0        RF[29]   0        RF[30]   0        RF[31]   0
+-----------------------------------------------------------------------------------------------------------------------------------------------
+Tests for test case: 'main.hex': [DOES NOT EXIST]

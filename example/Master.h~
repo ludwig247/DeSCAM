@@ -1,0 +1,63 @@
+//
+// Created by ludwig on 06.06.16.
+//
+
+#ifndef SCAM_MASTER_H
+#define SCAM_MASTER_H
+
+struct Master : public sc_module {
+public:
+    // use fifo to realize blocking read and blocking write
+    // In-port
+    sc_port <sc_fifo_in_if<int> > sensor;
+    // Out-port
+    sc_port <sc_fifo_out_if<int> > lcd;
+    //Internval Variables
+    int cnt;
+    int lcd_value;
+    //Stateset
+    enum States {
+        init, collecting, printing
+    };
+    States state;
+    States nextstate;
+
+    SC_HAS_PROCESS(Master);
+
+    Master(sc_module_name) :
+            cnt(0),
+            lcd_value(0),
+            state(collecting),
+            nextstate(collecting) {
+        SC_THREAD(fsm);
+    };
+
+    void fsm() {
+        int sensor_value;
+        state = nextstate;
+        while (true) {
+
+            if (state == collecting) {
+                if (cnt < 5) {
+                    lcd_value = lcd_value + sensor->read();
+                    ++cnt;
+                    nextstate = collecting;
+                }
+                else  nextstate = printing;
+
+            }
+            if (state == printing) {
+                cnt = 1;
+                lcd_value = lcd_value / 5;
+                lcd->write(lcd_value);
+                nextstate = collecting;
+            }
+        }
+
+
+    }
+
+};
+
+
+#endif //SCAM_MASTER_H

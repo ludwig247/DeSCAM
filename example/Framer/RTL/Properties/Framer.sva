@@ -1,0 +1,996 @@
+// required terminology
+`define next_shift_amount 2 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+/*
+sequence hold(l, e);
+	(l===e, l=e);
+endsequence
+
+sequence t;
+	##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_end(offset);
+	t ##offset 1'b1;
+endsequence
+
+sequence next(timepoint, offset);
+	timepoint ##offset 1'b1;
+endsequence
+
+property during(t1, t2, se);
+	(t1 ##0 se[*0:$] intersect t2) or
+	(t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_limited(t1, t2, off, se);
+	(t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+	(next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_o(t1, o1, t2, o2, se);
+	if (o2 >= 0)
+		during(next(t1, o1), next(t2, (o2<0) ? 0 : o2), se)
+	else
+		during_limited(next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+*/
+// end of ipc_sva
+
+import scam_model_types::*;
+
+module Framer_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge top.framer_comp.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function data_word_sync;
+	data_word_sync = 1;
+endfunction
+function frame_pulse_notify;
+	frame_pulse_notify = top.framer_comp.frame_pulse;
+endfunction
+
+// DP SIGNALS //
+function bool data_word_sig_isMarker;
+	data_word_sig_isMarker = (($past(MarkerPosition(),2)==8)? 1:0);
+endfunction
+function int data_word_sig_markerAlignment;
+	if($past(top.framer_comp.reset_n,3)==0) begin
+		return 8;
+	end else if ($past(top.framer_comp.reset_n,4)==0) begin
+		if ( {$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)} == top.framer_comp.FRAMEMARK_C) begin
+			return 0; end
+		else begin
+			return 8; end
+	end else begin
+		if ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[15:0] == top.framer_comp.FRAMEMARK_C) begin
+			return 0; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[16:1] == top.framer_comp.FRAMEMARK_C) begin
+			return 1; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[17:2] == top.framer_comp.FRAMEMARK_C) begin
+			return 2; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[18:3] == top.framer_comp.FRAMEMARK_C) begin
+			return 3; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[19:4] == top.framer_comp.FRAMEMARK_C) begin
+			return 4; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[20:5] == top.framer_comp.FRAMEMARK_C) begin
+			return 5; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[21:6] == top.framer_comp.FRAMEMARK_C) begin
+			return 6; end
+		else if  ( {$past(top.framer_comp.data_in,4),$past(top.framer_comp.data_in,3),$past(top.framer_comp.data_in,2)}[22:7] == top.framer_comp.FRAMEMARK_C) begin
+			return 7; end
+		else begin
+			return 8; end
+	end
+endfunction
+function bool frame_pulse_sig;
+	frame_pulse_sig = top.framer_comp.frame_pulse;
+endfunction
+//function bool lof_sig;
+//	lof_sig = $past(top.framer_comp.lof,2);
+//endfunction
+function bool oof_sig;
+	oof_sig = !top.framer_comp.synchronized;
+endfunction
+
+// VISIBLE REGISTERS //
+function int FRM_PULSE_POS;
+	FRM_PULSE_POS = 0;
+endfunction
+function int WORDS_IN_FRAME;
+	WORDS_IN_FRAME = 64;
+endfunction
+function int align;
+	align = top.framer_comp.prev_alignment;
+endfunction
+function int frm_cnt;
+	if (top.framer_comp.frame_cnt_int == 0) begin
+		return 61; end
+	else if (top.framer_comp.frame_cnt_int == 1) begin
+		return 62; end
+	else if (top.framer_comp.frame_cnt_int == 2) begin
+		return 63; end
+	else if (top.framer_comp.frame_cnt_int == 3) begin
+		return 0; end
+	else begin
+		return (top.framer_comp.frame_cnt_int - 6'b000011);
+	end
+endfunction
+
+// STATES //
+function FIND_SYNC_0;
+	FIND_SYNC_0 = ( !top.framer_comp.prev_miss && !$past(top.synchronized) &&
+			( !$past(top.framer_comp.sync_hit) || !top.synchronized ) );
+endfunction
+function MISS_2;
+	MISS_2 = ( top.framer_comp.prev_miss && $past(top.synchronized,2) && top.synchronized );
+endfunction
+function SEARCH_4;
+	bool result;
+	bool temp1;
+	bool temp2;
+	temp1 = ($past(MarkerIn(),3) && !($past(top.reset_n,3)==0));
+	temp2 = ($past(top.reset_n,4)==0);
+
+	result = ( top.framer_comp.prev_miss && !top.synchronized );
+	if(temp1) begin
+		result = result && (($past(MarkerPosition(),3) == $past(align(),3))?1:0); end
+	if(temp2) begin
+		result = result && (({$past(top.framer_comp.data_buffer,2)}[22:8]==0)?1:0); end
+	return result;
+endfunction
+function SYNC_6;
+	SYNC_6 = (!top.framer_comp.prev_miss && top.synchronized);
+endfunction
+
+
+// HELPER //
+function int MarkerPosition;
+	if($past(top.framer_comp.reset_n)==0) begin
+		return 8;
+	end else if ($past(top.framer_comp.reset_n,2)==0) begin
+		if ( {$past(top.framer_comp.data_in),top.framer_comp.data_in} == top.framer_comp.FRAMEMARK_C) begin
+			return 0; end
+		else begin
+			return 8; end
+	end else begin
+		if ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[15:0] == top.framer_comp.FRAMEMARK_C) begin
+			return 0; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[16:1] == top.framer_comp.FRAMEMARK_C) begin
+			return 1; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[17:2] == top.framer_comp.FRAMEMARK_C) begin
+			return 2; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[18:3] == top.framer_comp.FRAMEMARK_C) begin
+			return 3; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[19:4] == top.framer_comp.FRAMEMARK_C) begin
+			return 4; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[20:5] == top.framer_comp.FRAMEMARK_C) begin
+			return 5; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[21:6] == top.framer_comp.FRAMEMARK_C) begin
+			return 6; end
+		else if  ( {$past(top.framer_comp.data_in,2),$past(top.framer_comp.data_in),top.framer_comp.data_in}[22:7] == top.framer_comp.FRAMEMARK_C) begin
+			return 7; end
+		else begin
+			return 8; end
+	end
+endfunction
+function bit MarkerIn;
+	if (MarkerPosition() == 8) begin
+		return 0;
+	end else begin
+		return 1;
+	end
+endfunction
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+sequence reset_sequence;
+	##2 (top.framer_comp.reset_n == 0);//DISGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+property reset_p;
+	reset_sequence |=>
+	t ##0 SEARCH_4() and
+	t ##0 FRM_PULSE_POS() == 0 and
+	t ##0 WORDS_IN_FRAME() == 64 and
+	t ##0 align() == 0 and
+	t ##0 frm_cnt() == 63 and
+	t ##0 oof_sig() == 1 and
+	t ##0 frame_pulse_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+property FIND_SYNC_0_read_0_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 !(data_word_sync())
+implies
+	t_end(o) ##0 FIND_SYNC_0() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == frm_cnt_0 and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+FIND_SYNC_0_read_0_a: assert property (disable iff (reset) FIND_SYNC_0_read_0_p(1));// ASSIGN t_end offset here
+
+property FIND_SYNC_0_read_1_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 !((((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0)) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 FIND_SYNC_0() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+FIND_SYNC_0_read_1_a: assert property (disable iff (reset) FIND_SYNC_0_read_1_p(1));// ASSIGN t_end offset here
+
+property FIND_SYNC_0_read_2_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 !((data_word_sig_isMarker() && (align() == data_word_sig_markerAlignment()))) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+FIND_SYNC_0_read_2_a: assert property (disable iff (reset) FIND_SYNC_0_read_2_p(1));// ASSIGN t_end offset here
+
+property FIND_SYNC_0_read_3_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 (align() == data_word_sig_markerAlignment()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == 0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+FIND_SYNC_0_read_3_a: assert property (disable iff (reset) FIND_SYNC_0_read_3_p(1));// ASSIGN t_end offset here
+
+property FIND_SYNC_0_read_4_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 !((((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0)) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 FIND_SYNC_0() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+FIND_SYNC_0_read_4_a: assert property (disable iff (reset) FIND_SYNC_0_read_4_p(1));// ASSIGN t_end offset here
+
+property FIND_SYNC_0_read_5_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 !((data_word_sig_isMarker() && (align() == data_word_sig_markerAlignment()))) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+FIND_SYNC_0_read_5_a: assert property (disable iff (reset) FIND_SYNC_0_read_5_p(1));// ASSIGN t_end offset here
+
+property FIND_SYNC_0_read_6_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+// Conceptual State
+	t ##0 FIND_SYNC_0() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 (align() == data_word_sig_markerAlignment()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == 0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+FIND_SYNC_0_read_6_a: assert property (disable iff (reset) FIND_SYNC_0_read_6_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_7_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 !(data_word_sync())
+implies
+	t_end(o) ##0 MISS_2() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == frm_cnt_0 and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+MISS_2_read_7_a: assert property (disable iff (reset) MISS_2_read_7_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_8_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 !((((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0)) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 MISS_2() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+MISS_2_read_8_a: assert property (disable iff (reset) MISS_2_read_8_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_9_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 !((data_word_sig_isMarker() && (align() == data_word_sig_markerAlignment()))) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == 1 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+MISS_2_read_9_a: assert property (disable iff (reset) MISS_2_read_9_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_10_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 (align() == data_word_sig_markerAlignment()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+MISS_2_read_10_a: assert property (disable iff (reset) MISS_2_read_10_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_11_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 !((((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0)) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 MISS_2() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+MISS_2_read_11_a: assert property (disable iff (reset) MISS_2_read_11_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_12_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 !((data_word_sig_isMarker() && (align() == data_word_sig_markerAlignment()))) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == 1 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+MISS_2_read_12_a: assert property (disable iff (reset) MISS_2_read_12_p(1));// ASSIGN t_end offset here
+
+property MISS_2_read_13_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 MISS_2() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 (align() == data_word_sig_markerAlignment()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+MISS_2_read_13_a: assert property (disable iff (reset) MISS_2_read_13_p(1));// ASSIGN t_end offset here
+
+property SEARCH_4_read_14_p(o);
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int data_word_sig_markerAlignment_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(data_word_sig_markerAlignment_0, data_word_sig_markerAlignment()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SEARCH_4() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 FIND_SYNC_0() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == data_word_sig_markerAlignment_0 and
+	t_end(o) ##0 frm_cnt() == 0 and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SEARCH_4_read_14_a: assert property (disable iff (reset) SEARCH_4_read_14_p(1));// ASSIGN t_end offset here
+
+property SEARCH_4_read_15_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SEARCH_4() and
+// trigger
+	t ##0 !(data_word_sync())
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == frm_cnt_0 and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SEARCH_4_read_15_a: assert property (disable iff (reset) SEARCH_4_read_15_p(1));// ASSIGN t_end offset here
+
+property SEARCH_4_read_16_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SEARCH_4() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 !(data_word_sig_isMarker()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SEARCH_4_read_16_a: assert property (disable iff (reset) SEARCH_4_read_16_p(1));// ASSIGN t_end offset here
+
+property SEARCH_4_read_17_p(o);
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int data_word_sig_markerAlignment_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(data_word_sig_markerAlignment_0, data_word_sig_markerAlignment()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SEARCH_4() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 FIND_SYNC_0() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == data_word_sig_markerAlignment_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == 0 and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+SEARCH_4_read_17_a: assert property (disable iff (reset) SEARCH_4_read_17_p(1));// ASSIGN t_end offset here
+
+property SEARCH_4_read_18_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SEARCH_4() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 !(data_word_sig_isMarker()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SEARCH_4() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+SEARCH_4_read_18_a: assert property (disable iff (reset) SEARCH_4_read_18_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_19_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 !((data_word_sig_isMarker() && (align() == data_word_sig_markerAlignment()))) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 MISS_2() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SYNC_6_read_19_a: assert property (disable iff (reset) SYNC_6_read_19_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_20_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 !(data_word_sync())
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == frm_cnt_0 and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SYNC_6_read_20_a: assert property (disable iff (reset) SYNC_6_read_20_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_21_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 !((((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0)) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SYNC_6_read_21_a: assert property (disable iff (reset) SYNC_6_read_21_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_22_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 !((frm_cnt() == FRM_PULSE_POS())) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 (align() == data_word_sig_markerAlignment()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 0;
+endproperty;
+SYNC_6_read_22_a: assert property (disable iff (reset) SYNC_6_read_22_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_23_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 !((data_word_sig_isMarker() && (align() == data_word_sig_markerAlignment()))) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 MISS_2() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+SYNC_6_read_23_a: assert property (disable iff (reset) SYNC_6_read_23_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_24_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 !((((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0)) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+SYNC_6_read_24_a: assert property (disable iff (reset) SYNC_6_read_24_p(1));// ASSIGN t_end offset here
+
+property SYNC_6_read_25_p(o);
+int align_0;
+int FRM_PULSE_POS_0;
+int WORDS_IN_FRAME_0;
+int frm_cnt_0;
+bool oof_sig_0;
+// hold
+	t ##0 hold(align_0, align()) and
+	t ##0 hold(FRM_PULSE_POS_0, FRM_PULSE_POS()) and
+	t ##0 hold(WORDS_IN_FRAME_0, WORDS_IN_FRAME()) and
+	t ##0 hold(frm_cnt_0, frm_cnt()) and
+	t ##0 hold(oof_sig_0, oof_sig()) and
+// Conceptual State
+	t ##0 SYNC_6() and
+// trigger
+	t ##0 data_word_sync() and
+	t ##0 (frm_cnt() == FRM_PULSE_POS()) and
+	t ##0 (((1 + frm_cnt()) % WORDS_IN_FRAME()) == 0) and
+	t ##0 data_word_sig_isMarker() and
+	t ##0 (align() == data_word_sig_markerAlignment()) and
+	t ##0 data_word_sync()
+implies
+	t_end(o) ##0 SYNC_6() and
+	t_end(o) ##0 FRM_PULSE_POS() == FRM_PULSE_POS_0 and
+	t_end(o) ##0 WORDS_IN_FRAME() == WORDS_IN_FRAME_0 and
+	t_end(o) ##0 align() == align_0 and
+	t_end(o) ##0 frame_pulse_sig() == 1 and
+	t_end(o) ##0 frm_cnt() == ((1 + frm_cnt_0) % WORDS_IN_FRAME_0) and
+	t_end(o) ##0 oof_sig() == oof_sig_0 and
+	t ##1 frame_pulse_notify() == 1;
+endproperty;
+SYNC_6_read_25_a: assert property (disable iff (reset) SYNC_6_read_25_p(1));// ASSIGN t_end offset here
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind top.framer_comp Framer_verification inst (.*, .reset(!(top.framer_comp.reset_n)));

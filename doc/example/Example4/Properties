@@ -1,0 +1,493 @@
+deutschmann@tocai:~/SCAM> ./bin/SCAM ./doc/example/Example4/sc_main.cpp -ITL
+Creating Model
+----------------------
+Creating module: Example4
+----------------------
+-I-  Not all variables initialized
+Create Paths:6
+Add communication: 13
+Deleted 2 duplicated paths
+Deleted 0 unreachable paths
+Comm to Comm: 11
+Deleted 0 duplicated paths
+Value Propagation:11
+Deleted 0 duplicated paths
+Deleted 0 unreachable paths
+Clean-up: 11
+Optimized conditions
+Optimized datapath
+Optimization: 11
+----------------------
+Creating module: Stimuli
+----------------------
+-I-  Not all variables initialized
+-I- Stimuli: no states found. Adding default state run 
+----------------------
+Error: Translation of Stmts for module Stimuli
+----------------------
+- var = (rand()%2)==1
+	-E- rand() is not a valid function
+	-E- Could not translate  LHS of Stmts
+	-E- Could not translate  LHS of Stmts
+	-E- Could not translate  RHS of Stmts
+- std::cout << "#1" << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- std::cout << "#2" << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- std::cout << "#3" << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- std::cout << "Succ:" << succ << "Result" << result << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- std::cout << "Stop after "
+	-E- operator<<() is not a valid function
+- std::cout << "Stop after " << sc_delta_count() << "delta cycles" << std::endl
+	-E- Unknown error: Stmts can't be processed(d)
+- sc_stop()
+	-E- sc_stop() is not a valid function
+----------------------
+Create Paths:2
+Add communication: 6
+Deleted 0 duplicated paths
+Deleted 0 unreachable paths
+Comm to Comm: 5
+Deleted 0 duplicated paths
+Value Propagation:5
+Deleted 0 duplicated paths
+Deleted 0 unreachable paths
+Clean-up: 5
+Optimized conditions
+Optimized datapath
+Optimization: 5
+----------------------
+Creating module: Stimuli2
+----------------------
+-I- Stimuli2: no states found. Adding default state run 
+Create Paths:3
+Add communication: 7
+Deleted 2 duplicated paths
+Deleted 1 unreachable paths
+Comm to Comm: 4
+Deleted 0 duplicated paths
+Value Propagation:4
+Deleted 0 duplicated paths
+Deleted 0 unreachable paths
+Clean-up: 4
+Optimized conditions
+Optimized datapath
+Optimization: 4
+
+----------------------
+ITL: Example4
+----------------------
+State-map(unoptimized):11 operations created
+State-map(optimized):11 operations created
+----------------------
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+macro report_out_notify :  boolean  := end macro; 
+macro value_in_notify :  boolean  := end macro; 
+macro value_in_sync   :  boolean  := end macro; 
+
+
+-- DP SIGNALS -- 
+macro master_in1_sig : bool := end macro; 
+macro master_in2_sig : bool := end macro; 
+macro report_out_sig : bool := end macro; 
+macro value_in_sig : int := end macro; 
+
+
+--CONSTRAINTS-- 
+constraint no_reset := rst = '0'; end constraint; 
+
+
+-- VISIBLE REGISTERS --
+macro value : bool := end macro; 
+macro var : int := end macro; 
+
+
+-- STATES -- 
+macro idle_0 : boolean := true end macro;
+macro idle_1 : boolean := true end macro;
+macro reading_3 : boolean := true end macro;
+
+
+--Operations -- 
+property reset is
+assume:
+	 reset_sequence;
+prove:
+	 at t: idle_0;
+	 at t: report_out_sig = false;
+	 at t: value = false;
+	 at t: var = 10;
+	 at t: report_out_notify = true;
+	 at t: value_in_notify = false;
+end property;
+
+
+property idle_0_write_0 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	value_at_t = value@t,
+	var_at_t = var@t;
+assume: 
+	 at t: idle_0;
+prove:
+	 at t_end: idle_1;
+	 at t_end: value = value_at_t;
+	 at t_end: var = var_at_t;
+	 during[t+1, t_end]: report_out_notify = false;
+	 during[t+1, t_end-1]: value_in_notify = false;
+	 at t_end: value_in_notify = true;
+end property;
+
+property idle_1_read_1 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	value_at_t = value@t,
+	value_in_sig_at_t = value_in_sig@t;
+assume: 
+	 at t: idle_1;
+	 at t: not((value_in_sig = 0));
+	 at t: not(value);
+	 at t: value_in_sync;
+prove:
+	 at t_end: idle_0;
+	 at t_end: report_out_sig = false;
+	 at t_end: value = value_at_t;
+	 at t_end: var = value_in_sig_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_2 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	value_at_t = value@t,
+	var_at_t = var@t;
+assume: 
+	 at t: idle_1;
+	 at t: not((var = 0));
+	 at t: not(value);
+	 at t: not(value_in_sync);
+prove:
+	 at t_end: idle_0;
+	 at t_end: report_out_sig = false;
+	 at t_end: value = value_at_t;
+	 at t_end: var = var_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_3 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	value_at_t = value@t,
+	value_in_sig_at_t = value_in_sig@t;
+assume: 
+	 at t: idle_1;
+	 at t: not((value_in_sig = 0));
+	 at t: value;
+	 at t: value_in_sync;
+prove:
+	 at t_end: reading_3;
+	 at t_end: report_out_sig = true;
+	 at t_end: value = value_at_t;
+	 at t_end: var = value_in_sig_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_4 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	value_at_t = value@t,
+	var_at_t = var@t;
+assume: 
+	 at t: idle_1;
+	 at t: not((var = 0));
+	 at t: value;
+	 at t: not(value_in_sync);
+prove:
+	 at t_end: reading_3;
+	 at t_end: report_out_sig = true;
+	 at t_end: value = value_at_t;
+	 at t_end: var = var_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_5 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	master_in1_sig_at_t = master_in1_sig@t,
+	value_in_sig_at_t = value_in_sig@t;
+assume: 
+	 at t: idle_1;
+	 at t: not(master_in1_sig);
+	 at t: (value_in_sig = 0);
+	 at t: value_in_sync;
+prove:
+	 at t_end: idle_0;
+	 at t_end: report_out_sig = false;
+	 at t_end: value = master_in1_sig_at_t;
+	 at t_end: var = value_in_sig_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_6 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	master_in1_sig_at_t = master_in1_sig@t,
+	value_in_sig_at_t = value_in_sig@t;
+assume: 
+	 at t: idle_1;
+	 at t: master_in1_sig;
+	 at t: (value_in_sig = 0);
+	 at t: value_in_sync;
+prove:
+	 at t_end: reading_3;
+	 at t_end: report_out_sig = true;
+	 at t_end: value = master_in1_sig_at_t;
+	 at t_end: var = value_in_sig_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_7 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	master_in1_sig_at_t = master_in1_sig@t,
+	var_at_t = var@t;
+assume: 
+	 at t: idle_1;
+	 at t: not(master_in1_sig);
+	 at t: (var = 0);
+	 at t: not(value_in_sync);
+prove:
+	 at t_end: idle_0;
+	 at t_end: report_out_sig = false;
+	 at t_end: value = master_in1_sig_at_t;
+	 at t_end: var = var_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property idle_1_read_8 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	master_in1_sig_at_t = master_in1_sig@t,
+	var_at_t = var@t;
+assume: 
+	 at t: idle_1;
+	 at t: master_in1_sig;
+	 at t: (var = 0);
+	 at t: not(value_in_sync);
+prove:
+	 at t_end: reading_3;
+	 at t_end: report_out_sig = true;
+	 at t_end: value = master_in1_sig_at_t;
+	 at t_end: var = var_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+
+property reading_3_write_9 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	value_at_t = value@t,
+	var_at_t = var@t;
+assume: 
+	 at t: reading_3;
+prove:
+	 at t_end: idle_0;
+	 at t_end: report_out_sig = false;
+	 at t_end: value = value_at_t;
+	 at t_end: var = var_at_t;
+	 during[t+1, t_end-1]: report_out_notify = false;
+	 at t_end: report_out_notify = true;
+	 during[t+1, t_end]: value_in_notify = false;
+end property;
+----------------------
+ITL: Stimuli
+----------------------
+State-map(unoptimized):5 operations created
+State-map(optimized):3 operations created
+----------------------
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+macro report_in_sync   :  boolean  := end macro; 
+macro slave_out1_sync   :  boolean  := end macro; 
+macro slave_out2_sync   :  boolean  := end macro; 
+
+
+-- DP SIGNALS -- 
+macro report_in_sig : bool := end macro; 
+macro slave_out1_sig : bool := end macro; 
+macro slave_out2_sig : bool := end macro; 
+
+
+--CONSTRAINTS-- 
+constraint no_reset := rst = '0'; end constraint; 
+
+
+-- VISIBLE REGISTERS --
+macro var : bool := end macro; 
+
+
+-- STATES -- 
+macro run_0 : boolean := true end macro;
+
+
+--Operations -- 
+property reset is
+assume:
+	 reset_sequence;
+prove:
+	 at t: run_0;
+	 at t: slave_out2_sig = false;
+	 at t: var = false;
+end property;
+
+
+property run_0_write_0 is
+dependencies: no_reset;
+freeze:
+	var_at_t = var@t;
+assume: 
+	 at t: run_0;
+	 at t: report_in_sync;
+prove:
+	 at t+1: run_0;
+	 at t+1: slave_out1_sig = var_at_t;
+	 at t+1: slave_out2_sig = false;
+	 at t+1: var = var_at_t;
+end property;
+
+property run_0_write_1 is
+dependencies: no_reset;
+freeze:
+	var_at_t = var@t;
+assume: 
+	 at t: run_0;
+	 at t: not(report_in_sync);
+prove:
+	 at t+1: run_0;
+	 at t+1: slave_out1_sig = var_at_t;
+	 at t+1: slave_out2_sig = false;
+	 at t+1: var = var_at_t;
+end property;
+----------------------
+ITL: Stimuli2
+----------------------
+State-map(unoptimized):4 operations created
+State-map(optimized):4 operations created
+----------------------
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+macro value_notify :  boolean  := end macro; 
+macro value_sync   :  boolean  := end macro; 
+
+
+-- DP SIGNALS -- 
+macro value_sig : int := end macro; 
+
+
+--CONSTRAINTS-- 
+constraint no_reset := rst = '0'; end constraint; 
+
+
+-- VISIBLE REGISTERS --
+macro cnt : int := end macro; 
+
+
+-- STATES -- 
+macro run_0 : boolean := true end macro;
+
+
+--Operations -- 
+property reset is
+assume:
+	 reset_sequence;
+prove:
+	 at t: run_0;
+	 at t: cnt = 1;
+	 at t: value_sig = 1;
+	 at t: value_notify = true;
+end property;
+
+
+property run_0_write_0 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	cnt_at_t = cnt@t;
+assume: 
+	 at t: run_0;
+	 at t: (cnt <= 999);
+	 at t: value_sync;
+prove:
+	 at t_end: run_0;
+	 at t_end: cnt = (1 + cnt_at_t);
+	 at t_end: value_sig = (1 + cnt_at_t);
+	 during[t+1, t_end-1]: value_notify = false;
+	 at t_end: value_notify = true;
+end property;
+
+property run_0_write_1 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+assume: 
+	 at t: run_0;
+	 at t: (cnt >= 1000);
+	 at t: value_sync;
+prove:
+	 at t_end: run_0;
+	 at t_end: cnt = 0;
+	 at t_end: value_sig = 0;
+	 during[t+1, t_end-1]: value_notify = false;
+	 at t_end: value_notify = true;
+end property;
+
+property wait_run_0 is
+dependencies: no_reset;
+freeze:
+	cnt_at_t = cnt@t;
+assume: 
+	 at t: run_0;
+	 at t: not(value_sync);
+prove:
+	 at t+1: run_0;
+	 at t+1: cnt = cnt_at_t;
+	 at t+1: value_sig = cnt_at_t;
+	 at t+1: value_notify = true;
+end property;
+

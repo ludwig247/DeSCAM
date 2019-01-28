@@ -1,0 +1,107 @@
+#include "CommandLineParameter.h"
+#include "PluginAction.h"
+#include "ModelFactory.h"
+#include "CommandlineControl.h"
+
+
+#include <fstream>
+#include <PrintAML.h>
+#include <ModelGlobal.h>
+
+std::map<std::string,std::string> getConfiguration(std::string fileName){
+    std::map<std::string,std::string> myConfig;
+    std::map<std::string,std::string>::iterator *it;
+    //Converting the string into const char* because of the parameter of ifstream
+    std::ifstream file;
+    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try{
+        file.open(fileName);
+        std::string KeyName ="";
+        std::string Path ="";
+        // Inserting members to the map
+        while(!file.eof()){
+            file >>KeyName >> Path;
+            myConfig.insert(std::make_pair(KeyName, Path));
+        }
+        file.close();
+    }
+    catch (std::ifstream::failure e){
+        std::cerr << "Can't open file " << fileName << "\n";
+    }
+    return myConfig;
+}
+
+void information();
+
+//using namespace clang::tooling;
+int main(int argc,const char **argv)
+//int main(int argc,char *argv[])
+{
+//    std::map<std::string,std::string> myConfig;
+//    myConfig = getConfiguration("/home/tobias/SCAM/bin/Debug/fileConfig.txt");
+//    //Checking if the mapping is ok
+//    std::cout << myConfig["systemc"]<<std::endl;
+//    std::cout << myConfig["clang"]<<std::endl;
+//    std::cout << "The size of the map is="<< myConfig.size()<< std::endl;
+//    return 0;
+
+//    CommandLineParameter::setParameter("Operations",false);
+    CommandLineParameter::setParameter("AML",false);
+    CommandLineParameter::setParameter("ITL",false);
+    CommandLineParameter::setParameter("VHDL",false);
+//    CommandLineParameter::setParameter("Promela",true);
+    CommandLineParameter::setParameter("HideErrors",true);
+    //CommandLineParameter::setParameter("ControlFlowGraph",true);
+
+    SCAM::CommandlineControl commandlineControl("SCAM",argc,argv);
+
+
+    std::cout << "Setting up enviroment ..." << std::endl;
+    std::vector<const char*> commandLineArugmentsVector;
+    //Name of the Tool
+
+    commandLineArugmentsVector.push_back(argv[0]);
+    //SRC-File to be analyzed
+    commandLineArugmentsVector.push_back(argv[1]);
+    //Seperator n
+    commandLineArugmentsVector.push_back("--");
+    //Basic include-dir: may not be changed
+    commandLineArugmentsVector.push_back("-I/usr/include");
+    //Clang IncludeDir
+    commandLineArugmentsVector.push_back("-I/usr/local/lib/clang/3.4/include/");
+    commandLineArugmentsVector.push_back("-I/usr/local/hiwi/lib/clang/3.4.2/include");
+
+    //SystemC Directory
+//    commandLineArugmentsVector.push_back("-I/import/home/ludwig/SCAM/systemc-2.3.1/include");
+    commandLineArugmentsVector.push_back( "-I/usr/local/systemc-2.3/include");
+    commandLineArugmentsVector.push_back( "-I/usr/local/systemc/include");
+    //commandLineArugmentsVector.push_back( "-I/home/zhani/Desktop/TUK/HiWi/SCAM/example/Interfaces");
+//    commandLineArugmentsVector.push_back( "-I/usr/include/linux");
+//    commandLineArugmentsVector.push_back( "-I/usr/include/c++/5/tr1"); 
+//    commandLineArugmentsVector.push_back( "-D_GCC_LIMITS_H_");
+
+    //Parameters for clang: may not be changed
+    std::vector<const char*> clangParameter = {"-x", "c++", "-w", "-c"};
+    for(auto item: clangParameter){
+        commandLineArugmentsVector.push_back(item);
+    }
+    //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+    const char *commandLineArgumentsArray[commandLineArugmentsVector.size()];
+    for(int i=0; i < commandLineArugmentsVector.size(); i++){
+        commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
+    }
+
+    if(argc >= 1) {
+        PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
+        commandlineControl.output(SCAM::ModelGlobal::getModel());
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+

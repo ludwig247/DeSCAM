@@ -1,0 +1,19 @@
+set(PROPERTY_SYNTH_FILES
+        PropertyFactory.cpp
+        toPPA/SectionToPaths.cpp
+        Path.cpp
+        toPPA/FindCommunication.cpp
+        toPPA/ReplaceStmt.cpp
+        CleanUpPaths.cpp
+        toPPA/ValuePropagation.cpp
+        toPPA/ConditionOptimizer.cpp
+        toPPA/DataPathOptimizer.cpp
+        toPPA/CommToCommNew.cpp
+        toPPA/OnlyBlockingComm.cpp
+        optimizePPA/OptimizeMaster.cpp
+        optimizePPA/OptimizeSlave.cpp
+        optimizePPA/OptimizeOperations.cpp
+        toPPA/CreateInitSection.cpp
+        operationGraph/Operation.cpp
+        operationGraph/State.cpp)
+add_library(propertyFactory ${PROPERTY_SYNTH_FILES})
