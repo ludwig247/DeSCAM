@@ -180,7 +180,7 @@ SystemC. This subset will be described and detailed in the following.
 Let's continue with our first walk-through of PDD. We assume that our
 SystemC module has passed verification on the ESL and is considered
 ready for implementation. The SystemC code is analyzed using . We run
-the tool from the command line as `DeSCAM <path-to-file> -AML` The
+the tool from the command line as `DeSCAM --file <path-to-file> -PrintAML` The
 following example shows the output of DeSCAM when no errors are found:
 
     ############################
