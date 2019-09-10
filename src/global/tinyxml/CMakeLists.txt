@@ -1,1 +1,0 @@
-add_library(tinyXML tinyxml.cpp tinyxmlparser.cpp xmltest.cpp tinyxmlerror.cpp tinystr.cpp)
