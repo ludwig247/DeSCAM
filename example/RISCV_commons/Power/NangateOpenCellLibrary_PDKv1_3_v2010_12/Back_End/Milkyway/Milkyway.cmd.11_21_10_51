@@ -1,0 +1,69 @@
+;# Scheme
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+211+85"
+geOpenLib
+setFormField "Open Library" "open ref library for write" "1"
+setFormField "Open Library" "read only" "0"
+formButton "Open Library" "browse..."
+setFormField "Open Library" "open ref library for write" "0"
+setFormField "Open Library" "open ref library for write" "1"
+setFormField "Open Library" "read only" "0"
+setFormField "Open Library" "Library Name" "NG45"
+formOK "Open Library"
+geCreateLogicView
+setFormField "Create Logic View" "Design db Name" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Front_End/Liberty/NLDM/NangateOpenCellLibrary_typical.db"
+setFormField "Create Logic View" "Cell Name" "*"
+formOK "Create Logic View"
+geCreateLogicView
+formButton "Create Logic View" "addDb"
+formOK "Create Logic View"
+cmCheckLibrary
+formButton "Check Library" "browse..."
+setFormField "Check Library" "Library Name" "NG45"
+setFormField "Check Library" "Report File Name" "Report.txt"
+formOK "Check Library"
+read_lib
+readLibForm "logical"
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" ""
+
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" "NG45"
+
+readLibForm "logical"
+readLibForm "physical"
+readLibForm "logical"
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" "NG45"
+
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" "NG45"
+
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" "NG45"
+
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" "NG45"
+
+readLibForm "hide"
+geConfirmCloseLib
+formYes "Dialog Box"
+iconifyWindow 0
+deiconifyWindow 0
+read_lib
+readLibForm "logical"
+gePrepLibs
+
+setFormField "Library Preparation" "Library Name" "NG45"
+
+readLibForm "Library Name" "shri1704NG45"
+readLibForm "initial"
+readLibForm "hide"
+menuQuit
+formYes "Dialog Box"

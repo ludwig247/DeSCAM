@@ -1,0 +1,107 @@
+
+
+todo: add functionality to include functions and function calls
+
+todo: for compounds, maybe allow assignment (using the syntax now used for the init of compounds) and maybe allow the comparision of assignments, i.e., == and != between compound operands and {value, another}
+
+todo: using z3, try to calculate the range of both ports and variables, i.e., the possible values it can have.
+      in many cases, this will be dependent on global input. But if all global inputs are given a range from the user (e.g., as bitwidth), we should be able to calculate the range of all variables and outputs
+      This MAY be useful information for the user, or, maybe even for us, if we know how many "signals" we have, then we can, for example, calculate the minimum number of cycles needed to decode such messages
+      (if an (abstract) port requires 20 bits, and we have 2 lines available for the data, then minimum 10 cycles are required)
+
+todo: ExprTranslator is done but should be tested (could not get Z3interface to work...)
+todo: Should also be moved to some other folder..
+
+todo: add support for arrays
+
+
+
+Module:
+  port declarations
+  variable declarations
+    (when a compound type is declared, add the parent and all children explicitly to the list, i.e., not only the compound itself))
+    (contains the init value)
+  sectionVariable declaration (is an enum with the symbolic list given in states = {mode1, ..}
+    (is of Variable type and init value is contained within)
+  FSM
+
+FSM: is a map of:
+   section names (the symbols defined for sectionVariable)
+   statement list
+
+statement list:
+  At the top level (so directly in the list) Assignment, ITE, Call
+  Expressions are nested within these (Expression inherits from Stmt, but all have a DataType*)
+  Expressions are:
+    terminal
+      Constant Values (of some DataType)
+      Operand (pointer to Variable or Port of some DataType)
+        VariableOperand
+        PortOperand
+    non-terminal
+      binary infix (lhs expr, operator, rhs expr)
+      unary prefix (operator, rhs expr)
+
+Binary Operators:
+  relational : takes numbers as input and returns a boolean, e.g. > >= < <= == !=
+  logical : takes boolean as input and returns a boolean) AND OR XOR NOR XNOR NAND
+  arithmetic : takes numbers as input and returns a number) + - * / %
+  bitwise : (actually these can be considered arithmetic) bitor, bitand, ..
+Unary Operators:
+  logic : NOT
+  arithmetic : (unary -)
+  bitwise : bitnot
+
+
+Class Operand :
+  is a reference to a variable (this variable can be a subvariable of a compound type)
+Class VariableOperand : a variable type operand
+  --> rename to VariableOperand
+Class PortOperand : a port type operand
+Class CompoundPortOperand:
+  --> Can be ignored for now
+
+class Assignment : lhs must be an Operand, rhs an expression of matching DataType
+
+class ITE (if then else)
+  condition (boolean expression) a list of top-level-statements (Assignment, ITE, Call) for if part and a list for else part
+  inherits IF->BRANCH (these classes are not used directly)
+
+class While:
+  -->Should not be used, Can be removed?
+
+class BoolValue, IntegerValue, EnumValue:
+  inherits ConstValue
+  is a terminal expression of some DataType*
+
+class SectionValue:
+  will be removed
+class SectionOperand :
+  will be removed
+
+
+class Arithmetic : (rhs operator lhs) infix binary expression
+  --> becoems BinaryExpression
+  takes expressions as rhs and lhs (not top-level-statements, besides possibly Call, which is both Expression and top-level)
+
+class UnaryExpr ( rhs operator ) prefix unary expression
+ --> rename UnaryExpression
+ takes expressions as rhs (not top-level-statements, besides possibly Call, which is both Expression and top-level)
+
+class Call : Operand, as my old element_ref (so pointing to a port or a variable )
+  --> change the return value from string to DataType*
+
+class Compare:
+ --> merged with Arithmetic, becomes BinaryExpression
+
+
+
+Changes to FSM:
+  remove the stateList and initialValue
+Changes to Model
+  add: Variable* sectionVariable, off enum type defined by the stateList (that used to be in the FSM)
+
+
+Possibly define "operators" class or something similar, instead of leaving it as strings
+Possibly define "call-operators" class instead of the string methodName in the Call class
+

@@ -1,0 +1,1663 @@
+No PseudoColor Visual avaiable, try TrueColor instead
+;; ;# Scheme
+                                        
+                                 Milkyway (TM)
+                                        
+                Version K-2015.06-SP4 for suse64 - Nov 23, 2015 
+                                        
+                    Copyright (c) 1988 - 2015 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+
+Loading /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/scheme/.avntrc
+#t
+ Info: loading setup file(s)
+Info: sourcing installation .synopsys_milkyway.tcl
+Info: sourced /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/auxx/tcllib/astro/milkyway.tbc
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+Initialization completed
+;; configureWindow 0 "25x24+0+0"
+;; read_lef
+;; formButton "Read LEF" "browse..."
+;; setFormField "Read LEF" "Library Name" "NG45MILKYWAY"
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI22_X1."
+;; setFormField "Read LEF" "Tech LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef"
+;; formOK "Read LEF"
+
+	>>>>>>> MILKYWAY LEF IN <<<<<<<
+
+>>> Read Tech LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef" ... 
+WARNING : **** No technology information!
+Backup existing technology info ...
+WARNING : **** No technology information!
+The library already has via info attach file!
+If you want to regenerate the via info attach file,
+Use [dbDeleteLibAttachedFile libId "VIA_INFO_ATTACH_FILE"]
+to remove via info attach file first.
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefANTENNA_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI22_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI22_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI22_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefBUF_X16.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefBUF_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefBUF_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefBUF_X32.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefBUF_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefBUF_X8.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKBUF_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKBUF_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKBUF_X3.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATETST_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATETST_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATETST_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATETST_X8.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATE_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATE_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATE_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefCLKGATE_X8.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFFRS_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFFRS_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFFR_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFFR_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFFS_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFFS_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFF_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDFF_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDLH_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDLH_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDLL_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefDLL_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFA_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFILLCELL_X16.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFILLCELL_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFILLCELL_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFILLCELL_X32.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFILLCELL_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefFILLCELL_X8.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefHA_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefINV_X16.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefINV_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefINV_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefINV_X32.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefINV_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefINV_X8.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefLOGIC0_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefLOGIC1_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefMUX2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefMUX2_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND2_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND2_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND3_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND3_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND3_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND4_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND4_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNAND4_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR2_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR2_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR3_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR3_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR3_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR4_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR4_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNOR4_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI211_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI211_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI211_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI21_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI21_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI21_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI221_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI221_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI221_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI222_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI222_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI222_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI22_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI22_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI22_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOAI33_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR2_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR2_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR3_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR3_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR3_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR4_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR4_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefOR4_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFFRS_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFFRS_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFFR_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFFR_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFFS_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFFS_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFF_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefSDFF_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTBUF_X16.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTBUF_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTBUF_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTBUF_X4.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTBUF_X8.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTINV_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefTLAT_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefXNOR2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefXNOR2_X2.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefXOR2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefXOR2_X2.lef/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X1.lef does not exist. (MW-011)
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefXOR2_X2.lef does not exist. (MW-011)
+WARNING : **** No technology information!
+Read LEF completed.
+
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+;; read_lef
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12"
+;; formOK "Read LEF"
+
+	>>>>>>> MILKYWAY LEF IN <<<<<<<
+
+>>> Read Tech LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef" ... 
+WARNING : **** No technology information!
+Backup existing technology info ...
+WARNING : **** No technology information!
+The library already has via info attach file!
+If you want to regenerate the via info attach file,
+Use [dbDeleteLibAttachedFile libId "VIA_INFO_ATTACH_FILE"]
+to remove via info attach file first.
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef" ... 
+
+
+WARNING : **** No technology information!
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI22_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI22_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI22_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X32.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKBUF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKBUF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKBUF_X3.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFRS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFRS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFR_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFR_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLH_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLH_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLL_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLL_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FA_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X32.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/HA_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X32.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/LOGIC0_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/LOGIC1_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/MUX2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/MUX2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI211_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI211_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI211_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI21_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI21_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI21_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI221_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI221_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI221_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI222_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI222_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI222_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI22_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI22_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI22_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI33_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFRS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFRS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFR_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFR_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TINV_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TLAT_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XNOR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XNOR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XOR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XOR2_X2.lef" ... 
+
+
+Read LEF completed.
+
+;; configureWindow 0 "25x24+0+0"
+;; auExtractBlockagePinVia
+;; setFormField "Extract Blockage" "Library Name" "NG45MILKYWAY"
+;; setFormField "Extract Blockage" "Cell Name" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12"
+;; setFormField "Extract Blockage" "Cell Name" "*"
+;; formOK "Extract Blockage"
+Warning: Port type table is not defined. (RT-094)
+------ new BPV starts ... -----
+Warning: System layer 200(via11Blockage) is used by layer via11Blockage. BPV can not generate anything on via11Blockage.
+ (RT-503)
+Warning: System layer 201(metal12Blockage) is used by layer metal12Blockage. BPV can not generate anything on metal12Blockage.
+ (RT-503)
+Warning: System layer 208(metal7Blockage) is used by layer metal7Blockage. BPV can not generate anything on metal7Blockage.
+ (RT-503)
+Warning: System layer 209(via7Blockage) is used by layer via7Blockage. BPV can not generate anything on via7Blockage.
+ (RT-503)
+Warning: System layer 210(metal8Blockage) is used by layer metal8Blockage. BPV can not generate anything on metal8Blockage.
+ (RT-503)
+Warning: System layer 211(via8Blockage) is used by layer via8Blockage. BPV can not generate anything on via8Blockage.
+ (RT-503)
+Warning: System layer 212(polyBlockage) is used by layer polyBlockage. BPV can not generate anything on polyBlockage.
+ (RT-503)
+Warning: System layer 214(metal9Blockage) is used by layer metal9Blockage. BPV can not generate anything on metal9Blockage.
+ (RT-503)
+Warning: System layer 215(via9Blockage) is used by layer via9Blockage. BPV can not generate anything on via9Blockage.
+ (RT-503)
+Warning: System layer 216(metal4Blockage) is used by layer metal4Blockage. BPV can not generate anything on metal4Blockage.
+ (RT-503)
+Warning: System layer 217(via3Blockage) is used by layer via3Blockage. BPV can not generate anything on via3Blockage.
+ (RT-503)
+Warning: System layer 218(metal1Blockage) is used by layer metal1Blockage. BPV can not generate anything on metal1Blockage.
+ (RT-503)
+Warning: System layer 219(metal2Blockage) is used by layer metal2Blockage. BPV can not generate anything on metal2Blockage.
+ (RT-503)
+Warning: System layer 220(metal3Blockage) is used by layer metal3Blockage. BPV can not generate anything on metal3Blockage.
+ (RT-503)
+Warning: System layer 223(polyContBlockage) is used by layer polyContBlockage. BPV can not generate anything on polyContBlockage.
+ (RT-503)
+Warning: System layer 224(via1Blockage) is used by layer via1Blockage. BPV can not generate anything on via1Blockage.
+ (RT-503)
+Warning: System layer 225(via2Blockage) is used by layer via2Blockage. BPV can not generate anything on via2Blockage.
+ (RT-503)
+Warning: System layer 236(metal10Blockage) is used by layer metal10Blockage. BPV can not generate anything on metal10Blockage.
+ (RT-503)
+Warning: System layer 237(via10Blockage) is used by layer via10Blockage. BPV can not generate anything on via10Blockage.
+ (RT-503)
+Warning: System layer 238(metal11Blockage) is used by layer metal11Blockage. BPV can not generate anything on metal11Blockage.
+ (RT-503)
+Warning: System layer 239(metal5Blockage) is used by layer metal5Blockage. BPV can not generate anything on metal5Blockage.
+ (RT-503)
+Warning: System layer 240(metal6Blockage) is used by layer metal6Blockage. BPV can not generate anything on metal6Blockage.
+ (RT-503)
+Warning: System layer 241(via4Blockage) is used by layer via4Blockage. BPV can not generate anything on via4Blockage.
+ (RT-503)
+Warning: System layer 242(via5Blockage) is used by layer via5Blockage. BPV can not generate anything on via5Blockage.
+ (RT-503)
+Warning: System layer 243(via6Blockage) is used by layer via6Blockage. BPV can not generate anything on via6Blockage.
+ (RT-503)
+Warning: System layer 246(metal13Blockage) is used by layer metal13Blockage. BPV can not generate anything on metal13Blockage.
+ (RT-503)
+Warning: System layer 247(metal14Blockage) is used by layer metal14Blockage. BPV can not generate anything on metal14Blockage.
+ (RT-503)
+Warning: System layer 248(metal15Blockage) is used by layer metal15Blockage. BPV can not generate anything on metal15Blockage.
+ (RT-503)
+Warning: System layer 249(via12Blockage) is used by layer via12Blockage. BPV can not generate anything on via12Blockage.
+ (RT-503)
+Warning: System layer 250(via13Blockage) is used by layer via13Blockage. BPV can not generate anything on via13Blockage.
+ (RT-503)
+Warning: System layer 251(via14Blockage) is used by layer via14Blockage. BPV can not generate anything on via14Blockage.
+ (RT-503)
+Total Hash [0] Single Master Vias
+Total Hash [0] Array-Master Vias
+merge tolerance:
+mask 0: route layer 0,   cut layer -1
+mask 1: route layer 0,   cut layer 0
+mask 2: route layer 0,   cut layer 0
+mask 3: route layer 0,   cut layer 0
+mask 4: route layer 0,   cut layer 0
+mask 5: route layer 0,   cut layer 0
+mask 6: route layer 0,   cut layer 0
+mask 7: route layer 0,   cut layer 0
+mask 8: route layer 0,   cut layer 0
+mask 9: route layer 0,   cut layer 0
+mask 10: route layer 0,   cut layer 0
+mask 11: route layer 0,   cut layer 0
+mask 12: route layer 0,   cut layer 0
+mask 13: route layer 0,   cut layer 0
+mask 14: route layer 0,   cut layer 0
+mask 15: route layer 0,   cut layer 0
+mask 16: route layer 0,   cut layer 0
+mask 17: route layer 0,   cut layer 0
+Please define the Power or Ground port information.
+Marking EEQ ports in each cell.
+Cannot perform requested operation.
+
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+;; auExtractBlockagePinVia
+;; setFormField "Extract Blockage" "Cell Name" ""
+;; formOK "Extract Blockage"
+Warning: Port type table is not defined. (RT-094)
+------ new BPV starts ... -----
+Warning: System layer 200(via11Blockage) is used by layer via11Blockage. BPV can not generate anything on via11Blockage.
+ (RT-503)
+Warning: System layer 201(metal12Blockage) is used by layer metal12Blockage. BPV can not generate anything on metal12Blockage.
+ (RT-503)
+Warning: System layer 208(metal7Blockage) is used by layer metal7Blockage. BPV can not generate anything on metal7Blockage.
+ (RT-503)
+Warning: System layer 209(via7Blockage) is used by layer via7Blockage. BPV can not generate anything on via7Blockage.
+ (RT-503)
+Warning: System layer 210(metal8Blockage) is used by layer metal8Blockage. BPV can not generate anything on metal8Blockage.
+ (RT-503)
+Warning: System layer 211(via8Blockage) is used by layer via8Blockage. BPV can not generate anything on via8Blockage.
+ (RT-503)
+Warning: System layer 212(polyBlockage) is used by layer polyBlockage. BPV can not generate anything on polyBlockage.
+ (RT-503)
+Warning: System layer 214(metal9Blockage) is used by layer metal9Blockage. BPV can not generate anything on metal9Blockage.
+ (RT-503)
+Warning: System layer 215(via9Blockage) is used by layer via9Blockage. BPV can not generate anything on via9Blockage.
+ (RT-503)
+Warning: System layer 216(metal4Blockage) is used by layer metal4Blockage. BPV can not generate anything on metal4Blockage.
+ (RT-503)
+Warning: System layer 217(via3Blockage) is used by layer via3Blockage. BPV can not generate anything on via3Blockage.
+ (RT-503)
+Warning: System layer 218(metal1Blockage) is used by layer metal1Blockage. BPV can not generate anything on metal1Blockage.
+ (RT-503)
+Warning: System layer 219(metal2Blockage) is used by layer metal2Blockage. BPV can not generate anything on metal2Blockage.
+ (RT-503)
+Warning: System layer 220(metal3Blockage) is used by layer metal3Blockage. BPV can not generate anything on metal3Blockage.
+ (RT-503)
+Warning: System layer 223(polyContBlockage) is used by layer polyContBlockage. BPV can not generate anything on polyContBlockage.
+ (RT-503)
+Warning: System layer 224(via1Blockage) is used by layer via1Blockage. BPV can not generate anything on via1Blockage.
+ (RT-503)
+Warning: System layer 225(via2Blockage) is used by layer via2Blockage. BPV can not generate anything on via2Blockage.
+ (RT-503)
+Warning: System layer 236(metal10Blockage) is used by layer metal10Blockage. BPV can not generate anything on metal10Blockage.
+ (RT-503)
+Warning: System layer 237(via10Blockage) is used by layer via10Blockage. BPV can not generate anything on via10Blockage.
+ (RT-503)
+Warning: System layer 238(metal11Blockage) is used by layer metal11Blockage. BPV can not generate anything on metal11Blockage.
+ (RT-503)
+Warning: System layer 239(metal5Blockage) is used by layer metal5Blockage. BPV can not generate anything on metal5Blockage.
+ (RT-503)
+Warning: System layer 240(metal6Blockage) is used by layer metal6Blockage. BPV can not generate anything on metal6Blockage.
+ (RT-503)
+Warning: System layer 241(via4Blockage) is used by layer via4Blockage. BPV can not generate anything on via4Blockage.
+ (RT-503)
+Warning: System layer 242(via5Blockage) is used by layer via5Blockage. BPV can not generate anything on via5Blockage.
+ (RT-503)
+Warning: System layer 243(via6Blockage) is used by layer via6Blockage. BPV can not generate anything on via6Blockage.
+ (RT-503)
+Warning: System layer 246(metal13Blockage) is used by layer metal13Blockage. BPV can not generate anything on metal13Blockage.
+ (RT-503)
+Warning: System layer 247(metal14Blockage) is used by layer metal14Blockage. BPV can not generate anything on metal14Blockage.
+ (RT-503)
+Warning: System layer 248(metal15Blockage) is used by layer metal15Blockage. BPV can not generate anything on metal15Blockage.
+ (RT-503)
+Warning: System layer 249(via12Blockage) is used by layer via12Blockage. BPV can not generate anything on via12Blockage.
+ (RT-503)
+Warning: System layer 250(via13Blockage) is used by layer via13Blockage. BPV can not generate anything on via13Blockage.
+ (RT-503)
+Warning: System layer 251(via14Blockage) is used by layer via14Blockage. BPV can not generate anything on via14Blockage.
+ (RT-503)
+Total Hash [0] Single Master Vias
+Total Hash [0] Array-Master Vias
+merge tolerance:
+mask 0: route layer 0,   cut layer -1
+mask 1: route layer 0,   cut layer 0
+mask 2: route layer 0,   cut layer 0
+mask 3: route layer 0,   cut layer 0
+mask 4: route layer 0,   cut layer 0
+mask 5: route layer 0,   cut layer 0
+mask 6: route layer 0,   cut layer 0
+mask 7: route layer 0,   cut layer 0
+mask 8: route layer 0,   cut layer 0
+mask 9: route layer 0,   cut layer 0
+mask 10: route layer 0,   cut layer 0
+mask 11: route layer 0,   cut layer 0
+mask 12: route layer 0,   cut layer 0
+mask 13: route layer 0,   cut layer 0
+mask 14: route layer 0,   cut layer 0
+mask 15: route layer 0,   cut layer 0
+mask 16: route layer 0,   cut layer 0
+mask 17: route layer 0,   cut layer 0
+Please define the Power or Ground port information.
+Marking EEQ ports in each cell.
+Cannot perform requested operation.
+
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+;; (tcl ";; set_attribute [get_ports VDD] port_type \"Power\";; ")
+Error: Current design is not defined. (UID-4)
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+;; read_lef
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12"
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12"
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12"
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12"
+;; formOK "Read LEF"
+
+	>>>>>>> MILKYWAY LEF IN <<<<<<<
+
+>>> Read Tech LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef" ... 
+Backup existing technology info ...
+The library already has via info attach file!
+If you want to regenerate the via info attach file,
+Use [dbDeleteLibAttachedFile libId "VIA_INFO_ATTACH_FILE"]
+to remove via info attach file first.
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AND4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/ANTENNA_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI211_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI21_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI221_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI222_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI22_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI22_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/AOI22_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X32.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/BUF_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKBUF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKBUF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKBUF_X3.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATETST_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/CLKGATE_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFRS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFRS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFR_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFR_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFFS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DFF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLH_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLH_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLL_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/DLL_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FA_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X32.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/FILLCELL_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/HA_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X32.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/INV_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/LOGIC0_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/LOGIC1_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/MUX2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/MUX2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NAND4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NOR4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI211_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI211_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI211_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI21_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI21_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI21_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI221_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI221_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI221_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI222_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI222_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI222_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI22_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI22_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI22_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OAI33_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR2_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR3_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR3_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR3_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR4_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR4_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/OR4_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFRS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFRS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFR_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFR_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFS_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFFS_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/SDFF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X16.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X4.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TBUF_X8.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TINV_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/TLAT_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XNOR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XNOR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XOR2_X1.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/XOR2_X2.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.lef" ... 
+
+
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.macro.lef" ... 
+
+
+Read LEF completed.
+
+;; configureWindow 0 "25x24+0+0"
+;; auExtractBlockagePinVia
+;; setFormField "Extract Blockage" "Cell Name" "*"
+;; formOK "Extract Blockage"
+Warning: Port type table is not defined. (RT-094)
+------ new BPV starts ... -----
+Warning: System layer 200(via11Blockage) is used by layer via11Blockage. BPV can not generate anything on via11Blockage.
+ (RT-503)
+Warning: System layer 201(metal12Blockage) is used by layer metal12Blockage. BPV can not generate anything on metal12Blockage.
+ (RT-503)
+Warning: System layer 208(metal7Blockage) is used by layer metal7Blockage. BPV can not generate anything on metal7Blockage.
+ (RT-503)
+Warning: System layer 209(via7Blockage) is used by layer via7Blockage. BPV can not generate anything on via7Blockage.
+ (RT-503)
+Warning: System layer 210(metal8Blockage) is used by layer metal8Blockage. BPV can not generate anything on metal8Blockage.
+ (RT-503)
+Warning: System layer 211(via8Blockage) is used by layer via8Blockage. BPV can not generate anything on via8Blockage.
+ (RT-503)
+Warning: System layer 212(polyBlockage) is used by layer polyBlockage. BPV can not generate anything on polyBlockage.
+ (RT-503)
+Warning: System layer 214(metal9Blockage) is used by layer metal9Blockage. BPV can not generate anything on metal9Blockage.
+ (RT-503)
+Warning: System layer 215(via9Blockage) is used by layer via9Blockage. BPV can not generate anything on via9Blockage.
+ (RT-503)
+Warning: System layer 216(metal4Blockage) is used by layer metal4Blockage. BPV can not generate anything on metal4Blockage.
+ (RT-503)
+Warning: System layer 217(via3Blockage) is used by layer via3Blockage. BPV can not generate anything on via3Blockage.
+ (RT-503)
+Warning: System layer 218(metal1Blockage) is used by layer metal1Blockage. BPV can not generate anything on metal1Blockage.
+ (RT-503)
+Warning: System layer 219(metal2Blockage) is used by layer metal2Blockage. BPV can not generate anything on metal2Blockage.
+ (RT-503)
+Warning: System layer 220(metal3Blockage) is used by layer metal3Blockage. BPV can not generate anything on metal3Blockage.
+ (RT-503)
+Warning: System layer 223(polyContBlockage) is used by layer polyContBlockage. BPV can not generate anything on polyContBlockage.
+ (RT-503)
+Warning: System layer 224(via1Blockage) is used by layer via1Blockage. BPV can not generate anything on via1Blockage.
+ (RT-503)
+Warning: System layer 225(via2Blockage) is used by layer via2Blockage. BPV can not generate anything on via2Blockage.
+ (RT-503)
+Warning: System layer 236(metal10Blockage) is used by layer metal10Blockage. BPV can not generate anything on metal10Blockage.
+ (RT-503)
+Warning: System layer 237(via10Blockage) is used by layer via10Blockage. BPV can not generate anything on via10Blockage.
+ (RT-503)
+Warning: System layer 238(metal11Blockage) is used by layer metal11Blockage. BPV can not generate anything on metal11Blockage.
+ (RT-503)
+Warning: System layer 239(metal5Blockage) is used by layer metal5Blockage. BPV can not generate anything on metal5Blockage.
+ (RT-503)
+Warning: System layer 240(metal6Blockage) is used by layer metal6Blockage. BPV can not generate anything on metal6Blockage.
+ (RT-503)
+Warning: System layer 241(via4Blockage) is used by layer via4Blockage. BPV can not generate anything on via4Blockage.
+ (RT-503)
+Warning: System layer 242(via5Blockage) is used by layer via5Blockage. BPV can not generate anything on via5Blockage.
+ (RT-503)
+Warning: System layer 243(via6Blockage) is used by layer via6Blockage. BPV can not generate anything on via6Blockage.
+ (RT-503)
+Warning: System layer 246(metal13Blockage) is used by layer metal13Blockage. BPV can not generate anything on metal13Blockage.
+ (RT-503)
+Warning: System layer 247(metal14Blockage) is used by layer metal14Blockage. BPV can not generate anything on metal14Blockage.
+ (RT-503)
+Warning: System layer 248(metal15Blockage) is used by layer metal15Blockage. BPV can not generate anything on metal15Blockage.
+ (RT-503)
+Warning: System layer 249(via12Blockage) is used by layer via12Blockage. BPV can not generate anything on via12Blockage.
+ (RT-503)
+Warning: System layer 250(via13Blockage) is used by layer via13Blockage. BPV can not generate anything on via13Blockage.
+ (RT-503)
+Warning: System layer 251(via14Blockage) is used by layer via14Blockage. BPV can not generate anything on via14Blockage.
+ (RT-503)
+Total Hash [0] Single Master Vias
+Total Hash [0] Array-Master Vias
+merge tolerance:
+mask 0: route layer 0,   cut layer -1
+mask 1: route layer 0,   cut layer 0
+mask 2: route layer 0,   cut layer 0
+mask 3: route layer 0,   cut layer 0
+mask 4: route layer 0,   cut layer 0
+mask 5: route layer 0,   cut layer 0
+mask 6: route layer 0,   cut layer 0
+mask 7: route layer 0,   cut layer 0
+mask 8: route layer 0,   cut layer 0
+mask 9: route layer 0,   cut layer 0
+mask 10: route layer 0,   cut layer 0
+mask 11: route layer 0,   cut layer 0
+mask 12: route layer 0,   cut layer 0
+mask 13: route layer 0,   cut layer 0
+mask 14: route layer 0,   cut layer 0
+mask 15: route layer 0,   cut layer 0
+mask 16: route layer 0,   cut layer 0
+mask 17: route layer 0,   cut layer 0
+Please define the Power or Ground port information.
+Marking EEQ ports in each cell.
+Cannot perform requested operation.
+
+;; read_lib
+;; readLibForm "physical"
+;; readLibForm "physical" "LEF"
+;; read_lef
+
+;; formDefault "Read LEF"
+
+;; setFormField "Read LEF" "Library Name" "NG451"
+
+;; setFormField "Read LEF" "Manual Library Prep Mode" "1"
+
+;; configureWindow 0 "25x24+0+0"
+;; setFormField "Read LEF" "Tech LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef"
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.lef"
+;; formOK "Read LEF"
+
+	>>>>>>> MILKYWAY LEF IN <<<<<<<
+
+>>> Read Tech LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef" ... 
+
+Creating Library (NG451) ...
+Set caseSensitive ON.
+
+Cannot open library (NG451). Only one library can be opened for editing
+ERROR : Fail to open library NG451 in read mode
+ERROR : Can not get via info from library!
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.lef" ... 
+
+
+ERROR : Need Tech LEF file to create valid library!
+Read LEF completed.
+
+Read LEF during library preparation flow!
+Error: Failed to open library: 'NG451'. (MWUI-011)
+Invalid library name: Library not found.
+
+;; configureWindow 0 "25x24+0+0"
+;; read_lef
+;; formOK "Read LEF"
+
+	>>>>>>> MILKYWAY LEF IN <<<<<<<
+
+>>> Read Tech LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef" ... 
+
+Creating Library (NG451) ...
+Set caseSensitive ON.
+
+Cannot open library (NG451). Only one library can be opened for editing
+ERROR : Fail to open library NG451 in read mode
+ERROR : Can not get via info from library!
+
+>>> Read Cell LEF File "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.lef" ... 
+
+
+ERROR : Need Tech LEF file to create valid library!
+Read LEF completed.
+
+Read LEF during library preparation flow!
+Error: Failed to open library: 'NG451'. (MWUI-011)
+Invalid library name: Library not found.
+
+;; geOpenLib
+Library already open.
+;; geConfirmCloseLib
+;; formYes "Dialog Box"
+All libraries closed successfully.
+;; geOpenLib
+Library already open.
+;; readLibForm "hide"
+;; geOpenLib
+Library already open.
+;; geConfirmCloseLib
+;; formYes "Dialog Box"
+All libraries closed successfully.
+;; geOpenLib
+Library already open.
+;; menuQuit
+;; formYes "Dialog Box"
+Thank you for using Milkyway

@@ -1,0 +1,257 @@
+/*
+    FreeRTOS V8.2.3 - Copyright (C) 2015 Real Time Engineers Ltd.
+    All rights reserved
+
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
+
+    This file is part of the FreeRTOS distribution and was contributed
+    to the project by Technolution B.V. (www.technolution.nl,
+    freertos-riscv@technolution.eu) under the terms of the FreeRTOS
+    contributors license.
+
+    FreeRTOS is free software; you can redistribute it and/or modify it under
+    the terms of the GNU General Public License (version 2) as published by the
+    Free Software Foundation >>>> AND MODIFIED BY <<<< the FreeRTOS exception.
+
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
+
+    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
+    link: http://www.freertos.org/a00114.html
+
+    ***************************************************************************
+     *                                                                       *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
+     *                                                                       *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
+     *                                                                       *
+    ***************************************************************************
+
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
+
+    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
+
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
+
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
+    engineered and independently SIL3 certified version for use in safety and
+    mission critical applications that require provable dependability.
+
+    1 tab == 4 spaces!
+*/
+
+/*
+ * main() creates a set of standard demo task and a timer.
+ * It then starts the scheduler.  The web documentation provides
+ * more details of the standard demo application tasks, which provide no
+ * particular functionality, but do provide a good example of how to use the
+ * FreeRTOS API.
+ *
+ *
+ * In addition to the standard demo tasks, the following tasks and timer are
+ * defined and/or created within this file:
+ *
+ * "Check" software timer - The check timer period is initially set to three
+ * seconds.  Its callback function checks that all the standard demo tasks, and
+ * the register check tasks, are not only still executing, but are executing
+ * without reporting any errors.
+ */
+
+/* Kernel includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+
+/* Common demo includes. */
+#include "blocktim.h"
+#include "countsem.h"
+#include "recmutex.h"
+
+/* RISCV includes */
+#include "arch/syscalls.h"
+#include "arch/clib.h"
+
+/* must be less or equal to configTIMER_QUEUE_LENGTH */
+#define NUM_TIMERS 5
+
+/* An array to hold handles to the created timers. */
+TimerHandle_t xTimers[ NUM_TIMERS ];
+
+/*-----------------------------------------------------------*/
+
+/* Define a callback function that will be used by multiple timer
+instances.  The callback function does nothing but count the number
+of times the associated timer expires, and stop the timer once the
+timer has expired 10 times.  The count is saved as the ID of the
+timer. */
+void vTimerCallback( TimerHandle_t xTimer );
+
+/*
+ * FreeRTOS hook for when malloc fails, enable in FreeRTOSConfig.
+ */
+void vApplicationMallocFailedHook( void );
+
+/*
+ * FreeRTOS hook for when freertos is idling, enable in FreeRTOSConfig.
+ */
+void vApplicationIdleHook( void );
+
+/*
+ * FreeRTOS hook for when a stackoverflow occurs, enable in FreeRTOSConfig.
+ */
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName );
+
+/*-----------------------------------------------------------*/
+
+int main( void )
+{
+    printf("Hello world\n");
+	xTimers[ 0 ] = xTimerCreate("Timer0", pdMS_TO_TICKS( 100 ), pdTRUE, ( void * ) 0, vTimerCallback );
+	xTimers[ 1 ] = xTimerCreate("Timer1", pdMS_TO_TICKS( 100 + 100 ), pdTRUE, ( void * ) 0, vTimerCallback );
+	xTimers[ 2 ] = xTimerCreate("Timer2", pdMS_TO_TICKS( 200 + 100 ), pdTRUE, ( void * ) 0, vTimerCallback );
+	xTimers[ 3 ] = xTimerCreate("Timer3", pdMS_TO_TICKS( 300 + 100 ), pdTRUE, ( void * ) 0, vTimerCallback );
+	xTimers[ 4 ] = xTimerCreate("Timer4", pdMS_TO_TICKS( 400 + 100 ), pdTRUE, ( void * ) 0, vTimerCallback );
+	long x;
+	for( x = 0; x < NUM_TIMERS; x++ )
+	{
+		if( xTimers[ x ] == NULL )
+		{
+			/* The timer was not created. */
+            printf("timer was not created!!\n");
+		}
+		else
+		{
+			/* Start the timer.  No block time is specified, and even if one was it would be ignored because the RTOS scheduler has not yet been started. */
+			if( xTimerStart( xTimers[ x ], 0 ) != pdPASS )
+			{
+				/* The timer could not be set into the Active state. */
+                printf("timer could not be set into the Active state!!\n");
+			}
+			else
+			{
+                printf("timer is in Active state!!\n");
+			}
+		}
+	}
+
+    printf("BEGIN!!\n");
+	/* Start the kernel.  From here on, only tasks and interrupts will run. */
+	vTaskStartScheduler();
+    printf("END!!\n");
+
+	/* Exit FreeRTOS */
+	return 0;
+}
+
+
+/*-----------------------------------------------------------*/
+void vTimerCallback( TimerHandle_t xTimer )
+{
+	 const uint32_t ulMaxExpiryCountBeforeStopping = 20;
+	 uint32_t ulCount;
+
+	/* Optionally do something if the pxTimer parameter is NULL. */
+	configASSERT( xTimer );
+
+	/* The number of times this timer has expired is saved as the timer's ID.  Obtain the count. */
+	ulCount = ( uint32_t ) pvTimerGetTimerID( xTimer );
+
+
+	/* Increment the count, then test to see if the timer has expired ulMaxExpiryCountBeforeStopping yet. */
+	ulCount++;
+
+	/* If the timer has expired 10 times then stop it from running. */
+	if( ulCount >= ulMaxExpiryCountBeforeStopping )
+	{
+		/* Do not use a block time if calling a timer API function from a timer callback function, as doing so could cause a deadlock! */
+		xTimerStop( xTimer, 0 );
+		printf(pcTimerGetTimerName(xTimer));
+        printf(" Expire\n");
+	}
+	else
+	{
+		/* Store the incremented count back into the timer's ID field so it can be read back again the next time this software timer expires. */
+		vTimerSetTimerID( xTimer, ( void * ) ulCount );
+        printf(pcTimerGetTimerName(xTimer));
+        printf(" increment\n");
+	}
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationMallocFailedHook( void )
+{
+	/* vApplicationMallocFailedHook() will only be called if
+	configUSE_MALLOC_FAILED_HOOK is set to 1 in FreeRTOSConfig.h.  It is a hook
+	function that will get called if a call to pvPortMalloc() fails.
+	pvPortMalloc() is called internally by the kernel whenever a task, queue,
+	timer or semaphore is created.  It is also called by various parts of the
+	demo application.  If heap_1.c or heap_2.c are used, then the size of the
+	heap available to pvPortMalloc() is defined by configTOTAL_HEAP_SIZE in
+	FreeRTOSConfig.h, and the xPortGetFreeHeapSize() API function can be used
+	to query the size of free heap space that remains (although it does not
+	provide information on how the remaining heap might be fragmented). */
+    printf("vApplicationMallocFailedHook\n");
+	taskDISABLE_INTERRUPTS();
+	for( ;; );
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationIdleHook( void )
+{
+	/* vApplicationIdleHook() will only be called if configUSE_IDLE_HOOK is set
+	to 1 in FreeRTOSConfig.h.  It will be called on each iteration of the idle
+	task.  It is essential that code added to this hook function never attempts
+	to block in any way (for example, call xQueueReceive() with a block time
+	specified, or call vTaskDelay()).  If the application makes use of the
+	vTaskDelete() API function (as this demo application does) then it is also
+	important that vApplicationIdleHook() is permitted to return to its calling
+	function, because it is the responsibility of the idle task to clean up
+	memory allocated by the kernel to any task that has since been deleted. */
+    printf("vApplicationIdleHook\n");
+}
+/*-----------------------------------------------------------*/
+
+void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
+{
+	( void ) pcTaskName;
+	( void ) pxTask;
+
+	/* Run time stack overflow checking is performed if
+	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
+	function is called if a stack overflow is detected. */
+    printf("vApplicationStackOverflowHook\n");
+	taskDISABLE_INTERRUPTS();
+	for( ;; );
+}
+/*-----------------------------------------------------------*/

@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -fpermissive  -g  -rdynamic CMakeFiles/RISCV_elf_test.dir/sc_main_test.cpp.o  -o RISCV_elf_test  -L/import/lab/users/ovsthus/SCAM/lib -Wl,-rpath,/import/lab/users/ovsthus/SCAM/lib -lsystemc -lboost_iostreams-mt -lboost_program_options-mt -lboost_regex-mt -lpthread 

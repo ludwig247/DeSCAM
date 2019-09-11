@@ -1,0 +1,779 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SystemCXMLDescription>
+  <ModuleDescription>
+    <Int_Class_ID>1</Int_Class_ID>
+    <Name>Example</Name>
+    <DataType type="BuiltInType">
+      <Int_Class_ID>2</Int_Class_ID>
+      <Type>int</Type>
+    </DataType>
+    <DataType type="BuiltInType">
+      <Int_Class_ID>3</Int_Class_ID>
+      <Type>unsigned</Type>
+    </DataType>
+    <DataType type="EnumType">
+      <Int_Class_ID>6</Int_Class_ID>
+      <Name>TestEnum</Name>
+      <EnumElement>
+        <Int_Class_ID>4</Int_Class_ID>
+        <Name>1</Name>
+      </EnumElement>
+      <EnumElement>
+        <Int_Class_ID>5</Int_Class_ID>
+        <Name>2</Name>
+      </EnumElement>
+    </DataType>
+    <DataType type="BuiltInType">
+      <Int_Class_ID>7</Int_Class_ID>
+      <Type>bool</Type>
+    </DataType>
+    <DataType type="CompoundType">
+      <Int_Class_ID>10</Int_Class_ID>
+      <Name>TestCompound</Name>
+      <CompoundSubVariable>
+        <Int_Class_ID>8</Int_Class_ID>
+        <Name>SubVar1</Name>
+        <DataTypeRef>7</DataTypeRef>
+      </CompoundSubVariable>
+      <CompoundSubVariable>
+        <Int_Class_ID>9</Int_Class_ID>
+        <Name>SubVar2</Name>
+        <DataTypeRef>7</DataTypeRef>
+      </CompoundSubVariable>
+    </DataType>
+    <Port>
+      <Int_Class_ID>11</Int_Class_ID>
+      <Name>m_out</Name>
+      <Interface>Master</Interface>
+      <Direction>Out</Direction>
+      <DataTypeRef>7</DataTypeRef>
+    </Port>
+    <Port>
+      <Int_Class_ID>12</Int_Class_ID>
+      <Name>s_out</Name>
+      <Interface>Shared</Interface>
+      <Direction>Out</Direction>
+      <DataTypeRef>7</DataTypeRef>
+    </Port>
+    <Port>
+      <Int_Class_ID>13</Int_Class_ID>
+      <Name>b_in</Name>
+      <Interface>Blocking</Interface>
+      <Direction>In</Direction>
+      <DataTypeRef>7</DataTypeRef>
+    </Port>
+    <Variable>
+      <Int_Class_ID>15</Int_Class_ID>
+      <Name>cnt</Name>
+      <Init>
+        <Int_Class_ID>14</Int_Class_ID>
+        <Init>0</Init>
+      </Init>
+      <DataTypeRef>7</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>16</Int_Class_ID>
+      <Name>msg</Name>
+      <DataTypeRef>7</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>18</Int_Class_ID>
+      <Name>ready</Name>
+      <Init>
+        <Int_Class_ID>17</Int_Class_ID>
+        <Init>false</Init>
+      </Init>
+      <DataTypeRef>7</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>19</Int_Class_ID>
+      <Name>Lhs</Name>
+      <DataTypeRef>7</DataTypeRef>
+    </Variable>
+    <Section>
+      <Int_Class_ID>24</Int_Class_ID>
+      <Name>SectionToChangeCC</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>20</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>21</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>22</Int_Class_ID>
+          <Expression>a+b*12</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>23</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>29</Int_Class_ID>
+      <Name>SectionToChangToChange</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>25</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>26</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>27</Int_Class_ID>
+          <Expression>12</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="ChangeSectionStatement">
+        <Int_Class_ID>28</Int_Class_ID>
+        <SectionRef>24</SectionRef>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>33</Int_Class_ID>
+      <Name>SectionToChangeError</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>30</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>31</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>32</Int_Class_ID>
+          <Expression>status</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>51</Int_Class_ID>
+      <Name>Test_1</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>34</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>35</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>36</Int_Class_ID>
+          <Expression>a+b+c</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>37</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>38</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>39</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>40</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>41</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>42</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>43</Int_Class_ID>
+              <Expression>a+b+c</Expression>
+            </Rhs>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>44</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>45</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>46</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>47</Int_Class_ID>
+              <Expression>a+b+c</Expression>
+            </Rhs>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>48</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>49</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>50</Int_Class_ID>
+          <Expression>a+b+c</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>66</Int_Class_ID>
+      <Name>Test_2</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>52</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>53</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>54</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>55</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>56</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>57</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>58</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>59</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>60</Int_Class_ID>
+              <Expression>10</Expression>
+            </Rhs>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>61</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>62</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>63</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>64</Int_Class_ID>
+              <Expression>a*c == 10</Expression>
+            </Rhs>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>65</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>77</Int_Class_ID>
+      <Name>Test_3</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>67</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>68</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>69</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>70</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>71</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>72</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>73</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>74</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>75</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>76</Int_Class_ID>
+              <Expression>a*c == 10</Expression>
+            </Rhs>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>200</Int_Class_ID>
+        </ElsePart>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>90</Int_Class_ID>
+      <Name>Test_4</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>78</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>79</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>80</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>81</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>82</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>83</Int_Class_ID>
+          <Statement type="BlockingReadStatement">
+            <Int_Class_ID>84</Int_Class_ID>
+            <VariableRef>19</VariableRef>
+            <PortRef>13</PortRef>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>85</Int_Class_ID>
+          <Statement type="BlockingWriteStatement">
+            <Int_Class_ID>86</Int_Class_ID>
+            <VariableRef>19</VariableRef>
+            <PortRef>13</PortRef>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>87</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>88</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>89</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>99</Int_Class_ID>
+      <Name>Test_5</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>91</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>92</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>93</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>94</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>95</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>96</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>97</Int_Class_ID>
+          <Statement type="BlockingWriteStatement">
+            <Int_Class_ID>98</Int_Class_ID>
+            <VariableRef>19</VariableRef>
+            <PortRef>13</PortRef>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>201</Int_Class_ID>
+        </ElsePart>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>122</Int_Class_ID>
+      <Name>Test_6</Name>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>100</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>101</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>102</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>103</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>104</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>105</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>106</Int_Class_ID>
+              <Expression>a*c == 10</Expression>
+            </Rhs>
+          </Statement>
+          <Statement type="ITEStatement">
+            <Int_Class_ID>107</Int_Class_ID>
+            <Condition>
+              <Int_Class_ID>108</Int_Class_ID>
+              <Condition>a==b</Condition>
+            </Condition>
+            <IfPart>
+              <Int_Class_ID>109</Int_Class_ID>
+              <Statement type="Assignment">
+                <Int_Class_ID>110</Int_Class_ID>
+                <Lhs>
+                  <Int_Class_ID>111</Int_Class_ID>
+                  <VariableRef>19</VariableRef>
+                </Lhs>
+                <Rhs>
+                  <Int_Class_ID>112</Int_Class_ID>
+                  <Expression>a*c == 10</Expression>
+                </Rhs>
+              </Statement>
+            </IfPart>
+            <ElsePart>
+              <Int_Class_ID>113</Int_Class_ID>
+              <Statement type="BlockingReadStatement">
+                <Int_Class_ID>114</Int_Class_ID>
+                <VariableRef>19</VariableRef>
+                <PortRef>13</PortRef>
+              </Statement>
+            </ElsePart>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>115</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>116</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>117</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>118</Int_Class_ID>
+              <Expression>a*c == 10</Expression>
+            </Rhs>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>119</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>120</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>121</Int_Class_ID>
+          <Expression>a*d+13</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>147</Int_Class_ID>
+      <Name>Test_7</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>123</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>124</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>125</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>126</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>127</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>128</Int_Class_ID>
+          <Statement type="ITEStatement">
+            <Int_Class_ID>129</Int_Class_ID>
+            <Condition>
+              <Int_Class_ID>130</Int_Class_ID>
+              <Condition>a==b</Condition>
+            </Condition>
+            <IfPart>
+              <Int_Class_ID>131</Int_Class_ID>
+              <Statement type="BlockingReadStatement">
+                <Int_Class_ID>132</Int_Class_ID>
+                <VariableRef>19</VariableRef>
+                <PortRef>13</PortRef>
+              </Statement>
+            </IfPart>
+            <ElsePart>
+              <Int_Class_ID>133</Int_Class_ID>
+              <Statement type="NonBlockingReadStatement">
+                <Int_Class_ID>134</Int_Class_ID>
+                <BoolVariableReference>
+                  <Int_Class_ID>135</Int_Class_ID>
+                  <VariableRef>19</VariableRef>
+                </BoolVariableReference>
+                <VariableRef>19</VariableRef>
+                <PortRef>13</PortRef>
+              </Statement>
+            </ElsePart>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>136</Int_Class_ID>
+          <Statement type="ITEStatement">
+            <Int_Class_ID>137</Int_Class_ID>
+            <Condition>
+              <Int_Class_ID>138</Int_Class_ID>
+              <Condition>a==b</Condition>
+            </Condition>
+            <IfPart>
+              <Int_Class_ID>139</Int_Class_ID>
+              <Statement type="BlockingWriteStatement">
+                <Int_Class_ID>140</Int_Class_ID>
+                <VariableRef>19</VariableRef>
+                <PortRef>13</PortRef>
+              </Statement>
+            </IfPart>
+            <ElsePart>
+              <Int_Class_ID>141</Int_Class_ID>
+              <Statement type="NonBlockingWriteStatement">
+                <Int_Class_ID>142</Int_Class_ID>
+                <BoolVariableReference>
+                  <Int_Class_ID>143</Int_Class_ID>
+                  <VariableRef>19</VariableRef>
+                </BoolVariableReference>
+                <VariableRef>19</VariableRef>
+                <PortRef>13</PortRef>
+              </Statement>
+            </ElsePart>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>144</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>145</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>146</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>159</Int_Class_ID>
+      <Name>Test_8</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>148</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>149</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>150</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>151</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>152</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>153</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>154</Int_Class_ID>
+          <Statement type="ChangeSectionStatement">
+            <Int_Class_ID>155</Int_Class_ID>
+            <SectionRef>24</SectionRef>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>202</Int_Class_ID>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>156</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>157</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>158</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>171</Int_Class_ID>
+      <Name>Test_9</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>160</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>161</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>162</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>163</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>164</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>165</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>166</Int_Class_ID>
+          <Statement type="ChangeSectionStatement">
+            <Int_Class_ID>167</Int_Class_ID>
+            <SectionRef>33</SectionRef>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>168</Int_Class_ID>
+          <Statement type="ChangeSectionStatement">
+            <Int_Class_ID>169</Int_Class_ID>
+            <SectionRef>33</SectionRef>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="ChangeSectionStatement">
+        <Int_Class_ID>170</Int_Class_ID>
+        <SectionRef>24</SectionRef>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>180</Int_Class_ID>
+      <Name>Test_10</Name>
+      <Statement type="BlockingReadStatement">
+        <Int_Class_ID>172</Int_Class_ID>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>173</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>174</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>175</Int_Class_ID>
+          <Statement type="ChangeSectionStatement">
+            <Int_Class_ID>176</Int_Class_ID>
+            <SectionRef>29</SectionRef>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>203</Int_Class_ID>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>177</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>178</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>179</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>199</Int_Class_ID>
+      <Name>Test_11</Name>
+      <Statement type="NonBlockingReadStatement">
+        <Int_Class_ID>181</Int_Class_ID>
+        <BoolVariableReference>
+          <Int_Class_ID>182</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </BoolVariableReference>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ChangeSectionStatement">
+        <Int_Class_ID>183</Int_Class_ID>
+        <SectionRef>24</SectionRef>
+      </Statement>
+      <Statement type="NonBlockingWriteStatement">
+        <Int_Class_ID>184</Int_Class_ID>
+        <BoolVariableReference>
+          <Int_Class_ID>185</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </BoolVariableReference>
+        <VariableRef>19</VariableRef>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="ITEStatement">
+        <Int_Class_ID>186</Int_Class_ID>
+        <Condition>
+          <Int_Class_ID>187</Int_Class_ID>
+          <Condition>a==b</Condition>
+        </Condition>
+        <IfPart>
+          <Int_Class_ID>188</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>189</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>190</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>191</Int_Class_ID>
+              <Expression>a*c == 10</Expression>
+            </Rhs>
+          </Statement>
+        </IfPart>
+        <ElsePart>
+          <Int_Class_ID>192</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>193</Int_Class_ID>
+            <Lhs>
+              <Int_Class_ID>194</Int_Class_ID>
+              <VariableRef>19</VariableRef>
+            </Lhs>
+            <Rhs>
+              <Int_Class_ID>195</Int_Class_ID>
+              <Expression>a*c == 10</Expression>
+            </Rhs>
+          </Statement>
+        </ElsePart>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>196</Int_Class_ID>
+        <Lhs>
+          <Int_Class_ID>197</Int_Class_ID>
+          <VariableRef>19</VariableRef>
+        </Lhs>
+        <Rhs>
+          <Int_Class_ID>198</Int_Class_ID>
+          <Expression>a*c == 10</Expression>
+        </Rhs>
+      </Statement>
+    </Section>
+  </ModuleDescription>
+</SystemCXMLDescription>

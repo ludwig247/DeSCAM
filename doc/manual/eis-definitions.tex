@@ -1,0 +1,115 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%  Some useful definitions 
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand{\refsec}[1]{Sec.~\ref{sec:#1}}
+\newcommand{\reffig}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\reftab}[1]{Tab.~\ref{tab:#1}}
+\newcommand{\refalg}[1]{Alg.~\ref{alg:#1}}
+\newcommand{\refdef}[1]{Def.~\ref{def:#1}}
+
+\newcommand{\URLFORMAT}[1]{\mbox{\sffamily\small #1}}
+
+% symbols of PPA
+\newcommand{\CONCAT}{\mbox{$\odot$}}
+\newcommand{\IMPORTANT}{\mbox{$\Psi$}}
+  % message predicate
+\newcommand{\MSGPRED}{\mbox{$\mu$}}
+  % operational input predicate
+\newcommand{\INPPRED}{\mbox{$\iota$}}
+  % trigger 
+\newcommand{\TRIGPRED}{\mbox{$\iota$}}
+
+  %operational path
+\newcommand{\oppath}{\ensuremath\mbox{$\mathtt{opath}$}}
+%\newcommand\oppath{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily oper}}}{\pi}}}
+
+  %operational output
+%\newcommand{\opout}{\ensuremath\mbox{$\mathtt{oout}$}}
+
+  %color similar symbol
+\newcommand\colsim{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily color}}}{=}}}
+
+%state, input, output color
+\newcommand{\nodecolor}{\ensuremath\mbox{$\mathtt{f_{C}}$}}
+\newcommand{\statecolor}{\ensuremath\mbox{$\mathtt{f_{SC}}$}}
+\newcommand{\incolor}{\ensuremath\mbox{$\mathtt{f_{XC}}$}}
+\newcommand{\outcolor}{\ensuremath\mbox{$\mathtt{f_{YC}}$}}
+
+\newcommand{\notimplies}{%
+  \mathrel{{\ooalign{\hidewidth$\not\phantom{=}$\hidewidth\cr$\implies$}}}}
+
+
+% PredCol
+\newcommand{\statepredcolor}{\ensuremath\mbox{$\mathtt{B_{\eta{}C}}$}}
+\newcommand{\inputpredcolor}{\ensuremath\mbox{$\mathtt{B_{\iota{}C}}$}}
+\newcommand{\outputpredcolor}{\ensuremath\mbox{$\mathtt{B_{\mu{}C}}$}}
+% ColPred
+\newcommand{\statecolorpred}{\ensuremath\mbox{$\mathtt{B_{C\eta}}$}}
+\newcommand{\inputcolorpred}{\ensuremath\mbox{$\mathtt{B_{C\iota}}$}}
+\newcommand{\outputcolorpred}{\ensuremath\mbox{$\mathtt{B_{C\mu}}$}}
+
+
+% IMG and other operators
+\newcommand{\OPERATOR}[1]{\mbox{\textrm{\textit{#1}}}}
+\newcommand{\IMG}{\OPERATOR{img}} %image
+\newcommand{\PRE}{\OPERATOR{pre}} %pre-image
+
+\newcommand\LFP{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily fp}}}{\mbox{\normalfont\footnotesize\sffamily <}}}}
+\newcommand\GFP{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\scriptsize\sffamily fp}}}{\mbox{\normalfont\footnotesize\sffamily >}}}}
+
+\newcommand{\ISPATH}{\OPERATOR{ispath}}
+\newcommand{\ISOPERATION}{\OPERATOR{isoperation}}
+\newcommand{\ISOUTPUT}{\OPERATOR{isoutput}}
+\newcommand{\INPUT}{\OPERATOR{input}}
+\newcommand{\OUTPUT}{\OPERATOR{output}}
+% \newcommand{\ANY}{\OPERATOR{any}}
+%\newcommand{\NEXT}{\OPERATOR{next}}
+\newcommand{\STUTTER}{\OPERATOR{stutter}}
+
+
+
+
+
+
+
+\newcommand{\SYMBOLNAME}[1]{\mbox{\textsf{\textsl{\small #1}}\,}}
+\newcommand{\OURPSI}{\SYMBOLNAME{PSI}}
+\newcommand{\BOOLTRUE}{\SYMBOLNAME{true}} 
+\newcommand{\BOOLFALSE}{\SYMBOLNAME{false}}
+
+\newcommand{\CTLOPERATOR}[1]{\mbox{\textsf{\textup{#1}}}}
+\newcommand{\CTLA}{\CTLOPERATOR{A}}
+\newcommand{\CTLE}{\CTLOPERATOR{E}}
+\newcommand{\CTLU}{\CTLOPERATOR{U}}
+\newcommand{\CTLW}{\CTLOPERATOR{W}}
+\newcommand{\CTLX}{\CTLOPERATOR{X}}
+\newcommand{\CTLG}{\CTLOPERATOR{G}}
+\newcommand{\CTLF}{\CTLOPERATOR{F}}
+
+\newcommand{\CTLAX}{\CTLOPERATOR{AX}}
+\newcommand{\CTLAF}{\CTLOPERATOR{AF}}
+\newcommand{\CTLAG}{\CTLOPERATOR{AG}}
+\newcommand{\CTLEX}{\CTLOPERATOR{EX}}
+\newcommand{\CTLEF}{\CTLOPERATOR{EF}}
+\newcommand{\CTLEG}{\CTLOPERATOR{EG}}
+
+\newcommand{\LTLX}{\CTLOPERATOR{X}}
+\newcommand{\NEXT}[1]{\mbox{$\CTLOPERATOR{X}^{#1}$}}
+\newcommand{\LTLXT}[1]{\mbox{$\CTLOPERATOR{X}^{#1}$}}
+\newcommand{\LTLF}{\CTLOPERATOR{F}}
+\newcommand{\LTLG}{\CTLOPERATOR{G}}
+\newcommand{\LTLU}{\CTLOPERATOR{U}}
+\newcommand{\LTLR}{\CTLOPERATOR{R}}
+\newcommand{\LTLW}{\CTLOPERATOR{W}}
+
+\newcommand{\LTLS}{\CTLOPERATOR{S}}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "binder"
+%%% End: 

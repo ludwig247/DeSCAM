@@ -1,0 +1,66 @@
+SystemCXMLDescription = '<?xml version="1.0" ?>' , '\n' , {ModuleDescription};
+
+
+ModuleDescription = <Name> , {DataType}, {Port}, {Variable} , {Section};
+
+
+DataType = BuiltInType
+                | EnumType
+                | CompoundType
+                | CompoundSubType;
+
+BuiltInType =  <@Type>;
+
+EnumType = <Name> , {EnumElement};
+EnumElement = <Name>;
+
+CompoundType = <Name> , {CompoundSubType};
+CompoundSubType = <Name> , Ref2DataType;
+
+
+Port = <Name> , <@Interface> , <@Direction> , Ref2DataType;
+
+
+Variable = <Name>, Ref2DataType , [ Init ];
+Init = <Init>;
+
+
+Section = <Name> , {Statement};
+Statement = Blocking
+                | Shared
+                | ChangeSection
+                | Assignment
+                | ITE;
+
+Blocking = <@CommunicationType> , Expression , Ref2Port;
+Shared = <@SharedType> , Expression , Ref2Port;
+
+ChangeSection = Ref2Section, 'remove';
+
+Assignment = Ref2Variable , <@AssignmentOperator>, Expression;
+
+ITE = Expression , IfPart , [ ElsePart ];
+IfPart = {Statement};
+ElsePart = {Statement};
+
+Expression = UnaryExpression
+                | BinaryExpression
+                | NonBlocking
+                | VariableReferenceContainer
+                | Constant;
+
+UnaryExpression = <@UnaryOperator> , Expression;
+BinaryExpression = Expression , <@BinaryOperator> , Expression;
+NonBlocking = <@CommunicationType> , Expression , Ref2Port;
+Constant = <Constant>;
+VariableReferenceContainer = Ref2Variable, 'remove';
+
+@Type = 'bool' | 'int' | 'unsigned';
+@Interface = 'Blocking' | 'Master' | 'Slave' | 'Shared';
+@Direction = 'In' | 'Out';
+@CommunicationType = 'Read' | 'Write';
+@SharedType = 'Get' | 'Set';
+@AssignmentOperator = '=' | '*=' | '/=' | '%=' | '+=' | '-=';
+@UnaryOperator = '+' | '-' | '!' | '~';
+@BinaryOperator = '==' | '!=' | '+' | '-' | '*' | '/' | '%';
+

@@ -1,0 +1,302 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SystemCXMLDescription>
+  <ModuleDescription>
+    <Int_Class_ID>1</Int_Class_ID>
+    <Name>Example</Name>
+    <DataType type="BuiltInType">
+      <Int_Class_ID>2</Int_Class_ID>
+      <Type>int</Type>
+    </DataType>
+    <DataType type="BuiltInType">
+      <Int_Class_ID>3</Int_Class_ID>
+      <Type>unsigned</Type>
+    </DataType>
+    <DataType type="BuiltInType">
+      <Int_Class_ID>4</Int_Class_ID>
+      <Type>bool</Type>
+    </DataType>
+    <DataType type="EnumType">
+      <Int_Class_ID>7</Int_Class_ID>
+      <Name>status_t</Name>
+      <EnumElement>
+        <Int_Class_ID>5</Int_Class_ID>
+        <Name>in_frame</Name>
+      </EnumElement>
+      <EnumElement>
+        <Int_Class_ID>6</Int_Class_ID>
+        <Name>oof_frame</Name>
+      </EnumElement>
+    </DataType>
+    <DataType type="CompoundType">
+      <Int_Class_ID>10</Int_Class_ID>
+      <Name>msg_t</Name>
+      <CompoundSubType>
+        <Int_Class_ID>8</Int_Class_ID>
+        <Name>status</Name>
+        <DataTypeRef>7</DataTypeRef>
+      </CompoundSubType>
+      <CompoundSubType>
+        <Int_Class_ID>9</Int_Class_ID>
+        <Name>data</Name>
+        <DataTypeRef>2</DataTypeRef>
+      </CompoundSubType>
+    </DataType>
+    <Port>
+      <Int_Class_ID>11</Int_Class_ID>
+      <Name>b_in</Name>
+      <Interface>Blocking</Interface>
+      <Direction>In</Direction>
+      <DataTypeRef>10</DataTypeRef>
+    </Port>
+    <Port>
+      <Int_Class_ID>12</Int_Class_ID>
+      <Name>m_out</Name>
+      <Interface>Master</Interface>
+      <Direction>Out</Direction>
+      <DataTypeRef>2</DataTypeRef>
+    </Port>
+    <Port>
+      <Int_Class_ID>13</Int_Class_ID>
+      <Name>s_out</Name>
+      <Interface>Shared</Interface>
+      <Direction>Out</Direction>
+      <DataTypeRef>4</DataTypeRef>
+    </Port>
+    <Variable>
+      <Int_Class_ID>15</Int_Class_ID>
+      <Name>cnt</Name>
+      <Init>
+        <Int_Class_ID>14</Int_Class_ID>
+        <Init>0</Init>
+      </Init>
+      <DataTypeRef>2</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>16</Int_Class_ID>
+      <Name>msg</Name>
+      <DataTypeRef>10</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>17</Int_Class_ID>
+      <Name>msg.data</Name>
+      <DataTypeRef>9</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>18</Int_Class_ID>
+      <Name>msg.status</Name>
+      <DataTypeRef>8</DataTypeRef>
+    </Variable>
+    <Variable>
+      <Int_Class_ID>20</Int_Class_ID>
+      <Name>ready</Name>
+      <Init>
+        <Int_Class_ID>19</Int_Class_ID>
+        <Init>false</Init>
+      </Init>
+      <DataTypeRef>4</DataTypeRef>
+    </Variable>
+    <Section>
+      <Int_Class_ID>21</Int_Class_ID>
+      <Name>frame_data</Name>
+      <Statement type="Assignment">
+        <Int_Class_ID>24</Int_Class_ID>
+        <AssignmentOperator>=</AssignmentOperator>
+        <Expression type="NonBlocking">
+          <Int_Class_ID>25</Int_Class_ID>
+          <CommunicationType>Read</CommunicationType>
+          <Expression type="VariableReferenceContainer">
+            <Int_Class_ID>26</Int_Class_ID>
+            <VariableRef>16</VariableRef>
+          </Expression>
+          <PortRef>11</PortRef>
+        </Expression>
+        <VariableRef>20</VariableRef>
+      </Statement>
+      <Statement type="ITE">
+        <Int_Class_ID>27</Int_Class_ID>
+        <Expression type="UnaryExpression">
+          <Int_Class_ID>28</Int_Class_ID>
+          <UnaryOperator>!</UnaryOperator>
+          <Expression type="Constant"> <!-- Wrong here should be VarRef -->
+            <Int_Class_ID>29</Int_Class_ID>
+            <Constant>ready</Constant>
+          </Expression>
+        </Expression>
+        <IfPart>
+          <Int_Class_ID>30</Int_Class_ID>
+          <Statement type="Blocking">
+            <Int_Class_ID>31</Int_Class_ID>
+            <CommunicationType>Write</CommunicationType>
+            <Expression type="VariableReferenceContainer"> <!-- Could also be an arbitrarty expression -->
+              <Int_Class_ID>32</Int_Class_ID>
+              <VariableRef>17</VariableRef>
+            </Expression>
+            <PortRef>12</PortRef>
+          </Statement>
+          <Statement type="ITE">
+            <Int_Class_ID>33</Int_Class_ID>
+            <Expression type="BinaryExpression">
+              <Int_Class_ID>34</Int_Class_ID>
+              <BinaryOperator>==</BinaryOperator>
+              <Expression type="VariableReferenceContainer">
+                <Int_Class_ID>35</Int_Class_ID>
+                <VariableRef>15</VariableRef>
+              </Expression>
+              <Expression_2 type="Constant">
+                <Int_Class_ID>36</Int_Class_ID>
+                <Constant>0</Constant>
+              </Expression_2>
+            </Expression>
+            <IfPart>
+              <Int_Class_ID>37</Int_Class_ID>
+              <Statement type="ChangeSection">
+                <Int_Class_ID>38</Int_Class_ID>
+                <SectionRef>23</SectionRef>
+              </Statement>
+            </IfPart>
+          </Statement>
+          <Statement type="Assignment">
+            <Int_Class_ID>39</Int_Class_ID>
+            <AssignmentOperator>=</AssignmentOperator>
+            <Expression type="BinaryExpression">
+              <Int_Class_ID>40</Int_Class_ID>
+              <BinaryOperator>-</BinaryOperator>
+              <Expression type="VariableReferenceContainer">
+                <Int_Class_ID>41</Int_Class_ID>
+                <VariableRef>15</VariableRef>
+              </Expression>
+              <Expression_2 type="Constant">
+                <Int_Class_ID>42</Int_Class_ID>
+                <Constant>1</Constant>
+              </Expression_2>
+            </Expression>
+            <VariableRef>15</VariableRef>
+          </Statement>
+        </IfPart>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>22</Int_Class_ID>
+      <Name>frame_start</Name>
+      <Statement type="Blocking">
+        <Int_Class_ID>43</Int_Class_ID>
+        <CommunicationType>Write</CommunicationType>
+        <Expression type="VariableReferenceContainer">
+          <Int_Class_ID>44</Int_Class_ID>
+          <VariableRef>15</VariableRef>
+        </Expression>
+        <PortRef>12</PortRef>
+      </Statement>
+      <Statement type="Assignment">
+        <Int_Class_ID>45</Int_Class_ID>
+        <AssignmentOperator>=</AssignmentOperator>
+        <Expression type="BinaryExpression">
+          <Int_Class_ID>46</Int_Class_ID>
+          <BinaryOperator>-</BinaryOperator>
+          <Expression type="VariableReferenceContainer">
+            <Int_Class_ID>47</Int_Class_ID>
+            <VariableRef>15</VariableRef>
+          </Expression>
+          <Expression_2 type="Constant">
+            <Int_Class_ID>48</Int_Class_ID>
+            <Constant>1</Constant>
+          </Expression_2>
+        </Expression>
+        <VariableRef>15</VariableRef>
+      </Statement>
+      <Statement type="ITE">
+        <Int_Class_ID>49</Int_Class_ID>
+        <Expression type="BinaryExpression">
+          <Int_Class_ID>50</Int_Class_ID>
+          <BinaryOperator>==</BinaryOperator>
+          <Expression type="VariableReferenceContainer">
+            <Int_Class_ID>51</Int_Class_ID>
+            <VariableRef>15</VariableRef>
+          </Expression>
+          <Expression_2 type="Constant">
+            <Int_Class_ID>52</Int_Class_ID>
+            <Constant>0</Constant>
+          </Expression_2>
+        </Expression>
+        <IfPart>
+          <Int_Class_ID>53</Int_Class_ID>
+          <Statement type="Assignment">
+            <Int_Class_ID>54</Int_Class_ID>
+            <AssignmentOperator>=</AssignmentOperator>
+            <Expression type="Constant">
+              <Int_Class_ID>55</Int_Class_ID>
+              <Constant>15</Constant>
+            </Expression>
+            <VariableRef>15</VariableRef>
+          </Statement>
+          <Statement type="ChangeSection">
+            <Int_Class_ID>56</Int_Class_ID>
+            <SectionRef>21</SectionRef>
+          </Statement>
+        </IfPart>
+      </Statement>
+    </Section>
+    <Section>
+      <Int_Class_ID>23</Int_Class_ID>
+      <Name>idle</Name>
+      <Statement type="Shared">
+        <Int_Class_ID>57</Int_Class_ID>
+        <SharedType>Set</SharedType>
+        <Expression type="Constant">
+          <Int_Class_ID>58</Int_Class_ID>
+          <Constant>False</Constant>
+        </Expression>
+        <PortRef>13</PortRef>
+      </Statement>
+      <Statement type="Blocking">
+        <Int_Class_ID>59</Int_Class_ID>
+        <CommunicationType>Read</CommunicationType>
+        <Expression type="VariableReferenceContainer">
+          <Int_Class_ID>60</Int_Class_ID>
+          <VariableRef>16</VariableRef>
+        </Expression>
+        <PortRef>11</PortRef>
+      </Statement>
+      <Statement type="ITE">
+        <Int_Class_ID>61</Int_Class_ID>
+        <Expression type="BinaryExpression">
+          <Int_Class_ID>62</Int_Class_ID>
+          <BinaryOperator>==</BinaryOperator>
+          <Expression type="VariableReferenceContainer">
+            <Int_Class_ID>63</Int_Class_ID>
+            <VariableRef>18</VariableRef>
+          </Expression>
+          <Expression_2 type="Constant">
+            <Int_Class_ID>64</Int_Class_ID>
+            <Constant>in_frame</Constant>
+          </Expression_2>
+        </Expression>
+        <IfPart>
+          <Int_Class_ID>65</Int_Class_ID>
+          <Statement type="Shared">
+            <Int_Class_ID>66</Int_Class_ID>
+            <SharedType>Set</SharedType>
+            <Expression type="Constant">
+              <Int_Class_ID>67</Int_Class_ID>
+              <Constant>True</Constant>
+            </Expression>
+            <PortRef>13</PortRef>
+          </Statement>
+          <Statement type="ChangeSection">
+            <Int_Class_ID>5000</Int_Class_ID>
+            <SectionRef>22</SectionRef>
+          </Statement>
+          <Statement type="Assignment">
+            <Int_Class_ID>68</Int_Class_ID>
+            <AssignmentOperator>=</AssignmentOperator>
+            <Expression type="Constant">
+              <Int_Class_ID>69</Int_Class_ID>
+              <Constant>3</Constant>
+            </Expression>
+            <VariableRef>15</VariableRef>
+          </Statement>
+        </IfPart>
+      </Statement>
+    </Section>
+  </ModuleDescription>
+</SystemCXMLDescription>

@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : ISA
+Version: N-2017.09-SP3
+Date   : Sat Jan  5 13:07:43 2019
+****************************************
+
+Library(s) Used:
+
+    gscl45nm (File: /import/lab/users/morkunas/SCAM/example/StandardCellLibraries/FreePDK45/osu_soc/lib/files/gscl45nm.db)
+
+Number of ports:                          472
+Number of nets:                         23150
+Number of cells:                        22822
+Number of combinational cells:          22111
+Number of sequential cells:               711
+Number of macros/black boxes:               0
+Number of buf/inv:                      10743
+Number of references:                      20
+
+Combinational area:              54266.565835
+Buf/Inv area:                    20861.792299
+Noncombinational area:            6942.354992
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:                 61208.920827
+Total area:                 undefined
+1

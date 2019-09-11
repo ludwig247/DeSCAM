@@ -1,0 +1,1662 @@
+// required terminology
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+sequence hold(l, e);
+	(l===e, l=e);
+endsequence
+
+sequence t;
+	##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_end(offset);
+	t ##offset 1'b1;
+endsequence
+
+sequence next(timepoint, offset);
+	timepoint ##offset 1'b1;
+endsequence
+
+property during(t1, t2, se);
+	(t1 ##0 se[*0:$] intersect t2) or
+	(t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_limited(t1, t2, off, se);
+	(t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+	(next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_o(t1, o1, t2, o2, se);
+	if (o2 >= 0)
+		during(next(t1, o1), next(t2, (o2<0) ? 0 : o2), se)
+	else
+		during_limited(next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+// end of ipc_sva
+
+import scam_model_types::*;
+
+module Bus_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge Bus1.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function master_in_notify;
+	master_in_notify = Bus1.master_in_notify;
+endfunction
+function master_in_sync;
+	master_in_sync = Bus1.master_in_sync;
+endfunction
+function master_out_notify;
+	master_out_notify = Bus1.master_out_notify;
+endfunction
+function master_out_sync;
+	master_out_sync = Bus1.master_out_sync;
+endfunction
+function slave_in0_notify;
+	slave_in0_notify = Bus1.slave_in0_notify;
+endfunction
+function slave_in0_sync;
+	slave_in0_sync = Bus1.slave_in0_sync;
+endfunction
+function slave_in1_notify;
+	slave_in1_notify = Bus1.slave_in1_notify;
+endfunction
+function slave_in1_sync;
+	slave_in1_sync = Bus1.slave_in1_sync;
+endfunction
+function slave_in2_notify;
+	slave_in2_notify = Bus1.slave_in2_notify;
+endfunction
+function slave_in2_sync;
+	slave_in2_sync = Bus1.slave_in2_sync;
+endfunction
+function slave_in3_notify;
+	slave_in3_notify = Bus1.slave_in3_notify;
+endfunction
+function slave_in3_sync;
+	slave_in3_sync = Bus1.slave_in3_sync;
+endfunction
+function slave_out0_notify;
+	slave_out0_notify = Bus1.slave_out0_notify;
+endfunction
+function slave_out0_sync;
+	slave_out0_sync = Bus1.slave_out0_sync;
+endfunction
+function slave_out1_notify;
+	slave_out1_notify = Bus1.slave_out1_notify;
+endfunction
+function slave_out1_sync;
+	slave_out1_sync = Bus1.slave_out1_sync;
+endfunction
+function slave_out2_notify;
+	slave_out2_notify = Bus1.slave_out2_notify;
+endfunction
+function slave_out2_sync;
+	slave_out2_sync = Bus1.slave_out2_sync;
+endfunction
+function slave_out3_notify;
+	slave_out3_notify = Bus1.slave_out3_notify;
+endfunction
+function slave_out3_sync;
+	slave_out3_sync = Bus1.slave_out3_sync;
+endfunction
+
+// DP SIGNALS //
+function int master_in_sig_addr;
+	master_in_sig_addr = Bus1.master_in.addr;
+endfunction
+function int master_in_sig_data;
+	master_in_sig_data = Bus1.master_in.data;
+endfunction
+function trans_t master_in_sig_trans_type;
+	master_in_sig_trans_type = Bus1.master_in.trans_type;
+endfunction
+function ack_t master_out_sig_ack;
+	master_out_sig_ack = Bus1.master_out.ack;
+endfunction
+function int master_out_sig_data;
+	master_out_sig_data = Bus1.master_out.data;
+endfunction
+function ack_t slave_in0_sig_ack;
+	slave_in0_sig_ack = Bus1.slave_in0.ack;
+endfunction
+function int slave_in0_sig_data;
+	slave_in0_sig_data = Bus1.slave_in0.data;
+endfunction
+function ack_t slave_in1_sig_ack;
+	slave_in1_sig_ack = Bus1.slave_in1.ack;
+endfunction
+function int slave_in1_sig_data;
+	slave_in1_sig_data = Bus1.slave_in1.data;
+endfunction
+function ack_t slave_in2_sig_ack;
+	slave_in2_sig_ack = Bus1.slave_in2.ack;
+endfunction
+function int slave_in2_sig_data;
+	slave_in2_sig_data = Bus1.slave_in2.data;
+endfunction
+function ack_t slave_in3_sig_ack;
+	slave_in3_sig_ack = Bus1.slave_in3.ack;
+endfunction
+function int slave_in3_sig_data;
+	slave_in3_sig_data = Bus1.slave_in3.data;
+endfunction
+function int slave_out0_sig_addr;
+	slave_out0_sig_addr = Bus1.slave_out0.addr;
+endfunction
+function int slave_out0_sig_data;
+	slave_out0_sig_data = Bus1.slave_out0.data;
+endfunction
+function trans_t slave_out0_sig_trans_type;
+	slave_out0_sig_trans_type = Bus1.slave_out0.trans_type;
+endfunction
+function int slave_out1_sig_addr;
+	slave_out1_sig_addr = Bus1.slave_out1.addr;
+endfunction
+function int slave_out1_sig_data;
+	slave_out1_sig_data = Bus1.slave_out1.data;
+endfunction
+function trans_t slave_out1_sig_trans_type;
+	slave_out1_sig_trans_type = Bus1.slave_out1.trans_type;
+endfunction
+function int slave_out2_sig_addr;
+	slave_out2_sig_addr = Bus1.slave_out2.addr;
+endfunction
+function int slave_out2_sig_data;
+	slave_out2_sig_data = Bus1.slave_out2.data;
+endfunction
+function trans_t slave_out2_sig_trans_type;
+	slave_out2_sig_trans_type = Bus1.slave_out2.trans_type;
+endfunction
+function int slave_out3_sig_addr;
+	slave_out3_sig_addr = Bus1.slave_out3.addr;
+endfunction
+function int slave_out3_sig_data;
+	slave_out3_sig_data = Bus1.slave_out3.data;
+endfunction
+function trans_t slave_out3_sig_trans_type;
+	slave_out3_sig_trans_type = Bus1.slave_out3.trans_type;
+endfunction
+
+// VISIBLE REGISTERS //
+function int req_addr;
+	req_addr = Bus1.req_signal.addr;
+endfunction
+function int req_data;
+	req_data = Bus1.req_signal.data;
+endfunction
+function trans_t req_trans_type;
+	req_trans_type = Bus1.req_signal.trans_type;
+endfunction
+function ack_t resp_ack;
+	resp_ack = Bus1.resp_signal.ack;
+endfunction
+function int resp_data;
+	resp_data = Bus1.resp_signal.data;
+endfunction
+
+// STATES //
+function run_0;
+	run_0 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 1) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_1;
+	run_1 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 1) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_2;
+	run_2 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 1) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_3;
+	run_3 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 1) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_4;
+	run_4 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 1) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_5;
+	run_5 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 1) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_6;
+	run_6 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 1) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_7;
+	run_7 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 1) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+function run_8;
+	run_8 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 0) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 1) );
+endfunction
+function run_9;
+	run_9 = ( (Bus1.section==run) &&
+		(Bus1.master_in_notify == 0) &&
+		(Bus1.master_out_notify == 0) &&
+		(Bus1.slave_in0_notify == 0) &&
+		(Bus1.slave_in1_notify == 0) &&
+		(Bus1.slave_in2_notify == 0) &&
+		(Bus1.slave_in3_notify == 1) &&
+		(Bus1.slave_out0_notify == 0) &&
+		(Bus1.slave_out1_notify == 0) &&
+		(Bus1.slave_out2_notify == 0) &&
+		(Bus1.slave_out3_notify == 0) );
+endfunction
+
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+sequence reset_sequence;
+	(Bus1.rst == 1'b1);
+//DISGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+property reset_p;
+	reset_sequence |=>
+	t ##0 run_0() and
+	t ##0 req_addr() == 0 and
+	t ##0 req_data() == 0 and
+	t ##0 req_trans_type() == single_read and
+	t ##0 resp_ack() == err and
+	t ##0 resp_data() == 0 and
+	t ##0 master_in_notify() == 1 and
+	t ##0 master_out_notify() == 0 and
+	t ##0 slave_in0_notify() == 0 and
+	t ##0 slave_in1_notify() == 0 and
+	t ##0 slave_in2_notify() == 0 and
+	t ##0 slave_in3_notify() == 0 and
+	t ##0 slave_out0_notify() == 0 and
+	t ##0 slave_out1_notify() == 0 and
+	t ##0 slave_out2_notify() == 0 and
+	t ##0 slave_out3_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+property run_0_read_0_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int master_in_sig_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_data_0, master_in_sig_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 !((single_read == master_in_sig_trans_type())) and
+	t ##0 (master_in_sig_addr() >= 0) and
+	t ##0 (master_in_sig_addr() <= 7) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_1() and
+	t_end(o) ##0 req_addr() == master_in_sig_addr_0 and
+	t_end(o) ##0 req_data() == master_in_sig_data_0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out0_sig_addr() == master_in_sig_addr_0 and
+	t_end(o) ##0 slave_out0_sig_data() == master_in_sig_data_0 and
+	t_end(o) ##0 slave_out0_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out0_notify() == 0) and
+	t_end(o) ##0 slave_out0_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_0_a: assert property (disable iff (reset) run_0_read_0_p(1));// ASSIGN t_end offset here
+
+property run_0_read_1_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 (single_read == master_in_sig_trans_type()) and
+	t ##0 (master_in_sig_addr() >= 0) and
+	t ##0 (master_in_sig_addr() <= 7) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_1() and
+	t_end(o) ##0 req_addr() == master_in_sig_addr_0 and
+	t_end(o) ##0 req_data() == 0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out0_sig_addr() == master_in_sig_addr_0 and
+	t_end(o) ##0 slave_out0_sig_data() == 0 and
+	t_end(o) ##0 slave_out0_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out0_notify() == 0) and
+	t_end(o) ##0 slave_out0_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_1_a: assert property (disable iff (reset) run_0_read_1_p(1));// ASSIGN t_end offset here
+
+property run_0_read_2_p(o);
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 (single_read == master_in_sig_trans_type()) and
+	t ##0 !(((master_in_sig_addr() >= 0) && !((8 <= master_in_sig_addr())))) and
+	t ##0 !(((master_in_sig_addr() >= 8) && !((16 <= master_in_sig_addr())))) and
+	t ##0 !(((master_in_sig_addr() >= 16) && !((24 <= master_in_sig_addr())))) and
+	t ##0 !(((master_in_sig_addr() >= 24) && !((32 <= master_in_sig_addr())))) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == ok and
+	t_end(o) ##0 master_out_sig_data() == 0 and
+	t_end(o) ##0 req_addr() == master_in_sig_addr_0 and
+	t_end(o) ##0 req_data() == 0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == ok and
+	t_end(o) ##0 resp_data() == 0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_2_a: assert property (disable iff (reset) run_0_read_2_p(1));// ASSIGN t_end offset here
+
+property run_0_read_3_p(o);
+int master_in_sig_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(master_in_sig_data_0, master_in_sig_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 !(((master_in_sig_addr() >= 0) && !((8 <= master_in_sig_addr())))) and
+	t ##0 !(((master_in_sig_addr() >= 8) && !((16 <= master_in_sig_addr())))) and
+	t ##0 !(((master_in_sig_addr() >= 16) && !((24 <= master_in_sig_addr())))) and
+	t ##0 !(((master_in_sig_addr() >= 24) && !((32 <= master_in_sig_addr())))) and
+	t ##0 (single_write == master_in_sig_trans_type()) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == ok and
+	t_end(o) ##0 master_out_sig_data() == 0 and
+	t_end(o) ##0 req_addr() == master_in_sig_addr_0 and
+	t_end(o) ##0 req_data() == master_in_sig_data_0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == ok and
+	t_end(o) ##0 resp_data() == 0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_3_a: assert property (disable iff (reset) run_0_read_3_p(1));// ASSIGN t_end offset here
+
+property run_0_read_4_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int master_in_sig_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_data_0, master_in_sig_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 !((single_read == master_in_sig_trans_type())) and
+	t ##0 (master_in_sig_addr() >= 8) and
+	t ##0 (master_in_sig_addr() <= 15) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_4() and
+	t_end(o) ##0 req_addr() == (-8 + master_in_sig_addr_0) and
+	t_end(o) ##0 req_data() == master_in_sig_data_0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out1_sig_addr() == (-8 + master_in_sig_addr_0) and
+	t_end(o) ##0 slave_out1_sig_data() == master_in_sig_data_0 and
+	t_end(o) ##0 slave_out1_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out1_notify() == 0) and
+	t_end(o) ##0 slave_out1_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_4_a: assert property (disable iff (reset) run_0_read_4_p(1));// ASSIGN t_end offset here
+
+property run_0_read_5_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 (single_read == master_in_sig_trans_type()) and
+	t ##0 (master_in_sig_addr() >= 8) and
+	t ##0 (master_in_sig_addr() <= 15) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_4() and
+	t_end(o) ##0 req_addr() == (-8 + master_in_sig_addr_0) and
+	t_end(o) ##0 req_data() == 0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out1_sig_addr() == (-8 + master_in_sig_addr_0) and
+	t_end(o) ##0 slave_out1_sig_data() == 0 and
+	t_end(o) ##0 slave_out1_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out1_notify() == 0) and
+	t_end(o) ##0 slave_out1_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_5_a: assert property (disable iff (reset) run_0_read_5_p(1));// ASSIGN t_end offset here
+
+property run_0_read_6_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int master_in_sig_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_data_0, master_in_sig_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 !((single_read == master_in_sig_trans_type())) and
+	t ##0 (master_in_sig_addr() >= 16) and
+	t ##0 (master_in_sig_addr() <= 23) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_6() and
+	t_end(o) ##0 req_addr() == (-16 + master_in_sig_addr_0) and
+	t_end(o) ##0 req_data() == master_in_sig_data_0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out2_sig_addr() == (-16 + master_in_sig_addr_0) and
+	t_end(o) ##0 slave_out2_sig_data() == master_in_sig_data_0 and
+	t_end(o) ##0 slave_out2_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out2_notify() == 0) and
+	t_end(o) ##0 slave_out2_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_6_a: assert property (disable iff (reset) run_0_read_6_p(1));// ASSIGN t_end offset here
+
+property run_0_read_7_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 (single_read == master_in_sig_trans_type()) and
+	t ##0 (master_in_sig_addr() >= 16) and
+	t ##0 (master_in_sig_addr() <= 23) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_6() and
+	t_end(o) ##0 req_addr() == (-16 + master_in_sig_addr_0) and
+	t_end(o) ##0 req_data() == 0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out2_sig_addr() == (-16 + master_in_sig_addr_0) and
+	t_end(o) ##0 slave_out2_sig_data() == 0 and
+	t_end(o) ##0 slave_out2_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out2_notify() == 0) and
+	t_end(o) ##0 slave_out2_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_0_read_7_a: assert property (disable iff (reset) run_0_read_7_p(1));// ASSIGN t_end offset here
+
+property run_0_read_8_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int master_in_sig_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_data_0, master_in_sig_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 !((single_read == master_in_sig_trans_type())) and
+	t ##0 (master_in_sig_addr() >= 24) and
+	t ##0 (master_in_sig_addr() <= 31) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_8() and
+	t_end(o) ##0 req_addr() == (-24 + master_in_sig_addr_0) and
+	t_end(o) ##0 req_data() == master_in_sig_data_0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out3_sig_addr() == (-24 + master_in_sig_addr_0) and
+	t_end(o) ##0 slave_out3_sig_data() == master_in_sig_data_0 and
+	t_end(o) ##0 slave_out3_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out3_notify() == 0) and
+	t_end(o) ##0 slave_out3_notify() == 1;
+endproperty;
+run_0_read_8_a: assert property (disable iff (reset) run_0_read_8_p(1));// ASSIGN t_end offset here
+
+property run_0_read_9_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+trans_t master_in_sig_trans_type_0;
+int master_in_sig_addr_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(master_in_sig_trans_type_0, master_in_sig_trans_type()) and
+	t ##0 hold(master_in_sig_addr_0, master_in_sig_addr()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 (single_read == master_in_sig_trans_type()) and
+	t ##0 (master_in_sig_addr() >= 24) and
+	t ##0 (master_in_sig_addr() <= 31) and
+	t ##0 master_in_sync()
+implies
+	t_end(o) ##0 run_8() and
+	t_end(o) ##0 req_addr() == (-24 + master_in_sig_addr_0) and
+	t_end(o) ##0 req_data() == 0 and
+	t_end(o) ##0 req_trans_type() == master_in_sig_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	t_end(o) ##0 slave_out3_sig_addr() == (-24 + master_in_sig_addr_0) and
+	t_end(o) ##0 slave_out3_sig_data() == 0 and
+	t_end(o) ##0 slave_out3_sig_trans_type() == master_in_sig_trans_type_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_out3_notify() == 0) and
+	t_end(o) ##0 slave_out3_notify() == 1;
+endproperty;
+run_0_read_9_a: assert property (disable iff (reset) run_0_read_9_p(1));// ASSIGN t_end offset here
+
+property run_1_write_10_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_1() and
+// trigger
+	t ##0 slave_out0_sync()
+implies
+	t_end(o) ##0 run_2() and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_in0_notify() == 0) and
+	t_end(o) ##0 slave_in0_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_1_write_10_a: assert property (disable iff (reset) run_1_write_10_p(1));// ASSIGN t_end offset here
+
+property run_2_read_11_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in0_sig_ack_0;
+int slave_in0_sig_data_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in0_sig_ack_0, slave_in0_sig_ack()) and
+	t ##0 hold(slave_in0_sig_data_0, slave_in0_sig_data()) and
+// Conceptual State
+	t ##0 run_2() and
+// trigger
+	t ##0 !((single_write == req_trans_type())) and
+	t ##0 slave_in0_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in0_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == slave_in0_sig_data_0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in0_sig_ack_0 and
+	t_end(o) ##0 resp_data() == slave_in0_sig_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_2_read_11_a: assert property (disable iff (reset) run_2_read_11_p(1));// ASSIGN t_end offset here
+
+property run_2_read_12_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in0_sig_ack_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in0_sig_ack_0, slave_in0_sig_ack()) and
+// Conceptual State
+	t ##0 run_2() and
+// trigger
+	t ##0 (single_write == req_trans_type()) and
+	t ##0 slave_in0_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in0_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == 0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in0_sig_ack_0 and
+	t_end(o) ##0 resp_data() == 0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_2_read_12_a: assert property (disable iff (reset) run_2_read_12_p(1));// ASSIGN t_end offset here
+
+property run_3_write_13_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_3() and
+// trigger
+	t ##0 master_out_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	during_o (t, 1, t_end(o) , -1, master_in_notify() == 0) and
+	t_end(o) ##0 master_in_notify() == 1 and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_3_write_13_a: assert property (disable iff (reset) run_3_write_13_p(1));// ASSIGN t_end offset here
+
+property run_4_write_14_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_4() and
+// trigger
+	t ##0 slave_out1_sync()
+implies
+	t_end(o) ##0 run_5() and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_in1_notify() == 0) and
+	t_end(o) ##0 slave_in1_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_4_write_14_a: assert property (disable iff (reset) run_4_write_14_p(1));// ASSIGN t_end offset here
+
+property run_5_read_15_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in1_sig_ack_0;
+int slave_in1_sig_data_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in1_sig_ack_0, slave_in1_sig_ack()) and
+	t ##0 hold(slave_in1_sig_data_0, slave_in1_sig_data()) and
+// Conceptual State
+	t ##0 run_5() and
+// trigger
+	t ##0 !((single_write == req_trans_type())) and
+	t ##0 slave_in1_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in1_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == slave_in1_sig_data_0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in1_sig_ack_0 and
+	t_end(o) ##0 resp_data() == slave_in1_sig_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_5_read_15_a: assert property (disable iff (reset) run_5_read_15_p(1));// ASSIGN t_end offset here
+
+property run_5_read_16_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in1_sig_ack_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in1_sig_ack_0, slave_in1_sig_ack()) and
+// Conceptual State
+	t ##0 run_5() and
+// trigger
+	t ##0 (single_write == req_trans_type()) and
+	t ##0 slave_in1_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in1_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == 0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in1_sig_ack_0 and
+	t_end(o) ##0 resp_data() == 0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_5_read_16_a: assert property (disable iff (reset) run_5_read_16_p(1));// ASSIGN t_end offset here
+
+property run_6_write_17_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_6() and
+// trigger
+	t ##0 slave_out2_sync()
+implies
+	t_end(o) ##0 run_7() and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_in2_notify() == 0) and
+	t_end(o) ##0 slave_in2_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_6_write_17_a: assert property (disable iff (reset) run_6_write_17_p(1));// ASSIGN t_end offset here
+
+property run_7_read_18_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in2_sig_ack_0;
+int slave_in2_sig_data_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in2_sig_ack_0, slave_in2_sig_ack()) and
+	t ##0 hold(slave_in2_sig_data_0, slave_in2_sig_data()) and
+// Conceptual State
+	t ##0 run_7() and
+// trigger
+	t ##0 !((single_write == req_trans_type())) and
+	t ##0 slave_in2_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in2_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == slave_in2_sig_data_0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in2_sig_ack_0 and
+	t_end(o) ##0 resp_data() == slave_in2_sig_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_7_read_18_a: assert property (disable iff (reset) run_7_read_18_p(1));// ASSIGN t_end offset here
+
+property run_7_read_19_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in2_sig_ack_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in2_sig_ack_0, slave_in2_sig_ack()) and
+// Conceptual State
+	t ##0 run_7() and
+// trigger
+	t ##0 (single_write == req_trans_type()) and
+	t ##0 slave_in2_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in2_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == 0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in2_sig_ack_0 and
+	t_end(o) ##0 resp_data() == 0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_7_read_19_a: assert property (disable iff (reset) run_7_read_19_p(1));// ASSIGN t_end offset here
+
+property run_8_write_20_p(o);
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_8() and
+// trigger
+	t ##0 slave_out3_sync()
+implies
+	t_end(o) ##0 run_9() and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == resp_ack_0 and
+	t_end(o) ##0 resp_data() == resp_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during (next(t,1), t_end(o), master_out_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, slave_in3_notify() == 0) and
+	t_end(o) ##0 slave_in3_notify() == 1 and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_8_write_20_a: assert property (disable iff (reset) run_8_write_20_p(1));// ASSIGN t_end offset here
+
+property run_9_read_21_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in3_sig_ack_0;
+int slave_in3_sig_data_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in3_sig_ack_0, slave_in3_sig_ack()) and
+	t ##0 hold(slave_in3_sig_data_0, slave_in3_sig_data()) and
+// Conceptual State
+	t ##0 run_9() and
+// trigger
+	t ##0 !((single_write == req_trans_type())) and
+	t ##0 slave_in3_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in3_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == slave_in3_sig_data_0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in3_sig_ack_0 and
+	t_end(o) ##0 resp_data() == slave_in3_sig_data_0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_9_read_21_a: assert property (disable iff (reset) run_9_read_21_p(1));// ASSIGN t_end offset here
+
+property run_9_read_22_p(o);
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+ack_t slave_in3_sig_ack_0;
+// hold
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+	t ##0 hold(slave_in3_sig_ack_0, slave_in3_sig_ack()) and
+// Conceptual State
+	t ##0 run_9() and
+// trigger
+	t ##0 (single_write == req_trans_type()) and
+	t ##0 slave_in3_sync()
+implies
+	t_end(o) ##0 run_3() and
+	t_end(o) ##0 master_out_sig_ack() == slave_in3_sig_ack_0 and
+	t_end(o) ##0 master_out_sig_data() == 0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	t_end(o) ##0 resp_ack() == slave_in3_sig_ack_0 and
+	t_end(o) ##0 resp_data() == 0 and
+	during (next(t,1), t_end(o), master_in_notify() == 0) and
+	during_o (t, 1, t_end(o) , -1, master_out_notify() == 0) and
+	t_end(o) ##0 master_out_notify() == 1 and
+	during (next(t,1), t_end(o), slave_in0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_in3_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out0_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out1_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out2_notify() == 0) and
+	during (next(t,1), t_end(o), slave_out3_notify() == 0);
+endproperty;
+run_9_read_22_a: assert property (disable iff (reset) run_9_read_22_p(1));// ASSIGN t_end offset here
+
+
+property wait_run_0_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_0() and
+// trigger
+	t ##0 !(master_in_sync())
+implies
+	t ##1 run_0() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 master_in_notify() == 1 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_0_a: assert property (disable iff (reset) wait_run_0_p);
+
+
+property wait_run_1_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_1() and
+// trigger
+	t ##0 !(slave_out0_sync())
+implies
+	t ##1 run_1() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 slave_out0_sig_addr() == req_addr_0 and
+	t ##1 slave_out0_sig_data() == req_data_0 and
+	t ##1 slave_out0_sig_trans_type() == req_trans_type_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 1 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_1_a: assert property (disable iff (reset) wait_run_1_p);
+
+
+property wait_run_2_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_2() and
+// trigger
+	t ##0 !(slave_in0_sync())
+implies
+	t ##1 run_2() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 1 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_2_a: assert property (disable iff (reset) wait_run_2_p);
+
+
+property wait_run_3_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_3() and
+// trigger
+	t ##0 !(master_out_sync())
+implies
+	t ##1 run_3() and
+	t ##1 master_out_sig_ack() == resp_ack_0 and
+	t ##1 master_out_sig_data() == resp_data_0 and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 1 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_3_a: assert property (disable iff (reset) wait_run_3_p);
+
+
+property wait_run_4_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_4() and
+// trigger
+	t ##0 !(slave_out1_sync())
+implies
+	t ##1 run_4() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 slave_out1_sig_addr() == req_addr_0 and
+	t ##1 slave_out1_sig_data() == req_data_0 and
+	t ##1 slave_out1_sig_trans_type() == req_trans_type_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 1 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_4_a: assert property (disable iff (reset) wait_run_4_p);
+
+
+property wait_run_5_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_5() and
+// trigger
+	t ##0 !(slave_in1_sync())
+implies
+	t ##1 run_5() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 1 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_5_a: assert property (disable iff (reset) wait_run_5_p);
+
+
+property wait_run_6_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_6() and
+// trigger
+	t ##0 !(slave_out2_sync())
+implies
+	t ##1 run_6() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 slave_out2_sig_addr() == req_addr_0 and
+	t ##1 slave_out2_sig_data() == req_data_0 and
+	t ##1 slave_out2_sig_trans_type() == req_trans_type_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 1 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_6_a: assert property (disable iff (reset) wait_run_6_p);
+
+
+property wait_run_7_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_7() and
+// trigger
+	t ##0 !(slave_in2_sync())
+implies
+	t ##1 run_7() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 1 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_7_a: assert property (disable iff (reset) wait_run_7_p);
+
+
+property wait_run_8_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_8() and
+// trigger
+	t ##0 !(slave_out3_sync())
+implies
+	t ##1 run_8() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 slave_out3_sig_addr() == req_addr_0 and
+	t ##1 slave_out3_sig_data() == req_data_0 and
+	t ##1 slave_out3_sig_trans_type() == req_trans_type_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 0 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 1;
+endproperty;
+wait_run_8_a: assert property (disable iff (reset) wait_run_8_p);
+
+
+property wait_run_9_p;
+ack_t resp_ack_0;
+int resp_data_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold
+	t ##0 hold(resp_ack_0, resp_ack()) and
+	t ##0 hold(resp_data_0, resp_data()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State
+	t ##0 run_9() and
+// trigger
+	t ##0 !(slave_in3_sync())
+implies
+	t ##1 run_9() and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 resp_ack() == resp_ack_0 and
+	t ##1 resp_data() == resp_data_0 and
+	t ##1 master_in_notify() == 0 and
+	t ##1 master_out_notify() == 0 and
+	t ##1 slave_in0_notify() == 0 and
+	t ##1 slave_in1_notify() == 0 and
+	t ##1 slave_in2_notify() == 0 and
+	t ##1 slave_in3_notify() == 1 and
+	t ##1 slave_out0_notify() == 0 and
+	t ##1 slave_out1_notify() == 0 and
+	t ##1 slave_out2_notify() == 0 and
+	t ##1 slave_out3_notify() == 0;
+endproperty;
+wait_run_9_a: assert property (disable iff (reset) wait_run_9_p);
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind Bus1 Bus_verification inst (.*, .reset(Bus1.rst));

@@ -1,0 +1,163 @@
+completeness SCAM_Model;
+	disable iff: rst;
+	/*inputs: rst, master_in, master_in_sync,
+		master_out_sync,
+		slave_in0, slave_in0_sync,
+		slave_in1, slave_in1_sync,
+		slave_in2, slave_in2_sync,
+		slave_in3, slave_in3_sync,
+		slave_out0_sync,
+		slave_out1_sync,
+		slave_out2_sync,
+		slave_out3_sync;
+*/
+
+	determination_assumptions:
+		determined(rst);
+		determined(master_in);
+		determined(master_in_sync);
+		determined(master_out_sync);
+		determined(slave_in0);
+		determined(slave_in1);
+		determined(slave_in2);
+		determined(slave_in3);
+		determined(slave_in0_sync);
+		determined(slave_in1_sync);
+		determined(slave_in2_sync);
+		determined(slave_in3_sync);
+		determined(slave_out0_sync);
+		determined(slave_out1_sync);
+		determined(slave_out2_sync);
+		determined(slave_out3_sync);
+
+	determination_requirements:
+		determined(master_in_notify);
+		determined(master_out_notify);
+		determined(slave_in0_notify);
+		determined(slave_in1_notify);
+		determined(slave_in2_notify);
+		determined(slave_in3_notify);
+		determined(slave_out0_notify);
+		determined(slave_out1_notify);
+		determined(slave_out2_notify);
+		determined(slave_out3_notify);
+		if (sva/inst/gfv_functions/master_out_ready) determined(master_out) endif, end_offset=-1;
+		if (sva/inst/gfv_functions/slave_out0_ready) determined(slave_out0) endif, end_offset=-1;
+		if (sva/inst/gfv_functions/slave_out1_ready) determined(slave_out1) endif, end_offset=-1;
+		if (sva/inst/gfv_functions/slave_out2_ready) determined(slave_out2) endif, end_offset=-1;
+		if (sva/inst/gfv_functions/slave_out3_ready) determined(slave_out3) endif, end_offset=-1;
+
+
+	local_determination_requirements:
+		at right_hook: determined(req_signal);
+		at right_hook: determined(resp_signal);
+
+	
+
+	reset_property:
+		sva/inst/ops/reset_a;
+	property_graph:
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_0_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_1_a;
+		//sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_2_a;
+		//sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_3_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_4_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_5_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_6_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_7_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_8_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/run_0_read_9_a;
+		sva/inst/ops/reset_a -> sva/inst/ops/wait_run_0_a;
+		sva/inst/ops/run_0_read_0_a -> sva/inst/ops/run_1_write_10_a;
+		sva/inst/ops/run_0_read_0_a -> sva/inst/ops/wait_run_1_a;
+		sva/inst/ops/run_0_read_1_a -> sva/inst/ops/run_1_write_10_a;
+		sva/inst/ops/run_0_read_1_a -> sva/inst/ops/wait_run_1_a;
+		//sva/inst/ops/run_0_read_2_a -> sva/inst/ops/run_3_write_13_a;
+		//sva/inst/ops/run_0_read_2_a -> sva/inst/ops/wait_run_3_a;
+		//sva/inst/ops/run_0_read_3_a -> sva/inst/ops/run_3_write_13_a;
+		//sva/inst/ops/run_0_read_3_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/run_0_read_4_a -> sva/inst/ops/run_4_write_14_a;
+		sva/inst/ops/run_0_read_4_a -> sva/inst/ops/wait_run_4_a;
+		sva/inst/ops/run_0_read_5_a -> sva/inst/ops/run_4_write_14_a;
+		sva/inst/ops/run_0_read_5_a -> sva/inst/ops/wait_run_4_a;
+		sva/inst/ops/run_0_read_6_a -> sva/inst/ops/run_6_write_17_a;
+		sva/inst/ops/run_0_read_6_a -> sva/inst/ops/wait_run_6_a;
+		sva/inst/ops/run_0_read_7_a -> sva/inst/ops/run_6_write_17_a;
+		sva/inst/ops/run_0_read_7_a -> sva/inst/ops/wait_run_6_a;
+		sva/inst/ops/run_0_read_8_a -> sva/inst/ops/run_8_write_20_a;
+		sva/inst/ops/run_0_read_8_a -> sva/inst/ops/wait_run_8_a;
+		sva/inst/ops/run_0_read_9_a -> sva/inst/ops/run_8_write_20_a;
+		sva/inst/ops/run_0_read_9_a -> sva/inst/ops/wait_run_8_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_0_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_1_a;
+		//sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_2_a;
+		//sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_3_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_4_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_5_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_6_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_7_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_8_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/run_0_read_9_a;
+		sva/inst/ops/wait_run_0_a -> sva/inst/ops/wait_run_0_a;
+		sva/inst/ops/run_1_write_10_a -> sva/inst/ops/run_2_read_11_a;
+		sva/inst/ops/run_1_write_10_a -> sva/inst/ops/run_2_read_12_a;
+		sva/inst/ops/run_1_write_10_a -> sva/inst/ops/wait_run_2_a;
+		sva/inst/ops/wait_run_1_a -> sva/inst/ops/run_1_write_10_a;
+		sva/inst/ops/wait_run_1_a -> sva/inst/ops/wait_run_1_a;
+		sva/inst/ops/run_2_read_11_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_2_read_11_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/run_2_read_12_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_2_read_12_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/wait_run_2_a -> sva/inst/ops/run_2_read_11_a;
+		sva/inst/ops/wait_run_2_a -> sva/inst/ops/run_2_read_12_a;
+		sva/inst/ops/wait_run_2_a -> sva/inst/ops/wait_run_2_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_0_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_1_a;
+		//sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_2_a;
+		//sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_3_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_4_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_5_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_6_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_7_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_8_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/run_0_read_9_a;
+		sva/inst/ops/run_3_write_13_a -> sva/inst/ops/wait_run_0_a;
+		sva/inst/ops/wait_run_3_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/wait_run_3_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/run_4_write_14_a -> sva/inst/ops/run_5_read_15_a;
+		sva/inst/ops/run_4_write_14_a -> sva/inst/ops/run_5_read_16_a;
+		sva/inst/ops/run_4_write_14_a -> sva/inst/ops/wait_run_5_a;
+		sva/inst/ops/wait_run_4_a -> sva/inst/ops/run_4_write_14_a;
+		sva/inst/ops/wait_run_4_a -> sva/inst/ops/wait_run_4_a;
+		sva/inst/ops/run_5_read_15_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_5_read_15_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/run_5_read_16_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_5_read_16_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/wait_run_5_a -> sva/inst/ops/run_5_read_15_a;
+		sva/inst/ops/wait_run_5_a -> sva/inst/ops/run_5_read_16_a;
+		sva/inst/ops/wait_run_5_a -> sva/inst/ops/wait_run_5_a;
+		sva/inst/ops/run_6_write_17_a -> sva/inst/ops/run_7_read_18_a;
+		sva/inst/ops/run_6_write_17_a -> sva/inst/ops/run_7_read_19_a;
+		sva/inst/ops/run_6_write_17_a -> sva/inst/ops/wait_run_7_a;
+		sva/inst/ops/wait_run_6_a -> sva/inst/ops/run_6_write_17_a;
+		sva/inst/ops/wait_run_6_a -> sva/inst/ops/wait_run_6_a;
+		sva/inst/ops/run_7_read_18_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_7_read_18_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/run_7_read_19_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_7_read_19_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/wait_run_7_a -> sva/inst/ops/run_7_read_18_a;
+		sva/inst/ops/wait_run_7_a -> sva/inst/ops/run_7_read_19_a;
+		sva/inst/ops/wait_run_7_a -> sva/inst/ops/wait_run_7_a;
+		sva/inst/ops/run_8_write_20_a -> sva/inst/ops/run_9_read_21_a;
+		sva/inst/ops/run_8_write_20_a -> sva/inst/ops/run_9_read_22_a;
+		sva/inst/ops/run_8_write_20_a -> sva/inst/ops/wait_run_9_a;
+		sva/inst/ops/wait_run_8_a -> sva/inst/ops/run_8_write_20_a;
+		sva/inst/ops/wait_run_8_a -> sva/inst/ops/wait_run_8_a;
+		sva/inst/ops/run_9_read_21_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_9_read_21_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/run_9_read_22_a -> sva/inst/ops/run_3_write_13_a;
+		sva/inst/ops/run_9_read_22_a -> sva/inst/ops/wait_run_3_a;
+		sva/inst/ops/wait_run_9_a -> sva/inst/ops/run_9_read_21_a;
+		sva/inst/ops/wait_run_9_a -> sva/inst/ops/run_9_read_22_a;
+		sva/inst/ops/wait_run_9_a -> sva/inst/ops/wait_run_9_a;
+end completeness;

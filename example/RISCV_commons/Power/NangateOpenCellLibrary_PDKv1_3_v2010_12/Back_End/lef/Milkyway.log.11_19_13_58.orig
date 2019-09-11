@@ -1,0 +1,36 @@
+No PseudoColor Visual avaiable, try TrueColor instead
+;; ;# Scheme
+                                        
+                                 Milkyway (TM)
+                                        
+                Version K-2015.06-SP4 for suse64 - Nov 23, 2015 
+                                        
+                    Copyright (c) 1988 - 2015 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+
+Loading /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/scheme/.avntrc
+#t
+ Info: loading setup file(s)
+Info: sourcing installation .synopsys_milkyway.tcl
+Info: sourced /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/auxx/tcllib/astro/milkyway.tbc
+;; configureWindow 0 "25x24+0+0"
+;; configureWindow 0 "25x24+0+0"
+Initialization completed
+;; read_lef
+;; formButton "Read LEF" "browse..."
+;; setFormField "Read LEF" "Library Name" "NG45MILKYWAY"
+;; setFormField "Read LEF" "Tech LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNangateOpenCellLibrary.tech.lef"
+;; setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND2_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND3_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAND4_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefANTENNA_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI211_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI21_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI221_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X1.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X2.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI222_X4.lef;/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefAOI22_X1."
+;; formOK "Read LEF"
+
+	>>>>>>> MILKYWAY LEF IN <<<<<<<
+Error: File /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lefNangateOpenCellLibrary.tech.lef does not exist. (MW-011)
+WARNING : **** No technology information!
+The library already has via info attach file!
+If you want to regenerate the via info attach file,
+Use [dbDeleteLibAttachedFile libId "VIA_INFO_ATTACH_FILE"]
+to remove via info attach file first.
+caught signal 11 [segmentation violation].

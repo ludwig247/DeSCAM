@@ -1,0 +1,198 @@
+// ///////////////////////////////////////////////////////
+// Notes relating these SVA properties to the pseudo code in the article
+//////////////////////////////////////////////////////////
+// SVA does not support any "next" operator as used within macros in the pseudo code
+// (it would be the analog to $past and would return a "sample of future value")
+// The functions here are therefore shifted in time compared to the macros of the pseudocode.
+// The timing of the properties compensates this time shift, as should easily be observable.
+// E.g., the important state predicates (and the macros of the pseudo code) have the relationship
+//   important_state = $next($next(imp_s_function()))
+//
+// The notion of completeness is not supported by any open standard.
+// The completeness is proven using a proprietary language and the OneSpin360MV tool.
+//
+
+module monitor_verification;
+
+default clocking default_clk @(posedge top.clk); endclocking
+
+////////////////
+
+function lof;
+  lof = top.lof;
+endfunction
+function lof_period;
+  lof_period = top.lof_period;
+endfunction;
+function oof_period;
+  oof_period = top.lof_period;
+endfunction;
+function [3:0] LOFset;
+  LOFset = top.monitor_comp.lof_set;
+endfunction
+function [3:0] LOFreset;
+  LOFreset = top.monitor_comp.lof_reset;
+endfunction
+
+function LOF_S;
+  LOF_S = top.lof;
+endfunction
+
+function NOT_LOF_S;
+  NOT_LOF_S = !top.lof;
+endfunction
+
+
+function [3:0] cnt;
+  if (NOT_LOF_S()) begin
+    cnt = top.monitor_comp.oof_cnt;
+  end else begin
+    cnt = top.monitor_comp.if_cnt;
+  end
+endfunction
+
+
+sequence reset_sequence;
+  !top.reset_n;
+endsequence
+
+
+function FramePulse; // abstract: $next(FramePulse,2)
+  FramePulse=top.frame_pulse;
+endfunction
+
+function OutOfFrame;
+  OutOfFrame = !top.synchronized; // abstract: $next(OutOfFrame)
+endfunction
+
+
+property reset_p;
+  reset_sequence |=>
+
+   ##0 !lof() and
+   ##0 !lof_period() and
+   ##0 !oof_period() and
+   ##0 NOT_LOF_S();
+endproperty
+reset_a: assert property (@(posedge top.clk) reset_p);
+
+
+property not_lof_wait_p;
+// Conceptual State
+  ##2 NOT_LOF_S() and
+// trigger
+  ##2 !FramePulse()
+implies
+  ##3 lof() == $past(lof()) and
+  ##3 cnt() == $past(cnt()) and
+  ##3 NOT_LOF_S();
+endproperty
+not_lof_wait: assert property (@(posedge top.clk) disable iff (!top.reset_n) not_lof_wait_p);
+
+
+property not_lof_if_p;
+// Conceptual State
+  ##2 NOT_LOF_S() and
+// trigger
+  ##2 FramePulse() and
+  ##1 !OutOfFrame()
+implies
+  ##3 lof() == 0 and
+  ##3 cnt() == 0 and
+  ##3 NOT_LOF_S();
+endproperty
+not_lof_if: assert property (@(posedge top.clk) disable iff (!top.reset_n) not_lof_if_p);
+
+
+property not_lof_oof_p;
+// Conceptual State
+  ##2 NOT_LOF_S() and
+// trigger
+  ##2 FramePulse() and
+  ##1 OutOfFrame() and
+  ##2 cnt() < LOFset()
+implies
+  ##3 lof() == 0 and
+  ##3 cnt() == $past(cnt())+1 and
+  ##3 NOT_LOF_S();
+endproperty
+not_lof_oof_if: assert property (@(posedge top.clk) disable iff (!top.reset_n) not_lof_oof_p);
+
+
+property not_lof_to_lof_p;
+// Conceptual State
+  ##2 NOT_LOF_S() and
+// trigger
+  ##2 FramePulse() and
+  ##1 OutOfFrame() and
+  ##2 cnt() >= LOFset()
+implies
+  ##3 lof() == 1 and
+  ##3 cnt() == 0 and
+  ##3 LOF_S();
+endproperty
+not_lof_to_lof: assert property (@(posedge top.clk) disable iff (!top.reset_n) not_lof_to_lof_p);
+
+property lof_wait_p;
+// Conceptual State
+  ##2 LOF_S() and
+// trigger
+  ##2 !FramePulse()
+implies
+  ##3 lof() == $past(lof()) and
+  ##3 cnt() == $past(cnt()) and
+  ##3 LOF_S();
+endproperty
+lof_wait: assert property (@(posedge top.clk) disable iff (!top.reset_n) lof_wait_p);
+
+
+property lof_oof_p;
+// Conceptual State
+  ##2 LOF_S() and
+// trigger
+  ##2 FramePulse() and
+  ##1 OutOfFrame()
+implies
+  ##3 lof() == 1 and
+  ##3 cnt() == 0 and
+  ##3 LOF_S();
+endproperty
+lof_oof: assert property (@(posedge top.clk) disable iff (!top.reset_n) lof_oof_p);
+
+
+property lof_if_p;
+// Conceptual State
+  ##2 LOF_S() and
+// trigger
+  ##2 FramePulse() and
+  ##1 !OutOfFrame() and
+  ##2 cnt() < LOFreset()
+implies
+  ##3 lof() == 1 and
+  ##3 cnt() == $past(cnt())+1 and
+  ##3 LOF_S();
+endproperty
+lof_if: assert property (@(posedge top.clk) disable iff (!top.reset_n) lof_if_p);
+
+
+property lof_to_not_lof_p;
+// Conceptual State
+  ##2 LOF_S() and
+// trigger
+  ##2 FramePulse() and
+  ##1 !OutOfFrame() and
+  ##2 cnt() >= LOFreset()
+implies
+  ##3 lof() == 0 and
+  ##3 cnt() == 0 and
+  ##3 NOT_LOF_S();
+endproperty
+lof_to_not_lof: assert property (@(posedge top.clk) disable iff (!top.reset_n) lof_to_not_lof_p);
+
+
+
+endmodule
+
+bind top monitor_verification monitor ();
+
+

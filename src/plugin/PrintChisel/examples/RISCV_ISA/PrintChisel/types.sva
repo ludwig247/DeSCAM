@@ -1,0 +1,7 @@
+package scam_model_types;
+	typedef enum {instr_unknown, instr_add, instr_sub, instr_sll, instr_slt, instr_sltu, instr_xor, instr_srl, instr_sra, instr_or, instr_and, instr_addi, instr_slli, instr_slti, instr_sltui, instr_xori, instr_srli, instr_srai, instr_ori, instr_andi, instr_lb, instr_lh, instr_lw, instr_lbu, instr_lhu, instr_jalr, instr_sb, instr_sh, instr_sw, instr_beq, instr_bne, instr_blt, instr_bge, instr_bltu, instr_bgeu, instr_lui, instr_auipc, instr_jal} InstrType;
+	typedef enum {alu_x, alu_add, alu_sub, alu_sll, alu_srl, alu_sra, alu_and, alu_or, alu_xor, alu_slt, alu_sltu, alu_copy1} ALUfuncType;
+	typedef enum {enc_r, enc_i_i, enc_i_l, enc_i_j, enc_s, enc_b, enc_u, enc_j, enc_err} EncType;
+	typedef enum {mt_x, mt_w, mt_h, mt_b, mt_hu, mt_bu} ME_MaskType;
+	typedef enum {me_x, me_rd, me_wr} ME_AccessType;
+endpackage

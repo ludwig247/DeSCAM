@@ -1,0 +1,770 @@
+enum opc_t = {NOP_OPC, READ_OPC, WRITE_OPC, RMW_OPC, BTR2_OPC, BTR4_OPC, BTR8_OPC};
+enum ack_t = {OK_ACK, RTY_ACK, ERR_ACK};
+compound req_t = {int addr, opc_t opc, int data, bool abort};
+enum update_t = {NXT_GRANT_Q, NXT_PHASE_Q, RTY_Q, NXT_BTR_Q}; //grant sent when a req should be moved to grant, phase when only a phase increment, rty when retry, btr when the address should remain in address but the data phase is moved out
+enum req_status_t = {EMPTY_STATUS, REQ_STATUS, ADDR_STATUS, DATA_STAUS};
+
+module requestQ
+{
+  in<req_t> peripheral_request_i; //a new request from peripheral
+  shared_out<> req_o; //the request signal for the master agent
+
+(one-cycle) in<update_t> updateQ_i; //messages of this port should be read in every cycle
+/*To allow the updateQ_o never to be blocked, it must be ensured that when it writes this side will deal with the message in one cycle.
+All operations should take 1 cycle.
+In all states generated it should read a message (unless it can be shown for the system that a message doesnt come in a state)
+*/
+
+  shared_out<req_t> buffer1;
+  shared_out<req_t> buffer2;
+  shared_out<req_t> buffer3;
+  shared_out<req_status_t> status1;
+  shared_out<req_status_t> status2;
+  shared_out<req_status_t> status3;
+
+fsm {
+
+  sections {EMPTY, FREE, FULL} = EMPTY;
+
+  status1.set(EMPTY_STATUS);
+  status2.set(EMPTY_STATUS);
+  status3.set(EMPTY_STATUS);
+
+  req_o.set(false);
+
+  //dump variables//
+  bool tmp_bool_req;
+  bool tmp_bool_update;
+  req_t tmp_buffer;
+  update_t tmp_update;
+
+  //shared outs for internal use//
+  var<req_t> buffer1_var;
+  var<req_t> buffer2_var;
+  var<req_t> buffer3_var;
+  var<req_status_t> status1_var = EMPTY_STATUS;
+  var<req_status_t> status2_var = EMPTY_STATUS;
+  var<req_status_t> status3_var = EMPTY_STATUS;
+
+
+  @EMPTY:
+  tmp_bool_update = updateQ_i.nb_read(tmp_update);
+  ASSERT(tmp_bool_update==false, "Wrong use of updateQ, no requests to update");
+  tmp_bool_update = peripheral_request.nb_read(buffer1_var);
+  if (tmp_bool_update) {
+    status1.set(REQ_STATUS);
+    req_o.set(true);
+    nextsection = NON_EMPTY;
+  }
+
+
+  @NON_EMPTY:
+  tmp_bool_update = updateQ_i.nb_read(tmp_update);
+
+  if (tmp_bool_update) {
+    if (tmp_update_val==NXT_GRANT_Q) {
+      ASSERT(status1_var==REQ_STATUS || status2_var==REQ_STATUS || status3_var==REQ_STATUS, "Wrong use of updateQ NXT_GRANT_Q");
+      if (status1_var==REQ_STATUS) {
+        status1_var = ADDR_STATUS;
+      } else if (status2_var==REQ_STATUS) {
+        if (status1_var=DATA_STATUS) { //move the Q
+          status1_var = ADDR_STATUS;
+          buffer1_var = buffer2_var;
+          status2_var = status3_var;
+          buffer2_var = buffer3_var;
+          status3_var = EMPTY_STATUS;
+        } else {
+          status1_var = DATA_STATUS;
+          status2_var = ADDR_STATUS;
+        }
+      } else { //status3_var == REQ_STATUS (DATA ADDR REQ)
+        buffer1_var = buffer2_var;
+        buffer2_var = buffer3_var;
+        status3_var = EMPTY_STATUS;
+      }
+
+    } else if (tmp_update_val==NXT_PHASE_Q) {
+      ASSERT(status1_var==ADDR_STATUS || status1_var==DATA_STATUS, "Wrong use of updateQ NXT_PHASE_Q");
+      if (status1_var==DATA_STATUS) {
+        buffer1_var=buffer2_var;
+        buffer2_var=buffer3_var;
+        if (status2_var==ADDR_STATUS) {
+          status1_var = DATA_STATUS;
+        } else {
+          status1_var = status2_var; //req or empty
+        }
+        status3_var = EMPTY_STATUS;
+      } else if (status1_var==ADDR_STATUS) {
+        status1_var = DATA_STATUS;
+      }
+
+    } else if (tmp_update_val==NXT_BTR_Q) {
+      ASSERT(status1_var==ADDR_STATUS || status2_var==ADDR_STATUS, "Wrong use of updateQ NXT_BTR_Q");
+      //if a non BTR is ahead, then this is removed, but the BTR itself remains in ADDR (which it does until its last stage)
+      if (status1_var==DATA_STATUS) {
+        buffer1_var = buffer2_var;
+        buffer2_var = buffer3_var;
+        status1_var = ADDR_STATUS;
+        status2_var = status3_var;
+        status3_var = EMPTY_STATUS;
+      }
+
+    } else { //tmp_update_val==RTY_Q
+      ASSERT(status1_var==DATA_STATUS, "Wrong use of updateQ RTY_Q");
+      status1_var=REQ_STATUS;
+      if (status2_var==ADDR_STATUS) {
+        status2_var=REQ_STATUS;
+      }
+    }
+  }
+
+  tmp_bool_req = false;
+  if (status3_var == EMPTY_STATUS) {
+    tmp_bool_req = peripheral_request.nb_read(tmp_buffer);
+  }
+
+  if (tmp_bool_req) {
+    if (status1_var==EMPTY_STATUS) {
+      buffer1_var=tmp_buffer;
+      status1_var=REQ_STATUS;
+    } else if (status2_var==EMPTY_STATUS) {
+      buffer2_var=tmp_buffer;
+      status2_var=REQ_STATUS;
+    } else { // (status3_var==EMPTY_STATUS)
+      buffer3_var=tmp_buffer;
+      status3_var=REQ_STATUS;
+    }
+  } else {
+    if (status1_var==EMPTY_STATUS) {
+      nextsection = EMPTY;
+    }
+  }
+
+  req_o.set(status1_var==REQ_STATUS || status2_var==REQ_STATUS || status3_var==REQ_STATUS);
+  buffer1.set(buffer1_var);
+  buffer2.set(buffer2_var);
+  buffer3.set(buffer3_var);
+  status1.set(status1_var);
+  status2.set(status2_var);
+  status3.set(status3_var);
+
+}
+
+};
+
+
+
+module master_agent
+{
+
+in<> ready_i;
+shared_in<bool> gnt_i;
+shared_in<ack_t> ack_i;
+shared_in<int> data_i;
+
+shared_out<bool> addr_en_o;
+ shared_out<opc_t> opc_o;
+ shared_out<int> addr_o;
+shared_out<bool> abort_en_o;
+ shared_out<bool> abort_o;
+shared_out<bool> data_en_o;
+ shared_out<int> data_o;
+
+
+
+  in<> wait_cnt_end;
+
+
+(1-cycle never blocks) out<update_t> updateQ_o;
+shared_in<req_t> buffer1;
+shared_in<req_t> buffer2;
+shared_in<req_t> buffer3;
+shared_in<req_status_t> status1;
+shared_in<req_status_t> status2;
+shared_in<req_status_t> status3;
+
+out<> master_result_o; //only used with nb_write and ignoring success (no need for incoming sync signal)
+
+
+fsm {
+
+  states {IDLE, ADDR, DATA, DATA_ADDR, BTR_CONT, WAIT_BEFORE_RETRY} = IDLE;
+
+  int btrCnt = 0;
+  bool nop = false;
+
+
+  //dump vars
+  bool tmp_bool;
+  result_t result_tmp;
+  req_t nxtActive_tmp;
+
+  bool updateQ_cycle_tmp;
+  update_t updateQ_msg_tmp;
+
+  req_t buffer1_tmp;
+  req_t buffer2_tmp;
+  req_t buffer3_tmp;
+  req_status_t status1_tmp;
+  req_status_t status2_tmp;
+  req_status_t status3_tmp;
+    
+
+  @IDLE:
+  ready.wait(); //block until ready
+  updateQ_cycle_tmp = false;
+  buffer1_tmp = buffer1.get();
+  buffer2_tmp = buffer2.get();
+  buffer3_tmp = buffer3.get();
+  status1_tmp = status1.get();
+  status2_tmp = status2.get();
+  status3_tmp = status3.get();
+
+
+  //drive dataphase with nop, if last was a nop address phase
+  if (nop) {
+    abort_en_o.set( true );
+    abort_o.set( false ); 
+    data_en_o.set( true );
+    data_o.set( 0 );
+  } else {
+    abort_en_o.set( false );
+    data_en_o.set( false );
+  }
+
+  //address phase
+  if (gnt) {
+    if (status1_tmp==REQ_STATUS) { //pending req
+      updateQ_cycle_tmp = true;
+      updateQ_msg_tmp = NXT_GNT_Q;
+      addr_en_o.set( true );
+      addr_o.set( buffer1_tmp.addr );
+      opc_o.set( buffer1_tmp.opc );
+      nop = false;
+      nextsection = ADDR;
+    } else {
+      addr_en_o.set( true );
+      addr_o.set( 0 );
+      opc_o.set( NOP_OPC );
+      nop = true;
+    }
+  } else {
+    addr_en_o.set( false );
+    nop = false;
+  }
+
+  if (updateQ_cycle_tmp) {   updateQ_o.write(updateQ_msg_tmp);  }
+
+
+
+  @ADDR: //buffer1 is the active one
+  ready.wait(); //block until ready
+  updateQ_cycle_tmp = false;
+  buffer1_tmp = buffer1.get();
+  buffer2_tmp = buffer2.get();
+  buffer3_tmp = buffer3.get();
+  status1_tmp = status1.get();
+  status2_tmp = status2.get();
+  status3_tmp = status3.get();
+
+  //drive dataphase according to active1
+  abort_en_o.set( true );
+  abort_o.set( buffer1_tmp.abort );
+  if (buffer1_tmp.opc == SINGLE_WRITE_OPC) {
+    data_en_o.set( true );
+    data_o.set( buffer1_tmp.data );
+  } else {
+    data_en_o.set( false );
+  }
+
+  //address phase
+  if (gnt) {
+    if (is_BTR(buffer1_tmp.opc)) { //the current is BTR, so cannot grant a new
+      updateQ_cycle_tmp = true;
+      updateQ_msg_tmp = NXT_BTR_Q;
+      addr_en_o.set( true );
+      addr_o.set( buffer1_tmp.addr + 1 );
+      opc_o.set(buffer1_tmp.opc);
+      nextsection = BTR_CONT;
+      btrCnt=0;
+    } else {
+      if (status2_tmp==REQ_STATUS) {
+        updateQ_cycle_tmp = true;
+        updateQ_msg_tmp = NXT_GNT_Q;
+        addr_en_o.set( true );
+	    addr_o.set( buffer2_tmp.addr );
+	    opc_o.set(buffer2_tmp.opc);
+	    nop = false;
+	    nextsection = DATA_ADDR;
+      } else {
+        updateQ_cycle_tmp = true;
+        updateQ_msg_tmp = NXT_PHASE_Q;
+	    addr_en_o.set( true );
+	    addr_o.set( 0 );
+	    opc_o.set( NOP_OPC );
+	    nop = true;
+ 	    nextsection = DATA;
+      }
+    }
+  } else {
+    updateQ_cycle_tmp = true;
+    updateQ_msg_tmp = NXT_PHASE_Q;
+    addr_en_o.set( false );
+    nop = false;
+    nextsection = DATA;
+  }
+
+  if (updateQ_cycle_tmp) {   updateQ_o.write(updateQ_msg_tmp);  }
+
+
+
+  @DATA:
+  ready.wait(); //block until ready
+  updateQ_cycle_tmp = false;
+  buffer1_tmp = buffer1.get();
+  buffer2_tmp = buffer2.get();
+  buffer3_tmp = buffer3.get();
+  status1_tmp = status1.get();
+  status2_tmp = status2.get();
+  status3_tmp = status3.get();
+
+  //drive dataphase with nop, if last was a nop address phase
+  if (nop) {
+    abort_en_o.set( true );
+    abort_o.set( false ); 
+    data_en_o.set( true );
+    data_o.set( 0 );
+  } else {
+    abort_en_o.set( false );
+    data_en_o.set( false );
+  }
+
+  //unless retry, fwd result to peripheral
+  if (ack==RTY && !(is_BTR(buffer1_tmp.opc) || buffer1_tmp.opc!=RMW_OPC)) {
+    updateQ_cycle_tmp = true;
+    updateQ_msg_tmp = RTY_Q;
+    nextsection = WAIT_BEFORE_RETRY;
+    nop = gnt;
+  } else {
+    result_tmp.err = (ack!=OK);
+    result_tmp.data = data_i;
+    master_done.nb_write(result_tmp);
+
+    if (gnt) {
+      if (status2_tmp==REQ_STATUS) {
+        updateQ_cycle_tmp = true;
+        updateQ_msg_tmp = NXT_GNT_Q;
+	    addr_en_o.set( true );
+	    addr_o.set( buffer2_tmp.addr );
+	    opc_o.set( buffer2_tmp.opc );
+	    nop = false;
+	    nextsection = ADDR;
+      } else {
+        updateQ_cycle_tmp = true;
+        updateQ_msg_tmp = NXT_PHASE_Q;
+	    addr_en_o.set( true );
+	    addr_o.set( 0 );
+	    opc_o.set( NOP_OPC );
+	    nop = true;
+	    nextsection = IDLE;
+      }
+    } else {
+      updateQ_cycle_tmp = true;
+      updateQ_msg_tmp = NXT_PHASE_Q;
+      addr_en_o.set( false );
+      nop = false;
+      nextsection = IDLE
+	}
+
+  }
+  if (updateQ_cycle_tmp) {   updateQ_o.write(updateQ_msg_tmp);  }
+
+
+
+  @DATA_ADDR:
+  ready.wait(); //block until ready
+  updateQ_cycle_tmp = false;
+  buffer1_tmp = buffer1.get();
+  buffer2_tmp = buffer2.get();
+  buffer3_tmp = buffer3.get();
+  status1_tmp = status1.get();
+  status2_tmp = status2.get();
+  status3_tmp = status3.get();
+
+  if (ack==RTY && !(is_BTR(buffer1_tmp.opc) || buffer1_tmp.opc!=RMW_OPC)) {
+    abort_en_o.set( true );
+    abort_o.set( true );
+    if (buffer2_tmp.opc == SINGLE_WRITE_OPC) {
+      data_en_o.set( true );
+      data_o.set( 0 );
+    } else {
+      data_en_o.set( false );
+    }
+  } else {
+    abort_en_o.set( true );
+    abort_o.set( buffer2_tmp.abort );
+    if (buffer2_tmp.opc == SINGLE_WRITE_OPC) {
+      data_en_o.set( true );
+      data_o.set( buffer2_tmp.data );
+    } else {
+      data_en_o.set( false );
+    }
+  }
+
+  //unless retry, fwd result to peripheral
+  if (ack==RTY && !(is_BTR(buffer1_tmp.opc) || buffer1_tmp.opc!=RMW_OPC)) {
+    updateQ_cycle_tmp = true;
+    updateQ_msg_tmp = RTY_Q;
+    nextsection = WAIT_BEFORE_RETRY;
+    if (gnt) {
+      nop = true;
+      addr_en_o.set( true );
+      addr_o.set( 0 );
+      opc_o.set( NOP_OPC );
+    } else {
+      addr_en_o.set( false );
+      nop = false;
+    }
+  } else {
+    result_tmp.err = (ack!=OK);
+    result_tmp.data = data_i;
+    master_done.nb_write(result_tmp);
+
+    if (gnt) {
+      if (is_BTR(buffer2_tmp.opc)) {
+        updateQ_cycle_tmp = true;
+        updateQ_msg_tmp = NXT_BTR_Q;
+	    addr_en_o.set( true );
+	    addr_o.set( buffer2_tmp.addr + 1 );
+	    opc_o.set(buffer2_tmp.opc);
+	    nextsection = BTR_CONT;
+	    btrCnt=0;
+      } else {
+	    if (status3_tmp==REQ_STATUS) {
+          updateQ_cycle_tmp = true;
+          updateQ_msg_tmp = NXT_GNT_Q;
+  	      addr_en_o.set( true );
+	      addr_o.set( buffer3_tmp.addr );
+	      opc_o.set( buffer3_tmp.opc );
+	      nop = false;
+	      nextsection = DATA_ADDR;
+	    } else {
+          updateQ_cycle_tmp = true;
+          updateQ_msg_tmp = NXT_PHASE_Q;
+	      addr_en_o.set( true );
+	      addr_o.set( 0 );
+	      opc_o.set( NOP_OPC );
+	      nop = true;
+	      nextsection = DATA;
+	    }
+      }
+    } else {
+      addr_en_o.set( false );
+      nop = false;
+      nextsection = DATA;
+    }
+
+  }
+  if (updateQ_cycle_tmp) {   updateQ_o.write(updateQ_msg_tmp);  }
+
+
+
+
+  @BTR_CONT:
+  ready.wait(); //block until ready
+  updateQ_cycle_tmp = false;
+  buffer1_tmp = buffer1.get();
+  buffer2_tmp = buffer2.get();
+  buffer3_tmp = buffer3.get();
+  status1_tmp = status1.get();
+  status2_tmp = status2.get();
+  status3_tmp = status3.get();
+
+  if (btrCnt==0 && ack==RTY) {
+    abort_en_o.set( true );
+    abort_o.set( true );
+    data_en_o.set( false );
+  } else {
+    //drive dataphase
+    abort_en_o.set( true );
+    abort_o.set( false );
+    data_en_o.set( false );
+  }
+
+  //unless retry in first, fwd result to peripheral and continue
+  if (btrCnt==0 && ack==RTY) {
+    updateQ_cycle_tmp = true;
+    updateQ_msg_tmp = RTY_Q;
+    nextsection = WAIT_BEFORE_RETRY;
+    if (gnt) {
+      addr_en_o.set( true );
+      addr_o.set( 0 );
+      opc_o.set( NOP_OPC );
+      nop = true;
+    } else {
+      addr_en_o.set( false );
+      nop = false;
+    }
+  } else {
+    result_tmp.err = (ack!=OK);
+    result_tmp.data = data_i;
+    master_done.nb_write(result_tmp);
+    btrCnt = btrCnt + 1;
+
+    if ((buffer1_tmp.opc==BTR2_OPC && btrCnt==1) || (buffer1_tmp.opc==BTR4_OPC && btrCnt==3) || (buffer1_tmp.opc==BTR8_OPC && btrCnt==7) ) {
+      if (gnt) {
+	    if (status2==REQ_STATUS) {
+          updateQ_cycle_tmp = true;
+          updateQ_msg_tmp = NXT_GNT_Q;
+	      addr_en_o.set( true );
+	      addr_o.set( buffer2_tmp.addr );
+	      opc_o.set( buffer2_tmp.opc );
+	      nop = false;
+	      nextsection = DATA_ADDR;
+	    } else {
+          updateQ_cycle_tmp = true;
+          updateQ_msg_tmp = NXT_PHASE_Q;
+	      addr_en_o.set( true );
+	      addr_o.set( 0 );
+	      opc_o.set( NOP_OPC );
+	      nop = true;
+	      nextsection = DATA;
+	    }
+      } else {
+        updateQ_cycle_tmp = true;
+        updateQ_msg_tmp = NXT_PHASE_Q;
+	    addr_en_o.set( false );
+	    nop = false;
+	    nextsection = DATA
+	  }
+
+    } else {
+      if (gnt) {
+	    addr_en_o.set( true );
+	    addr_o.set( buffer1_tmp.addr + btrCnt + 1 );
+	    opc_o.set( buffer1_tmp.opc );
+      } else {
+	    ASSERT(false, "BCU should have granted within a block transfer"); //should not be reachable, BCU lock should ensure a grant
+      }
+    }
+
+
+  }
+  if (updateQ_cycle_tmp) {   updateQ_o.write(updateQ_msg_tmp);  }
+
+
+
+
+
+
+  @WAIT_BEFORE_RETRY:
+  ready.wait(); //block until ready
+
+  //drive dataphase with nop, if last was a nop address phase
+  if (nop) {
+    abort_en_o.set( true );
+    abort_o.set( false ); 
+    data_en_o.set( true );
+    data_o.set( 0 );
+  } else {
+    abort_en_o.set( false );
+    data_en_o.set( false );
+  }
+
+  if (gnt) {
+    addr_en_o.set( true );
+    addr_o.set( 0 );
+    opc_o.set( NOP_OPC );
+    nop = true;
+  } else {
+    addr_en_o.set( false );
+    nop = false;
+  }
+
+  tmp_bool = wait_cnt_end.nb_wait();
+  if (tmp_bool) {
+    nextsection = IDLE;
+  }
+
+
+}//fsm end
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+IDLE:
+request if get_next_req() == true || lock_req
+ADDR:
+request if get_next_req() == true || lock_req
+DATA
+request if get_next_req() == true || lock_req
+DATA_ADDR
+request if get_next_req() == true || lock_req
+BTR_CONT
+request
+WAIT_BEFORE_RETRY
+!request
+
+
+
+BTR2:
+**    ->       addr or addr_data         ->           BTR_CONT   -->
+  ADDR PHASE                          ADDR2 PHASE
+  request with lock                   req if next               req if next
+
+
+BTR4:
+**    ->       addr or addr_data         ->           BTR_CONT    -->      BTR_CONT     -->          BTR_CONT   -->
+  ADDR PHASE                          ADDR2 PHASE               ADDR3 PHASE          ADDR4 PHASE
+  request with lock                   request with lock         request with lock    request with lock          req if next
+
+
+summary, reset lock in btr, together with leaving BTR_CONT (to BTR_CONT, keep lock, from BTR_CONT to something else (DATA or DATA_ADDR) unset it, unless a new btr or rmw is pending)
+
+
+
+
+rmw behaves in no special way so far ....
+but it should.
+The write part should not retry
+and req. until grant of write should be with a lock
+
+
+if next is rmw, set request lock
+if next is btr, set request lock
+
+(btr lock get reset in BTR_CONT section)
+
+if request lock and a transaction which is not rmw is done then reset
+(this can happen in DATA and DATA_ADDR)
+
+if request_lock and RTY treat as error.
+
+when going to WAIT_BEFORE_RETRY, turn off request AND turn off request lock..
+
+
+
+SUM:
+in (STATE /= WAIT_BEFORE_RETRY)
+  reset request if granted (and the granted is !nop and !rmw) (IDLE, ADDR, DATA_ADDR, DATA)
+  set request if new request is pending
+
+reset request when granted and not request_lock
+set request if new request pending
+
+reset request_lock (in BTR_CONT, when moving to DATA or DATA_ADDR) (in ADDR or DATA_ADDR when a non RMW is granted)
+
+set request_lock if new request pending is RMW or BTR2, BTR4 or BTR8
+
+
+in WAIT_BEFORE_RETRY:
+ unset request and request_lock
+
+
+
+IDLE, ADDR, DATA, DATA_ADDR
+
+
+
+
+RMW
+**    -->    addr or addr_data  -->
+  ADDR PHASE
+  req with lock
+
+
+
+
+set lock_req when get_next_req()==true and rmw or btr
+reset lock_req when rmw got grant for w part, and when last btr is granted
+
+
+if next is btr or rmw --> req+lock
+keep req+lock until ?
+
+in WAIT_BEFORE_RETRY, do not request
+
+if rmw, keep req+lock until next transaction is granted (a non nop is granted)
+
+if btr, keep req+lock until the last word of the block is granted
+
+
+
+*/
+
+
+
+/*
+Communication concerns:
+This is a protcol description.
+The protocol is synchronized by ready_i which is driven by BCU in special scenarios (reset and timeout) and the selected slave agent otherwise
+
+ISSUE1.
+as of now, the only blocking statement in this description is ready.wait();
+But it may take "indef." long to get back to the next ready.wait().
+Can we miss a ready cycle? No, because it is modeled by a double sided handshake event (at the system level) so that the slave side also needs to use this long.
+SOLVED.
+
+ISSUE2.
+How is delay between input and output (response time within the ready cycle) modeled?
+ready + gnt -> drive address phase
+last(address phase) + ready --> drive data phase
+last(data phase) + ready -> get result
+In general, we wanted the shared_out to be like a variable (which we only prove at t_end and ignore otherwise)
+But clarely, for output we cannot allow an arbitrary value at any timepoint (unless it is disabled, but shareds are never..)
+version1:
+update shareds: during[t+1,t_end]: new value    (would imply that they have to be calculated very quickly..)
+version2:
+update shared: during[t+1,t_end-1]: value@t; at t_end: new value   (as slow as possible, but ensures that no arbitrary value is outputed)
+Both version should be OK
+BUT, we need to ensure that we read all values at T (as we do)
+Read values at T
+SOLVED
+
+LIMITATION1.
+Cannot model combinational communication, i.e., between two modules the answer cannot come in the same cycle (will need at least t+1).
+
+
+
+The BCU:
+drives all after reset.
+does arbitration. Read requests and grants request in the next ready cycle
+timeout: starts a counter for each ready cycle, if the counter reaches some timeout value, the BCU will abort the transaction.
+  it sends timeout to slave
+  it sends ack=ERR to master
+  What if slave finnishes in the same cycle as it receives the timeout?
+
+  The timeout is a own bus signal shared by all slaves, always driven by BCU
+  If the slave agent sees a timeout and an answer from the slave in the same cycly??
+
+  If the slave agent sees a timeout it needs to answer...
+  when that answer has arrived then the BCU will drive or not drive (if slave done in same)
+
+
+
+
+
+
+It should, and it does read the gnt_i ack_i and data_i
+
+*/
+
+
+
+
+
+

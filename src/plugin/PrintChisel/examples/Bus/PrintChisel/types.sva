@@ -1,0 +1,4 @@
+package scam_model_types;
+	typedef enum {single_read, single_write} trans_t;
+	typedef enum {ok, rty, err} ack_t;
+endpackage

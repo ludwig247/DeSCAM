@@ -1,0 +1,9 @@
+
+Technology	{
+		name				= ""
+		date				= "Oct 29 2015"
+		dielectric			= 0
+		minBaselineTemperature		= 0
+		nomBaselineTemperature		= 0
+		maxBaselineTemperature		= 0
+}

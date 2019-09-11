@@ -1,0 +1,258 @@
+enum err_id_t = {ERR_MIX, ERR_TEMP_TOP, ERR_TEMP_BOT, ERR_UNKNOWN};
+compound sensor_t = {int data, bool stable};
+compound act_t = {bool on, int sample_value, int setpoint, int Kp, int Ki, int Kd, int sample_time};
+compound config_t = {int sample_time, int target_temp, int Kp_Heat, int Ki_Heat, int Kd_Heat, int Kp_Mix, int Ki_Mix, int Kd_Mix};
+
+enum trans_t = {SINGLE_READ, SINGLE_WRITE};
+enum ack_t = {OK, RTY, ERR};
+compound bus_req_t = {int addr, trans_t type, int data};
+compound bus_resp_t = {int data, ack_t ack};
+
+
+system example
+{
+  //GLOBAL IO
+  shared_in<config_t> uP_in;
+  shared_out<err_id_t> uP_report;
+  shared_in<int> adc_temp[2];
+  shared_out<int> dac_mix;
+  shared_out<int> dac_heat;
+  shared_out<bool> power_mix;
+  shared_out<bool> power_heat;
+
+  //timer events
+  in<> sample_PID;
+  in<> sample_temp_detector;
+
+  //Modules
+  server s;
+  temp_detector temp_top;
+  temp_detector temp_bot;
+  PID_Actuator heat;
+  PID_Actuator mix;
+  bus b;
+
+  connect {
+    //globals
+    uP_in -> s.uP_in;
+    s.uP_report -> uP_report;
+    adc_temp[0] -> temp_top.adc_in;
+    adc_temp[1] -> temp_bot.adc_in;
+    mix.dac -> dac_mix;
+    heat.dac -> dac_heat;
+    mix.device_power -> power_mix;
+    heat.device_power -> power_heat;
+    sample_PID -> s.timer_dt;
+    sample_temp_detector -> temp_top.sample_event;
+    sample_temp_detector -> temp_bot.sample_event;
+
+    //bus
+    s.bus_out -> b.master_in;
+    b.slave_out[0] -> temp_top.bus_in;
+    b.slave_out[1] -> temp_bot.bus_in;
+    b.slave_out[2] -> heat.bus_in;
+    b.slave_out[3] -> mix.bus_in;
+    temp_top.bus_out -> b.slave_in[0];
+    temp_bot.bus_out -> b.slave_in[1];
+    heat.bus_out -> b.slave_in[2];
+    mix.bus_out -> b.slave_in[3];
+    b.master_out -> s.bus_in;
+  }
+};
+
+
+module bus
+{
+  in<bus_req_t> master_in;
+  in<bus_resp_t> slave_in[4];
+  out<bus_resp_t> master_out;
+  out<bus_req_t> slave_out[4];
+
+  fsm {
+    SECTIONS {RUN};
+    bus_req_t req;
+    bus_resp_t resp;
+
+    @RUN:
+     master_in.read(req);
+
+     if        (req.addr == 0) {
+       slave_out0.write(req);
+       slave_in0.read(resp);
+     }
+     else if (req.addr == 1) {
+       slave_out1.write(req);
+       slave_in1.read(resp);
+     }
+     else if (req.addr == 2) {
+       slave_out2.write(req);
+       slave_in2.read(resp);
+     }
+     else {
+       slave_out3.write(req);
+       slave_in3.read(resp);
+     }
+
+     master_out.write(resp);
+  }
+};
+
+
+
+
+module server
+{
+  shared_in <config_t> uP_in;
+  shared_out <err_id_t> uP_report;
+  in <> timer_dt;
+  in <sensor_t> temp_top_in;
+  in <sensor_t> temp_bot_in;
+  out <act_t> heat_out;
+  out <act_t> mix_out;
+
+  fsm {
+
+    SECTIONS {IDLE, GET_TEMP, MIXING, HEAT, ERROR} = IDLE;
+    config_t uP;
+	sensor_t temp_top = 0;
+	sensor_t temp_bot = 0;
+	act_t heat;
+	act_t mix;
+	err_id_t err_id = ERR_UNKNOWN;
+
+	@IDLE:
+	  timer_dt.read();
+	  uP_in.get(uP);
+	  nextsection = GET_TEMP;
+
+	@GET_TEMP:
+	  temp_top = temp_top_in.read();
+	  temp_bot = temp_bot_in.read();
+
+      if (!temp_top_last.stable) {
+	    nextsection = ERROR;
+		err_id = ERR_TEMP_TOP;
+	  } else if (!temp_bot_last.stable) {
+	    nextsection = ERROR;
+		err_id = ERR_TEMP_BOT;
+	  else if ( abs(temp_top.data - temp_bot.data) > uP.max_temp_diff ) {
+	    //mixing is not working
+	    nextsection = ERROR
+		err_id = ERR_MIX;
+	  } else {
+	    nextsection = MIXING;
+	  }
+
+
+	@MIXING:
+	  mix.on = true;
+	  mix.sample_value = abs(temp_top - temp_bot);
+	  mix.setpoint = 0;
+	  mix.Kp = uP.Kp_Mix;
+	  mix.Ki = uP.Ki_Mix;
+	  mix.Kd = uP.Kd_Mix;
+	  mix.dt = uP.sample_time;
+	  mix_out.write( mix );
+	  nextsection = HEAT;
+
+	@HEAT:
+	  heat.on;
+	  heat.sample_value = (temp_top + temp_bot)/2;
+	  heat.setpoint = uP.target_temp;
+	  heat.Kp = uP.Kp_Heat;
+	  heat.Ki = uP.Ki_Heat;
+	  heat.Kd = uP.Kd_Heat;
+	  heat.dt = uP.sample_time;
+  	  heat_out.write( heat );
+      nextsection = GET_TEMP;
+
+	@ERROR:
+	  heat.on = false;
+	  mix.on = false;
+	  heat_out.write(heat);
+	  mix_out.write(mix);
+	  uP_report.set(err_id);
+
+  }
+};
+
+
+module temp_detector
+{
+  out <sensor_t> temp_out;
+  shared_in <int> adc_in;
+  in <> sample_event;
+
+  fsm {
+    SECTIONS {MEASURE, UPDATE} = MEASURE;
+	sensor_t avg_temp = {0,false};
+	int adc_value;
+	int sample_cnt = 0;
+	int sample_cnt_ok = 0;
+	int measured_sum = 0;
+	int measured_sum_ok = 0;
+	int average_last = 0;
+
+    @MEASURE:
+	  sample_event.wait();
+	  adc_in.get(adc_value);
+	  measured_sum += adc_value;
+	  ++sample_cnt;
+	  if ( abs(average_last - adc_value) <= MAX_DIFF) {
+	    measured_sum_ok += adc_value;
+		++sample_cnt_ok;
+	  }
+	  if (sample_cnt == 16) {
+	    nextsection = UPDATE;
+	  }
+	@UPDATE:
+	  average_last = measured_sum / 16;
+	  avg_temp.stable = (sample_cnt_ok >= 10);
+	  if (avg_temp.stable) {
+	    avg_temp.data = measured_sum_ok / sample_cnt_ok;
+	  }
+	  temp_out.write(avg_temp);
+	  sample_cnt = 0;
+	  measured_sum = 0;
+	  sample_cnt_ok = 0;
+	  measured_sum_ok = 0;
+	  nextsection = MEASURE;
+  }
+};
+
+
+
+module PID_Actuator
+{
+  in<act_t> bus_in;
+  out<int> bus_resp;
+  shared_out<int> dac;
+  shared_out<bool> device_power;
+
+  fsm {
+    SECTIONS {READ, COMPUTE} = READ;
+    act_t param;
+    int err = 0;
+    int prev_err = 0;
+    int integral = 0;
+    int derivative = 0;
+
+    @READ:
+      bus_in.read(param);
+      bus_resp.write(SUCCESS);
+      device_power.set(param.on);
+      if (param.on) {
+        nextsection = compute;
+      }
+    @COMPUTE:
+      err = param.setpoint - param.sample_value;
+      integral = integral + err * param.sample_time;
+      derivative = (err - prev_err)/sample_time;
+      prev_err = err;
+      dac.set(param.Kp * err + param.Ki * integral + param.Kd * deriv);
+      nextsection = read;
+  }
+};
+
+
+

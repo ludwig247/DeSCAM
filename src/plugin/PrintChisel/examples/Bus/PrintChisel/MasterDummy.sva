@@ -1,0 +1,695 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "MasterDummy_functions.sva"
+`include "types.sva"
+import scam_model_types::*;
+
+module MasterDummy_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge MasterDummy.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function bus_req_sync;
+	bus_req_sync = MasterDummy.io_bus_req_sync;
+endfunction
+function bus_resp_sync;
+	bus_resp_sync = MasterDummy.io_bus_resp_sync;
+endfunction
+function bus_req_notify;
+	bus_req_notify = MasterDummy.io_bus_req_notify;
+endfunction
+function bus_resp_notify;
+	bus_resp_notify = MasterDummy.io_bus_resp_notify;
+endfunction
+
+// DP SIGNALS //
+function int bus_req_sig_addr;
+	bus_req_sig_addr = MasterDummy.io_bus_req_addr;
+endfunction
+function int bus_req_sig_data;
+	bus_req_sig_data = MasterDummy.io_bus_req_data;
+endfunction
+function trans_t bus_req_sig_trans_type;
+	bus_req_sig_trans_type = MasterDummy.io_bus_req_trans_type;
+endfunction
+function ack_t bus_resp_sig_ack;
+	bus_resp_sig_ack = MasterDummy.io_bus_resp_ack;
+endfunction
+function int bus_resp_sig_data;
+	bus_resp_sig_data = MasterDummy.io_bus_resp_data;
+endfunction
+
+
+// VISIBLE REGISTERS //
+function int cnt;
+	cnt = MasterDummy.cnt_signal_r;
+endfunction
+function int req_addr;
+	req_addr = MasterDummy.req_signal_r_addr;
+endfunction
+function int req_data;
+	req_data = MasterDummy.req_signal_r_data;
+endfunction
+function trans_t req_trans_type;
+	req_trans_type = MasterDummy.req_signal_r_trans_type;
+endfunction
+
+
+// STATES //
+--macro run_0 : Bool := 1 end macro;
+--macro run_1 : Bool := 1 end macro;
+
+
+// OPERATIONS //
+sequence reset_sequence;
+//DISGNER REFER TO MODEL RESET SIGNAL HERE
+	(MasterDummy.reset == 1'b1);
+endsequence
+property reset_p;
+	reset_sequence |=>
+	t ##0 run_0() and
+	t ##0 bus_req_sig_addr() == 8 and
+	t ##0 bus_req_sig_data() == 1 and
+	t ##0 bus_req_sig_trans_type() == single_write and
+	t ##0 cnt() == 1 and
+	t ##0 req_addr() == 8 and
+	t ##0 req_data() == 1 and
+	t ##0 req_trans_type() == single_write and
+	t ##0 bus_req_notify() == 1 and
+	t ##0 bus_resp_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+property run_0_write_0_p(o);
+int cnt_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State //
+	t ##0 run_0() and
+// trigger //
+	t ##0 bus_req_sync()
+implies
+	t_end(o) ##0 run_1() and
+	t_end(o) ##0 cnt() == cnt_0 and
+	t_end(o) ##0 req_addr() == req_addr_0 and
+	t_end(o) ##0 req_data() == req_data_0 and
+	t_end(o) ##0 req_trans_type() == req_trans_type_0 and
+	during (next(t,1), t_end(o), bus_req_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, bus_resp_notify() == 0) and
+	t_end(o) ##0 bus_resp_notify() == 1;
+endproperty;
+run_0_write_0_a: assert property (disable iff (reset) run_0_write_0_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_1_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 0) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 8 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 8 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_1_a: assert property (disable iff (reset) run_1_read_1_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_2_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 0) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 8 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 8 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_2_a: assert property (disable iff (reset) run_1_read_2_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_3_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (req_addr() == 0) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 8 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 8 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_3_a: assert property (disable iff (reset) run_1_read_3_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_4_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (req_addr() == 0) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 8 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 8 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_4_a: assert property (disable iff (reset) run_1_read_4_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_5_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 8) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 16 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 16 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_5_a: assert property (disable iff (reset) run_1_read_5_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_6_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 8) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 16 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 16 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_6_a: assert property (disable iff (reset) run_1_read_6_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_7_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (req_addr() == 8) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 16 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 16 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_7_a: assert property (disable iff (reset) run_1_read_7_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_8_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (req_addr() == 8) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 16 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 16 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_8_a: assert property (disable iff (reset) run_1_read_8_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_9_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 16) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 25 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 25 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_9_a: assert property (disable iff (reset) run_1_read_9_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_10_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 16) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 25 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 25 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_10_a: assert property (disable iff (reset) run_1_read_10_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_11_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (req_addr() == 16) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 25 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 25 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_11_a: assert property (disable iff (reset) run_1_read_11_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_12_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (req_addr() == 16) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 25 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 25 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_12_a: assert property (disable iff (reset) run_1_read_12_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_13_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 25) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_13_a: assert property (disable iff (reset) run_1_read_13_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_14_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 (req_addr() == 25) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_14_a: assert property (disable iff (reset) run_1_read_14_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_15_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((req_addr() == 0)) and
+	t ##0 !((req_addr() == 8)) and
+	t ##0 !((req_addr() == 16)) and
+	t ##0 !((req_addr() == 25)) and
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_15_a: assert property (disable iff (reset) run_1_read_15_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_16_p(o);
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((req_addr() == 0)) and
+	t ##0 !((req_addr() == 8)) and
+	t ##0 !((req_addr() == 16)) and
+	t ##0 !((req_addr() == 25)) and
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (cnt() == 10000000) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == 10000000 and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == 10000000 and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == 10000000 and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_16_a: assert property (disable iff (reset) run_1_read_16_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_17_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 (req_addr() == 25) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_17_a: assert property (disable iff (reset) run_1_read_17_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_18_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 (req_addr() == 25) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_18_a: assert property (disable iff (reset) run_1_read_18_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_19_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 !((req_addr() == 0)) and
+	t ##0 !((req_addr() == 8)) and
+	t ##0 !((req_addr() == 16)) and
+	t ##0 !((req_addr() == 25)) and
+	t ##0 (req_trans_type() == single_read) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_write and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_write and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_19_a: assert property (disable iff (reset) run_1_read_19_p(1)); //ASSIGN t_end offset here
+
+
+property run_1_read_20_p(o);
+int cnt_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !((cnt() == 10000000)) and
+	t ##0 !((req_addr() == 0)) and
+	t ##0 !((req_addr() == 8)) and
+	t ##0 !((req_addr() == 16)) and
+	t ##0 !((req_addr() == 25)) and
+	t ##0 !((req_trans_type() == single_read)) and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 run_0() and
+	t_end(o) ##0 bus_req_sig_addr() == 0 and
+	t_end(o) ##0 bus_req_sig_data() == (1 + cnt_0) and
+	t_end(o) ##0 bus_req_sig_trans_type() == single_read and
+	t_end(o) ##0 cnt() == (1 + cnt_0) and
+	t_end(o) ##0 req_addr() == 0 and
+	t_end(o) ##0 req_data() == (1 + cnt_0) and
+	t_end(o) ##0 req_trans_type() == single_read and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during (next(t,1), t_end(o), bus_resp_notify() == 0);
+endproperty;
+run_1_read_20_a: assert property (disable iff (reset) run_1_read_20_p(1)); //ASSIGN t_end offset here
+
+
+property wait_run_0_p;
+int cnt_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State //
+	t ##0 run_0() and
+// trigger //
+	t ##0 !(bus_req_sync())
+implies
+	t ##1 run_0() and
+	t ##1 bus_req_sig_addr() == req_addr_0 and
+	t ##1 bus_req_sig_data() == req_data_0 and
+	t ##1 bus_req_sig_trans_type() == req_trans_type_0 and
+	t ##1 cnt() == cnt_0 and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 bus_req_notify() == 1 and
+	t ##1 bus_resp_notify() == 0;
+endproperty;
+wait_run_0_a: assert property (disable iff (reset) wait_run_0_p); //ASSIGN t_end offset here
+
+
+property wait_run_1_p;
+int cnt_0;
+int req_addr_0;
+int req_data_0;
+trans_t req_trans_type_0;
+// hold //
+	t ##0 hold(cnt_0, cnt()) and
+	t ##0 hold(req_addr_0, req_addr()) and
+	t ##0 hold(req_data_0, req_data()) and
+	t ##0 hold(req_trans_type_0, req_trans_type()) and
+// Conceptual State //
+	t ##0 run_1() and
+// trigger //
+	t ##0 !(bus_resp_sync())
+implies
+	t ##1 run_1() and
+	t ##1 cnt() == cnt_0 and
+	t ##1 req_addr() == req_addr_0 and
+	t ##1 req_data() == req_data_0 and
+	t ##1 req_trans_type() == req_trans_type_0 and
+	t ##1 bus_req_notify() == 0 and
+	t ##1 bus_resp_notify() == 1;
+endproperty;
+wait_run_1_a: assert property (disable iff (reset) wait_run_1_p); //ASSIGN t_end offset here
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind MasterDummy MasterDummy_verification inst (.*, .reset(MasterDummy.reset));

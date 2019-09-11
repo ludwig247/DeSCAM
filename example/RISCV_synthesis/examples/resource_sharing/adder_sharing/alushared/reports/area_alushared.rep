@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : ALU
+Version: N-2017.09-SP3
+Date   : Fri Dec  7 15:32:56 2018
+****************************************
+
+Library(s) Used:
+
+    gscl45nm (File: /import/lab/users/morkunas/SCAM/example/StandardCellLibraries/FreePDK45/osu_soc/lib/files/gscl45nm.db)
+
+Number of ports:                          171
+Number of nets:                         12448
+Number of cells:                        12252
+Number of combinational cells:          12123
+Number of sequential cells:               129
+Number of macros/black boxes:               0
+Number of buf/inv:                       5630
+Number of references:                      20
+
+Combinational area:              29931.953412
+Buf/Inv area:                    10969.417883
+Noncombinational area:             916.073608
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:                 30848.027021
+Total area:                 undefined
+1

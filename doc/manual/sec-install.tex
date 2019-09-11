@@ -1,0 +1,30 @@
+
+\section{Installation}
+\label{sec:installation}
+
+Download the most current version of \DeSCAM{}:
+
+\begin{verbatim}
+git clone git@bordeaux.eit.uni-kl.de:DeSCAM
+cd DeSCAM
+git fetch --all
+git pull origin master
+\end{verbatim}
+
+Make sure your environments provides the following tools: 
+\begin{itemize}
+ \item CMake, version 3.0 or higher,
+ \item unzip, 
+ \item g++, version 4.8 or higher. 
+\end{itemize}
+
+Before installing \DeSCAM{}, open and configure the shell script
+\tsCODE{install/install\_new.sh} by providing the paths to \DeSCAM{}, cmake3
+and python3 at the top of the file. %
+Afterwards, run the shell script to compile and install \DeSCAM{}. %
+The binary will be located in the \tsCODE{bin/} folder.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "binder"
+%%% End: 

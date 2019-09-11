@@ -1,0 +1,87 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <1>;  
+	#size-cells = <1>;     
+	compatible = "riscv,rv32ia";
+        model = "tuk,rv32priv";
+
+
+aliases {
+		serial0 = &L28;
+		serial1 = &L29;
+};
+
+chosen {
+	};
+
+firmware {
+		pk,bbl = "YYYY-MM-DD";
+	};
+
+L3: cpus {
+#address-cells = <1>;  
+#size-cells = <0>;  
+              L9:  cpu@0 {  
+                        device_type = "cpu";     
+                        reg = <0>; 
+                        status = "okay";        
+                        compatible = "riscv";  
+                        riscv,isa = "rv32ia";
+                        clock-frequency = <3330000>;
+                  L10: interrupt-controller {
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+};
+
+                };
+};
+
+L36: memory@80000000 {
+device_type = "memory";
+reg = <0x80000000 0x10000000>;
+};
+
+
+L2: soc {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		ranges;
+
+L5: clint@2000000 {
+			compatible = "riscv,clint0";
+			reg = <0x2000000 0x10000>;
+                        interrupts-extended = <&L10 3 &L10 7>;
+                        reg-names = "control";
+};
+
+L4: interrupt-controller@c000000 {
+			#interrupt-cells = <1>;
+			compatible = "riscv,plic0";
+			interrupt-controller;
+                        interrupts-extended = <&L10 11>;
+			reg = <0xc000000 0x200008>;
+			reg-names = "control";
+			riscv,max-priority = <7>;
+			riscv,ndev = <53>;
+};
+
+
+L28: serial@10013000 {
+			compatible = "sifive,uart0";
+			reg = <0x10013000 0x1000>;
+			reg-names = "control";
+		};
+L29: serial@10000000 {
+			compatible = "ns16550";
+			reg = <0x10000000 0xff>;
+                        clock-frequency = <333000>;
+			reg-names = "control";
+};
+
+};
+
+};
+

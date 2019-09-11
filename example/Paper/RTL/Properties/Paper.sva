@@ -1,0 +1,329 @@
+`define next_shift_amount 31
+// required terminology 
+sequence hold(l, e);
+        (l===e, l=e);
+endsequence
+
+sequence t;
+        ##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_end(offset);
+        t ##offset 1'b1;
+endsequence
+
+sequence next(timepoint, offset);
+        timepoint ##offset 1'b1;
+endsequence
+
+property during(t1, t2, se);
+        (t1 ##0 se[*0:$] intersect t2) or
+        (t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_limited(t1, t2, off, se);
+        (t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+        (next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_o(t1, o1, t2, o2, se);
+        if (o2 >= 0)
+                during(next(t1, o1), next(t2, (o2<0) ? 0 : o2), se)
+        else
+                during_limited(next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+// end of ipc_sva
+
+import scam_model_types::*;
+
+module Example_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge Example.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+`define b_in_notify $past(Example.b_in_notify,31)
+`define b_in_sync $past(Example.b_in_sync,31)
+`define m_out_notify $past(Example.m_out_notify,31)
+
+// DP SIGNALS //
+`define b_in_sig_data 	{$past(Example.data_in,31), $past(Example.data_in,30), $past(Example.data_in,29), $past(Example.data_in,28), \
+			$past(Example.data_in,27), $past(Example.data_in,26), $past(Example.data_in,25), $past(Example.data_in,24), \
+			$past(Example.data_in,23), $past(Example.data_in,22), $past(Example.data_in,21), $past(Example.data_in,20), \
+			$past(Example.data_in,19), $past(Example.data_in,18), $past(Example.data_in,17), $past(Example.data_in,16), \
+			$past(Example.data_in,15), $past(Example.data_in,14), $past(Example.data_in,13), $past(Example.data_in,12), \
+			$past(Example.data_in,11), $past(Example.data_in,10), $past(Example.data_in,9), $past(Example.data_in,8), \
+			$past(Example.data_in,7), $past(Example.data_in,6), $past(Example.data_in,5), $past(Example.data_in,4),  \
+			$past(Example.data_in,3), $past(Example.data_in,2), $past(Example.data_in,1), Example.data_in} 
+
+`define b_in_sig_status ($past(Example.rst,32) ? frame_detected( 0 ) : \
+			($past(Example.rst,33) ? frame_detected( {1'b0, 1'b0, 1'b0, $past(Example.data_in,32)} ) : \
+			($past(Example.rst,34) ? frame_detected( {1'b0, 1'b0, $past(Example.data_in,33), $past(Example.data_in,32)} ) : \
+			($past(Example.rst,35) ? frame_detected( {1'b0, $past(Example.data_in,33), $past(Example.data_in,32), $past(Example.data_in,32)} ) : \
+			frame_detected( {$past(Example.data_in,35), $past(Example.data_in,34), $past(Example.data_in,33), $past(Example.data_in,32)} ) ) ) ) )
+
+
+function status_t frame_detected(signed[3:0] value);
+	if(value == -1) begin 
+		return in_frame;
+	end else begin
+		return oof_frame;
+	end
+endfunction
+
+`define m_out_sig $past(Example.m_out,31)
+`define s_out_sig $past(Example.s_out,31)
+
+// VISIBLE REGISTERS //
+`define cnt $past(Example.cnt_signal,31)
+`define msg_data $past(Example.msg_signal.data,31)
+`define msg_status $past(Example.msg_signal.status,31)
+
+// STATES //
+function frame_data_0;
+        frame_data_0 = (($past(Example.section,31)==frame_data) && ($past(Example.buffer_cnt,31) == 0));
+endfunction
+function frame_start_2;
+        frame_start_2 = ($past(Example.section,31)==frame_start);
+endfunction
+function idle_3;
+        idle_3 = (($past(Example.section,31)==idle) && ($past(Example.buffer_cnt,31) == 0));
+endfunction
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+sequence reset_sequence_1;
+	(Example.rst == 1'b1);
+endsequence
+
+sequence reset_sequence;
+	(Example.rst == 1'b1);
+endsequence
+property reset_p;
+        reset_sequence |=>
+        t ##0 idle_3() and
+        t ##0 `cnt == 0 and
+        t ##0 `msg_data == 0 and
+        t ##0 `msg_status == in_frame and
+        t ##0 `s_out_sig == 0 and
+        t ##0 `b_in_notify == 1 and
+        t ##0 `m_out_notify == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+property frame_data_0_read_0_p(o);
+int cnt_0;
+bool s_out_sig_0;
+int b_in_sig_data_0;
+status_t b_in_sig_status_0;
+// hold
+        t ##0 hold(cnt_0, `cnt) and
+        t ##0 hold(s_out_sig_0, `s_out_sig) and
+        t ##0 hold(b_in_sig_data_0, `b_in_sig_data) and
+        t ##0 hold(b_in_sig_status_0, `b_in_sig_status) and
+// Conceptual State
+        t ##0 frame_data_0() and
+// trigger
+        t ##0 `b_in_sync and
+        t ##0 `b_in_sync
+implies
+        t_end(o) ##0 frame_data_0() and
+        t_end(o) ##0 `cnt == cnt_0 and
+        t_end(o) ##0 `msg_data == b_in_sig_data_0 and
+        t_end(o) ##0 `msg_status == b_in_sig_status_0 and
+        t_end(o) ##0 `s_out_sig == s_out_sig_0 and
+        during_o (t, 1, t_end(o) , -1, `b_in_notify == 0) and
+        t_end(o) ##0 `b_in_notify == 1 and
+        during (next(t,1), t_end(o), `m_out_notify == 0);
+endproperty;
+frame_data_0_read_0_a: assert property (disable iff (reset) frame_data_0_read_0_p(32));// ASSIGN t_end offset here
+
+property frame_data_0_read_1_p(o);
+status_t msg_status_0;
+int msg_data_0;
+int cnt_0;
+bool s_out_sig_0;
+// hold
+        t ##0 hold(msg_status_0, `msg_status) and
+        t ##0 hold(msg_data_0, `msg_data) and
+        t ##0 hold(cnt_0, `cnt) and
+        t ##0 hold(s_out_sig_0, `s_out_sig) and
+// Conceptual State
+        t ##0 frame_data_0() and
+// trigger
+        t ##0 !((`cnt == 0)) and
+        t ##0 !(`b_in_sync)
+implies
+        t_end(o) ##0 frame_data_0() and
+        t_end(o) ##0 `cnt == (-1 + cnt_0) and
+        t_end(o) ##0 `m_out_sig == msg_data_0 and
+        t_end(o) ##0 `msg_data == msg_data_0 and
+        t_end(o) ##0 `msg_status == msg_status_0 and
+        t_end(o) ##0 `s_out_sig == s_out_sig_0 and
+        during_o (t, 1, t_end(o) , -1, `b_in_notify == 0) and
+        t_end(o) ##0 `b_in_notify == 1 and
+        during_o (t, 1, t_end(o), -1, `m_out_notify == 0) and
+        t_end(o) ##0 `m_out_notify == 1;
+endproperty;
+frame_data_0_read_1_a: assert property (disable iff (reset) frame_data_0_read_1_p(1));// ASSIGN t_end offset here
+
+property frame_data_0_read_2_p(o);
+status_t msg_status_0;
+int msg_data_0;
+int cnt_0;
+// hold
+        t ##0 hold(msg_status_0, `msg_status) and
+        t ##0 hold(msg_data_0, `msg_data) and
+        t ##0 hold(cnt_0, `cnt) and
+// Conceptual State
+        t ##0 frame_data_0() and
+// trigger
+        t ##0 (`cnt == 0) and
+        t ##0 !(`b_in_sync)
+implies
+        t_end(o) ##0 idle_3() and
+        t_end(o) ##0 `cnt == (-1 + cnt_0) and
+        t_end(o) ##0 `m_out_sig == msg_data_0 and
+        t_end(o) ##0 `msg_data == msg_data_0 and
+        t_end(o) ##0 `msg_status == msg_status_0 and
+        t_end(o) ##0 `s_out_sig == 0 and
+        during_o (t, 1, t_end(o) , -1, `b_in_notify == 0) and
+        t_end(o) ##0 `b_in_notify == 1 and
+        during_o (t, 1, t_end(o), -1, `m_out_notify == 0) and
+        t_end(o) ##0 `m_out_notify == 1;
+endproperty;
+frame_data_0_read_2_a: assert property (disable iff (reset) frame_data_0_read_2_p(1));// ASSIGN t_end offset here
+
+property frame_start_2_write_3_p(o);
+status_t msg_status_0;
+int msg_data_0;
+bool s_out_sig_0;
+// hold
+        t ##0 hold(msg_status_0, `msg_status) and
+        t ##0 hold(msg_data_0, `msg_data) and
+        t ##0 hold(s_out_sig_0, `s_out_sig) and
+// Conceptual State
+        t ##0 frame_start_2() and
+// trigger
+        t ##0 (`cnt == 1)
+implies
+        t_end(o) ##0 frame_data_0() and
+        t_end(o) ##0 `cnt == 15 and
+        t_end(o) ##0 `msg_data == msg_data_0 and
+        t_end(o) ##0 `msg_status == msg_status_0 and
+        t_end(o) ##0 `s_out_sig == s_out_sig_0 and
+        during_o (t, 1, t_end(o) , -1, `b_in_notify == 0) and
+        t_end(o) ##0 `b_in_notify == 1 and
+        during (next(t,1), t_end(o), `m_out_notify == 0);
+endproperty;
+frame_start_2_write_3_a: assert property (disable iff (reset) frame_start_2_write_3_p(1));// ASSIGN t_end offset here
+
+property frame_start_2_write_4_p(o);
+status_t msg_status_0;
+int msg_data_0;
+int cnt_0;
+bool s_out_sig_0;
+// hold
+        t ##0 hold(msg_status_0, `msg_status) and
+        t ##0 hold(msg_data_0, `msg_data) and
+        t ##0 hold(cnt_0, `cnt) and
+        t ##0 hold(s_out_sig_0, `s_out_sig) and
+// Conceptual State
+        t ##0 frame_start_2() and
+// trigger
+        t ##0 !((`cnt == 1))
+implies
+        t_end(o) ##0 frame_start_2() and
+        t_end(o) ##0 `cnt == (-1 + cnt_0) and
+        t_end(o) ##0 `m_out_sig == (-1 + cnt_0) and
+        t_end(o) ##0 `msg_data == msg_data_0 and
+        t_end(o) ##0 `msg_status == msg_status_0 and
+        t_end(o) ##0 `s_out_sig == s_out_sig_0 and
+        during (next(t,1), t_end(o), `b_in_notify == 0) and
+        during_o (t, 1, t_end(o) , -1, `m_out_notify == 0) and
+        t_end(o) ##0 `m_out_notify == 1;
+endproperty;
+frame_start_2_write_4_a: assert property (disable iff (reset) frame_start_2_write_4_p(1));// ASSIGN t_end offset here
+
+property idle_3_read_5_p(o);
+int b_in_sig_data_0;
+status_t b_in_sig_status_0;
+// hold
+        t ##0 hold(b_in_sig_data_0, `b_in_sig_data) and
+        t ##0 hold(b_in_sig_status_0, `b_in_sig_status) and
+// Conceptual State
+        t ##0 idle_3() and
+// trigger
+        t ##0 (`b_in_sig_status == in_frame) and
+        t ##0 `b_in_sync
+implies
+        t_end(o) ##0 frame_start_2() and
+        t_end(o) ##0 `cnt == 3 and
+        t_end(o) ##0 `m_out_sig == 3 and
+        t_end(o) ##0 `msg_data == b_in_sig_data_0 and
+        t_end(o) ##0 `msg_status == b_in_sig_status_0 and
+        t_end(o) ##0 `s_out_sig == 1 and
+        during (next(t,1), t_end(o), `b_in_notify == 0) and
+        during_o (t, 1, t_end(o) , -1, `m_out_notify == 0) and
+        t_end(o) ##0 `m_out_notify == 1;
+endproperty;
+idle_3_read_5_a: assert property (disable iff (reset) idle_3_read_5_p(32));// ASSIGN t_end offset here
+
+property idle_3_read_6_p(o);
+int cnt_0;
+int b_in_sig_data_0;
+status_t b_in_sig_status_0;
+// hold
+        t ##0 hold(cnt_0, `cnt) and
+        t ##0 hold(b_in_sig_data_0, `b_in_sig_data) and
+        t ##0 hold(b_in_sig_status_0, `b_in_sig_status) and
+// Conceptual State
+        t ##0 idle_3() and
+// trigger
+        t ##0 !((`b_in_sig_status == in_frame)) and
+        t ##0 `b_in_sync
+implies
+        t_end(o) ##0 idle_3() and
+        t_end(o) ##0 `cnt == cnt_0 and
+        t_end(o) ##0 `msg_data == b_in_sig_data_0 and
+        t_end(o) ##0 `msg_status == b_in_sig_status_0 and
+        t_end(o) ##0 `s_out_sig == 0 and
+        during_o (t, 1, t_end(o) , -1, `b_in_notify == 0) and
+        t_end(o) ##0 `b_in_notify == 1 and
+        during (next(t,1), t_end(o), `m_out_notify == 0);
+endproperty;
+idle_3_read_6_a: assert property (disable iff (reset) idle_3_read_6_p(32));// ASSIGN t_end offset here
+
+
+property wait_idle_3_p;
+status_t msg_status_0;
+int msg_data_0;
+int cnt_0;
+bool s_out_sig_0;
+// hold
+        t ##0 hold(msg_status_0, `msg_status) and
+        t ##0 hold(msg_data_0, `msg_data) and
+        t ##0 hold(cnt_0, `cnt) and
+        t ##0 hold(s_out_sig_0, `s_out_sig) and
+// Conceptual State
+        t ##0 idle_3() and
+// trigger
+        t ##0 !(`b_in_sync)
+implies
+        t ##1 idle_3() and
+        t ##1 `cnt == cnt_0 and
+        t ##1 `msg_data == msg_data_0 and
+        t ##1 `msg_status == msg_status_0 and
+        t ##1 `s_out_sig == s_out_sig_0 and
+        t ##1 `b_in_notify == 1 and
+        t ##1 `m_out_notify == 0;
+endproperty;
+wait_idle_3_a: assert property (disable iff (reset) wait_idle_3_p);
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind Example Example_verification inst (.*, .reset(Example.rst));

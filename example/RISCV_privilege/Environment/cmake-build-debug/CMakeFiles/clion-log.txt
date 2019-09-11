@@ -1,0 +1,9 @@
+/import/lab/users/ovsthus/Downloads/clion-2018.2.6/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /import/lab/users/ovsthus/SCAM/example/RISCV_privilege/Environment
+-- Boost version: 1.53.0
+-- Found the following Boost libraries:
+--   iostreams
+--   program_options
+--   regex
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /import/lab/users/ovsthus/SCAM/example/RISCV_privilege/Environment/cmake-build-debug

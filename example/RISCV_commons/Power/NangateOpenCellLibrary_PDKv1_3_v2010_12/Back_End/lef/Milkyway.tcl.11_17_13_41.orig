@@ -1,0 +1,9 @@
+;# Tcl
+configureWindow 0 25x24+0+0
+cd ..
+ll
+ls
+cd lef
+read_lef Na*
+menuQuit
+formYes dialog_box
