@@ -8,7 +8,7 @@
 #include "systemc.h"
 #include "../../Interfaces/Interfaces.h"
 #include "Compound_Bus.h"
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "Compound.h"
 
 
 struct MasterAgent : public sc_module {

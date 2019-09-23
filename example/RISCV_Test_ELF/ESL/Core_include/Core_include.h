@@ -14,7 +14,8 @@
 
 #include "../../RISCV_ISA/ESL/Core.h" // Remark: Choose memory_complicated.
 //#include "../../RISCV_Pipelined/ESL/Core.h" // Remark: Choose memory_complicated.
-
+//#include "../../RISCV_privilege/ESL/Full/Core.h"
+//#include "../../RISCV_interrupts/ESL/Full/Core.h"
 
 /// ############ UNDER MAINTAINANCE ##############
 //#include "../../RISCV_MS/ESL/Core.h" // Remark: Choose memory_complicated.

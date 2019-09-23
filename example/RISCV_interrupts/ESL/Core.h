@@ -8,7 +8,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // Working ESL-Description -> #define NOSCAM
 // Properties can be generated -> //#define NOSCAM
-//#define NOSCAM
+#define NOSCAM
 
 #ifdef NOSCAM
 #include "../../RISCV_commons/Memory_Interfaces.h"

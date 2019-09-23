@@ -7,7 +7,7 @@
 #include "systemc.h"
 #include "../../Interfaces/Interfaces.h"
 #include "Compound_Bus.h"
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "Compound.h"
 
 
 struct SlaveAgent : public sc_module {
