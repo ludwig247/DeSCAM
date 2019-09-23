@@ -102,8 +102,9 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition){
     path->addCondition(logical);
 
     auto result = ConditionOptimizer::optimize(path,module);
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"(input_unsigned.sig == 0)");
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"not((input.sig <= 10))");
+    std::cout << PrintStmt::toString(path->getConditionList().front()) << std::endl;
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"(input_unsigned_sig == 0)");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"not((input_sig <= 10))");
 
 }
 
@@ -123,8 +124,8 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition2){
     path->addCondition(logical);
 
     auto result = ConditionOptimizer::optimize(path,module);
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"(input_unsigned.sig == 0)");
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((input.sig <= 10))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"(input_unsigned_sig == 0)");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((input_sig <= 10))");
 
 }
 
@@ -144,8 +145,8 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition3){
     path->addCondition(logical);
 
     auto result = ConditionOptimizer::optimize(path,module);
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((input_unsigned.sig == 0))");
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"not((input.sig <= 10))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((input_unsigned_sig == 0))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"not((input_sig <= 10))");
 
 }
 
@@ -166,8 +167,8 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition4){
     path->addCondition(logical);
 
     auto result = ConditionOptimizer::optimize(path,module);
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((input_unsigned.sig == 0))");
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"not((10 <= input.sig))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((input_unsigned_sig == 0))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"not((10 <= input_sig))");
 
 }
 
@@ -192,7 +193,7 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition5){
 
     auto result = ConditionOptimizer::optimize(path,module);
     ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"not((unsigned_var > 10))");
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"(input.sig > 10)");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().back()),"(input_sig > 10)");
 
 }
 
@@ -216,7 +217,7 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition6){
 
 
     auto result = ConditionOptimizer::optimize(path,module);
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"((input.sig > 10) and (unsigned_var > 10))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"((input_sig > 10) and (unsigned_var > 10))");
 
 }
 
@@ -236,11 +237,11 @@ TEST_F(ConditionOptimizer_Test,SignedAndUnsignedCondition7){
     Path * path = new Path("foo");
     std::cout << PrintStmt::toString(logical) << std::endl;
     path->addCondition(logical);
-    //path->addCondition(relational2);
+
 
 
     auto result = ConditionOptimizer::optimize(path,module);
-    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"((unsigned_var > 10) and (input.sig > 10))");
+    ASSERT_EQ(PrintStmt::toString(path->getConditionList().front()),"((unsigned_var > 10) and (input_sig > 10))");
 
 }
 

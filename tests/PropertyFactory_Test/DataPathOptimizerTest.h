@@ -915,7 +915,7 @@ TEST_F(DataPathOptimizer_Test, BitShiftRight6) {
 TEST_F(DataPathOptimizer_Test, UnsignedPortAssignment) {
     VariableOperand *variableOperand = new VariableOperand(module->getVariable("compound_var")->getSubVar("unsigned_val"));
     PortOperand portOperand(module->getPort("input_compound"));
-    DataSignalOperand * dataSignalOperand = new DataSignalOperand(portOperand.getPort()->getDataSignal()->getSubSig("unsigned_val"));
+    DataSignalOperand * dataSignalOperand = new DataSignalOperand(portOperand.getPort()->getDataSignal()->getSubVar("unsigned_val"));
 
 
     Path *path2 = new Path("foo2");
@@ -1024,7 +1024,7 @@ TEST_F(DataPathOptimizer_Test, SignedAfterUnsigned) {
     assignmentList2.push_back(assignment2);
 
     VariableOperand *variableOperand2 = new VariableOperand(module->getVariable("compound_var")->getSubVar("int_val"));
-    DataSignalOperand * dataSignalOperand = new DataSignalOperand(module->getPort("input_compound")->getDataSignal()->getSubSig("int_val"));
+    DataSignalOperand * dataSignalOperand = new DataSignalOperand(module->getPort("input_compound")->getDataSignal()->getSubVar("int_val"));
     UnaryExpr * mul = new UnaryExpr("-",dataSignalOperand);
     Arithmetic * arithmetic = new Arithmetic(mul,"+",variableOperand2);
 
