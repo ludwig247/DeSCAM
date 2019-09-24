@@ -2,11 +2,11 @@
 #define PROJECT_CPU_INTERFACES_H
 #define NDEBUG
 
+#include "Defines.h"
+
 enum EncType {
     R, I, S, B, U, J, Error_Type
 };
-
-
 
 struct DecodedInstr {
 

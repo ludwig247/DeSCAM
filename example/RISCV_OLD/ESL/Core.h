@@ -14,6 +14,9 @@
 #include "regs.h"
 #include "Decoder.h"
 
+#define REGFILE(x) RF.reg_file_##x
+#define PCREG cpath.pc_reg
+
 class Core : public sc_module {
 public:
 

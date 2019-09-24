@@ -2,6 +2,7 @@
 #define PROJECT_REGS_H
 
 #include "systemc.h"
+#include <iomanip>
 #include "Interfaces.h"
 #include "CPU_Interfaces.h"
 
