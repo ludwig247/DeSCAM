@@ -1,0 +1,267 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  Collaborative editing in EIS group
+%  
+%  Let NN be your initials. 
+%  The following macros are defined: 
+%
+%  \NNINS{a}     - Suggest inserting the text a. 
+%  \NNDEL{a}     - Suggest deleting the text a. 
+%  \NNREP{a}{b}  - Suggest replacing a by b. 
+%  \NNSAY{a}     - Comment by saying a.
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%   Required packages:
+% 
+%   \usepackage{color}
+%   \usepackage{ifthen}
+%   \usepackage[normalem]{ulem}
+%   \usepackage{soul}
+%
+%   Place those in the file prefix.tex
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MARKUP switch
+% Set to true if markup is to be shown, false otherwise
+
+\newboolean{MARKUP}
+\setboolean{MARKUP}{true}
+% \setboolean{MARKUP}{false}
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Authors
+
+%  Every author can have their own distinctive markup color. 
+
+%  WK - Wolfgang Kunz
+\definecolor{ColorWK}{rgb}{0.8,0,0}
+%  DS - Dominik Stoffel
+\definecolor{ColorDS}{rgb}{0, 0, 1.0}
+
+%  AK - Ammar Ben Khadra
+\definecolor{ColorAK}{rgb}{0.7,0.7,0.7}
+%  CB - Christian Bartsch
+\definecolor{ColorCB}{rgb}{0.7,0.7,0.7}
+%  CV - Carlos Villarraga
+\definecolor{ColorCV}{rgb}{0.1,0.6,0.3}
+%  JU - Joakim Urdahl
+\definecolor{ColorJU}{rgb}{0,0.5,0}
+%  MF - Mohammed Fadiheh
+\definecolor{ColorMF}{RGB}{0,126,0}
+%  MS - Michael Schwarz
+\definecolor{ColorMS}{RGB}{255,140,0}
+%  OM - Oliver Marx
+\definecolor{ColorOM}{rgb}{0.1,0.7,0.1}
+%  SM - Subhasish Mitra
+\definecolor{ColorSM}{RGB}{166,179,109}
+%  SU - Shrinidhi Udupi
+\definecolor{ColorSU}{rgb}{0.1,0.5,0.5}
+%  TF - Thomas Fehmel
+\definecolor{ColorTF}{RGB}{192,88,0}
+\definecolor{ColorTF2}{RGB}{152,48,0}
+%  TL - Tobias Ludwig
+\definecolor{ColorTL}{RGB}{33,190,190}
+%  AA - Anna 
+\definecolor{ColorAA}{RGB}{66,33,00}
+
+\definecolor{ColorNN}{rgb}{0.9,0.0,0.0}
+
+\definecolor{ColorDELETE}{RGB}{108,108,108}
+
+\newcommand{\PRINTCOLORLIST}{%
+\par\textcolor{ColorWK}{Wolfgang Kunz}%
+\par\textcolor{ColorDS}{Dominik Stoffel}%
+\par\textcolor{ColorAK}{Ammar Ben Khadra}%
+\par\textcolor{ColorCB}{Christian Bartsch}%
+\par\textcolor{ColorCV}{Carlos Villarraga}%
+\par\textcolor{ColorJU}{Joakim Urdahl}%
+\par\textcolor{ColorMF}{Mohammed Fadiheh}%
+\par\textcolor{ColorMS}{Michael Schwarz}%
+\par\textcolor{ColorSM}{Subhasish Mitra}%
+\par\textcolor{ColorSU}{Shrinidhi Udupi}%
+\par\textcolor{ColorTF}{Thomas Fehmel}%
+\par\textcolor{ColorTL}{Tobias Ludwig}%
+}%
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macro definitions
+
+% The macro \sout is from the ulem package. 
+% \usepackage[normalem]{ulem}
+\newcommand{\STRIKETHROUGH}[1]{\sout{#1}}
+
+% This command simply deletes content, but keeps it in the source text. 
+\newcommand{\FORJOURNAL}[1]{}
+
+\newcommand{\tsSAY}[1]{\slshape\sffamily\color{#1}}
+\newcommand{\tsINITIALS}[2]{\color{#1}\raisebox{0.7ex}{\tiny\bfseries (#2)}}
+
+\newcommand{\EISREP}[4]{{\ifthenelse{\boolean{MARKUP}}{\tsINITIALS{#2}{#1}\,\STRIKETHROUGH{#3} {#4}}{#4}}}
+\newcommand{\EISSAY}[3]{{\ifthenelse{\boolean{MARKUP}}{\tsSAY{#2} #1:~#3}{}}}
+% the \ul command is from the soul package. 
+\newcommand{\EISCOM}[4]{{\ifthenelse{\boolean{MARKUP}}{\tsINITIALS{#2}{#1}\,\ul{#3} {\tsSAY{#2} #4}}{#3}}}
+\newcommand{\EISINSERTBEGIN}[2]{\ifthenelse{\boolean{MARKUP}}{\color{#2}\textbf{(#1 BEGIN INSERT)}}{}}
+\newcommand{\EISINSERTEND}[2]{\ifthenelse{\boolean{MARKUP}}{\par\color{#2}{(\textit{#1 END INSERT}\/)}\par}{}}
+\newcommand{\EISDELETEBEGIN}[2]{\ifthenelse{\boolean{MARKUP}}{\textbf{\color{#2}(#1 BEGIN DELETE)}\color{ColorDELETE}}{}}
+\newcommand{\EISDELETEEND}[2]{\ifthenelse{\boolean{MARKUP}}{\par\color{#2}{(\textit{#1 END DELETE}\/)}\par}{}}
+\newcommand{\EISEDITBORDERLINE}[2]{\ifthenelse{\boolean{MARKUP}}{%
+\vspace{2ex}%
+{\tsSAY{#2}{#1:~~Free to edit all of the above text. Please, DO NOT EDIT BELOW THIS LINE. %
+\par\hrulefill\mbox{}}}\par\vspace{2ex}%
+}{}}
+
+
+\newcommand{\NNREP}[2]{{\EISREP{NN}{ColorNN}{#1}{#2}}}
+\newcommand{\NNINS}[1]{{\NNREP{}{#1}}}
+\newcommand{\NNDEL}[1]{{\NNREP{#1}{}}}
+\newcommand{\NNSAY}[1]{{\EISSAY{NN}{ColorNN}{#1}}}
+\newcommand{\NNCOM}[2]{{\EISCOM{NN}{ColorNN}{#1}{#2}}}
+\newcommand{\NNEDITBORDERLINE}{\EISEDITBORDERLINE{NN}{ColorNN}}
+\newenvironment{NNINSERT}{\EISINSERTBEGIN{NN}{ColorNN}}{\EISINSERTEND{NN}{ColorNN}}
+\newenvironment{NNDELETE}{\EISDELETEBEGIN{NN}{ColorNN}}{\EISDELETEEND{NN}{ColorNN}}
+
+\newcommand{\AKREP}[2]{{\EISREP{AK}{ColorAK}{#1}{#2}}}
+\newcommand{\AKINS}[1]{{\AKREP{}{#1}}}
+\newcommand{\AKDEL}[1]{{\AKREP{#1}{}}}
+\newcommand{\AKSAY}[1]{{\EISSAY{AK}{ColorAK}{#1}}}
+\newcommand{\AKCOM}[2]{{\EISCOM{AK}{ColorAK}{#1}{#2}}}
+\newcommand{\AKEDITBORDERLINE}{\EISEDITBORDERLINE{AK}{ColorAK}}
+\newenvironment{AKINSERT}{\EISINSERTBEGIN{AK}{ColorAK}}{\EISINSERTEND{AK}{ColorAK}}
+\newenvironment{AKDELETE}{\EISDELETEBEGIN{AK}{ColorAK}}{\EISDELETEEND{AK}{ColorAK}}
+
+\newcommand{\CBREP}[2]{{\EISREP{CB}{ColorCB}{#1}{#2}}}
+\newcommand{\CBINS}[1]{{\CBREP{}{#1}}}
+\newcommand{\CBDEL}[1]{{\CBREP{#1}{}}}
+\newcommand{\CBSAY}[1]{{\EISSAY{CB}{ColorCB}{#1}}}
+\newcommand{\CBCOM}[2]{{\EISCOM{CB}{ColorCB}{#1}{#2}}}
+\newcommand{\CBEDITBORDERLINE}{\EISEDITBORDERLINE{CB}{ColorCB}}
+\newenvironment{CBINSERT}{\EISINSERTBEGIN{CB}{ColorCB}}{\EISINSERTEND{CB}{ColorCB}}
+\newenvironment{CBDELETE}{\EISDELETEBEGIN{CB}{ColorCB}}{\EISDELETEEND{CB}{ColorCB}}
+
+\newcommand{\CVREP}[2]{{\EISREP{CV}{ColorCV}{#1}{#2}}}
+\newcommand{\CVINS}[1]{{\CVREP{}{#1}}}
+\newcommand{\CVDEL}[1]{{\CVREP{#1}{}}}
+\newcommand{\CVSAY}[1]{{\EISSAY{CV}{ColorCV}{#1}}}
+\newcommand{\CVCOM}[2]{{\EISCOM{CV}{ColorCV}{#1}{#2}}}
+\newcommand{\CVEDITBORDERLINE}{\EISEDITBORDERLINE{CV}{ColorCV}}
+\newenvironment{CVINSERT}{\EISINSERTBEGIN{CV}{ColorCV}}{\EISINSERTEND{CV}{ColorCV}}
+\newenvironment{CVDELETE}{\EISDELETEBEGIN{CV}{ColorCV}}{\EISDELETEEND{CV}{ColorCV}}
+
+\newcommand{\JUREP}[2]{{\EISREP{JU}{ColorJU}{#1}{#2}}}
+\newcommand{\JUINS}[1]{{\JUREP{}{#1}}}
+\newcommand{\JUDEL}[1]{{\JUREP{#1}{}}}
+\newcommand{\JUSAY}[1]{{\EISSAY{JU}{ColorJU}{#1}}}
+\newcommand{\JUCOM}[2]{{\EISCOM{JU}{ColorJU}{#1}{#2}}}
+\newcommand{\JUEDITBORDERLINE}{\EISEDITBORDERLINE{JU}{ColorJU}}
+\newenvironment{JUINSERT}{\EISINSERTBEGIN{JU}{ColorJU}}{\EISINSERTEND{JU}{ColorJU}}
+\newenvironment{JUDELETE}{\EISDELETEBEGIN{JU}{ColorJU}}{\EISDELETEEND{JU}{ColorJU}}
+
+\newcommand{\MSREP}[2]{{\EISREP{MS}{ColorMS}{#1}{#2}}}
+\newcommand{\MSINS}[1]{{\MSREP{}{#1}}}
+\newcommand{\MSDEL}[1]{{\MSREP{#1}{}}}
+\newcommand{\MSSAY}[1]{{\EISSAY{MS}{ColorMS}{#1}}}
+\newcommand{\MSCOM}[2]{{\EISCOM{MS}{ColorMS}{#1}{#2}}}
+\newcommand{\MSEDITBORDERLINE}{\EISEDITBORDERLINE{MS}{ColorMS}}
+\newenvironment{MSINSERT}{\EISINSERTBEGIN{MS}{ColorMS}}{\EISINSERTEND{MS}{ColorMS}}
+\newenvironment{MSDELETE}{\EISDELETEBEGIN{MS}{ColorMS}}{\EISDELETEEND{MS}{ColorMS}}
+
+\newcommand{\MFREP}[2]{{\EISREP{MF}{ColorMF}{#1}{#2}}}
+\newcommand{\MFINS}[1]{{\MFREP{}{#1}}}
+\newcommand{\MFDEL}[1]{{\MFREP{#1}{}}}
+\newcommand{\MFSAY}[1]{{\EISSAY{MF}{ColorMF}{#1}}}
+\newcommand{\MFCOM}[2]{{\EISCOM{MF}{ColorMF}{#1}{#2}}}
+\newcommand{\MFEDITBORDERLINE}{\EISEDITBORDERLINE{MF}{ColorMF}}
+\newenvironment{MFINSERT}{\EISINSERTBEGIN{MF}{ColorMF}}{\EISINSERTEND{MF}{ColorMF}}
+\newenvironment{MFDELETE}{\EISDELETEBEGIN{MF}{ColorMF}}{\EISDELETEEND{MF}{ColorMF}}
+
+\newcommand{\OMREP}[2]{{\EISREP{OM}{ColorOM}{#1}{#2}}}
+\newcommand{\OMINS}[1]{{\OMREP{}{#1}}}
+\newcommand{\OMDEL}[1]{{\OMREP{#1}{}}}
+\newcommand{\OMSAY}[1]{{\EISSAY{OM}{ColorOM}{#1}}}
+\newcommand{\OMCOM}[2]{{\EISCOM{OM}{ColorOM}{#1}{#2}}}
+\newcommand{\OMEDITBORDERLINE}{\EISEDITBORDERLINE{OM}{ColorOM}}
+\newenvironment{OMINSERT}{\EISINSERTBEGIN{OM}{ColorOM}}{\EISINSERTEND{OM}{ColorOM}}
+\newenvironment{OMDELETE}{\EISDELETEBEGIN{OM}{ColorOM}}{\EISDELETEEND{OM}{ColorOM}}
+
+\newcommand{\SMREP}[2]{{\EISREP{SM}{ColorSM}{#1}{#2}}}
+\newcommand{\SMINS}[1]{{\SMREP{}{#1}}}
+\newcommand{\SMDEL}[1]{{\SMREP{#1}{}}}
+\newcommand{\SMSAY}[1]{{\EISSAY{SM}{ColorSM}{#1}}}
+\newcommand{\SMCOM}[2]{{\EISCOM{SM}{ColorSM}{#1}{#2}}}
+\newcommand{\SMEDITBORDERLINE}{\EISEDITBORDERLINE{SM}{ColorSM}}
+\newenvironment{SMINSERT}{\EISINSERTBEGIN{SM}{ColorSM}}{\EISINSERTEND{SM}{ColorSM}}
+\newenvironment{SMDELETE}{\EISDELETEBEGIN{SM}{ColorSM}}{\EISDELETEEND{SM}{ColorSM}}
+
+\newcommand{\SUREP}[2]{{\EISREP{SU}{ColorSU}{#1}{#2}}}
+\newcommand{\SUINS}[1]{{\SUREP{}{#1}}}
+\newcommand{\SUDEL}[1]{{\SUREP{#1}{}}}
+\newcommand{\SUSAY}[1]{{\EISSAY{SU}{ColorSU}{#1}}}
+\newcommand{\SUCOM}[2]{{\EISCOM{SU}{ColorSU}{#1}{#2}}}
+\newcommand{\SUEDITBORDERLINE}{\EISEDITBORDERLINE{SU}{ColorSU}}
+\newenvironment{SUINSERT}{\EISINSERTBEGIN{SU}{ColorSU}}{\EISINSERTEND{SU}{ColorSU}}
+\newenvironment{SUDELETE}{\EISDELETEBEGIN{SU}{ColorSU}}{\EISDELETEEND{SU}{ColorSU}}
+
+\newcommand{\TFREP}[2]{{\EISREP{TF}{ColorTF2}{#1}{#2}}}
+\newcommand{\TFINS}[1]{{\TFREP{}{#1}}}
+\newcommand{\TFDEL}[1]{{\TFREP{#1}{}}}
+\newcommand{\TFSAY}[1]{{\EISSAY{TF}{ColorTF}{#1}}}
+\newcommand{\TFCOM}[2]{{\EISCOM{TF}{ColorTF}{#1}{#2}}}
+\newcommand{\TFEDITBORDERLINE}{\EISEDITBORDERLINE{TF}{ColorTF}}
+\newenvironment{TFINSERT}{\EISINSERTBEGIN{TF}{ColorTF}}{\EISINSERTEND{TF}{ColorTF}}
+\newenvironment{TFDELETE}{\EISDELETEBEGIN{TF}{ColorTF}}{\EISDELETEEND{TF}{ColorTF}}
+
+\newcommand{\TLREP}[2]{{\EISREP{TL}{ColorTL}{#1}{#2}}}
+\newcommand{\TLINS}[1]{{\TLREP{}{#1}}}
+\newcommand{\TLDEL}[1]{{\TLREP{#1}{}}}
+\newcommand{\TLSAY}[1]{{\EISSAY{TL}{ColorTL}{#1}}}
+\newcommand{\TLCOM}[2]{{\EISCOM{TL}{ColorTL}{#1}{#2}}}
+\newcommand{\TLEDITBORDERLINE}{\EISEDITBORDERLINE{TL}{ColorTL}}
+\newenvironment{TLINSERT}{\EISINSERTBEGIN{TL}{ColorTL}}{\EISINSERTEND{TL}{ColorTL}}
+\newenvironment{TLDELETE}{\EISDELETEBEGIN{TL}{ColorTL}}{\EISDELETEEND{TL}{ColorTL}}
+
+\newcommand{\AAREP}[2]{{\EISREP{AA}{ColorAA}{#1}{#2}}}
+\newcommand{\AAINS}[1]{{\AAREP{}{#1}}}
+\newcommand{\AADEL}[1]{{\AAREP{#1}{}}}
+\newcommand{\AASAY}[1]{{\EISSAY{AA}{ColorAA}{#1}}}
+\newcommand{\AAEDITBORDERLINE}{\EISEDITBORDERLINE{AA}{ColorAA}}
+\newenvironment{AAINSERT}{\EISINSERTBEGIN{AA}{ColorAA}}{\EISINSERTEND{AA}{ColorAA}}
+\newenvironment{AADELETE}{\EISDELETEBEGIN{AA}{ColorAA}}{\EISDELETEEND{AA}{ColorAA}}
+
+\newcommand{\DSREP}[2]{{\EISREP{DS}{ColorDS}{#1}{#2}}}
+\newcommand{\DSINS}[1]{{\DSREP{}{#1}}}
+\newcommand{\DSDEL}[1]{{\DSREP{#1}{}}}
+\newcommand{\DSSAY}[1]{{\EISSAY{DS}{ColorDS}{#1}}}
+\newcommand{\DSWON}[1]{{\EISSAY{(The reader may wonder}{ColorDS}{#1 Please, fix.) }}}
+\newcommand{\DSCOM}[2]{{\EISCOM{DS}{ColorDS}{#1}{#2}}}
+\newcommand{\DSEDITBORDERLINE}{\EISEDITBORDERLINE{DS}{ColorDS}}
+\newenvironment{DSINSERT}{\EISINSERTBEGIN{DS}{ColorDS}}{\EISINSERTEND{DS}{ColorDS}}
+\newenvironment{DSDELETE}{\EISDELETEBEGIN{DS}{ColorDS}}{\EISDELETEEND{DS}{ColorDS}}
+
+\newcommand{\WKREP}[2]{{\EISREP{WK}{ColorWK}{#1}{#2}}}
+\newcommand{\WKINS}[1]{{\WKREP{}{#1}}}
+\newcommand{\WKDEL}[1]{{\WKREP{#1}{}}}
+\newcommand{\WKSAY}[1]{{\EISSAY{WK}{ColorWK}{#1}}}
+\newcommand{\WKCOM}[2]{{\EISCOM{WK}{ColorWK}{#1}{#2}}}
+\newcommand{\WKEDITBORDERLINE}{\EISEDITBORDERLINE{WK}{ColorWK}}
+\newenvironment{WKINSERT}{\EISINSERTBEGIN{WK}{ColorWK}}{\EISINSERTEND{WK}{ColorWK}}
+\newenvironment{WKDELETE}{\EISDELETEBEGIN{WK}{ColorWK}}{\EISDELETEEND{WK}{ColorWK}}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "binder"
+%%% End: 

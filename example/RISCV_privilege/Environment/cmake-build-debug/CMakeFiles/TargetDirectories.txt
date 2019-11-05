@@ -1,0 +1,3 @@
+/import/lab/users/ovsthus/SCAM/example/RISCV_privilege/Environment/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/import/lab/users/ovsthus/SCAM/example/RISCV_privilege/Environment/cmake-build-debug/CMakeFiles/edit_cache.dir
+/import/lab/users/ovsthus/SCAM/example/RISCV_privilege/Environment/cmake-build-debug/CMakeFiles/RISCV_privilege.dir

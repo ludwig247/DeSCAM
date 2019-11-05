@@ -1,0 +1,145 @@
+digraph Test_1 {  graph [rankdir=TD];
+state_0[ label = "------"];
+state_1[ label = "section = run"];
+state_2[ label = "nextphase = PROCESS"];
+state_3[ label = "phase = PROCESS"];
+state_4[ label = "reqValue = 0"];
+state_5[ label = "rspValue = 0"];
+
+state_100[ label = "m_out_visited = false"];
+
+state_6[ label = "nextphase = READ"];
+state_7[ label = "while (true)"];
+state_8[ label = "phase = nextphase"];
+state_9[ label = "if ((phase == READ))"];
+
+state_101[ label = "b_in_notify = true"];
+state_102[ style=filled color=brown2 label = "wait(SC_ZERO_TIME)"];
+state_103[ label = "if (b_in.sync())"];
+state_104[ label = "reqValue = b_in_sig"];
+
+
+state_11[ label = "nextphase = PROCESS"];
+state_12[ label = "------"];
+state_13[ label = "if ((phase == PROCESS))"];
+
+state_141[ label = "if(m_out_visited)"];
+state_142[ style=filled color=brown2 label = "wait(SC_ZERO_TIME)"];
+state_143[ label = "m_out_sig = reqValue"];
+state_144[ label = "m_out_notify = true"];
+state_145[ label = "m_out_visited = true"];
+
+
+state_151[ label = "if(m_out_visited)"];
+state_152[ style=filled color=brown2 label = "wait(SC_ZERO_TIME)"];
+state_153[ label = "m_out_sig = reqValue"];
+state_154[ label = "m_out_notify = true"];
+state_155[ label = "m_out_visited = true"];
+
+state_16[ label = "nextphase = WRITE"];
+state_17[ label = "if ((phase == WRITE))"];
+
+state_181[ label = "b_out_sig = rspValue"];
+state_182[ label = "b_out_notify = true"];
+state_183[ style=filled color=brown2 label = "wait(SC_ZERO_TIME)"];
+state_184[ label = "if (b_out.sync())"];
+state_185[ label = "------"];
+
+
+state_19[ label = "nextphase = READ"];
+
+state_0 -> state_1;
+state_1 -> state_2;
+state_2 -> state_3;
+state_3 -> state_4;
+state_4 -> state_5;
+state_5 -> state_100;
+state_100 -> state_6;
+state_6 -> state_7;
+state_7 -> state_8;
+state_8 -> state_9;
+state_9 -> state_101[label = "yes"];
+state_9 -> state_13[label = "no"];
+
+state_101 -> state_102;
+state_102 -> state_103;
+state_103 -> state_104[label = "yes"];
+state_103 -> state_101[label = "no"];
+
+state_104 -> state_11;
+state_11 -> state_12;
+state_12 -> state_7;
+state_13 -> state_141[label = "yes"];
+state_13 -> state_17[label = "no"];
+
+state_141 -> state_142[label = "yes"];
+state_141 -> state_143[label = "no"];
+state_142 -> state_143;
+state_143 -> state_144;
+state_144 -> state_145;
+state_145 -> state_151;
+
+state_151 -> state_152[label = "yes"];
+state_151 -> state_153[label = "no"];
+state_152 -> state_153;
+state_153 -> state_154;
+state_154 -> state_155;
+state_155 -> state_16;
+
+state_16 -> state_12;
+state_17 -> state_181[label = "yes"];
+state_17 -> state_12[label = "no"];
+
+state_181 -> state_182;
+state_182 -> state_183;
+state_183 -> state_184;
+state_184 -> state_181;[label = "no"];
+state_184 -> state_185;[label = "yes"];
+state_185 -> state_19;
+
+state_19 -> state_12;
+
+subgraph cluster_0 {
+style=filled; color=slategray;
+state_101
+state_102
+state_103
+state_104;
+label = "b_in.read(reqValue)";
+}
+
+subgraph cluster_1 {
+style=filled; color=slategray;
+state_141
+state_142
+state_143
+state_144
+state_145;
+label = "m_out.write(reqValue)";
+}
+
+subgraph cluster_2 {
+style=filled; color=slategray;
+state_151
+state_152
+state_153
+state_154
+state_155;
+label = "m_out.write(reqValue)";
+}
+
+subgraph cluster_3 {
+style=filled; color=slategray;
+state_181
+state_182
+state_183
+state_184
+state_185;
+label = "b_out.write(rspValue)";
+}
+
+subgraph cluster_4 {
+style=filled; color=slategray;
+state_100;
+}
+}

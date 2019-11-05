@@ -1,0 +1,1321 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+//`include "ISA_functions.sva//"
+`include "types.sva"
+import scam_model_types::*;
+
+module ISA_verification(reset);
+
+    input   reset;
+
+    //DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+    default clocking default_clk @(posedge ISA.clk); endclocking
+
+    // SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+    function fromMemoryPort_sync;
+        fromMemoryPort_sync = ISA.io_fromMemoryPort_sync;
+    endfunction
+    function toMemoryPort_sync;
+        toMemoryPort_sync = ISA.io_toMemoryPort_sync;
+    endfunction
+    function fromMemoryPort_notify;
+        fromMemoryPort_notify = ISA.io_fromMemoryPort_notify;
+    endfunction
+    function toMemoryPort_notify;
+        toMemoryPort_notify = ISA.io_toMemoryPort_notify;
+    endfunction
+    function toRegsPort_notify;
+        toRegsPort_notify = ISA.io_toRegsPort_notify;
+    endfunction
+
+    // DP SIGNALS //
+    function unsigned fromMemoryPort_sig_loadedData;
+        fromMemoryPort_sig_loadedData = ISA.io_fromMemoryPort_loadedData;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_01;
+        fromRegsPort_sig_reg_file_01 = ISA.io_fromRegsPort_reg_file_01;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_02;
+        fromRegsPort_sig_reg_file_02 = ISA.io_fromRegsPort_reg_file_02;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_03;
+        fromRegsPort_sig_reg_file_03 = ISA.io_fromRegsPort_reg_file_03;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_04;
+        fromRegsPort_sig_reg_file_04 = ISA.io_fromRegsPort_reg_file_04;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_05;
+        fromRegsPort_sig_reg_file_05 = ISA.io_fromRegsPort_reg_file_05;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_06;
+        fromRegsPort_sig_reg_file_06 = ISA.io_fromRegsPort_reg_file_06;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_07;
+        fromRegsPort_sig_reg_file_07 = ISA.io_fromRegsPort_reg_file_07;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_08;
+        fromRegsPort_sig_reg_file_08 = ISA.io_fromRegsPort_reg_file_08;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_09;
+        fromRegsPort_sig_reg_file_09 = ISA.io_fromRegsPort_reg_file_09;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_10;
+        fromRegsPort_sig_reg_file_10 = ISA.io_fromRegsPort_reg_file_10;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_11;
+        fromRegsPort_sig_reg_file_11 = ISA.io_fromRegsPort_reg_file_11;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_12;
+        fromRegsPort_sig_reg_file_12 = ISA.io_fromRegsPort_reg_file_12;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_13;
+        fromRegsPort_sig_reg_file_13 = ISA.io_fromRegsPort_reg_file_13;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_14;
+        fromRegsPort_sig_reg_file_14 = ISA.io_fromRegsPort_reg_file_14;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_15;
+        fromRegsPort_sig_reg_file_15 = ISA.io_fromRegsPort_reg_file_15;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_16;
+        fromRegsPort_sig_reg_file_16 = ISA.io_fromRegsPort_reg_file_16;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_17;
+        fromRegsPort_sig_reg_file_17 = ISA.io_fromRegsPort_reg_file_17;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_18;
+        fromRegsPort_sig_reg_file_18 = ISA.io_fromRegsPort_reg_file_18;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_19;
+        fromRegsPort_sig_reg_file_19 = ISA.io_fromRegsPort_reg_file_19;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_20;
+        fromRegsPort_sig_reg_file_20 = ISA.io_fromRegsPort_reg_file_20;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_21;
+        fromRegsPort_sig_reg_file_21 = ISA.io_fromRegsPort_reg_file_21;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_22;
+        fromRegsPort_sig_reg_file_22 = ISA.io_fromRegsPort_reg_file_22;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_23;
+        fromRegsPort_sig_reg_file_23 = ISA.io_fromRegsPort_reg_file_23;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_24;
+        fromRegsPort_sig_reg_file_24 = ISA.io_fromRegsPort_reg_file_24;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_25;
+        fromRegsPort_sig_reg_file_25 = ISA.io_fromRegsPort_reg_file_25;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_26;
+        fromRegsPort_sig_reg_file_26 = ISA.io_fromRegsPort_reg_file_26;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_27;
+        fromRegsPort_sig_reg_file_27 = ISA.io_fromRegsPort_reg_file_27;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_28;
+        fromRegsPort_sig_reg_file_28 = ISA.io_fromRegsPort_reg_file_28;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_29;
+        fromRegsPort_sig_reg_file_29 = ISA.io_fromRegsPort_reg_file_29;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_30;
+        fromRegsPort_sig_reg_file_30 = ISA.io_fromRegsPort_reg_file_30;
+    endfunction
+    function unsigned fromRegsPort_sig_reg_file_31;
+        fromRegsPort_sig_reg_file_31 = ISA.io_fromRegsPort_reg_file_31;
+    endfunction
+    function unsigned toMemoryPort_sig_addrIn;
+        toMemoryPort_sig_addrIn = ISA.io_toMemoryPort_addrIn;
+    endfunction
+    function unsigned toMemoryPort_sig_dataIn;
+        toMemoryPort_sig_dataIn = ISA.io_toMemoryPort_dataIn;
+    endfunction
+    function ME_MaskType toMemoryPort_sig_mask;
+        toMemoryPort_sig_mask = ISA.io_toMemoryPort_mask;
+    endfunction
+    function ME_AccessType toMemoryPort_sig_req;
+        toMemoryPort_sig_req = ISA.io_toMemoryPort_req;
+    endfunction
+    function unsigned toRegsPort_sig_dst;
+        toRegsPort_sig_dst = ISA.io_toRegsPort_dst;
+    endfunction
+    function unsigned toRegsPort_sig_dstData;
+        toRegsPort_sig_dstData = ISA.io_toRegsPort_dstData;
+    endfunction
+
+
+    // VISIBLE REGISTERS //
+    function unsigned memoryAccess_addrIn;
+        memoryAccess_addrIn = ISA.memoryAccess_signal_r_addrIn;
+    endfunction
+    function unsigned memoryAccess_dataIn;
+        memoryAccess_dataIn = ISA.memoryAccess_signal_r_dataIn;
+    endfunction
+    function ME_MaskType memoryAccess_mask;
+        memoryAccess_mask = ISA.memoryAccess_signal_r_mask;
+    endfunction
+    function ME_AccessType memoryAccess_req;
+        memoryAccess_req = ISA.memoryAccess_signal_r_req;
+    endfunction
+    function unsigned pcReg;
+        pcReg = ISA.pcReg_signal_r;
+    endfunction
+    function unsigned regfileWrite_dst;
+        regfileWrite_dst = ISA.regfileWrite_signal_r_dst;
+    endfunction
+    function unsigned regfileWrite_dstData;
+        regfileWrite_dstData = ISA.regfileWrite_signal_r_dstData;
+    endfunction
+
+
+    // STATES //
+    --macro execute_4 : Bool := 1 end macro;
+    --macro execute_5 : Bool := 1 end macro;
+    --macro execute_11 : Bool := 1 end macro;
+    --macro execute_12 : Bool := 1 end macro;
+    --macro fetch_16 : Bool := 1 end macro;
+    --macro fetch_17 : Bool := 1 end macro;
+
+
+    // OPERATIONS //
+    sequence reset_sequence;
+        //DISGNER REFER TO MODEL RESET SIGNAL HERE
+                                   (ISA.reset == 1'b1);
+    endsequence
+    property reset_p;
+        reset_sequence |=>
+            t ##0 fetch_16() and
+                t ##0 memoryAccess_addrIn() == 0 and
+        t ##0 memoryAccess_dataIn() == 0 and
+        t ##0 memoryAccess_mask() == mt_w and
+        t ##0 memoryAccess_req() == me_rd and
+        t ##0 pcReg() == 0 and
+        t ##0 regfileWrite_dst() == 0 and
+        t ##0 regfileWrite_dstData() == 0 and
+        t ##0 toMemoryPort_sig_addrIn() == 0 and
+        t ##0 toMemoryPort_sig_dataIn() == 0 and
+        t ##0 toMemoryPort_sig_mask() == mt_w and
+        t ##0 toMemoryPort_sig_req() == me_rd and
+        t ##0 fromMemoryPort_notify() == 0 and
+        t ##0 toMemoryPort_notify() == 1 and
+        t ##0 toRegsPort_notify() == 0;
+    endproperty
+    reset_a: assert property (reset_p);
+
+    property execute_4_write_0_p(o);
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 execute_4() and
+                                        // trigger //
+                                        t ##0 toMemoryPort_sync()
+            implies
+            t_end(o) ##0 execute_5() and
+                t_end(o) ##0 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t_end(o) ##0 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t_end(o) ##0 memoryAccess_mask() == memoryAccess_mask_0 and
+        t_end(o) ##0 memoryAccess_req() == memoryAccess_req_0 and
+        t_end(o) ##0 pcReg() == pcReg_0 and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        during_o (t, 1, t_end(o), -1, fromMemoryPort_notify() == 0) and
+            t_end(o) ##0 fromMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toMemoryPort_notify() == 0) and
+            during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    execute_4_write_0_a: assert property (disable iff (reset) execute_4_write_0_p(1)); //ASSIGN t_end offset here
+
+    property execute_5_read_1_p(o);
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(pcReg_0, pcReg()) and
+            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                    // Conceptual State //
+                    t ##0 execute_5() and
+                        // trigger //
+                        t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (4 + pcReg_0) and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    execute_5_read_1_a: assert property (disable iff (reset) execute_5_read_1_p(1)); //ASSIGN t_end offset here
+
+    property execute_11_write_2_p(o);
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 execute_11() and
+                                        // trigger //
+                                        t ##0 toMemoryPort_sync()
+            implies
+            t_end(o) ##0 execute_12() and
+                t_end(o) ##0 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t_end(o) ##0 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t_end(o) ##0 memoryAccess_mask() == memoryAccess_mask_0 and
+        t_end(o) ##0 memoryAccess_req() == memoryAccess_req_0 and
+        t_end(o) ##0 pcReg() == pcReg_0 and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        during_o (t, 1, t_end(o), -1, fromMemoryPort_notify() == 0) and
+            t_end(o) ##0 fromMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toMemoryPort_notify() == 0) and
+            during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    execute_11_write_2_a: assert property (disable iff (reset) execute_11_write_2_p(1)); //ASSIGN t_end offset here
+
+    property execute_12_read_3_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(pcReg_0, pcReg()) and
+                t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                    // Conceptual State //
+                    t ##0 execute_12() and
+                        // trigger //
+                        t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (4 + pcReg_0) and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == fromMemoryPort_sig_loadedData_0 and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        t_end(o) ##0 toRegsPort_sig_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 toRegsPort_sig_dstData() == fromMemoryPort_sig_loadedData_0 and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+            t_end(o) ##0 toRegsPort_notify() == 1;
+    endproperty;
+    execute_12_read_3_a: assert property (disable iff (reset) execute_12_read_3_p(1)); //ASSIGN t_end offset here
+
+    property fetch_16_write_4_p(o);
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 fetch_16() and
+                                        // trigger //
+                                        t ##0 toMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_17() and
+                t_end(o) ##0 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t_end(o) ##0 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t_end(o) ##0 memoryAccess_mask() == memoryAccess_mask_0 and
+        t_end(o) ##0 memoryAccess_req() == memoryAccess_req_0 and
+        t_end(o) ##0 pcReg() == pcReg_0 and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        during_o (t, 1, t_end(o), -1, fromMemoryPort_notify() == 0) and
+            t_end(o) ##0 fromMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toMemoryPort_notify() == 0) and
+            during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    fetch_16_write_4_a: assert property (disable iff (reset) fetch_16_write_4_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_5_p(o);
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(pcReg_0, pcReg()) and
+            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                    // Conceptual State //
+                    t ##0 fetch_17() and
+                        // trigger //
+                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_s)) and
+                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_u)) and
+                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_j)) and
+                                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_i_i)) and
+                                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_i_l)) and
+                                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_i_j)) and
+                                                        t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == pcReg_0 and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == pcReg_0 and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == pcReg_0 and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    fetch_17_read_5_a: assert property (disable iff (reset) fetch_17_read_5_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_6_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned fromRegsPort_sig_reg_file_01_0;
+        unsigned fromRegsPort_sig_reg_file_02_0;
+        unsigned fromRegsPort_sig_reg_file_03_0;
+        unsigned fromRegsPort_sig_reg_file_04_0;
+        unsigned fromRegsPort_sig_reg_file_05_0;
+        unsigned fromRegsPort_sig_reg_file_06_0;
+        unsigned fromRegsPort_sig_reg_file_07_0;
+        unsigned fromRegsPort_sig_reg_file_08_0;
+        unsigned fromRegsPort_sig_reg_file_09_0;
+        unsigned fromRegsPort_sig_reg_file_10_0;
+        unsigned fromRegsPort_sig_reg_file_11_0;
+        unsigned fromRegsPort_sig_reg_file_12_0;
+        unsigned fromRegsPort_sig_reg_file_13_0;
+        unsigned fromRegsPort_sig_reg_file_14_0;
+        unsigned fromRegsPort_sig_reg_file_15_0;
+        unsigned fromRegsPort_sig_reg_file_16_0;
+        unsigned fromRegsPort_sig_reg_file_17_0;
+        unsigned fromRegsPort_sig_reg_file_18_0;
+        unsigned fromRegsPort_sig_reg_file_19_0;
+        unsigned fromRegsPort_sig_reg_file_20_0;
+        unsigned fromRegsPort_sig_reg_file_21_0;
+        unsigned fromRegsPort_sig_reg_file_22_0;
+        unsigned fromRegsPort_sig_reg_file_23_0;
+        unsigned fromRegsPort_sig_reg_file_24_0;
+        unsigned fromRegsPort_sig_reg_file_25_0;
+        unsigned fromRegsPort_sig_reg_file_26_0;
+        unsigned fromRegsPort_sig_reg_file_27_0;
+        unsigned fromRegsPort_sig_reg_file_28_0;
+        unsigned fromRegsPort_sig_reg_file_29_0;
+        unsigned fromRegsPort_sig_reg_file_30_0;
+        unsigned fromRegsPort_sig_reg_file_31_0;
+        unsigned pcReg_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_01()) and
+                t ##0 hold(fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_02()) and
+                    t ##0 hold(fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_03()) and
+                        t ##0 hold(fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_04()) and
+                            t ##0 hold(fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_05()) and
+                                t ##0 hold(fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_06()) and
+                                    t ##0 hold(fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_07()) and
+                                        t ##0 hold(fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_08()) and
+                                            t ##0 hold(fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_09()) and
+                                                t ##0 hold(fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_10()) and
+                                                    t ##0 hold(fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_11()) and
+                                                        t ##0 hold(fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_12()) and
+                                                            t ##0 hold(fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_13()) and
+                                                                t ##0 hold(fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_14()) and
+                                                                    t ##0 hold(fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_15()) and
+                                                                        t ##0 hold(fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_16()) and
+                                                                            t ##0 hold(fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_17()) and
+                                                                                t ##0 hold(fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_18()) and
+                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_19()) and
+                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_20()) and
+                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_21()) and
+                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_22()) and
+                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_23()) and
+                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_24()) and
+                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_25()) and
+                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_26()) and
+                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_27()) and
+                                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_28()) and
+                                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_29()) and
+                                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_30()) and
+                                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_31_0, fromRegsPort_sig_reg_file_31()) and
+                                                                                                                                        t ##0 hold(pcReg_0, pcReg()) and
+                                                                                                                                            // Conceptual State //
+                                                                                                                                            t ##0 fetch_17() and
+                                                                                                                                                // trigger //
+                                                                                                                                                t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_r) and
+                                                                                                                                                    t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (4 + pcReg_0) and
+        t_end(o) ##0 regfileWrite_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 regfileWrite_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0))) and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        t_end(o) ##0 toRegsPort_sig_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 toRegsPort_sig_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0))) and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+            t_end(o) ##0 toRegsPort_notify() == 1;
+    endproperty;
+    fetch_17_read_6_a: assert property (disable iff (reset) fetch_17_read_6_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_7_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned fromRegsPort_sig_reg_file_01_0;
+        unsigned fromRegsPort_sig_reg_file_02_0;
+        unsigned fromRegsPort_sig_reg_file_03_0;
+        unsigned fromRegsPort_sig_reg_file_04_0;
+        unsigned fromRegsPort_sig_reg_file_05_0;
+        unsigned fromRegsPort_sig_reg_file_06_0;
+        unsigned fromRegsPort_sig_reg_file_07_0;
+        unsigned fromRegsPort_sig_reg_file_08_0;
+        unsigned fromRegsPort_sig_reg_file_09_0;
+        unsigned fromRegsPort_sig_reg_file_10_0;
+        unsigned fromRegsPort_sig_reg_file_11_0;
+        unsigned fromRegsPort_sig_reg_file_12_0;
+        unsigned fromRegsPort_sig_reg_file_13_0;
+        unsigned fromRegsPort_sig_reg_file_14_0;
+        unsigned fromRegsPort_sig_reg_file_15_0;
+        unsigned fromRegsPort_sig_reg_file_16_0;
+        unsigned fromRegsPort_sig_reg_file_17_0;
+        unsigned fromRegsPort_sig_reg_file_18_0;
+        unsigned fromRegsPort_sig_reg_file_19_0;
+        unsigned fromRegsPort_sig_reg_file_20_0;
+        unsigned fromRegsPort_sig_reg_file_21_0;
+        unsigned fromRegsPort_sig_reg_file_22_0;
+        unsigned fromRegsPort_sig_reg_file_23_0;
+        unsigned fromRegsPort_sig_reg_file_24_0;
+        unsigned fromRegsPort_sig_reg_file_25_0;
+        unsigned fromRegsPort_sig_reg_file_26_0;
+        unsigned fromRegsPort_sig_reg_file_27_0;
+        unsigned fromRegsPort_sig_reg_file_28_0;
+        unsigned fromRegsPort_sig_reg_file_29_0;
+        unsigned fromRegsPort_sig_reg_file_30_0;
+        unsigned fromRegsPort_sig_reg_file_31_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_01()) and
+                t ##0 hold(fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_02()) and
+                    t ##0 hold(fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_03()) and
+                        t ##0 hold(fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_04()) and
+                            t ##0 hold(fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_05()) and
+                                t ##0 hold(fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_06()) and
+                                    t ##0 hold(fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_07()) and
+                                        t ##0 hold(fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_08()) and
+                                            t ##0 hold(fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_09()) and
+                                                t ##0 hold(fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_10()) and
+                                                    t ##0 hold(fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_11()) and
+                                                        t ##0 hold(fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_12()) and
+                                                            t ##0 hold(fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_13()) and
+                                                                t ##0 hold(fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_14()) and
+                                                                    t ##0 hold(fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_15()) and
+                                                                        t ##0 hold(fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_16()) and
+                                                                            t ##0 hold(fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_17()) and
+                                                                                t ##0 hold(fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_18()) and
+                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_19()) and
+                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_20()) and
+                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_21()) and
+                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_22()) and
+                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_23()) and
+                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_24()) and
+                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_25()) and
+                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_26()) and
+                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_27()) and
+                                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_28()) and
+                                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_29()) and
+                                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_30()) and
+                                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_31_0, fromRegsPort_sig_reg_file_31()) and
+                                                                                                                                        t ##0 hold(pcReg_0, pcReg()) and
+                                                                                                                                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                                                                                                                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                                                                                                                                    // Conceptual State //
+                                                                                                                                                    t ##0 fetch_17() and
+                                                                                                                                                        // trigger //
+                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                                                                                                                                                            t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_b) and
+                                                                                                                                                                t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0))), fromMemoryPort_sig_loadedData_0, pcReg_0) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0))), fromMemoryPort_sig_loadedData_0, pcReg_0) and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0))), fromMemoryPort_sig_loadedData_0, pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    fetch_17_read_7_a: assert property (disable iff (reset) fetch_17_read_7_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_8_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned fromRegsPort_sig_reg_file_01_0;
+        unsigned fromRegsPort_sig_reg_file_02_0;
+        unsigned fromRegsPort_sig_reg_file_03_0;
+        unsigned fromRegsPort_sig_reg_file_04_0;
+        unsigned fromRegsPort_sig_reg_file_05_0;
+        unsigned fromRegsPort_sig_reg_file_06_0;
+        unsigned fromRegsPort_sig_reg_file_07_0;
+        unsigned fromRegsPort_sig_reg_file_08_0;
+        unsigned fromRegsPort_sig_reg_file_09_0;
+        unsigned fromRegsPort_sig_reg_file_10_0;
+        unsigned fromRegsPort_sig_reg_file_11_0;
+        unsigned fromRegsPort_sig_reg_file_12_0;
+        unsigned fromRegsPort_sig_reg_file_13_0;
+        unsigned fromRegsPort_sig_reg_file_14_0;
+        unsigned fromRegsPort_sig_reg_file_15_0;
+        unsigned fromRegsPort_sig_reg_file_16_0;
+        unsigned fromRegsPort_sig_reg_file_17_0;
+        unsigned fromRegsPort_sig_reg_file_18_0;
+        unsigned fromRegsPort_sig_reg_file_19_0;
+        unsigned fromRegsPort_sig_reg_file_20_0;
+        unsigned fromRegsPort_sig_reg_file_21_0;
+        unsigned fromRegsPort_sig_reg_file_22_0;
+        unsigned fromRegsPort_sig_reg_file_23_0;
+        unsigned fromRegsPort_sig_reg_file_24_0;
+        unsigned fromRegsPort_sig_reg_file_25_0;
+        unsigned fromRegsPort_sig_reg_file_26_0;
+        unsigned fromRegsPort_sig_reg_file_27_0;
+        unsigned fromRegsPort_sig_reg_file_28_0;
+        unsigned fromRegsPort_sig_reg_file_29_0;
+        unsigned fromRegsPort_sig_reg_file_30_0;
+        unsigned fromRegsPort_sig_reg_file_31_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_01()) and
+                t ##0 hold(fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_02()) and
+                    t ##0 hold(fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_03()) and
+                        t ##0 hold(fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_04()) and
+                            t ##0 hold(fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_05()) and
+                                t ##0 hold(fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_06()) and
+                                    t ##0 hold(fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_07()) and
+                                        t ##0 hold(fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_08()) and
+                                            t ##0 hold(fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_09()) and
+                                                t ##0 hold(fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_10()) and
+                                                    t ##0 hold(fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_11()) and
+                                                        t ##0 hold(fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_12()) and
+                                                            t ##0 hold(fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_13()) and
+                                                                t ##0 hold(fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_14()) and
+                                                                    t ##0 hold(fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_15()) and
+                                                                        t ##0 hold(fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_16()) and
+                                                                            t ##0 hold(fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_17()) and
+                                                                                t ##0 hold(fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_18()) and
+                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_19()) and
+                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_20()) and
+                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_21()) and
+                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_22()) and
+                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_23()) and
+                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_24()) and
+                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_25()) and
+                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_26()) and
+                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_27()) and
+                                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_28()) and
+                                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_29()) and
+                                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_30()) and
+                                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_31_0, fromRegsPort_sig_reg_file_31()) and
+                                                                                                                                        t ##0 hold(pcReg_0, pcReg()) and
+                                                                                                                                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                                                                                                                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                                                                                                                                    // Conceptual State //
+                                                                                                                                                    t ##0 fetch_17() and
+                                                                                                                                                        // trigger //
+                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                                                                                                                                                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                                                                                                                                                                t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_s) and
+                                                                                                                                                                    t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 execute_4() and
+                t_end(o) ##0 memoryAccess_addrIn() == getALUresult(alu_add, readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_dataIn() == readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_req() == me_wr and
+        t_end(o) ##0 pcReg() == pcReg_0 and
+        t_end(o) ##0 regfileWrite_dst() == regfileWrite_dst_0 and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == getALUresult(alu_add, readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs2Addr(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_wr and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    fetch_17_read_8_a: assert property (disable iff (reset) fetch_17_read_8_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_9_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned pcReg_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(pcReg_0, pcReg()) and
+                // Conceptual State //
+                t ##0 fetch_17() and
+                    // trigger //
+                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_s)) and
+                                t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_u) and
+                                    t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (4 + pcReg_0) and
+        t_end(o) ##0 regfileWrite_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 regfileWrite_dstData() == getEncUALUresult(fromMemoryPort_sig_loadedData_0, pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        t_end(o) ##0 toRegsPort_sig_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 toRegsPort_sig_dstData() == getEncUALUresult(fromMemoryPort_sig_loadedData_0, pcReg_0) and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+            t_end(o) ##0 toRegsPort_notify() == 1;
+    endproperty;
+    fetch_17_read_9_a: assert property (disable iff (reset) fetch_17_read_9_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_10_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned pcReg_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(pcReg_0, pcReg()) and
+                // Conceptual State //
+                t ##0 fetch_17() and
+                    // trigger //
+                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_s)) and
+                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_u)) and
+                                    t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_j) and
+                                        t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (pcReg_0 + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (pcReg_0 + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 regfileWrite_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 regfileWrite_dstData() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (pcReg_0 + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        t_end(o) ##0 toRegsPort_sig_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 toRegsPort_sig_dstData() == (4 + pcReg_0) and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+            t_end(o) ##0 toRegsPort_notify() == 1;
+    endproperty;
+    fetch_17_read_10_a: assert property (disable iff (reset) fetch_17_read_10_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_11_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned fromRegsPort_sig_reg_file_01_0;
+        unsigned fromRegsPort_sig_reg_file_02_0;
+        unsigned fromRegsPort_sig_reg_file_03_0;
+        unsigned fromRegsPort_sig_reg_file_04_0;
+        unsigned fromRegsPort_sig_reg_file_05_0;
+        unsigned fromRegsPort_sig_reg_file_06_0;
+        unsigned fromRegsPort_sig_reg_file_07_0;
+        unsigned fromRegsPort_sig_reg_file_08_0;
+        unsigned fromRegsPort_sig_reg_file_09_0;
+        unsigned fromRegsPort_sig_reg_file_10_0;
+        unsigned fromRegsPort_sig_reg_file_11_0;
+        unsigned fromRegsPort_sig_reg_file_12_0;
+        unsigned fromRegsPort_sig_reg_file_13_0;
+        unsigned fromRegsPort_sig_reg_file_14_0;
+        unsigned fromRegsPort_sig_reg_file_15_0;
+        unsigned fromRegsPort_sig_reg_file_16_0;
+        unsigned fromRegsPort_sig_reg_file_17_0;
+        unsigned fromRegsPort_sig_reg_file_18_0;
+        unsigned fromRegsPort_sig_reg_file_19_0;
+        unsigned fromRegsPort_sig_reg_file_20_0;
+        unsigned fromRegsPort_sig_reg_file_21_0;
+        unsigned fromRegsPort_sig_reg_file_22_0;
+        unsigned fromRegsPort_sig_reg_file_23_0;
+        unsigned fromRegsPort_sig_reg_file_24_0;
+        unsigned fromRegsPort_sig_reg_file_25_0;
+        unsigned fromRegsPort_sig_reg_file_26_0;
+        unsigned fromRegsPort_sig_reg_file_27_0;
+        unsigned fromRegsPort_sig_reg_file_28_0;
+        unsigned fromRegsPort_sig_reg_file_29_0;
+        unsigned fromRegsPort_sig_reg_file_30_0;
+        unsigned fromRegsPort_sig_reg_file_31_0;
+        unsigned pcReg_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_01()) and
+                t ##0 hold(fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_02()) and
+                    t ##0 hold(fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_03()) and
+                        t ##0 hold(fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_04()) and
+                            t ##0 hold(fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_05()) and
+                                t ##0 hold(fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_06()) and
+                                    t ##0 hold(fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_07()) and
+                                        t ##0 hold(fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_08()) and
+                                            t ##0 hold(fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_09()) and
+                                                t ##0 hold(fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_10()) and
+                                                    t ##0 hold(fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_11()) and
+                                                        t ##0 hold(fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_12()) and
+                                                            t ##0 hold(fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_13()) and
+                                                                t ##0 hold(fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_14()) and
+                                                                    t ##0 hold(fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_15()) and
+                                                                        t ##0 hold(fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_16()) and
+                                                                            t ##0 hold(fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_17()) and
+                                                                                t ##0 hold(fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_18()) and
+                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_19()) and
+                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_20()) and
+                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_21()) and
+                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_22()) and
+                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_23()) and
+                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_24()) and
+                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_25()) and
+                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_26()) and
+                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_27()) and
+                                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_28()) and
+                                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_29()) and
+                                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_30()) and
+                                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_31_0, fromRegsPort_sig_reg_file_31()) and
+                                                                                                                                        t ##0 hold(pcReg_0, pcReg()) and
+                                                                                                                                            // Conceptual State //
+                                                                                                                                            t ##0 fetch_17() and
+                                                                                                                                                // trigger //
+                                                                                                                                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                                                                                                                                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_s)) and
+                                                                                                                                                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_u)) and
+                                                                                                                                                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_j)) and
+                                                                                                                                                                    t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_i_i) and
+                                                                                                                                                                        t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (4 + pcReg_0) and
+        t_end(o) ##0 regfileWrite_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 regfileWrite_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        t_end(o) ##0 toRegsPort_sig_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 toRegsPort_sig_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)), readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+            t_end(o) ##0 toRegsPort_notify() == 1;
+    endproperty;
+    fetch_17_read_11_a: assert property (disable iff (reset) fetch_17_read_11_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_12_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned fromRegsPort_sig_reg_file_01_0;
+        unsigned fromRegsPort_sig_reg_file_02_0;
+        unsigned fromRegsPort_sig_reg_file_03_0;
+        unsigned fromRegsPort_sig_reg_file_04_0;
+        unsigned fromRegsPort_sig_reg_file_05_0;
+        unsigned fromRegsPort_sig_reg_file_06_0;
+        unsigned fromRegsPort_sig_reg_file_07_0;
+        unsigned fromRegsPort_sig_reg_file_08_0;
+        unsigned fromRegsPort_sig_reg_file_09_0;
+        unsigned fromRegsPort_sig_reg_file_10_0;
+        unsigned fromRegsPort_sig_reg_file_11_0;
+        unsigned fromRegsPort_sig_reg_file_12_0;
+        unsigned fromRegsPort_sig_reg_file_13_0;
+        unsigned fromRegsPort_sig_reg_file_14_0;
+        unsigned fromRegsPort_sig_reg_file_15_0;
+        unsigned fromRegsPort_sig_reg_file_16_0;
+        unsigned fromRegsPort_sig_reg_file_17_0;
+        unsigned fromRegsPort_sig_reg_file_18_0;
+        unsigned fromRegsPort_sig_reg_file_19_0;
+        unsigned fromRegsPort_sig_reg_file_20_0;
+        unsigned fromRegsPort_sig_reg_file_21_0;
+        unsigned fromRegsPort_sig_reg_file_22_0;
+        unsigned fromRegsPort_sig_reg_file_23_0;
+        unsigned fromRegsPort_sig_reg_file_24_0;
+        unsigned fromRegsPort_sig_reg_file_25_0;
+        unsigned fromRegsPort_sig_reg_file_26_0;
+        unsigned fromRegsPort_sig_reg_file_27_0;
+        unsigned fromRegsPort_sig_reg_file_28_0;
+        unsigned fromRegsPort_sig_reg_file_29_0;
+        unsigned fromRegsPort_sig_reg_file_30_0;
+        unsigned fromRegsPort_sig_reg_file_31_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_01()) and
+                t ##0 hold(fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_02()) and
+                    t ##0 hold(fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_03()) and
+                        t ##0 hold(fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_04()) and
+                            t ##0 hold(fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_05()) and
+                                t ##0 hold(fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_06()) and
+                                    t ##0 hold(fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_07()) and
+                                        t ##0 hold(fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_08()) and
+                                            t ##0 hold(fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_09()) and
+                                                t ##0 hold(fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_10()) and
+                                                    t ##0 hold(fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_11()) and
+                                                        t ##0 hold(fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_12()) and
+                                                            t ##0 hold(fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_13()) and
+                                                                t ##0 hold(fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_14()) and
+                                                                    t ##0 hold(fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_15()) and
+                                                                        t ##0 hold(fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_16()) and
+                                                                            t ##0 hold(fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_17()) and
+                                                                                t ##0 hold(fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_18()) and
+                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_19()) and
+                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_20()) and
+                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_21()) and
+                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_22()) and
+                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_23()) and
+                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_24()) and
+                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_25()) and
+                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_26()) and
+                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_27()) and
+                                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_28()) and
+                                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_29()) and
+                                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_30()) and
+                                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_31_0, fromRegsPort_sig_reg_file_31()) and
+                                                                                                                                        t ##0 hold(pcReg_0, pcReg()) and
+                                                                                                                                            t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                                                                                                                                // Conceptual State //
+                                                                                                                                                t ##0 fetch_17() and
+                                                                                                                                                    // trigger //
+                                                                                                                                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                                                                                                                                                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_s)) and
+                                                                                                                                                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_u)) and
+                                                                                                                                                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_j)) and
+                                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_i_i)) and
+                                                                                                                                                                            t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_i_l) and
+                                                                                                                                                                                t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 execute_11() and
+                t_end(o) ##0 memoryAccess_addrIn() == getALUresult(alu_add, readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == pcReg_0 and
+        t_end(o) ##0 regfileWrite_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == getALUresult(alu_add, readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)), getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during (next(t, 1), t_end(o), toRegsPort_notify() == 0);
+    endproperty;
+    fetch_17_read_12_a: assert property (disable iff (reset) fetch_17_read_12_p(1)); //ASSIGN t_end offset here
+
+    property fetch_17_read_13_p(o);
+        unsigned fromMemoryPort_sig_loadedData_0;
+        unsigned fromRegsPort_sig_reg_file_01_0;
+        unsigned fromRegsPort_sig_reg_file_02_0;
+        unsigned fromRegsPort_sig_reg_file_03_0;
+        unsigned fromRegsPort_sig_reg_file_04_0;
+        unsigned fromRegsPort_sig_reg_file_05_0;
+        unsigned fromRegsPort_sig_reg_file_06_0;
+        unsigned fromRegsPort_sig_reg_file_07_0;
+        unsigned fromRegsPort_sig_reg_file_08_0;
+        unsigned fromRegsPort_sig_reg_file_09_0;
+        unsigned fromRegsPort_sig_reg_file_10_0;
+        unsigned fromRegsPort_sig_reg_file_11_0;
+        unsigned fromRegsPort_sig_reg_file_12_0;
+        unsigned fromRegsPort_sig_reg_file_13_0;
+        unsigned fromRegsPort_sig_reg_file_14_0;
+        unsigned fromRegsPort_sig_reg_file_15_0;
+        unsigned fromRegsPort_sig_reg_file_16_0;
+        unsigned fromRegsPort_sig_reg_file_17_0;
+        unsigned fromRegsPort_sig_reg_file_18_0;
+        unsigned fromRegsPort_sig_reg_file_19_0;
+        unsigned fromRegsPort_sig_reg_file_20_0;
+        unsigned fromRegsPort_sig_reg_file_21_0;
+        unsigned fromRegsPort_sig_reg_file_22_0;
+        unsigned fromRegsPort_sig_reg_file_23_0;
+        unsigned fromRegsPort_sig_reg_file_24_0;
+        unsigned fromRegsPort_sig_reg_file_25_0;
+        unsigned fromRegsPort_sig_reg_file_26_0;
+        unsigned fromRegsPort_sig_reg_file_27_0;
+        unsigned fromRegsPort_sig_reg_file_28_0;
+        unsigned fromRegsPort_sig_reg_file_29_0;
+        unsigned fromRegsPort_sig_reg_file_30_0;
+        unsigned fromRegsPort_sig_reg_file_31_0;
+        unsigned pcReg_0;
+        // hold //
+        t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+            t ##0 hold(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_01()) and
+                t ##0 hold(fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_02()) and
+                    t ##0 hold(fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_03()) and
+                        t ##0 hold(fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_04()) and
+                            t ##0 hold(fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_05()) and
+                                t ##0 hold(fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_06()) and
+                                    t ##0 hold(fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_07()) and
+                                        t ##0 hold(fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_08()) and
+                                            t ##0 hold(fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_09()) and
+                                                t ##0 hold(fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_10()) and
+                                                    t ##0 hold(fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_11()) and
+                                                        t ##0 hold(fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_12()) and
+                                                            t ##0 hold(fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_13()) and
+                                                                t ##0 hold(fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_14()) and
+                                                                    t ##0 hold(fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_15()) and
+                                                                        t ##0 hold(fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_16()) and
+                                                                            t ##0 hold(fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_17()) and
+                                                                                t ##0 hold(fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_18()) and
+                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_19()) and
+                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_20()) and
+                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_21()) and
+                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_22()) and
+                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_23()) and
+                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_24()) and
+                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_25()) and
+                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_26()) and
+                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_27()) and
+                                                                                                                        t ##0 hold(fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_28()) and
+                                                                                                                            t ##0 hold(fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_29()) and
+                                                                                                                                t ##0 hold(fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_30()) and
+                                                                                                                                    t ##0 hold(fromRegsPort_sig_reg_file_31_0, fromRegsPort_sig_reg_file_31()) and
+                                                                                                                                        t ##0 hold(pcReg_0, pcReg()) and
+                                                                                                                                            // Conceptual State //
+                                                                                                                                            t ##0 fetch_17() and
+                                                                                                                                                // trigger //
+                                                                                                                                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_r)) and
+                                                                                                                                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_b)) and
+                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_s)) and
+                                                                                                                                                            t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_u)) and
+                                                                                                                                                                t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_j)) and
+                                                                                                                                                                    t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_i_i)) and
+                                                                                                                                                                        t ##0 !((getEncType(fromMemoryPort_sig_loadedData()) == enc_i_l)) and
+                                                                                                                                                                            t ##0 (getEncType(fromMemoryPort_sig_loadedData()) == enc_i_j) and
+                                                                                                                                                                                t ##0 fromMemoryPort_sync()
+            implies
+            t_end(o) ##0 fetch_16() and
+                t_end(o) ##0 memoryAccess_addrIn() == (readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)) + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 memoryAccess_dataIn() == 0 and
+        t_end(o) ##0 memoryAccess_mask() == mt_w and
+        t_end(o) ##0 memoryAccess_req() == me_rd and
+        t_end(o) ##0 pcReg() == (readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)) + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 regfileWrite_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 regfileWrite_dstData() == (4 + pcReg_0) and
+        t_end(o) ##0 toMemoryPort_sig_addrIn() == (readRegfile(fromRegsPort_sig_reg_file_01_0, fromRegsPort_sig_reg_file_02_0, fromRegsPort_sig_reg_file_03_0, fromRegsPort_sig_reg_file_04_0, fromRegsPort_sig_reg_file_05_0, fromRegsPort_sig_reg_file_06_0, fromRegsPort_sig_reg_file_07_0, fromRegsPort_sig_reg_file_08_0, fromRegsPort_sig_reg_file_09_0, fromRegsPort_sig_reg_file_10_0, fromRegsPort_sig_reg_file_11_0, fromRegsPort_sig_reg_file_12_0, fromRegsPort_sig_reg_file_13_0, fromRegsPort_sig_reg_file_14_0, fromRegsPort_sig_reg_file_15_0, fromRegsPort_sig_reg_file_16_0, fromRegsPort_sig_reg_file_17_0, fromRegsPort_sig_reg_file_18_0, fromRegsPort_sig_reg_file_19_0, fromRegsPort_sig_reg_file_20_0, fromRegsPort_sig_reg_file_21_0, fromRegsPort_sig_reg_file_22_0, fromRegsPort_sig_reg_file_23_0, fromRegsPort_sig_reg_file_24_0, fromRegsPort_sig_reg_file_25_0, fromRegsPort_sig_reg_file_26_0, fromRegsPort_sig_reg_file_27_0, fromRegsPort_sig_reg_file_28_0, fromRegsPort_sig_reg_file_29_0, fromRegsPort_sig_reg_file_30_0, fromRegsPort_sig_reg_file_31_0, getRs1Addr(fromMemoryPort_sig_loadedData_0)) + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+        t_end(o) ##0 toMemoryPort_sig_dataIn() == 0 and
+        t_end(o) ##0 toMemoryPort_sig_mask() == mt_w and
+        t_end(o) ##0 toMemoryPort_sig_req() == me_rd and
+        t_end(o) ##0 toRegsPort_sig_dst() == getRdAddr(fromMemoryPort_sig_loadedData_0) and
+        t_end(o) ##0 toRegsPort_sig_dstData() == (4 + pcReg_0) and
+        during (next(t, 1), t_end(o), fromMemoryPort_notify() == 0) and
+            during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+                t_end(o) ##0 toMemoryPort_notify() == 1 and
+        during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+            t_end(o) ##0 toRegsPort_notify() == 1;
+    endproperty;
+    fetch_17_read_13_a: assert property (disable iff (reset) fetch_17_read_13_p(1)); //ASSIGN t_end offset here
+
+    property wait_execute_4_p;
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 execute_4() and
+                                        // trigger //
+                                        t ##0 !(toMemoryPort_sync())
+            implies
+            t ##1 execute_4() and
+                t ##1 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 memoryAccess_mask() == memoryAccess_mask_0 and
+        t ##1 memoryAccess_req() == memoryAccess_req_0 and
+        t ##1 pcReg() == pcReg_0 and
+        t ##1 regfileWrite_dst() == regfileWrite_dst_0 and
+        t ##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t ##1 toMemoryPort_sig_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 toMemoryPort_sig_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 toMemoryPort_sig_mask() == memoryAccess_mask_0 and
+        t ##1 toMemoryPort_sig_req() == memoryAccess_req_0 and
+        t ##1 fromMemoryPort_notify() == 0 and
+        t ##1 toMemoryPort_notify() == 1 and
+        t ##1 toRegsPort_notify() == 0;
+    endproperty;
+    wait_execute_4_a: assert property (disable iff (reset) wait_execute_4_p); //ASSIGN t_end offset here
+
+    property wait_execute_5_p;
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 execute_5() and
+                                        // trigger //
+                                        t ##0 !(fromMemoryPort_sync())
+            implies
+            t ##1 execute_5() and
+                t ##1 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 memoryAccess_mask() == memoryAccess_mask_0 and
+        t ##1 memoryAccess_req() == memoryAccess_req_0 and
+        t ##1 pcReg() == pcReg_0 and
+        t ##1 regfileWrite_dst() == regfileWrite_dst_0 and
+        t ##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t ##1 fromMemoryPort_notify() == 1 and
+        t ##1 toMemoryPort_notify() == 0 and
+        t ##1 toRegsPort_notify() == 0;
+    endproperty;
+    wait_execute_5_a: assert property (disable iff (reset) wait_execute_5_p); //ASSIGN t_end offset here
+
+    property wait_execute_11_p;
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 execute_11() and
+                                        // trigger //
+                                        t ##0 !(toMemoryPort_sync())
+            implies
+            t ##1 execute_11() and
+                t ##1 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 memoryAccess_mask() == memoryAccess_mask_0 and
+        t ##1 memoryAccess_req() == memoryAccess_req_0 and
+        t ##1 pcReg() == pcReg_0 and
+        t ##1 regfileWrite_dst() == regfileWrite_dst_0 and
+        t ##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t ##1 toMemoryPort_sig_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 toMemoryPort_sig_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 toMemoryPort_sig_mask() == memoryAccess_mask_0 and
+        t ##1 toMemoryPort_sig_req() == memoryAccess_req_0 and
+        t ##1 fromMemoryPort_notify() == 0 and
+        t ##1 toMemoryPort_notify() == 1 and
+        t ##1 toRegsPort_notify() == 0;
+    endproperty;
+    wait_execute_11_a: assert property (disable iff (reset) wait_execute_11_p); //ASSIGN t_end offset here
+
+    property wait_execute_12_p;
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 execute_12() and
+                                        // trigger //
+                                        t ##0 !(fromMemoryPort_sync())
+            implies
+            t ##1 execute_12() and
+                t ##1 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 memoryAccess_mask() == memoryAccess_mask_0 and
+        t ##1 memoryAccess_req() == memoryAccess_req_0 and
+        t ##1 pcReg() == pcReg_0 and
+        t ##1 regfileWrite_dst() == regfileWrite_dst_0 and
+        t ##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t ##1 fromMemoryPort_notify() == 1 and
+        t ##1 toMemoryPort_notify() == 0 and
+        t ##1 toRegsPort_notify() == 0;
+    endproperty;
+    wait_execute_12_a: assert property (disable iff (reset) wait_execute_12_p); //ASSIGN t_end offset here
+
+    property wait_fetch_16_p;
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 fetch_16() and
+                                        // trigger //
+                                        t ##0 !(toMemoryPort_sync())
+            implies
+            t ##1 fetch_16() and
+                t ##1 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 memoryAccess_mask() == memoryAccess_mask_0 and
+        t ##1 memoryAccess_req() == memoryAccess_req_0 and
+        t ##1 pcReg() == pcReg_0 and
+        t ##1 regfileWrite_dst() == regfileWrite_dst_0 and
+        t ##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t ##1 toMemoryPort_sig_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 toMemoryPort_sig_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 toMemoryPort_sig_mask() == memoryAccess_mask_0 and
+        t ##1 toMemoryPort_sig_req() == memoryAccess_req_0 and
+        t ##1 fromMemoryPort_notify() == 0 and
+        t ##1 toMemoryPort_notify() == 1 and
+        t ##1 toRegsPort_notify() == 0;
+    endproperty;
+    wait_fetch_16_a: assert property (disable iff (reset) wait_fetch_16_p); //ASSIGN t_end offset here
+
+    property wait_fetch_17_p;
+        unsigned memoryAccess_addrIn_0;
+        unsigned memoryAccess_dataIn_0;
+        ME_MaskType memoryAccess_mask_0;
+        ME_AccessType memoryAccess_req_0;
+        unsigned pcReg_0;
+        unsigned regfileWrite_dst_0;
+        unsigned regfileWrite_dstData_0;
+        // hold //
+        t ##0 hold(memoryAccess_addrIn_0, memoryAccess_addrIn()) and
+            t ##0 hold(memoryAccess_dataIn_0, memoryAccess_dataIn()) and
+                t ##0 hold(memoryAccess_mask_0, memoryAccess_mask()) and
+                    t ##0 hold(memoryAccess_req_0, memoryAccess_req()) and
+                        t ##0 hold(pcReg_0, pcReg()) and
+                            t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+                                t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+                                    // Conceptual State //
+                                    t ##0 fetch_17() and
+                                        // trigger //
+                                        t ##0 !(fromMemoryPort_sync())
+            implies
+            t ##1 fetch_17() and
+                t ##1 memoryAccess_addrIn() == memoryAccess_addrIn_0 and
+        t ##1 memoryAccess_dataIn() == memoryAccess_dataIn_0 and
+        t ##1 memoryAccess_mask() == memoryAccess_mask_0 and
+        t ##1 memoryAccess_req() == memoryAccess_req_0 and
+        t ##1 pcReg() == pcReg_0 and
+        t ##1 regfileWrite_dst() == regfileWrite_dst_0 and
+        t ##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+        t ##1 fromMemoryPort_notify() == 1 and
+        t ##1 toMemoryPort_notify() == 0 and
+        t ##1 toRegsPort_notify() == 0;
+    endproperty;
+    wait_fetch_17_a: assert property (disable iff (reset) wait_fetch_17_p); //ASSIGN t_end offset here
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind ISA ISA_verification inst (.*,
+    .reset (ISA.reset));

@@ -1,0 +1,40 @@
+
+completeness TestArray1;
+
+inputs: 
+	clk,
+	rst,
+	m_in,
+	m_in_sync,
+	m_out_sync;
+
+determination_requirements:
+
+//  determined(OutOfFrame);
+//  if not OutOfFrame then
+//    determined(DataOut);
+//  end if;
+
+ determined(m_out_notify);
+ determined(m_in_notify);
+if (m_out_notify) determined(m_out)
+endif;
+
+//local_determination_requirements:
+//at right_hook: determined(word_ID);
+
+
+
+reset_property: reset;
+
+property_graph:
+        reset->run_0_read_0,wait_run_0;
+	run_1_write_1 ->run_0_read_0;
+	run_0_read_0 -> run_1_write_1;
+	run_0_read_0 -> wait_run_1;
+	run_1_write_1 -> wait_run_0;
+	wait_run_0 ->wait_run_0;
+	wait_run_0 -> run_0_read_0;
+	wait_run_1->wait_run_1;
+	wait_run_1->run_1_write_1;
+end completeness;

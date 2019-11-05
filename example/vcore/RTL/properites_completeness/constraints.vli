@@ -1,0 +1,10 @@
+macro unsigned max_wait_dmem := 4; end macro;
+
+constraint bounded_wait :=
+disable iff: !reset_n;
+    if (dmem_enable_o)
+        exists i in 0..(max_wait_dmem-1):
+            next(dmem_valid_i,i);
+        end exists;
+    endif;
+end constraint;

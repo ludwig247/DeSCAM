@@ -1,0 +1,31 @@
+property instr_nop;
+disable iff: !reset_n;
+
+freeze:
+  opcode  = field_opcode(IR) @ t,
+  fetched_instruction = imem_data_i @ t,
+  pc      = PC @ t,
+  new_pc  = (pc+2)[15:0] @ t;
+
+assume:
+// conceptual state
+at t:   conceptual_state;
+
+// trigger
+at t:   opcode == 5'b00101 || opcode == 5'b00011 || opcode > 5'b00111;
+
+prove:
+// conceptual state
+at t+1: conceptual_state;
+
+// outputs
+at t+1: no_dmem_access;                       // no data memory access
+at t: imem_read(new_pc, fetched_instruction); // correct fetch of next instruction
+
+// visible_registers
+at t+1: rf_unchanged;
+at t+1: PC == new_pc;
+at t+1: IR == fetched_instruction;
+
+right_hook: t+1;
+end property;

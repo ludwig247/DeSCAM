@@ -1,0 +1,296 @@
+Connection to IPC server failed.
+Starting IPC Server. (Port = 1925)
+IPC Server started successfully.
+No PseudoColor Visual avaiable, try TrueColor instead
+;; ;# Scheme
+                                        
+                                 Milkyway (TM)
+                                        
+                Version K-2015.06-SP4 for suse64 - Nov 23, 2015 
+                                        
+                    Copyright (c) 1988 - 2015 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+
+Loading /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/scheme/.avntrc
+#t
+ Info: loading setup file(s)
+Info: sourcing installation .synopsys_milkyway.tcl
+Info: sourced /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/auxx/tcllib/astro/milkyway.tbc
+;; configureWindow 0 "25x24+0+0"
+Initialization completed
+;; configureWindow 0 "25x24+211+85"
+;; geOpenLib
+;; setFormField "Open Library" "open ref library for write" "1"
+;; setFormField "Open Library" "read only" "0"
+;; formButton "Open Library" "browse..."
+;; setFormField "Open Library" "open ref library for write" "0"
+;; setFormField "Open Library" "open ref library for write" "1"
+;; setFormField "Open Library" "read only" "0"
+;; setFormField "Open Library" "Library Name" "NG45"
+;; formOK "Open Library"
+Open library "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/Milkyway/NG45" successfully.
+;; geCreateLogicView
+;; setFormField "Create Logic View" "Design db Name" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Front_End/Liberty/NLDM/NangateOpenCellLibrary_typical.db"
+;; setFormField "Create Logic View" "Cell Name" "*"
+;; formOK "Create Logic View"
+;; geCreateLogicView
+Library /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/Milkyway/NG45 has no LOGIC DB attached
+;; formButton "Create Logic View" "addDb"
+'/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Front_End/Liberty/NLDM/NangateOpenCellLibrary_typical.db' imported to library
+;; formOK "Create Logic View"
+;; cmCheckLibrary
+Information: The 'cmCheckLibrary' command will become obsolete in the '2011.09' release. Please use 'check_library' instead. (MWUI-997)
+;; formButton "Check Library" "browse..."
+;; setFormField "Check Library" "Library Name" "NG45"
+;; setFormField "Check Library" "Report File Name" "Report.txt"
+;; formOK "Check Library"
+Technology data dumped to NG45.tf_checker completely.
+Start to load technology file NG45.tf_checker.
+Technology file NG45.tf_checker has been loaded successfully.
+The technology file has been dumped to the working directory as 'NG45.tf_checker'.
+
+---------- Begin of Cell DRC ----------
+
+Checking cell TINV_X1.FRAM...................[OK]
+Checking cell TLAT_X1.FRAM...................[OK]
+Checking cell XNOR2_X1.FRAM..................[OK]
+Checking cell XNOR2_X2.FRAM..................[OK]
+Checking cell XOR2_X1.FRAM...................[OK]
+Checking cell XOR2_X2.FRAM...................[OK]
+Checking cell OAI22_X1.FRAM..................[OK]
+Checking cell OAI22_X2.FRAM..................[OK]
+Checking cell OAI22_X4.FRAM..................[OK]
+Checking cell OAI33_X1.FRAM..................[OK]
+Checking cell OR2_X1.FRAM....................[OK]
+Checking cell OR2_X2.FRAM....................[OK]
+Checking cell OR2_X4.FRAM....................[OK]
+Checking cell OR3_X1.FRAM....................[OK]
+Checking cell OR3_X2.FRAM....................[OK]
+Checking cell OR3_X4.FRAM....................[OK]
+Checking cell OR4_X1.FRAM....................[OK]
+Checking cell OR4_X2.FRAM....................[OK]
+Checking cell OR4_X4.FRAM....................[OK]
+Checking cell SDFFRS_X1.FRAM.................[OK]
+Checking cell SDFFRS_X2.FRAM.................[OK]
+Checking cell SDFFR_X1.FRAM..................[OK]
+Checking cell SDFFR_X2.FRAM..................[OK]
+Checking cell SDFFS_X1.FRAM..................[OK]
+Checking cell SDFFS_X2.FRAM..................[OK]
+Checking cell SDFF_X1.FRAM...................[OK]
+Checking cell SDFF_X2.FRAM...................[OK]
+Checking cell TBUF_X1.FRAM...................[OK]
+Checking cell TBUF_X16.FRAM..................[OK]
+Checking cell TBUF_X2.FRAM...................[OK]
+Checking cell TBUF_X4.FRAM...................[OK]
+Checking cell TBUF_X8.FRAM...................[OK]
+Checking cell NAND3_X2.FRAM..................[OK]
+Checking cell NAND3_X4.FRAM..................[OK]
+Checking cell NAND4_X1.FRAM..................[OK]
+Checking cell NAND4_X2.FRAM..................[OK]
+Checking cell NAND4_X4.FRAM..................[OK]
+Checking cell NOR2_X1.FRAM...................[OK]
+Checking cell NOR2_X2.FRAM...................[OK]
+Checking cell NOR2_X4.FRAM...................[OK]
+Checking cell NOR3_X1.FRAM...................[OK]
+Checking cell NOR3_X2.FRAM...................[OK]
+Checking cell NOR3_X4.FRAM...................[OK]
+Checking cell NOR4_X1.FRAM...................[OK]
+Checking cell NOR4_X2.FRAM...................[OK]
+Checking cell NOR4_X4.FRAM...................[OK]
+Checking cell OAI211_X1.FRAM.................[OK]
+Checking cell OAI211_X2.FRAM.................[OK]
+Checking cell OAI211_X4.FRAM.................[OK]
+Checking cell OAI21_X1.FRAM..................[OK]
+Checking cell OAI21_X2.FRAM..................[OK]
+Checking cell OAI21_X4.FRAM..................[OK]
+Checking cell OAI221_X1.FRAM.................[OK]
+Checking cell OAI221_X2.FRAM.................[OK]
+Checking cell OAI221_X4.FRAM.................[OK]
+Checking cell OAI222_X1.FRAM.................[OK]
+Checking cell OAI222_X2.FRAM.................[OK]
+Checking cell OAI222_X4.FRAM.................[OK]
+Checking cell DLH_X1.FRAM....................[OK]
+Checking cell DLH_X2.FRAM....................[OK]
+Checking cell DLL_X1.FRAM....................[OK]
+Checking cell DLL_X2.FRAM....................[OK]
+Checking cell FA_X1.FRAM.....................[OK]
+Checking cell FILLCELL_X1.FRAM...............[OK]
+Checking cell FILLCELL_X16.FRAM..............[OK]
+Checking cell FILLCELL_X2.FRAM...............[OK]
+Checking cell FILLCELL_X32.FRAM..............[OK]
+Checking cell FILLCELL_X4.FRAM...............[OK]
+Checking cell FILLCELL_X8.FRAM...............[OK]
+Checking cell HA_X1.FRAM.....................[OK]
+Checking cell INV_X1.FRAM....................[OK]
+Checking cell INV_X16.FRAM...................[OK]
+Checking cell INV_X2.FRAM....................[OK]
+Checking cell INV_X32.FRAM...................[OK]
+Checking cell INV_X4.FRAM....................[OK]
+Checking cell INV_X8.FRAM....................[OK]
+Checking cell LOGIC0_X1.FRAM.................[OK]
+Checking cell LOGIC1_X1.FRAM.................[OK]
+Checking cell MUX2_X1.FRAM...................[OK]
+Checking cell MUX2_X2.FRAM...................[OK]
+Checking cell NAND2_X1.FRAM..................[OK]
+Checking cell NAND2_X2.FRAM..................[OK]
+Checking cell NAND2_X4.FRAM..................[OK]
+Checking cell NAND3_X1.FRAM..................[OK]
+Checking cell AOI22_X4.FRAM..................[OK]
+Checking cell BUF_X1.FRAM....................[OK]
+Checking cell BUF_X16.FRAM...................[OK]
+Checking cell BUF_X2.FRAM....................[OK]
+Checking cell BUF_X32.FRAM...................[OK]
+Checking cell BUF_X4.FRAM....................[OK]
+Checking cell BUF_X8.FRAM....................[OK]
+Checking cell CLKBUF_X1.FRAM.................[OK]
+Checking cell CLKBUF_X2.FRAM.................[OK]
+Checking cell CLKBUF_X3.FRAM.................[OK]
+Checking cell CLKGATETST_X1.FRAM.............[OK]
+Checking cell CLKGATETST_X2.FRAM.............[OK]
+Checking cell CLKGATETST_X4.FRAM.............[OK]
+Checking cell CLKGATETST_X8.FRAM.............[OK]
+Checking cell CLKGATE_X1.FRAM................[OK]
+Checking cell CLKGATE_X2.FRAM................[OK]
+Checking cell CLKGATE_X4.FRAM................[OK]
+Checking cell CLKGATE_X8.FRAM................[OK]
+Checking cell DFFRS_X1.FRAM..................[OK]
+Checking cell DFFRS_X2.FRAM..................[OK]
+Checking cell DFFR_X1.FRAM...................[OK]
+Checking cell DFFR_X2.FRAM...................[OK]
+Checking cell DFFS_X1.FRAM...................[OK]
+Checking cell DFFS_X2.FRAM...................[OK]
+Checking cell DFF_X1.FRAM....................[OK]
+Checking cell DFF_X2.FRAM....................[OK]
+Checking cell AND2_X1.FRAM...................[OK]
+Checking cell AND2_X2.FRAM...................[OK]
+Checking cell AND2_X4.FRAM...................[OK]
+Checking cell AND3_X1.FRAM...................[OK]
+Checking cell AND3_X2.FRAM...................[OK]
+Checking cell AND3_X4.FRAM...................[OK]
+Checking cell AND4_X1.FRAM...................[OK]
+Checking cell AND4_X2.FRAM...................[OK]
+Checking cell AND4_X4.FRAM...................[OK]
+Checking cell ANTENNA_X1.FRAM................[OK]
+Checking cell AOI211_X1.FRAM.................[OK]
+Checking cell AOI211_X2.FRAM.................[OK]
+Checking cell AOI211_X4.FRAM.................[OK]
+Checking cell AOI21_X1.FRAM..................[OK]
+Checking cell AOI21_X2.FRAM..................[OK]
+Checking cell AOI21_X4.FRAM..................[OK]
+Checking cell AOI221_X1.FRAM.................[OK]
+Checking cell AOI221_X2.FRAM.................[OK]
+Checking cell AOI221_X4.FRAM.................[OK]
+Checking cell AOI222_X1.FRAM.................[OK]
+Checking cell AOI222_X2.FRAM.................[OK]
+Checking cell AOI222_X4.FRAM.................[OK]
+Checking cell AOI22_X1.FRAM..................[OK]
+Checking cell AOI22_X2.FRAM..................[OK]
+
+Total of 134 cells scanned, including
+                    0 Macro cells
+                    0 Module cells
+                    0 IOPad cells
+                  134 Standard cells
+                    0 Cover cells
+                    0 DoubleHeightStd cells
+                    0 CornerPad cells
+
+Total of 0 scanned cells failed DRC.
+
+Elapsed =    0:00:02, CPU =    0:00:00
+
+---------- End of Cell DRC ----------
+
+;; read_lib
+;; readLibForm "logical"
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" ""
+
+ERROR : Form name (Library Preparation) does not match any active form
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" "NG45"
+
+ERROR : Form name (Library Preparation) does not match any active form
+;; readLibForm "logical"
+;; readLibForm "physical"
+;; readLibForm "logical"
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" "NG45"
+
+ERROR : Form name (Library Preparation) does not match any active form
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" "NG45"
+
+ERROR : Form name (Library Preparation) does not match any active form
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" "NG45"
+
+ERROR : Form name (Library Preparation) does not match any active form
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" "NG45"
+
+;; readLibForm "hide"
+;; geConfirmCloseLib
+;; formYes "Dialog Box"
+...
+[6 times]
+All libraries closed successfully.
+;; iconifyWindow 0
+;; deiconifyWindow 0
+;; read_lib
+;; readLibForm "logical"
+;; gePrepLibs
+
+
+ERROR: (misc-error) in expression: (gePrepLibs)
+Backtrace:
+0*: (gePrepLibs)
+Unbound variable: gePrepLibs
+;; setFormField "Library Preparation" "Library Name" "NG45"
+
+ERROR : Form name (Library Preparation) does not match any active form
+;; readLibForm "Library Name" "shri1704NG45"
+;; readLibForm "initial"
+;; readLibForm "hide"
+;; menuQuit
+;; formYes "Dialog Box"
+Thank you for using Milkyway

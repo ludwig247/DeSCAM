@@ -1,0 +1,50 @@
+module monitor
+{
+
+in<void> frame_pulse;
+shared in<bool> oof;
+shared out<bool> lof;
+
+
+fsm {
+   sections {LOF, N_LOF} = N_LOF;
+   bool oof_var;
+   int cnt;
+   int LOFreset;
+   int LOFset;
+
+   lof.set(false); // init value of shared variable
+
+   @LOF:
+     frame_pulse.wait();
+     oof_var = oof.get();
+     if (oof_var) {
+       cnt=0;
+     } else {
+       if (cnt<LOFreset) {
+         ++cnt;
+       } else {
+         cnt=0;
+         lof.set(false);
+         nextsection = N_LOF;
+       }
+     }
+
+   @N_LOF:
+     frame_pulse.wait();
+     oof_var = oof.get()
+     if (oof_var) {
+       if (cnt<LOFset) {
+         ++cnt;
+       } else {
+         cnt=0;
+         lof.set(true);
+         nextsection = LOF;
+       }
+     } else {
+       cnt = 0;
+     }
+}
+
+};
+

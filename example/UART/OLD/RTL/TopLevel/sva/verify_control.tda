@@ -1,0 +1,71 @@
+import scam_model_types::*;
+
+module verify_control_property_suite(rst);
+
+input rst;        
+
+
+default clocking default_clk @(posedge Control.clk); endclocking
+
+function logic unsigned [31:0] re_flag;
+re_flag = Control.RE_flag_out;
+endfunction
+
+function logic unsigned [31:0] te_flag;
+te_flag = Control.TE_flag_out;
+endfunction
+
+function logic unsigned [31:0] CR_reg;
+CR_reg = Control.regs_signal.cr_reg;
+endfunction
+
+function logic unsigned [31:0] SR_reg;
+SR_reg = Control.regs_signal.sr_reg;
+endfunction
+
+function logic unsigned [31:0] DR_reg;
+DR_reg = Control.regs_signal.dr_reg;
+endfunction
+
+
+function logic unsigned [31:0] DR_reg_from_RX;
+DR_reg_from_RX = Control.shiftreg_to_RX_reg.dr_reg;
+endfunction
+
+
+function  DR_reg_from_RX_sync;
+DR_reg_from_RX_sync = Control.shiftreg_to_RX_reg_sync;
+endfunction
+
+function  DR_reg_from_RX_act;
+DR_reg_from_RX_act = Control.shiftreg_to_RX_reg.r_act;
+endfunction
+
+
+function interrupt_notify;
+interrupt_notify = Control.interrupt_notify;
+endfunction
+
+
+ `include "tidal.sv"
+ 
+ `begin_tda(ops)
+ 
+
+property receive_byte;
+
+
+t##0 
+
+
+
+
+
+
+
+
+ `end_tda
+ 
+ endmodule
+ 
+ bind Control verify_control_property_suite inst_verify_control_property_suite(.*, .rst(Control.rst));

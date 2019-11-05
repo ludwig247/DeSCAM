@@ -1,0 +1,10 @@
+[
+  {
+    "class": "firrtl.transforms.DontTouchAnnotation",
+    "target": "Bus.Bus.req_signal_r"
+  },
+  {
+    "class": "firrtl.transforms.DontTouchAnnotation",
+    "target": "Bus.Bus.resp_signal_r"
+  }
+]

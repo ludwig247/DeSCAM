@@ -1,0 +1,1710 @@
+--Operations -- 
+property reset is
+assume:
+	 reset_sequence;
+prove:
+	 at t: instrFetch_write_2;
+	 at t: CUtoME_data_addrIn = resize(0,32);
+	 at t: CUtoME_data_dataIn = resize(0,32);
+	 at t: CUtoME_data_mask = MT_W;
+	 at t: CUtoME_data_req = ME_RD;
+	 at t: CUtoME_port_sig_addrIn = resize(0,32);
+	 at t: CUtoME_port_sig_dataIn = resize(0,32);
+	 at t: CUtoME_port_sig_mask = MT_W;
+	 at t: CUtoME_port_sig_req = ME_RD;
+	 at t: CS_2_s2_aluFunc = ALU_X;
+	 at t: CS_2_s2_aluOp1Sel = OP_X;
+	 at t: CS_2_s2_aluOp2Sel = OP_X;
+	 at t: CS_3_s2_regfileWrite = false;
+	 at t: CS_3_s2_writeDataSel = WB_X;
+	 at t: CS_3_s3_regfileWrite = false;
+	 at t: CS_3_s3_writeDataSel = WB_X;
+	 at t: DS_s2_encType = ENC_I_I;
+	 at t: DS_s2_imm = resize(0,32);
+	 at t: DS_s2_pc = resize(0,32);
+	 at t: DS_s2_reg1content = resize(0,32);
+	 at t: DS_s2_reg2content = resize(0,32);
+	 at t: DS_s2_regRdAddr = resize(0,32);
+	 at t: DS_s3_aluResult = resize(0,32);
+	 at t: DS_s3_encType = ENC_I_I;
+	 at t: DS_s3_pc = resize(0,32);
+	 at t: DS_s3_regRdAddr = resize(0,32);
+	 at t: loadedData = resize(0,32);
+	 at t: pc = resize(0,32);
+	 at t: CUtoME_port_notify = true;
+	 at t: CUtoRF_port_notify = false;
+	 at t: MEtoCU_port_notify = false;
+end property;
+
+
+property instrFetch_read_0_read_0 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: not(MEtoCU_port_sync);
+prove:
+	 at t_end: instrFetch_read_0;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property instrFetch_read_0_read_1 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: not(MEtoCU_port_sync);
+prove:
+	 at t_end: instrFetch_read_0;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property instrFetch_read_0_read_2 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	RFtoCU_port_sig_reg_file_01_at_t = RFtoCU_port_sig_reg_file_01@t,
+	RFtoCU_port_sig_reg_file_02_at_t = RFtoCU_port_sig_reg_file_02@t,
+	RFtoCU_port_sig_reg_file_03_at_t = RFtoCU_port_sig_reg_file_03@t,
+	RFtoCU_port_sig_reg_file_04_at_t = RFtoCU_port_sig_reg_file_04@t,
+	RFtoCU_port_sig_reg_file_05_at_t = RFtoCU_port_sig_reg_file_05@t,
+	RFtoCU_port_sig_reg_file_06_at_t = RFtoCU_port_sig_reg_file_06@t,
+	RFtoCU_port_sig_reg_file_07_at_t = RFtoCU_port_sig_reg_file_07@t,
+	RFtoCU_port_sig_reg_file_08_at_t = RFtoCU_port_sig_reg_file_08@t,
+	RFtoCU_port_sig_reg_file_09_at_t = RFtoCU_port_sig_reg_file_09@t,
+	RFtoCU_port_sig_reg_file_10_at_t = RFtoCU_port_sig_reg_file_10@t,
+	RFtoCU_port_sig_reg_file_11_at_t = RFtoCU_port_sig_reg_file_11@t,
+	RFtoCU_port_sig_reg_file_12_at_t = RFtoCU_port_sig_reg_file_12@t,
+	RFtoCU_port_sig_reg_file_13_at_t = RFtoCU_port_sig_reg_file_13@t,
+	RFtoCU_port_sig_reg_file_14_at_t = RFtoCU_port_sig_reg_file_14@t,
+	RFtoCU_port_sig_reg_file_15_at_t = RFtoCU_port_sig_reg_file_15@t,
+	RFtoCU_port_sig_reg_file_16_at_t = RFtoCU_port_sig_reg_file_16@t,
+	RFtoCU_port_sig_reg_file_17_at_t = RFtoCU_port_sig_reg_file_17@t,
+	RFtoCU_port_sig_reg_file_18_at_t = RFtoCU_port_sig_reg_file_18@t,
+	RFtoCU_port_sig_reg_file_19_at_t = RFtoCU_port_sig_reg_file_19@t,
+	RFtoCU_port_sig_reg_file_20_at_t = RFtoCU_port_sig_reg_file_20@t,
+	RFtoCU_port_sig_reg_file_21_at_t = RFtoCU_port_sig_reg_file_21@t,
+	RFtoCU_port_sig_reg_file_22_at_t = RFtoCU_port_sig_reg_file_22@t,
+	RFtoCU_port_sig_reg_file_23_at_t = RFtoCU_port_sig_reg_file_23@t,
+	RFtoCU_port_sig_reg_file_24_at_t = RFtoCU_port_sig_reg_file_24@t,
+	RFtoCU_port_sig_reg_file_25_at_t = RFtoCU_port_sig_reg_file_25@t,
+	RFtoCU_port_sig_reg_file_26_at_t = RFtoCU_port_sig_reg_file_26@t,
+	RFtoCU_port_sig_reg_file_27_at_t = RFtoCU_port_sig_reg_file_27@t,
+	RFtoCU_port_sig_reg_file_28_at_t = RFtoCU_port_sig_reg_file_28@t,
+	RFtoCU_port_sig_reg_file_29_at_t = RFtoCU_port_sig_reg_file_29@t,
+	RFtoCU_port_sig_reg_file_30_at_t = RFtoCU_port_sig_reg_file_30@t,
+	RFtoCU_port_sig_reg_file_31_at_t = RFtoCU_port_sig_reg_file_31@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: MEtoCU_port_sync;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: not((getEncType(MEtoCU_port_sig_loadedData) = ENC_S));
+	 at t: not((getEncType(MEtoCU_port_sig_loadedData) = ENC_I_L));
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = getALUfunc(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp1Sel = getALUop1Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp2Sel = getALUop2Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_regfileWrite = getRegfileWriteReq(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_writeDataSel = getwriteDataSel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: DS_s2_encType = getEncType(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_imm = getImm(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_pc = pc_at_t;
+	 at t_end: DS_s2_reg1content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_reg2content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_regRdAddr = getRegRdAddr(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_read_0_read_3 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	RFtoCU_port_sig_reg_file_01_at_t = RFtoCU_port_sig_reg_file_01@t,
+	RFtoCU_port_sig_reg_file_02_at_t = RFtoCU_port_sig_reg_file_02@t,
+	RFtoCU_port_sig_reg_file_03_at_t = RFtoCU_port_sig_reg_file_03@t,
+	RFtoCU_port_sig_reg_file_04_at_t = RFtoCU_port_sig_reg_file_04@t,
+	RFtoCU_port_sig_reg_file_05_at_t = RFtoCU_port_sig_reg_file_05@t,
+	RFtoCU_port_sig_reg_file_06_at_t = RFtoCU_port_sig_reg_file_06@t,
+	RFtoCU_port_sig_reg_file_07_at_t = RFtoCU_port_sig_reg_file_07@t,
+	RFtoCU_port_sig_reg_file_08_at_t = RFtoCU_port_sig_reg_file_08@t,
+	RFtoCU_port_sig_reg_file_09_at_t = RFtoCU_port_sig_reg_file_09@t,
+	RFtoCU_port_sig_reg_file_10_at_t = RFtoCU_port_sig_reg_file_10@t,
+	RFtoCU_port_sig_reg_file_11_at_t = RFtoCU_port_sig_reg_file_11@t,
+	RFtoCU_port_sig_reg_file_12_at_t = RFtoCU_port_sig_reg_file_12@t,
+	RFtoCU_port_sig_reg_file_13_at_t = RFtoCU_port_sig_reg_file_13@t,
+	RFtoCU_port_sig_reg_file_14_at_t = RFtoCU_port_sig_reg_file_14@t,
+	RFtoCU_port_sig_reg_file_15_at_t = RFtoCU_port_sig_reg_file_15@t,
+	RFtoCU_port_sig_reg_file_16_at_t = RFtoCU_port_sig_reg_file_16@t,
+	RFtoCU_port_sig_reg_file_17_at_t = RFtoCU_port_sig_reg_file_17@t,
+	RFtoCU_port_sig_reg_file_18_at_t = RFtoCU_port_sig_reg_file_18@t,
+	RFtoCU_port_sig_reg_file_19_at_t = RFtoCU_port_sig_reg_file_19@t,
+	RFtoCU_port_sig_reg_file_20_at_t = RFtoCU_port_sig_reg_file_20@t,
+	RFtoCU_port_sig_reg_file_21_at_t = RFtoCU_port_sig_reg_file_21@t,
+	RFtoCU_port_sig_reg_file_22_at_t = RFtoCU_port_sig_reg_file_22@t,
+	RFtoCU_port_sig_reg_file_23_at_t = RFtoCU_port_sig_reg_file_23@t,
+	RFtoCU_port_sig_reg_file_24_at_t = RFtoCU_port_sig_reg_file_24@t,
+	RFtoCU_port_sig_reg_file_25_at_t = RFtoCU_port_sig_reg_file_25@t,
+	RFtoCU_port_sig_reg_file_26_at_t = RFtoCU_port_sig_reg_file_26@t,
+	RFtoCU_port_sig_reg_file_27_at_t = RFtoCU_port_sig_reg_file_27@t,
+	RFtoCU_port_sig_reg_file_28_at_t = RFtoCU_port_sig_reg_file_28@t,
+	RFtoCU_port_sig_reg_file_29_at_t = RFtoCU_port_sig_reg_file_29@t,
+	RFtoCU_port_sig_reg_file_30_at_t = RFtoCU_port_sig_reg_file_30@t,
+	RFtoCU_port_sig_reg_file_31_at_t = RFtoCU_port_sig_reg_file_31@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: MEtoCU_port_sync;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: (getEncType(MEtoCU_port_sig_loadedData) = ENC_S);
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: memAccess_write_6;
+	 at t_end: CS_2_s2_aluFunc = getALUfunc(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp1Sel = getALUop1Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp2Sel = getALUop2Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_regfileWrite = getRegfileWriteReq(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_writeDataSel = getwriteDataSel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_data_dataIn = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: CUtoME_data_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_data_req = ME_WR;
+	 at t_end: CUtoME_port_sig_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_port_sig_dataIn = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: CUtoME_port_sig_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_port_sig_req = ME_WR;
+	 at t_end: DS_s2_encType = getEncType(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_imm = getImm(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_pc = pc_at_t;
+	 at t_end: DS_s2_reg1content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_reg2content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_regRdAddr = getRegRdAddr(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_read_0_read_4 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	RFtoCU_port_sig_reg_file_01_at_t = RFtoCU_port_sig_reg_file_01@t,
+	RFtoCU_port_sig_reg_file_02_at_t = RFtoCU_port_sig_reg_file_02@t,
+	RFtoCU_port_sig_reg_file_03_at_t = RFtoCU_port_sig_reg_file_03@t,
+	RFtoCU_port_sig_reg_file_04_at_t = RFtoCU_port_sig_reg_file_04@t,
+	RFtoCU_port_sig_reg_file_05_at_t = RFtoCU_port_sig_reg_file_05@t,
+	RFtoCU_port_sig_reg_file_06_at_t = RFtoCU_port_sig_reg_file_06@t,
+	RFtoCU_port_sig_reg_file_07_at_t = RFtoCU_port_sig_reg_file_07@t,
+	RFtoCU_port_sig_reg_file_08_at_t = RFtoCU_port_sig_reg_file_08@t,
+	RFtoCU_port_sig_reg_file_09_at_t = RFtoCU_port_sig_reg_file_09@t,
+	RFtoCU_port_sig_reg_file_10_at_t = RFtoCU_port_sig_reg_file_10@t,
+	RFtoCU_port_sig_reg_file_11_at_t = RFtoCU_port_sig_reg_file_11@t,
+	RFtoCU_port_sig_reg_file_12_at_t = RFtoCU_port_sig_reg_file_12@t,
+	RFtoCU_port_sig_reg_file_13_at_t = RFtoCU_port_sig_reg_file_13@t,
+	RFtoCU_port_sig_reg_file_14_at_t = RFtoCU_port_sig_reg_file_14@t,
+	RFtoCU_port_sig_reg_file_15_at_t = RFtoCU_port_sig_reg_file_15@t,
+	RFtoCU_port_sig_reg_file_16_at_t = RFtoCU_port_sig_reg_file_16@t,
+	RFtoCU_port_sig_reg_file_17_at_t = RFtoCU_port_sig_reg_file_17@t,
+	RFtoCU_port_sig_reg_file_18_at_t = RFtoCU_port_sig_reg_file_18@t,
+	RFtoCU_port_sig_reg_file_19_at_t = RFtoCU_port_sig_reg_file_19@t,
+	RFtoCU_port_sig_reg_file_20_at_t = RFtoCU_port_sig_reg_file_20@t,
+	RFtoCU_port_sig_reg_file_21_at_t = RFtoCU_port_sig_reg_file_21@t,
+	RFtoCU_port_sig_reg_file_22_at_t = RFtoCU_port_sig_reg_file_22@t,
+	RFtoCU_port_sig_reg_file_23_at_t = RFtoCU_port_sig_reg_file_23@t,
+	RFtoCU_port_sig_reg_file_24_at_t = RFtoCU_port_sig_reg_file_24@t,
+	RFtoCU_port_sig_reg_file_25_at_t = RFtoCU_port_sig_reg_file_25@t,
+	RFtoCU_port_sig_reg_file_26_at_t = RFtoCU_port_sig_reg_file_26@t,
+	RFtoCU_port_sig_reg_file_27_at_t = RFtoCU_port_sig_reg_file_27@t,
+	RFtoCU_port_sig_reg_file_28_at_t = RFtoCU_port_sig_reg_file_28@t,
+	RFtoCU_port_sig_reg_file_29_at_t = RFtoCU_port_sig_reg_file_29@t,
+	RFtoCU_port_sig_reg_file_30_at_t = RFtoCU_port_sig_reg_file_30@t,
+	RFtoCU_port_sig_reg_file_31_at_t = RFtoCU_port_sig_reg_file_31@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: MEtoCU_port_sync;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: not((getEncType(MEtoCU_port_sig_loadedData) = ENC_S));
+	 at t: (getEncType(MEtoCU_port_sig_loadedData) = ENC_I_L);
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: memAccess_write_6;
+	 at t_end: CS_2_s2_aluFunc = getALUfunc(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp1Sel = getALUop1Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp2Sel = getALUop2Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_regfileWrite = getRegfileWriteReq(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_writeDataSel = getwriteDataSel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: DS_s2_encType = getEncType(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_imm = getImm(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_pc = pc_at_t;
+	 at t_end: DS_s2_reg1content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_reg2content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_regRdAddr = getRegRdAddr(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_read_0_read_5 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	RFtoCU_port_sig_reg_file_01_at_t = RFtoCU_port_sig_reg_file_01@t,
+	RFtoCU_port_sig_reg_file_02_at_t = RFtoCU_port_sig_reg_file_02@t,
+	RFtoCU_port_sig_reg_file_03_at_t = RFtoCU_port_sig_reg_file_03@t,
+	RFtoCU_port_sig_reg_file_04_at_t = RFtoCU_port_sig_reg_file_04@t,
+	RFtoCU_port_sig_reg_file_05_at_t = RFtoCU_port_sig_reg_file_05@t,
+	RFtoCU_port_sig_reg_file_06_at_t = RFtoCU_port_sig_reg_file_06@t,
+	RFtoCU_port_sig_reg_file_07_at_t = RFtoCU_port_sig_reg_file_07@t,
+	RFtoCU_port_sig_reg_file_08_at_t = RFtoCU_port_sig_reg_file_08@t,
+	RFtoCU_port_sig_reg_file_09_at_t = RFtoCU_port_sig_reg_file_09@t,
+	RFtoCU_port_sig_reg_file_10_at_t = RFtoCU_port_sig_reg_file_10@t,
+	RFtoCU_port_sig_reg_file_11_at_t = RFtoCU_port_sig_reg_file_11@t,
+	RFtoCU_port_sig_reg_file_12_at_t = RFtoCU_port_sig_reg_file_12@t,
+	RFtoCU_port_sig_reg_file_13_at_t = RFtoCU_port_sig_reg_file_13@t,
+	RFtoCU_port_sig_reg_file_14_at_t = RFtoCU_port_sig_reg_file_14@t,
+	RFtoCU_port_sig_reg_file_15_at_t = RFtoCU_port_sig_reg_file_15@t,
+	RFtoCU_port_sig_reg_file_16_at_t = RFtoCU_port_sig_reg_file_16@t,
+	RFtoCU_port_sig_reg_file_17_at_t = RFtoCU_port_sig_reg_file_17@t,
+	RFtoCU_port_sig_reg_file_18_at_t = RFtoCU_port_sig_reg_file_18@t,
+	RFtoCU_port_sig_reg_file_19_at_t = RFtoCU_port_sig_reg_file_19@t,
+	RFtoCU_port_sig_reg_file_20_at_t = RFtoCU_port_sig_reg_file_20@t,
+	RFtoCU_port_sig_reg_file_21_at_t = RFtoCU_port_sig_reg_file_21@t,
+	RFtoCU_port_sig_reg_file_22_at_t = RFtoCU_port_sig_reg_file_22@t,
+	RFtoCU_port_sig_reg_file_23_at_t = RFtoCU_port_sig_reg_file_23@t,
+	RFtoCU_port_sig_reg_file_24_at_t = RFtoCU_port_sig_reg_file_24@t,
+	RFtoCU_port_sig_reg_file_25_at_t = RFtoCU_port_sig_reg_file_25@t,
+	RFtoCU_port_sig_reg_file_26_at_t = RFtoCU_port_sig_reg_file_26@t,
+	RFtoCU_port_sig_reg_file_27_at_t = RFtoCU_port_sig_reg_file_27@t,
+	RFtoCU_port_sig_reg_file_28_at_t = RFtoCU_port_sig_reg_file_28@t,
+	RFtoCU_port_sig_reg_file_29_at_t = RFtoCU_port_sig_reg_file_29@t,
+	RFtoCU_port_sig_reg_file_30_at_t = RFtoCU_port_sig_reg_file_30@t,
+	RFtoCU_port_sig_reg_file_31_at_t = RFtoCU_port_sig_reg_file_31@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: MEtoCU_port_sync;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: not((getEncType(MEtoCU_port_sig_loadedData) = ENC_S));
+	 at t: not((getEncType(MEtoCU_port_sig_loadedData) = ENC_I_L));
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = getALUfunc(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp1Sel = getALUop1Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp2Sel = getALUop2Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_regfileWrite = getRegfileWriteReq(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_writeDataSel = getwriteDataSel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = getEncType(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_imm = getImm(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_pc = pc_at_t;
+	 at t_end: DS_s2_reg1content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_reg2content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_regRdAddr = getRegRdAddr(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_read_0_read_6 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	RFtoCU_port_sig_reg_file_01_at_t = RFtoCU_port_sig_reg_file_01@t,
+	RFtoCU_port_sig_reg_file_02_at_t = RFtoCU_port_sig_reg_file_02@t,
+	RFtoCU_port_sig_reg_file_03_at_t = RFtoCU_port_sig_reg_file_03@t,
+	RFtoCU_port_sig_reg_file_04_at_t = RFtoCU_port_sig_reg_file_04@t,
+	RFtoCU_port_sig_reg_file_05_at_t = RFtoCU_port_sig_reg_file_05@t,
+	RFtoCU_port_sig_reg_file_06_at_t = RFtoCU_port_sig_reg_file_06@t,
+	RFtoCU_port_sig_reg_file_07_at_t = RFtoCU_port_sig_reg_file_07@t,
+	RFtoCU_port_sig_reg_file_08_at_t = RFtoCU_port_sig_reg_file_08@t,
+	RFtoCU_port_sig_reg_file_09_at_t = RFtoCU_port_sig_reg_file_09@t,
+	RFtoCU_port_sig_reg_file_10_at_t = RFtoCU_port_sig_reg_file_10@t,
+	RFtoCU_port_sig_reg_file_11_at_t = RFtoCU_port_sig_reg_file_11@t,
+	RFtoCU_port_sig_reg_file_12_at_t = RFtoCU_port_sig_reg_file_12@t,
+	RFtoCU_port_sig_reg_file_13_at_t = RFtoCU_port_sig_reg_file_13@t,
+	RFtoCU_port_sig_reg_file_14_at_t = RFtoCU_port_sig_reg_file_14@t,
+	RFtoCU_port_sig_reg_file_15_at_t = RFtoCU_port_sig_reg_file_15@t,
+	RFtoCU_port_sig_reg_file_16_at_t = RFtoCU_port_sig_reg_file_16@t,
+	RFtoCU_port_sig_reg_file_17_at_t = RFtoCU_port_sig_reg_file_17@t,
+	RFtoCU_port_sig_reg_file_18_at_t = RFtoCU_port_sig_reg_file_18@t,
+	RFtoCU_port_sig_reg_file_19_at_t = RFtoCU_port_sig_reg_file_19@t,
+	RFtoCU_port_sig_reg_file_20_at_t = RFtoCU_port_sig_reg_file_20@t,
+	RFtoCU_port_sig_reg_file_21_at_t = RFtoCU_port_sig_reg_file_21@t,
+	RFtoCU_port_sig_reg_file_22_at_t = RFtoCU_port_sig_reg_file_22@t,
+	RFtoCU_port_sig_reg_file_23_at_t = RFtoCU_port_sig_reg_file_23@t,
+	RFtoCU_port_sig_reg_file_24_at_t = RFtoCU_port_sig_reg_file_24@t,
+	RFtoCU_port_sig_reg_file_25_at_t = RFtoCU_port_sig_reg_file_25@t,
+	RFtoCU_port_sig_reg_file_26_at_t = RFtoCU_port_sig_reg_file_26@t,
+	RFtoCU_port_sig_reg_file_27_at_t = RFtoCU_port_sig_reg_file_27@t,
+	RFtoCU_port_sig_reg_file_28_at_t = RFtoCU_port_sig_reg_file_28@t,
+	RFtoCU_port_sig_reg_file_29_at_t = RFtoCU_port_sig_reg_file_29@t,
+	RFtoCU_port_sig_reg_file_30_at_t = RFtoCU_port_sig_reg_file_30@t,
+	RFtoCU_port_sig_reg_file_31_at_t = RFtoCU_port_sig_reg_file_31@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: MEtoCU_port_sync;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: (getEncType(MEtoCU_port_sig_loadedData) = ENC_S);
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: memAccess_write_6;
+	 at t_end: CS_2_s2_aluFunc = getALUfunc(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp1Sel = getALUop1Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp2Sel = getALUop2Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_regfileWrite = getRegfileWriteReq(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_writeDataSel = getwriteDataSel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_data_dataIn = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: CUtoME_data_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_data_req = ME_WR;
+	 at t_end: CUtoME_port_sig_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_port_sig_dataIn = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: CUtoME_port_sig_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_port_sig_req = ME_WR;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = getEncType(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_imm = getImm(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_pc = pc_at_t;
+	 at t_end: DS_s2_reg1content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_reg2content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_regRdAddr = getRegRdAddr(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_read_0_read_7 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	RFtoCU_port_sig_reg_file_01_at_t = RFtoCU_port_sig_reg_file_01@t,
+	RFtoCU_port_sig_reg_file_02_at_t = RFtoCU_port_sig_reg_file_02@t,
+	RFtoCU_port_sig_reg_file_03_at_t = RFtoCU_port_sig_reg_file_03@t,
+	RFtoCU_port_sig_reg_file_04_at_t = RFtoCU_port_sig_reg_file_04@t,
+	RFtoCU_port_sig_reg_file_05_at_t = RFtoCU_port_sig_reg_file_05@t,
+	RFtoCU_port_sig_reg_file_06_at_t = RFtoCU_port_sig_reg_file_06@t,
+	RFtoCU_port_sig_reg_file_07_at_t = RFtoCU_port_sig_reg_file_07@t,
+	RFtoCU_port_sig_reg_file_08_at_t = RFtoCU_port_sig_reg_file_08@t,
+	RFtoCU_port_sig_reg_file_09_at_t = RFtoCU_port_sig_reg_file_09@t,
+	RFtoCU_port_sig_reg_file_10_at_t = RFtoCU_port_sig_reg_file_10@t,
+	RFtoCU_port_sig_reg_file_11_at_t = RFtoCU_port_sig_reg_file_11@t,
+	RFtoCU_port_sig_reg_file_12_at_t = RFtoCU_port_sig_reg_file_12@t,
+	RFtoCU_port_sig_reg_file_13_at_t = RFtoCU_port_sig_reg_file_13@t,
+	RFtoCU_port_sig_reg_file_14_at_t = RFtoCU_port_sig_reg_file_14@t,
+	RFtoCU_port_sig_reg_file_15_at_t = RFtoCU_port_sig_reg_file_15@t,
+	RFtoCU_port_sig_reg_file_16_at_t = RFtoCU_port_sig_reg_file_16@t,
+	RFtoCU_port_sig_reg_file_17_at_t = RFtoCU_port_sig_reg_file_17@t,
+	RFtoCU_port_sig_reg_file_18_at_t = RFtoCU_port_sig_reg_file_18@t,
+	RFtoCU_port_sig_reg_file_19_at_t = RFtoCU_port_sig_reg_file_19@t,
+	RFtoCU_port_sig_reg_file_20_at_t = RFtoCU_port_sig_reg_file_20@t,
+	RFtoCU_port_sig_reg_file_21_at_t = RFtoCU_port_sig_reg_file_21@t,
+	RFtoCU_port_sig_reg_file_22_at_t = RFtoCU_port_sig_reg_file_22@t,
+	RFtoCU_port_sig_reg_file_23_at_t = RFtoCU_port_sig_reg_file_23@t,
+	RFtoCU_port_sig_reg_file_24_at_t = RFtoCU_port_sig_reg_file_24@t,
+	RFtoCU_port_sig_reg_file_25_at_t = RFtoCU_port_sig_reg_file_25@t,
+	RFtoCU_port_sig_reg_file_26_at_t = RFtoCU_port_sig_reg_file_26@t,
+	RFtoCU_port_sig_reg_file_27_at_t = RFtoCU_port_sig_reg_file_27@t,
+	RFtoCU_port_sig_reg_file_28_at_t = RFtoCU_port_sig_reg_file_28@t,
+	RFtoCU_port_sig_reg_file_29_at_t = RFtoCU_port_sig_reg_file_29@t,
+	RFtoCU_port_sig_reg_file_30_at_t = RFtoCU_port_sig_reg_file_30@t,
+	RFtoCU_port_sig_reg_file_31_at_t = RFtoCU_port_sig_reg_file_31@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_read_0;
+	 at t: MEtoCU_port_sync;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: not((getEncType(MEtoCU_port_sig_loadedData) = ENC_S));
+	 at t: (getEncType(MEtoCU_port_sig_loadedData) = ENC_I_L);
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: memAccess_write_6;
+	 at t_end: CS_2_s2_aluFunc = getALUfunc(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp1Sel = getALUop1Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_2_s2_aluOp2Sel = getALUop2Sel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_regfileWrite = getRegfileWriteReq(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s2_writeDataSel = getwriteDataSel(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = (regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)) + getImm(MEtoCU_port_sig_loadedData_at_t))(31 downto 0);
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = getDmemMask(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = getEncType(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_imm = getImm(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s2_pc = pc_at_t;
+	 at t_end: DS_s2_reg1content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_reg2content = regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t));
+	 at t_end: DS_s2_regRdAddr = getRegRdAddr(MEtoCU_port_sig_loadedData_at_t);
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = getPC(getBranchEvaluation(getInstrType(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs2Addr(MEtoCU_port_sig_loadedData_at_t))),getImm(MEtoCU_port_sig_loadedData_at_t),pc_at_t,getPCsel(MEtoCU_port_sig_loadedData_at_t),regContentFwdUnit(getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t)),DS_s3_aluResult_at_t,DS_s2_regRdAddr_at_t,DS_s3_regRdAddr_at_t,DS_s2_encType_at_t,DS_s3_encType_at_t,loadedData_at_t,DS_s2_pc_at_t,DS_s3_pc_at_t,getRegContent(RFtoCU_port_sig_reg_file_01_at_t,RFtoCU_port_sig_reg_file_02_at_t,RFtoCU_port_sig_reg_file_03_at_t,RFtoCU_port_sig_reg_file_04_at_t,RFtoCU_port_sig_reg_file_05_at_t,RFtoCU_port_sig_reg_file_06_at_t,RFtoCU_port_sig_reg_file_07_at_t,RFtoCU_port_sig_reg_file_08_at_t,RFtoCU_port_sig_reg_file_09_at_t,RFtoCU_port_sig_reg_file_10_at_t,RFtoCU_port_sig_reg_file_11_at_t,RFtoCU_port_sig_reg_file_12_at_t,RFtoCU_port_sig_reg_file_13_at_t,RFtoCU_port_sig_reg_file_14_at_t,RFtoCU_port_sig_reg_file_15_at_t,RFtoCU_port_sig_reg_file_16_at_t,RFtoCU_port_sig_reg_file_17_at_t,RFtoCU_port_sig_reg_file_18_at_t,RFtoCU_port_sig_reg_file_19_at_t,RFtoCU_port_sig_reg_file_20_at_t,RFtoCU_port_sig_reg_file_21_at_t,RFtoCU_port_sig_reg_file_22_at_t,RFtoCU_port_sig_reg_file_23_at_t,RFtoCU_port_sig_reg_file_24_at_t,RFtoCU_port_sig_reg_file_25_at_t,RFtoCU_port_sig_reg_file_26_at_t,RFtoCU_port_sig_reg_file_27_at_t,RFtoCU_port_sig_reg_file_28_at_t,RFtoCU_port_sig_reg_file_29_at_t,RFtoCU_port_sig_reg_file_30_at_t,RFtoCU_port_sig_reg_file_31_at_t,getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)),getRegRs1Addr(MEtoCU_port_sig_loadedData_at_t)));
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_write_2_write_8 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: (DS_s3_encType = ENC_I_L);
+	 at t: CUtoME_port_sync;
+	 at t: (DS_s2_encType = ENC_I_L);
+	 at t: CUtoME_port_sync;
+prove:
+	 at t_end: instrFetch_read_0;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property instrFetch_write_2_write_9 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: not(((DS_s3_encType = ENC_I_L) and (DS_s2_encType = ENC_I_L)));
+	 at t: CUtoME_port_sync;
+	 at t: CUtoME_port_sync;
+prove:
+	 at t_end: instrFetch_read_0;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property instrFetch_write_2_write_10 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: (DS_s3_encType = ENC_I_L);
+	 at t: (DS_s2_encType = ENC_I_L);
+	 at t: not(CUtoME_port_sync);
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = pc_at_t;
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = pc_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_write_2_write_11 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: not(((DS_s3_encType = ENC_I_L) and (DS_s2_encType = ENC_I_L)));
+	 at t: not(CUtoME_port_sync);
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = pc_at_t;
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = pc_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_write_2_write_12 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: (DS_s3_encType = ENC_I_L);
+	 at t: CUtoME_port_sync;
+	 at t: (DS_s2_encType = ENC_I_L);
+	 at t: CUtoME_port_sync;
+prove:
+	 at t_end: instrFetch_read_0;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property instrFetch_write_2_write_13 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: not(((DS_s3_encType = ENC_I_L) and (DS_s2_encType = ENC_I_L)));
+	 at t: CUtoME_port_sync;
+	 at t: CUtoME_port_sync;
+prove:
+	 at t_end: instrFetch_read_0;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property instrFetch_write_2_write_14 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: (DS_s3_encType = ENC_I_L);
+	 at t: (DS_s2_encType = ENC_I_L);
+	 at t: not(CUtoME_port_sync);
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = pc_at_t;
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = pc_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property instrFetch_write_2_write_15 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: instrFetch_write_2;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: not(((DS_s3_encType = ENC_I_L) and (DS_s2_encType = ENC_I_L)));
+	 at t: not(CUtoME_port_sync);
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = pc_at_t;
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = pc_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = getALUresult(CS_2_s2_aluFunc_at_t,getALUoperand(CS_2_s2_aluOp1Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg1content_at_t),getALUoperand(CS_2_s2_aluOp2Sel_at_t,DS_s2_imm_at_t,DS_s2_pc_at_t,DS_s2_reg2content_at_t));
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property memAccess_read_4_read_16 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_read_4;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = false;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = pc_at_t;
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = pc_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = 0;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = MEtoCU_port_sig_loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property memAccess_read_4_read_17 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	MEtoCU_port_sig_loadedData_at_t = MEtoCU_port_sig_loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_read_4;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: MEtoCU_port_sync;
+prove:
+	 at t_end: instrFetch_write_2;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = false;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = pc_at_t;
+	 at t_end: CUtoME_data_dataIn = 0;
+	 at t_end: CUtoME_data_mask = MT_W;
+	 at t_end: CUtoME_data_req = ME_RD;
+	 at t_end: CUtoME_port_sig_addrIn = pc_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = 0;
+	 at t_end: CUtoME_port_sig_mask = MT_W;
+	 at t_end: CUtoME_port_sig_req = ME_RD;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,MEtoCU_port_sig_loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = 0;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: loadedData = MEtoCU_port_sig_loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property memAccess_write_6_write_18 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_write_6;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: CUtoME_port_sync;
+	 at t: CUtoME_port_sync;
+prove:
+	 at t_end: memAccess_read_4;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property memAccess_write_6_write_19 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_write_6;
+	 at t: not(CS_3_s3_regfileWrite);
+	 at t: not(CUtoME_port_sync);
+prove:
+	 at t_end: memAccess_write_6;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoME_port_sig_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_port_sig_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_port_sig_req = CUtoME_data_req_at_t;
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end]: CUtoRF_port_notify = false;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property memAccess_write_6_write_20 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_write_6;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: CUtoME_port_sync;
+	 at t: CUtoME_port_sync;
+prove:
+	 at t_end: memAccess_read_4;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end]: CUtoME_port_notify = false;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end-1]: MEtoCU_port_notify = false;
+	 at t_end: MEtoCU_port_notify = true;
+end property;
+
+property memAccess_write_6_write_21 is
+dependencies: no_reset;
+for timepoints:
+	 t_end = t+1;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_write_6;
+	 at t: CS_3_s3_regfileWrite;
+	 at t: not(CUtoME_port_sync);
+prove:
+	 at t_end: memAccess_write_6;
+	 at t_end: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t_end: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t_end: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t_end: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t_end: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t_end: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t_end: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t_end: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoME_port_sig_addrIn = CUtoME_data_addrIn_at_t;
+	 at t_end: CUtoME_port_sig_dataIn = CUtoME_data_dataIn_at_t;
+	 at t_end: CUtoME_port_sig_mask = CUtoME_data_mask_at_t;
+	 at t_end: CUtoME_port_sig_req = CUtoME_data_req_at_t;
+	 at t_end: CUtoRF_port_sig_dst = DS_s3_regRdAddr_at_t;
+	 at t_end: CUtoRF_port_sig_dstData = getWBdata(DS_s3_aluResult_at_t,loadedData_at_t,DS_s3_pc_at_t,CS_3_s3_writeDataSel_at_t);
+	 at t_end: DS_s2_encType = DS_s2_encType_at_t;
+	 at t_end: DS_s2_imm = DS_s2_imm_at_t;
+	 at t_end: DS_s2_pc = DS_s2_pc_at_t;
+	 at t_end: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t_end: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t_end: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t_end: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t_end: DS_s3_encType = DS_s3_encType_at_t;
+	 at t_end: DS_s3_pc = DS_s3_pc_at_t;
+	 at t_end: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t_end: loadedData = loadedData_at_t;
+	 at t_end: pc = pc_at_t;
+	 during[t+1, t_end-1]: CUtoME_port_notify = false;
+	 at t_end: CUtoME_port_notify = true;
+	 during[t+1, t_end-1]: CUtoRF_port_notify = false;
+	 at t_end: CUtoRF_port_notify = true;
+	 during[t+1, t_end]: MEtoCU_port_notify = false;
+end property;
+
+property wait_memAccess_read_4 is
+dependencies: no_reset;
+freeze:
+	CS_2_s2_aluFunc_at_t = CS_2_s2_aluFunc@t,
+	CS_2_s2_aluOp1Sel_at_t = CS_2_s2_aluOp1Sel@t,
+	CS_2_s2_aluOp2Sel_at_t = CS_2_s2_aluOp2Sel@t,
+	CS_3_s2_regfileWrite_at_t = CS_3_s2_regfileWrite@t,
+	CS_3_s2_writeDataSel_at_t = CS_3_s2_writeDataSel@t,
+	CS_3_s3_regfileWrite_at_t = CS_3_s3_regfileWrite@t,
+	CS_3_s3_writeDataSel_at_t = CS_3_s3_writeDataSel@t,
+	CUtoME_data_addrIn_at_t = CUtoME_data_addrIn@t,
+	CUtoME_data_dataIn_at_t = CUtoME_data_dataIn@t,
+	CUtoME_data_mask_at_t = CUtoME_data_mask@t,
+	CUtoME_data_req_at_t = CUtoME_data_req@t,
+	DS_s2_encType_at_t = DS_s2_encType@t,
+	DS_s2_imm_at_t = DS_s2_imm@t,
+	DS_s2_pc_at_t = DS_s2_pc@t,
+	DS_s2_reg1content_at_t = DS_s2_reg1content@t,
+	DS_s2_reg2content_at_t = DS_s2_reg2content@t,
+	DS_s2_regRdAddr_at_t = DS_s2_regRdAddr@t,
+	DS_s3_aluResult_at_t = DS_s3_aluResult@t,
+	DS_s3_encType_at_t = DS_s3_encType@t,
+	DS_s3_pc_at_t = DS_s3_pc@t,
+	DS_s3_regRdAddr_at_t = DS_s3_regRdAddr@t,
+	loadedData_at_t = loadedData@t,
+	pc_at_t = pc@t;
+assume: 
+	 at t: memAccess_read_4;
+	 at t: not(MEtoCU_port_sync);
+prove:
+	 at t+1: memAccess_read_4;
+	 at t+1: CS_2_s2_aluFunc = CS_2_s2_aluFunc_at_t;
+	 at t+1: CS_2_s2_aluOp1Sel = CS_2_s2_aluOp1Sel_at_t;
+	 at t+1: CS_2_s2_aluOp2Sel = CS_2_s2_aluOp2Sel_at_t;
+	 at t+1: CS_3_s2_regfileWrite = CS_3_s2_regfileWrite_at_t;
+	 at t+1: CS_3_s2_writeDataSel = CS_3_s2_writeDataSel_at_t;
+	 at t+1: CS_3_s3_regfileWrite = CS_3_s3_regfileWrite_at_t;
+	 at t+1: CS_3_s3_writeDataSel = CS_3_s3_writeDataSel_at_t;
+	 at t+1: CUtoME_data_addrIn = CUtoME_data_addrIn_at_t;
+	 at t+1: CUtoME_data_dataIn = CUtoME_data_dataIn_at_t;
+	 at t+1: CUtoME_data_mask = CUtoME_data_mask_at_t;
+	 at t+1: CUtoME_data_req = CUtoME_data_req_at_t;
+	 at t+1: DS_s2_encType = DS_s2_encType_at_t;
+	 at t+1: DS_s2_imm = DS_s2_imm_at_t;
+	 at t+1: DS_s2_pc = DS_s2_pc_at_t;
+	 at t+1: DS_s2_reg1content = DS_s2_reg1content_at_t;
+	 at t+1: DS_s2_reg2content = DS_s2_reg2content_at_t;
+	 at t+1: DS_s2_regRdAddr = DS_s2_regRdAddr_at_t;
+	 at t+1: DS_s3_aluResult = DS_s3_aluResult_at_t;
+	 at t+1: DS_s3_encType = DS_s3_encType_at_t;
+	 at t+1: DS_s3_pc = DS_s3_pc_at_t;
+	 at t+1: DS_s3_regRdAddr = DS_s3_regRdAddr_at_t;
+	 at t+1: loadedData = loadedData_at_t;
+	 at t+1: pc = pc_at_t;
+	 at t+1: CUtoME_port_notify = false;
+	 at t+1: CUtoRF_port_notify = false;
+	 at t+1: MEtoCU_port_notify = true;
+end property;

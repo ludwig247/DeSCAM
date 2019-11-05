@@ -1,0 +1,31 @@
+Connection to IPC server failed.
+Starting IPC Server. (Port = 1925)
+IPC Server started successfully.
+No PseudoColor Visual avaiable, try TrueColor instead
+;; ;# Tcl
+                                        
+                                 Milkyway (TM)
+                                        
+                Version K-2015.06-SP4 for suse64 - Nov 23, 2015 
+                                        
+                    Copyright (c) 1988 - 2015 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+            or distribution of this software is strictly prohibited.
+
+Loading /import/home/udupi/opt/synopsys/K-2015.06-SP4/etc/scheme/.avntrc
+#t
+ Info: loading setup file(s)
+ configureWindow 0 25x24+0+0
+Initialization completed
+ configureWindow 0 25x24+558+87
+ cmCreateLib 
+ setFormField create_library library_name Nangate
+ setFormField create_library technology_file_name /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/captables/
+ setFormField create_library technology_file_name /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/captables/NCSU_FreePDK_45nm.ptf
+ formOK create_library
+Error: Technology section is missing entirely. (line 6782) (TFCHK-040)
+ menuQuit 
+ formYes dialog_box
+Thank you for using Milkyway

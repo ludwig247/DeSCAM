@@ -1,0 +1,75 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : Regs
+Version: N-2017.09-SP3
+Date   : Fri Dec  7 13:55:43 2018
+****************************************
+
+Operating Conditions: typical   Library: gscl45nm
+Wire Load Model Mode: top
+
+  Startpoint: toRegsPort_sig[DST][7]
+              (input port clocked by clk)
+  Endpoint: reg_file_07_reg[0]
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Point                                    Incr       Path
+  -----------------------------------------------------------
+  clock clk (rise edge)                    0.00       0.00
+  clock network delay (ideal)              0.00       0.00
+  input external delay                     0.10       0.10 r
+  toRegsPort_sig[DST][7] (in)              0.01       0.11 r
+  U4879/Y (OR2X1)                          0.05       0.16 r
+  U4880/Y (NOR3X1)                         0.02       0.18 f
+  U3316/Y (AND2X1)                         0.03       0.22 f
+  U4436/Y (INVX1)                          0.01       0.22 r
+  U4881/Y (NOR3X1)                         0.02       0.24 f
+  U4886/Y (NAND3X1)                        0.04       0.28 r
+  U4045/Y (BUFX2)                          0.04       0.31 r
+  U3320/Y (OR2X1)                          0.05       0.36 r
+  U4054/Y (INVX1)                          0.02       0.38 f
+  U4887/Y (NAND3X1)                        0.03       0.41 r
+  U4857/Y (BUFX2)                          0.04       0.45 r
+  U4888/Y (INVX1)                          0.03       0.48 f
+  U4889/Y (NAND3X1)                        0.04       0.52 r
+  U4065/Y (BUFX2)                          0.04       0.55 r
+  U3321/Y (OR2X1)                          0.05       0.60 r
+  U4080/Y (INVX1)                          0.04       0.64 f
+  U4061/Y (AND2X1)                         0.22       0.86 f
+  U4062/Y (INVX1)                          0.38       1.24 r
+  U3317/Y (AND2X1)                         0.01       1.25 r
+  U4068/Y (INVX1)                          0.02       1.27 f
+  U4900/Y (AOI21X1)                        0.02       1.29 r
+  U4082/Y (BUFX2)                          0.03       1.32 r
+  U3335/Y (AND2X1)                         0.04       1.36 r
+  U4862/Y (INVX1)                          0.02       1.39 f
+  U3333/Y (OR2X1)                          0.06       1.44 f
+  U3322/Y (OR2X1)                          0.06       1.50 f
+  U4079/Y (INVX1)                          0.03       1.52 r
+  U4048/Y (AND2X1)                         0.03       1.55 r
+  U4049/Y (INVX1)                          0.02       1.57 f
+  U5314/Y (OR2X1)                          0.05       1.62 f
+  U5315/Y (INVX1)                          0.52       2.14 r
+  U5317/Y (OAI21X1)                        0.15       2.30 f
+  reg_file_07_reg[0]/D (DFFSR)             0.00       2.30 f
+  data arrival time                                   2.30
+
+  clock clk (rise edge)                  100.00     100.00
+  clock network delay (ideal)              0.00     100.00
+  reg_file_07_reg[0]/CLK (DFFSR)           0.00     100.00 r
+  library setup time                      -0.10      99.90
+  data required time                                 99.90
+  -----------------------------------------------------------
+  data required time                                 99.90
+  data arrival time                                  -2.30
+  -----------------------------------------------------------
+  slack (MET)                                        97.60
+
+
+1

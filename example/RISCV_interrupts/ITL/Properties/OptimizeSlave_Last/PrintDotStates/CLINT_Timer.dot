@@ -1,0 +1,8 @@
+digraph CLINT_Timer {  graph [rankdir=TD];  
+-1->0;
+-1[ label =" init "];
+0->0;
+0->0;
+0->0;
+0[ label ="run_0"];
+}

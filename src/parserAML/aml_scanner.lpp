@@ -1,0 +1,218 @@
+
+%{
+#include <cstdlib>
+#include <cerrno>
+#include <climits>
+#include <string>
+#include "aml_driver.h"
+#include "aml_parser.hpp"
+
+
+// Work around an incompatibility in flex (at least versions
+// 2.5.31 through 2.5.33): it generates code that does
+// not conform to C89.  See Debian bug 333231
+// <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=333231>.
+# undef yywrap
+# define yywrap() 1
+
+
+#define yyterminate() return token::END
+
+// The location of the current token.
+static yy::location loc;
+%}
+
+%option noyywrap nounput batch debug noinput
+
+word  [a-zA-Z][a-zA-Z_0-9]*
+int   [0-9]+
+blank [ \t]
+
+%x ACOMMENT
+%x LINECOMMENT
+%x LOCATION_HANDLE
+
+
+%{
+  #define YY_USER_ACTION  loc.columns(yyleng);
+%}
+
+%%
+
+%{
+  loc.step();
+%}
+{blank}+   loc.step();
+[\n]+      loc.lines(yyleng);
+
+[ \n\t\f\r]     ;
+
+\/\*            {BEGIN(ACOMMENT);}
+<ACOMMENT>\*\/  {BEGIN(INITIAL);}
+<ACOMMENT>\n    {loc.lines();}
+<ACOMMENT>.     ;
+
+\/\/            {BEGIN(LINECOMMENT);}
+<LINECOMMENT>\n {BEGIN(INITIAL);loc.lines();}
+<LINECOMMENT>.  ;
+
+
+"init"          return yy::aml_parser::make_INIT(loc);
+"INIT"          return yy::aml_parser::make_INIT(loc);
+"enum"          return yy::aml_parser::make_ENUM(loc);
+"ENUM"          return yy::aml_parser::make_ENUM(loc);
+"const"         return yy::aml_parser::make_CONST(loc);
+"CONST"         return yy::aml_parser::make_CONST(loc);
+"function"      return yy::aml_parser::make_FUNC(loc);
+"FUNCTION"      return yy::aml_parser::make_FUNC(loc);
+"system"        return yy::aml_parser::make_SYSTEM(loc);
+"SYSTEM"        return yy::aml_parser::make_SYSTEM(loc);
+"sys"           return yy::aml_parser::make_SYSTEM(loc);
+"SYS"           return yy::aml_parser::make_SYSTEM(loc);
+"module"        return yy::aml_parser::make_MODULE(loc);
+"MODULE"        return yy::aml_parser::make_MODULE(loc);
+"mod"           return yy::aml_parser::make_MODULE(loc);
+"MOD"           return yy::aml_parser::make_MODULE(loc);
+"blocking"      return yy::aml_parser::make_BLOCKING(loc);
+"BLOCKING"      return yy::aml_parser::make_BLOCKING(loc);
+"shared"        return yy::aml_parser::make_SHARED(loc);
+"SHARED"        return yy::aml_parser::make_SHARED(loc);
+"input"         return yy::aml_parser::make_IN(loc);
+"INPUT"         return yy::aml_parser::make_IN(loc);
+"in"            return yy::aml_parser::make_IN(loc);
+"IN"            return yy::aml_parser::make_IN(loc);
+"output"        return yy::aml_parser::make_OUT(loc);
+"OUTPUT"        return yy::aml_parser::make_OUT(loc);
+"out"           return yy::aml_parser::make_OUT(loc);
+"OUT"           return yy::aml_parser::make_OUT(loc);
+"sections"      return yy::aml_parser::make_SECTIONS(loc);
+"SECTIONS"      return yy::aml_parser::make_SECTIONS(loc);
+"nextsection"   return yy::aml_parser::make_NEXTSECTION(loc);
+"NEXTSECTION"   return yy::aml_parser::make_NEXTSECTION(loc);
+"@"             return yy::aml_parser::make_AT(loc);
+"fsm"           return yy::aml_parser::make_FSM(loc);
+"FSM"           return yy::aml_parser::make_FSM(loc);
+"connect"       return yy::aml_parser::make_CONNECT(loc);
+"CONNECT"       return yy::aml_parser::make_CONNECT(loc);
+"bool"          return yy::aml_parser::make_BOOL(loc);
+"BOOL"          return yy::aml_parser::make_BOOL(loc);
+"int"           return yy::aml_parser::make_INT(loc);
+"INT"           return yy::aml_parser::make_INT(loc);
+"compound"      return yy::aml_parser::make_COMPOUND(loc);
+"COMPOUND"      return yy::aml_parser::make_COMPOUND(loc);
+
+"if"            return yy::aml_parser::make_IF(loc);
+"IF"            return yy::aml_parser::make_IF(loc);
+"else"          return yy::aml_parser::make_ELSE(loc);
+"ELSE"          return yy::aml_parser::make_ELSE(loc);
+
+"read"          return yy::aml_parser::make_READ(loc);
+"READ"          return yy::aml_parser::make_READ(loc);
+"write"         return yy::aml_parser::make_WRITE(loc);
+"WRITE"         return yy::aml_parser::make_WRITE(loc);
+"nb_read"       return yy::aml_parser::make_NBREAD(loc);
+"NB_READ"       return yy::aml_parser::make_NBREAD(loc);
+"nb_write"      return yy::aml_parser::make_NBWRITE(loc);
+"NB_WRITE"      return yy::aml_parser::make_NBWRITE(loc);
+"get"       return yy::aml_parser::make_GET(loc);
+"GET"       return yy::aml_parser::make_GET(loc);
+"set"      return yy::aml_parser::make_SET(loc);
+"SET"      return yy::aml_parser::make_SET(loc);
+
+"("           return yy::aml_parser::make_LPAREN(loc);
+")"           return yy::aml_parser::make_RPAREN(loc);
+"{"           return yy::aml_parser::make_LCURLY(loc);
+"}"           return yy::aml_parser::make_RCURLY(loc);
+":"           return yy::aml_parser::make_COLON(loc);
+";"           return yy::aml_parser::make_SEMICOLON(loc);
+"."           return yy::aml_parser::make_PUNKT(loc);
+","           return yy::aml_parser::make_COMMA(loc);
+"->"          return yy::aml_parser::make_ARROW(loc);
+
+"="           return yy::aml_parser::make_ASSIGNMENT(loc);
+
+"++"          return yy::aml_parser::make_INCREMENT(loc);
+"--"          return yy::aml_parser::make_DECREMENT(loc);
+"+"           return yy::aml_parser::make_PLUS(loc);
+"-"           return yy::aml_parser::make_MINUS(loc);
+"*"           return yy::aml_parser::make_MULTIPLY(loc);
+"/"           return yy::aml_parser::make_DIVIDE(loc);
+"%"           return yy::aml_parser::make_REMAINDER(loc);
+
+"&"           return yy::aml_parser::make_BITAND(loc);
+"bitand"      return yy::aml_parser::make_BITAND(loc);
+"BITAND"      return yy::aml_parser::make_BITAND(loc);
+"|"           return yy::aml_parser::make_BITOR(loc);
+"bitor"       return yy::aml_parser::make_BITOR(loc);
+"BITOR"       return yy::aml_parser::make_BITOR(loc);
+"^"           return yy::aml_parser::make_BITXOR(loc);
+"bitxor"      return yy::aml_parser::make_BITXOR(loc);
+"BITXOR"      return yy::aml_parser::make_BITXOR(loc);
+"~"           return yy::aml_parser::make_BITNOT(loc);
+"bitnot"      return yy::aml_parser::make_BITNOT(loc);
+"BITNOT"      return yy::aml_parser::make_BITNOT(loc);
+"<<"          return yy::aml_parser::make_SHIFTL(loc);
+">>"          return yy::aml_parser::make_SHIFTR(loc);
+
+"=="          return yy::aml_parser::make_EQ(loc);
+"!="          return yy::aml_parser::make_NEQ(loc);
+">"           return yy::aml_parser::make_MORE(loc);
+">="          return yy::aml_parser::make_MOREEQ(loc);
+"<"           return yy::aml_parser::make_LESS(loc);
+"<="          return yy::aml_parser::make_LESSEQ(loc);
+
+"&&"          return yy::aml_parser::make_AND(loc);
+"and"         return yy::aml_parser::make_AND(loc);
+"AND"         return yy::aml_parser::make_AND(loc);
+"||"          return yy::aml_parser::make_OR(loc);
+"or"          return yy::aml_parser::make_OR(loc);
+"OR"          return yy::aml_parser::make_OR(loc);
+"!"           return yy::aml_parser::make_NOT(loc);
+"not"         return yy::aml_parser::make_NOT(loc);
+"NOT"         return yy::aml_parser::make_NOT(loc);
+"xor"         return yy::aml_parser::make_XOR(loc);
+"XOR"         return yy::aml_parser::make_XOR(loc);
+"xnor"        return yy::aml_parser::make_XNOR(loc);
+"XNOR"        return yy::aml_parser::make_XNOR(loc);
+"nor"         return yy::aml_parser::make_NOR(loc);
+"NOR"         return yy::aml_parser::make_NOR(loc);
+"nand"        return yy::aml_parser::make_NAND(loc);
+"NAND"        return yy::aml_parser::make_NAND(loc);
+
+"false"       return yy::aml_parser::make_BOOLVAL(false,loc);
+"FALSE"       return yy::aml_parser::make_BOOLVAL(false,loc);
+"true"        return yy::aml_parser::make_BOOLVAL(true,loc);
+"TRUE"        return yy::aml_parser::make_BOOLVAL(true,loc);
+
+{int}      {
+  errno = 0;
+  long n = strtol(yytext, NULL, 10);
+  if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE))
+    driver.error(loc, "integer is out of range");
+  return yy::aml_parser::make_NUM(n, loc);
+}
+
+{word}     return yy::aml_parser::make_NAME(yytext, loc);
+
+.          driver.error(loc, "invalid character");
+
+<<EOF>>    return yy::aml_parser::make_END(loc);
+
+%%
+
+
+
+
+void aml_driver::scan_begin()
+{
+    yy_flex_debug = trace_scanning;
+    if (! (yyin = fopen(filename.c_str(), "r"))) {
+        error(std::string ("cannot open ") + filename);
+        error_code = 1;
+    }
+}
+
+void aml_driver::scan_end()
+{
+    fclose(yyin);
+}

@@ -1,0 +1,64 @@
+import scam_model_types::*;
+
+module verify_baudgen_property_suite(rst);
+                                     
+input rst;                               
+        
+                              
+default clocking default_clk @(posedge baudgen.clk); endclocking
+
+
+function logic unsigned [31:0] baudcounter;
+baudcounter = baudgen.baudcounter_signal;
+endfunction
+
+function baudgen_sections section;
+section = baudgen.section;
+endfunction
+
+function baudrate_trigger;
+baudrate_trigger = baudgen.trigg_signal;
+endfunction
+
+function logic unsigned [31:0] baudrate_ctrl;
+baudrate_ctrl = baudgen.baudrate_control;
+endfunction
+
+                        
+ `include "tidal.sv"
+ 
+ `begin_tda(ops)
+
+
+
+
+
+
+property baud_rate;
+
+t##0 section() == \baudgen_sections__\run 
+and
+t##0 baudrate_trigger() == 1 and
+t##0 baudcounter() == 0 
+
+
+implies
+
+t##1 baudrate_trigger() == 0 and
+t##2 baudrate_trigger() == 0 and
+t##3 baudrate_trigger() == 0 and
+t##4 baudrate_trigger() == 1 and //Verifies baudrate triggers by correctly divided clock (CLK/N) where clockdivider = N-1
+t##5 baudrate_trigger() == 0;
+
+endproperty;
+
+assert_baud_rate: assert property (disable iff(baudgen.rst || baudrate_ctrl() != 3) baud_rate);
+
+
+
+
+ `end_tda
+ 
+ endmodule
+ 
+ bind baudgen verify_baudgen_property_suite inst_verify_baudgen_property_suite(.*, .rst(baudgen.rst));

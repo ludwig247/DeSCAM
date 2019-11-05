@@ -1,0 +1,43 @@
+
+
+completeness vcore;
+disable iff: !reset_n;
+determination_assumptions:
+	determined(reset_n);
+	determined(dmem_valid_i);
+	determined(imem_data_i);
+	determined(dmem_data_i);
+
+allow_uninitialized:
+	wb_write_reg,wb_dest_reg,wb_result;
+
+determination_requirements:
+	// imem interface
+	decode: determined(imem_read_o);
+	decode: if (imem_read_o) determined(imem_addr_o); endif;
+	decode: determined(dec_pc);
+
+	// dmem interface
+	execute: determined(dmem_enable_o);
+	execute: if(dmem_enable_o)determined(dmem_write_o); endif;
+	execute: if(dmem_enable_o)determined(dmem_addr_o); endif;
+	execute: if(dmem_write_o) determined(dmem_data_o); endif;
+
+	execute: determined(ex_write_reg);
+	execute: if(ex_write_reg)  determined(ex_dest_reg) endif;
+	execute: if(ex_write_reg)  determined(ex_result) endif;
+
+	write_back: determined(wb_write_reg);
+	write_back: if(wb_write_reg)  determined(wb_result) endif;
+	write_back: if(wb_write_reg)  determined(wb_dest_reg) endif;
+
+	done: determined(regfile);
+
+reset_property:
+	reset;
+
+property_graph:
+	//all_instr := 	arithmetic,load,store,nop,branch,misspredict;
+	all_instr := 	add,sub,nop,branch_taken,branch_not_taken,load,store,cycle1;
+	reset, all_instr -> all_instr;
+end completeness;

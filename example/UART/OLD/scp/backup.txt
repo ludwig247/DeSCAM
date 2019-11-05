@@ -1,0 +1,152 @@
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
+--macro from_mem_if_sync : boolean := end macro;
+--macro to_mem_if_sync : boolean := end macro;
+--macro data_out_notify : boolean := end macro;
+--macro from_mem_if_notify : boolean := end macro;
+--macro interrupt_out_notify : boolean := end macro;
+--macro to_mem_if_notify : boolean := end macro;
+
+macro data_in_sig : unsigned := data_in & next(data_in, 1) & next(data_in, 2) & next(data_in, 3) & next(data_in, 4)
+ & next(data_in, 5) & next(data_in, 6) & next(data_in, 7) & next(data_in, 8) & next(data_in, 9) & next(data_in, 10) end macro;
+
+macro data_out_sig : unsigned := data_out & next(data_out, 1) & next(data_out, 2) & next(data_out, 3) & next(data_out, 4)
+ & next(data_out, 5) & next(data_out, 6) & next(data_out, 7) & next(data_out, 8) & next(data_out, 9) & next(data_out, 10) end macro;
+
+
+
+macro from_mem_if_sig_addrIn : unsigned := from_mem_if.addrIn end macro;
+macro from_mem_if_sig_dataIn : unsigned := from_mem_if.dataIn end macro;
+macro from_mem_if_sig_mask : ME_MaskType := from_mem_if.mask end macro;
+macro from_mem_if_sig_req : ME_AccessType := from_mem_if.req end macro;
+macro interrupt_out_sig : boolean := interrupt_out end macro;
+macro to_mem_if_sig_CR1 : unsigned := to_mem_if.CR1 end macro;
+macro to_mem_if_sig_CR2 : unsigned := to_mem_if.CR2 end macro;
+macro to_mem_if_sig_CR3 : unsigned := to_mem_if.CR3 end macro;
+macro to_mem_if_sig_RX : unsigned := to_mem_if.RX end macro;
+macro to_mem_if_sig_SR1 : unsigned := to_mem_if.SR1 end macro;
+macro to_mem_if_sig_SR2 : unsigned := to_mem_if.SR2 end macro;
+macro to_mem_if_sig_SR3 : unsigned := to_mem_if.SR3 end macro;
+macro to_mem_if_sig_TX : unsigned := to_mem_if.TX end macro;
+
+
+-- CONSTRAINTS --
+constraint no_reset := rst = '0'; end constraint;
+
+
+-- VISIBLE REGISTERS --
+macro regs_CR1 : unsigned := regs_signal.CR1 end macro;
+macro regs_CR2 : unsigned := regs_signal.CR2 end macro;
+macro regs_CR3 : unsigned := regs_signal.CR3 end macro;
+macro regs_RX : unsigned := regs_signal.RX end macro;
+macro regs_SR1 : unsigned := regs_signal.SR1 end macro;
+macro regs_SR2 : unsigned := regs_signal.SR2 end macro;
+macro regs_SR3 : unsigned := regs_signal.SR3 end macro;
+macro regs_TX : unsigned := regs_signal.TX end macro;
+macro rx_buffer : unsigned := rx_buffer_signal end macro;
+macro tx_buffer : unsigned := tx_buffer_signal end macro;
+
+
+-- STATES --
+macro run_0 : boolean :=
+section = run0 and
+to_mem_if_notify = false
+end macro;
+macro run_4 : boolean :=
+section = run4 and
+from_mem_if_notify = false
+end macro;
+
+///////////////////////////////////////////////////////////////////////
+
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
+--macro from_mem_if_sync : boolean := end macro;
+--macro to_mem_if_sync : boolean := end macro;
+--macro data_out_notify : boolean := end macro;
+--macro from_mem_if_notify : boolean := end macro;
+--macro interrupt_out_notify : boolean := end macro;
+--macro to_mem_if_notify : boolean := end macro;
+
+macro data_in_sig : unsigned :=
+if(prev(rst,1)) then
+data_in & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 
+--doesnt give a shit about prev 2
+elsif(prev(rst,3)) then
+--next(data_in, 2) & next(data_in, 1) & data_in &  1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 
+data_in & prev(data_in, 1) & prev(data_in, 2) &  1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 
+elsif(prev(rst,5)) then
+data_in & prev(data_in, 1) & prev(data_in, 2) &  prev(data_in, 3) & prev(data_in, 4) & 1 & 1 & 1 & 1 & 1 & 1 
+elsif(prev(rst,7)) then
+data_in & prev(data_in, 1) & prev(data_in, 2) &  prev(data_in, 3) & prev(data_in, 4) & prev(data_in, 5) & prev(data_in, 6) & 1 & 1 & 1 & 1 
+elsif(prev(rst,9)) then
+data_in & prev(data_in, 1) & prev(data_in, 2) &  prev(data_in, 3) & prev(data_in, 4) & prev(data_in, 5) & prev(data_in, 6) & prev(data_in, 7) & prev(data_in, 8) & 1 & 1 
+--1 & 1 & prev(data_in, 8) & prev(data_in, 7) & prev(data_in, 6) & prev(data_in, 5) & prev(data_in, 4) & prev(data_in, 3) & prev(data_in, 2) & prev(data_in, 1) & data_in
+--elsif(prev(rst,10)) then
+--1 & prev(data_in, 9) & prev(data_in, 8) & prev(data_in, 7) & prev(data_in, 6) & prev(data_in, 5) & prev(data_in, 4) & prev(data_in, 3) & prev(data_in, 2) & prev(data_in, 1) & data_in --& next(data_in,1)
+elsif(prev(rst,11)) then
+data_in & prev(data_in, 1) & prev(data_in, 2) &  prev(data_in, 3) & prev(data_in, 4) & prev(data_in, 5) & prev(data_in, 6) & prev(data_in, 7) & prev(data_in, 8) & prev(data_in, 9) & prev(data_in, 10)  
+--prev(data_in, 10) & prev(data_in, 9) & prev(data_in, 8) & prev(data_in, 7) & prev(data_in, 6) & prev(data_in, 5) & prev(data_in, 4) & prev(data_in, 3) & prev(data_in, 2) & prev(data_in, 1) & data_in
+--elsif(prev(rst,13)) then
+
+--next(data_in, 1) & data_in & prev(data_in, 1) & prev(data_in, 2) &  prev(data_in, 3) & prev(data_in, 4) & prev(data_in, 5) & prev(data_in, 6) & prev(data_in, 7) & prev(data_in, 8) & prev(data_in,9)
+
+
+else
+next(data_in, 10) & next(data_in, 9) & next(data_in, 8) & next(data_in, 7)
+& next(data_in, 6) & next(data_in, 5) & next(data_in, 4) & next(data_in, 3) & next(data_in, 2) & next(data_in, 1) & data_in 
+
+--data_in & next(data_in, 1) & next(data_in, 2) & next(data_in, 3) & next(data_in, 4)
+--& next(data_in, 5) & next(data_in, 6) & next(data_in, 7) & next(data_in, 8) & next(data_in, 9) & next(data_in, 10) 
+end if;
+
+end macro;
+
+
+macro data_out_sig : unsigned := data_out & next(data_out, 1) & next(data_out, 2) & next(data_out, 3) & next(data_out, 4)
+ & next(data_out, 5) & next(data_out, 6) & next(data_out, 7) & next(data_out, 8) & next(data_out, 9) & next(data_out, 10) end macro;
+
+
+
+macro from_mem_if_sig_addrIn : unsigned := from_mem_if.addrIn end macro;
+macro from_mem_if_sig_dataIn : unsigned := from_mem_if.dataIn end macro;
+macro from_mem_if_sig_mask : ME_MaskType := from_mem_if.mask end macro;
+macro from_mem_if_sig_req : ME_AccessType := from_mem_if.req end macro;
+macro interrupt_out_sig : boolean := interrupt_out end macro;
+macro to_mem_if_sig_CR1 : unsigned := to_mem_if.CR1 end macro;
+macro to_mem_if_sig_CR2 : unsigned := to_mem_if.CR2 end macro;
+macro to_mem_if_sig_CR3 : unsigned := to_mem_if.CR3 end macro;
+macro to_mem_if_sig_RX : unsigned := to_mem_if.RX end macro;
+macro to_mem_if_sig_SR1 : unsigned := to_mem_if.SR1 end macro;
+macro to_mem_if_sig_SR2 : unsigned := to_mem_if.SR2 end macro;
+macro to_mem_if_sig_SR3 : unsigned := to_mem_if.SR3 end macro;
+macro to_mem_if_sig_TX : unsigned := to_mem_if.TX end macro;
+
+
+-- CONSTRAINTS --
+constraint no_reset := rst = '0'; end constraint;
+
+
+-- VISIBLE REGISTERS --
+macro regs_CR1 : unsigned := regs_signal.CR1 end macro;
+macro regs_CR2 : unsigned := regs_signal.CR2 end macro;
+macro regs_CR3 : unsigned := regs_signal.CR3 end macro;
+macro regs_RX : unsigned := regs_signal.RX end macro;
+macro regs_SR1 : unsigned := regs_signal.SR1 end macro;
+macro regs_SR2 : unsigned := regs_signal.SR2 end macro;
+macro regs_SR3 : unsigned := regs_signal.SR3 end macro;
+macro regs_TX : unsigned := regs_signal.TX end macro;
+macro rx_buffer : unsigned := rx_buffer_signal end macro;
+macro tx_buffer : unsigned := tx_buffer_signal end macro;
+
+
+-- STATES --
+macro run_0 : boolean :=
+section = run0 and
+to_mem_if_notify = false and
+from_mem_if_notify = true
+end macro;
+macro run_4 : boolean :=
+section = run4 and
+from_mem_if_notify = false and
+to_mem_if_notify = true
+end macro;
+

@@ -1,0 +1,74 @@
+property instr_beqz;
+disable iff: !reset_n;
+
+freeze:
+  opcode  = field_opcode(IR) @ t,
+  a       = field_A(IR) @ t,
+  taken   = virtual_register(a) == 0 @ t,
+  fetched_instruction = imem_data_i @ t,
+  pc      = PC @ t,
+  new_pc  = (pc+2)[15:0] @ t;
+
+assume:
+// conceptual state
+at t:   conceptual_state;
+
+// trigger
+at t:   opcode == 5'b00111;
+at t:   !taken;
+
+prove:
+// conceptual state
+at t+1: conceptual_state;
+
+// outputs
+at t+1: no_dmem_access;                       // no data memory access
+at t: imem_read(new_pc, fetched_instruction); // correct fetch of next instruction
+
+// visible_registers
+at t+1: rf_unchanged;
+at t+1: PC == new_pc;
+at t+1: IR == fetched_instruction;
+
+right_hook: t+1;
+end property;
+
+
+property instr_beqz_mispredict;
+disable iff: !reset_n;
+
+freeze:
+  opcode  = field_opcode(IR) @ t,
+  a       = field_A(IR) @ t,
+  imm     = sign_ext(field_imm8(IR),16) @ t,
+  taken   = virtual_register(a) == 0 @ t,
+  wrong_instruction = imem_data_i @ t,
+  fetched_instruction = imem_data_i @ t+1,
+  pc      = PC @ t,
+  wrong_pc= (pc+2)[15:0] @ t,
+  new_pc  = unsigned(pc+2*imm)[15:0] @ t;
+
+assume:
+// conceptual state
+at t:   conceptual_state;
+
+// trigger
+at t:   opcode == 5'b00111;
+at t:   taken;
+
+prove:
+// conceptual state
+at t+2: conceptual_state;
+
+// outputs
+during[t+1, t+2]: no_dmem_access;               // no data memory access
+at t: imem_read(wrong_pc, wrong_instruction);
+at t+1: imem_read(new_pc, fetched_instruction); // correct fetch of next instruction
+
+// visible_registers
+during [t+1,t+2]: rf_unchanged;
+at t+2: PC == new_pc;
+at t+2: IR == fetched_instruction;
+
+right_hook: t+2;
+end property;

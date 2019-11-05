@@ -1,0 +1,106 @@
+;# Scheme
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+read_lef
+setFormField "Read LEF" "Library Name" "NG45"
+setFormField "Read LEF" "Tech LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.macro.lef"
+setFormField "Read LEF" "Tech LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.tech.lef"
+setFormField "Read LEF" "Cell LEF Files" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/lef/NangateOpenCellLibrary.lef"
+formButton "Read LEF" "advancedOption"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+cmDumpTech
+formCancel "Read LEF"
+cmDumpTech
+setFormField "Dump Technology File" "Technology File Name" "NG45_NEW.TF"
+setFormField "Dump Technology File" "Library Name" "NG45"
+formOK "Dump Technology File"
+configureWindow 0 "25x24+0+0"
+geOpenLib
+setFormField "Open Library" "Library Name" "NG45"
+setFormField "Open Library" "open ref library for write" "1"
+setFormField "Open Library" "read only" "0"
+formOK "Open Library"
+auExtractBlockagePinVia
+setFormField "Extract Blockage" "Library Name" "NG45"
+setFormField "Extract Blockage" "Cell Name" "*"
+formOK "Extract Blockage"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+cmCheckLibrary
+setFormField "Check Library" "Library Name" "NG45"
+formOK "Check Library"
+auExtractBlockagePinVia
+formButton "Extract Blockage" "extractPin"
+formCancel "Extract Blockage"
+cmCheckLibrary
+formOK "Check Library"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+cmDumpTech
+setFormField "Dump Technology File" "Technology File Name" "NG45_NEW.tf"
+formOK "Dump Technology File"
+configureWindow 0 "25x24+0+0"
+cmDumpTech
+formOK "Dump Technology File"
+configureWindow 0 "25x24+0+0"
+cmDumpTLUPlus
+setFormField "Dump TLU+ File" "TLU+ File Name" "NG45_new.tlu"
+formOK "Dump TLU+ File"
+formCancel "Dump TLU+ File"
+geOpenLib
+read_lef
+setFormField "Read LEF" "Overwrite Existing Technology" "1"
+setFormField "Read LEF" "Cell Options" "Overwrite Existing Cell"
+configureWindow 0 "25x24+0+0"
+formOK "Read LEF"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+cmDumpTech
+formOK "Dump Technology File"
+configureWindow 0 "25x24+0+0"
+geOpenCell
+formButton "Open Cell" "browse..."
+setFormField "Open Cell" "Cell Name" "DFFRS_X1"
+setFormField "Open Cell" "Cell Name" "DFFRS_X1"
+formOK "Open Cell"
+configureWindow 1 "816x704+250+100"
+configureWindow 1 "816x732+250+100"
+configureWindow 1 "1233x776+250+100"
+configureWindow 1 "816x704+250+100"
+configureWindow 0 "25x24+0+0"
+configureWindow 1 "816x704+382+105"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+geCloseWindow
+formOK "Close Window"
+auExtractBlockagePinVia
+setToggleField "Extract Blockage" "Generate Boundary" "left" 1
+setFormField "Extract Blockage" "Cell Name" "DFFRS_X1"
+formOK "Extract Blockage"
+configureWindow 0 "25x24+0+0"
+geOpenCell
+formButton "Open Cell" "browse..."
+formOK "Open Cell"
+configureWindow 2 "816x704+275+125"
+configureWindow 0 "25x24+0+0"
+geOpenCell
+setFormField "Open Cell" "Cell Name" "DFFRS_X2"
+formOK "Open Cell"
+configureWindow 3 "816x704+300+150"
+configureWindow 0 "25x24+0+0"
+geCloseWindow
+formOK "Close Window"
+configureWindow 0 "25x24+0+0"
+geCloseWindow
+formOK "Close Window"
+configureWindow 0 "25x24+0+0"
+auExtractBlockagePinVia
+formOK "Extract Blockage"
+configureWindow 0 "25x24+0+0"
+menuQuit
+formYes "Dialog Box"

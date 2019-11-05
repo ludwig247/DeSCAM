@@ -1,0 +1,30 @@
+//
+// Created by M.I.Alkoudsi on 24.09.19.
+//
+
+#ifndef SCAM_OPTIMIZER_DEBUG_H
+#define SCAM_OPTIMIZER_DEBUG_H
+
+    #define DEBUG_OPTIMIZER
+
+    #ifdef DEBUG_OPTIMIZER
+//        #define DEBUG_MERGE_REDUNDANT_IF_ELSE
+//        #define DEBUG_RENUMBER_CFG
+//        #define DEBUG_FIND_READ_VARIABLES
+//        #define DEBUG_FIND_VARIABLES_VALUES
+//        #define DEBUG_FIND_CFG_PATHS
+//        #define DEBUG_LOCAL_VARIABLE_PROPAGATION
+//        #define DEBUG_GLOBAL_CONSTANT_PROPAGATION
+//        #define DEBUG_LIVENESS_ANALYSIS
+//        #define DEBUG_REACHABILITY_ANALYSIS
+//        #define DEBUG_SIMPLIFY_EXPRESSIONS
+//        #define DEBUG_OPERATOR_STRENGTH_REDUCTION
+//        #define DEBUG_FUNCTIONS_OPTIMIZER
+//        #define DEBUG_PARAM_VALUE_PROPAGATION
+//        #define DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
+//        #define DEBUG_OPERATOR_STRENGTH_REDUCTION_FUNCTIONS
+//        #define DEBUG_RANGE_ANALYSIS
+
+    #endif
+
+#endif //SCAM_OPTIMIZER_DEBUG_H

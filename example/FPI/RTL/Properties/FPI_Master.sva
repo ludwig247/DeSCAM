@@ -1,0 +1,3958 @@
+// required terminology
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+sequence hold(l, e);
+	(l===e, l=e);
+endsequence
+
+sequence t;
+	##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_end(offset);
+	t ##offset 1'b1;
+endsequence
+
+sequence next(timepoint, offset);
+	timepoint ##offset 1'b1;
+endsequence
+
+property during(t1, t2, se);
+	(t1 ##0 se[*0:$] intersect t2) or
+	(t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_limited(t1, t2, off, se);
+	(t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+	(next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_o(t1, o1, t2, o2, se);
+	if (o2 >= 0)
+		during(next(t1, o1), next(t2, (o2<0) ? 0 : o2), se)
+	else
+		during_limited(next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+// end of ipc_sva
+
+import scam_model_types::*;
+
+module FPI_Master_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge FPI_Master.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function master_done_notify;
+	master_done_notify = FPI_Master.master_done_notify;
+endfunction
+function master_result_o_notify;
+	master_result_o_notify = FPI_Master.master_result_o_notify;
+endfunction
+function ready_i_sync;
+	ready_i_sync = FPI_Master.ready_i_sync;
+endfunction
+function updateQ_o_notify;
+	updateQ_o_notify = FPI_Master.updateQ_o_notify;
+endfunction
+
+// DP SIGNALS //
+function bool abort_en_o_sig;
+	abort_en_o_sig = FPI_Master.abort_en_o;
+endfunction
+function bool abort_o_sig;
+	abort_o_sig = FPI_Master.abort_o;
+endfunction
+function ack_t ack_i_sig;
+	ack_i_sig = FPI_Master.ack_i;
+endfunction
+function bool addr_en_o_sig;
+	addr_en_o_sig = FPI_Master.addr_en_o;
+endfunction
+function int addr_o_sig;
+	addr_o_sig = FPI_Master.addr_o;
+endfunction
+function bool buffer1_sig_abort;
+	buffer1_sig_abort = FPI_Master.buffer1.abort;
+endfunction
+function int buffer1_sig_addr;
+	buffer1_sig_addr = FPI_Master.buffer1.addr;
+endfunction
+function int buffer1_sig_data;
+	buffer1_sig_data = FPI_Master.buffer1.data;
+endfunction
+function opc_t buffer1_sig_opc;
+	buffer1_sig_opc = FPI_Master.buffer1.opc;
+endfunction
+function bool buffer2_sig_abort;
+	buffer2_sig_abort = FPI_Master.buffer2.abort;
+endfunction
+function int buffer2_sig_addr;
+	buffer2_sig_addr = FPI_Master.buffer2.addr;
+endfunction
+function int buffer2_sig_data;
+	buffer2_sig_data = FPI_Master.buffer2.data;
+endfunction
+function opc_t buffer2_sig_opc;
+	buffer2_sig_opc = FPI_Master.buffer2.opc;
+endfunction
+function bool buffer3_sig_abort;
+	buffer3_sig_abort = FPI_Master.buffer3.abort;
+endfunction
+function int buffer3_sig_addr;
+	buffer3_sig_addr = FPI_Master.buffer3.addr;
+endfunction
+function int buffer3_sig_data;
+	buffer3_sig_data = FPI_Master.buffer3.data;
+endfunction
+function opc_t buffer3_sig_opc;
+	buffer3_sig_opc = FPI_Master.buffer3.opc;
+endfunction
+function bool data_en_o_sig;
+	data_en_o_sig = FPI_Master.data_en_o;
+endfunction
+function int data_i_sig;
+	data_i_sig = FPI_Master.data_i;
+endfunction
+function int data_o_sig;
+	data_o_sig = FPI_Master.data_o;
+endfunction
+function bool gnt_i_sig;
+	gnt_i_sig = FPI_Master.gnt_i;
+endfunction
+function int master_done_sig_data;
+	master_done_sig_data = FPI_Master.master_done.data;
+endfunction
+function bool master_done_sig_err;
+	master_done_sig_err = FPI_Master.master_done.err;
+endfunction
+//function bool master_result_o_sig;
+//	master_result_o_sig = FPI_Master.master_result_o;
+//endfunction
+function opc_t opc_o_sig;
+	opc_o_sig = FPI_Master.opc_o;
+endfunction
+function bool ready_i_sig;
+	ready_i_sig = FPI_Master.ready_i;
+endfunction
+function req_status_t status1_sig;
+	status1_sig = FPI_Master.status1;
+endfunction
+function req_status_t status2_sig;
+	status2_sig = FPI_Master.status2;
+endfunction
+function req_status_t status3_sig;
+	status3_sig = FPI_Master.status3;
+endfunction
+function update_t updateQ_o_sig;
+	updateQ_o_sig = FPI_Master.updateQ_o;
+endfunction
+function bool wait_cnt_end_sig;
+	wait_cnt_end_sig = FPI_Master.wait_cnt_end;
+endfunction
+
+// VISIBLE REGISTERS //
+function int btrCnt;
+	btrCnt = FPI_Master.btrCnt_signal;
+endfunction
+function int buffer1_tmp_addr;
+	buffer1_tmp_addr = FPI_Master.buffer1_tmp_signal_addr;
+endfunction
+function bool nop;
+	nop = FPI_Master.nop_signal;
+endfunction
+
+// STATES //
+function ADDR_0;
+	ADDR_0 = (FPI_Master.section == addr);
+endfunction
+function BTR_CONT_4;
+	BTR_CONT_4 = (FPI_Master.section == btr_cont);
+endfunction
+function DATA_10;
+	DATA_10 = (FPI_Master.section == data);
+endfunction
+function DATA_ADDR_15;
+	DATA_ADDR_15 = (FPI_Master.section == data_addr);
+endfunction
+function IDLE_21;
+	IDLE_21 = (FPI_Master.section == idle);
+endfunction
+function WAIT_BEFORE_RETRY_24;
+	WAIT_BEFORE_RETRY_24 = (FPI_Master.section == wait_before_retry);
+endfunction
+
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+sequence reset_sequence;
+	(FPI_Master.rst == 1'b1);//DISGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+property reset_p;
+	reset_sequence |=>
+	t ##0 IDLE_21() and
+	t ##0 abort_en_o_sig() == 0 and
+	t ##0 abort_o_sig() == 0 and
+	t ##0 addr_en_o_sig() == 0 and
+	t ##0 addr_o_sig() == 0 and
+	t ##0 btrCnt() == 0 and
+	t ##0 buffer1_tmp_addr() == 0 and
+	t ##0 data_en_o_sig() == 0 and
+	t ##0 data_o_sig() == 0 and
+	t ##0 nop() == 0 and
+	t ##0 opc_o_sig() == btr2_opc and
+	t ##0 master_done_notify() == 0 and
+	t ##0 master_result_o_notify() == 0 and
+	t ##0 updateQ_o_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+property ADDR_0_read_0_p(o);
+bool nop_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 gnt_i_sig() and
+	t ##0 (((buffer1_sig_opc() == btr2_opc) || (buffer1_sig_opc() == btr4_opc)) || (buffer1_sig_opc() == btr8_opc)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == (1 + buffer1_sig_addr_0) and
+	t_end(o) ##0 btrCnt() == 0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_btr_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_0_a: assert property (disable iff (reset) ADDR_0_read_0_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_1_p(o);
+bool nop_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 gnt_i_sig() and
+	t ##0 (((buffer1_sig_opc() == btr2_opc) || (buffer1_sig_opc() == btr4_opc)) || (buffer1_sig_opc() == btr8_opc)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == (1 + buffer1_sig_addr_0) and
+	t_end(o) ##0 btrCnt() == 0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_btr_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_1_a: assert property (disable iff (reset) ADDR_0_read_1_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_2_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 !((buffer1_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer1_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr8_opc)) and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_2_a: assert property (disable iff (reset) ADDR_0_read_2_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_3_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 !((buffer1_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer1_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr8_opc)) and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_3_a: assert property (disable iff (reset) ADDR_0_read_3_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_4_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer1_sig_data_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_data_0, buffer1_sig_data()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 (buffer1_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer1_sig_data_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_4_a: assert property (disable iff (reset) ADDR_0_read_4_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_5_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer1_sig_data_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_data_0, buffer1_sig_data()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 (buffer1_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer1_sig_data_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_5_a: assert property (disable iff (reset) ADDR_0_read_5_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_6_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 !((buffer1_sig_opc() == write_opc)) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_6_a: assert property (disable iff (reset) ADDR_0_read_6_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_7_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 !((buffer1_sig_opc() == write_opc)) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_7_a: assert property (disable iff (reset) ADDR_0_read_7_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_8_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer1_sig_data_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_data_0, buffer1_sig_data()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 (buffer1_sig_opc() == write_opc) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer1_sig_data_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_8_a: assert property (disable iff (reset) ADDR_0_read_8_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_9_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer1_sig_data_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_data_0, buffer1_sig_data()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 (buffer1_sig_opc() == write_opc) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer1_sig_data_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_9_a: assert property (disable iff (reset) ADDR_0_read_9_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_10_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 !((buffer1_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer1_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr8_opc)) and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_10_a: assert property (disable iff (reset) ADDR_0_read_10_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_11_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 !((buffer1_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer1_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer1_sig_opc() == btr8_opc)) and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_11_a: assert property (disable iff (reset) ADDR_0_read_11_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_12_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer1_sig_data_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_data_0, buffer1_sig_data()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 (buffer1_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer1_sig_data_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_12_a: assert property (disable iff (reset) ADDR_0_read_12_p(1));// ASSIGN t_end offset here
+
+property ADDR_0_read_13_p(o);
+int btrCnt_0;
+bool buffer1_sig_abort_0;
+int buffer1_sig_addr_0;
+int buffer1_sig_data_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_abort_0, buffer1_sig_abort()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_data_0, buffer1_sig_data()) and
+// Conceptual State
+	t ##0 ADDR_0() and
+// trigger
+	t ##0 (buffer1_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer1_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer1_sig_data_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+ADDR_0_read_13_a: assert property (disable iff (reset) ADDR_0_read_13_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_14_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 (btrCnt() == 0) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_14_a: assert property (disable iff (reset) BTR_CONT_4_read_14_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_15_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 (btrCnt() == 0) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_15_a: assert property (disable iff (reset) BTR_CONT_4_read_15_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_16_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 gnt_i_sig() and
+	t ##0 (btrCnt() == 0) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_16_a: assert property (disable iff (reset) BTR_CONT_4_read_16_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_17_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 gnt_i_sig() and
+	t ##0 (btrCnt() == 0) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_17_a: assert property (disable iff (reset) BTR_CONT_4_read_17_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_18_p(o);
+int btrCnt_0;
+bool nop_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+bool addr_en_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_en_o_sig_0, addr_en_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 !(((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0))) and
+	t ##0 !(((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) and
+	t ##0 !(((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == addr_en_o_sig_0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+BTR_CONT_4_read_18_a: assert property (disable iff (reset) BTR_CONT_4_read_18_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_19_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool nop_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 !(((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0))) and
+	t ##0 !(((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) and
+	t ##0 !(((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 gnt_i_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == ((1 + buffer1_tmp_addr_0) + btrCnt_0) and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+BTR_CONT_4_read_19_a: assert property (disable iff (reset) BTR_CONT_4_read_19_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_20_p(o);
+int btrCnt_0;
+bool nop_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+bool addr_en_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_en_o_sig_0, addr_en_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 !(((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0))) and
+	t ##0 !(((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) and
+	t ##0 !(((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == addr_en_o_sig_0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+BTR_CONT_4_read_20_a: assert property (disable iff (reset) BTR_CONT_4_read_20_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_21_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool nop_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 !(((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0))) and
+	t ##0 !(((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) and
+	t ##0 !(((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == ((1 + buffer1_tmp_addr_0) + btrCnt_0) and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+BTR_CONT_4_read_21_a: assert property (disable iff (reset) BTR_CONT_4_read_21_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_22_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 ((((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0)) || ((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) || ((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_22_a: assert property (disable iff (reset) BTR_CONT_4_read_22_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_23_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 ((((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0)) || ((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) || ((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_23_a: assert property (disable iff (reset) BTR_CONT_4_read_23_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_24_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 ((((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0)) || ((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) || ((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_24_a: assert property (disable iff (reset) BTR_CONT_4_read_24_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_25_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 ((((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0)) || ((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) || ((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_25_a: assert property (disable iff (reset) BTR_CONT_4_read_25_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_26_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 ((((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0)) || ((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) || ((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_26_a: assert property (disable iff (reset) BTR_CONT_4_read_26_p(1));// ASSIGN t_end offset here
+
+property BTR_CONT_4_read_27_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 BTR_CONT_4() and
+// trigger
+	t ##0 !(((btrCnt() == 0) && (ack_i_sig() == rty))) and
+	t ##0 ((((buffer1_sig_opc() == btr2_opc) && (btrCnt() == 0)) || ((buffer1_sig_opc() == btr4_opc) && (btrCnt() == 2))) || ((buffer1_sig_opc() == btr8_opc) && (btrCnt() == 6))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == (1 + btrCnt_0) and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+BTR_CONT_4_read_27_a: assert property (disable iff (reset) BTR_CONT_4_read_27_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_28_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool gnt_i_sig_0;
+bool abort_o_sig_0;
+bool addr_en_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(gnt_i_sig_0, gnt_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_en_o_sig_0, addr_en_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == addr_en_o_sig_0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == gnt_i_sig_0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_28_a: assert property (disable iff (reset) DATA_10_read_28_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_29_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool gnt_i_sig_0;
+bool abort_o_sig_0;
+bool addr_en_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(gnt_i_sig_0, gnt_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_en_o_sig_0, addr_en_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == addr_en_o_sig_0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == gnt_i_sig_0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_29_a: assert property (disable iff (reset) DATA_10_read_29_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_30_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool gnt_i_sig_0;
+bool addr_en_o_sig_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(gnt_i_sig_0, gnt_i_sig()) and
+	t ##0 hold(addr_en_o_sig_0, addr_en_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == addr_en_o_sig_0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == gnt_i_sig_0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_30_a: assert property (disable iff (reset) DATA_10_read_30_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_31_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool gnt_i_sig_0;
+bool addr_en_o_sig_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(gnt_i_sig_0, gnt_i_sig()) and
+	t ##0 hold(addr_en_o_sig_0, addr_en_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == addr_en_o_sig_0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == gnt_i_sig_0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_31_a: assert property (disable iff (reset) DATA_10_read_31_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_32_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_32_a: assert property (disable iff (reset) DATA_10_read_32_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_33_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_33_a: assert property (disable iff (reset) DATA_10_read_33_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_34_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_34_a: assert property (disable iff (reset) DATA_10_read_34_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_35_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status2_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer2_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_35_a: assert property (disable iff (reset) DATA_10_read_35_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_36_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_36_a: assert property (disable iff (reset) DATA_10_read_36_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_37_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_37_a: assert property (disable iff (reset) DATA_10_read_37_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_38_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_38_a: assert property (disable iff (reset) DATA_10_read_38_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_39_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_39_a: assert property (disable iff (reset) DATA_10_read_39_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_40_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_40_a: assert property (disable iff (reset) DATA_10_read_40_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_41_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_41_a: assert property (disable iff (reset) DATA_10_read_41_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_42_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_42_a: assert property (disable iff (reset) DATA_10_read_42_p(1));// ASSIGN t_end offset here
+
+property DATA_10_read_43_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_10() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status2_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_10_read_43_a: assert property (disable iff (reset) DATA_10_read_43_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_44_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_44_a: assert property (disable iff (reset) DATA_ADDR_15_read_44_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_45_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_45_a: assert property (disable iff (reset) DATA_ADDR_15_read_45_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_46_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_46_a: assert property (disable iff (reset) DATA_ADDR_15_read_46_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_47_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_47_a: assert property (disable iff (reset) DATA_ADDR_15_read_47_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_48_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_48_a: assert property (disable iff (reset) DATA_ADDR_15_read_48_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_49_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_49_a: assert property (disable iff (reset) DATA_ADDR_15_read_49_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_50_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_50_a: assert property (disable iff (reset) DATA_ADDR_15_read_50_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_51_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 (ack_i_sig() == rty) and
+	t ##0 (buffer1_sig_opc() == rmw_opc) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 1 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == rty_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_51_a: assert property (disable iff (reset) DATA_ADDR_15_read_51_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_52_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+DATA_ADDR_15_read_52_a: assert property (disable iff (reset) DATA_ADDR_15_read_52_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_53_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+DATA_ADDR_15_read_53_a: assert property (disable iff (reset) DATA_ADDR_15_read_53_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_54_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_data_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_data_0, buffer2_sig_data()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer2_sig_data_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+DATA_ADDR_15_read_54_a: assert property (disable iff (reset) DATA_ADDR_15_read_54_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_55_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_data_0;
+int data_i_sig_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_data_0, buffer2_sig_data()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer2_sig_data_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+DATA_ADDR_15_read_55_a: assert property (disable iff (reset) DATA_ADDR_15_read_55_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_56_p(o);
+bool nop_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (((buffer2_sig_opc() == btr2_opc) || (buffer2_sig_opc() == btr4_opc)) || (buffer2_sig_opc() == btr8_opc)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == (1 + buffer2_sig_addr_0) and
+	t_end(o) ##0 btrCnt() == 0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_btr_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_56_a: assert property (disable iff (reset) DATA_ADDR_15_read_56_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_57_p(o);
+bool nop_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_addr_0;
+opc_t buffer2_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(nop_0, nop()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_addr_0, buffer2_sig_addr()) and
+	t ##0 hold(buffer2_sig_opc_0, buffer2_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 gnt_i_sig() and
+	t ##0 (((buffer2_sig_opc() == btr2_opc) || (buffer2_sig_opc() == btr4_opc)) || (buffer2_sig_opc() == btr8_opc)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 BTR_CONT_4() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == (1 + buffer2_sig_addr_0) and
+	t_end(o) ##0 btrCnt() == 0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == nop_0 and
+	t_end(o) ##0 opc_o_sig() == buffer2_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_btr_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_57_a: assert property (disable iff (reset) DATA_ADDR_15_read_57_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_58_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer3_sig_addr_0;
+opc_t buffer3_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer3_sig_addr_0, buffer3_sig_addr()) and
+	t ##0 hold(buffer3_sig_opc_0, buffer3_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer2_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr8_opc)) and
+	t ##0 (status3_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer3_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer3_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_58_a: assert property (disable iff (reset) DATA_ADDR_15_read_58_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_59_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer3_sig_addr_0;
+opc_t buffer3_sig_opc_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer3_sig_addr_0, buffer3_sig_addr()) and
+	t ##0 hold(buffer3_sig_opc_0, buffer3_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer2_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr8_opc)) and
+	t ##0 (status3_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer3_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer3_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_59_a: assert property (disable iff (reset) DATA_ADDR_15_read_59_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_60_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_data_0;
+int buffer3_sig_addr_0;
+opc_t buffer3_sig_opc_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_data_0, buffer2_sig_data()) and
+	t ##0 hold(buffer3_sig_addr_0, buffer3_sig_addr()) and
+	t ##0 hold(buffer3_sig_opc_0, buffer3_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status3_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer3_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer2_sig_data_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer3_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_60_a: assert property (disable iff (reset) DATA_ADDR_15_read_60_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_61_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_data_0;
+int buffer3_sig_addr_0;
+opc_t buffer3_sig_opc_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_data_0, buffer2_sig_data()) and
+	t ##0 hold(buffer3_sig_addr_0, buffer3_sig_addr()) and
+	t ##0 hold(buffer3_sig_opc_0, buffer3_sig_opc()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status3_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_ADDR_15() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer3_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer2_sig_data_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer3_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_61_a: assert property (disable iff (reset) DATA_ADDR_15_read_61_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_62_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer2_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr8_opc)) and
+	t ##0 !((status3_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_62_a: assert property (disable iff (reset) DATA_ADDR_15_read_62_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_63_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int data_i_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 !((buffer2_sig_opc() == write_opc)) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((buffer2_sig_opc() == btr2_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr4_opc)) and
+	t ##0 !((buffer2_sig_opc() == btr8_opc)) and
+	t ##0 !((status3_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_63_a: assert property (disable iff (reset) DATA_ADDR_15_read_63_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_64_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_data_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_data_0, buffer2_sig_data()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status3_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer2_sig_data_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_64_a: assert property (disable iff (reset) DATA_ADDR_15_read_64_p(1));// ASSIGN t_end offset here
+
+property DATA_ADDR_15_read_65_p(o);
+int btrCnt_0;
+ack_t ack_i_sig_0;
+int buffer1_sig_addr_0;
+bool buffer2_sig_abort_0;
+int buffer2_sig_data_0;
+int data_i_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(ack_i_sig_0, ack_i_sig()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer2_sig_abort_0, buffer2_sig_abort()) and
+	t ##0 hold(buffer2_sig_data_0, buffer2_sig_data()) and
+	t ##0 hold(data_i_sig_0, data_i_sig()) and
+// Conceptual State
+	t ##0 DATA_ADDR_15() and
+// trigger
+	t ##0 !(((ack_i_sig() == rty) && (buffer1_sig_opc() == rmw_opc))) and
+	t ##0 (buffer2_sig_opc() == write_opc) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status3_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 DATA_10() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == buffer2_sig_abort_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == buffer2_sig_data_0 and
+	t_end(o) ##0 master_done_sig_data() == data_i_sig_0 and
+	t_end(o) ##0 master_done_sig_err() == !((ack_i_sig_0 == ok)) and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t_end(o) ##0 updateQ_o_sig() == nxt_phase_q and
+	t ##1 master_done_notify() == 1 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+DATA_ADDR_15_read_65_a: assert property (disable iff (reset) DATA_ADDR_15_read_65_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_66_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_66_a: assert property (disable iff (reset) IDLE_21_read_66_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_67_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_67_a: assert property (disable iff (reset) IDLE_21_read_67_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_68_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_68_a: assert property (disable iff (reset) IDLE_21_read_68_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_69_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_69_a: assert property (disable iff (reset) IDLE_21_read_69_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_70_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status1_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_70_a: assert property (disable iff (reset) IDLE_21_read_70_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_71_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status1_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_71_a: assert property (disable iff (reset) IDLE_21_read_71_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_72_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status1_sig() == req_status)) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_72_a: assert property (disable iff (reset) IDLE_21_read_72_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_73_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 !((status1_sig() == req_status)) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+IDLE_21_read_73_a: assert property (disable iff (reset) IDLE_21_read_73_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_74_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status1_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer1_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+IDLE_21_read_74_a: assert property (disable iff (reset) IDLE_21_read_74_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_75_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 (status1_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer1_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+IDLE_21_read_75_a: assert property (disable iff (reset) IDLE_21_read_75_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_76_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 (status1_sig() == req_status) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer1_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+IDLE_21_read_76_a: assert property (disable iff (reset) IDLE_21_read_76_p(1));// ASSIGN t_end offset here
+
+property IDLE_21_read_77_p(o);
+int btrCnt_0;
+int buffer1_sig_addr_0;
+opc_t buffer1_sig_opc_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_sig_addr_0, buffer1_sig_addr()) and
+	t ##0 hold(buffer1_sig_opc_0, buffer1_sig_opc()) and
+// Conceptual State
+	t ##0 IDLE_21() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 (status1_sig() == req_status) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 ADDR_0() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == buffer1_sig_addr_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_sig_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == buffer1_sig_opc_0 and
+	t_end(o) ##0 updateQ_o_sig() == nxt_grant_q and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 1;
+endproperty;
+IDLE_21_read_77_a: assert property (disable iff (reset) IDLE_21_read_77_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_78_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_78_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_78_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_79_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_79_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_79_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_80_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_80_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_80_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_81_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_81_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_81_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_82_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_82_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_82_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_83_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_83_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_83_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_84_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_84_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_84_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_85_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 wait_cnt_end_sig() and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 IDLE_21() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_85_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_85_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_86_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_86_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_86_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_87_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int addr_o_sig_0;
+int data_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_87_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_87_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_88_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_88_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_88_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_89_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_89_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_89_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_90_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+int addr_o_sig_0;
+opc_t opc_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(addr_o_sig_0, addr_o_sig()) and
+	t ##0 hold(opc_o_sig_0, opc_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 !(gnt_i_sig()) and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 0 and
+	t_end(o) ##0 addr_o_sig() == addr_o_sig_0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 0 and
+	t_end(o) ##0 opc_o_sig() == opc_o_sig_0 and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_90_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_90_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_91_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+bool abort_o_sig_0;
+int data_o_sig_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+	t ##0 hold(abort_o_sig_0, abort_o_sig()) and
+	t ##0 hold(data_o_sig_0, data_o_sig()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 !(nop()) and
+	t ##0 gnt_i_sig() and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 0 and
+	t_end(o) ##0 abort_o_sig() == abort_o_sig_0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 0 and
+	t_end(o) ##0 data_o_sig() == data_o_sig_0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_91_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_91_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_92_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 ready_i_sync()
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_92_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_92_p(1));// ASSIGN t_end offset here
+
+property WAIT_BEFORE_RETRY_24_read_93_p(o);
+int btrCnt_0;
+int buffer1_tmp_addr_0;
+// hold
+	t ##0 hold(btrCnt_0, btrCnt()) and
+	t ##0 hold(buffer1_tmp_addr_0, buffer1_tmp_addr()) and
+// Conceptual State
+	t ##0 WAIT_BEFORE_RETRY_24() and
+// trigger
+	t ##0 nop() and
+	t ##0 gnt_i_sig() and
+	t ##0 !(wait_cnt_end_sig()) and
+	t ##0 !(ready_i_sync())
+implies
+	t_end(o) ##0 WAIT_BEFORE_RETRY_24() and
+	t_end(o) ##0 abort_en_o_sig() == 1 and
+	t_end(o) ##0 abort_o_sig() == 0 and
+	t_end(o) ##0 addr_en_o_sig() == 1 and
+	t_end(o) ##0 addr_o_sig() == 0 and
+	t_end(o) ##0 btrCnt() == btrCnt_0 and
+	t_end(o) ##0 buffer1_tmp_addr() == buffer1_tmp_addr_0 and
+	t_end(o) ##0 data_en_o_sig() == 1 and
+	t_end(o) ##0 data_o_sig() == 0 and
+	t_end(o) ##0 nop() == 1 and
+	t_end(o) ##0 opc_o_sig() == nop_opc and
+	t ##1 master_done_notify() == 0 and
+	t ##1 master_result_o_notify() == 0 and
+	t ##1 updateQ_o_notify() == 0;
+endproperty;
+WAIT_BEFORE_RETRY_24_read_93_a: assert property (disable iff (reset) WAIT_BEFORE_RETRY_24_read_93_p(1));// ASSIGN t_end offset here
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind FPI_Master FPI_Master_verification inst (.*, .reset(FPI_Master.rst));

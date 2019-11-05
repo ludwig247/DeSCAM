@@ -1,0 +1,44 @@
+;# Scheme
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+auStreamIn
+formCancel "Stream In Data File"
+read_lib
+readLibForm "physical"
+readLibForm "physical" "LEF+GDSII"
+auStreamIn
+
+setFormField "Stream In Data File" "Library Name" "NG45MW"
+
+setFormField "Stream In Data File" "Merge Existing Cells" "1"
+
+setFormField "Stream In Data File" "Stream File Name" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/gds/AND2_X1.gds"
+formOK "Stream In Data File"
+configureWindow 0 "25x24+0+0"
+readLibForm "hide"
+geOpenLib
+formCancel "Stream In Data File"
+geOpenLib
+formButton "Open Library" "browse..."
+formCancel "Open Library"
+configureWindow 0 "25x24+0+0"
+geOpenLib
+formCancel "Open Library"
+read_lib
+readLibForm "physical"
+readLibForm "physical" "LEF+GDSII"
+auStreamIn
+
+setFormField "Stream In Data File" "Library Name" "NG45MW"
+
+setFormField "Stream In Data File" "Merge Existing Cells" "1"
+
+setFormField "Stream In Data File" "Stream File Name" "/import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/Back_End/gds/AND2_X1.gds"
+formApply "Stream In Data File"
+formCancel "Stream In Data File"
+readLibForm "hide"
+configureWindow 0 "25x24+0+0"
+configureWindow 0 "25x24+0+0"
+menuQuit
+formYes "Dialog Box"

@@ -1,0 +1,10 @@
+;# Tcl
+configureWindow 0 25x24+0+0
+configureWindow 0 25x24+558+87
+cmCreateLib
+setFormField create_library library_name Nangate
+setFormField create_library technology_file_name /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/captables/
+setFormField create_library technology_file_name /import/home/udupi/work/NangateOpenCellLibrary_PDKv1_3_v2010_12/captables/NCSU_FreePDK_45nm.ptf
+formOK create_library
+menuQuit
+formYes dialog_box

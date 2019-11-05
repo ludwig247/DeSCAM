@@ -1,0 +1,66 @@
+// @lang=vli @ts=2
+
+completeness threestagepipeline;
+disable iff: (rst || !CU/MEtoCU_port_sync || !CU/CUtoME_port_sync);
+inputs: CU/CUtoME_port_sync,  CU/MEtoCU_port, CU/MEtoCU_port_sync, rst;
+
+//determination_requirements:
+// endif;
+
+reset_property: reset;
+
+property_graph:
+from17to16 := 
+	fetch_17_read_5,
+	fetch_17_read_6,
+	fetch_17_read_7,
+	fetch_17_read_9,
+	fetch_17_read_10,
+	fetch_17_read_11,
+	fetch_17_read_13;
+  
+reset -> fetch_16_write_4, wait_fetch_16;
+
+fetch_16_write_4 -> wait_fetch_17;	
+fetch_16_write_4 -> from17to16;
+fetch_16_write_4 -> fetch_17_read_8;
+fetch_16_write_4 -> fetch_17_read_12;
+	
+from17to16 -> fetch_16_write_4;
+from17to16 -> wait_fetch_16;
+
+fetch_17_read_8 -> execute_4_write_0;
+fetch_17_read_8 -> wait_execute_4;
+
+fetch_17_read_12 -> execute_11_write_2;
+fetch_17_read_12 -> wait_execute_11;
+
+execute_4_write_0 -> execute_5_read_1;
+execute_4_write_0 -> wait_execute_5;
+
+execute_5_read_1 -> fetch_16_write_4;
+execute_5_read_1 -> wait_fetch_16;
+
+execute_11_write_2 -> execute_12_read_3;
+execute_11_write_2 -> wait_execute_12;
+
+execute_12_read_3 -> fetch_16_write_4;
+execute_12_read_3 -> wait_fetch_16;
+
+wait_fetch_16   -> fetch_16_write_4;
+wait_fetch_17   -> from17to16;
+wait_fetch_17   -> fetch_17_read_8;
+wait_fetch_17   -> fetch_17_read_12;
+wait_execute_4  -> execute_4_write_0;
+wait_execute_5  -> execute_5_read_1;
+wait_execute_11 -> execute_11_write_2;
+wait_execute_12 -> execute_12_read_3;
+
+wait_fetch_16   -> wait_fetch_16;
+wait_fetch_17   -> wait_fetch_17;
+wait_execute_4  -> wait_execute_4;
+wait_execute_5  -> wait_execute_5;
+wait_execute_11 -> wait_execute_11;
+wait_execute_12 -> wait_execute_12;
+
+end completeness;

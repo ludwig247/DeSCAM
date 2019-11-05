@@ -1,0 +1,47 @@
+completeness vcore;
+disable iff: !reset_n;
+determination_assumptions:
+  determined(reset_n);
+  determined(dmem_valid_i);
+  determined(imem_data_i);
+  determined(dmem_data_i);
+
+determination_requirements:
+  // imem interface
+  determined(imem_read_o), end_offset=-1;
+  if (imem_read_o)
+    determined(imem_addr_o)
+  endif, end_offset=-1;
+
+  // dmem interface
+  determined(dmem_enable_o);
+  if (dmem_enable_o)
+      determined(dmem_write_o),
+      determined(dmem_addr_o)
+  endif;
+  if (dmem_enable_o && dmem_write_o)
+      determined(dmem_data_o)
+  endif;
+
+local_determination_requirements:
+at right_hook: determined(conceptual_state);     // needed for length 1
+at right_hook: determined(IR);                  // visible register
+at right_hook: determined(PC);                  // visible register
+at right_hook: determined(virtual_register(0)); // visible register
+at right_hook: determined(virtual_register(1)); // visible register
+at right_hook: determined(virtual_register(2)); // visible register
+at right_hook: determined(virtual_register(3)); // visible register
+at right_hook: determined(virtual_register(4)); // visible register
+at right_hook: determined(virtual_register(5)); // visible register
+at right_hook: determined(virtual_register(6)); // visible register
+at right_hook: determined(virtual_register(7)); // visible register
+
+reset_property:
+  reset;
+
+property_graph:
+  all_instr := instr_not, instr_add, instr_sub, instr_ld, instr_st, 
+               instr_beqz, instr_beqz_mispredict;
+
+  reset, all_instr -> all_instr;
+end completeness;

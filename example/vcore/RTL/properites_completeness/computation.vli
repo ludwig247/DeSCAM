@@ -1,0 +1,9 @@
+macro unsigned instr_result(unsigned opcode, Ra, Rb) :=
+    case (opcode)
+    5'h00:      ~Ra;
+    5'h01:      (Ra+Rb)[15:0];
+    5'h02:      unsigned(Ra-Rb)[15:0];
+    default:    undefined(16);
+    endcase;
+end macro;
+

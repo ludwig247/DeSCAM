@@ -1,0 +1,329 @@
+\section{Walk-Through}
+\label{sec:walk-through}
+
+\subsection{Step 1: ESL Analysis and Refactoring}
+\label{sec:walk-through-step1}
+
+\begin{lstlisting}[language=C++,
+caption={Example of a SystemC module},
+label={lst:walk-through},
+numbers=left,
+captionpos=b,   
+basicstyle={\footnotesize},
+xleftmargin=5.0ex]
+struct Example: public sc_module{
+  //Constructor
+  Example(sc_module_name name):
+          value(9){SC_THREAD(fsm);}
+  SC_HAS_PROCESS(Example);
+
+  //Ports
+  blocking_in<int> b_in;
+  blocking_out<bool> b_out;
+
+  //Variables
+  int value;
+
+  //Finite State Machine
+  void fsm(){
+  while(true){
+    b_in->read(value);
+    if(value > 10){
+      b_out->write(true);
+    }else b_out->write(false);
+  }}
+};
+\end{lstlisting}
+
+The PDD-methodology starts with a system-level design serving as golden reference for the following design process. %
+Here, SystemC is used as system-level design entry language. %
+A system is composed of a set of communicating modules. %
+At the system level the main focus is on describing and verifying the \emph{communication} between modules. 
+Each of these modules is later transformed into a set of properties. %
+
+Listing~\ref{lst:walk-through} shows the description of a SystemC module, named \textit{Example}, with one input and one output. %
+The inputs and outputs are connected with other modules via \emph{channels} describing the underlying communication protocol. %
+In this module, the inputs (\textit{b\_in}) and outputs (\textit{b\_out}) use a \textit{blocking} interface. %
+Blocking, in this context, means that the underlying communication protocol implements a four-phase handshake. %
+Thus, the message is transmitted if and only if both sides are ready for communication. %
+
+The behavior of the module is described within the method \textit{fsm}
+that is registered as a thread with the SystemC scheduler and is
+executed infinitely often. %
+The module reads a value from the input \textit{b\_in} and stores the
+result in the variable \textit{value}. %
+If \textit{value} is $>$\textit{10} the output port sends
+\textit{true}, otherwise \textit{false}. %
+
+As you might already suspect from examining
+listing~\ref{lst:walk-through}, it is not possible to use arbitrary
+SystemC constructs when following the PDD paradigm. %
+Only a certain subset of SystemC is allowed, and the code needs to
+follow a certain structure and coding rules. %
+The reason is that SystemC, per se, does not have a clear semantics
+with respect to cycle-accurate RTL implementation. %
+The semantics need to be introduced by restricting the use of language
+constructs to what we call the ``designable subset'' of SystemC. %
+This subset will be described and detailed in the following. %
+
+Let's continue with our first walk-through of PDD. %
+We assume that our SystemC module has passed verification on the ESL
+and is considered ready for implementation. %
+The SystemC code is analyzed using \DeSCAM{}. %
+We run the tool from the command line as \texttt{DeSCAM <path-to-file> -AML}
+The following example shows the output of DeSCAM %
+when no errors are found:
+\begin{small}
+\begin{verbatim}
+############################
+Module: Example
+############################
+
+======================
+PPA generation:
+----------------------
+[...] Metrics of PPA generation
+
+======================
+Instances
+----------------------
+[...] Connection between modules
+[...] No connections for single modules
+
+======================
+AML: Example
+----------------------
+[...] Pseudo-representation of the module
+\end{verbatim}
+\end{small}
+
+The pseudo-code underneath \textit{"AML: Example"} shows an abstract
+representation of the module. %
+The language used here is called \textit{"Abstract Model Language"}
+and is based on the specification described as \href{https://www.eit.uni-kl.de/fileadmin/eis/PPA/designflow/AML-syntax.txt}{EBNF}.
+We use this DSL as an intermediate format in our flow.
+
+The file \textit{WalkThrough\_with\_error.h} contains a statement that is not part of the subset and the output of \textit{DeSCAM} reports the error. %
+If a statement is found to be not part of the subset it is ignored for the abstract model. %
+\newpage
+\begin{small}
+\begin{verbatim}
+======================
+Errors: Translation of Stmts for module Example
+----------------------
+- test.push_back(value)
+  -E- push_back() is not a supported method!
+\end{verbatim}
+\end{small}
+For example, using a \tsCODE{std::vector} on system level is
+beneficial when it comes to executing the simulation on the CPU but it
+is not transferable to a hardware system, because memory
+implementations have a static and known size. %
+Thus, the statement is reported by DeSCAM as not being part of the
+subset. %
+The designer must now make a decision, {\begin{itemize}
+  \item whether or not the statement is important for the module behavior,
+  \item whether the SystemC description has to be modified,
+  \item or whether the statement can be safely ignored as it has no
+    effect on the behavior (e.g., a \tsCODE{std::cout}). %
+ \end{itemize}
+
+
+\subsection{Step 2: Property Generation}
+\label{sec:walk-through-step2}
+
+Once the \SYSTEMCPPA{} code is stable and deemed ready for RTL
+implementation, we can generate the initial set of abstract
+properties using \DeSCAM{}. %
+This is the second step of PDD in which we generate the properties with our tool \textit{DeSCAM}. 
+A single SystemC module or a system of SystemC modules serves as the input to the tool. %
+The tool parses the files and generates an abstract model that is used for the generation of the properties. % 
+In order to generate the properties run \tsCODE{./DeSCAM path-to-file/WalkThrough.h -ITL}. %
+The \tsCODE{-ITL} flag invokes property generation in ITL (\emph{InTerval Language}). %
+ITL is a property specification language available for the OneSpin~\cite{web-onespin} property checker. %
+We support it because the language is quite intuitive and apt to specifying the kind of properties used in PDD. %
+Of course, also other property specification languages can be used in PDD. %
+Currently, besides ITL,  \DeSCAM{} also support SystemVerilog Assertion (SVA)~\cite{2009-SystemVerilog}. %
+For SVA  generation run the tool with the option \tsCODE{-SVA}. %
+For a full list of possible commands run \tsCODE{./DeSCAM -help}. %
+
+In this section, we will provide only a quick overview over the
+generated abstract properties. %
+For a more detailed explanation refer to Sec~\ref{sec:pdd}. In
+order to link the abstract objects of the system level to a concrete
+RTL implementation we introduce \emph{macros}. %
+The RT designer refines these macros by replacing the \tsCODE{MACRO\_BODY} with concrete information from the RT design. 
+For \tsCODE{b\_in} and \tsCODE{b\_out} the following macros are generated:
+
+\begin{small}
+\begin{verbatim}
+-- SYNC AND NOTIFY SIGNALS
+macro b_in_notify :boolean:= MACRO_BODY end macro; 
+macro b_in_sync   :boolean:= MACRO_BODY end macro; 
+macro b_out_notify:boolean:= MACRO_BODY end macro; 
+macro b_out_sync  :boolean:= MACRO_BODY end macro; 
+-- DP SIGNALS -- 
+macro b_in_sig : int := MACRO_BODY end macro; 
+macro b_out_sig : bool := MACRO_BODY end macro; 
+\end{verbatim}
+\end{small}
+
+There are two types of macros -- synchronization macros for event signalling, and data path macros for transporting the message content. %
+The synchronization macro names have the suffixes \tsCODE{sync} and  \tsCODE{notify}. %
+Thes signals are of Boolean type and implement the four-phase handshake. %
+The generated data path macro names have the suffix \tsCODE{sig}. %
+The return type of these macros is the type of the transported message. %
+The designer specifies, by refining these macros, how the abstract message is encoded at the RTL. %
+
+The protocol for sending (receiving) a message with a four-phase handshake is:
+\begin{itemize}
+\item The writer (reader) set the outgoing notify signal to
+  \textit{true}. %
+\item The writer (reader) waits until the incoming sync signal
+  evaluates to \textit{true}. %
+\item The message is exchanged by writing (reading) the datapath
+  signal. %
+\item After message exchange, the writer (reader) unsets the notify signal
+\item End of the transmission. %
+\end{itemize}
+
+At the system level the handshaking is implicitly implemented through
+events and, thus, not visible to the user, whereas at the RTL there
+has to be an explicit implementation of the handshaking. %
+ 
+In our methodology, the generated properties capture the full I/O
+behavior of the system-level design. %
+The system-level thread is transformed into a special finite state
+machine (\textit{FSM}). 
+This FSM represents a \emph{path predicate abstraction}
+(\textit{PPA})~\cite{2015-UrdahlStoffel.etal, 2014-UrdahlStoffel.etal,
+  2016-UrdahlUdupi.etal} of the RTL design to be implemented. %
+The states of the FSM represent the points of communication between
+modules, and the transitions between states represent the computations
+inside the module, as specified by the properties. %
+
+Listing~\ref{lst:walk-through} contains three communication calls (line~17, 19, 20). %
+For each of these calls, a state is created. 
+These states are called \textit{important states}, because they
+represent important control points of the hardware. %
+
+When refining the property suite, the designer needs to fill in the
+corresponding state macros in order to specify what conditions in the
+RTL hardware represent the states. %
+In order to do so it is allowed to use internal signals as well as outputs. %
+
+\begin{small}
+\begin{verbatim}
+-- STATES -- 
+macro run_0 : boolean :=  end macro;
+macro run_1 : boolean :=  end macro;
+macro run_2 : boolean :=  end macro;
+\end{verbatim}
+\end{small}
+
+There is a directed edge between two important states if there exists an
+execution path between the corresponding communication calls at the system level. %
+Each edge translates into an interval property describing the actions taken in the RTL when moving from one important state to the next. %
+The following property starts in the important state \tsCODE{run\_0},
+which is the state after reset. %
+
+\begin{small}
+\begin{verbatim}
+property run_0_read_0 is
+dependencies: no_reset;
+for timepoints:
+  t_end = t+1; -- CHANGE HERE
+assume: 
+  at t: run_0;
+  at t: (b_in_sig >= 11);
+  at t: b_in_sync;
+prove:
+  at t_end: run_1;
+  at t_end: b_out_sig=true;
+  during[t+1,t_end]: b_in_notify=false;
+  during[t+1,t_end-1]: b_out_notify=false;
+  at t_end: b_out_notify = true;
+end property;
+\end{verbatim}
+\end{small}
+
+The property run\_0\_read\_0 describes the execution path between
+line~17 and line~19 of Figure~\ref{lst:walk-through}. %
+
+If the input is available ($b\_in\_sync == true$) and the input value
+is greater or equal~11 the hardware moves to important state
+\tsCODE{run\_1}. %
+In \tsCODE{run\_1} the value of \tsCODE{b\_out\_sig} is set to
+\textit{true} and the counterpart is notified by raising
+\tsCODE{b\_out\_notify}. The property assumes that:
+\begin{itemize}
+\item The hardware is in state \tsCODE{run\_0},
+\item a new input is available ($b\_in\_sync == true$),
+\item and the value of the received message is greater or equal~11 (\tsCODE{b\_in\_sig}~$\geq$~11). 
+\end{itemize} 
+Then, it is proven that: 
+\begin{itemize}
+\item The hardware moves to important state \tsCODE{run\_1},
+\item the value of \tsCODE{b\_out\_sig} is set to \textit{true},
+\item and the outgoing message is offered by raising
+  \tsCODE{b\_out\_notify}. %
+\end{itemize}
+
+The hardware remains in state \tsCODE{run\_1} until the recipient of
+the message accepts the handshake and the message is passed. %
+
+In case the module has to wait for the communication partner, a
+\emph{wait} property is generated automatically for each blocking
+communication that enforces the hardware to remain in the same
+important state until the respective \tsCODE{sync} signal is active. %
+
+\subsection{Step 3: Hardware Implementation}
+\label{sec:walk-through-step3}
+
+Now, the RT designer has the task to specify how the abstract
+system-level objects are implemented by the RT-design by filling in the macros. %
+For example, the macro \tsCODE{b\_in\_sig} represents the incoming value. %
+The designer has  full freedom in how to implement a representation of this data. %
+The designer maps the corresponding RTL signals to the property by providing a body for this macro. %
+
+Let us suppose that the incoming message be transported by the input signal \tsCODE{value\_in} and, thus, the macro is refined into
+\begin{small}
+ \begin{verbatim} 
+macro b_in_sig : int := 
+  RT_design/value_in 
+end macro; 
+\end{verbatim}
+\end{small}
+It could also be that a message is transported by two different RT signals and the resulting value is the sum of those two signals. %
+The designer would, accordingly, provide this information in the macro body:
+\begin{small}
+  \begin{verbatim} 
+macro b_in_sig : int := 
+  RT_design/input1 + RT_design/input2  
+end macro; 
+\end{verbatim}
+
+\end{small}
+
+In case there exists no previous implementation, the RT designer has
+the option to generate a VHDL template by running \tsCODE{./DeSCAM
+  <path-to-file>/WalkThrough.h -VHDL}. %
+This template contains a package with all used data types and a
+bare-bone VHDL implementation matching the properties. %
+The template is not a synthesized design and thus doesn't contain any
+behavioral components. %
+
+In order to start the hardware design process, load your VHDL template
+or empty design and the accompanying properties with the property
+checker. %
+The first property to prove is the reset property. %
+The design process continues with implementing all operations starting
+in the important state after reset. %
+The RT designer refines the important state macros for the currently
+implemented operations during the design process. %
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "binder"
+%%% End: 
+

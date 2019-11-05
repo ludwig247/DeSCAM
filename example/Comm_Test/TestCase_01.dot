@@ -1,0 +1,47 @@
+digraph TestCase_01 {  graph [rankdir=TD];  
+state_0[ label = "------"];
+state_1[ label = "section = run"];
+state_2[ label = "cnt = 0"];
+state_3[ label = "nextphase = PROCESS"];
+state_4[ label = "phase = PROCESS"];
+state_5[ label = "nextphase = READ"];
+state_6[ label = "while (true)"];
+state_7[ label = "phase = nextphase"];
+state_8[ label = "if ((phase == READ))"];
+state_9[ label = "b_in.read(cnt)"];
+state_10[ label = "nextphase = PROCESS"];
+state_11[ label = "if ((phase == PROCESS))"];
+state_12[ label = "cnt = (cnt - 1)"];
+state_13[ label = "nextphase = WRITE"];
+state_14[ label = "if ((phase == WRITE))"];
+state_15[ label = "m_out.write(cnt)"];
+state_16[ label = "nextphase = READ"];
+state_17[ label = "------"];
+
+state_0 -> state_1;
+state_1 -> state_2;
+state_2 -> state_3;
+state_3 -> state_4;
+state_4 -> state_5;
+state_5 -> state_6;
+state_6 -> state_7;
+state_7 -> state_8;
+state_8 -> state_9[label = "yes"];
+state_8 -> state_11[label = "no"];
+state_9 -> state_10;
+state_10 -> state_11;
+state_11 -> state_12[label = "yes"];
+state_11 -> state_14[label = "no"];
+state_12 -> state_13;
+state_13 -> state_14;
+state_14 -> state_15[label = "yes"];
+state_14 -> state_17[label = "no"];
+state_15 -> state_16;
+state_16 -> state_17;
+state_17 -> state_6;
+
+subgraph cluster_0 {
+	style=filled; color=brown2;
+	state_9;
+}
+}

@@ -1,0 +1,51 @@
+module Bus
+{
+  blocking in <bus_req_t> master_in;
+  blocking out <bus_resp_t> master_out;
+  blocking in <bus_resp_t> slave_in0;
+  blocking in <bus_resp_t> slave_in1;
+  blocking in <bus_resp_t> slave_in2;
+  blocking in <bus_resp_t> slave_in3;
+  blocking out <bus_req_t> slave_out0;
+  blocking out <bus_req_t> slave_out1;
+  blocking out <bus_req_t> slave_out2;
+  blocking out <bus_req_t> slave_out3;
+
+  FSM {
+    sections {run} = run;
+    bus_req_t req = {0, 0, SINGLE_READ};
+    bus_resp_t resp = {ERR, 0};
+
+    @run:
+      master_in.read(req);
+      if ((SINGLE_READ == req.trans_type)) {
+        req.data = 0;
+      }
+      if (((req.addr >= 0) and (req.addr < 8))) {
+        slave_out0.write(req);
+        slave_in0.read(resp);
+      } else {
+        if (((req.addr >= 8) and (req.addr < 16))) {
+          req.addr = (req.addr - 8);
+          slave_out1.write(req);
+          slave_in1.read(resp);
+        } else {
+          if (((req.addr >= 16) and (req.addr < 24))) {
+            req.addr = (req.addr - 16);
+            slave_out2.write(req);
+            slave_in2.read(resp);
+          } else {
+            if (((req.addr >= 24) and (req.addr < 32))) {
+              req.addr = (req.addr - 24);
+              slave_out3.write(req);
+              slave_in3.read(resp);
+            }
+          }
+        }
+      }
+      if ((SINGLE_WRITE == req.trans_type)) {
+        resp.data = 0;
+      }
+      master_out.write(resp);
+  }
+};

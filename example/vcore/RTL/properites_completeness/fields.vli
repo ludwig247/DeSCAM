@@ -1,0 +1,7 @@
+macro unsigned field_opcode(unsigned iw) := iw[15:11]; end macro;
+macro unsigned field_A     (unsigned iw) := iw[10: 8]; end macro;
+macro unsigned field_B     (unsigned iw) := iw[ 7: 5]; end macro;
+macro unsigned field_D     (unsigned iw) := iw[ 4: 2]; end macro;
+macro unsigned field_imm5  (unsigned iw) := iw[ 4: 0]; end macro;
+macro unsigned field_imm8  (unsigned iw) := iw[ 7: 0]; end macro;
+

@@ -1,0 +1,458 @@
+import scam_model_types::*;
+
+module uart_testbench_property_suite(rst);
+                                     
+input rst;                               
+        
+                              
+default clocking default_clk @(posedge UART.clk); endclocking
+
+
+function logic unsigned [31:0] request_addrin;
+request_addrin = UART.request.addrin;
+endfunction
+
+function logic unsigned [31:0] request_datain;
+request_datain = UART.request.datain;
+endfunction
+
+function me_masktype request_mask;
+request_mask = UART.request.mask;
+endfunction
+
+function me_accesstype request_req;
+request_req = UART.request.req;
+endfunction
+
+
+function request_notify;
+request_notify = UART.request_notify;
+endfunction
+
+function request_sync;
+request_sync = UART.request_sync;
+endfunction
+
+function metocu_if response;
+response = UART.response;
+endfunction
+
+function response_sync;
+response_sync = UART.response_sync;
+endfunction
+
+function response_notify;
+response_notify = UART.response_notify;
+endfunction
+
+function txpin;
+txpin = UART.txpin;
+endfunction
+
+function rxpin;
+rxpin = UART.rxpin;
+endfunction
+
+function interrupt_sig;
+interrupt_sig = UART.interrupt_sig;
+endfunction
+
+function interrupt_sig_notify;
+interrupt_sig_notify = UART.interrupt_sig_notify;
+endfunction
+
+
+function logic unsigned [31:0] te_flag;
+te_flag = UART.te_flag;
+endfunction
+
+function logic unsigned [31:0] re_flag;
+re_flag = UART.re_flag;
+endfunction
+              
+
+function logic unsigned [31:0] RX_to_ctrl;
+RX_to_ctrl = UART.RXreg.dr_reg;
+endfunction
+
+function logic unsigned [31:0] RX_SR_to_ctrl;
+RX_SR_to_ctrl = UART.RXreg.sr_reg;
+endfunction
+
+
+function reg_action RX_r_act;
+RX_r_act = UART.RXreg.r_act;
+endfunction
+
+
+function RX_to_ctrl_notify;
+RX_to_ctrl_notify = UART.RXreg_notify;
+endfunction              
+              
+function baud_to_rx;
+baud_to_rx = UART.baud_rx;
+endfunction
+
+function logic unsigned [31:0] parity_rx;
+parity_rx = UART.ctrl_par_rx;
+endfunction
+
+function logic unsigned [31:0] baudrate_ctrl;
+baudrate_ctrl = UART.ctrl_baud;
+endfunction
+
+function baud_to_tx;
+baud_to_tx = UART.baud_tx;
+endfunction
+      
+function rx_sections section_rx;
+section_rx = UART.rec.section;
+endfunction
+
+function logic unsigned [31:0] rx_bitcount;
+rx_bitcount = UART.rec.bitcounter_signal;
+endfunction
+
+function logic unsigned [31:0] baudcounter;
+baudcounter = UART.baud.baudcounter_signal;
+endfunction
+
+function baudgen_sections section_baud;
+section_baud = UART.baud.section;
+endfunction
+
+function baudrate_trigger;
+baudrate_trigger = UART.baud.trigg_signal;
+endfunction
+
+function ctrl_SR;
+ctrl_SR = UART.ctrl.regs_signal.sr_reg;
+endfunction 
+
+function ctrl_CR;
+ctrl_CR = UART.ctrl.regs_signal.cr_reg;
+endfunction 
+
+function ctrl_DR;
+ctrl_DR = UART.ctrl.regs_signal.dr_reg;
+endfunction 
+
+function mem_man_ctrl_notify;
+mem_man_ctrl_notify = UART.mem_man_ctrl_notify;
+endfunction             
+
+function trans_flag_notify;
+trans_flag_notify = UART.trans_flag_notify;
+endfunction
+
+
+function section_tx;
+section_tx = UART.trans.section;
+endfunction
+
+
+                        
+ `include "tidal.sv"
+ 
+ `begin_tda(ops)
+ 
+ //------------------------------
+ // Sequences
+ //------------------------------
+ 
+sequence reset_sequence;
+UART.rst == 1;
+endsequence 
+
+
+
+property reset;
+
+t##0 reset_sequence
+
+implies
+
+t##1 txpin() == 1 and
+t##1 interrupt_sig_notify() == 0 and
+t##1 request_notify() == 1 and
+t##1 response_notify() == 0;
+
+endproperty;
+
+assert_reset: assert property(reset);
+
+
+//--------------------------
+// Verify Memory_manager
+//--------------------------
+
+
+
+property generic_read;
+
+t##0 request_req() == me_rd and
+t##0 request_sync() == 1 and
+t##0 request_notify() == 1
+
+implies
+
+t##1 request_notify() == 0 and
+t##1 response_notify() == 1;
+
+endproperty;
+
+assert_generic_read: assert property(disable iff(UART.rst) generic_read);
+
+
+//--------------------------
+// Verify Control
+//--------------------------
+
+
+property enable;
+
+t##0 request_addrin() == 0 and
+t##0 request_datain() == 3 and
+t##0 request_req() == me_wr and
+t##0 request_mask() == mt_w and
+t##0 request_sync() == 1 and
+t##0 request_notify() == 1
+
+implies
+
+t##3 te_flag() == 1 and
+t##3 re_flag() == 1;
+
+
+endproperty;
+
+assert_enable: assert property(disable iff(UART.rst) enable);
+
+
+
+
+
+
+//--------------------------
+// Verify RX
+//--------------------------
+
+
+property simple_receive;
+
+
+t##0 section_rx() == \rx_sections__\scan and
+t##0 rxpin() == 0 
+
+
+implies
+
+t##10 RX_to_ctrl_notify() == 1 and
+t##10 RX_r_act() == rx_wr;
+
+
+endproperty;
+
+assert_simple_receive: assert property (disable iff(UART.rst || re_flag() == 0 || baud_to_rx() == 0 || parity_rx() != 0) simple_receive);
+
+property disabled_receive;
+
+
+t##0 section_rx() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##0 re_flag() == 0
+
+
+implies
+
+t##10 RX_to_ctrl_notify() == 0;
+
+
+endproperty;
+
+assert_disabled_receive: assert property (disable iff(UART.rst || baud_to_rx() == 0 || parity_rx() != 0) disabled_receive);
+
+
+property even_par_receive;
+
+t##0 section_rx() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##1 rxpin() == 1 and
+t##2 rxpin() == 0 and
+t##3 rxpin() == 1 and
+t##4 rxpin() == 1 and
+t##5 rxpin() == 0 and
+t##6 rxpin() == 0 and
+t##7 rxpin() == 0 and
+t##8 rxpin() == 0 and
+t##9 rxpin() == 1 and
+t##10 rxpin() == 1 
+
+implies
+
+t##11 RX_to_ctrl_notify() == 1 and
+t##11 RX_r_act() == rx_wr and
+t##11 RX_to_ctrl() == 32'hd00  and
+t##11 (RX_SR_to_ctrl() & 32'h20) == 0;
+
+endproperty;
+
+
+assert_even_par_receive: assert property (disable iff(UART.rst || re_flag() == 0 || baud_to_rx() == 0 || parity_rx() != 2) even_par_receive);
+
+property odd_par_receive;
+
+t##0 section_rx() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##1 rxpin() == 1 and
+t##2 rxpin() == 0 and
+t##3 rxpin() == 1 and
+t##4 rxpin() == 0 and
+t##5 rxpin() == 0 and
+t##6 rxpin() == 0 and
+t##7 rxpin() == 0 and
+t##8 rxpin() == 0 and
+t##9 rxpin() == 1 and
+t##10 rxpin() == 1 
+
+implies
+
+t##11 RX_to_ctrl_notify() == 1 and
+t##11 RX_r_act() == rx_wr and
+t##11 RX_to_ctrl() == 32'h500  and
+t##11 (RX_SR_to_ctrl() & 32'h20) == 0;
+
+endproperty;
+
+
+assert_odd_par_receive: assert property (disable iff(UART.rst || re_flag() == 0 || baud_to_rx() == 0 || parity_rx() != 1) odd_par_receive);
+
+property receive_error;
+
+t##0 section_rx() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##0 rx_bitcount() == 0 and
+t##1 rxpin() == 1 and
+t##2 rxpin() == 0 and
+t##3 rxpin() == 1 and
+t##4 rxpin() == 0 and
+t##5 rxpin() == 0 and
+t##6 rxpin() == 0 and
+t##7 rxpin() == 0 and
+t##8 rxpin() == 0 and
+t##9 rxpin() == 1 and
+t##10 rxpin() == 0 
+
+implies
+
+
+t##9 rx_bitcount() == 2 and
+t##11 RX_to_ctrl_notify() == 1 and
+t##11 RX_r_act() == rx_wr and
+t##11 RX_to_ctrl() == 32'h500  and
+t##11 (RX_SR_to_ctrl() & 32'h40) != 0 and
+t##11 (RX_SR_to_ctrl() & 32'h80) != 0;
+
+endproperty;
+
+
+assert_receive_error: assert property (disable iff(UART.rst || re_flag() == 0 || baud_to_rx() == 0 || parity_rx() != 2) receive_error);
+
+
+//--------------------------
+// Verify baudgen
+//--------------------------
+
+property baud_rate;
+
+t##0 section_baud() == \baudgen_sections__\run 
+and
+t##0 baudrate_trigger() == 1 and
+t##0 baudcounter() == 0 
+
+
+implies
+
+t##1 baudrate_trigger() == 0 and
+t##2 baudrate_trigger() == 0 and
+t##3 baudrate_trigger() == 0 and
+t##4 baudrate_trigger() == 1 and //Verifies baudrate triggers by correctly divided clock (CLK/N) where clockdivider = N-1
+t##5 baudrate_trigger() == 0;
+
+endproperty;
+
+assert_baud_rate: assert property (disable iff(UART.rst || baudrate_ctrl() != 3) baud_rate);
+
+
+//--------------------------
+// Verify TX
+//--------------------------
+
+
+
+
+//--------------------------
+// Verify toplevel
+//--------------------------
+
+property send_byte;
+
+t##0 request_addrin() == 0 and
+t##0 request_datain() == 32'h01 and
+t##0 request_mask() == mt_w and
+t##0 request_req() == me_wr and
+t##0 request_notify() == 1 and
+t##0 request_sync() == 1 and
+t##1 request_addrin() == 8 and
+t##1 request_datain() == 32'hdc and
+t##1 request_mask() == mt_b and
+t##1 request_req() == me_wr and
+t##1 request_notify() == 1 and
+t##1 request_sync() == 1 and
+t##2 section_tx() == \tx_sections__\idle1 
+and
+t##3 section_tx() == \tx_sections__\idle2
+and 
+t##2 request_sync() == 0 and 
+t##3 request_sync() == 0 and 
+t##4 request_sync() == 0 and 
+t##5 request_sync() == 0 and 
+t##6 request_sync() == 0 and 
+t##7 request_sync() == 0 and 
+t##8 request_sync() == 0 and 
+t##9 request_sync() == 0 and 
+t##10 request_sync() == 0 and 
+t##11 request_sync() == 0 and 
+t##12 request_sync() == 0 and 
+t##13 request_sync() == 0 and 
+t##14 request_sync() == 0 and
+t##15 request_sync() == 0 
+
+implies 
+
+t##6 txpin() == 0 and
+t##7 txpin() == 0 and
+t##8 txpin() == 0 and
+t##9 txpin() == 1 and
+t##10 txpin() == 1 and
+t##11 txpin() == 1 and
+t##12 txpin() == 0 and
+t##13 txpin() == 1 and
+t##14 txpin() == 1 and
+t##15 txpin() == 1;
+
+endproperty;
+
+assert_send_byte: assert property(disable iff(UART.rst) send_byte);
+
+
+
+
+
+
+ 
+ `end_tda
+ 
+ endmodule
+ 
+ bind UART uart_testbench_property_suite inst_uart_testbench_property_suite(.*, .rst(UART.rst));

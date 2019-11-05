@@ -1,0 +1,84 @@
+import scam_model_types::*;
+
+module verify_mem_man_property_suite(rst);
+                                     
+input rst;                               
+        
+                              
+default clocking default_clk @(posedge Memory_manager.clk); endclocking
+
+
+function logic unsigned [31:0] request_addrin;
+request_addrin = Memory_manager.bus_to_mem_man.addrin;
+endfunction
+
+function logic unsigned [31:0] request_datain;
+request_datain = Memory_manager.bus_to_mem_man.datain;
+endfunction
+
+function me_masktype request_mask;
+request_mask = Memory_manager.bus_to_mem_man.mask;
+endfunction
+
+function me_accesstype request_req;
+request_req = Memory_manager.bus_to_mem_man.req;
+endfunction
+
+
+function request_notify;
+request_notify = Memory_manager.bus_to_mem_man_notify;
+endfunction
+
+function request_sync;
+request_sync = Memory_manager.bus_to_mem_man_sync;
+endfunction
+
+function logic unsigned [31:0] response;
+response = Memory_manager.mem_man_to_bus.loadeddata;
+endfunction
+
+function response_sync;
+response_sync = Memory_manager.mem_man_to_bus_sync;
+endfunction
+
+function response_notify;
+response_notify = Memory_manager.mem_man_to_bus_notify;
+endfunction
+
+
+
+
+
+ `include "tidal.sv"
+ 
+ `begin_tda(ops)
+ 
+
+
+
+
+
+property generic_read;
+
+t##0 request_req() == me_rd and
+t##0 request_sync() == 1 and
+t##0 request_notify() == 1
+
+implies
+
+t##1 request_notify() == 0 and
+t##1 response_notify() == 1;
+
+endproperty;
+
+assert_generic_read: assert property(disable iff(Memory_manager.rst) generic_read);
+
+
+
+
+
+ `end_tda
+ 
+ endmodule
+ 
+ bind Memory_manager verify_mem_man_property_suite inst_verify_mem_man_property_suite(.*, .rst(Memory_manager.rst));

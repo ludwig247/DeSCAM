@@ -1,0 +1,21 @@
+define		 _libId (dbGetCurrentLibId)
+
+dbDefineAntennaRule _libId 4 4 0 0
+dbAddAntennaLayerRule _libId 4 "M1" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M1" 1 1
+dbAddAntennaLayerRule _libId 4 "M2" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M2" 1 1
+dbAddAntennaLayerRule _libId 4 "M3" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M3" 1 1
+dbAddAntennaLayerRule _libId 4 "M4" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M4" 1 1
+dbAddAntennaLayerRule _libId 4 "M5" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M5" 1 1
+dbAddAntennaLayerRule _libId 4 "M6" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M6" 1 1
+dbAddAntennaLayerRule _libId 4 "M7" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M7" 1 1
+dbAddAntennaLayerRule _libId 4 "M8" 1000 '(0.06 0 456 43000)
+dbDefineAntennaLayerRatioScale _libId "M8" 1 1
+dbAddAntennaLayerRule _libId 4 "M9" 1000 '(0.06 0 8000.01 50000)
+dbDefineAntennaLayerRatioScale _libId "M9" 1 1

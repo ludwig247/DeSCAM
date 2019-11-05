@@ -1,0 +1,89 @@
+digraph Producer {  graph [rankdir=TD];  
+state_0[ label = "------"];
+state_1[ label = "section = run"];
+state_2[ label = "cnt = 0"];
+state_3[ label = "out_1_data = 1"];
+state_4[ label = "out_1_status = false"];
+state_5[ label = "out_2_data = 1"];
+state_6[ label = "out_2_status = false"];
+state_7[ label = "out_3_data = 1"];
+state_8[ label = "out_3_status = false"];
+state_9[ label = "out_4_data = 1"];
+state_10[ label = "out_4_status = false"];
+state_11[ label = "while (true)"];
+state_12[ label = "out_1.try_write(out_1_data,out_1_status)"];
+state_13[ label = "if (out_1_status)"];
+state_14[ label = "out_1_data = (out_1_data + 1)"];
+state_15[ label = "out_2.try_write(out_2_data,out_2_status)"];
+state_16[ label = "if (out_2_status)"];
+state_17[ label = "out_2_data = (out_2_data + 1)"];
+state_18[ label = "out_3.try_write(out_3_data,out_3_status)"];
+state_19[ label = "if (out_3_status)"];
+state_20[ label = "out_3_data = (out_3_data + 1)"];
+state_21[ label = "out_4.try_write(out_4_data,out_4_status)"];
+state_22[ label = "if (out_4_status)"];
+state_23[ label = "out_4_data = (out_4_data + 1)"];
+state_24[ label = "cnt = (cnt + 1)"];
+state_25[ label = "------"];
+state_26[ label = "------"];
+state_27[ label = "if (((((out_1_data > 10000000) and (out_2_data > 10000000)) and (out_3_data > 10000000)) and (out_4_data > 10000000)))"];
+state_28[ label = "wait(SC_ZERO_TIME)"];
+state_29[ label = "------"];
+
+state_0 -> state_1;
+state_1 -> state_2;
+state_2 -> state_3;
+state_3 -> state_4;
+state_4 -> state_5;
+state_5 -> state_6;
+state_6 -> state_7;
+state_7 -> state_8;
+state_8 -> state_9;
+state_9 -> state_10;
+state_10 -> state_11;
+state_11 -> state_12;
+state_12 -> state_13;
+state_13 -> state_14[label = "yes"];
+state_13 -> state_15[label = "no"];
+state_14 -> state_15;
+state_15 -> state_16;
+state_16 -> state_17[label = "yes"];
+state_16 -> state_18[label = "no"];
+state_17 -> state_18;
+state_18 -> state_19;
+state_19 -> state_20[label = "yes"];
+state_19 -> state_21[label = "no"];
+state_20 -> state_21;
+state_21 -> state_22;
+state_22 -> state_23[label = "yes"];
+state_22 -> state_24[label = "no"];
+state_23 -> state_24;
+state_24 -> state_25;
+state_25 -> state_26;
+state_26 -> state_27;
+state_27 -> state_28[label = "yes"];
+state_27 -> state_29[label = "no"];
+state_28 -> state_29;
+state_29 -> state_11;
+
+subgraph cluster_0 {
+	style=filled; color=brown2;
+	state_12;
+}
+subgraph cluster_1 {
+	style=filled; color=brown2;
+	state_15;
+}
+subgraph cluster_2 {
+	style=filled; color=brown2;
+	state_18;
+}
+subgraph cluster_3 {
+	style=filled; color=brown2;
+	state_21;
+}
+subgraph cluster_4 {
+	style=filled; color=brown2;
+	state_28;
+}
+}

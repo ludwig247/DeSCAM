@@ -1,0 +1,93 @@
+include "s2qed_state_constraint_vcore.vli";
+
+
+//macro unsigned gpr1 := cpu1/register; end macro;
+//macro unsigned gpr2 := cpu1/register; end macro;
+
+//macro unsigned pc1 := ; end macro;
+//macro unsigned pc2 := ; end macro;
+
+constraint no_reset :=
+  reset;
+end constraint;
+
+ 
+property S2QED_property;
+
+  dependencies: no_reset;
+
+  for timepoints:
+	t_if = t,
+	t_de = t_if+1..5 waits_for (cpu2/dmem_enable_o==0 || cpu2/dmem_valid_i),
+	t_ex = t_de+1..5 waits_for (cpu2/dmem_enable_o==0 || cpu2/dmem_valid_i),
+	t_wb = t_ex+1,
+	t_check = t_wb+1;
+    //t_check = t+1..5 waits_for tracker_in_writeback,
+    //t_check = t+4;
+    //t_EX = t+2..4 waits_for tracker_in_execute,
+ //   t_ID = t_EX-1;
+
+  freeze:
+//initial value for gpr
+    gpr1_init = cpu1/register @ t,
+
+// For Branch
+    // value of the PC in CPU1 needs to be freezed in the time points before and after execution of branch
+    dec_pc_at_t_de = cpu1/dec_PC@t+1,
+    dec_pc_at_t_ex = cpu1/dec_PC@t+2,
+    ex_pc_at_t_ex = cpu1/ex_PC@t+2,
+    pc_at_t_wb = cpu1/dec_PC@t+3,
+
+// For Load/Store checke
+    last_accessed_address = addr_recorder_1 @ t_check,
+    last_accessed_data = data_recorder_1 @ t_check;
+
+  assume:
+//----Main property----------------
+
+// Tracker :
+//    at t+1: tracker_in_decode; 
+
+// constraints on CPU1
+    at t: state_constraint;
+    during [t+1,t_check]: inst1[15:11] > 7;
+
+// same instruction for IUV
+    at t: inst1 == inst2;
+    at t: inst1[15:11] != 4 && inst1[15:11] == 6;
+    at t: (cpu2/dmem_enable_o==0 || cpu2/dmem_valid_i);
+// QED consistent registers
+    at t_check - 1: cpu2/register == gpr1_init;
+
+    at t: cpu1/imem_addr_o == cpu2/imem_addr_o;
+//    at t_ex: cpu2/dec_PC == dec_pc_at_t_ex;
+//    at t_ex: cpu2/ex_PC ==  ex_pc_at_t_ex;
+    
+
+// no interrupt in the whole time window and no exception in initial pipeline state_constraint
+
+// constraints on data memroy for load instructions
+    during [t,t_check]: (addr_recorder_2 == last_accessed_address && dmem_valid_i2) ? (data2 == last_accessed_data) : 1'b1; // if (load_address2 == last_accessed_address) then data_in2 == last_accessed_data;
+
+// constraints on addtional registers for Pseudo-memory
+    at t: !dmem_store_flag;
+
+//  additional assumption may be required since there can be more than one register to store PC (e.g., PC_IF, PC_ID, etc. )
+
+    at t+1: cpu1/ex_mispredict  == cpu2/ex_mispredict;
+    at t+1: cpu1/ex_mispredict ? cpu1/imem_addr_o == cpu2/imem_addr_o : true;
+    //at t+1: cpu1/imm == cpu2/imm;
+  prove:
+    at t_de: cpu2/dec_PC == dec_pc_at_t_de;
+// general registers
+    at t_check: cpu2/register == cpu1/register;
+
+//--- For Branch check
+//    the value of the PC should be checked in the exact time point that the branch instruction writes the new value (depends on the micro architecture)
+    at t_wb: cpu2/dec_PC == pc_at_t_wb;
+//store check
+//    at t_check: if(store_flag) store_data_recorder1 == store_data_recorder2; end if;
+//    at t_check-1: if(store_flag) addr_recorder1 == addr_recorder2; end if;
+
+end property;
+

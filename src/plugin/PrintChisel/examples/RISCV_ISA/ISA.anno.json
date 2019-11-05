@@ -1,0 +1,14 @@
+[
+  {
+    "class": "firrtl.transforms.DontTouchAnnotation",
+    "target": "ISA.ISA.memoryAccess_signal_r"
+  },
+  {
+    "class": "firrtl.transforms.DontTouchAnnotation",
+    "target": "ISA.ISA.pcReg_signal_r"
+  },
+  {
+    "class": "firrtl.transforms.DontTouchAnnotation",
+    "target": "ISA.ISA.regfileWrite_signal_r"
+  }
+]

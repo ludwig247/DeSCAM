@@ -1,0 +1,45 @@
+
+completeness single_unit;
+disable iff: (rst);
+inputs: clk, rst, b_in1_sig, b_in2_sig, b_in1_sync, b_in2_sync, b_out_sync;
+
+determination_requirements: 
+	determined(b_in1_notify);
+	determined(b_in2_notify);
+	determined(b_out_notify);
+
+reset_property:
+	reset;
+property_graph:
+	reset -> op_awwawa_wait, op_awwawa_to_awab;
+	//wait operations
+	op_awwawa_wait -> op_awwawa_wait, op_awwawa_to_awab;
+	op_abc_wait -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_abaw_wait -> op_abaw_wait, op_abaw_to_bca, op_abaw_to_acwaw, op_abaw_to_bwbaw;
+	op_acwc_wait -> op_acwc_wait, op_acwc_to_bca, op_acwc_to_acwaw, op_acwc_to_bwcwc; 
+	op_bwbc_wait -> op_bwbc_wait, op_bwbc_to_bca, op_bwbc_to_bwcwc, op_bwbc_to_bwbaw;
+	op_acwaw_wait -> op_acwaw_wait, op_acwaw_to_bca; 
+	op_bwcwc_wait -> op_bwcwc_wait, op_bwcwc_to_bca;
+	op_bwbaw_wait -> op_bwbaw_wait, op_bwbaw_to_bca;
+	//advance operations
+	op_awwawa_to_awab -> op_abaw_wait, op_abaw_to_bca, op_abaw_to_acwaw, op_abaw_to_bwbaw;
+	op_abc_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_abc_to_abaw -> op_abaw_wait, op_abaw_to_bca, op_abaw_to_acwaw, op_abaw_to_bwbaw;
+	op_abc_to_acwc -> op_acwc_wait, op_acwc_to_bca, op_acwc_to_acwaw, op_acwc_to_bwcwc;
+	op_abc_to_bwbc -> op_bwbc_wait, op_bwbc_to_bca, op_bwbc_to_bwcwc, op_bwbc_to_bwbaw;
+	op_abc_to_acwaw -> op_acwaw_wait, op_acwaw_to_bca;
+	op_abc_to_bwcwc -> op_bwcwc_wait, op_bwcwc_to_bca;
+	op_abc_to_bwbaw -> op_bwbaw_wait, op_bwbaw_to_bca;
+	op_abaw_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_acwc_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_bwbc_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_acwaw_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_bwcwc_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_bwbaw_to_bca -> op_abc_wait, op_abc_to_bca, op_abc_to_abaw, op_abc_to_acwc, op_abc_to_bwbc, op_abc_to_acwaw, op_abc_to_bwcwc, op_abc_to_bwbaw;
+	op_abaw_to_acwaw -> op_acwaw_wait, op_acwaw_to_bca; 
+	op_acwc_to_acwaw -> op_acwaw_wait, op_acwaw_to_bca; 
+	op_acwc_to_bwcwc -> op_bwcwc_wait, op_bwcwc_to_bca;
+	op_bwbc_to_bwcwc -> op_bwcwc_wait, op_bwcwc_to_bca;
+	op_abaw_to_bwbaw -> op_bwbaw_wait, op_bwbaw_to_bca;
+	op_bwbc_to_bwbaw -> op_bwbaw_wait, op_bwbaw_to_bca;
+end completeness;

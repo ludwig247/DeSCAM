@@ -1,0 +1,26 @@
+
+macro bit no_imem_access :=
+  !imem_read_o;
+end macro;
+
+macro bit imem_read(unsigned addr, data) :=
+  imem_read_o && imem_addr_o == addr && data == imem_data_i;
+end macro;
+
+macro bit no_dmem_access :=
+  !dmem_enable_o;
+end macro;
+
+macro temporal dmem_read(unsigned addr, data; timepoint t_start,t_end) :=
+  during [t_start,t_end]:   dmem_enable_o && !dmem_write_o && dmem_addr_o == addr;
+  during [t_start,t_end-1]: !dmem_valid_i;
+  at t_end:                 dmem_valid_i && data == dmem_data_i;
+end macro;
+
+macro temporal dmem_write(unsigned addr, data; timepoint t_start,t_end) :=
+  during [t_start,t_end]: dmem_enable_o && dmem_write_o &&
+                            dmem_addr_o == addr && dmem_data_o == data;
+  during [t_start,t_end-1]: !dmem_valid_i;
+  at t_end:                 dmem_valid_i;
+end macro;
+

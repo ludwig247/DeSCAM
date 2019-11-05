@@ -1,0 +1,43 @@
+completeness core_me_notify;
+disable iff: (rst);
+inputs: clk, rst, COtoME_port_sync, MEtoCO_data_ex, MEtoCO_port_sync, ex_stage_out_ready, memory_used_by_if;
+
+determination_requirements: 
+	determined(COtoME_notify_me);
+	determined(MEtoCO_notify_me);
+
+reset_property:
+	reset_to_idle;
+property_graph:
+	reset_to_idle -> idle_to_idle, idle_to_bypass, idle_to_wait, idle_to_load_write, idle_to_store_write;
+	//wait operations
+	idle_to_idle -> idle_to_idle, idle_to_bypass, idle_to_wait, idle_to_load_write, idle_to_store_write;
+	bypass_to_bypass -> bypass_to_bypass, bypass_to_idle, bypass_to_wait, bypass_to_load_write, bypass_to_store_write;
+	load_read_to_load_read -> load_read_to_load_read, load_read_to_bypass, load_read_to_idle, load_read_to_wait, load_read_to_load_write, load_read_to_store_write;
+	store_write_to_store_write -> store_write_to_store_write, store_write_to_bypass, store_write_to_idle, store_write_to_wait, store_write_to_load_write, store_write_to_store_write2;
+	wait_to_wait -> wait_to_wait, wait_to_store_write, wait_to_load_write;
+	load_write_to_load_write -> load_write_to_load_write, load_write_to_load_read;
+	//advance operations
+	idle_to_bypass -> bypass_to_bypass, bypass_to_idle, bypass_to_wait, bypass_to_load_write, bypass_to_store_write;
+	idle_to_wait -> wait_to_wait, wait_to_store_write, wait_to_load_write;
+	idle_to_load_write -> load_write_to_load_write, load_write_to_load_read;
+	idle_to_store_write -> store_write_to_store_write, store_write_to_bypass, store_write_to_idle, store_write_to_wait, store_write_to_load_write, store_write_to_store_write2;
+	bypass_to_idle -> idle_to_idle, idle_to_bypass, idle_to_wait, idle_to_load_write, idle_to_store_write;
+	bypass_to_wait -> wait_to_wait, wait_to_store_write, wait_to_load_write;
+	bypass_to_load_write -> load_write_to_load_write, load_write_to_load_read;
+	bypass_to_store_write -> store_write_to_store_write, store_write_to_bypass, store_write_to_idle, store_write_to_wait, store_write_to_load_write, store_write_to_store_write2;
+	load_read_to_bypass -> bypass_to_bypass, bypass_to_idle, bypass_to_wait, bypass_to_load_write, bypass_to_store_write;
+	load_read_to_idle -> idle_to_idle, idle_to_bypass, idle_to_wait, idle_to_load_write, idle_to_store_write;
+	load_read_to_wait -> wait_to_wait, wait_to_store_write, wait_to_load_write;
+	load_read_to_load_write -> load_write_to_load_write, load_write_to_load_read;
+	load_read_to_store_write -> store_write_to_store_write, store_write_to_bypass, store_write_to_idle, store_write_to_wait, store_write_to_load_write, store_write_to_store_write2;
+	store_write_to_bypass -> bypass_to_bypass, bypass_to_idle, bypass_to_wait, bypass_to_load_write, bypass_to_store_write;
+	store_write_to_idle -> idle_to_idle, idle_to_bypass, idle_to_wait, idle_to_load_write, idle_to_store_write;
+	store_write_to_wait -> wait_to_wait, wait_to_store_write, wait_to_load_write;
+	store_write_to_load_write -> load_write_to_load_write, load_write_to_load_read;
+	store_write_to_store_write2 -> store_write_to_store_write, store_write_to_bypass, store_write_to_idle, store_write_to_wait, store_write_to_load_write, store_write_to_store_write2;
+	wait_to_store_write -> store_write_to_store_write, store_write_to_bypass, store_write_to_idle, store_write_to_wait, store_write_to_load_write, store_write_to_store_write2;
+	wait_to_load_write -> load_write_to_load_write, load_write_to_load_read;
+	load_write_to_load_read -> load_read_to_load_read, load_read_to_bypass, load_read_to_idle, load_read_to_wait, load_read_to_load_write, load_read_to_store_write;
+end completeness;
+

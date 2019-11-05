@@ -1,0 +1,53 @@
+\section{Frequently Asked Questions}
+\label{sec:faq}
+
+\textbf{Note:} %
+This FAQ section may be removed in later versions of this manual. %
+There is always an up-to-date FAQ list on Github (\cite{web-scam}). %
+
+\begin{itemize}
+\item \textbf{The property generation takes a very long time/doesn't
+    finish:} Please try to split up your design into several
+  sections. %
+  This helps the tool during property generation. %
+  It is best to put each communication call into a separate section. %
+
+\item \textbf{else with only one undetected statement $\rightarrow$
+    blockCFG error}: This is usually due to a case that should never
+  occur. %
+  \DSWON{%
+?!? If it happens ``usually'', how can it ``never occur''?%
+}%
+People throw an exception or write an assertion for this case. %
+  Obviously this doesn't translate to hardware. %
+  \DSSAY{%
+This is really cryptic...%
+}%
+
+
+\item \textbf{Multiple path possible from init:} Usually after state merging
+  the reset sequence depends on an input value. %
+
+\item \textbf{Properties with compound/enum types:} If your design
+  uses compound/enum types they will also be used within the
+  properties. %
+  The user has two options: either define the types themselves or run
+  \SCAM{} with -VHDL and extract the package defining all user-defined
+  types. %
+
+\item Don't use reserverd VHDL keywords as names for variables, in
+  enum types or anything else. %
+
+\item overflow arithmetic use (31 downto 0) in the properties. %
+
+\DSWON{%
+Where are the questions/answers to the last two items? %
+}%
+
+
+\end{itemize}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "binder"
+%%% End: 

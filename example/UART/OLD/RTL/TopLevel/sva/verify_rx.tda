@@ -1,0 +1,211 @@
+import scam_model_types::*;
+
+module verify_rx_property_suite(rst);
+
+input rst;        
+
+
+default clocking default_clk @(posedge RX.clk); endclocking
+
+
+function rx_sections section;
+section = RX.section;
+endfunction
+
+
+function logic unsigned [31:0] bitcount;
+bitcount = RX.bitcounter_signal;
+endfunction
+
+function logic unsigned [31:0] re_flag;
+re_flag = RX.RE_flag_in;
+endfunction
+              
+
+function logic unsigned [31:0] DR_to_ctrl;
+DR_to_ctrl = RX.shiftreg_to_RX_reg.dr_reg;
+endfunction
+
+function logic unsigned [31:0] SR_to_ctrl;
+SR_to_ctrl = RX.shiftreg_to_RX_reg.sr_reg;
+endfunction
+
+function logic unsigned [31:0] SR_reg;
+SR_reg = RX.regs_signal.sr_reg;
+endfunction
+
+
+function reg_action r_act;
+r_act = RX.shiftreg_to_RX_reg.r_act;
+endfunction
+
+
+function to_ctrl_notify;
+to_ctrl_notify = RX.shiftreg_to_RX_reg_notify;
+endfunction              
+              
+function baudrate_in;
+baudrate_in = RX.baudrate_in;
+endfunction
+
+function logic unsigned [31:0] parity;
+parity = RX.Parity_control_in;
+endfunction
+
+function rxpin;
+rxpin = RX.RX_pin;
+endfunction
+
+
+ `include "tidal.sv"
+ 
+ `begin_tda(ops)
+ 
+
+
+
+
+
+
+property simple_receive;
+
+
+t##0 section() == \rx_sections__\scan and
+t##0 rxpin() == 0 
+
+
+implies
+
+t##10 to_ctrl_notify() == 1 and
+t##10 r_act() == rx_wr;
+
+
+endproperty;
+
+assert_simple_receive: assert property (disable iff(RX.rst || re_flag() == 0 || baudrate_in() == 0 || parity() != 0) simple_receive);
+
+property disabled_receive;
+
+
+t##0 section() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##0 re_flag() == 0
+
+
+implies
+
+t##10 to_ctrl_notify() == 0;
+
+
+endproperty;
+
+assert_disabled_receive: assert property (disable iff(RX.rst || baudrate_in() == 0 || parity() != 0) disabled_receive);
+
+
+property even_par_receive;
+
+t##0 section() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##0 bitcount() == 0 and
+t##1 rxpin() == 1 and
+t##2 rxpin() == 0 and
+t##3 rxpin() == 1 and
+t##4 rxpin() == 1 and
+t##5 rxpin() == 0 and
+t##6 rxpin() == 0 and
+t##7 rxpin() == 0 and
+t##8 rxpin() == 0 and
+t##9 rxpin() == 1 and
+t##10 rxpin() == 1 
+
+implies
+
+t##11 to_ctrl_notify() == 1 and
+t##11 r_act() == rx_wr and
+t##11 DR_to_ctrl() == 32'hd00  and
+t##11 (SR_to_ctrl() & 32'h40) == 0 and
+t##11 (SR_to_ctrl() & 32'h80) == 0;
+
+endproperty;
+
+
+assert_even_par_receive: assert property (disable iff(RX.rst || re_flag() == 0 || baudrate_in() == 0 || parity() != 2) even_par_receive);
+
+property odd_par_receive;
+
+t##0 section() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##0 bitcount() == 0 and
+t##1 rxpin() == 1 and
+t##2 rxpin() == 0 and
+t##3 rxpin() == 1 and
+t##4 rxpin() == 0 and
+t##5 rxpin() == 0 and
+t##6 rxpin() == 0 and
+t##7 rxpin() == 0 and
+t##8 rxpin() == 0 and
+t##9 rxpin() == 1 and
+t##10 rxpin() == 1 
+
+implies
+
+t##9 bitcount() == 2 and
+t##11 to_ctrl_notify() == 1 and
+t##11 r_act() == rx_wr and
+t##11 DR_to_ctrl() == 32'h500  and
+t##11 (SR_to_ctrl() & 32'h40) == 0 and
+t##11 (SR_to_ctrl() & 32'h80) == 0;
+
+endproperty;
+
+
+assert_odd_par_receive: assert property (disable iff(RX.rst || re_flag() == 0 || baudrate_in() == 0 || parity() != 1) odd_par_receive);
+
+property receive_error;
+
+t##0 section() == \rx_sections__\scan and
+t##0 rxpin() == 0 and
+t##0 bitcount() == 0 and
+t##1 rxpin() == 1 and
+t##2 rxpin() == 0 and
+t##3 rxpin() == 1 and
+t##4 rxpin() == 0 and
+t##5 rxpin() == 0 and
+t##6 rxpin() == 0 and
+t##7 rxpin() == 0 and
+t##8 rxpin() == 0 and
+t##9 rxpin() == 1 and  //Receiver uses even parity so this gives error
+t##10 rxpin() == 0    // no stop bit
+
+implies
+
+
+t##9  bitcount() == 2 and
+t##11 to_ctrl_notify() == 1 and
+t##11 r_act() == rx_wr and
+t##11 DR_to_ctrl() == 32'h500  and
+t##11 (SR_to_ctrl() & 32'h40) != 0 and
+t##11 (SR_to_ctrl() & 32'h80) != 0;
+
+endproperty;
+
+
+assert_receive_error: assert property (disable iff(RX.rst || re_flag() == 0 || baudrate_in() == 0 || parity() != 2) receive_error);
+
+
+
+
+
+
+
+
+
+
+
+
+
+ `end_tda
+ 
+ endmodule
+ 
+ bind RX verify_rx_property_suite inst_verify_rx_property_suite(.*, .rst(RX.rst));

@@ -1,0 +1,51 @@
+// required terminology 
+sequence ipc_hold(l, e);
+	(l===e, l=e);
+endsequence
+
+sequence ipc_t;
+	##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_virtual; nxt(t, `next_shift_amount); endsequence
+//sequence t_virtual; t ; endsequence
+
+//sequence t_end(offset);
+//	t_virtual ##offset 1'b1;
+//endsequence
+sequence t_end(offset);
+  nxt(t_virtual, offset);
+endsequence
+sequence t_end_38;
+  nxt(t_virtual, 38);
+  //nxt(t_virtual, 1);
+  //t;
+endsequence
+sequence t_end_33;
+  nxt(t_virtual, 33);
+  //nxt(t_virtual, 1);
+  //t;
+endsequence
+
+sequence next(timepoint, offset);
+	timepoint ##offset 1'b1;
+endsequence
+
+property ipc_during(t1, t2, se);
+	(t1 ##0 se[*0:$] intersect t2) or
+	(t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property ipc_during_limited(t1, t2, off, se);
+	(t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+	(ipc_next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property ipc_during_o(t1, o1, t2, o2, se);
+	if (o2 >= 0)
+		ipc_during(ipc_next(t1, o1), ipc_next(t2, (o2<0) ? 0 : o2), se)
+	else
+		ipc_during_limited(ipc_next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+// end of ipc_sva
+

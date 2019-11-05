@@ -1,0 +1,1 @@
+~/SCAM/bin/SCAM -f ~/SCAM/example/agile_pipeline/simplified_riscv_pipeline/core.h -o ~/SCAM/example/agile_pipeline/simplified_riscv_pipeline/ -PrintVHDL -PrintITL --adjustmacros -PrintDotStates

@@ -1,0 +1,1 @@
+~/SCAM/bin/SCAM -f ~/SCAM/example/agile_pipeline/simplified_riscv_pipeline/structural_hazard/core.h -o ~/SCAM/example/agile_pipeline/simplified_riscv_pipeline/structural_hazard/ -PrintVHDL -PrintITL --adjustmacros -PrintDotStates
