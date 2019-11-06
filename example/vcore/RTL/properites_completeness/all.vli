@@ -1,8 +1,0 @@
-include "all_includes.vli";
-include "reset.vli";
-include "instr_nomem.vli";
-include "instr_ld.vli";
-include "instr_st.vli";
-include "instr_beqz.vli";
-include "instr_nop.vli";
-include "completeness.vli";

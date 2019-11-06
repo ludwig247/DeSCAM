@@ -1,6 +1,0 @@
-macro boolean conceptual_state :=
-    (current_mem_state==MEM_IDLE || // controller is in idle state
-    dmem_valid_i) &&                // or about to enter the idle state
-    !ex_mispredict &&               // no cancellation by previous instruction
-    dec_valid;                      // there is an instruction in decode
-end macro;

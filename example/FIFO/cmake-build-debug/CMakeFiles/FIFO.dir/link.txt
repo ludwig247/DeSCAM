@@ -1,1 +1,0 @@
-/opt/rh/devtoolset-6/root/usr/bin/c++   -std=c++11   -g  -rdynamic CMakeFiles/FIFO.dir/sc_main.cpp.o  -o FIFO  -L/import/lab/users/wezel/SCAM/example/FIFO/SCAM/lib 

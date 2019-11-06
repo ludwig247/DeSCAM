@@ -1,7 +1,0 @@
-include "constraints.vli";
-include "macros.vli";
-include "visible_registers.vli";
-include "protocol.vli";
-include "fields.vli";
-include "computation.vli";
-include "instr_arithlog.vli";

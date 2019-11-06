@@ -1,1 +1,0 @@
-~/SCAM/bin/SCAM -f ~/SCAM/example/agile_pipeline/blocking_3_stage_with_shortcuts/pipeline.h -o ~/SCAM/example/agile_pipeline/blocking_3_stage_with_shortcuts/ -PrintVHDL -PrintITL --adjustmacros

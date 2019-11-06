@@ -1,1 +1,0 @@
-~/SCAM/bin/SCAM -f ~/SCAM/example/agile_pipeline/circular1/circular1.h -o ~/SCAM/example/agile_pipeline/circular1/ -PrintVHDL -PrintITL --adjustmacros

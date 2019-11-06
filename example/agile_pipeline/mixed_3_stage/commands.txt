@@ -1,1 +1,0 @@
-~/SCAM/bin/SCAM -f ~/SCAM/example/agile_pipeline/mixed_3_stage/pipeline.h -o ~/SCAM/example/agile_pipeline/mixed_3_stage/ -PrintVHDL -PrintITL --adjustmacros

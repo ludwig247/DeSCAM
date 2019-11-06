@@ -1,1 +1,0 @@
-This iteration is meant for modeling structural hazard in the pipeline when two stages are using the same port to the memory (IF and MEM). 
