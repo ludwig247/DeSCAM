@@ -14,7 +14,7 @@ add_subdirectory(RISCV_UVMSYSTEMC)
 add_subdirectory(I2C)
 #add_subdirectory(TLM_Examples)
 add_subdirectory(Comm_Test_newInterfaces)
-add_subdirectory(UART_NORDIC)
+
 
 
 
