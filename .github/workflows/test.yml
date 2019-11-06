@@ -10,8 +10,19 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: unzip
-      run: sh install/install_github.sh
+      run: sh install/install_unzip.sh
     - name: z3
       run: sh install/install_z3.sh
+    - name: gtest
+      run: sh install/install_gtest.sh
+    - name: systemc
+      run: sh install/install_systemc.sh
+    - name: clang
+      run: sh install/install_clang.sh
+    - name: cleanup
+      run: sh install/install_cleanup.sh
+
+      
+
 
 
