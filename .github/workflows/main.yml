@@ -1,0 +1,15 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: ./.github/actions/main.yml
+    - name: test 
+      run: pwd
+    - name: install
+      run: sh install/install_new.sh
