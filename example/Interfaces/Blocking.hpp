@@ -6,6 +6,8 @@
 #define INTERFACES_BLOCKING_HPP
 
 
+#include "Interfaces.h"
+
 template<typename T>
 Blocking<T>::Blocking (const char *name) :
     sc_prim_channel(name),

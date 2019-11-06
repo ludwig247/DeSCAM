@@ -15,3 +15,5 @@ FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
 add_executable(Bus_2 ${R_SRC})
 target_link_libraries(Bus_2 systemc)
+
+
