@@ -1,12 +1,15 @@
-name: CI
+name: DESCAM-BUILD
 
 on: [push]
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-12.04, ubuntu-14.04, ubuntu-16.04, ubuntu-18.04]
+        node: [6, 8, 10]
     steps:
     - uses: actions/checkout@v1
     - name: unzip
@@ -22,6 +25,11 @@ jobs:
 
     - name: cleanup
       run: sh install/install_cleanup.sh
+
+    - name: descam
+      run: sh install/install_descam.sh
+    - name: run_tests
+      run: sh install/install_run_tests.sh
 
 
 
