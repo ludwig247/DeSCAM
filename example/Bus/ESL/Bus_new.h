@@ -1,7 +1,7 @@
 //
 // Created by ludwig on 30.01.17.
 //
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "systemc.h"
 
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
