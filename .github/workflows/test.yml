@@ -9,10 +9,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Run a one-line script
-      run: echo Hello, world!
-    - name: pwd
-      run: pwd
-    - name: install
+    - name: unzip
       run: sh install/install_github.sh
+    - name: z3
+      run: sh install/install_z3.sh
+
 
