@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: .github/actions/main.yml
+    - uses: ./.github/actions/main
     - name: test 
       run: pwd
     - name: install
