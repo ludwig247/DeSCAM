@@ -22,7 +22,7 @@ cp -r $SCAM_HOME/install/tmp/files/z3/include/* ./include
 cp -r $SCAM_HOME/install/tmp/files/gtest/include/* ./include
 mv $SCAM_HOME/install/tmp/files/llvm/lib/clang/3.4.2/ $SCAM_HOME/include/clang/3.4.2
 
-//LIB
+#LIB
 find $SCAM_HOME/install/tmp/files/ -name "*.a" | while read f; do
     cp "$f" $SCAM_HOME/lib/
 done
