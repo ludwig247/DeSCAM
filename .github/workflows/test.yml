@@ -16,8 +16,6 @@ jobs:
       run: sh install/install_unzip.sh
     - name: systemc
       run: sh install/install_systemc.sh
-    - name: clang
-      run: sh install/install_clang.sh
     - name: gtest
       run: sh install/install_gtest.sh
     - name: z3
@@ -28,6 +26,8 @@ jobs:
       run: sh install/install_descam.sh
     - name: run_tests
       run: sh install/install_run_tests.sh
+    - name: clang
+      run: sh install/install_clang.sh
     - name: cleanup
       run: sh install/install_cleanup.sh
 
