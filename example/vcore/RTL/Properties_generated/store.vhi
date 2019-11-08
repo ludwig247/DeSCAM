@@ -1,52 +1,37 @@
-
-
 property store is
 dependencies: no_reset;
 for timepoints:
-	t_state_1 = t,
-	t_state_7 = t_state_1+1,
-	t_state_6 = t_state_7+1..max_wait_dmem waits_for complete (dmem_valid_i),
-	t_state_3 = t_state_6+1;
+	t_fetch = t,
+	t_decode  = t_fetch+1,
+	t_execute = t_decode +1..max_wait_dmem waits_for complete (dmem_valid_i),
+	t_wb = t_execute+1;
 freeze:
-	dec_pc_at_t_state_1 = dec_pc@t_state_1,
-	instr_in_sig_at_t_state_1 = instr_in_sig@t_state_1,
-	instr_at_t_state_7 = instr@t_state_7,
-	regfile_at_t_state_7 = regfile@t_state_7;
+	dec_pc_at_t_fetch = dec_pc@t_fetch,
+	instr_in_sig_at_t_fetch = instr_in_sig@t_fetch,
+	instr_at_t_decode  = instr@t_decode;
 assume:
 
 	at t: state_constraint;
-	at t: instruction_word_reg(15 downto 11) > 8; --manual
-	--during[t_state_7,t_state_6]: regfile = prev(regfile);
-	during[t_state_1,t_state_7]: wb_write_reg = false;
-	--at t_state_7: not((getOpCode(instr_in_sig_at_t_state_1) = resize(0,32)));
-	--at t_state_7: not((getOpCode(instr_in_sig_at_t_state_1) = resize(1,32)));
-	--at t_state_7: not((getOpCode(instr_in_sig_at_t_state_1) = resize(2,32)));
-	--at t_state_7: not((getOpCode(instr_in_sig_at_t_state_1) = resize(4,32)));
-	at t_state_7: (getOpCode(instr_in_sig_at_t_state_1) = resize(6,32));
-	--at t_state_6: mem_write_sync; //should not be here 
-	--at t_state_6: not(ex_write_reg); //manually removed for compl.
-	--at t_state_6: not(branch); //manually removed for compl.
-	at t_state_3: not((nextphase = rst));
+	at t: only_nop; --manual
+	at t_decode : (getOpCode(instr_in_sig_at_t_fetch) = resize(6,32));
 prove:	
-	during[t_state_7+1,t_state_3]: reg_out_notify = false;
-	during[t_state_1,t_state_7]: dmem_enable_o = false; --manual
-	at t_state_7: state_constraint; -- manual
-	at t_state_7: imem_read_o; -- manual
-	at t_state_7: dmem_data_o = prev(dmem_data_o); -- manual
-	at t_state_7: dec_pc = (2 + dec_pc_at_t_state_1)(15 downto 0);
-	at t_state_7: instr = instr_in_sig_at_t_state_1;
-	at t_state_7: instr_req_sig = (4 + dec_pc_at_t_state_1)(15 downto 0);
-	at t_state_6: branch = false;
-	at t_state_6: ex_write_reg = false;
-	at t_state_6: memRequest_addr = (regfile(getOpB(instr_at_t_state_7)) + getImm(instr_at_t_state_7))(15 downto 0);
-	at t_state_6: memRequest_data = regfile(getOpA(instr_at_t_state_7));
-	at t_state_6: memRequest_write = true;
-	during[t_state_7+1,t_state_6]: mem_write_sig_addr = (regfile(getOpB(instr_at_t_state_7)) + getImm(instr_at_t_state_7))(15 downto 0);
-	during[t_state_7+1,t_state_6]: mem_write_sig_data = regfile(getOpA(instr_at_t_state_7));
-	during[t_state_7+1,t_state_6]: mem_write_sig_write = true;
-right_hook: t_state_7;
-local_determination_requirements:
-	at t_state_7: determined(instruction_word_reg);
-	at t_state_6: determined(ex_write_reg);
+	during[t_decode,t_wb]: reg_out_notify = false;
+	during[t_fetch,t_decode]: dmem_enable_o = false; --manual
+	during[t_fetch,t_decode]: dmem_write_o = false; --manual
+	during[t_fetch,t_decode]: ex_write_reg = false;
+
+	at t_decode : instr_req_notify; -- manual
+	at t_decode : instr_req_sig = (4 + dec_pc_at_t_fetch)(15 downto 0);
+	at t_decode : dmem_data_o = prev(dmem_data_o); -- manual
+	at t_decode : dec_pc = (2 + dec_pc_at_t_fetch)(15 downto 0);
+	at t_decode : instr = instr_in_sig_at_t_fetch;
+
+	during[t_decode +1,t_execute]: branch = false;
+	during[t_decode +1,t_execute]: ex_write_reg = false;
+	during[t_decode +1,t_execute]: mem_write_sig_addr = (reg_in_sig(getOpB(instr_at_t_decode )) + getImm(instr_at_t_decode ))(15 downto 0);
+	during[t_decode +1,t_execute]: mem_write_sig_data = reg_in_sig(getOpA(instr_at_t_decode ));
+	during[t_decode +1,t_execute]: mem_write_sig_write = true;
+right_hook: t_decode ;
+
 end property;
 

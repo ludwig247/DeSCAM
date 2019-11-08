@@ -1,5 +1,5 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro instr_req_notify : boolean := imem_read_o end macro;
+macro instr_req_notify : boolean := imem_read_o and (dec_valid or prev(reset_n=0)) end macro;
 macro mem_write_notify : boolean := dmem_enable_o end macro;
 macro reg_out_notify : boolean := wb_write_reg end macro;
 
@@ -10,7 +10,7 @@ macro instr_req_sig : unsigned := imem_addr_o end macro;
 -- CONSTRAINTS --
 constraint no_reset := reset_n = '1'; end constraint;
 
-macro max_wait_dmem: unsigned  := 3 ; end macro;
+macro max_wait_dmem: unsigned  := 2 ; end macro;
 
 constraint bounded_wait := disable iff: not(reset_n);
     if (dmem_enable_o) then
@@ -48,8 +48,15 @@ macro instr : unsigned := instruction_word_reg end macro;
 --macro rf : unsigned_8 := register_file end macro;
 
 
+macro only_nop : boolean := 
+	(instruction_word_reg(15 downto 11) > 7) or (instruction_word_reg(15 downto 11) = 5) or (instruction_word_reg(15 downto 11) = 3) ;
+end macro;
+
+
 macro state_constraint : boolean := 
-	current_mem_state = 0 and
+	--current_mem_state = 0 and
+	reg_out_notify = 0 and
+	mem_write_notify = 0 and
 	dec_valid = 1 and
 	ex_branch = 0 and 
 	--ex_dest_reg = 0 and

@@ -1,5 +1,3 @@
-
-
 completeness vcore;
 disable iff: !reset_n;
 determination_assumptions:
@@ -7,9 +5,10 @@ determination_assumptions:
 	determined(dmem_valid_i);
 	determined(imem_data_i);
 	determined(dmem_data_i);
+	determined(regfile);
 
 allow_uninitialized:
-	wb_write_reg,wb_dest_reg,wb_result;
+	wb_write_reg,wb_dest_reg,wb_result,dmem_data_o;
 
 determination_requirements:
 	// imem interface
@@ -31,14 +30,13 @@ determination_requirements:
 	write_back: if(wb_write_reg)  determined(wb_result) endif;
 	write_back: if(wb_write_reg)  determined(wb_dest_reg) endif;
 
-	done: determined(regfile);
+	//done: determined(regfile);
 	
-
 reset_property:
-	reset2;
+	reset;
 
 property_graph:
 	//all_instr := 	arithmetic,load,store,nop,branch,misspredict;
 	all_instr := 	add,sub,nop,branch_taken,branch_not_taken,load,store,neg;
-	reset2, all_instr -> all_instr;
+	reset, all_instr -> all_instr;
 end completeness;
