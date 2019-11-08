@@ -1,0 +1,22 @@
+property fix_case_split is
+dependencies: no_reset;
+for timepoints:
+	t_fetch = t,
+	t_decode = t_fetch+1,
+	t_execute = t_decode+1,
+	t_wb = t_execute+1;
+freeze:
+	dec_pc_at_t_fetch = dec_pc@t_fetch,
+	instr_in_sig_at_t_fetch = instr_in_sig@t_fetch,
+	regfile_at_t_decode = regfile@t_decode,
+	instr_at_t_decode = instr@t_decode,
+	ex_result_at_t_execute = ex_result@t_execute,
+	ex_dest_reg_at_t_execute = ex_dest_reg@t_execute;
+assume:
+	at t: not(state_constraint) or not(only_nop);
+
+prove:	
+	true;
+right_hook: t_decode;
+
+end property;
