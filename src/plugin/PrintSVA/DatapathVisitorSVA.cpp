@@ -1,5 +1,5 @@
 //
-// Created by Nawras Altaleb (nawras.altaleb89@gmail.com) on 17.04.18.
+// Created by deutschmann on 9/26/19.
 //
 
 #include "DatapathVisitorSVA.h"
@@ -30,10 +30,11 @@ void SCAM::DatapathVisitorSVA::visit(BoolValue &node) {
 }
 
 void SCAM::DatapathVisitorSVA::visit(EnumValue &node) {
-    std::locale loc;
+/*    std::locale loc;
     std::string str = node.getEnumValue();
     for (char i : str)
-        this->ss << std::tolower(i, loc);
+        this->ss << std::tolower(i, loc);*/
+    this->ss << node.getEnumValue();
 }
 
 void SCAM::DatapathVisitorSVA::visit(SCAM::Assignment &node) {
@@ -175,7 +176,3 @@ std::string SCAM::DatapathVisitorSVA::toString(SCAM::Stmt *stmt, unsigned int in
     DatapathVisitorSVA printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
-
-
-
-

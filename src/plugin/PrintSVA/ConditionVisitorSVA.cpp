@@ -99,14 +99,6 @@ void SCAM::ConditionVisitorSVA::visit(SCAM::Return &node) {
 }
 
 void SCAM::ConditionVisitorSVA::visit(SCAM::ITE &node) {
-    /*
-     * if (print condition) {
-     *   print stmts
-     * } else {
-     *   print stmts
-     * }
-     *
-     */
 
     this->ss << "if (";
     node.getConditionStmt()->accept(*this);
@@ -165,13 +157,6 @@ void SCAM::ConditionVisitorSVA::visit(BoolValue &node) {
         this->ss << "0";
 }
 
-void SCAM::ConditionVisitorSVA::visit(EnumValue &node) {
-    std::locale loc;
-    std::string str = node.getEnumValue();
-    for (char i : str)
-        this->ss << std::tolower(i, loc);
-}
-
 void SCAM::ConditionVisitorSVA::visit(Logical &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
@@ -213,6 +198,18 @@ std::string SCAM::ConditionVisitorSVA::toString(SCAM::Stmt *stmt, unsigned int i
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
+void SCAM::ConditionVisitorSVA::visit(SCAM::Notify &node) {
+    this->ss << node.getPort()->getName() << "_notify()";
+}
 
-
+void SCAM::ConditionVisitorSVA::visit(SCAM::ParamOperand &node) {
+    if (node.getParameter()->isSubVar()) {
+        this->ss << node.getParameter()->getParent()->getName();
+        this->ss << "_";
+        this->ss << node.getParameter()->getName();
+    } else {
+        this->ss << node.getOperandName();
+    }
+    useParenthesesFlag = true;
+}
 
