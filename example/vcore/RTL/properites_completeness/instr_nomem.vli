@@ -1,0 +1,11 @@
+property instr_not;
+instr_arithlog(5'h00);
+end property;
+
+property instr_add;
+instr_arithlog(5'h01);
+end property;
+
+property instr_sub;
+instr_arithlog(5'h02);
+end property;

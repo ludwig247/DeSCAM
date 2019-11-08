@@ -1,0 +1,37 @@
+macro property instr_arithlog(unsigned instr_opc) :=
+disable iff: !reset_n;
+
+freeze:
+  opcode  = field_opcode(IR) @ t,
+  a       = field_A(IR) @ t,
+  b       = field_B(IR) @ t,
+  dest    = field_D(IR) @ t,
+  Ra      = virtual_register(a) @ t,
+  Rb      = virtual_register(b) @ t,
+  res     = instr_result(instr_opc,Ra,Rb) @ t,
+  fetched_instruction = imem_data_i @ t,
+  pc      = PC @ t,
+  new_pc  = (pc+2)[15:0] @ t;
+
+assume:
+// conceptual state
+at t:   conceptual_state;
+
+// trigger
+at t:   opcode == instr_opc;
+
+prove:
+// conceptual state
+at t+1: conceptual_state;
+
+// outputs
+at t+1: no_dmem_access;                       // no data memory access
+at t: imem_read(new_pc, fetched_instruction); // correct fetch of next instruction
+
+// visible_registers
+at t+1: rf_write(dest,res);
+at t+1: PC == new_pc;
+at t+1: IR == fetched_instruction;
+
+right_hook: t+1;
+end macro;

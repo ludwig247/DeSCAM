@@ -1,0 +1,1 @@
+add_library(VCORE VCORE.h main.cpp types.h)
