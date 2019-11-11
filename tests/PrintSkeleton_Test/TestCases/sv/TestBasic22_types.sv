@@ -1,8 +1,9 @@
 package testbasic22_types;
 
+	import scam_model_types::*;
 	typedef enum logic {
 		section_a,
 		section_b
-	} TestBasic22_SECTIONS;
+	} Sections;
 
 endpackage

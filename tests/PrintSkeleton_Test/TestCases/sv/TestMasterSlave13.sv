@@ -1,3 +1,4 @@
+import scam_model_types::*;
 import testmasterslave13_types::*;
 
 module TestMasterSlave13 (
@@ -14,26 +15,23 @@ module TestMasterSlave13 (
 	output integer shared_out
 	);
 
-	TestMasterSlave13_SECTIONS section;
+	Sections nextsection_signal;
 	integer save_val_signal;
-	logic succ_signal;
+	Sections section_signal;
+	bit succ_signal;
 	integer val_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			section <= section_a;
+			nextsection_signal <= section_a;
 			save_val_signal <= 0;
+			section_signal <= section_a;
 			succ_signal <= 1'b0;
 			val_signal <= 0;
 			m_out_notify <= 1'b0;
 		end else begin
-			if (section == section_a) begin
 				// FILL OUT HERE
-			end
-			if (section == section_b) begin
-				// FILL OUT HERE
-			end
 		end
 	end
 endmodule

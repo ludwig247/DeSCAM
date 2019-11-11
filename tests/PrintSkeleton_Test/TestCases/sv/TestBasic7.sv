@@ -11,7 +11,7 @@ module TestBasic7 (
 	output logic m_out_notify
 	);
 
-	logic nb_result_signal;
+	bit nb_result_signal;
 	integer var_signal;
 
 

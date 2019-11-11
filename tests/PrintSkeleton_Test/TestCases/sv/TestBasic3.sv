@@ -9,7 +9,7 @@ module TestBasic3 (
 	output logic b_out_notify
 	);
 
-	logic nb_result_signal;
+	bit nb_result_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin

@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all; 
+use work.SCAM_Model_types.all;
 use work.TestFunction2_types.all;
 
 entity TestFunction2 is
@@ -17,7 +18,6 @@ port(
 end TestFunction2;
 
 architecture TestFunction2_arch of TestFunction2 is
-	signal section: TestFunction2_SECTIONS;
 	signal record_var_signal: record_t;
 	signal x_signal: int;
 	signal y_signal: unsigned (31 downto 0);
@@ -27,7 +27,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			section <= run;
 			record_var_signal.x <= to_signed(0, 32);
 			record_var_signal.y <= to_unsigned(0, 32);
 			x_signal <= to_signed(0, 32);
@@ -35,9 +34,7 @@ begin
 			b_in_notify <= true;
 			b_out_notify <= false;
 		else
-			if section = run then
 			 -- FILL OUT HERE;
-			end if;
 		end if;
 	end if;
 	end process;

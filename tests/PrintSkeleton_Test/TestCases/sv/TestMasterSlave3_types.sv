@@ -1,8 +1,9 @@
 package testmasterslave3_types;
 
+	import scam_model_types::*;
 	typedef enum logic {
 		section_a,
 		section_b
-	} TestMasterSlave3_SECTIONS;
+	} Sections;
 
 endpackage

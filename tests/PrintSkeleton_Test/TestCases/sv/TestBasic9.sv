@@ -10,7 +10,7 @@ module TestBasic9 (
 	input integer m_in
 	);
 
-	logic nb_result_signal;
+	bit nb_result_signal;
 	integer var_signal;
 
 

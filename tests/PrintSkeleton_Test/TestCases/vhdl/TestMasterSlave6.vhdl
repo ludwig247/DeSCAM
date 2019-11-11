@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all; 
+use work.SCAM_Model_types.all;
 use work.TestMasterSlave6_types.all;
 
 entity TestMasterSlave6 is
@@ -13,7 +14,8 @@ port(
 end TestMasterSlave6;
 
 architecture TestMasterSlave6_arch of TestMasterSlave6 is
-	signal section: TestMasterSlave6_SECTIONS;
+	signal nextsection_signal: Sections;
+	signal section_signal: Sections;
 	signal val_signal: int;
 
 begin
@@ -21,15 +23,11 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			section <= SECTION_A;
+			nextsection_signal <= SECTION_A;
+			section_signal <= SECTION_A;
 			val_signal <= to_signed(0, 32);
 		else
-			if section = SECTION_A then
 			 -- FILL OUT HERE;
-			end if;
-			if section = SECTION_B then
-			 -- FILL OUT HERE;
-			end if;
 		end if;
 	end if;
 	end process;

@@ -12,7 +12,7 @@ module GlobalLocal (
 	output logic b_out_notify
 	);
 
-	logic bool_var_signal;
+	bit bool_var_signal;
 	global_compound_type gct_signal;
 	global_enum ge_signal;
 	global_enum_class gec_signal;

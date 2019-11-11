@@ -9,7 +9,7 @@ module TestBasic4 (
 	output logic b_out_notify
 	);
 
-	logic nb_result_signal;
+	bit nb_result_signal;
 	integer var_signal;
 
 

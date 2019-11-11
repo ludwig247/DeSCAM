@@ -238,10 +238,13 @@ void PrintSkeleton::printPackageHeader(std::stringstream &ss, const std::string 
 
     if (language == VHDL) {
         ss << "library ieee;\n";
-        ss << "use IEEE.numeric_std.all;\n\n";
+        ss << "use IEEE.numeric_std.all;\n";
+        ss << "use work.SCAM_Model_types.all;\n\n";
         ss << "package " + packageName << "_types is\n";
     } else if (language == SV) {
         ss << "package " + convertToLower(packageName) << "_types;\n\n";
+        ss << "\timport scam_model_types::*;\n";
+
     }
 }
 
@@ -553,9 +556,9 @@ std::string PrintSkeleton::getDataTypeWrapper(const SCAM::DataType *dataType) {
         if (dataType->isInteger()) {
             return "integer";
         } else if (dataType->isUnsigned()) {
-            return "integer unsigned";
+            return "bit[31:0]";
         } else if (dataType->getName() == "bool") {
-            return "logic";
+            return "bit";
         } else {
             return dataType->getName();
         }

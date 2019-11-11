@@ -12,7 +12,7 @@ module TestBasic6 (
 	output logic b_in2_notify
 	);
 
-	logic nb_result_signal;
+	bit nb_result_signal;
 	integer var_signal;
 
 
