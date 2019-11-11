@@ -38,26 +38,18 @@ public:
     }
 
     virtual void SetUp() override {
-        std::cout << "Setting up..." << std::endl;
     }
 
     virtual void TearDown() {
     }
 
-    //std::vector<SCAM::Module *> getModules() {return result;}
-//private:
-    //std::vector<SCAM::Module *> result;
 };
 
-//INSTANTIATE_TEST_CASE(Basic, PrintSkeleton_Test);
-//TEST(PrintSkeleton_Test, GlobalTypes) {
 
-//}
 
 INSTANTIATE_TEST_CASE_P(Basic, PrintSkeleton_Test, ::testing::ValuesIn(parameter()));
 
-//TEST_P(PrintSkeleton_Test, GlobalTypes) {
-//}
+
 TEST_F(PrintSkeleton_Test, GlobalTypesVHDL) {
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);

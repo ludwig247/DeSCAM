@@ -1,7 +1,9 @@
 name: DESCAM-BUILD
 
 on: [push]
-
+  branches:
+    - 'development'         # development branch
+    - 'deprecated'          # old stable version
 jobs:
   build:
 

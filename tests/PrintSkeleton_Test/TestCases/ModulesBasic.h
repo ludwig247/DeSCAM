@@ -286,6 +286,7 @@ struct TestBasic9 : public sc_module {
 };
 //
 //
+
 enum Mode {
     READ, WRITE
 };
@@ -296,7 +297,7 @@ struct CompoundType {
     Mode mode;
 };
 
-
+/*
 struct TestBasic10 : public sc_module {
     //Sections
     enum Sections {
@@ -973,7 +974,7 @@ struct TestBasic23 : public sc_module {
         }
     }
 };
-
+*/
 
 #endif //PROJECT_FIFO_H
 

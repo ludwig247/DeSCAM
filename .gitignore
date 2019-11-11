@@ -21,6 +21,7 @@ example/RISCV_interrupts/RTL/work/*
 example/RISCV_interrupts/RTL/transcript
 
 tests/Print_ITL_Tests/unsorted/*
+tests/PrintSkeleton_Test/unsorted/*
 
 #Python cache
 *.pyc

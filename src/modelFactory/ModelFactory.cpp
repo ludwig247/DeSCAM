@@ -86,7 +86,7 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         std::cout << "############################" << std::endl;
         std::cout << "Module: " << name << std::endl;
         std::cout << "############################" << std::endl;
-        DataTypes::reset();//FIXME:
+        //DataTypes::reset();//FIXME:
         Module *module = new Module(scparModule.first);
         model->addModule(module);
         //Members

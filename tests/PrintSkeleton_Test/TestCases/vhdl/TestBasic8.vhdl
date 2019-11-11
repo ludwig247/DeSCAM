@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all; 
+use work.SCAM_Model_types.all;
 use work.TestBasic8_types.all;
 
 entity TestBasic8 is
@@ -16,7 +17,6 @@ port(
 end TestBasic8;
 
 architecture TestBasic8_arch of TestBasic8 is
-	signal section: TestBasic8_SECTIONS;
 	signal nb_result_signal: bool;
 	signal var_signal: int;
 
@@ -25,15 +25,12 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			section <= run;
 			nb_result_signal <= false;
 			var_signal <= to_signed(1337, 32);
 			b_in_notify <= true;
 			m_out_notify <= false;
 		else
-			if section = run then
 			 -- FILL OUT HERE;
-			end if;
 		end if;
 	end if;
 	end process;

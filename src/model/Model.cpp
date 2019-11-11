@@ -20,6 +20,7 @@ namespace SCAM {
     }
 
     Model::~Model() {
+        std::cout << "Destructing model" << std::endl;
         DataTypes::reset();
         for (auto module : moduleMap) {
             delete module.second;

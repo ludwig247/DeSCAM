@@ -22,6 +22,7 @@ public:
 
     std::pair<std::string, std::string> printModule(SCAM::Module *module);
 
+
     std::pair<std::string, std::string> printGlobalTypes(Model *node);
 
     std::pair<std::string, std::string> printLocalTypes(SCAM::Module *module);

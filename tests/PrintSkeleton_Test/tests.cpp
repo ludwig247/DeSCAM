@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     std::vector<const char *> commandLineArugmentsVector;
 
     //Binaray
-    std::string bin = std::string(SCAM_HOME"/bin/SCAM ");
+    std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
     commandLineArugmentsVector.push_back(bin.c_str());
 
     //SRC-File to be analyzed
@@ -22,6 +22,44 @@ int main(int argc, char **argv) {
         commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
     }
     SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+
+
+    for(auto module: ModelGlobal::getModel()->getModules()){
+        {
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+            PrintSkeleton printSkeleton;
+            auto result = printSkeleton.printModule(module.second);
+            std::ofstream moduleString;
+            moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
+            moduleString << result.second;
+            moduleString.close();
+
+            result = printSkeleton.printLocalTypes(module.second);
+            std::ofstream functionString;
+            functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
+            functionString << result.second;
+            functionString.close();
+        }
+
+        {
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
+
+            PrintSkeleton printSkeleton;
+            auto result = printSkeleton.printModule(module.second);
+            std::ofstream moduleString;
+            moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
+            moduleString << result.second;
+            moduleString.close();
+
+            result = printSkeleton.printLocalTypes(module.second);
+            std::ofstream functionString;
+            functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
+            functionString << result.second;
+            functionString.close();
+        }
+    }
 
     testing::InitGoogleTest(&argc, argv);
 
