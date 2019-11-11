@@ -142,9 +142,9 @@ std::string PrintSVA::functions() {
 
                 ss << ") begin return ";
                 //TODO: The following lines print statements like "regfile.reg_file_01", which should be changed to "regfile_reg_file_01"
-                ss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
+                ss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
             } else {
-                ss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
+                ss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
             }
             --j;
         }
