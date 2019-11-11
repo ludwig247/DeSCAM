@@ -367,7 +367,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                     } else if (subVar->getDataType()->isInteger()) {
                         resetValue = "to_signed(" + PrintStmt::toString(subVar->getInitialValue()) + ", 32)";
                     } else if (subVar->isArrayType()) {
-                        resetValue = "(others <= to_signed(0, 32)";
+                        resetValue = "(others => to_signed(0, 32)";
                     } else {
                         resetValue = PrintStmt::toString(subVar->getInitialValue());
                     }
