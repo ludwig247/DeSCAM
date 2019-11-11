@@ -12,23 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: unzip
-      run: sh .github/workflows/install_unzip.sh
+      run: sh install/github/install_unzip.sh
     - name: systemc
-      run: sh .github/workflows/install_systemc.sh
+      run: sh install/github/install_systemc.sh
     - name: gtest
-      run: sh .github/workflows/install_gtest.sh
+      run: sh install/github/install_gtest.sh
     - name: z3
-      run: sh .github/workflows/install_z3.sh
+      run: sh install/github/install_z3.sh
     - name: clang
-      run: sh .github/workflows/install_clang.sh
+      run: sh install/github/install_clang.sh
     - name: move files
-      run: sh .github/workflows/install_move.sh
+      run: sh install/github/install_move.sh
     - name: descam
-      run: sh .github/workflows/install_descam.sh
+      run: sh install/github/install_descam.sh
     - name: run_tests
-      run: sh .github/workflows/install_run_tests.sh
+      run: sh install/github/install_run_tests.sh
     - name: cleanup
-      run: sh .github/workflows/install_cleanup.sh
+      run: sh install/github/install_cleanup.sh
 
 
 
