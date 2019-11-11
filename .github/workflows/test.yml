@@ -28,7 +28,6 @@ jobs:
       run: sh install/install_descam.sh
     - name: run_tests
       run: sh install/install_run_tests.sh
-
     - name: cleanup
       run: sh install/install_cleanup.sh
 
