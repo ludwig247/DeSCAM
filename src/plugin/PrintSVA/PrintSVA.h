@@ -47,11 +47,7 @@ private:
 
     std::string wait_operations();
 
-    std::string convertDataType(DataType *dataTypeName);
-
-    std::string convertDataTypeFunction(std::string dataTypeName);
-
-    std::string convertDataTypeProperty(std::string dataTypeName);
+    std::string convertDataType(const DataType * dataType) const;
 
     std::string location(bool loc);
 

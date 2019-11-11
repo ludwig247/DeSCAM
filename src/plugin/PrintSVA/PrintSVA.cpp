@@ -187,7 +187,7 @@ std::string PrintSVA::signals() {
 
     ss << "\n// DP SIGNALS //\n";
     for (auto dp: ps->getDpSignals()) {
-        ss << "function " << convertDataTypeFunction(dp->getDataType()->getName()) << " " << dp->getName();
+        ss << "function " << convertDataType(dp->getDataType()) << " " << dp->getName();
         if (dp->isCompoundType()) {
             ss << "_" + dp->getSubVarName();
         }
@@ -206,7 +206,7 @@ std::string PrintSVA::registers() {
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
         if (!vr->isArrayType()) {
-            ss << "function " << convertDataTypeFunction(vr->getDataType()->getName()) << " " << vr->getName();
+            ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getName();
             if (vr->isCompoundType()) {
                 ss << "_" + vr->getSubVarName();
             }
@@ -266,7 +266,7 @@ std::string PrintSVA::operations() {
 
         if (!op->getFreezeSignals().empty()) {
             for (auto freeze : op->getFreezeSignals()) {
-                ss << " " << convertDataTypeProperty(freeze.second->getDataType()->getName()) << " " << freeze.first << "_0;\n";
+                ss << " " << convertDataType(freeze.second->getDataType()) << " " << freeze.first << "_0;\n";
             }
             for (auto freeze : op->getFreezeSignals()) {
                 ss << "\tt ##0 hold(";
@@ -306,7 +306,6 @@ std::string PrintSVA::operations() {
         ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p(1)); //ASSIGN t_end offset here\n\n";
         ss << "\n\n";
     }
-
     return ss.str();
 }
 
@@ -320,7 +319,7 @@ std::string PrintSVA::wait_operations() {
 
         if (!op->getFreezeSignals().empty()) {
             for (auto freeze : op->getFreezeSignals()) {
-                ss << " " << convertDataTypeProperty(freeze.second->getDataType()->getName()) << " " << freeze.first << "_0;\n";
+                ss << " " << convertDataType(freeze.second->getDataType()) << " " << freeze.first << "_0;\n";
             }
             for (auto freeze : op->getFreezeSignals()) {
                 ss << "\tt ##0 hold(";
@@ -354,32 +353,12 @@ std::string PrintSVA::wait_operations() {
     return ss.str();
 }
 
-std::string PrintSVA::convertDataType(DataType *dataType) {
-    std::stringstream ret;
-    /*if (dataType->isEnumType())
-        ret << tolower(dataType->getName());
-    else */if (dataType->isInteger() || dataType->isUnsigned())
-        ret << "int " << dataType->getName();
-    else
-        ret << dataType->getName();
-    return ret.str();
-}
-
-std::string PrintSVA::convertDataTypeFunction(std::string dataTypeName) {
+std::string PrintSVA::convertDataType(const DataType *dataType) const {
+    std::string dataTypeName = dataType->getName();
     if (dataTypeName == "bool") {
-        return "boolean";
+        return "bit";
     } else if (dataTypeName == "unsigned") {
-        return "unsigned[31:0]";
-    } else {
-        return dataTypeName;
-    }
-}
-
-std::string PrintSVA::convertDataTypeProperty(std::string dataTypeName) {
-    if (dataTypeName == "bool") {
-        return "boolean";
-    } else if (dataTypeName == "unsigned") {
-        return "int unsigned";
+        return "bit[31:0]";
     } else {
         return dataTypeName;
     }
