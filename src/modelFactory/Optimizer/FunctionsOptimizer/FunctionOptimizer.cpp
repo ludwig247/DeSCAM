@@ -8,8 +8,10 @@
 #include "Optimizer/Debug.h"
 
 
-SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module, std::set<std::string> variablesThatHaveReadSet) : CFG(std::move(
-        CFG)), module(module), hasFunction(false), newStmt(nullptr), newExpr(nullptr), variablesThatHaveReadSet(std::move(variablesThatHaveReadSet)) {
+SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module,
+                                             std::set<std::string> variablesThatHaveReadSet) : CFG(std::move(
+        CFG)), module(module), hasFunction(false), newStmt(nullptr), newExpr(nullptr), variablesThatHaveReadSet(
+        std::move(variablesThatHaveReadSet)) {
 
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
     std::cout << std::endl << "********************** Functions Optimizer *********************** " << std::endl;
@@ -54,7 +56,7 @@ void SCAM::FunctionsOptimizer::visit(SCAM::Assignment &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    if(hasFunction) {
+    if (hasFunction) {
         this->newStmt = new SCAM::Assignment(lhs, rhs);
     }
 }
@@ -64,16 +66,14 @@ void SCAM::FunctionsOptimizer::visit(class UnaryExpr &node) {
     if (this->newExpr && hasFunction) {
         if (node.getOperation() == "not") {
             this->newExpr = new UnaryExpr("not", this->newExpr);
-            this->newStmt = this->newExpr;
-        } else if (node.getOperation() == "-") {
+        }else if (node.getOperation() == "~") {
+            this->newExpr = new UnaryExpr("~", this->newExpr);
+        }else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
-                this->newStmt = this->newExpr;
             } else {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
-                this->newStmt = this->newExpr;
             }
-
         } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
     }
 }
@@ -89,7 +89,7 @@ void SCAM::FunctionsOptimizer::visit(SCAM::If &node) {
 void SCAM::FunctionsOptimizer::visit(class Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr && hasFunction) {
-        this->newStmt = new Write(node.getPort(), this->newExpr , node.isNonBlockingAccess() , node.getStatusOperand());
+        this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand());
     }
 }
 
@@ -107,7 +107,7 @@ void SCAM::FunctionsOptimizer::visit(class Arithmetic &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    if(hasFunction) {
+    if (hasFunction) {
         this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
     }
 }
@@ -126,8 +126,8 @@ void SCAM::FunctionsOptimizer::visit(class Logical &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    if(hasFunction){
-    this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
+    if (hasFunction) {
+        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
     }
 }
 
@@ -145,7 +145,7 @@ void SCAM::FunctionsOptimizer::visit(class Relational &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    if(hasFunction) {
+    if (hasFunction) {
         this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
     }
 }
@@ -164,7 +164,7 @@ void SCAM::FunctionsOptimizer::visit(class Bitwise &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    if(hasFunction) {
+    if (hasFunction) {
         this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
     }
 }
@@ -177,10 +177,11 @@ void SCAM::FunctionsOptimizer::visit(class Cast &node) {
 }
 
 void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
-
+    if(node.getFunction()->getName().find("_opt")!=std::string::npos) return;
     hasFunction = true;
+    //optimize argument list
     std::map<std::string, SCAM::Expr *> newParamValueMap;
-    for (const auto& param : node.getParamValueMap()) {
+    for (const auto &param : node.getParamValueMap()) {
         if (auto funOp = SCAM::NodePeekVisitor::nodePeekFunctionOperand(param.second)) {
             this->newExpr = nullptr;
             funOp->accept(*this);
@@ -204,72 +205,72 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     }
 
     function->setName(newName);
+    function->setReturnValueConditionList(node.getFunction()->getReturnValueConditionList());
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
-//    std::cout << newName << std::endl;
-//    std::cout << "function " << function->getName() << std::endl;
-//    std::cout << "operand new name is " << newName << std::endl;
-//    std::cout << "return map before param value propagation " << function->getReturnValueConditionList().size() << std::endl;
-//    for (auto pair :function->getReturnValueConditionList()) {
-//        std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
-//                  << std::endl;
-//    std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
-//        for (auto stmt : pair.second) {
-//
-//            std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
-//        }
-//
-//    }
+        std::cout<< function->getName() << std::endl;
+        std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
+        for (auto pair :function->getReturnValueConditionList()) {
+            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+                      << std::endl;
+            std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
+            for (auto stmt : pair.second) {
+                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            }
+        }
 
-//    std::cout << "---Value propagation---" << std::endl;
+        std::cout << "---Parameters Value propagation---" << std::endl;
 #endif
     /// Param value propagation
-    ParamValuePropagation pvp(node.getParamValueMap(), function->getReturnValueConditionList());
+    ParamValuePropagation pvp(newParamValueMap, function->getReturnValueConditionList());
     function->setReturnValueConditionList(pvp.getReturnValueConditionList());
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
-//    std::cout << std::endl;
-//    std::cout << "return map after param value propagation " << function->getReturnValueConditionList().size() << std::endl;
+     std::cout << std::endl;
+        std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
+        for (auto pair :function->getReturnValueConditionList()) {
+            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+                      << std::endl;
+            std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
+            for (auto stmt : pair.second) {
+                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            }
+        }
 
-//    std::cout << std::endl << "after propagation " << function->getName() << std::endl;
-//    std::cout << "From function return value condition list is  " << std::endl;
-//    for (auto pair :function->getReturnValueConditionList()) {
-//        std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
-//                  << std::endl;
-//        std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
-//        for (auto stmt : pair.second) {
-//
-//            std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
-//        }
-//    }
-
-//    std::cout << "---Reachability analysis---" << std::endl;
+        std::cout << "---Reachability analysis---" << std::endl;
 #endif
     /// Function reachability analysis
     ReachabilityAnalysis fra(function->getReturnValueConditionList(), this->allVarValuesMap,
-                                     this->variablesThatHaveReadSet);
+                             this->variablesThatHaveReadSet);
     function->setReturnValueConditionList(fra.getReturnValueConditionList());
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
-//    std::cout << std::endl;
-//    std::cout << "return map after reachability analysis " << function->getReturnValueConditionList().size() << std::endl;
-//
-    /*std::cout << std::endl << "after function reachability analysis " << function->getName() << std::endl;
-    std::cout << "From function return value condition list is  " << std::endl;
-    for (auto pair :function->getReturnValueConditionList()) {
-        std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
-                  << std::endl;
-        std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
-        for (auto stmt : pair.second) {
-
-            std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+        std::cout << std::endl;
+        std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
+        for (auto pair :function->getReturnValueConditionList()) {
+            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+                      << std::endl;
+            std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
+            for (auto stmt : pair.second) {
+                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            }
         }
-    }*/
 
-//    std::cout << "---Simplify expressions---" << std::endl;
+        std::cout << "---Simplify expressions---" << std::endl;
 #endif
     /// Simplify expressions
     SimplifyExpressions se(function->getReturnValueConditionList(), this->module);
     function->setReturnValueConditionList(se.getReturnValueConditionList());
 
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
+    std::cout << std::endl;
+        std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
+        for (auto pair :function->getReturnValueConditionList()) {
+            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+                      << std::endl;
+            std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
+            for (auto stmt : pair.second) {
+                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            }
+        }
+
     std::cout << "---Operator Strength Reduction---" << std::endl;
 #endif
     /// Operator Strength Reduction
@@ -277,7 +278,42 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     function->setReturnValueConditionList(osr.getReturnValueConditionList());
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
     std::cout << std::endl;
+        std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
+        for (auto pair :function->getReturnValueConditionList()) {
+            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+                      << std::endl;
+            std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
+            for (auto stmt : pair.second) {
+                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            }
+        }
+
+    std::cout << std::endl;
 #endif
+
+    //optimize return value condition list
+    std::vector<std::pair<Return *, std::vector<Expr *>>> newReturnValueConditionList;
+    for (const auto &pair: function->getReturnValueConditionList()) {
+        std::vector<Expr *> newConditionVector;
+        for (auto expr : pair.second) {
+            this->newExpr = nullptr;
+            expr->accept(*this);
+            if (this->newExpr) {
+                newConditionVector.push_back(this->newExpr);
+            } else { newConditionVector.push_back(expr); }
+        }
+        if (pair.first->getReturnValue()) {
+            this->newExpr = nullptr;
+            pair.first->getReturnValue()->accept(*this);
+            if (this->newExpr) {
+                auto newReturn = new Return(this->newExpr);
+                newReturnValueConditionList.emplace_back(newReturn, newConditionVector);
+            } else { newReturnValueConditionList.emplace_back(pair.first, newConditionVector); }
+        } else {
+            newReturnValueConditionList.emplace_back(pair.first, newConditionVector);
+        }
+    }
+    function->setReturnValueConditionList(newReturnValueConditionList);
     //making functionOperand point to the new function
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();
@@ -293,7 +329,7 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
 }
 
 void SCAM::FunctionsOptimizer::visit(SCAM::ArrayOperand &node) {
-node.getIdx()->accept(*this);
+    node.getIdx()->accept(*this);
 }
 
 void SCAM::FunctionsOptimizer::visit(SCAM::CompoundExpr &node) {
@@ -309,7 +345,7 @@ void SCAM::FunctionsOptimizer::visit(SCAM::CompoundExpr &node) {
     }
     if (valueMapChanged) {
         this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType());
-    }else{
+    } else {
         this->newExpr = nullptr;
     }
 }
@@ -327,7 +363,7 @@ void SCAM::FunctionsOptimizer::visit(SCAM::ArrayExpr &node) {
     }
     if (valueMapChanged) {
         this->newExpr = new SCAM::ArrayExpr(newValMap, node.getDataType());
-    }else{
+    } else {
         this->newExpr = nullptr;
     }
 }

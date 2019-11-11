@@ -13,6 +13,7 @@
 #include "Behavior/CfgNode.h"
 #include "StmtAbstractVisitor.h"
 #include "NodePeekVisitor.h"
+#include "PrintStmt.h"
 
 
 namespace SCAM {

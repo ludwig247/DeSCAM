@@ -3,68 +3,67 @@
 //
 
 #include "FindUnusedFunctions.h"
-#include "NodePeekVisitor.h"
 
-SCAM::FindUnusedFunctions::FindUnusedFunctions(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module)
-        : module(module), CFG(std::move(CFG)) {
 
-    for (auto block : this->CFG) {
+SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBlock *> &CFG, SCAM::Module *module)
+        : module(module), blockCFG(CFG) {
+
+    for (auto block : this->blockCFG) {
         auto stmtList = block.second->getStmtList();
+        std::vector<SCAM::Stmt*> toBeDeletedWronglyGeneratedStatements;
         for (auto stmt : stmtList) {
             if (stmt) {
                 stmt->accept(*this);
             }
-            if(NodePeekVisitor::nodePeekFunctionOperand(stmt)!=nullptr){
-                for (const auto &item : stmtList) {
-                    std::cout << PrintStmt::toString(item) << std::endl;
-                }
-                std::cout << "\t\033[1;33mWarning\033[0m: " <<  "wrong use of functions at:\033[1;33m'" << PrintStmt::toString(stmt) << "'\033[0m, function returned value is never used"
+            if(NodePeekVisitor::nodePeekFunctionOperand(stmt)){
+                std::cout << "\t\033[1;33mWarning\033[0m: " <<  "wrong use of functions at:\033[1;33m'" << PrintStmt::toString(stmt) << "'\033[0m, function returned value is never used. Therefore, the statement is deleted"
                           << std::endl;
+                toBeDeletedWronglyGeneratedStatements.push_back(stmt);
             }
         }
+        if(!toBeDeletedWronglyGeneratedStatements.empty()){
+            for(auto wrongStatement: toBeDeletedWronglyGeneratedStatements){
+                stmtList.erase(std::remove(stmtList.begin(),stmtList.end(),wrongStatement), stmtList.end());
+            }
+            block.second->setStmtList(stmtList);
+        }
+
         if(block.second->hasIf()){
             block.second->getTerminator()->accept(*this);
         }
     }
-    for (const auto& function : this->module->getFunctionMap()) {
-        if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
-            this->unusedFunctionSet.insert(function.first);
+    if(this->usedFunctionsSet.size()!=this->module->getFunctionMap().size()) {
+        for (const auto &function : this->module->getFunctionMap()) {
+            if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
+                this->unusedFunctionSet.insert(function.first);
+            }
+        }
+        for (const auto &function : this->unusedFunctionSet) {
+            std::cout << "\t\033[1;33mWarning\033[0m: " << "the function '" << function
+                      << "' was never used!, DeSCAM deletes it by default"
+                      << std::endl;
+            this->module->removeFunction(function);
         }
     }
-    for (const auto& function : this->unusedFunctionSet) {
-        std::cout << "\t\033[1;33mWarning\033[0m: " <<  "the function '" << function << "' was never used!, DeSCAM deletes it by default"
-                  << std::endl;
-        this->module->removeFunction(function);
+}
+SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode *> &CFG, SCAM::Module *module): module(module), nodeCFG(CFG)  {
+    for (auto node : this->nodeCFG) {
+            if (auto stmt = node.second->getStmt()) {
+                stmt->accept(*this);
+        }
+    }
+    if(this->usedFunctionsSet.size()!=this->module->getFunctionMap().size()) {
+        for (const auto &function : this->module->getFunctionMap()) {
+            if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
+                this->unusedFunctionSet.insert(function.first);
+            }
+        }
+        for (const auto &function : this->unusedFunctionSet) {
+            this->module->removeFunction(function);
+        }
     }
 }
 
-void SCAM::FindUnusedFunctions::visit(struct VariableOperand &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct IntegerValue &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct UnsignedValue &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct BoolValue &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct EnumValue &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct CompoundValue &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct PortOperand &node) {
-
-}
 
 void SCAM::FindUnusedFunctions::visit(struct Assignment &node) {
     node.getRhs()->accept(*this);
@@ -74,32 +73,12 @@ void SCAM::FindUnusedFunctions::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct While &node) {
-
-}
-
 void SCAM::FindUnusedFunctions::visit(struct If &node) {
     node.getConditionStmt()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Read &node) {
-
-}
-
 void SCAM::FindUnusedFunctions::visit(struct Write &node) {
     node.getValue()->accept(*this);
-}
-
-void SCAM::FindUnusedFunctions::visit(struct SectionOperand &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct SectionValue &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct ITE &node) {
-
 }
 
 void SCAM::FindUnusedFunctions::visit(struct Arithmetic &node) {
@@ -120,14 +99,6 @@ void SCAM::FindUnusedFunctions::visit(struct Relational &node) {
 void SCAM::FindUnusedFunctions::visit(struct Bitwise &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
-}
-
-void SCAM::FindUnusedFunctions::visit(struct SyncSignal &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct DataSignalOperand &node) {
-
 }
 
 void SCAM::FindUnusedFunctions::visit(struct Cast &node) {
@@ -160,25 +131,10 @@ void SCAM::FindUnusedFunctions::visit(SCAM::ArrayExpr &node) {
     }
 }
 
-void SCAM::FindUnusedFunctions::visit(struct ParamOperand &node) {
-
-}
-
 void SCAM::FindUnusedFunctions::visit(struct Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Notify &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct Wait &node) {
-
-}
-
-void SCAM::FindUnusedFunctions::visit(struct Peek &node) {
-
-}
 
 
 

@@ -12,24 +12,20 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
     for (auto node: CFG) {
         auto statement = node.second->getStmt();
         if (statement != nullptr) {
-            if (auto assignment = dynamic_cast<SCAM::Assignment*>(statement)) {
-                if (auto varOp = dynamic_cast<SCAM::VariableOperand*>(assignment->getLhs())) {
+            if (auto assignment = dynamic_cast<SCAM::Assignment *>(statement)) {
+                if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
                     if (this->readVariablesSet.find(varOp->getVariable()->getFullName()) !=
                         this->readVariablesSet.end()) { continue; }
                     if (varOp->getVariable()->isCompoundType() || varOp->getVariable()->isArrayType()) {
-                        if (auto compoundValue = dynamic_cast<SCAM::CompoundValue*>(assignment->getRhs())) {
-                            for (auto subVar : varOp->getVariable()->getSubVarList()) {
-                                auto subVarVal = dynamic_cast<SCAM::Expr *>(compoundValue->getValues().at(
-                                        subVar->getName()));
-                                if (subVarVal != nullptr) {
-                                    addValToVariableValuesMap(subVar, subVarVal);
-                                } else {
-                                    throw std::runtime_error("subVar " + subVar->getFullName() + " is not an Expr!");
-                                }
-                            }
+                        if (auto compoundValue = dynamic_cast<SCAM::CompoundValue *>(assignment->getRhs())) {
+                            addSubVariablesToValuesMap(varOp,compoundValue->getValues());
+                        } else if (auto compoundExpression = dynamic_cast<SCAM::CompoundExpr *>(assignment->getRhs())) {
+                            addSubVariablesToValuesMap(varOp,compoundExpression->getValueMap());
+                        } else if (auto arrayExpression = dynamic_cast<SCAM::ArrayExpr *>(assignment->getRhs())) {
+                            addSubVariablesToValuesMap(varOp,arrayExpression->getValueMap());
                         } else {
                             throw std::runtime_error(
-                                    "direct assignment to compound expressions or arrays was not expected!");
+                                    "unexpected rhs of an assignment to a compound or array expression");
                         }
                     }
                     addValToVariableValuesMap(varOp->getVariable(), assignment->getRhs());
@@ -37,6 +33,7 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
             }
         }
     }
+
 #ifdef DEBUG_FIND_VARIABLES_VALUES
     std::cout << "---------------Find Variables Values---------------" << std::endl;
     for(auto variable : this->variablesValuesMap)
@@ -73,3 +70,32 @@ void SCAM::FindVariablesValues::addValToVariableValuesMap(SCAM::Variable *variab
         this->variablesValuesMap.insert(std::make_pair(variable->getFullName(), valuesSet));
     }
 }
+
+template<class T>
+void SCAM::FindVariablesValues::addSubVariablesToValuesMap(SCAM::VariableOperand *varOp,
+                                                           const std::map<std::string, T *> &compoundValuesMap) {
+    auto valItr = compoundValuesMap.begin();
+    for (auto &subVar : varOp->getVariable()->getSubVarList()) {
+        if (valItr == compoundValuesMap.end()) { break; }
+        auto subVarVal = dynamic_cast<SCAM::Expr*>((*valItr).second);
+        valItr++;
+        if (subVarVal) {
+            addValToVariableValuesMap(subVar, subVarVal);
+        }
+    }
+}
+/*
+void SCAM::FindVariablesValues::addSubVariablesToValuesMap(
+        SCAM::VariableOperand* varOp,
+        const std::map<std::string, SCAM::Expr *> &compoundValuesMap) {
+    auto valItr = compoundValuesMap.begin();
+    for (auto &subVar : varOp->getVariable()->getSubVarList()) {
+        if (valItr == compoundValuesMap.end()) { break; }
+        auto subVarVal = (*valItr).second;
+        valItr++;
+        if (subVarVal) {
+            addValToVariableValuesMap(subVar, subVarVal);
+        }
+    }
+}
+*/

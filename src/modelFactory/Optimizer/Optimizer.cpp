@@ -55,9 +55,12 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     SCAM::RenumberCFG rcn(la2.getCFG());
 
     this->nodeCFG = rcn.getNewNodeCFG();
+
+    SCAM::FindUnusedFunctions uff2(this->nodeCFG, module);
+
 //    std::cout << OptUtilities::printCFG(this->nodeCFG);
     module->setCFG(this->nodeCFG);
-//    std::cout << SCAM::OptUtilities::printCFG(this->nodeCFG);
+
     // SCAM::RangeAndBitWidthAnalysis raba(module, frv.getReadVariablesSet());
 
 }
