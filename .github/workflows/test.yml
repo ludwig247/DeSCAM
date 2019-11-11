@@ -1,8 +1,7 @@
 name: DESCAM-BUILD
 
 on: [push]
-  branches:
-    - "DeSCAM/development"         # development branch
+
 jobs:
   build:
 
