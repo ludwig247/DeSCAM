@@ -15,6 +15,8 @@
 #Add new plugins by calling:
 
 add_plugin(PrintITL; "Complete set of properties in ITL")
+add_plugin(PrintSVA; "Complete set of properties in SVA")
+
 add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
 add_plugin(PrintSkeleton; "Structure and FSM in AML")
 add_plugin(PrintChisel; "Print a module in CHISEL")
@@ -24,7 +26,7 @@ add_plugin(PrintDotFull; "statemachine + conditions + commitments as .dot" ; Pri
 add_plugin(PrintDotStates; "statemachine as .dot" ; PrintDot)
 
 add_plugin(PrintCFGDot; "Present Control Flow Graph of every module as .dot file" ; PrintDot)
-add_plugin(PrintCompleteness; "Complete set of properties in ITL")
+add_plugin(PrintCompleteness; "Completeness description in ITL")
 
 add_plugin(PrintTemplate; "Example for a plugin")
 
@@ -32,7 +34,6 @@ add_plugin(PrintTemplate; "Example for a plugin")
 
 #UNDER MAINTANANCE
 #add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
-#add_plugin(PrintSVA; "Complete set of properties in SVA")
 
 
 #NOT WORKING ANYMORE

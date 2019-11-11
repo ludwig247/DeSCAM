@@ -8,7 +8,6 @@
 #include <PluginFactory.h>
 #include <sstream>
 #include "Model.h"
-//#include <PropertyFactory.h>
 
 class PrintSVA : public PluginFactory {
 
@@ -29,13 +28,10 @@ private:
     std::string Text_ipc();
 
     std::string Text_body();
-//        void optimizeCommunicationFSM();
-//        inline int getOpCnt(std::map<int, State *> stateMap);
-//        std::set<Port*> usedPortsList;
-//        std::map<int, State *> stateMap;
-//        std::map<std::string ,SCAM::Variable*> stateVarMap;
 
     std::string functions();
+
+    std::string dataTypes();
 
     std::string signals();
 
@@ -53,7 +49,9 @@ private:
 
     std::string convertDataType(DataType *dataTypeName);
 
-    std::string convertDataType(std::string dataTypeName);
+    std::string convertDataTypeFunction(std::string dataTypeName);
+
+    std::string convertDataTypeProperty(std::string dataTypeName);
 
     std::string location(bool loc);
 

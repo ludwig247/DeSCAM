@@ -2,12 +2,8 @@
 // Created by Nawras Altaleb (nawras.altaleb89@gmail.com) on 17.04.18.
 //
 
-//#include "PropertyFactory.h"
 #include <fstream>
 #include <ExprVisitor.h>
-//#include <optimizePPA/OptimizeMaster.h>
-//#include <optimizePPA/OptimizeSlave.h>
-//#include <optimizePPA/OptimizeOperations.h>
 #include "PrintSVA.h"
 #include "Config.h"
 #include "ConditionVisitorSVA.h"
@@ -18,7 +14,6 @@ std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
 
     for (auto &module: node->getModules()) {
         this->module = module.second;
-        //optimizeCommunicationFSM();
         pluginOutput.insert(std::make_pair(module.first + ".sva", Text_body()));
         pluginOutput.insert(std::make_pair(module.first + "_functions.sva", functions()));
     }
@@ -80,11 +75,12 @@ std::string PrintSVA::Text_ipc() {
 std::string PrintSVA::Text_body() {
     std::stringstream result;
     result
+            << dataTypes() << "\n"
             << "`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR\n\n"
             << "`include \"ipc.sva\"\n"
             << "`include \"" << this->module->getName() << "_functions.sva\"\n\n"
             << "import scam_model_types::*;\n\n"
-            //            << "import " << tolower(this->module->getName()) << "_functions::*;\n\n"
+            //<< "import " << tolower(this->module->getName()) << "_functions::*;\n\n"
             << "module " << this->module->getName() << "_verification(reset);\n\n"
             << "input reset;\n\n"
             << "//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT\n"
@@ -93,6 +89,7 @@ std::string PrintSVA::Text_body() {
             << "////////////////////////////////////\n"
             << "//////////// Operations ////////////\n"
             << "////////////////////////////////////\n"
+            << "\n"
             << reset_sequence() << reset_operation() << operations() << wait_operations()
             << "endmodule\n\n"
             << "//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT\n"
@@ -101,45 +98,6 @@ std::string PrintSVA::Text_body() {
 
     return result.str();
 }
-
-/*
-void PrintSVA::optimizeCommunicationFSM() {
-//        std::cout << "State-map(unoptimized):" << getOpCnt(this->module->getFSM()->getStateMap())
-//                  << " operations created" << std::endl;
-
-    std::map<SCAM::Operation *, SCAM::Path *> operation_path_map = this->module->getFSM()->getOperationPathMap();
-    OptimizeMaster optimizeMaster(this->module->getFSM()->getStateMap(), this->module, operation_path_map);
-
-    OptimizeSlave optzimizeSlave(optimizeMaster.getNewStateMap(), this->module, optimizeMaster.getOperationPathMap());
-
-
-    OptimizeOperations optimizeOperations(optzimizeSlave.getNewStateMap(), this->module);
-
-    this->stateMap = optimizeOperations.getNewStateMap();
-    this->stateVarMap = optimizeOperations.getStateVarMap();
-//        std::cout << "State-map(optimized):" << getOpCnt(this->stateMap) << " operations created" << std::endl;
-//        std::cout << "----------------------" << std::endl;.
-
-    int opCnt = 0;
-    for (auto state: this->stateMap) {
-        if (state.second->isInit()) continue;
-        opCnt += state.second->getOutgoingOperationList().size();
-    }
-    std::cout << "Operations created: " << opCnt << std::endl;
-    if (opCnt > 1000)
-        std::cout << "Warning: Due to a large operation cnt streaming output to files!" << std::endl;
-}
-
-inline int PrintSVA::getOpCnt(std::map<int, State *> stateMap) {
-    int op_cnt = 0;
-    for (auto state: stateMap) {
-        for (auto op: state.second->getOutgoingOperationList()) {
-            op_cnt++;
-        }
-    }
-    return op_cnt;
-}
-*/
 
 
 std::string PrintSVA::functions() {
@@ -183,13 +141,35 @@ std::string PrintSVA::functions() {
                 }
 
                 ss << ") begin return ";
+                //TODO: The following lines print statements like "regfile.reg_file_01", which should be changed to "regfile_reg_file_01"
                 ss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
-            } else
+            } else {
                 ss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
+            }
             --j;
         }
         ss << "endfunction\n\n";
     }
+    return ss.str();
+}
+
+std::string PrintSVA::dataTypes() {
+
+    std::stringstream ss;
+
+    ss << "// DATA TYPES //\n";
+    for (auto type: DataTypes::getDataTypeMap()) {
+        if (type.second->isEnumType()) {
+            ss << "typedef enum {";
+            for (auto it = type.second->getEnumValueMap().begin(); it != type.second->getEnumValueMap().end(); ++it) {
+                ss << it->first;
+                if (std::next(it) != type.second->getEnumValueMap().end())
+                    ss << ", ";
+            }
+            ss << "} " << type.second->getName() << ";\n";
+        }
+    }
+
     return ss.str();
 }
 
@@ -198,17 +178,16 @@ std::string PrintSVA::signals() {
     std::stringstream ss;
 
     ss << "\n// SYNC AND NOTIFY SIGNALS (1-cycle macros) //\n";
-    for (auto sync: ps->getSyncSignals()) {
-        ss << "function " << sync->getName() << ";\n\t" << sync->getName() << " = \nendfunction" << std::endl;
+    for (auto sync: ps->getSyncSignals()){
+        ss << "function " << sync->getName() << ";\n\t"  << sync->getName() << " = ;\nendfunction" << std::endl;
     }
-    for (auto notify: ps->getNotifySignals()) {
-        ss << "function " << notify->getName() << ";\n\t" << notify->getName() << " = \nendfunction" << std::endl;
+    for (auto notify: ps->getNotifySignals()){
+        ss << "function " << notify->getName() << ";\n\t"  << notify->getName() << " = ;\nendfunction" << std::endl;
     }
-    ss << std::endl << std::endl;
 
     ss << "\n// DP SIGNALS //\n";
     for (auto dp: ps->getDpSignals()) {
-        ss << "function " << convertDataType(dp->getDataType()->getName()) << " " << dp->getName();
+        ss << "function " << convertDataTypeFunction(dp->getDataType()->getName()) << " " << dp->getName();
         if (dp->isCompoundType()) {
             ss << "_" + dp->getSubVarName();
         }
@@ -216,9 +195,8 @@ std::string PrintSVA::signals() {
         if (dp->isCompoundType()) {
             ss << "_" + dp->getSubVarName();
         }
-        ss << " = " << "\nendfunction\n";
+        ss << " = " << ";\nendfunction\n";
     }
-    ss << std::endl << std::endl;
     return ss.str();
 }
 
@@ -228,7 +206,7 @@ std::string PrintSVA::registers() {
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
         if (!vr->isArrayType()) {
-            ss << "function " << convertDataType(vr->getDataType()->getName()) << " " << vr->getName();
+            ss << "function " << convertDataTypeFunction(vr->getDataType()->getName()) << " " << vr->getName();
             if (vr->isCompoundType()) {
                 ss << "_" + vr->getSubVarName();
             }
@@ -236,7 +214,7 @@ std::string PrintSVA::registers() {
             if (vr->isCompoundType()) {
                 ss << "_" + vr->getSubVarName();
             }
-            ss << " = ;\nendfunction\n" << std::endl;
+            ss << " = ;\nendfunction\n";
         }
     }
     return ss.str();
@@ -256,22 +234,25 @@ std::string PrintSVA::states() {
 
 std::string PrintSVA::reset_sequence() {
     std::stringstream ss;
-    ss << "sequence reset_sequence;\n//DISGNER REFER TO MODEL RESET SIGNAL HERE\nendsequence\n";
+    ss << "sequence reset_sequence;\n\t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\nendsequence\n\n";
     return ss.str();
 }
 
 std::string PrintSVA::reset_operation() {
     PropertySuite *ps = this->module->getPropertySuite();
     std::stringstream ss;
-    ss << "property " << ps->getResetProperty()->getName() << ";\n"
+    ss << "property reset_p;\n"
        << "\treset_sequence |=>\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\tt ##0 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << ConditionVisitorSVA::toString(commitment->getRhs()) << " and\n";
+        ss << "\tt ##0 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << ConditionVisitorSVA::toString(commitment->getRhs());
+        if (commitment != ps->getResetProperty()->getCommitmentList().back())
+            ss << " and\n";
+
     }
-    ss.seekp(-5, std::ios_base::end);//remove last " and\n"
-    ss << ";\n";//and replace it with ";"
+    ss << ";\n";
     ss << "endproperty\n";
     ss << "reset_a: assert property (reset_p);\n\n";
+    ss << "\n\n";
     return ss.str();
 }
 
@@ -283,14 +264,11 @@ std::string PrintSVA::operations() {
     for (auto op : ps->getOperationProperties()) {
         ss << "property " << op->getName() << "_p(o);\n";
 
-        unsigned long freezeVarSize = op->getFreezeSignals().size();
-        if (freezeVarSize > 0) {
+        if (!op->getFreezeSignals().empty()) {
             for (auto freeze : op->getFreezeSignals()) {
-                ss << freeze.second->getDataType()->getName() << " " << freeze.first << "_0;\n";
+                ss << " " << convertDataTypeProperty(freeze.second->getDataType()->getName()) << " " << freeze.first << "_0;\n";
             }
-            ss << "// hold\n";
             for (auto freeze : op->getFreezeSignals()) {
-
                 ss << "\tt ##0 hold(";
                 if (freeze.second->isArrayType()) {
                     ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_0,";
@@ -298,200 +276,37 @@ std::string PrintSVA::operations() {
                 } else {
                     ss << freeze.first << "_0," << freeze.first << "()) and\n";
                 }
-
-                if (freezeVarSize > 1) {
-                    ss << ",\n";
-                } else {
-                    ss << ";\n";
-                }
-                freezeVarSize--;
             }
         }
-        ss << "assume:\n";
-        ss << "\tat t: " << op->getState()->getName() << ";\n";
-        for (auto assumption : op->getAssumptionList()) {
-            ss << "\tat t: " << PrintStmt::toString(assumption) << ";\n";
+        ss << "\tt ##0 " << op->getState()->getName() << "()";
+        for (auto assumption : op->getAssumptionList()){
+            ss << " and\n";
+            ss << "\tt ##0 " << ConditionVisitorSVA::toString(assumption);
         }
-        ss << "prove:\n";
-        //TODO: @LUCAS: t_end is missing ... I guess its something like t##0 t_end(0) compare with version on master
+        ss << "\n";
 
-        ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
+        ss << "implies\n";
+        ss << "\tt_end(o) ##0 " << op->getNextState()->getName() << "()";
         for (auto commitment : op->getCommitmentList()) {
-            ss << "\tat " << t_end << ": " << ConditionVisitorSVA::toString(commitment->getLhs()) << " = " << DatapathVisitorSVA::toString(commitment->getRhs()) << ";\n";
+            ss << " and\n";
+            ss << "\tt_end(o) ##0 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << DatapathVisitorSVA::toString(commitment->getRhs());
         }
-        for (auto notify : ps->getNotifySignals()) {
-            switch (op->getTiming(notify->getPort())) {
-                case TT_1:
-                    ss << "\tat t+1: " << notify->getName() << " = true;\n";
-                    break;
-                case FF_1:
-                    ss << "\tat t+1: " << notify->getName() << " = false;\n";
-                    break;
-                case FF_e:
-                    ss << "\tduring[t+1, t_end]: " << notify->getName() << " = false;\n";
-                    break;
-                case FT_e:
-                    ss << "\tduring[t+1, t_end-1]: " << notify->getName() << " = false;\n";
-                    ss << "\tat t_end: " << notify->getName() << " = true;\n";
-                    break;
+        for (auto notify : ps->getNotifySignals()){
+            ss << " and\n";
+            switch(op->getTiming(notify->getPort())){
+                case TT_1: ss << "\tt ##1 " << notify->getName() << "() == 1"; break;
+                case FF_1: ss << "\tt ##1 " << notify->getName() << "() == 0"; break;
+                case FF_e: ss << "\tduring (next(t,1), t_end(o), " << notify->getName() << "() == 0)"; break;
+                case FT_e: ss << "\tduring_o (t, 1, t_end(o), -1, " << notify->getName() << "() == 0) and\n";
+                           ss << "\tt_end(o) ##0 " << notify->getName() << "() == 1"; break;
             }
         }
-        ss << "end property;\n";
+        ss << ";\n";
+        ss << "endproperty;\n";
+        ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p(1)); //ASSIGN t_end offset here\n\n";
         ss << "\n\n";
     }
 
-    int opCnt = 0;
-    int ChunkOpCnt = 0;
-    //TODO: @LUCAS: this part is still relying on the statemap ... we would need to change it to the property suite .. still including all the optimizations
-    for (auto state: this->stateMap) {
-        if (state.second->isInit()) continue;
-        for (auto operation: state.second->getOutgoingOperationList()) {
-            ChunkOpCnt++;
-            if (ChunkOpCnt > 1000) {
-                pluginOutput.insert(std::make_pair(this->module->getName() + "_OPs_" + std::to_string(opCnt) + ".sva", ss.str()));
-                ss.str("");
-                ChunkOpCnt = 0;
-            }
-            if (operation->isWait()) continue;
-            ss << "property ";
-            ss << operation->getState()->getName();
-            if (operation->getState()->isRead()) ss << "_read_";
-            else if (operation->getState()->isWrite()) ss << "_write_";
-            ss << opCnt << "_p(o);\n";
-
-            //FREEZE VARS
-            std::set<SCAM::SyncSignal *> syncSignals;
-            std::set<SCAM::Variable *> variables;
-            std::set<SCAM::DataSignal *> dataSignals;
-            std::vector<std::string> freezeVars;
-            std::vector<std::string> freezeVarsTypes;
-            for (auto assignment : operation->getCommitmentList()) {
-                //Find all objects that need to be freezed
-                auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
-                syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
-                auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
-                variables.insert(newVariables.begin(), newVariables.end());
-                auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
-                dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
-            }
-            for (auto sync :syncSignals) {
-                freezeVarsTypes.emplace_back("");//this type is boolean and not necessery to show
-                freezeVars.push_back(sync->getPort()->getName() + "_sync");
-            }
-            for (auto var : variables) {
-                auto varOp = VariableOperand(var);
-                freezeVarsTypes.push_back(convertDataType(var->getDataType()));
-                if (varOp.getVariable()->isSubVar()) {
-                    freezeVars.push_back(
-                            varOp.getVariable()->getParent()->getName() + "_" + varOp.getVariable()->getName());
-                } else {
-                    freezeVars.push_back(varOp.getVariable()->getName());
-                }
-            }
-            for (auto dataSig : dataSignals) {
-                auto dataOp = DataSignalOperand(dataSig);
-                freezeVarsTypes.push_back(convertDataType(dataSig->getDataType()));
-                if (dataOp.getDataSignal()->isSubVar()) {
-                    freezeVars.push_back(
-                            dataOp.getDataSignal()->getParent()->getName() + "_" +
-                            dataOp.getDataSignal()->getName());
-                } else {
-                    freezeVars.push_back(dataOp.getDataSignal()->getName());
-                }
-            }
-            for (int i = 0; i < freezeVars.size(); i++) {
-                ss << freezeVarsTypes.at(i) << " " << freezeVars.at(i) << "_0;\n";
-            }
-            if (!freezeVars.empty()) ss << "// hold\n";
-            ///// t ##0 hold(var_0, var()) and
-            for (const auto &freezeVar : freezeVars) {
-                ss << "\tt ##0 hold(" + freezeVar << "_0, " << freezeVar << "()) and\n";
-            }
-
-            //CONCEPTUAL STATE & TRIGGERS
-            ss << "// Conceptual State\n";
-            ss << "\tt ##0 " + operation->getState()->getName() << "() and\n";
-            ss << "// trigger\n";
-            for (auto assumption: operation->getAssumptionList()) {
-                ss << "\tt ##0 " + ConditionVisitorSVA::toString(assumption) << " and\n";
-            }
-            ss.seekp(-5, std::ios_base::end);//remove last " and\n"
-            ss << "\n";
-
-            //IMPLICATIONS
-            std::set<Port *> usedPortsList;
-            ss << "implies\n";
-            //Nextstate
-            ss << "\tt_end(o) ##0 " << operation->getNextState()->getName() << "() and\n";
-            //Translate all dataPath assignments into strings,
-            // for the datapath all variable and signals are replaced with their value@t
-            for (auto commitment: operation->getCommitmentList()) {
-                ss << "\tt_end(o) ##0 " << ConditionVisitorSVA::toString(commitment->getLhs());
-                ss << " == ";
-                ss << DatapathVisitorSVA::toString(commitment->getRhs()) << " and\n";
-                //Add all output port that are used within this operation
-                auto usedPorts = ExprVisitor::getUsedPorts(commitment->getLhs());
-                for (auto port: ExprVisitor::getUsedPorts(commitment->getLhs())) {
-                    if (port->getInterface()->isOutput()) {
-                        usedPortsList.insert(port);
-                    }
-                }
-            }
-
-            //Add all possible inputs for the next state to usedPortsList, necessary because of merge of operations
-            for (auto nextOp: operation->getNextState()->getOutgoingOperationList()) {
-                for (auto commitment: nextOp->getCommitmentList()) {
-                    //Add all input port that are used within this operation
-
-                    for (auto port: ExprVisitor::getUsedPorts(commitment->getRhs())) {
-                        if (port->getInterface()->isInput()) {
-                            usedPortsList.insert(port);
-                        }
-                    }
-                }
-            }
-
-            //Notify&Sync Signals, no notification for shared, alwaysReady in ...
-            for (auto port: module->getPorts()) {
-                auto interface = port.second->getInterface();
-                if (interface->isShared()) continue;
-                if (interface->isSlaveIn()) continue;
-                if (interface->isSlaveOut()) continue;
-                if (interface->isMasterIn()) continue;
-
-                if (module->isSlave()) {
-                    if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                        ss << "\tt ##1 " + port.first + "_notify() == 1 and\n";
-                    } else ss << "\tt ##1 " + port.first + "_notify() == 0 and\n";
-                } else {
-                    if (port.second == operation->getNextState()->getCommPort()) {
-                        ss << "\tduring_o (t, 1, t_end(o) , -1, " + port.first + "_notify() == 0) and\n";
-                        ss << "\tt_end(o) ##0 " + port.first + "_notify() == 1 and\n";
-                    } else if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                        ss << "\tduring_o (t, 1, t_end(o), -1, " + port.first + "_notify() == 0) and\n";
-                        ss << "\tt_end(o) ##0 " + port.first + "_notify() == 1 and\n";
-                    } else ss << "\tduring (next(t,1), t_end(o), " + port.first + "_notify() == 0) and\n";
-                }
-            }
-
-            ss.seekp(-5, std::ios_base::end);//remove last " and\n"
-            ss << ";\n";//and replace it with ";"
-            ss << "endproperty;\n";
-
-            //PROPERTY ASSERTION
-            ///// S_read_#_a: assert property (disable iff (reset) S_read_#_p(1));
-            ss << operation->getState()->getName();
-            if (operation->getState()->isRead()) ss << "_read_";
-            else if (operation->getState()->isWrite()) ss << "_write_";
-            ss << opCnt << "_a: assert property (disable iff (reset) "
-               << operation->getState()->getName();
-            if (operation->getState()->isRead()) ss << "_read_";
-            else if (operation->getState()->isWrite()) ss << "_write_";
-            ss << opCnt << "_p(1));// ASSIGN t_end offset here\n\n";
-
-            opCnt++;
-        }
-    }
     return ss.str();
 }
 
@@ -499,132 +314,72 @@ std::string PrintSVA::wait_operations() {
     PropertySuite *ps = this->module->getPropertySuite();
     std::stringstream ss;
 
-    //TODO: @Lucas ... same here. statemap should not be here ... compare to PrintITL
-    for (auto state: this->stateMap) {
-        if (state.second->isInit()) continue;
-        for (auto operation: state.second->getOutgoingOperationList()) {
-            if (!operation->isWait()) continue;
-            ss << "\n";
-            ss << "property ";
-            ss << "wait_";
-            ss << operation->getState()->getName();
-            ss << "_p;\n";
+    // Operation properties
+    for (auto op : ps->getWaitProperties()){
+        ss << "property " << op->getName() << "_p;\n";
 
-            //FREEZE VARS
-            std::set<SCAM::SyncSignal *> syncSignals;
-            std::set<SCAM::Variable *> variables;
-            std::set<SCAM::DataSignal *> dataSignals;
-            std::vector<std::string> freezeVars;
-            std::vector<std::string> freezeVarsTypes;
-            for (auto assignment : operation->getCommitmentList()) {
-                //Find all objects that need to be freezed
-                auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
-                syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
-                auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
-                variables.insert(newVariables.begin(), newVariables.end());
-                auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
-                dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
+        if (!op->getFreezeSignals().empty()) {
+            for (auto freeze : op->getFreezeSignals()) {
+                ss << " " << convertDataTypeProperty(freeze.second->getDataType()->getName()) << " " << freeze.first << "_0;\n";
             }
-            for (auto sync :syncSignals) {
-                freezeVarsTypes.emplace_back("");//this type is boolean and not necessery to show
-                freezeVars.push_back(sync->getPort()->getName() + "_sync");
-            }
-            for (auto var : variables) {
-                auto varOp = VariableOperand(var);
-                freezeVarsTypes.push_back(convertDataType(var->getDataType()));
-                if (varOp.getVariable()->isSubVar()) {
-                    freezeVars.push_back(
-                            varOp.getVariable()->getParent()->getName() + "_" + varOp.getVariable()->getName());
+            for (auto freeze : op->getFreezeSignals()) {
+                ss << "\tt ##0 hold(";
+                if (freeze.second->isArrayType()) {
+                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_0,";
+                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << "()) and\n";
                 } else {
-                    freezeVars.push_back(varOp.getVariable()->getName());
+                    ss << freeze.first << "_0," << freeze.first << "()) and\n";
                 }
             }
-            for (auto dataSig : dataSignals) {
-                auto dataOp = DataSignalOperand(dataSig);
-                freezeVarsTypes.push_back(convertDataType(dataSig->getDataType()));
-                if (dataOp.getDataSignal()->isSubVar()) {
-                    freezeVars.push_back(dataOp.getDataSignal()->getParent()->getName() + "_" +
-                                         dataOp.getDataSignal()->getName());
-                } else {
-                    freezeVars.push_back(dataOp.getDataSignal()->getName());
-                }
-            }
-
-            for (int i = 0; i < freezeVars.size(); i++) {
-                ss << freezeVarsTypes.at(i) << " " << freezeVars.at(i) << "_0;\n";
-            }
-            if (!freezeVars.empty()) ss << "// hold\n";
-            ///// t ##0 hold(var_0, var()) and
-            for (const auto &freezeVar : freezeVars) {
-                ss << "\tt ##0 hold(" + freezeVar << "_0, " << freezeVar << "()) and\n";
-            }
-
-            //CONCEPTUAL STATE & TRIGGERS
-            ss << "// Conceptual State\n";
-            ss << "\tt ##0 " + operation->getState()->getName() << "() and\n";
-            ss << "// trigger\n";
-            for (auto assumption: operation->getAssumptionList()) {
-                ss << "\tt ##0 " + ConditionVisitorSVA::toString(assumption) << " and\n";
-            }
-            ss.seekp(-5, std::ios_base::end);//remove last " and\n"
-            ss << "\n";
-
-            //IMPLICATIONS
-            ss << "implies\n";
-            //Nextstate
-            ss << "\tt ##1 " << operation->getNextState()->getName() << "() and\n";
-            //Translate all dataPath assignments into strings,
-            // for the datapath all variable and signals are replaced with their value@t
-            for (auto commitment: operation->getCommitmentList()) {
-                ss << "\tt ##1 " << ConditionVisitorSVA::toString(commitment->getLhs());
-                ss << " == ";
-                ss << DatapathVisitorSVA::toString(commitment->getRhs()) << " and\n";
-            }
-
-            //Notify&Sync Signals, no notification for shareds
-            for (auto port: module->getPorts()) {
-                Interface *pI = port.second->getInterface();
-                if (pI->isMasterIn()) continue;
-                if (pI->isShared()) continue;
-                if ((pI->isBlocking() || pI->isMasterOut()) &&
-                    port.second != operation->getNextState()->getCommPort())
-                    ss << "\tt ##1 " + port.first << "_notify() == 0 and\n";
-                else
-                    ss << "\tt ##1 " + operation->getNextState()->getCommPort()->getName()
-                       << "_notify() == 1 and\n";
-            }
-
-            ss.seekp(-5, std::ios_base::end);//remove last " and\n"
-            ss << ";\n";//and replace it with ";"
-            ss << "endproperty;\n";
-
-            //PROPERTY ASSERTION
-            ///// wait_state_a: assert property (disable iff (reset) wait_state_p);
-            ss << "wait_" << operation->getState()->getName()
-               << "_a: assert property (disable iff (reset) wait_"
-               << operation->getState()->getName()
-               << "_p);\n\n";
         }
+
+        ss << "\tt ##0 " << op->getState()->getName() << "()";
+        for (auto assumption : op->getAssumptionList()){
+            ss << " and\n";
+            ss << "\tt ##0 " << ConditionVisitorSVA::toString(assumption);
+        }
+        ss << "\n";
+
+        ss << "implies\n";
+        ss << "\tt ##1 " << op->getNextState()->getName() << "()";
+        for (auto commitment : op->getCommitmentList()) {
+            ss << " and\n";
+            ss << "\tt ##1 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << DatapathVisitorSVA::toString(commitment->getRhs());
+        }
+        ss << ";\n";
+        ss << "endproperty;\n";
+        ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p);\n\n";
+        ss << "\n\n";
     }
     return ss.str();
 }
 
 std::string PrintSVA::convertDataType(DataType *dataType) {
     std::stringstream ret;
-    if (dataType->isEnumType())
+    /*if (dataType->isEnumType())
         ret << tolower(dataType->getName());
-    else if (dataType->isInteger() || dataType->isUnsigned())
+    else */if (dataType->isInteger() || dataType->isUnsigned())
         ret << "int " << dataType->getName();
     else
         ret << dataType->getName();
     return ret.str();
 }
 
-std::string PrintSVA::convertDataType(std::string dataTypeName) {
+std::string PrintSVA::convertDataTypeFunction(std::string dataTypeName) {
     if (dataTypeName == "bool") {
         return "boolean";
-    } else if (dataTypeName == "int") {
-        return "signed";
+    } else if (dataTypeName == "unsigned") {
+        return "unsigned[31:0]";
+    } else {
+        return dataTypeName;
+    }
+}
+
+std::string PrintSVA::convertDataTypeProperty(std::string dataTypeName) {
+    if (dataTypeName == "bool") {
+        return "boolean";
+    } else if (dataTypeName == "unsigned") {
+        return "int unsigned";
     } else {
         return dataTypeName;
     }

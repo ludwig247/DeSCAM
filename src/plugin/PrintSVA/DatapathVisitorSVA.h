@@ -1,9 +1,9 @@
 //
-// Created by Nawras Altaleb (nawras.altaleb89@gmail.com) on 17.04.18.
+// Created by deutschmann on 9/26/19.
 //
 
-#ifndef SCAM_DATAPATHVISITORSVA_H
-#define SCAM_DATAPATHVISITORSVA_H
+#ifndef PROJECT_DATAPATHVISITORSVA_H
+#define PROJECT_DATAPATHVISITORSVA_H
 
 #include <PrintStmt.h>
 
@@ -51,4 +51,4 @@ namespace SCAM {
 
 }
 
-#endif //SCAM_DATAPATHVISITORSVA_H
+#endif //PROJECT_DATAPATHVISITORSVA_H
