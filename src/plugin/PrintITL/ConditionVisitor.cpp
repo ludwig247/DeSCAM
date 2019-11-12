@@ -209,3 +209,14 @@ void SCAM::ConditionVisitor::visit(SCAM::ArrayExpr &node) {
 }
 
 
+void SCAM::ConditionVisitor::visit(SCAM::UnaryExpr &node) {
+    useParenthesesFlag = true;
+    if(node.getOperation() == "~") {
+        this->ss << "not(";
+    }else this->ss << node.getOperation() << "(";
+    node.getExpr()->accept(*this);
+    this->ss << ")";
+}
+
+
+

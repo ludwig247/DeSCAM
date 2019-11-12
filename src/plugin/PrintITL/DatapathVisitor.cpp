@@ -133,5 +133,15 @@ void SCAM::DatapathVisitor::visit(SCAM::ArrayOperand &node) {
     this->ss << ")";
 }
 
+void SCAM::DatapathVisitor::visit(SCAM::UnaryExpr &node) {
+
+        useParenthesesFlag = true;
+        if(node.getOperation() == "~") {
+            this->ss << "not(";
+        }else this->ss << node.getOperation() << "(";
+        node.getExpr()->accept(*this);
+        this->ss << ")";
+}
+
 
 

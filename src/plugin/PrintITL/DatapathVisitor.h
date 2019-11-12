@@ -52,6 +52,8 @@ namespace SCAM {
 
         void visit(class ArrayOperand &node) override;
 
+        void visit(class UnaryExpr &node) override;
+
         bool resize_flag = false;
     };
 

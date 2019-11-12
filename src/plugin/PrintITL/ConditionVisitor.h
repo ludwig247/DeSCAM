@@ -30,6 +30,7 @@ namespace SCAM {
 
         virtual void visit(class UnsignedValue &node);
 
+        virtual void visit(class UnaryExpr & node);
 
         virtual void visit(class Cast &node);
 
