@@ -1,5 +1,5 @@
 
 add_library(PrintTrueOperation
-        ConditionVisitor.cpp
+        ConditionVisitor2.cpp
         DatapathVisitor.cpp
         PrintTrueOperation.cpp)

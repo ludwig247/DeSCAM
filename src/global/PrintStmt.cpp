@@ -119,7 +119,7 @@ void SCAM::PrintStmt::visit(PortOperand &node) {
 void SCAM::PrintStmt::visit(UnaryExpr &node) {
     useParenthesesFlag = true;
     if(node.getOperation() == "~") {
-        this->ss << "~(";
+        this->ss << "not(";
     }else this->ss << node.getOperation() << "(";
     node.getExpr()->accept(*this);
     this->ss << ")";

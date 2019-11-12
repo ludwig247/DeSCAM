@@ -6,13 +6,12 @@
 #include <fstream>
 #include <ExprVisitor.h>
 #include <algorithm>
-#include <stack>
+
 #include <list>
 
 #include "PrintTrueOperation.h"
 #include "Config.h"
-#include "ConditionVisitor.h"
-#include "DatapathVisitor.h"
+
 
 
 std::map<std::string, std::string> PrintTrueOperation::printModel(Model *node) {
@@ -82,7 +81,7 @@ std::string PrintTrueOperation::functions() {
 
                     auto condNum = returnValue.second.size();
                     for (auto cond_it: returnValue.second) {
-                        ss << ConditionVisitor::toString(cond_it);
+                        ss << ConditionVisitor2::toString(cond_it);
                         if (condNum > 1) ss << " and ";
                         condNum--;
                     }
@@ -99,7 +98,7 @@ std::string PrintTrueOperation::functions() {
                 function.second->getReturnType()->getName() == "unsigned") {
                 ss << convertDataType(function.second->getReturnType()->getName());
             }
-            ss << "(" << ConditionVisitor::toString(returnValue.first->getReturnValue()) << ")";
+            ss << "(" << ConditionVisitor2::toString(returnValue.first->getReturnValue()) << ")";
             if (!returnValue.second.empty()) {
                 ss << "\n";
             } else {
@@ -171,7 +170,7 @@ std::string PrintTrueOperation::propertySuite() {
     ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
     for (auto co: ps->getConstraints()) {
         if (co->getName() != "no_reset") {
-            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression())
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor2::toString(co->getExpression())
                << "; end constraint;" << std::endl;
         }
     }
@@ -193,7 +192,7 @@ std::string PrintTrueOperation::propertySuite() {
     ss << "-- STATES --" << std::endl;
     for (auto st: ps->getStates()) {
         ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
-        ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
+        ss << " := " << ConditionVisitor2::toString(st->getExpression()) << " end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
@@ -207,8 +206,8 @@ std::string PrintTrueOperation::propertySuite() {
     ss << "prove:\n";
     ss << "\t at t: " << ps->getResetProperty()->getNextState()->getName() << ";\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = "
-           << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
+        ss << "\t at t: " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
+           << ConditionVisitor2::toString(commitment->getRhs()) << ";\n";
     }
     ss << "end property;\n";
     ss << std::endl << std::endl;
@@ -265,12 +264,12 @@ std::string PrintTrueOperation::propertySuite() {
         ss << "assume:\n";
         ss << "\tat t: " << op->getState()->getName() << ";\n";
         for (auto assumption : op->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\tat t: " << ConditionVisitor2::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
         ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
         for (auto commitment : op->getCommitmentList()) {
-            ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = "
+            ss << "\tat " << t_end << ": " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
                << DatapathVisitor2::toString(commitment->getRhs()) << ";\n";
         }
         for (auto notify : ps->getNotifySignals()) {
@@ -345,12 +344,12 @@ std::string PrintTrueOperation::propertySuite() {
         ss << "assume:\n";
         ss << "\tat t: " << wp->getState()->getName() << ";\n";
         for (auto assumption : wp->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\tat t: " << ConditionVisitor2::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
         ss << "\tat t+1: " << wp->getNextState()->getName() << ";\n";
         for (auto commitment : wp->getCommitmentList()) {
-            ss << "\tat t+1: " << ConditionVisitor::toString(commitment->getLhs()) << " = "
+            ss << "\tat t+1: " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
                << DatapathVisitor2::toString(commitment->getRhs()) << ";\n";
         }
         ss << "end property;\n";
@@ -401,7 +400,7 @@ std::string PrintTrueOperation::adjustmacros() {
     ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
     for (auto co: ps->getConstraints()) {
         if (co->getName() != "no_reset") {
-            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression())
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor2::toString(co->getExpression())
                << "; end constraint;" << std::endl;
         }
     }
@@ -429,7 +428,7 @@ std::string PrintTrueOperation::adjustmacros() {
     ss << "-- STATES --" << std::endl;
     for (auto st: ps->getStates()) {
         ss << "--macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
-        ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
+        ss << " := " << ConditionVisitor2::toString(st->getExpression()) << " end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
@@ -442,8 +441,8 @@ std::string PrintTrueOperation::adjustmacros() {
     ss << "prove:\n";
     ss << "\t at t: " << ps->getResetProperty()->getNextState()->getName() << ";\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = "
-           << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
+        ss << "\t at t: " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
+           << ConditionVisitor2::toString(commitment->getRhs()) << ";\n";
     }
     ss << "end property;\n";
     ss << std::endl << std::endl;
@@ -499,12 +498,12 @@ std::string PrintTrueOperation::adjustmacros() {
         ss << "assume:\n";
         ss << "\tat t: " << op->getState()->getName() << ";\n";
         for (auto assumption : op->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\tat t: " << ConditionVisitor2::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
         ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
         for (auto commitment : op->getCommitmentList()) {
-            ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = "
+            ss << "\tat " << t_end << ": " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
                << DatapathVisitor2::toString(commitment->getRhs()) << ";\n";
         }
         for (auto notify : ps->getNotifySignals()) {
@@ -568,12 +567,12 @@ std::string PrintTrueOperation::adjustmacros() {
         ss << "assume:\n";
         ss << "\tat t: " << wp->getState()->getName() << ";\n";
         for (auto assumption : wp->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\tat t: " << ConditionVisitor2::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
         ss << "\tat t+1: " << wp->getNextState()->getName() << ";\n";
         for (auto commitment : wp->getCommitmentList()) {
-            ss << "\tat t+1: " << ConditionVisitor::toString(commitment->getLhs()) << " = "
+            ss << "\tat t+1: " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
                << DatapathVisitor2::toString(commitment->getRhs()) << ";\n";
         }
         ss << "end property;\n";
@@ -619,7 +618,7 @@ std::string PrintTrueOperation::pipelined() {
     ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
     for (auto co: ps->getConstraints()) {
         if (co->getName() != "no_reset") {
-            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression())
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor2::toString(co->getExpression())
                << "; end constraint;" << std::endl;
         }
     }
@@ -641,7 +640,7 @@ std::string PrintTrueOperation::pipelined() {
     ss << "-- STATES --" << std::endl;
     for (auto st: ps->getStates()) {
         ss << "macro " << st->getName() << "(location:boolean) : " << convertDataType(st->getDataType()->getName());
-        ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
+        ss << " := " << ConditionVisitor2::toString(st->getExpression()) << " end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
@@ -654,7 +653,7 @@ std::string PrintTrueOperation::pipelined() {
     ss << "prove:\n";
     ss << "\tat t: " << ps->getResetProperty()->getNextState()->getName() << "(true);\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs());
+        ss << "\tat " << t_end << ": " << ConditionVisitor2::toString(commitment->getLhs());
         if (ExprVisitor::isVar(commitment->getLhs())) {
             ss << "(true)";
         }
@@ -719,12 +718,12 @@ std::string PrintTrueOperation::pipelined() {
         ss << "assume:\n";
         ss << "\tat t: " << op->getState()->getName() << "(false);\n";
         for (auto assumption : op->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\tat t: " << ConditionVisitor2::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
         ss << "\tat " << t_end << ": " << op->getNextState()->getName() << "(true);\n";
         for (auto commitment : op->getCommitmentList()) {
-            ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs());
+            ss << "\tat " << t_end << ": " << ConditionVisitor2::toString(commitment->getLhs());
             if (ExprVisitor::isVar(commitment->getLhs())) {
                 ss << "(true)";
             }
@@ -796,12 +795,12 @@ std::string PrintTrueOperation::pipelined() {
         ss << "assume:\n";
         ss << "\tat t: " << wp->getState()->getName() << "(false);\n";
         for (auto assumption : wp->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\tat t: " << ConditionVisitor2::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
         ss << "\tat t+1: " << wp->getNextState()->getName() << "(true);\n";
         for (auto commitment : wp->getCommitmentList()) {
-            ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs());
+            ss << "\tat " << t_end << ": " << ConditionVisitor2::toString(commitment->getLhs());
             if (ExprVisitor::isVar(commitment->getLhs())) {
                 ss << "(true)";
             }
@@ -925,7 +924,7 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) 
     for (auto &&op : cycle) {
         auto timpeoint = "at t_" + op->getState()->getName() + ": ";
         for (auto &&assumption : op->getAssumptionsList()) {
-            ss << "\t" << timpeoint << ConditionVisitor::toString(assumption) << ";\n";
+            ss << "\t" << timpeoint << ConditionVisitor2::toString(assumption) << ";\n";
         }
     }
 
@@ -946,7 +945,7 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) 
 
             if (vars.empty() || isRequired(*vars.begin(), op, cycle)) {
                 if (vars.empty() || isRequired2(*vars.begin(), op, cycle)) {
-                    ss << "\t" << timpeoint << ConditionVisitor::toString(commitment->getLhs()) << " = "
+                    ss << "\t" << timpeoint << ConditionVisitor2::toString(commitment->getLhs()) << " = "
                        << DatapathVisitor2::toString(commitment->getRhs(), 2, 0, tp) << ";\n";
                 }
             }
@@ -959,7 +958,7 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) 
     /*
     ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
     for (auto commitment : op->getCommitmentList()) {
-        ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = "
+        ss << "\tat " << t_end << ": " << ConditionVisitor2::toString(commitment->getLhs()) << " = "
            << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
     }
     for (auto notify : ps->getNotifySignals()) {

@@ -30,6 +30,7 @@ namespace SCAM {
 
         virtual void visit(class UnsignedValue &node);
 
+
         virtual void visit(class Cast &node);
 
         virtual void visit(class Return &node);
@@ -45,6 +46,8 @@ namespace SCAM {
         virtual void visit(class ParamOperand &node);
 
         virtual void visit(class Notify &node);
+        virtual void visit(SCAM::ArrayExpr &node);
+
 
         bool resize_flag = false;
     };

@@ -2,8 +2,6 @@
 // Created by ludwig on 31.08.16.
 //
 
-#include <PrintTrueOperation/ConditionVisitor.h>
-
 #include "ConditionVisitor.h"
 
 
@@ -199,6 +197,8 @@ void SCAM::ConditionVisitor::visit(SCAM::ParamOperand &node) {
 void SCAM::ConditionVisitor::visit(SCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify";
 }
+
+
 
 void SCAM::ConditionVisitor::visit(SCAM::ArrayExpr &node) {
     auto valueMap = node.getValueMap();

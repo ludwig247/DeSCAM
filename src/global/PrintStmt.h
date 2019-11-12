@@ -88,7 +88,7 @@ namespace SCAM {
 
         virtual void visit(Peek &node) override;
 
-        virtual void visit(class ArrayExpr &node);
+        virtual void visit(ArrayExpr &node);
 
     protected:
 

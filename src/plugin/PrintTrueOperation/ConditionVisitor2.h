@@ -2,14 +2,14 @@
 // Created by ludwig on 31.08.16.
 //
 
-#ifndef SCAM_CONDITIONVISITOR_H
-#define SCAM_CONDITIONVISITOR_H
+#ifndef SCAM_CONDITIONVISITOR2_H
+#define SCAM_CONDITIONVISITOR2_H
 
 #include <PrintStmt.h>
 
 namespace SCAM {
 
-    class ConditionVisitor : public PrintStmt {
+    class ConditionVisitor2 : public PrintStmt {
     public:
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
@@ -45,9 +45,6 @@ namespace SCAM {
         virtual void visit(class ParamOperand &node);
 
         virtual void visit(class Notify &node);
-
-        virtual void visit(class ArrayExpr &node);
-
 
 
         bool resize_flag = false;

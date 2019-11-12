@@ -2,12 +2,10 @@
 // Created by ludwig on 27.10.16.
 //
 
-//#include "PropertyFactory.h"
+
 #include <fstream>
 #include <ExprVisitor.h>
-//#include <optimizePPA/OptimizeMaster.h>
-//#include <optimizePPA/OptimizeSlave.h>
-//#include <optimizePPA/OptimizeOperations.h>
+
 
 #include "PrintITL.h"
 #include "Config.h"

@@ -2,10 +2,10 @@
 // Created by ludwig on 31.08.16.
 //
 
-#include "ConditionVisitor.h"
+#include "ConditionVisitor2.h"
 
 
-void SCAM::ConditionVisitor::visit(SCAM::VariableOperand &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::VariableOperand &node) {
 
     if (node.getVariable()->isSubVar()) {
         if (node.getVariable()->getParent()->isCompoundType()) {
@@ -19,11 +19,11 @@ void SCAM::ConditionVisitor::visit(SCAM::VariableOperand &node) {
     }
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::SyncSignal &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::SyncSignal &node) {
     this->ss << node.getPort()->getName() << "_sync";
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::DataSignalOperand &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << node.getDataSignal()->getParent()->getName() << "(" << node.getDataSignal()->getName() << ")";
@@ -35,12 +35,12 @@ void SCAM::ConditionVisitor::visit(SCAM::DataSignalOperand &node) {
     }
 }
 
-std::string SCAM::ConditionVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    ConditionVisitor printer;
+std::string SCAM::ConditionVisitor2::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+    ConditionVisitor2 printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::Relational &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -55,7 +55,7 @@ void SCAM::ConditionVisitor::visit(SCAM::Relational &node) {
 }
 
 
-void SCAM::ConditionVisitor::visit(SCAM::Arithmetic &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "%") {
@@ -68,7 +68,7 @@ void SCAM::ConditionVisitor::visit(SCAM::Arithmetic &node) {
 
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::Bitwise &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Bitwise &node) {
     if (node.getOperation() == "<<") {
         this->resize_flag = true;
         this->ss << "(shift_left(";
@@ -98,21 +98,21 @@ void SCAM::ConditionVisitor::visit(SCAM::Bitwise &node) {
     }
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::UnsignedValue &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::UnsignedValue &node) {
     //if(this->resize_flag){
     //FIXME: remove once concat is present?
     this->ss << "resize(" << node.getValueAsString() << ",32)";
     //}else this->ss << node.getValue();
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::IntegerValue &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::IntegerValue &node) {
     //if(this->resize_flag){
     //FIXME: remove once concat is present?
     this->ss << "resize(" << node.getValueAsString() << ",32)";
     //}else this->ss << node.getValue();
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::Cast &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
@@ -122,11 +122,11 @@ void SCAM::ConditionVisitor::visit(SCAM::Cast &node) {
     this->ss << ")";
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::Return &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::ITE &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::ITE &node) {
     /*
      * if (print condition) {
      *   print stmts
@@ -142,7 +142,7 @@ void SCAM::ConditionVisitor::visit(SCAM::ITE &node) {
     indent += indentSize;
     for (auto stmt: node.getIfList()) {
         for (int i = 0; i < indent; ++i) { this->ss << " "; } //add indent
-        std::string statementstring = ConditionVisitor::toString(stmt, indentSize, indent);
+        std::string statementstring = ConditionVisitor2::toString(stmt, indentSize, indent);
         this->ss << statementstring;
         if (statementstring.find('\n') == std::string::npos) this->ss << ";";
         this->ss << std::endl;
@@ -155,7 +155,7 @@ void SCAM::ConditionVisitor::visit(SCAM::ITE &node) {
         indent += indentSize;
         for (auto stmt: node.getElseList()) {
             for (int i = 0; i < indent; ++i) { this->ss << " "; } //add indent
-            std::string statementstring = ConditionVisitor::toString(stmt, indentSize, indent);
+            std::string statementstring = ConditionVisitor2::toString(stmt, indentSize, indent);
             this->ss << statementstring;
             if (statementstring.find('\n') == std::string::npos) this->ss << ";";
             this->ss << std::endl;
@@ -167,19 +167,19 @@ void SCAM::ConditionVisitor::visit(SCAM::ITE &node) {
 
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::Assignment &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Assignment &node) {
     PrintStmt::visit(node);
     this->ss << ";\n";
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::ArrayOperand &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::ArrayOperand &node) {
     this->ss << node.getArrayVar()->getName();
     this->ss << "[";
     node.getIdx()->accept(*this);
     this->ss << "]";
 }
 
-void SCAM::ConditionVisitor::visit(struct CompoundExpr &node) {
+void SCAM::ConditionVisitor2::visit(struct CompoundExpr &node) {
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
         begin->second->accept(*this);
@@ -187,14 +187,14 @@ void SCAM::ConditionVisitor::visit(struct CompoundExpr &node) {
     }
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::ParamOperand &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::ParamOperand &node) {
     auto param = node.getParameter();
     if (param->isSubVar()) {
         this->ss << param->getParent()->getName() << "_" << param->getName();
     } else this->ss << param->getName();
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::Notify &node) {
+void SCAM::ConditionVisitor2::visit(SCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify";
 }
 

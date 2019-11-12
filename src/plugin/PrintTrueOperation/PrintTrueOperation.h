@@ -5,10 +5,13 @@
 #ifndef SCAM_TrueOP_H
 #define SCAM_TrueOP_H
 
+#include "ConditionVisitor2.h"
+#include "DatapathVisitor.h"
+
 #include <PluginFactory.h>
 #include <sstream>
 #include "Model.h"
-//#include <PropertyFactory.h>
+
 
 class PrintTrueOperation : public PluginFactory {
 
