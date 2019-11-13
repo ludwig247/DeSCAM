@@ -3,6 +3,7 @@
 //
 
 #include <ExprVisitor.h>
+#include <ModelGlobal.h>
 #include "OptimizeOperations2.h"
 
 namespace SCAM {
@@ -10,6 +11,8 @@ namespace SCAM {
     SCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<SCAM::Operation2 *> &opList, SCAM::Module *module) :
     operationsList(opList) {
         // mark all variables for removal initially
+
+        //local vars
         for (auto var: module->getVariableMap()) {
             if (var.second->isCompoundType() || var.second->isArrayType()) {
                 for (auto subVar: var.second->getSubVarList()) {
@@ -18,11 +21,15 @@ namespace SCAM {
             } else removeVars.insert(std::make_pair(var.second, true));
         }
 
+
+
+
         for (auto op : operationsList) {
             //Check assumptions for usage
             for (auto ass: op->getAssumptionsList()) {
                 for (auto usedVar: ExprVisitor::getUsedVariables(ass)) {
-                    if(usedVar->isArrayType()){
+                    if(usedVar->isConstant()) continue;
+                    else if(usedVar->isArrayType()){
                         for(auto subVar: usedVar->getSubVarList()){
                             removeVars.at(subVar) = false;
                         }
@@ -36,7 +43,8 @@ namespace SCAM {
                     continue;
                 }
                 for (auto usedVar: ExprVisitor::getUsedVariables(comm->getRhs())) {
-                    if (usedVar->isCompoundType() || usedVar->isArrayType()) {
+                    if(usedVar->isConstant()) continue;
+                    else if ((usedVar->isCompoundType() || usedVar->isArrayType())) {
                         for (auto subVar: usedVar->getSubVarList()) {
                             removeVars.at(subVar) = false;
                         }
@@ -90,6 +98,8 @@ namespace SCAM {
                 }
             }
         }
+
+
     }
 
     const std::map<std::string, Variable*> OptimizeOperations2::getNewVarMap() const {
@@ -99,5 +109,7 @@ namespace SCAM {
     const std::vector<SCAM::Operation2 *> SCAM::OptimizeOperations2::getOperationsList() const {
         return this->operationsList;
     }
+
+
 
 }

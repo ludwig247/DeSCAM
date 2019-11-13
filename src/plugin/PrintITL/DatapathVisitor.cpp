@@ -26,9 +26,12 @@ void SCAM::DatapathVisitor::visit(SCAM::DataSignalOperand &node) {
 
 
 void SCAM::DatapathVisitor::visit(class VariableOperand &node) {
-    if (node.getVariable()->isSubVar()) {
-        this->ss << node.getVariable()->getParent()->getName() + "_" + node.getVariable()->getName() + "_at_t";
-    } else this->ss << node.getOperandName() << "_at_t";
+    if(node.getVariable()->isConstant()) this->ss << node.getOperandName();
+    else{
+        if (node.getVariable()->isSubVar()) {
+            this->ss << node.getVariable()->getParent()->getName() + "_" + node.getVariable()->getName() + "_at_t";
+        } else this->ss << node.getOperandName() << "_at_t";
+    }
 }
 
 std::string SCAM::DatapathVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {

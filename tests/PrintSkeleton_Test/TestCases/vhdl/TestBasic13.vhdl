@@ -1,7 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all; 
-use work.SCAM_Model_types.all;
+use work.top_level_types.all;
 use work.TestBasic13_types.all;
 
 entity TestBasic13 is

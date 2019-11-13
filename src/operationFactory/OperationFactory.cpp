@@ -23,9 +23,6 @@ namespace SCAM {
     propertySuite(nullptr),
     module(module),
     cfg(std::move(controlFlowMap)) {
-
-
-
         std::cout << "======================" << std::endl;
         std::cout << "Operations generation:" << std::endl;
         std::cout << "----------------------" << std::endl;
@@ -294,7 +291,7 @@ namespace SCAM {
                     newOperationProperty->addFreezeSignal(signalMacro);
                 }
                 for (auto var: variables) {
-
+                        if(var->isConstant()) continue;
                         PropertyMacro *signalMacro = propertySuite->findSignal(var);
                         newOperationProperty->addFreezeSignal(signalMacro);
                 }
@@ -401,7 +398,7 @@ namespace SCAM {
                     newWaitProperty->addFreezeSignal(signalMacro);
                 }
                 for (auto var: variables) {
-
+                        if(var->isConstant()) continue;
                         PropertyMacro *signalMacro = propertySuite->findSignal(var);
                         newWaitProperty->addFreezeSignal(signalMacro);
                 }

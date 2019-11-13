@@ -1,4 +1,4 @@
-import scam_model_types::*;
+import top_level_types::*;
 import testbasic13_types::*;
 
 module TestBasic13 (

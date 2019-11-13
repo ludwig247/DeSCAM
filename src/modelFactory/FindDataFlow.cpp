@@ -23,6 +23,7 @@
 #include <Stmts/Cast.h>
 #include <ExprVisitor.h>
 #include <NodePeekVisitor.h>
+#include <ModelGlobal.h>
 #include "PortOperand.h"
 #include "FindDataFlow.h"
 
@@ -36,12 +37,11 @@ SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigne
         rhsExpr(nullptr),
         lhsExpr(nullptr),
         unsigned_flag(unsigned_flag),
-        //context(context),
         pass(0) {
     //stmt->dump();
-    //llvm::errs() << "------------------------------\n";
+
     TraverseStmt(stmt);
-    //stmt->dump();
+
 
 }
 
@@ -375,6 +375,8 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
 
     //Get mememberMap for module
     const std::map<std::string, Variable *> &memberMap = module->getVariableMap();
+    auto globalVariableMap = ModelGlobal::getModel()->getGlobalVariableMap();
+
     const std::map<std::string, Function *> &functionMap = module->getFunctionMap();
 
     // Determine name for compound: var.x;
@@ -385,6 +387,10 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
             if (memberMap.find(parent->getOperandName()) != memberMap.end()) {
                 //Assign value
                 this->switchPassExpr(new VariableOperand(memberMap.at(parent->getOperandName())->getSubVar(name)));
+                return false;
+            }else if (globalVariableMap.find(parent->getOperandName()) != globalVariableMap.end()) {
+                //Assign value
+                this->switchPassExpr(new VariableOperand(globalVariableMap.at(parent->getOperandName())->getSubVar(name)));
                 return false;
             } else return exitVisitor(parent->getOperandName() + " is not a parent of " + name);
         } else if (SCAM::FunctionOperand *parent = dynamic_cast<SCAM::FunctionOperand *>(findParentOfSubVar.getExpr())) {
@@ -405,11 +411,23 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
     }
 
     //Simple Variable
-    if (memberMap.find(name) != memberMap.end()) {
-        //Assign value
-        this->switchPassExpr(new VariableOperand(memberMap.at(name)));
-        return false;
+    if(!memberMap.empty()){
+        if (memberMap.find(name) != memberMap.end()) {
+            //Assign value
+            this->switchPassExpr(new VariableOperand(memberMap.at(name)));
+            return false;
+        }
     }
+
+    //Global Variable
+    if(!globalVariableMap.empty()){
+        if (globalVariableMap.find(name) != globalVariableMap.end()) {
+            //Assign value
+            this->switchPassExpr(new VariableOperand(globalVariableMap.at(name)));
+            return false;
+        }
+    }
+
     //Only the case, if the operation is Call
     std::map<std::string, Port *> portMap = module->getPorts();
     //Read/Write on Port
@@ -432,6 +450,7 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
 
 
 bool SCAM::FindDataFlow::VisitIntegerLiteral(clang::IntegerLiteral *integerLiteral) {
+
     if (unsigned_flag) {
         unsigned int ret = (unsigned int) *integerLiteral->getValue().getRawData();
         //Assign value
@@ -452,6 +471,12 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
     //Name
     std::string name = declRefExpr->getDecl()->getNameAsString();
+    //Check for global variables
+    auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
+    if(!globalVars.empty() && globalVars.find(name) != globalVars.end()){
+        this->switchPassExpr(new VariableOperand((globalVars.find(name))->second));
+        return false;
+    }
 
     //Check for state values
     if (clang::EnumConstantDecl *enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
@@ -564,7 +589,7 @@ bool SCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *op
         //Find assignemnt of structs -> which is represented as an overloaded copy
         // ComplexType foo = port[ComplexType].read()
         //Return-type is an expression(is that always the case?)
-        if (operatorCallExpr->getCallReturnType()->isReferenceType()) {
+        if (! operatorCallExpr->isTypeDependent() && operatorCallExpr->getCallReturnType()->isReferenceType()) {
             if (clang::OverloadedOperatorKind::OO_Equal == operatorCallExpr->getOperator()) {
                 if (operatorCallExpr->getNumArgs() == 2) {
                     //get foo
@@ -591,6 +616,7 @@ bool SCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *op
 
 
 bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
+    if(callExpr->getDirectCallee() == nullptr) return  true;
     if (callExpr->getDirectCallee()->isCXXClassMember()) return true;
     else {
         std::string functionName = callExpr->getDirectCallee()->getNameAsString();
@@ -602,6 +628,9 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
 bool SCAM::FindDataFlow::VisitImplicitCastExpr(clang::ImplicitCastExpr *implicitCastExpr) {
     if (implicitCastExpr->getType()->isUnsignedIntegerType() && implicitCastExpr->getType().getAsString() == "unsigned int") {
         FindDataFlow unsigendSearch(implicitCastExpr->getSubExpr(), module, implicitCastExpr->getType()->isUnsignedIntegerType());
+        if(unsigendSearch.getExpr() == nullptr){
+            return exitVisitor("Unknown unsigned value");
+        }
         switchPassExpr(unsigendSearch.getExpr());
         return false;
     }
@@ -684,16 +713,13 @@ bool SCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
 }
 
 bool SCAM::FindDataFlow::VisitCompoundStmt(clang::CompoundStmt *compoundStmt) {
-    //compoundStmt->dump();
     return false;
 }
 
 bool SCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) {
-    //throw std::runtime_error("NONO");
 
-    //auto idx = clang::cast<clang::IntegerLiteral>(arraySubscriptExpr->getIdx())->getValue().getSExtValue();
     FindDataFlow array(arraySubscriptExpr->getLHS(),module,false);
-    if(array.getExpr()->getDataType()->isArrayType()){
+    if(array.getExpr()!= nullptr &&array.getExpr()->getDataType()->isArrayType()){
         if(auto varOp = NodePeekVisitor::nodePeekVariableOperand(array.getExpr())){
             FindDataFlow findIndex(arraySubscriptExpr->getIdx(),module,false);
             if(auto index = NodePeekVisitor::nodePeekIntegerValue(findIndex.getExpr())){

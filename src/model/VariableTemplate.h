@@ -28,12 +28,17 @@ namespace SCAM {
 
         std::string getFullName() const;
 
+        bool isConstant() const;
+
+        void setConstant(bool isConstant);
+
     private:
 
         std::vector<VariableTemplate *> subVarList;
         bool subVar; //! True, if this is a subVar
         VariableTemplate *parent; //! If this is a subVar; parent points to the variable contining this
         SCAM::ConstValue *initialValue;
+        bool constant = false;
 
     };
 

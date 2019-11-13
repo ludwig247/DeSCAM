@@ -122,7 +122,9 @@ void SCAM::ReconstructOperations::reset() {
 // Visitor functions
 namespace SCAM {
     void SCAM::ReconstructOperations::visit(SCAM::VariableOperand &node) {
-        if (node.getDataType()->isCompoundType()) {
+        if(node.getVariable()->isConstant()){
+            this->newExpr = &node;
+        }else if (node.getDataType()->isCompoundType()) {
             std::map<std::string, Expr *> selectList;
             for (auto subVar: node.getVariable()->getSubVarList()) {
                 auto *subVarOp = new VariableOperand(subVar);

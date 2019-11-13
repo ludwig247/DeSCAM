@@ -4,6 +4,7 @@
 #include <tgmath.h>
 
 #include "ExprTranslator.h"
+#include "ModelGlobal.h"
 
 
 //
@@ -83,7 +84,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate(z3::expr &z3_expr, const SCAM::Modul
         throw std::runtime_error("ExprTranslator translation from z3 to SCAM requires a datatypeMap including the built-in types");
     }
 
-    if(module == nullptr){
+    if (module == nullptr) {
         throw std::runtime_error("Module passed to ExprTranslator is null");
     }
 
@@ -197,6 +198,11 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
         if (arrayMap.find(symbolname) != arrayMap.end()) {
             return arrayMap.at(symbolname);
         }
+
+        auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
+        if (globalVars.find(symbolname) != globalVars.end()) {
+            return new VariableOperand(globalVars.find(symbolname)->second);
+        }
         //NOTHING found!
         throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, missing variable for " + symbolname);
     }
@@ -264,13 +270,14 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
                 return new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper), translate_intern(rhs));
             } else {
                 std::cout << z3_expr << std::endl;
-                throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");}
+                throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
+            }
         } else if (bvBitwiseOperatorMap.find(oper) != bvBitwiseOperatorMap.end()) {
             if (z3_expr.num_args() == 2) {
                 z3::expr lhs = z3_expr.arg(0);
                 z3::expr rhs = z3_expr.arg(1);
                 return new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper), translate_intern(rhs));
-            } else{
+            } else {
                 std::cout << z3_expr << std::endl;
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
@@ -436,7 +443,7 @@ void SCAM::ExprTranslator::visit(SCAM::UnaryExpr &node) {
     }
 
     if (node.getOperation() == "~") {
-        z3_expr =  ~(rhs);
+        z3_expr = ~(rhs);
         return;
     }
     throw std::runtime_error("ExprTranslator UnaryExpr: cannot be translated");
