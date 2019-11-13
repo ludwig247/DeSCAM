@@ -38,8 +38,8 @@ SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigne
         unsigned_flag(unsigned_flag),
         //context(context),
         pass(0) {
-    stmt->dump();
-//    llvm::errs() << "------------------------------\n";
+    //stmt->dump();
+    //llvm::errs() << "------------------------------\n";
     TraverseStmt(stmt);
     //stmt->dump();
 
