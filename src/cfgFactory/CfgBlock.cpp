@@ -38,7 +38,6 @@ namespace SCAM {
             if (pred == node) inList = true;
         }
         if (!inList) this->predecessorList.push_back(node);
-
     }
 
     std::vector<CfgBlock *> CfgBlock::getSuccessorList() {

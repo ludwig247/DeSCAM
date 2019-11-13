@@ -24,29 +24,10 @@ namespace SCAM {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
         }
-//        clang::LangOptions lo;
-//        clangCFG->dump(lo, false);
-
-        //Generate new blockCFG
-//        std::cout << "Global:" << std::endl;
-//        for(auto type: DataTypes::getDataTypeMap()){
-//            std::cout <<  "\t" << type.first  << std::endl;
-//        }
-//
-//        std::cout << "Local:" << std::endl;
-//        auto localDataTypeMap = DataTypes::getLocalDataTypeMap();
-//        for (auto module : localDataTypeMap) {
-//            std::cout << "\t" << "Module: " << module.first << std::endl;
-//            for (auto type : module.second) {
-//                std::cout << "\t" << "\t" <<  type.first << std::endl;
-//            }
-//        }
 
 
         this->translateToScamCFG();
-//        for(auto b:this->controlFlowMap)
-//            std::cout << b.second->print() << std::endl;
-//        throw std::runtime_error("STOP Yooo");
+
 
     }
 
@@ -61,10 +42,11 @@ namespace SCAM {
  */
     void CFGFactory::translateToScamCFG() {
 
-//        clang::LangOptions LO;
-//        LO.CPlusPlus = true;
-//        clangCFG->dump(LO, false);
+        clang::LangOptions LO;
+        LO.CPlusPlus = true;
+        clangCFG->dump(LO, false);
         clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
+
         //Translate entry node of block
         CfgBlock *entryNode = this->createCFGNode(entryCFGBlock, nullptr);
 
@@ -110,7 +92,9 @@ namespace SCAM {
         //Translate CLANG::Stms to SCAM:Stmts and add to node
         for (auto clangStmt: statementList) {
             SCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
-            if (scamStmt != nullptr) {
+            //Check that the stmt is not null and the statement is not an Expr*
+            //In case of an Expr* skips the statement, because the statementlist should only contain Statements
+            if (scamStmt != nullptr && dynamic_cast<Expr*>(scamStmt)== nullptr) {
                 cfgNode->addStmt(this->getScamStmt(clangStmt));
             }
         }
@@ -305,6 +289,7 @@ namespace SCAM {
     //! Methods that translates a Clang::Stmt into a SCAM::Stmt
     SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
         SCAM::FindDataFlow dataFlow(clangStmt, module, false);
+
         //Is stmt properly initialized?
         if (dataFlow.getStmt() == nullptr) {
             //Get the source code as string
