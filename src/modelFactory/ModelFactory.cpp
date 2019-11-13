@@ -351,9 +351,6 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     } else {
         SCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
         module->setCFG(test.getCFG());
-        for (auto item   : cfgFactory.getControlFlowMap()) {
-            std::cout << item.second->print() << std::endl;
-        }
         SCAM::OperationFactory operationFactory(test.getCFG(), module);
         module->setPropertySuite(operationFactory.getPropertySuite());
     }

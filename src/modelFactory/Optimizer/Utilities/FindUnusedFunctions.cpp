@@ -7,27 +7,14 @@
 
 SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBlock *> &CFG, SCAM::Module *module)
         : module(module), blockCFG(CFG) {
-
+    cnt = 0;
     for (auto block : this->blockCFG) {
         auto stmtList = block.second->getStmtList();
-        std::vector<SCAM::Stmt*> toBeDeletedWronglyGeneratedStatements;
         for (auto stmt : stmtList) {
             if (stmt) {
                 stmt->accept(*this);
             }
-            if(NodePeekVisitor::nodePeekFunctionOperand(stmt)){
-                std::cout << "\t\033[1;33mWarning\033[0m: " <<  "wrong use of functions at:\033[1;33m'" << PrintStmt::toString(stmt) << "'\033[0m, function returned value is never used. Therefore, the statement is deleted"
-                          << std::endl;
-                toBeDeletedWronglyGeneratedStatements.push_back(stmt);
-            }
         }
-        if(!toBeDeletedWronglyGeneratedStatements.empty()){
-            for(auto wrongStatement: toBeDeletedWronglyGeneratedStatements){
-                stmtList.erase(std::remove(stmtList.begin(),stmtList.end(),wrongStatement), stmtList.end());
-            }
-            block.second->setStmtList(stmtList);
-        }
-
         if(block.second->hasIf()){
             block.second->getTerminator()->accept(*this);
         }
@@ -45,8 +32,10 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBloc
             this->module->removeFunction(function);
         }
     }
+    std::cout << "the number of times functionoperand was accessed " << cnt << std::endl;
 }
 SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode *> &CFG, SCAM::Module *module): module(module), nodeCFG(CFG)  {
+    cnt = 0;
     for (auto node : this->nodeCFG) {
             if (auto stmt = node.second->getStmt()) {
                 stmt->accept(*this);
@@ -62,6 +51,7 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode
             this->module->removeFunction(function);
         }
     }
+std::cout << "the number of times functionoperand was accessed " << cnt << std::endl;
 }
 
 
@@ -106,6 +96,7 @@ void SCAM::FindUnusedFunctions::visit(struct Cast &node) {
 }
 
 void SCAM::FindUnusedFunctions::visit(SCAM::FunctionOperand &node) {
+    cnt++;
     this->usedFunctionsSet.insert(node.getFunction()->getName());
     for (auto param : node.getParamValueMap()) {
         param.second->accept(*this);
