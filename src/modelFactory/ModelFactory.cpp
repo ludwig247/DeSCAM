@@ -65,6 +65,8 @@ bool SCAM::ModelFactory::fire() {
 //Modules
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
     FindModules modules(decl);
+
+
     //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
 
