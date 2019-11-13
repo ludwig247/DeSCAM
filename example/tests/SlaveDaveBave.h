@@ -29,17 +29,10 @@ SC_MODULE(TestBasic28)
     }
     void fsm()
     {
-
-        foo = 23;
-        bar = 24;
         while(true)
         {
           test_in->read(foo);
 
-          bar = static_cast<unsigned int>(~foo) + bar ;
-          if(bar > 10){
-              ++bar;
-          }
           bar = bar + test();
           test_out->write(bar);
         }
