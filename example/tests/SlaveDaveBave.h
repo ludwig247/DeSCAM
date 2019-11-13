@@ -17,6 +17,10 @@ SC_MODULE(TestBasic28)
     int foo;
     unsigned int bar;
 
+    unsigned int test() const {
+        return 0x395;
+    }
+
     SC_CTOR(TestBasic28):
             test_in("test_in"),
             test_out("test_out")
@@ -36,6 +40,7 @@ SC_MODULE(TestBasic28)
           if(bar > 10){
               ++bar;
           }
+          bar = bar + test();
           test_out->write(bar);
         }
     }
