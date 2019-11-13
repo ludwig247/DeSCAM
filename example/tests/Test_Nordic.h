@@ -10,6 +10,7 @@
 #include "../Interfaces/Interfaces.h"
 #define ADD_HEX 0x100
 
+const unsigned int number = 0x111;
 
 SC_MODULE(Test_Nordic)
 {
@@ -35,8 +36,7 @@ SC_MODULE(Test_Nordic)
         {
           test_in->read(foo);
 
-          bar = bar + test_var();
-          test_out->write(bar);
+          test_out->write(number);
         }
     }
 };

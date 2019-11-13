@@ -38,8 +38,8 @@ SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigne
         unsigned_flag(unsigned_flag),
         //context(context),
         pass(0) {
-   // stmt->dump();
-//    llvm::errs() << "------------------------------\n";
+    //stmt->dump();
+    //llvm::errs() << "------------------------------\n";
     TraverseStmt(stmt);
     //stmt->dump();
 
@@ -452,17 +452,9 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
     //Name
     std::string name = declRefExpr->getDecl()->getNameAsString();
-    //Check for section variables
-    //TODO: remove
-//    if (name == "section" || name == "nextsection") {
-//        //Assign value
-//        throw std::runtime_error("Should never occur?");
-//        //this->switchPass(new SectionOperand(this->module->ge);
-//        return false;
-//    }
+
     //Check for state values
     if (clang::EnumConstantDecl *enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
-
 
         //Regular enum-value
         std::string typeName = enumDecl->getType()->getAs<clang::EnumType>()->getDecl()->getName().str();
@@ -474,17 +466,6 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
             this->switchPassExpr(new EnumValue(value, DataTypes::getLocalDataType(module->getName(),typeName)));
             return false;
         }
-
-        //FSM of the process
-        //Statelist of the process
-        //TODO: delelte
-  //      std::vector<std::string> sectionList = module->getFSM()->getSectionList();
-        //Is value(name) of EnumDecl in sectionList -> new value to stateVariable is assigned
-//        if (std::find(sectionList.begin(), sectionList.end(), name) != sectionList.end()) {
-//            //Assign value
-//            this->switchPassExpr(new SectionValue(name, DataTypes::getLocalDataType(module->getName(), module->getName() + "_SECTIONS")));
-//            return false;
-//        }
 
     }
     if (clang::ParmVarDecl *parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
