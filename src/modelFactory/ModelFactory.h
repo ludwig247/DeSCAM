@@ -79,8 +79,10 @@ namespace SCAM {
 
         //Methods
         void addModules(clang::TranslationUnitDecl* decl);
+
         void addPorts(Module* module,clang::CXXRecordDecl* decl);
         void addFunctions(Module *module, CXXRecordDecl *pDecl);
+
         void addBehavior(Module *module, clang::CXXRecordDecl *decl);
         void addSections(Module *module, clang::CXXRecordDecl *decl);
         void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module

@@ -71,6 +71,7 @@ struct VCORE : public sc_module {
 
     bool ex_write_reg;
 
+
     unsigned getOpCode(unsigned instr) const {
         return OPCODE_FIELD(instr);
     }

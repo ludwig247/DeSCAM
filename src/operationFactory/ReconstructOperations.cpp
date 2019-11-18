@@ -291,8 +291,6 @@ namespace SCAM {
                         this->variableAssignmentMap[subSig->getFullName()] = this->variableAssignmentMap[var->getSubVar(subSig->getName())->getFullName()];
                     }
                 }
-
-
                 //Simple var
             } else {
                 find_or_add_variable(node.getPort()->getDataSignal()->getName(), new DataSignalOperand(node.getPort()->getDataSignal()));
