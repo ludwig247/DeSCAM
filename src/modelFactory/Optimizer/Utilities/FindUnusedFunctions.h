@@ -37,7 +37,6 @@ namespace SCAM {
         SCAM::Module* module;
         std::set<std::string> usedFunctionsSet;
         std::set<std::string> unusedFunctionSet;
-        int cnt;
 
         //visitors
         void visit(struct VariableOperand &node) override{};

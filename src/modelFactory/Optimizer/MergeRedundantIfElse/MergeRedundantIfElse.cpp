@@ -17,383 +17,179 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
             }
             this->currentIfID = node.first;
             this->currentElseIfID = node.first;
-            bool hasElseIf = false;
-            bool ifthenif = false;
-            if (node.second->getSuccessorList()[1]->hasIf()) {//else if
-                if (node.second->getSuccessorList()[1]->getPredecessorList().size() > 1) {
-                    for (auto pred : node.second->getSuccessorList()[1]->getPredecessorList()) {
-                        if (pred->getBlockID() == node.second->getSuccessorList()[1]->getBlockID() - 1) {
-                            ifthenif = true;
-                        }
-                    }
-                }
-                if (ifthenif) { continue; }
-                hasElseIf = true;
-                bool moreElseIf = true;
-                while (moreElseIf) {
+            bool hasElseIfOrElse = false;
+            auto secondSucc = node.second->getSuccessorList()[1];
+            if (secondSucc->hasIf()) {
+                if (notFromTheSameGroupIfStatement(secondSucc->getBlockID())) { continue; }
+                //adding else if statements and their true branches to the stmtsMap
+                hasElseIfOrElse = true;
+                while (bool moreElseIf = true) {
                     this->currentElseIfID = this->blockCFG.at(
                             this->currentElseIfID)->getSuccessorList()[1]->getBlockID();
-                    int currentNodeID = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[0]->getBlockID();
-                    if (this->blockCFG.at(this->currentElseIfID)->getSuccessorList().size() == 1) { break; }
-                    this->checkedIfStmts.push_back(this->currentElseIfID);
+                    int currentBlockId = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[0]->getBlockID();
+                    if (this->blockCFG.at(this->currentElseIfID)->getSuccessorList().size() == 1) {
+                        this->currentElseIfID = this->blockCFG.at(this->currentElseIfID)->getPredecessorList()[0]->getBlockID();
+                        break;
+                    }
                     int elsebranchID = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID();
-                    std::vector<SCAM::Stmt *> ifStmtVector;
-                    bool elseHasIf = false;
-                    if (elsebranchID > currentNodeID) {
-                        std::vector<int> blocksInsideIf;
-                        for (int i = currentNodeID; i < elsebranchID; i++) { blocksInsideIf.push_back(i); }
-                        this->trueBranchBlocksMap.insert(std::make_pair(this->currentElseIfID, blocksInsideIf));
+                    if (notFromTheSameGroupIfStatement(elsebranchID)) { // e.g., else { if(...){...} }
+                        break;
+                    }
+                    this->checkedIfStmts.push_back(this->currentElseIfID);
 
-                        while (currentNodeID != elsebranchID) {
-                            if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                                    ifStmtVector.push_back(stmt);
-                                }
-                            }
-                            currentNodeID++;
-                        }
-                        this->stmtsMap.insert(std::make_pair(-this->currentElseIfID, ifStmtVector));
+                    if (elsebranchID > currentBlockId) {
+                        addStatementsInTrueBranch(currentBlockId, elsebranchID, false);
                     } else { //else if without else
-                        while (!(this->blockCFG.at(currentNodeID)->getSuccessorList().size() == 1 &&
-                                 (this->blockCFG.at(currentNodeID)->getBlockID() >
-                                  this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID()))) {
-                            if (this->blockCFG.at(currentNodeID)->hasIf()) {
-                                if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                                    for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                                        ifStmtVector.push_back(stmt);
-                                    }
-                                }
-                                //call recursive function
-                                AddNestedIfStatementsListsToStmtsMap(currentNodeID, ifStmtVector);
-                                elseHasIf = true;
-                                currentNodeID--;
-                            } else if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                                    ifStmtVector.push_back(stmt);
-                                }
-                            }
-                            currentNodeID++;
-                        }
-                        if (!elseHasIf) {
-                            if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                                    ifStmtVector.push_back(stmt);
-                                }
-                            }
-                        }
-                        std::vector<int> blocksInsideIf;
-                        for (int i = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[0]->getBlockID();
-                             i <= currentNodeID; i++) { blocksInsideIf.push_back(i); }
-                        this->trueBranchBlocksMap.insert(std::make_pair(this->currentElseIfID, blocksInsideIf));
-
-                        this->stmtsMap.insert(std::make_pair(-this->currentElseIfID, ifStmtVector));
-                        if (!this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->hasIf()) {
-                            moreElseIf = false;
-                        }
+                        addStatementsInElseBranch(currentBlockId, false);
+                        break;
                     }
                 }
             } else if (node.second->getSuccessorList()[1]->getStmtList().empty()) { break; }
 
-            if (this->blockCFG.at(this->currentElseIfID)->getSuccessorList().size() == 1) {
-                this->currentElseIfID = this->blockCFG.at(this->currentElseIfID)->getPredecessorList()[0]->getBlockID();
-            }
             if (this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getPredecessorList().size() ==
-                1) { //else statement
+                1) {
+                //adding statements in the else branch of the If statement to stmtsMap
                 this->ifAndItsElseMap.insert(std::make_pair(currentIfID, this->blockCFG.at(
                         this->currentElseIfID)->getSuccessorList()[1]->getBlockID()));
-                hasElseIf = true;
-                int currentNodeID = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID();
-                std::vector<SCAM::Stmt *> ifStmtVector;
-                bool elseHasIf = false;
-                while (!(this->blockCFG.at(currentNodeID)->getSuccessorList().size() == 1 &&
-                         (this->blockCFG.at(currentNodeID)->getBlockID() >
-                          this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID()))) {
-                    if (this->blockCFG.at(currentNodeID)->hasIf()) {
-                        if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                            for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                                ifStmtVector.push_back(stmt);
-                            }
-                        }
-                        //call recursive function
-                        AddNestedIfStatementsListsToStmtsMap(currentNodeID, ifStmtVector);
-                        elseHasIf = true;
-                        currentNodeID--;
-                    } else if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                        for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                            ifStmtVector.push_back(stmt);
-                        }
-                    }
-                    currentNodeID++;
-                }
-                if (!elseHasIf) {
-                    if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                        for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                            ifStmtVector.push_back(stmt);
-                        }
-                    }
-                }
-
-                std::vector<int> blocksInsideIf;
-                for (int i = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID();
-                     i <= currentNodeID; i++) { blocksInsideIf.push_back(i); }
-                this->trueBranchBlocksMap.insert(
-                        std::make_pair(this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID(),
-                                       blocksInsideIf));
-
-
-                this->stmtsMap.insert(std::make_pair(0, ifStmtVector));
-
+                hasElseIfOrElse = true;
+                int currentBlockId = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID();
+                addStatementsInElseBranch(currentBlockId, true);
             }
-            if (!hasElseIf) {
+            if (!hasElseIfOrElse) {
                 this->stmtsMap.clear();
                 continue;
             }
+            //Adding statements in the true branch of the If statement to stmtsMap
             this->checkedIfStmts.push_back(this->currentIfID);
-            int currentNodeID = this->blockCFG.at(this->currentIfID)->getSuccessorList()[0]->getBlockID();
-            int elsebranchID = this->blockCFG.at(this->currentIfID)->getSuccessorList()[1]->getBlockID();
-            std::vector<SCAM::Stmt *> ifStmtVector;
-            std::vector<int> blocksInsideIf;
-            for (int i = currentNodeID; i < elsebranchID; i++) { blocksInsideIf.push_back(i); }
-            this->trueBranchBlocksMap.insert(std::make_pair(this->currentIfID, blocksInsideIf));
-            while (currentNodeID != elsebranchID) {
-                if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                    for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
-                        ifStmtVector.push_back(stmt);
-                    }
-                }
-                currentNodeID++;
-            }
-            this->stmtsMap.insert(std::make_pair(this->currentIfID, ifStmtVector));
+            int currentBlockId = this->blockCFG.at(this->currentIfID)->getSuccessorList()[0]->getBlockID();
+            int elseBranchId = this->blockCFG.at(this->currentIfID)->getSuccessorList()[1]->getBlockID();
+            addStatementsInTrueBranch(currentBlockId, elseBranchId, true);
+
+            //Checking statements inside true branches of conditional statements
             int i = 0;
-            for (auto ifstmt : this->stmtsMap) {
-                auto elseifstmt = this->stmtsMap.begin();
-                for (int j = 0; j <= i; j++) { elseifstmt++; }
-                for (elseifstmt; elseifstmt != this->stmtsMap.end(); elseifstmt++) {
-                    if (ifstmt.first == (*elseifstmt).first) { continue; }
-                    if (ifstmt.second.size() != (*elseifstmt).second.size()) { continue; }
-                    bool logicError = true;
-                    auto ifStmtPtr = ifstmt.second.begin();
-                    auto elseStmtPtr = (*elseifstmt).second.begin();
-                    while (ifStmtPtr != ifstmt.second.end()) {
-                        auto stmt1 = SCAM::PrintStmt::toString((*ifStmtPtr));
-                        auto stmt2 = SCAM::PrintStmt::toString((*elseStmtPtr));
+            for (auto conditionTrueBranchPair : this->stmtsMap) {
+                auto pair = this->stmtsMap.begin();
+                for (int j = 0; j <= i; j++) { pair++; }
+                for (pair; pair != this->stmtsMap.end(); pair++) {
+                    if (conditionTrueBranchPair.first == (*pair).first) { continue; }
+                    if (conditionTrueBranchPair.second.size() != (*pair).second.size()) { continue; }
+                    bool redundantLogic = true;
+                    auto cond1TrueBranchPtr = conditionTrueBranchPair.second.begin();
+                    auto cond2TrueBranchPtr = (*pair).second.begin();
+                    while (cond1TrueBranchPtr != conditionTrueBranchPair.second.end()) {
+                        auto stmt1 = SCAM::PrintStmt::toString((*cond1TrueBranchPtr));
+                        auto stmt2 = SCAM::PrintStmt::toString((*cond2TrueBranchPtr));
 #ifdef DEBUG_MERGE_REDUNDANT_IF_ELSE
-                        std::cout << "(*ifStmtPtr)= " << stmt1 << std::endl;
-                        std::cout << "(*elseStmtPtr)= " << stmt2 << std::endl << std::endl;
+                        std::cout << "(*cond1TrueBranchPtr)= " << stmt1 << std::endl;
+                        std::cout << "(*cond2TrueBranchPtr)= " << stmt2 << std::endl << std::endl;
 #endif
-                        //  if(!(**ifStmtPtr == **elseStmtPtr)){
+                        //  if(!(**cond1TrueBranchPtr == **cond2TrueBranchPtr)){
                         if (stmt1 != stmt2) {
-                            logicError = false;
+                            redundantLogic = false;
                             break;
                         }
-                        ifStmtPtr++;
-                        elseStmtPtr++;
+                        cond1TrueBranchPtr++;
+                        cond2TrueBranchPtr++;
                     }
 
-                    if (logicError) {
-                        std::cout << std::endl;
-                        if (ifstmt.first > 0 && (*elseifstmt).first < 0) {
-
-                        } else if ((ifstmt.first > 0 && (*elseifstmt).first < 0) ||
-                                   (ifstmt.first < 0 && (*elseifstmt).first > 0)) {
-
-                            std::cout
-                                    << "Warning!!, found the same code in the following 'if' and related 'else if' branch:"
-                                    << std::endl;
-                            if (ifstmt.first > 0) {
-                                std::cout << SCAM::PrintStmt::toString(this->blockCFG.at(ifstmt.first)->getTerminator())
-                                          << std::endl
-                                          << "else "
-                                          << SCAM::PrintStmt::toString(
-                                                  this->blockCFG.at(-(*elseifstmt).first)->getTerminator())
-                                          << std::endl;
-
-                                auto ifCondition = dynamic_cast<SCAM::If *>(this->blockCFG.at(
-                                        ifstmt.first)->getTerminator());
-                                auto elseifcondition = dynamic_cast<SCAM::If *>(this->blockCFG.at(
-                                        -(*elseifstmt).first)->getTerminator());
-                                if (ifCondition != nullptr && elseifcondition != nullptr) {
-                                    auto newCondition = new SCAM::If(
-                                            new SCAM::Logical(ifCondition->getConditionStmt(), "or",
-                                                              elseifcondition->getConditionStmt()));
-                                    if (newCondition != nullptr &&
-                                        this->blockCFG.find(ifstmt.first) != this->blockCFG.end()) {
-                                        this->blockCFG.at(ifstmt.first)->setTerminator(newCondition);
-                                        this->changedConditions.insert(ifstmt.first);
-                                    }
-                                    this->toBeDeletedMap.insert(std::make_pair(-(*elseifstmt).first, true));
-                                }
-
+                    if (redundantLogic) {
+                        if ((conditionTrueBranchPair.first > 0 && (*pair).first < 0) ||
+                            (conditionTrueBranchPair.first < 0 && (*pair).first > 0)) {
+                            CfgBlock *ifBlock, *elseIfBlock;
+                            if (conditionTrueBranchPair.first > 0) {
+                                ifBlock = this->blockCFG.at(conditionTrueBranchPair.first);
+                                elseIfBlock = this->blockCFG.at(-(*pair).first);
                             } else {
-                                std::cout
-                                        << SCAM::PrintStmt::toString(
-                                                this->blockCFG.at((*elseifstmt).first)->getTerminator())
-                                        << std::endl << "else "
-                                        << SCAM::PrintStmt::toString(this->blockCFG.at(-ifstmt.first)->getTerminator())
-                                        << std::endl;
-                                auto ifCondition = dynamic_cast<SCAM::If *>(this->blockCFG.at(
-                                        (*elseifstmt).first)->getTerminator());
-                                auto elseifcondition = dynamic_cast<SCAM::If *>(this->blockCFG.at(
-                                        -ifstmt.first)->getTerminator());
-                                if (ifCondition != nullptr && elseifcondition != nullptr) {
-                                    auto newCondition = new SCAM::If(
-                                            new SCAM::Logical(ifCondition->getConditionStmt(), "or",
-                                                              elseifcondition->getConditionStmt()));
-                                    if (newCondition != nullptr &&
-                                        this->blockCFG.find(ifstmt.first) != this->blockCFG.end()) {
-                                        this->blockCFG.at((*elseifstmt).first)->setTerminator(newCondition);
-                                        this->changedConditions.insert((*elseifstmt).first);
-                                    }
-                                    this->toBeDeletedMap.insert(std::make_pair(-ifstmt.first, true));
-                                }
+                                ifBlock = this->blockCFG.at((*pair).first);
+                                elseIfBlock = this->blockCFG.at(-conditionTrueBranchPair.first);
                             }
-                            std::cout
-                                    << "This might indicate a copy and paste or logic error. Therefore, the else if branch is deleted!"
-                                    << std::endl;
-                        } else if ((ifstmt.first < 0 && (*elseifstmt).first == 0) ||
-                                   (ifstmt.first == 0 && (*elseifstmt).first < 0)) {
-                            std::cout
-                                    << "Warning!!, found the same code in the following 'else if' and related 'else' branch:"
-                                    << std::endl;
-                            if (ifstmt.first == 0) {
-                                std::cout
-                                        << "else "
-                                        << SCAM::PrintStmt::toString(
-                                                this->blockCFG.at(-(*elseifstmt).first)->getTerminator())
-                                        << std::endl;
-                                this->toBeDeletedMap.insert(std::make_pair(-(*elseifstmt).first, true));
-                            } else {
-                                std::cout << "else "
-                                          << SCAM::PrintStmt::toString(
-                                                  this->blockCFG.at(-ifstmt.first)->getTerminator())
-                                          << std::endl;
-                                this->toBeDeletedMap.insert(std::make_pair(-ifstmt.first, true));
-                            }
-                            std::cout
-                                    << "This might indicate a copy and paste or logic error. Therefore, the else if branch is deleted!"
-                                    << std::endl;
+                            if (toBeDeletedMap.find(elseIfBlock->getBlockID()) != toBeDeletedMap.end()) { continue; }
+                            printWarning("if", PrintStmt::toString(ifBlock->getTerminator()), "else if",
+                                         PrintStmt::toString(elseIfBlock->getTerminator()));
 
-                        } else if ((ifstmt.first > 0 && (*elseifstmt).first == 0) ||
-                                   (ifstmt.first == 0 && (*elseifstmt).first > 0)) {
-                            std::cout
-                                    << "Warning!!, found the same code in the following 'if' and related 'else' branch:"
-                                    << std::endl;
-                            if (ifstmt.first == 0) {
-                                std::cout
-                                        << SCAM::PrintStmt::toString(
-                                                this->blockCFG.at((*elseifstmt).first)->getTerminator())
-                                        << std::endl;
-                                this->toBeDeletedMap.insert(std::make_pair((*elseifstmt).first,
-                                                                           true));
-                            } else {
-                                std::cout << SCAM::PrintStmt::toString(this->blockCFG.at(ifstmt.first)->getTerminator())
-                                          << std::endl;
-                                this->toBeDeletedMap.insert(std::make_pair(ifstmt.first,
-                                                                           true));
-                            }
-                            std::cout
-                                    << "This might indicate a copy and paste or logic error. Therefore, the if branch is deleted!"
-                                    << std::endl;
-
-
-                        } else if (ifstmt.first < 0 && (*elseifstmt).first < 0) {
-                            std::cout
-                                    << "Warning!!, found the same code in the following 'else if' and related 'else if' branch:"
-                                    << std::endl << "else "
-                                    << SCAM::PrintStmt::toString(this->blockCFG.at(-ifstmt.first)->getTerminator())
-                                    << std::endl
-                                    << "else "
-                                    << SCAM::PrintStmt::toString(
-                                            this->blockCFG.at(-(*elseifstmt).first)->getTerminator())
-                                    << std::endl
-                                    << "This might indicate a copy and paste or logic error. Therefore, one else if branch is deleted!"
-                                    << std::endl;
-
-                            if (this->changedConditions.find(-ifstmt.first) == this->changedConditions.end()) {
-                                if (this->changedConditions.find(-(*elseifstmt).first) ==
-                                    this->changedConditions.end()) {
-                                    auto condition1 =  dynamic_cast<SCAM::If *>(
-                                            this->blockCFG.at(-ifstmt.first)->getTerminator());
-                                    auto condition2 =  dynamic_cast<SCAM::If *>(
-                                            this->blockCFG.at(-(*elseifstmt).first)->getTerminator());
-                                    if (condition1 != nullptr && condition2 != nullptr) {
-                                        auto newCondition = new SCAM::If(
-                                                new SCAM::Logical(condition1->getConditionStmt(), "or",
-                                                                  condition2->getConditionStmt()));
-                                        if (newCondition != nullptr &&
-                                            this->blockCFG.find(-ifstmt.first) != this->blockCFG.end()) {
-                                            this->blockCFG.at(-ifstmt.first)->setTerminator(newCondition);
-                                            this->changedConditions.insert(-ifstmt.first);
-                                            this->toBeDeletedMap.insert(std::make_pair(-(*elseifstmt).first, true));
-                                        }
-                                    }
-                                } else {
-                                    auto condition1 = dynamic_cast<SCAM::If *>(
-                                            this->blockCFG.at(-ifstmt.first)->getTerminator());
-                                    auto condition2 =  dynamic_cast<SCAM::If *>(
-                                            this->blockCFG.at(-(*elseifstmt).first)->getTerminator());
-                                    if (condition1 != nullptr && condition2 != nullptr) {
-                                        auto newCondition = new SCAM::If(
-                                                new SCAM::Logical(condition1->getConditionStmt(), "or",
-                                                                  condition2->getConditionStmt()));
-                                        if (newCondition != nullptr &&
-                                            this->blockCFG.find(-(*elseifstmt).first) != this->blockCFG.end()) {
-                                            this->blockCFG.at(-(*elseifstmt).first)->setTerminator(newCondition);
-                                            this->changedConditions.insert(-(*elseifstmt).first);
-                                            this->toBeDeletedMap.insert(std::make_pair(-ifstmt.first, true));
-                                        }
-                                    }
+                            auto ifCondition = dynamic_cast<SCAM::If *>(ifBlock->getTerminator());
+                            auto elseifcondition = dynamic_cast<SCAM::If *>(elseIfBlock->getTerminator());
+                            if (ifCondition && elseifcondition) {
+                                auto newCondition = new SCAM::If(
+                                        new SCAM::Logical(ifCondition->getConditionStmt(), "or",
+                                                          elseifcondition->getConditionStmt()));
+                                if (newCondition &&
+                                    this->blockCFG.find(ifBlock->getBlockID()) != this->blockCFG.end()) {
+                                    this->blockCFG.at(ifBlock->getBlockID())->setTerminator(newCondition);
                                 }
+                                this->toBeDeletedMap.insert(elseIfBlock->getBlockID());
+                            }
+                        } else if ((conditionTrueBranchPair.first < 0 && (*pair).first == 0) ||
+                                   (conditionTrueBranchPair.first == 0 && (*pair).first < 0)) {
+                            CfgBlock *elseIfBlock;
+                            if (conditionTrueBranchPair.first == 0) {
+                                elseIfBlock = this->blockCFG.at(-(*pair).first);
                             } else {
-                                auto condition1 =  dynamic_cast<SCAM::If *>(
-                                        this->blockCFG.at(-ifstmt.first)->getTerminator());
-                                auto condition2 =  dynamic_cast<SCAM::If *>(
-                                        this->blockCFG.at(-(*elseifstmt).first)->getTerminator());
-                                if (condition1 != nullptr && condition2 != nullptr) {
-                                    auto newCondition = new SCAM::If(
-                                            new SCAM::Logical(condition1->getConditionStmt(), "or",
-                                                              condition2->getConditionStmt()));
-                                    if (newCondition != nullptr &&
-                                        this->blockCFG.find(-ifstmt.first) != this->blockCFG.end()) {
-                                        this->blockCFG.at(-ifstmt.first)->setTerminator(newCondition);
-                                        this->changedConditions.insert(-ifstmt.first);
-                                        this->toBeDeletedMap.insert(
-                                                std::make_pair(-(*elseifstmt).first, true));
-                                    }
+                                elseIfBlock = this->blockCFG.at(-conditionTrueBranchPair.first);
+                            }
+                            if (toBeDeletedMap.find(elseIfBlock->getBlockID()) != toBeDeletedMap.end()) { continue; }
+                            printWarning("else if", PrintStmt::toString(elseIfBlock->getTerminator()), "else",
+                                         "");
+                            this->toBeDeletedMap.insert(elseIfBlock->getBlockID());
+
+                        } else if ((conditionTrueBranchPair.first > 0 && (*pair).first == 0) ||
+                                   (conditionTrueBranchPair.first == 0 && (*pair).first > 0)) {
+                            CfgBlock *ifBlock;
+                            if (conditionTrueBranchPair.first == 0) {
+                                ifBlock = this->blockCFG.at((*pair).first);
+                            } else {
+                                ifBlock = this->blockCFG.at(conditionTrueBranchPair.first);
+                            }
+                            printWarning("if", PrintStmt::toString(ifBlock->getTerminator()), "else",
+                                         "");
+                            this->toBeDeletedMap.insert(ifBlock->getBlockID());
+                        } else if (conditionTrueBranchPair.first < 0 && (*pair).first < 0) {
+                            CfgBlock *elseifBlock1, *elseIfBlock2;
+                            elseifBlock1 = this->blockCFG.at(-conditionTrueBranchPair.first);
+                            elseIfBlock2 = this->blockCFG.at(-(*pair).first);
+                            if (toBeDeletedMap.find(elseifBlock1->getBlockID()) != toBeDeletedMap.end() ||
+                                toBeDeletedMap.find(elseIfBlock2->getBlockID()) != toBeDeletedMap.end()) { continue; }
+                            printWarning("else if", PrintStmt::toString(elseifBlock1->getTerminator()), "else if",
+                                         PrintStmt::toString(elseIfBlock2->getTerminator()));
+                            auto elseIf1Condition = dynamic_cast<SCAM::If *>(elseifBlock1->getTerminator());
+                            auto elseIf2condition = dynamic_cast<SCAM::If *>(elseIfBlock2->getTerminator());
+                            if (elseIf1Condition && elseIf2condition) {
+                                auto newCondition = new SCAM::If(
+                                        new SCAM::Logical(elseIf1Condition->getConditionStmt(), "or",
+                                                          elseIf2condition->getConditionStmt()));
+                                if (newCondition &&
+                                    this->blockCFG.find(elseifBlock1->getBlockID()) != this->blockCFG.end()) {
+                                    this->blockCFG.at(elseifBlock1->getBlockID())->setTerminator(newCondition);
                                 }
+                                this->toBeDeletedMap.insert(elseIfBlock2->getBlockID());
                             }
 
                         }
-                        std::cout << std::endl;
                     }
-
                 }
                 i++;
             }
 #ifdef DEBUG_MERGE_REDUNDANT_IF_ELSE
             for (
-                auto node
+                const auto &block
                     : this->stmtsMap) {
-                std::cout << "if ID is " << node.first <<
+                std::cout << "if ID is " << block.first <<
                           std::endl;
-                if (node.second.empty()) {
+                if (block.second.empty()) {
                     std::cout << "vector is empty";
                     continue;
                 }
                 for (
                     auto stmt
-                        : node.second) {
+                        : block.second) {
 
                     if (stmt != nullptr) {
                         std::cout <<
                                   SCAM::PrintStmt::toString(stmt)
                                   <<
                                   std::endl;
-
                     }
-
                 }
-
             }
 #endif
 
@@ -401,12 +197,12 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
         }
 #ifdef DEBUG_MERGE_REDUNDANT_IF_ELSE
         std::cout << std::endl << "checked if stmts" << std::endl;
-        for(auto ifstmt : this->checkedIfStmts){
-          std::cout << ifstmt << " " ;
+        for (auto ifstmt : this->checkedIfStmts) {
+            std::cout << ifstmt << " ";
         }
 
         std::cout << std::endl << "Blocks inside the following if stmts" << std::endl;
-        for (auto blockid : this->trueBranchBlocksMap) {
+        for (const auto &blockid : this->trueBranchBlocksMap) {
             std::cout << "if Node" << blockid.first << std::endl;
             for (auto id : blockid.second) {
                 std::cout << id << " ";
@@ -414,152 +210,145 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
             std::cout << std::endl;
         }
 #endif
-        for (auto fNode: this->toBeDeletedMap) {
-            if (fNode.second) {//delete else if branch
-                if (this->blockCFG.find(fNode.first) != this->blockCFG.end()) {
-                    auto elseifnode = this->blockCFG.at(fNode.first);
-                    for (auto pred : this->blockCFG.at(fNode.first)->getPredecessorList()) {
-                        pred->replaceSuccessor(elseifnode, elseifnode->getSuccessorList()[1]);
-                    }
-                    this->blockCFG.erase(fNode.first);
-                    for (auto insideNode : this->trueBranchBlocksMap.at(fNode.first)) {
-                        if (this->blockCFG.find(insideNode) != this->blockCFG.end()) {
-                            this->blockCFG.erase(insideNode);
-                        }
-                    }
+    }
+    for (auto ifStatement: this->toBeDeletedMap) {
+        if (this->blockCFG.find(ifStatement) != this->blockCFG.end()) {
+            auto elseifnode = this->blockCFG.at(ifStatement);
+            for (auto pred : this->blockCFG.at(ifStatement)->getPredecessorList()) {
+                pred->replaceSuccessor(elseifnode, elseifnode->getSuccessorList()[1]);
+            }
+            this->blockCFG.erase(ifStatement);
+            for (auto insideNode : this->trueBranchBlocksMap.at(ifStatement)) {
+                if (this->blockCFG.find(insideNode) != this->blockCFG.end()) {
+                    this->blockCFG.erase(insideNode);
                 }
             }
         }
-
     }
 }
 
-void SCAM::MergeRedundantIfElse::AddNestedIfStatementsListsToStmtsMap(int &currentNodeID,
-                                                                      std::vector<SCAM::Stmt *> &ifStmtList) {
-    int elseIfID = currentNodeID;
-    int elseifbranchID = this->blockCFG.at(currentNodeID)->getSuccessorList()[1]->getBlockID();
-    currentNodeID = this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID();
-
-    if (currentNodeID < elseifbranchID) { //there is else if or else
-
-        while (currentNodeID != elseifbranchID) {
-            if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+void SCAM::MergeRedundantIfElse::addNestedIfStatementsToStmtsMap(int &currentBlockID,
+                                                                 std::vector<SCAM::Stmt *> &ifStmtList) {
+    ///add if statements
+    auto elseIfID = currentBlockID;
+    auto elseifbranchID = this->blockCFG.at(currentBlockID)->getSuccessorList()[1]->getBlockID();
+    currentBlockID = this->blockCFG.at(currentBlockID)->getSuccessorList()[0]->getBlockID();
+    if (currentBlockID < elseifbranchID) { //there is else if or else
+        while (currentBlockID != elseifbranchID) {
+            if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                     ifStmtList.push_back(stmt);
                 }
             }
-            currentNodeID++;
+            if(this->blockCFG.at(currentBlockID)->hasIf()){
+                ifStmtList.push_back(this->blockCFG.at(currentBlockID)->getTerminator());
+            }
+            currentBlockID++;
         }
-
         if (this->blockCFG.at(elseifbranchID)->hasIf()) {//there is else if
             bool moreElseIf = true;
             while (moreElseIf) {
                 elseIfID = this->blockCFG.at(elseIfID)->getSuccessorList()[1]->getBlockID();
-                if (this->blockCFG.at(elseIfID)->getSuccessorList().size() == 1) { break; }
-                currentNodeID = this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID();
-
-                if (elseIfID > currentNodeID) {
-                    while (currentNodeID != elseIfID) {
-                        if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                            for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+                if (this->blockCFG.at(elseIfID)->getSuccessorList().size() == 1){
+                    elseIfID = this->blockCFG.at(elseIfID)->getPredecessorList()[0]->getBlockID();
+                    break;
+                }else if(notFromTheSameGroupIfStatement(elseIfID)){break;}
+                currentBlockID = this->blockCFG.at(currentBlockID)->getSuccessorList()[0]->getBlockID();
+                if (elseIfID > currentBlockID) {
+                    while (currentBlockID != elseIfID) {
+                        if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                            for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                                 ifStmtList.push_back(stmt);
                             }
                         }
-                        currentNodeID++;
+                        if(this->blockCFG.at(currentBlockID)->hasIf()){
+                            ifStmtList.push_back(this->blockCFG.at(currentBlockID)->getTerminator());
+                        }
+                        currentBlockID++;
                     }
                 } else { //else if without else
-                    while (!(this->blockCFG.at(currentNodeID)->getSuccessorList().size() == 1 &&
-                             (this->blockCFG.at(currentNodeID)->getBlockID() >
-                              this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID()))) {
-                        if (this->blockCFG.at(currentNodeID)->hasIf()) {
+                    while (!(this->blockCFG.at(currentBlockID)->getSuccessorList().size() == 1 &&
+                             (this->blockCFG.at(currentBlockID)->getBlockID() >
+                              this->blockCFG.at(currentBlockID)->getSuccessorList()[0]->getBlockID()))) {
+                        if (this->blockCFG.at(currentBlockID)->hasIf()) {
                             //call recursive function
-                            if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+                            if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                                for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                                     ifStmtList.push_back(stmt);
                                 }
                             }
-                            AddNestedIfStatementsListsToStmtsMap(currentNodeID, ifStmtList);
-                            currentNodeID--;
-                        } else if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                            for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+                            ifStmtList.push_back(this->blockCFG.at(currentBlockID)->getTerminator());
+                            addNestedIfStatementsToStmtsMap(currentBlockID, ifStmtList);
+                            currentBlockID--;
+                        } else if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                            for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                                 ifStmtList.push_back(stmt);
                             }
                         }
-                        currentNodeID++;
+                        currentBlockID++;
                     }
-                    if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                        for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+                    if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                        for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                             ifStmtList.push_back(stmt);
                         }
                     }
-
                     if (!this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->hasIf()) {
                         moreElseIf = false;
                     }
                 }
-
             }
-
-        }
-        if (this->blockCFG.at(elseIfID)->getSuccessorList().size() == 1) {
-            elseIfID = this->blockCFG.at(elseIfID)->getPredecessorList()[0]->getBlockID();
         }
         if (this->blockCFG.at(elseIfID)->getSuccessorList()[1]->getPredecessorList().size() ==
             1) { //else statement
-            currentNodeID = this->blockCFG.at(elseIfID)->getSuccessorList()[1]->getBlockID();
-            while (!(this->blockCFG.at(currentNodeID)->getSuccessorList().size() == 1 &&
-                     (this->blockCFG.at(currentNodeID)->getBlockID() >
-                      this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID()))) {
-                if (this->blockCFG.at(currentNodeID)->hasIf()) {
-                    if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                        for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+            currentBlockID = this->blockCFG.at(elseIfID)->getSuccessorList()[1]->getBlockID();
+            while (!(this->blockCFG.at(currentBlockID)->getSuccessorList().size() == 1 &&
+                     (this->blockCFG.at(currentBlockID)->getBlockID() >
+                      this->blockCFG.at(currentBlockID)->getSuccessorList()[0]->getBlockID()))) {
+                if (this->blockCFG.at(currentBlockID)->hasIf()) {
+                    if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                        for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                             ifStmtList.push_back(stmt);
                         }
                     }
                     //call recursive function
-                    AddNestedIfStatementsListsToStmtsMap(currentNodeID, ifStmtList);
-                    currentNodeID--;
-                } else if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                    for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+                    addNestedIfStatementsToStmtsMap(currentBlockID, ifStmtList);
+                    currentBlockID--;
+                } else if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                    for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                         ifStmtList.push_back(stmt);
                     }
                 }
-                currentNodeID++;
+                currentBlockID++;
             }
-            if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+            if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                     ifStmtList.push_back(stmt);
                 }
             }
-
-
         }
-
-
     } else {
         if (this->blockCFG.at(elseIfID)->getSuccessorList()[1]->getPredecessorList().size() ==
             1) { //else statement
-
-            while (!(this->blockCFG.at(currentNodeID)->getSuccessorList().size() == 1 &&
-                     (this->blockCFG.at(currentNodeID)->getBlockID() >
-                      this->blockCFG.at(currentNodeID)->getSuccessorList()[0]->getBlockID()))) {
-                if (this->blockCFG.at(currentNodeID)->hasIf()) {
-                    if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                        for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+            while (!(this->blockCFG.at(currentBlockID)->getSuccessorList().size() == 1 &&
+                     (this->blockCFG.at(currentBlockID)->getBlockID() >
+                      this->blockCFG.at(currentBlockID)->getSuccessorList()[0]->getBlockID()))) {
+                if (this->blockCFG.at(currentBlockID)->hasIf()) {
+                    if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                        for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                             ifStmtList.push_back(stmt);
                         }
                     }
                     //call recursive function
-                    AddNestedIfStatementsListsToStmtsMap(currentNodeID, ifStmtList);
-                } else if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                    for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+                    addNestedIfStatementsToStmtsMap(currentBlockID, ifStmtList);
+                } else if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                    for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                         ifStmtList.push_back(stmt);
                     }
                 }
-                currentNodeID++;
+                currentBlockID++;
             }
-            if (!this->blockCFG.at(currentNodeID)->getStmtList().empty()) {
-                for (auto stmt : this->blockCFG.at(currentNodeID)->getStmtList()) {
+            if (!this->blockCFG.at(currentBlockID)->getStmtList().empty()) {
+                for (auto stmt : this->blockCFG.at(currentBlockID)->getStmtList()) {
                     ifStmtList.push_back(stmt);
                 }
             }
@@ -570,5 +359,109 @@ void SCAM::MergeRedundantIfElse::AddNestedIfStatementsListsToStmtsMap(int &curre
 const std::map<int, SCAM::CfgBlock *> &SCAM::MergeRedundantIfElse::getNewBlockCFG() const {
     return this->blockCFG;
 }
+
+bool SCAM::MergeRedundantIfElse::notFromTheSameGroupIfStatement(int ifId) {
+    if (this->blockCFG.at(ifId)->getPredecessorList().size() > 1) {
+        for (auto pred : this->blockCFG.at(ifId)->getPredecessorList()) {
+            if (pred->getBlockID() == ifId - 1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void SCAM::MergeRedundantIfElse::addStatementsInTrueBranch(int &firstBlockInTrueBranchId, int &elseIfblockId,
+                                                           bool isIfBranch) {
+    std::vector<int> blocksInsideIf;
+    for (auto i = firstBlockInTrueBranchId; i < elseIfblockId; i++) { blocksInsideIf.push_back(i); }
+
+    std::vector<SCAM::Stmt *> ifStmtVector;
+    while (firstBlockInTrueBranchId != elseIfblockId) {
+        for (auto stmt : this->blockCFG.at(firstBlockInTrueBranchId)->getStmtList()) {
+            ifStmtVector.push_back(stmt);
+        }
+        if(this->blockCFG.at(firstBlockInTrueBranchId)->hasIf()){
+            ifStmtVector.push_back(this->blockCFG.at(firstBlockInTrueBranchId)->getTerminator());
+        }
+        firstBlockInTrueBranchId++;
+    }
+    if (isIfBranch) {
+        this->trueBranchBlocksMap.insert(std::make_pair(this->currentIfID, blocksInsideIf));
+        this->stmtsMap.insert(std::make_pair(this->currentIfID, ifStmtVector));
+    } else {
+        this->trueBranchBlocksMap.insert(std::make_pair(this->currentElseIfID, blocksInsideIf));
+        this->stmtsMap.insert(std::make_pair(-this->currentElseIfID, ifStmtVector));
+    }
+}
+
+void SCAM::MergeRedundantIfElse::addStatementsInElseBranch(int &currentBlockId, bool isElseBranch) {
+    bool elseHasIf = false;
+    std::vector<SCAM::Stmt *> ifStmtVector;
+    while (!(this->blockCFG.at(currentBlockId)->getSuccessorList().size() == 1 &&
+             (this->blockCFG.at(currentBlockId)->getBlockID() >
+              this->blockCFG.at(currentBlockId)->getSuccessorList()[0]->getBlockID()))) {
+        if (this->blockCFG.at(currentBlockId)->hasIf()) {
+            for (auto stmt : this->blockCFG.at(currentBlockId)->getStmtList()) {
+                ifStmtVector.push_back(stmt);
+            }
+            if(this->blockCFG.at(currentBlockId)->hasIf()){
+                ifStmtVector.push_back(this->blockCFG.at(currentBlockId)->getTerminator());
+            }
+            //call recursive function
+            addNestedIfStatementsToStmtsMap(currentBlockId, ifStmtVector);
+            elseHasIf = true;
+            currentBlockId--;
+        } else if (!this->blockCFG.at(currentBlockId)->getStmtList().empty()) {
+            for (auto stmt : this->blockCFG.at(currentBlockId)->getStmtList()) {
+                ifStmtVector.push_back(stmt);
+            }
+        }
+        currentBlockId++;
+    }
+    if (!elseHasIf) {
+        if (!this->blockCFG.at(currentBlockId)->getStmtList().empty()) {
+            for (auto stmt : this->blockCFG.at(currentBlockId)->getStmtList()) {
+                ifStmtVector.push_back(stmt);
+            }
+        }
+    }
+    if (isElseBranch) {
+        this->stmtsMap.insert(std::make_pair(0, ifStmtVector));
+        std::vector<int> blocksInsideIf;
+        for (int i = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID();
+             i <= currentBlockId; i++) { blocksInsideIf.push_back(i); }
+        this->trueBranchBlocksMap.insert(
+                std::make_pair(this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[1]->getBlockID(),
+                               blocksInsideIf));
+    } else {
+        this->stmtsMap.insert(std::make_pair(-this->currentElseIfID, ifStmtVector));
+        std::vector<int> blocksInsideIf;
+        for (int i = this->blockCFG.at(this->currentElseIfID)->getSuccessorList()[0]->getBlockID();
+             i <= currentBlockId; i++) { blocksInsideIf.push_back(i); }
+        this->trueBranchBlocksMap.insert(std::make_pair(this->currentElseIfID, blocksInsideIf));
+    }
+}
+
+void
+SCAM::MergeRedundantIfElse::printWarning(const std::string &firstCondType, const std::string &firstCond,
+                                         const std::string &secondCondType,
+                                         const std::string &secondCond) {
+    std::stringstream warning;
+    warning << "\t\033[1;33mWarning\033[0m: found the same code in the following '" << firstCondType
+            << "' and related '" << secondCondType << "' branch:" << std::endl;
+    if (firstCondType == "if") {
+        warning << firstCond << std::endl;
+    } else if (firstCondType == "else if") {
+        warning << "else " << firstCond << std::endl;
+    }
+    if (secondCondType == "else if") {
+        warning << "else " << secondCond << std::endl;
+    }
+    warning << "This might indicate a copy and paste or logic error. Therefore, the conditions are merged!"
+            << std::endl;
+    std::cout << warning.str();
+}
+
 
 

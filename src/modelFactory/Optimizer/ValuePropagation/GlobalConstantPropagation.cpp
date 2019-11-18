@@ -255,7 +255,7 @@ namespace SCAM {
     void GlobalConstantPropagation::visit(struct ArrayOperand &node) {
         this->newExpr = nullptr;
         node.getIdx()->accept(*this);
-        if (!(*node.getIdx() == *this->newExpr) && this->newExpr != nullptr) {
+        if (this->newExpr != nullptr && !(*node.getIdx() == *this->newExpr)) {
             this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
         }
     }

@@ -2,6 +2,7 @@
 // Created by M.I.Alkoudsi on 22.08.19.
 //
 
+#include <PrintStmt.h>
 #include "FindVariablesValues.h"
 #include "Optimizer/Debug.h"
 
@@ -17,7 +18,8 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
                     if (this->readVariablesSet.find(varOp->getVariable()->getFullName()) !=
                         this->readVariablesSet.end()) { continue; }
                     if (varOp->getVariable()->isCompoundType() || varOp->getVariable()->isArrayType()) {
-                        if (auto compoundValue = dynamic_cast<SCAM::CompoundValue *>(assignment->getRhs())) {
+                        if(dynamic_cast<SCAM::VariableOperand *>(assignment->getRhs())){
+                        }else if (auto compoundValue = dynamic_cast<SCAM::CompoundValue *>(assignment->getRhs())) {
                             addSubVariablesToValuesMap(varOp,compoundValue->getValues());
                         } else if (auto compoundExpression = dynamic_cast<SCAM::CompoundExpr *>(assignment->getRhs())) {
                             addSubVariablesToValuesMap(varOp,compoundExpression->getValueMap());

@@ -40,10 +40,13 @@ namespace SCAM {
         std::map<int, SCAM::CfgBlock *> blockCFG;
         std::map<int, std::vector<SCAM::Stmt *>> stmtsMap;
         std::map<int, std::vector<int>> trueBranchBlocksMap;
-        std::map<int, bool> toBeDeletedMap;              //when true the bool indicates the else if, otherwise else and the int reflects the equal (redundant) if or else if
-        std::set<int> changedConditions;
+        std::set<int> toBeDeletedMap;              //when true the bool indicates the else if, otherwise else and the int reflects the redundant if or else if
         std::map<int, int> ifAndItsElseMap;
-        void AddNestedIfStatementsListsToStmtsMap(int &currentNodeID, std::vector<SCAM::Stmt *> &ifStmtList);
+        bool notFromTheSameGroupIfStatement(int ifId);
+        void addStatementsInTrueBranch(int &firstBlockInTrueBranchId, int& elseIfblockId, bool isIfBranch);
+        void addStatementsInElseBranch(int &currentBlockId, bool isElseBranch);
+        void addNestedIfStatementsToStmtsMap(int &currentBlockID, std::vector<SCAM::Stmt *> &ifStmtList);
+        static void printWarning(const std::string& firstCondType, const std::string& firstCond, const std::string& secondCondType, const std::string& secondCond);
     };
 
 

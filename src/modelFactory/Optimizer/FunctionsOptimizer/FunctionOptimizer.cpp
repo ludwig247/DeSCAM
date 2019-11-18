@@ -192,7 +192,6 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
             newParamValueMap.insert(std::make_pair(param.first, param.second));
         }
     }
-
     auto function = new Function(*node.getFunction());
     std::string newName;
     if (this->functionUseMap.find(node.getOperandName()) == this->functionUseMap.end()) {
@@ -203,7 +202,6 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         newName = node.getOperandName() + "_opt" + std::to_string(this->functionUseMap.at(node.getOperandName()));
         this->functionUseMap.at(node.getOperandName())++;
     }
-
     function->setName(newName);
     function->setReturnValueConditionList(node.getFunction()->getReturnValueConditionList());
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
@@ -314,18 +312,13 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         }
     }
     function->setReturnValueConditionList(newReturnValueConditionList);
-    //making functionOperand point to the new function
+    //inline function if it has one return value
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();
-        this->newStmt = this->newExpr;
-    } else {
+    } else {//create new function and add it to the module
         this->newExpr = new SCAM::FunctionOperand(function, newParamValueMap);
-        this->newStmt = this->newExpr;
-
-        //add function to the module
         this->module->addFunction(function);
     }
-
 }
 
 void SCAM::FunctionsOptimizer::visit(SCAM::ArrayOperand &node) {
