@@ -1,5 +1,0 @@
-ERROR : Tk_Init() failed. Tk Path is TK_LIBRARY=/import/home/udupi/opt/synopsys/K-2015.06-SP4/auxx/tcllib/lib/tk8.5
-Cannot initialize GUI. Likely causes: 
-	(1) The executable is not in the right path;
-	(2) The connection to X-server is broken or refused.
-Exit Milkyway!
