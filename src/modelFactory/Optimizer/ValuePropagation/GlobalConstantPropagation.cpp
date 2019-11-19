@@ -60,7 +60,8 @@ namespace SCAM {
             this->propagationValid = true;
         } else {
             PropagateConstantValue propagator(this->makeAllPathsToNode(this->currentNodeID),
-                                              node.getVariable(),this->currentNodeID);           //check if propagation is valid on all paths
+                                              node.getVariable(),
+                                              this->currentNodeID);           //check if propagation is valid on all paths
             this->varAlreadyCheckedSet.insert(node.getVariable()->getFullName());
             if (propagator.getPropagatedValue() != nullptr) {
                 this->propagationValid = true;
@@ -72,7 +73,7 @@ namespace SCAM {
 
     void GlobalConstantPropagation::visit(class Assignment &node) {
         // if the lhs is a variableoperand check if there is a use of a variable in the rhs
-        auto lhs = dynamic_cast<SCAM::VariableOperand*>(node.getLhs());
+        auto lhs = dynamic_cast<SCAM::VariableOperand *>(node.getLhs());
         if (lhs != nullptr) {
             node.getRhs()->accept(*this);
             if (this->newExpr != nullptr && propagationValid) {
@@ -101,16 +102,15 @@ namespace SCAM {
         if (this->newExpr != nullptr) {
             if (node.getOperation() == "not") {
                 this->newExpr = new UnaryExpr("not", this->newExpr);
-
+            } else if (node.getOperation() == "~") {
+                this->newExpr = new UnaryExpr("~", this->newExpr);
             } else if (node.getOperation() == "-") {
                 if (node.getExpr()->getDataType()->isUnsigned()) {
                     this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
                 } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
-
             } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
         }
     }
-
 
     void GlobalConstantPropagation::visit(struct If &node) {
         if (node.getConditionStmt() != nullptr) {
@@ -255,7 +255,7 @@ namespace SCAM {
     void GlobalConstantPropagation::visit(struct ArrayOperand &node) {
         this->newExpr = nullptr;
         node.getIdx()->accept(*this);
-        if (!(*node.getIdx() == *this->newExpr) && this->newExpr != nullptr) {
+        if (this->newExpr != nullptr && !(*node.getIdx() == *this->newExpr)) {
             this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
         }
     }

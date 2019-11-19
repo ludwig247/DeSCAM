@@ -9,7 +9,7 @@ SCAM::SimplifyExpressions::SimplifyExpressions(std::map<int, SCAM::CfgNode *> CF
         : CFG(std::move(
         CFG)), module(module) {
 #ifdef DEBUG_SIMPLIFY_EXPRESSIONS
-//    std::cout << std::endl << "********************** Simplify CFG Expressions ********************** " << std::endl;
+    std::cout << std::endl << "********************** Simplify CFG Expressions ********************** " << std::endl;
 #endif
     for (auto node : this->CFG) {
         auto stmt = node.second->getStmt();
@@ -43,9 +43,9 @@ SCAM::SimplifyExpressions::SimplifyExpressions(
         for (auto expr : pair.second) {
             if (!expr) { continue; }
             this->newExpr = nullptr;
-            expr->accept(*this);
+            translateExpression(expr);
             if (this->newExpr) {
-#ifdef DEBUG_SIMPLIFY_EXPRESSIONS
+#ifdef DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS
                 std::cout << "Expression: " << SCAM::PrintStmt::toString(expr) << " is changed into "
                           << SCAM::PrintStmt::toString(this->newExpr) << std::endl;
 #endif
@@ -56,10 +56,10 @@ SCAM::SimplifyExpressions::SimplifyExpressions(
         }
         if (!pair.first->getReturnValue()) { continue; }
         this->newExpr = nullptr;
-        pair.first->getReturnValue()->accept(*this);
+        translateExpression(pair.first->getReturnValue());
         if (this->newExpr) {
             auto newReturn = new Return(this->newExpr);
-#ifdef DEBUG_SIMPLIFY_EXPRESSIONS
+#ifdef DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS
             std::cout << "Statement: " << SCAM::PrintStmt::toString(pair.first) << " is changed into "
                       << SCAM::PrintStmt::toString(newReturn) << std::endl;
 #endif
@@ -94,16 +94,16 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
         SCAM::ExprTranslator translator(&contxt);
         z3::expr z3Expr(contxt);
         z3Expr = translator.translate(expr);
-#ifdef DEBUG_SIMPLIFY_EXPRESSIONS
-        std::cout << "before simplification Expr is" << z3Expr << std::endl;
+#if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
+        std::cout << "before simplification Expr is " << z3Expr << std::endl;
 #endif
         z3Expr = z3Expr.simplify(params);
-#ifdef DEBUG_SIMPLIFY_EXPRESSIONS
-        std::cout << "after simplification Expr is" << z3Expr << std::endl;
+#if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
+        std::cout << "after simplification Expr is " << z3Expr << std::endl;
 #endif
         bool abort = SCAM::OptUtilities::isAbortTranslation(z3Expr);
         if (abort) {
-#ifdef DEBUG_SIMPLIFY_EXPRESSIONS
+#if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
             std::cout << "translation aborted" << std::endl;
 #endif
             return;

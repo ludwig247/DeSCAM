@@ -44,7 +44,7 @@ namespace SCAM {
 
         clang::LangOptions LO;
         LO.CPlusPlus = true;
-        clangCFG->dump(LO, false);
+        //clangCFG->dump(LO, false);
         clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
 
         //Translate entry node of block

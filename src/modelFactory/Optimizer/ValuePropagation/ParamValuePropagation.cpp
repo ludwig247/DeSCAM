@@ -53,6 +53,8 @@ void SCAM::ParamValuePropagation::visit(SCAM::UnaryExpr &node) {
     if (this->newExpr) {
         if (node.getOperation() == "not") {
             this->newExpr = new UnaryExpr("not", this->newExpr);
+        } else if (node.getOperation() == "~") {
+            this->newExpr = new UnaryExpr("~", this->newExpr);
         } else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
@@ -140,7 +142,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::Cast &node) {
 }
 
 void SCAM::ParamValuePropagation::visit(SCAM::FunctionOperand &node) {
-    for (const auto& param : this->paramValMap) {
+    for (const auto &param : this->paramValMap) {
         if (node.getOperandName() == param.first) {
             this->newExpr = param.second;
             return;
@@ -199,7 +201,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::ArrayExpr &node) {
 }
 
 void SCAM::ParamValuePropagation::visit(SCAM::ParamOperand &node) {
-    for (const auto& param : this->paramValMap) {
+    for (const auto &param : this->paramValMap) {
         if (node.getOperandName() == param.first) {
             this->newExpr = param.second;
             return;

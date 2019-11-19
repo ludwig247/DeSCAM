@@ -47,6 +47,7 @@ namespace SCAM {
         int stmtId;
         int currentNodeId{};
         int lastAssignmentId{};
+        bool lastAssignmentAlreadyStored;
         int numLastAssignments;
         bool isVarRead;                                                                  // true when the last assignment of a specific path to the variable at hands is a read
         bool wasRhsVarOp{};                                                                 // true when the right handside of an assignment is a variable operand

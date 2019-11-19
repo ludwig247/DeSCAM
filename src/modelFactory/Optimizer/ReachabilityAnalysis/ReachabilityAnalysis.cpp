@@ -470,7 +470,7 @@ namespace SCAM {
                                     condExpr);
 
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
-                            for (auto exp : toBeAssertedExpr) {
+                            for (auto exp : toBeAssertedExpressions) {
                                 std::cout << "exp is: " << exp << std::endl;
 
                             }

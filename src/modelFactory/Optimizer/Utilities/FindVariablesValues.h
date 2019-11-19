@@ -34,7 +34,8 @@ namespace SCAM {
         std::map<int, CfgNode *> CFG;
         std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
         std::set<std::string> readVariablesSet;
-
+        template <class T>
+        void addSubVariablesToValuesMap(SCAM::VariableOperand* varOp, const std::map<std::string, T *>& compoundValuesMap);
         void addValToVariableValuesMap(SCAM::Variable *variable, SCAM::Expr *rhs);
     };
 }

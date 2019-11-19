@@ -3,6 +3,7 @@
 //
 
 #include "PropagateConstantValue.h"
+#include "FindVariablesAndFunctionsInStatement.h"
 
 namespace SCAM {
 
@@ -10,7 +11,7 @@ namespace SCAM {
             const std::map<int, std::vector<SCAM::CfgNode *>> &allPathsToNodeMap,
             SCAM::Variable *var, int stmtId) :
             allPathsToNodeMap(allPathsToNodeMap),
-            variable(var), numLastAssignments(0), isVarRead(false), stmtId(stmtId), currentNodeId(0) {
+            variable(var), numLastAssignments(0), isVarRead(false), stmtId(stmtId), currentNodeId(0),lastAssignmentAlreadyStored(false) {
 
         for (const auto &pathPair: allPathsToNodeMap) {
             variableValueMap.clear();
@@ -65,7 +66,7 @@ namespace SCAM {
             return nullptr;
         } else if (this->wasRhsVarOp) {
             bool isPropagationFalse = false;
-            for (const auto& rhsVar : this->rhsVariableAssignmentsIds) {
+            for (const auto &rhsVar : this->rhsVariableAssignmentsIds) {
                 for (auto rhsVarAssignmentId : rhsVar.second) {
                     if (this->lastAssignmentId < rhsVarAssignmentId && rhsVarAssignmentId < this->stmtId) {
                         isPropagationFalse = true;
@@ -74,14 +75,16 @@ namespace SCAM {
                 }
             }
             this->wasRhsVarOp = false;
+            this->lastAssignmentAlreadyStored = false;
             this->rhsVariableAssignmentsIds.clear();
+
             if (isPropagationFalse) {
                 this->variableValueMap.clear();
                 return nullptr;
             }
         }
         if (variable->getDataType()->isCompoundType()) {
-            for (const auto& subVar: variable->getDataType()->getSubVarMap()) {
+            for (const auto &subVar: variable->getDataType()->getSubVarMap()) {
                 //check that there is no missing assignment to the subvariable or datatype mismatch
                 if (variableValueMap.find(subVar.first) == variableValueMap.end() ||
                     (variableValueMap.find(subVar.first) != variableValueMap.end() &&
@@ -91,7 +94,7 @@ namespace SCAM {
             }
             return new CompoundExpr(variableValueMap, variable->getDataType());
         } else if (variable->getDataType()->isArrayType()) {
-            for (const auto& subVar: variable->getDataType()->getSubVarMap()) {
+            for (const auto &subVar: variable->getDataType()->getSubVarMap()) {
                 //check that there is no missing assignment to the subvariable or datatype mismatch
                 if (variableValueMap.find(subVar.first) == variableValueMap.end() ||
                     (variableValueMap.find(subVar.first) != variableValueMap.end() &&
@@ -133,7 +136,10 @@ namespace SCAM {
                 if (varOp->getVariable()->getParent() != nullptr) {
                     if (varOp->getVariable()->getParent()->getFullName() == this->variable->getFullName()) {
                         addOrSubstituteVariableValue(varOp->getVariable()->getName(), node.getRhs());
-                        this->lastAssignmentId = this->currentNodeId;
+                        if(!this->lastAssignmentAlreadyStored) {
+                            this->lastAssignmentId = this->currentNodeId;
+                            this->lastAssignmentAlreadyStored = true;
+                        }
                         checkIfRhsOfAssignmentIsAVarOp(node.getRhs());
                         if (this->variable->getDataType()->getSubVarMap().size() == this->variableValueMap.size()) {
                             this->isVarRead = false;
@@ -151,7 +157,7 @@ namespace SCAM {
                 }
             }
             if (this->wasRhsVarOp) {
-                if (varOpName == (*this->rhsVariableAssignmentsIds.begin()).first) {
+                if (this->rhsVariableAssignmentsIds.find(varOpName) != this->rhsVariableAssignmentsIds.end()) {
                     this->rhsVariableAssignmentsIds.at(varOpName).insert(this->currentNodeId);
                 }
             }
@@ -194,10 +200,13 @@ namespace SCAM {
             }
         }
         if (this->wasRhsVarOp) {
-            if (varOpName == (*this->rhsVariableAssignmentsIds.begin()).first || (node.getStatusOperand() != nullptr &&
-                                                                                  node.getStatusOperand()->getVariable()->getFullName() ==
-                                                                                  (*this->rhsVariableAssignmentsIds.begin()).first)) {
+            if (this->rhsVariableAssignmentsIds.find(varOpName) != this->rhsVariableAssignmentsIds.end()) {
                 this->rhsVariableAssignmentsIds.at(varOpName).insert(this->currentNodeId);
+            } else if (node.getStatusOperand() != nullptr &&
+                       this->rhsVariableAssignmentsIds.find(node.getStatusOperand()->getVariable()->getFullName()) !=
+                       this->rhsVariableAssignmentsIds.end()) {
+                this->rhsVariableAssignmentsIds.at(node.getStatusOperand()->getVariable()->getFullName()).insert(
+                        this->currentNodeId);
             }
         }
     }
@@ -208,6 +217,15 @@ namespace SCAM {
             this->isVarRead = true;
             this->lastAssignmentId = this->currentNodeId;
         }
+        if (this->wasRhsVarOp) {
+            if (node.getStatusOperand() != nullptr &&
+                this->rhsVariableAssignmentsIds.find(node.getStatusOperand()->getVariable()->getFullName()) !=
+                this->rhsVariableAssignmentsIds.end()) {
+                this->rhsVariableAssignmentsIds.at(node.getStatusOperand()->getVariable()->getFullName()).insert(
+                        this->currentNodeId);
+            }
+        }
+
     }
 
 
@@ -228,13 +246,19 @@ namespace SCAM {
     }
 
     void PropagateConstantValue::checkIfRhsOfAssignmentIsAVarOp(SCAM::Expr *rhs) {
-        this->rhsVariableAssignmentsIds.clear();
-        if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(rhs)) {// a new assignment to the variable from another variable
+        SCAM::FindVariablesAndFunctionsInStatement findVars(rhs);
+        if (!findVars.getVariablesInStmtSet().empty()) {// a new assignment to the variable from another variable
             this->wasRhsVarOp = true;
             std::set<int> assignmentsIds;
-            this->rhsVariableAssignmentsIds.insert(std::make_pair(varOp->getVariable()->getFullName(), assignmentsIds));
+            for (auto varName : findVars.getVariablesInStmtSet()) {
+                if (this->rhsVariableAssignmentsIds.find(varName) == this->rhsVariableAssignmentsIds.end()) {
+                    this->rhsVariableAssignmentsIds.insert(
+                            std::make_pair(varName, assignmentsIds));
+                }
+            }
         } else { // if a new assignment to the variable that is not a variable operand occurs, reset flag and clear map
             this->wasRhsVarOp = false;
+            this->rhsVariableAssignmentsIds.clear();
         }
     }
 }

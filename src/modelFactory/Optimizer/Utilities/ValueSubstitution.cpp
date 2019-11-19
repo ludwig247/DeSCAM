@@ -71,16 +71,14 @@ void SCAM::ValueSubstitution::visit(struct UnaryExpr &node) {
     if (this->newExpr != nullptr) {
         if (node.getOperation() == "not") {
             this->newExpr = new UnaryExpr("not", this->newExpr);
-            this->newStmt = new UnaryExpr("not", this->newExpr);
+        }else if (node.getOperation() == "~") {
+            this->newExpr = new UnaryExpr("~", this->newExpr);
         } else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
-                this->newStmt = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
             } else {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
-                this->newStmt = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
             }
-
         } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
     }
 }
