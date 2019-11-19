@@ -26,7 +26,7 @@ std::string PrintDotStates::printDotStates(Module *module) {
         ss << "init" << "->";
         ss << "op_" << op->getName() << "[dir=none];\n";
         ss << "op_" << op->getName() << " ->" << op->getNextState()->getName() << ";" << std::endl;
-        ss << "op_" << op->getName() << "[shape=record label =\"" << op->getName() << "\"];" << std::endl;
+        ss << "op_" << op->getName() << "[shape=record label =\"" << "op_"<< op->getName() << "\"];" << std::endl;
     }
 
 
@@ -35,7 +35,7 @@ std::string PrintDotStates::printDotStates(Module *module) {
         ss << op->getState()->getName() << "->";
         ss << "op_" << op->getName() << "[dir=none];\n";
         ss << "op_" << op->getName() << " ->" << op->getNextState()->getName() << ";" << std::endl;
-        ss << "op_" << op->getName() << "[shape=record label =\"" << op->getName() << "\"];" << std::endl;
+        ss << "op_" << op->getName() << "[shape=record label =\"" << "op_"<<  op->getName() << "\"];" << std::endl;
     }
 
     ss << "init [ label =\"init\"];" << std::endl;

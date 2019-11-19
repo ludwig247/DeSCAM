@@ -51,7 +51,7 @@ std::string PrintDotSimple::printDotSimple(Module *module) {
         ss << "op_" << op->getName() << "[dir=none];\n";
         ss << "op_" << op->getName() << " ->";
         ss << op->getNextState()->getName() << ";" << std::endl;
-        ss << "op_" << op->getName() << "[shape=record label =\"{" << op->getName() << "}";
+        ss << "op_" << op->getName() << "[shape=record label =\"{" << "op_"<<op->getName() << "}";
         //Assumptions
         if (!op->getAssumptionList().empty()) {
             ss << " | { Assumptions |";
