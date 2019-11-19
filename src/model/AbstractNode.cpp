@@ -22,7 +22,7 @@ namespace SCAM {
         return this->name;
     }
 
-    void AbstractNode::setName(std::string &newName) {
+    void AbstractNode::setName(std::string newName) {
         this->name = newName;
     }
 
