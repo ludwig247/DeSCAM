@@ -51,6 +51,13 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module,
             this->variableBitWidthMap.insert(std::make_pair(variable.first, bitwidth));
         }
     }
+    std::set<std::string> deletedVariables;
+    for(const auto& pair : this->variableBitWidthMap){
+        if(pair.second ==0){
+            deletedVariables.insert(pair.first);
+        }
+    }
+
     //now check the write ports
     for (auto node : this->CFG) {
         auto stmt = node.second->getStmt();
@@ -279,8 +286,15 @@ void SCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
                    variable.second->getDataType()->isUnsigned()) {
             if (this->variablesThatHaveReadSet.find(variable.first) == this->variablesThatHaveReadSet.end() &&
                 this->variablesValuesMap.find(variable.first) == this->variablesValuesMap.end()) {
-                this->variableBitWidthMap.insert(
-                        std::make_pair(variable.second->getFullName(), 0)); //variable removed by other optimizations
+//                this->variableBitWidthMap.insert(
+//                        std::make_pair(variable.second->getFullName(), 0)); //variable removed by other optimizations
+                    if(variable.second->isCompoundType() || variable.second->isArrayType()){
+                        for(auto subvar : variable.second->getSubVarList()){
+                            if(this->variableBitWidthMap.find(subvar->getFullName())!=this->variableBitWidthMap.end()){
+                                this->variableBitWidthMap.erase(subvar->getFullName());
+                            }
+                        }
+                    }
             } else {
                 this->variableBitWidthMap.insert(std::make_pair(variable.second->getFullName(), 32));
             }
