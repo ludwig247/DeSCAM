@@ -1,6 +1,6 @@
 name: DESCAM-BUILD
 
-on: [push,pull-request]
+on: [push, pull_request]
 
 jobs:
   build:
