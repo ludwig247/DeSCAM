@@ -179,6 +179,11 @@ void SCAM::FunctionsOptimizer::visit(class Cast &node) {
 void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     if(node.getFunction()->getName().find("_opt")!=std::string::npos) return;
     hasFunction = true;
+    //check if already optimized a function with the same paramterslist
+    if(auto optFunc = isAlreadyOptimizedFunction(node.getOperandName(),node.getParamValueMap())){
+        this->newExpr = optFunc;
+        return;
+    }
     //optimize argument list
     std::map<std::string, SCAM::Expr *> newParamValueMap;
     for (const auto &param : node.getParamValueMap()) {
@@ -193,16 +198,6 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         }
     }
     auto function = new Function(*node.getFunction());
-    std::string newName;
-    if (this->functionUseMap.find(node.getOperandName()) == this->functionUseMap.end()) {
-        this->functionUseMap.insert(std::make_pair(node.getOperandName(), 1));
-        newName = node.getOperandName() + "_opt" + std::to_string(this->functionUseMap.at(node.getOperandName()));
-        this->functionUseMap.at(node.getOperandName())++;
-    } else {
-        newName = node.getOperandName() + "_opt" + std::to_string(this->functionUseMap.at(node.getOperandName()));
-        this->functionUseMap.at(node.getOperandName())++;
-    }
-    function->setName(newName);
     function->setReturnValueConditionList(node.getFunction()->getReturnValueConditionList());
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
         std::cout<< function->getName() << std::endl;
@@ -315,9 +310,14 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     //inline function if it has one return value
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();
+        this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, this->newExpr));
+    } else if(function->getReturnValueConditionList() == pvp.getReturnValueConditionList()) {
+        this->newExpr = nullptr;
     } else {//create new function and add it to the module
+        function->setName(createFuncName(node.getOperandName()));
         this->newExpr = new SCAM::FunctionOperand(function, newParamValueMap);
         this->module->addFunction(function);
+        this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, this->newExpr));
     }
 }
 
@@ -364,6 +364,38 @@ void SCAM::FunctionsOptimizer::visit(SCAM::ArrayExpr &node) {
 
 const std::map<int, SCAM::CfgNode *> &SCAM::FunctionsOptimizer::getCFG() const {
     return this->CFG;
+}
+
+std::string SCAM::FunctionsOptimizer::createFuncName(std::string funcOpName) {
+    std::string newName;
+    if (this->functionUseMap.find(funcOpName) == this->functionUseMap.end()) {
+        this->functionUseMap.insert(std::make_pair(funcOpName, 1));
+        newName = funcOpName + "_opt" + std::to_string(this->functionUseMap.at(funcOpName));
+        this->functionUseMap.at(funcOpName)++;
+    } else {
+        newName = funcOpName + "_opt" + std::to_string(this->functionUseMap.at(funcOpName));
+        this->functionUseMap.at(funcOpName)++;
+    }
+    return newName;
+}
+
+SCAM::Expr *
+SCAM::FunctionsOptimizer::isAlreadyOptimizedFunction(std::string operandName,const std::map<std::string, SCAM::Expr *> &paramValueMap) {
+    for (const auto& pair  : oldFuncOpOptimizedFuncPairsMap) {
+        if(pair.first->getOperandName() == operandName){
+            bool foundOptFunction = true;
+            for(const auto& param : pair.first->getParamValueMap()) {
+                if(!(*param.second == *paramValueMap.at(param.first))) {
+                    foundOptFunction = false;
+                    break;
+                }
+            }
+            if(foundOptFunction){
+                return pair.second;
+            }
+        }
+    }
+    return nullptr;
 }
 
 
