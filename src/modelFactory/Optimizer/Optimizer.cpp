@@ -14,7 +14,7 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
 
     SCAM::RemoveEmptyNodes rem(this->blockCFG);
 
-    SCAM::MergeRedundantIfElse sie(rem.getNewBlockCFG());  //TODO make it more readable
+    SCAM::MergeRedundantIfElse sie(rem.getNewBlockCFG());
 
     SCAM::RenumberCFG renumBlockCFG(sie.getNewBlockCFG());
 
@@ -23,7 +23,6 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     CreateRealCFG crNodeCFG(
             renumBlockCFG.getNewBlockCFG());
     module->setCFG(crNodeCFG.getCFG());
-
 
     SCAM::FindReadVariables frv(crNodeCFG.getCFG());
 
@@ -43,22 +42,25 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
 
     SCAM::ReachabilityAnalysis ra(gcp2.getCFG(), frv.getReadVariablesSet());
 
-    SCAM::OperatorStrengthReduction osr(ra.getCFG());
+    SCAM::SimplifyExpressions se(ra.getCFG(), module);
 
-    SCAM::SimplifyExpressions se(osr.getCFG(), module);
+    SCAM::OperatorStrengthReduction osr(se.getCFG());
 
-    SCAM::FunctionsOptimizer fo(se.getCFG(), module, frv.getReadVariablesSet());
+    SCAM::LivenessAnalysis la2(osr.getCFG(), module->getVariableMap(), frv.getReadVariablesSet());
+
+    SCAM::FunctionsOptimizer fo(la2.getCFG(), module, frv.getReadVariablesSet());
     module->setCFG(fo.getCFG());
 
-    SCAM::LivenessAnalysis la2(fo.getCFG(), module->getVariableMap(), frv.getReadVariablesSet());
-
-    SCAM::RenumberCFG rcn(la2.getCFG());
+    SCAM::RenumberCFG rcn(fo.getCFG());
 
     this->nodeCFG = rcn.getNewNodeCFG();
+
+    SCAM::FindUnusedFunctions uff2(this->nodeCFG, module);
+
 //    std::cout << OptUtilities::printCFG(this->nodeCFG);
     module->setCFG(this->nodeCFG);
-//    std::cout << SCAM::OptUtilities::printCFG(this->nodeCFG);
-    // SCAM::RangeAndBitWidthAnalysis raba(module, frv.getReadVariablesSet());
+
+//     SCAM::RangeAndBitWidthAnalysis raba(module, frv.getReadVariablesSet());
 
 }
 

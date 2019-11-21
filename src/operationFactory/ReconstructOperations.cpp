@@ -280,7 +280,12 @@ namespace SCAM {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
                         this->variableAssignmentMap[subSig->getFullName()] = value;
                     }
-                } else {
+                }else if(auto arrayExpr = NodePeekVisitor::nodePeekArrayExpr(this->newExpr)){
+                    for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
+                        find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
+                        this->variableAssignmentMap[subSig->getFullName()] = arrayExpr->getValueMap().at(subSig->getName());
+                    }
+                }else {
                     auto var = this->module->getVariable(ExprVisitor::getOperand(this->newExpr)->getOperandName());
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(var->getSubVar(subSig->getName())->getFullName(), new VariableOperand(var->getSubVar(subSig->getName())));
@@ -288,8 +293,6 @@ namespace SCAM {
                         this->variableAssignmentMap[subSig->getFullName()] = this->variableAssignmentMap[var->getSubVar(subSig->getName())->getFullName()];
                     }
                 }
-
-
                 //Simple var
             } else {
                 find_or_add_variable(node.getPort()->getDataSignal()->getName(), new DataSignalOperand(node.getPort()->getDataSignal()));

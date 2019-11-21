@@ -42,6 +42,7 @@ namespace SCAM {
         std::set<std::string> variablesThatHaveReadSet;                           // all variables that can't be optimized due to interprocedural behaviour
         std::vector<bool> toggledToTrueNodeVector;                                // true when a variable use detected/propagated at/to currentNode
         int numToTrueToggles;                                                     // if it doesn't change between runs,terminate algorithm
+        std::set<int> deadAssignmentSet;
 
         void removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId);
 

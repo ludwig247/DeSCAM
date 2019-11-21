@@ -49,6 +49,9 @@ namespace SCAM {
         std::map<std::string, std::set<SCAM::Expr *>> allVarValuesMap;          //Contains all possible values that all variable can take
         std::set<std::string> variablesThatHaveReadSet;                         //All variables that can't be optimized due to interprocedural behaviour
         std::map<std::string, int> functionUseMap;                              //keeps the number of times a function is used in the blockCFG, for naming purposes
+        std::map<SCAM::FunctionOperand*,SCAM::Expr*> oldFuncOpOptimizedFuncPairsMap;   //Keeps a pointer to the optimized function to reuse an optimized function instead of creating a new one if paramter list is the same
+        std::string createFuncName(std::string funcOpName);
+        SCAM::Expr* isAlreadyOptimizedFunction(std::string operandName, const std::map<std::string,SCAM::Expr*>& paramValueMap);
 
         //visitors
         void visit(class VariableOperand &node) override{};

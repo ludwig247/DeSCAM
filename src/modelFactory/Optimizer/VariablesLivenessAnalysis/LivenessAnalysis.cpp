@@ -108,6 +108,12 @@ namespace SCAM {
                           << "'\033[0m is pointless and has been deleted!" << std::endl;
                 removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(pointlessIfStmtNodeId);
             }
+            for( auto deadAssignment : deadAssignmentSet){
+                std::cout << "\t\033[1;33mWarning\033[0m: The statement: \033[1;33m'"
+                          << PrintStmt::toString(this->CFG.at(deadAssignment)->getStmt())
+                          << "'\033[0m is pointless and has been deleted!" << std::endl;
+                removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(deadAssignment);
+            }
         }
 
 #ifdef DEBUG_LIVENESS_ANALYSIS
@@ -199,6 +205,10 @@ namespace SCAM {
                 this->allAssignments.at(lhs->getVariable()->getFullName()).insert(currentNodeID);
             }
             node.getRhs()->accept(*this);
+            if(*node.getLhs() == *node.getRhs()){
+                deadAssignmentSet.insert(currentNodeID);
+                this->deadNodeDetected = true;
+            }
         }
     }
 

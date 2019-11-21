@@ -138,4 +138,8 @@ namespace SCAM {
         return ss.str();
 
     }
+
+    void CfgBlock::setStmtList(const std::vector<SCAM::Stmt *> &newStmtList) {
+        this->stmtList = newStmtList;
+    }
 }

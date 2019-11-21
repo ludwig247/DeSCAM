@@ -15,6 +15,7 @@ const unsigned int number2 = 0x111;
 const int number3 = ADD_HEX;
 const bool number4 = true;
 
+
 SC_MODULE(Test_Nordic)
 {
     blocking_in <int> test_in;
@@ -38,6 +39,7 @@ SC_MODULE(Test_Nordic)
         while(true)
         {
           test_in->read(foo);
+
           if(number4){
               bar = bar + number2;
           }
@@ -46,6 +48,7 @@ SC_MODULE(Test_Nordic)
 
           bar = number + bar;
           test_out->write(bar);
+
         }
     }
 };

@@ -46,7 +46,7 @@ namespace SCAM {
 
         //Statements
         void addStmt(SCAM::Stmt *);
-
+        void setStmtList(const std::vector<SCAM::Stmt *>& newStmtList);
         std::vector<SCAM::Stmt *> getStmtList(); //! Returns the list of SCAM Stmts
         //Terminators: are conditional statements: if,while,for
         void setTerminator(SCAM::Stmt *terminator);

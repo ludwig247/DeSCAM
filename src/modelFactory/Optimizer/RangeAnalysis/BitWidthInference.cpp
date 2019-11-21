@@ -116,7 +116,7 @@ void SCAM::BitWidthInference::visit(SCAM::UnaryExpr &node) {
 
     if (node.getOperation() == "not") {
         this->newBitWidth = 1;
-    } else if (node.getOperation() == "-") {
+    } else if (node.getOperation() == "-" || node.getOperation() == "~") {
         this->newBitWidth = 32;
         node.accept(*this);
     }

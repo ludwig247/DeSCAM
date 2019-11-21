@@ -38,6 +38,7 @@ SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigne
         lhsExpr(nullptr),
         unsigned_flag(unsigned_flag),
         pass(0) {
+
     //stmt->dump();
 
     TraverseStmt(stmt);
@@ -471,12 +472,14 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
     //Name
     std::string name = declRefExpr->getDecl()->getNameAsString();
+
     //Check for global variables
     auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
     if(!globalVars.empty() && globalVars.find(name) != globalVars.end()){
         this->switchPassExpr(new VariableOperand((globalVars.find(name))->second));
         return false;
     }
+
 
     //Check for state values
     if (clang::EnumConstantDecl *enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {

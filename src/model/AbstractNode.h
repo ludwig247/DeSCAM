@@ -29,7 +29,7 @@ namespace SCAM {
         //Name
         std::string getName() const;
 
-        void setName(std::string &newName);
+        void setName(std::string newName);
 
     private:
         std::string name;
