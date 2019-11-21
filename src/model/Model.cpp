@@ -54,4 +54,17 @@ namespace SCAM {
         return topInstance;
     }
 
+    void Model::addGlobalVariable(Variable *variable) {
+        this->globalVariableMap.insert(std::make_pair(variable->getName(),variable));
+
+    }
+
+    const std::map<std::string, Variable *> &Model::getGlobalVariableMap() const {
+        return globalVariableMap;
+    }
+
+    void Model::removeGlobalVariable(Variable *variable) {
+        this->globalVariableMap.erase(variable->getName());
+    }
+
 }

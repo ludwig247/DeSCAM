@@ -15,6 +15,7 @@
 #include "ModuleInstance.h"
 #include "FindDataFlow.h"
 #include "FindFunctions.h"
+#include "FindGlobal.h"
 #include <OperationFactory.h>
 #include <Optimizer/Optimizer.h>
 
@@ -51,10 +52,13 @@ bool SCAM::ModelFactory::fire() {
 
     //Delte content of previous models
     //SCAM model
-    model = new Model("SCAM_Model");
+    this->model = new Model("top_level");
+    ModelGlobal::setModel(model);
     //Modules
-    this->addModules(tu);
+    this->addModules(tu, SCAM::Module());
 
+    //Optimize model
+    this->optimizeModel();
     //Instances
     this->addInstances(tu);
     //sc_main
@@ -63,7 +67,7 @@ bool SCAM::ModelFactory::fire() {
 
 
 //Modules
-void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
+void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl, SCAM::Module module) {
     FindModules modules(decl);
 
 
@@ -91,7 +95,14 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         std::cout << "############################" << std::endl;
         //DataTypes::reset();//FIXME:
         Module *module = new Module(scparModule.first);
+        //INFO: this is the most important step ! Otherwise the PluginAction Object is deleted and with it the model
+
+
         model->addModule(module);
+
+        //Global variables
+        this->addGlobalVariables(decl,module);
+
         //Members
         this->addVariables(module, scparModule.second);
         //Ports
@@ -353,6 +364,9 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     } else {
         SCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
         module->setCFG(test.getCFG());
+        for (auto item   : cfgFactory.getControlFlowMap()) {
+            std::cout << item.second->print() << std::endl;
+        }
         SCAM::OperationFactory operationFactory(test.getCFG(), module);
         module->setPropertySuite(operationFactory.getPropertySuite());
     }
@@ -418,7 +432,6 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
             }
 
             module->addVariable(new Variable(variable.first, type, initialValue));
-
         }
     }
 
@@ -430,8 +443,7 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
 }
 
 bool SCAM::ModelFactory::postFire() {
-    //INFO: this is the most important step ! Otherwise the PluginAction Object is deleted and with it the model
-    ModelGlobal::setModel(model);
+
     return 0;
 }
 
@@ -517,6 +529,56 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *pDecl
 
     }
     //throw std::runtime_error(" Throw ");
+}
+
+void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Module *pModule) {
+    FindGlobal findGlobal(pDecl, pModule);
+
+    for(auto var: findGlobal.getVariableMap()){
+        this->model->addGlobalVariable(var.second);
+        var.second->setConstant(true);
+    }
+
+}
+
+void SCAM::ModelFactory::optimizeModel() {
+
+    //Remove unused globalVariables
+    std::map<Variable *, bool> removeGlobalVars;
+    for (auto var: model->getGlobalVariableMap()) {
+        assert(var.second->isBuiltInType() && var.second->isConstant() && "Only built-in allowed as global variable");
+        removeGlobalVars.insert(std::make_pair(var.second, true));
+    }
+    for(auto module: model->getModules()){
+        for (auto state : module.second->getFSM()->getStateMap()) {
+            for(auto op: state.second->getOutgoingOperationsList()){
+                for (auto ass: op->getAssumptionsList()) {
+                    for (auto usedVar: ExprVisitor::getUsedVariables(ass)) {
+                        if(usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+                    }
+                }
+                //Check commitment for usage
+                for (auto comm: op->getCommitmentsList()) {
+                    if (PrintStmt::toString(comm->getLhs()) == PrintStmt::toString(comm->getRhs())) {
+                        continue;
+                    }
+                    for (auto usedVar: ExprVisitor::getUsedVariables(comm->getRhs())) {
+                        if(usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+                    }
+                }
+            }
+        }
+    }
+
+    //New global vars
+    std::map<Variable *, bool> newGlobalVars;
+    for(auto var: removeGlobalVars){
+        if(var.second){
+            this->model->removeGlobalVariable(var.first);
+        }
+    }
+
+
 }
 
 

@@ -28,14 +28,19 @@ namespace SCAM {
         std::map<std::string, Module *> getModules();
 
         //ModuleInstances
-        void addTopInstance(ModuleInstance *instance);
+        void addTopInstance(ModuleInstance * instance);
 
         ModuleInstance *getTopInstance() const;
+
+        void addGlobalVariable(Variable * variable);
+        void removeGlobalVariable(Variable * variable);
+        const std::map<std::string, Variable *> &getGlobalVariableMap() const;
 
         const std::map<std::string, ModuleInstance *> &getModuleInstanceMap() const;
 
     private:
         std::map<std::string, Module *> moduleMap; //! Contains the structural describtion of each _module
+        std::map<std::string, Variable*> globalVariableMap; //! Contains variables that are used throughout the model
         std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains the structural describtion of each _module
 
         ModuleInstance *topInstance;
