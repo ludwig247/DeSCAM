@@ -16,7 +16,8 @@ namespace SCAM {
     public:
 
         // Constructor
-        AbstractMacro(const std::string &name, const DataType * type);
+        AbstractMacro() = delete;
+        explicit AbstractMacro(const std::string &name, const DataType * type);
 
         // Getter
         const std::string &getName() const;

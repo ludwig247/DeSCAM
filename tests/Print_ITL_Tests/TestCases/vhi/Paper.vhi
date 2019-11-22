@@ -5,6 +5,7 @@ macro m_out_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro b_in_sig : msg_t := end macro;
 macro b_in_sig_data : signed := end macro;
 macro b_in_sig_status : status_t := end macro;
 macro m_out_sig : signed := end macro;

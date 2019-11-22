@@ -215,7 +215,7 @@ void SCAM::ValueSubstitution::visit(struct FunctionOperand &node) {
 void SCAM::ValueSubstitution::visit(struct ArrayOperand &node) {
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
     } else this->newExpr = &node;
 }
 

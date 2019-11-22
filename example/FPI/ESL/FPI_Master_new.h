@@ -8,7 +8,7 @@
 #include "systemc.h"
 
 #include "Types.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 
 #define is_BTR(opc) (opc==BTR2_OPC || opc==BTR4_OPC || opc==BTR8_OPC)
 

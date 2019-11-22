@@ -353,7 +353,7 @@ void SCAM::ExpressionSubstitution::visit(struct ArrayOperand &node) {
         if (*this->propagatedExpr == *node.getIdx()) {
             this->propagatedExpr = &node;
         } else {
-            this->propagatedExpr = new ArrayOperand(node.getArrayVar(), this->propagatedExpr);
+            this->propagatedExpr = new ArrayOperand(node.getArrayOperand(), this->propagatedExpr);
         }
     }
 }

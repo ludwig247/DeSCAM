@@ -364,9 +364,6 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     } else {
         SCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
         module->setCFG(test.getCFG());
-        for (auto item   : cfgFactory.getControlFlowMap()) {
-            std::cout << item.second->print() << std::endl;
-        }
         SCAM::OperationFactory operationFactory(test.getCFG(), module);
         module->setPropertySuite(operationFactory.getPropertySuite());
     }
@@ -532,13 +529,12 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *pDecl
 }
 
 void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Module *pModule) {
-    FindGlobal findGlobal(pDecl, pModule);
+    //FindGlobal findGlobal(pDecl, pModule);
 
-    for(auto var: findGlobal.getVariableMap()){
-        this->model->addGlobalVariable(var.second);
-        var.second->setConstant(true);
-    }
-
+    //for(auto var: findGlobal.getVariableMap()){
+    //    this->model->addGlobalVariable(var.second);
+    //    var.second->setConstant(true);
+    //}
 }
 
 void SCAM::ModelFactory::optimizeModel() {

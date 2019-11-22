@@ -15,10 +15,13 @@ namespace SCAM {
         ArrayOperand() = delete;
 
         ArrayOperand(Variable *arrayVar, Expr *idx);
+        ArrayOperand(Operand * operand, Expr *idx);
+
 
         virtual ~ArrayOperand() = default;
 
-        Variable *getArrayVar() const;
+        Operand * getArrayOperand() const;
+
 
         Expr *getIdx() const;
 
@@ -28,6 +31,8 @@ namespace SCAM {
 
     private:
         SCAM::Variable *arrayVar;
+        Operand * operand;
+
         SCAM::Expr *idx;
     };
 }

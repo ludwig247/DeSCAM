@@ -173,7 +173,7 @@ void SCAM::ConditionVisitor::visit(SCAM::Assignment &node) {
 }
 
 void SCAM::ConditionVisitor::visit(SCAM::ArrayOperand &node) {
-    this->ss << node.getArrayVar()->getName();
+    this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "(";
     node.getIdx()->accept(*this);
     this->ss << ")";

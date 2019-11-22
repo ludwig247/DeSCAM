@@ -85,7 +85,7 @@ echo "#endif") > $SCAM_HOME/src/global/Config.h;
 echo -e "\e[30;48;5;82mInstalling SCAM ...\e[0m";
 (cd $SCAM_HOME/install/tmp/build/ &&
 $CMAKE_BIN ../../../ &&
-$CMAKE_BIN --build $SCAM_HOME/install/tmp/build/ --target SCAM -- -j 4  &&
+$CMAKE_BIN --build $SCAM_HOME/install/tmp/build/ --target DESCAM -- -j 4  &&
 echo -e"\e[30;48;5;82mInstalled SCAM!\e[0m" ) || (echo -e "\e[41mError installing SCAM \e[0m" && exit 1);
 
 echo -e "\e[30;48;5;82mRun Test\e[0m";
