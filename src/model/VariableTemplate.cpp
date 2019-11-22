@@ -94,4 +94,14 @@ namespace SCAM {
         }
         return test;
     }
+
+    template<class T>
+    bool VariableTemplate<T>::isConstant() const {
+        return constant;
+    }
+
+    template<class T>
+    void VariableTemplate<T>::setConstant(bool isConstant) {
+        VariableTemplate::constant = isConstant;
+    }
 }

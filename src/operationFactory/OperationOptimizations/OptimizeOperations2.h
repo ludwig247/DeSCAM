@@ -20,10 +20,13 @@ public:
     const std::map<std::string, Variable*> getNewVarMap() const;
     const std::vector<SCAM::Operation2*> getOperationsList() const;
 
+    const std::map<Variable *, bool> &getRemoveGlobalVars() const; //!if true, remove
+
 private:
     std::map<Variable *, bool> removeVars;
     std::map<std::string, Variable*> varMap;
     std::vector<SCAM::Operation2*> operationsList;
+
 };
 
 }

@@ -1,4 +1,4 @@
 package testbasic3_types;
 
-	import scam_model_types::*;
+	 import top_level_types::*;
 endpackage

@@ -19,7 +19,7 @@ add_library (modelFactory
         FindSections.cpp
         FindNewDatatype.cpp
         FindFunctions.cpp
-        )
+        FindGlobal.cpp FindGlobal.h)
 
 target_link_libraries(modelFactory cfgFactory)
 target_link_libraries(modelFactory functionFactory)

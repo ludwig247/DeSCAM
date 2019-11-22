@@ -42,9 +42,10 @@ namespace SCAM {
  */
     void CFGFactory::translateToScamCFG() {
 
-        clang::LangOptions LO;
-        LO.CPlusPlus = true;
-        //clangCFG->dump(LO, false);
+//        clang::LangOptions LO;
+//        LO.CPlusPlus = true;
+//        clangCFG->dump(LO, true);
+
         clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
 
         //Translate entry node of block

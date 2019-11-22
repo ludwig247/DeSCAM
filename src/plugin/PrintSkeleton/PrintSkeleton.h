@@ -41,6 +41,8 @@ private:
 
     std::string generateGlobalTypes();
 
+    std::string generateGlobalDefs();
+
     std::string generateHDLSkeleton();
 
     void setLanguage();
@@ -84,6 +86,8 @@ private:
     void insertRegister(std::stringstream &ss, const std::string &name, const std::string &type);
 
     void insertNonblockingAssignment(std::stringstream &ss, const std::string &name, const std::string &value, int indentation);
+
+
 };
 
 #endif //PROJECT_PRINTVHDL_H

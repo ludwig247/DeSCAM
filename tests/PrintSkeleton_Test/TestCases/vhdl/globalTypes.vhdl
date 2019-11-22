@@ -1,8 +1,8 @@
 library ieee;
 use IEEE.numeric_std.all;
-use work.SCAM_Model_types.all;
+use work.top_level_types.all;
 
-package SCAM_Model_types is
+package top_level_types is
 subtype bool is Boolean;
 subtype int is signed(31 downto 0);
 type Mode is (READ, WRITE);
@@ -27,4 +27,4 @@ type test_compound is record
 	x: int;
 	y: unsigned (31 downto 0);
 end record;
-end package SCAM_Model_types;
+end package top_level_types;
