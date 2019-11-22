@@ -56,7 +56,6 @@ public:
             bus_req->write(req);
             bus_resp->read(resp);
 
-            wait(SC_ZERO_TIME);
         }
     }
 };

@@ -19,7 +19,7 @@ struct MasterAgent : public sc_module {
     Sections section;
     Sections nextsection;
     //CLK
-    master_in<bool> clk;
+    //master_in<bool> clk;
     bool clk_pulse;
 
     //Communication between Master and Agent
@@ -48,6 +48,7 @@ struct MasterAgent : public sc_module {
 
     void fsm() {
         while (true) {
+
             section = nextsection;
             if (section == IDLE) {
 //                std::cout << this->name() << " - IDLE" << std::endl;
@@ -80,7 +81,7 @@ struct MasterAgent : public sc_module {
             }
             if (section == WAITING) {
 //                std::cout << this->name() << " - WAIT " << std::endl;
-                clk->master_read(clk_pulse);
+                important_state
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == true){
                     agent_to_bus_resp.ack = OK;
@@ -103,7 +104,7 @@ struct MasterAgent : public sc_module {
             }
             if(section == DONE){
 //                std::cout << this->name() << " - DONE " << std::endl;
-                clk->master_read(clk_pulse);
+                important_state
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == false){
                     agent_to_master->write(agent_to_bus_resp);
@@ -111,7 +112,7 @@ struct MasterAgent : public sc_module {
                 }
 
             }
-            wait(SC_ZERO_TIME);
+
         }
     }
 

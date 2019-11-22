@@ -20,20 +20,24 @@ class MasterSlave : public sc_prim_channel,
 public:
     MasterSlave(const char *name);
 
-    void master_read(T &out,std::string stateName = "");
+    void master_read(T &out);
 
-    void master_write(const T &val,std::string stateName = "");
+    void master_write(const T &val);
 
 //    bool slave_read(T &out);
-    void slave_read(T & out,std::string stateName = "");
-    void slave_read(T & out, bool & success,std::string stateName = "");
+    void slave_read(T & out);
+    void slave_read(T & out, bool & success);
 
-    void slave_write(const T &val,std::string stateName = "");
+    void slave_write(const T &val);
+
+//    bool peek();
+//
+//    bool poke();
 
     void register_port(sc_port_base &port, const char *if_typename);
 
 private:
-    T *shared_data;
+    const T *shared_data;
     bool available_data, data_read;
     bool reader_ready, writer_ready;
 

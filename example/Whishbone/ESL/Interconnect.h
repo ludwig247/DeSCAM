@@ -19,8 +19,8 @@ struct Interconnect : public sc_module {
     Sections section;
     Sections nextsection;
     //clock
-    master_in<bool> clk;
-    bool clk_pulse;
+//    master_in<bool> clk;
+//    bool clk_pulse;
 
     //Master
     shared_in<master_signals> master_input;
@@ -55,9 +55,10 @@ struct Interconnect : public sc_module {
 
     void fsm() {
         while (true) {
+
             section = nextsection;
             if (section == IDLE) {
-                clk->master_read(clk_pulse);
+               important_state
                 //std::cout << this->name() << " - IDLE" << std::endl;
                 master_input->get(from_master);
                 if (from_master.cyc == true && from_master.stb == true) {
@@ -96,7 +97,7 @@ struct Interconnect : public sc_module {
                 from_master.cyc = false;
                 from_master.stb = false;
                 from_master.we = false;
-                clk->master_read(clk_pulse);
+                important_state
                 //std::cout << this->name() << "- TRANSMITTING" << std::endl;
                 if (slave_number == 0) {
                     slave_in0->get(to_master);
@@ -133,7 +134,7 @@ struct Interconnect : public sc_module {
                 master_output->set(to_master);
 
                 //Wait until master has read the signals
-                clk->master_read(clk_pulse);
+                important_state
                 master_input->get(from_master);
                 if (from_master.cyc == false && from_master.stb == false) {
                     //std::cout << this->name() << " - DONE " << std::endl;
@@ -145,7 +146,7 @@ struct Interconnect : public sc_module {
                 }
 
             }
-            wait(SC_ZERO_TIME);
+
         }
     }
 };

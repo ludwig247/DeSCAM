@@ -1,6 +1,6 @@
 #include <Blocking.h>
 #include "systemc.h"
-#include "Bus.h"
+#include "Bus_new.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
@@ -19,7 +19,7 @@ int sc_main(int, char **) {
     SlaveDummy slaveDummy2("slaveDummy2");
     SlaveDummy slaveDummy3("slaveDummy3");
 
-    Bus bus("bus");
+    Bus_new bus("bus");
 
     Blocking<bus_req_t> MasterToBus("MasterToBus");
     masterDummy.bus_req(MasterToBus);

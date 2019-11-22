@@ -19,8 +19,8 @@ struct SlaveAgent : public sc_module {
     Sections nextsection;
 
     //clock
-    master_in<bool> clk;
-    bool clk_pulse;
+    //master_in<bool> clk;
+    //bool clk_pulse;
 
     //Communication between Master and Agent
     blocking_in<bus_resp_t> slave_to_agent;
@@ -48,10 +48,11 @@ struct SlaveAgent : public sc_module {
 
     void fsm() {
         while (true) {
+
             section = nextsection;
             if (section == IDLE) {
                 //std::cout << this->name() << " - SLAVE IDLE"  << std::endl;
-                clk->master_read(clk_pulse);
+                important_state
                 this->bus_to_agent->get(wb_in);
 
                 if (wb_in.cyc == true && wb_in.stb == true && wb_in.we == false) {
@@ -81,7 +82,7 @@ struct SlaveAgent : public sc_module {
                 nextsection = DONE;
             }
             if (section == DONE) {
-                clk->master_read(clk_pulse);
+               important_state
                 bus_to_agent->get(wb_in);
 
                 if(wb_in.cyc == false && wb_in.stb == false){
@@ -100,7 +101,7 @@ struct SlaveAgent : public sc_module {
                 }
                 agent_to_bus->set(wb_out);
             }
-            wait(SC_ZERO_TIME);
+            //wait(SC_ZERO_TIME);
         }
     }
 };
