@@ -10,6 +10,13 @@
 #include "Model.h"
 //#include <PropertyFactory.h>
 
+enum ITLOption {
+    STANDARD,
+    ADJUSTMACROS,
+    PIPELINED,
+    HLS
+};
+
 class PrintITL : public PluginFactory {
 
 public:
@@ -26,9 +33,13 @@ public:
 private:
     std::stringstream ss;
 
+    ITLOption usedITLOption;
+
     std::string functions();
 
     std::string convertDataType(std::string dataTypeName);
+
+    std::string convertDataTypeForHLS(std::string dataTypeName);
 
     std::string location(bool loc);
 
@@ -38,7 +49,9 @@ private:
 
     std::string pipelined();
 
-//        std::string hideConstants();
+    std::string hls();
+
+    //        std::string hideConstants();
     SCAM::Module *module;
 
 };

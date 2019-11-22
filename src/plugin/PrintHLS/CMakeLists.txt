@@ -1,0 +1,11 @@
+add_library(PrintHLS
+            PrintHLS.cpp
+            PrintFunctionStatements.cpp
+            PrintFunctionParameters.cpp
+            PrintOperations.cpp
+            PrintSynthesisScripts.cpp
+            VisitParameters.cpp
+            PrintVisibleRegisters.cpp
+            VisitInternalRegister.cpp
+            InputRegisterVisitor.cpp
+            Utilities.cpp)

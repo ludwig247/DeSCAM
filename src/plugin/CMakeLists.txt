@@ -30,6 +30,9 @@ add_plugin(PrintCompleteness; "Completeness description in ITL")
 
 add_plugin(PrintTemplate; "Example for a plugin")
 
+add_plugin(PrintVHDL; "Print VHDL template")
+add_plugin(PrintHLS; "Print C++ Files and scripts for Vivado High Level Synthesis")
+
 #add_plugin(PrintMonitor; "fill out")
 
 #UNDER MAINTANANCE
@@ -37,7 +40,6 @@ add_plugin(PrintTemplate; "Example for a plugin")
 
 
 #NOT WORKING ANYMORE
-#add_plugin(PrintVHDL; "Print VHDL template")
 #add_plugin(PrintAML; "Structure and FSM in AML")
 #add_plugin(PrintXML; "Dumps the structure of each module as XML")
 #add_plugin(PrintModulesCheckers; "Create a project to check equivalency between generate module and original one" ; PrintSystemC)
@@ -46,11 +48,14 @@ add_plugin(PrintTemplate; "Example for a plugin")
 #Add new options by calling:
 add_plugin_option(PrintITL; adjustmacros; "Adjusts macros to automatically fit them to the generated RTL")
 add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal with pipelining more easily")
+add_plugin_option(PrintITL; hls; "Adjusts macros to automatically fit them to the generated RTL with HLS")
 
 add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 
 add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
+
+add_plugin_option(PrintVHDL; hls; "Print VHDL with HLS module")
 
 #Please don't change the code below.
 add_library(PluginFactory
