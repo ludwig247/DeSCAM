@@ -31,12 +31,12 @@ public:
 
     void fsm() {
         while (true) {
-            clk1->nb_write(true);
-            clk2->nb_write(true);
-            clk3->nb_write(true);
-            clk4->nb_write(true);
-            clk5->nb_write(true);
-            clk6->nb_write(true);
+            clk1->slave_write(true);
+            clk2->slave_write(true);
+            clk3->slave_write(true);
+            clk4->slave_write(true);
+            clk5->slave_write(true);
+            clk6->slave_write(true);
             wait(SC_ZERO_TIME);
         }
     }

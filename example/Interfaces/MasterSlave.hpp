@@ -18,7 +18,7 @@ MasterSlave<T>::MasterSlave (const char *name) : sc_prim_channel(name) {
 }
 
 template<typename T>
-void MasterSlave<T>::master_write(const T &val) {
+void MasterSlave<T>::master_write(const T &val,std::string stateName) {
     /**
      * @breaf: Master write should definitely be read
      *
@@ -59,7 +59,7 @@ void MasterSlave<T>::master_write(const T &val) {
 }
 
 template<typename T>
-void MasterSlave<T>::slave_read(T &out) {
+void MasterSlave<T>::slave_read(T &out,std::string stateName) {
     /**
      * @breaf: Slave read reads data IF AVAILABLE and return a boolean stating successful reading
      *
@@ -101,7 +101,7 @@ void MasterSlave<T>::slave_read(T &out) {
 }
 
 template<typename T>
-void MasterSlave<T>::slave_read(T &out, bool &success) {
+void MasterSlave<T>::slave_read(T &out, bool &success,std::string stateName) {
     /**
      * @breaf: Slave read reads data IF AVAILABLE and return a boolean stating successful reading
      *
@@ -144,7 +144,7 @@ void MasterSlave<T>::slave_read(T &out, bool &success) {
 }
 
 template<typename T>
-void MasterSlave<T>::master_read(T & out) {
+void MasterSlave<T>::master_read(T & out,std::string stateName) {
     /**
      * @breaf: Master read should always have a value to read
      *
@@ -184,7 +184,7 @@ void MasterSlave<T>::master_read(T & out) {
 }
 
 template<typename T>
-void MasterSlave<T>::slave_write(const T &val) {
+void MasterSlave<T>::slave_write(const T &val,std::string stateName) {
 //    std::cout << "@" << this->name() << ": MasterSlave->slave_write: writing something\n";
     shared_data = &val;
     available_data = true;

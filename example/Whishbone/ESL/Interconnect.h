@@ -57,7 +57,7 @@ struct Interconnect : public sc_module {
         while (true) {
             section = nextsection;
             if (section == IDLE) {
-                clk->read(clk_pulse);
+                clk->master_read(clk_pulse);
                 //std::cout << this->name() << " - IDLE" << std::endl;
                 master_input->get(from_master);
                 if (from_master.cyc == true && from_master.stb == true) {
@@ -96,7 +96,7 @@ struct Interconnect : public sc_module {
                 from_master.cyc = false;
                 from_master.stb = false;
                 from_master.we = false;
-                clk->read(clk_pulse);
+                clk->master_read(clk_pulse);
                 //std::cout << this->name() << "- TRANSMITTING" << std::endl;
                 if (slave_number == 0) {
                     slave_in0->get(to_master);
@@ -133,7 +133,7 @@ struct Interconnect : public sc_module {
                 master_output->set(to_master);
 
                 //Wait until master has read the signals
-                clk->read(clk_pulse);
+                clk->master_read(clk_pulse);
                 master_input->get(from_master);
                 if (from_master.cyc == false && from_master.stb == false) {
                     //std::cout << this->name() << " - DONE " << std::endl;

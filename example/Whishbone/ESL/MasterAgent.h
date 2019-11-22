@@ -80,7 +80,7 @@ struct MasterAgent : public sc_module {
             }
             if (section == WAITING) {
 //                std::cout << this->name() << " - WAIT " << std::endl;
-                clk->read(clk_pulse);
+                clk->master_read(clk_pulse);
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == true){
                     agent_to_bus_resp.ack = OK;
@@ -103,7 +103,7 @@ struct MasterAgent : public sc_module {
             }
             if(section == DONE){
 //                std::cout << this->name() << " - DONE " << std::endl;
-                clk->read(clk_pulse);
+                clk->master_read(clk_pulse);
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == false){
                     agent_to_master->write(agent_to_bus_resp);

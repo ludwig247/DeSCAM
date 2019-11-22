@@ -12,5 +12,5 @@ include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces_new/)
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
 add_executable(Whisbone_new ${R_SRC}
-        MasterAgent.h SlaveAgent.h Interconnect.h MasterDummy.h SlaveDummy.h Clk.h)
+        MasterAgent.h SlaveAgent.h Interconnect.h ../MasterDummy.h SlaveDummy.h Clk.h)
 target_link_libraries(Whisbone_new systemc)
