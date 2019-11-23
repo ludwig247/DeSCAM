@@ -5,7 +5,6 @@ add_library(PrintVHDL
         VHDLPrintVisitor.cpp
         OperationPruning.cpp
         VHDLPrintVisitorHLS.cpp
-        VisitFunctions.cpp
         VHDLPrintReset.cpp
         VHDLPrintResetNotify.cpp
         PrintVHDLForHLS.cpp

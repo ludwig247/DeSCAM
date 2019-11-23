@@ -2,11 +2,9 @@
 // Created by johannes on 02.11.19.
 //
 
-#include <cmath>
 #include "ExprVisitor.h"
 #include "PrintVHDLForHLS.h"
 #include "VHDLPrintVisitor.h"
-#include "VisitFunctions.h"
 #include "VHDLPrintResetNotify.h"
 #include "VHDLPrintVisitorHLS.h"
 
@@ -19,7 +17,6 @@ PrintVHDLForHLS::PrintVHDLForHLS() :
 }
 
 std::map<std::string, std::string> PrintVHDLForHLS::printModel(Model *model) {
-    // Print types that have to be seen from outside of the provided modules
     for (auto &module : model->getModules()) {
         this->propertySuite = module.second->getPropertySuite();
         this->currentModule = module.second;
@@ -100,7 +97,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     auto portIt = signalFactory->getAllPorts();
     for (auto signal = portIt.begin(); signal != portIt.end(); ++signal) {
-        ss << "\t" << signal->name << "_sig: " << signal->direction << " " << signal->type;
+        ss << "\t" << signal->name << ": " << signal->direction << " " << signal->type;
         if (std::next(signal) != portIt.end()) {
             ss << ";\n";
         }
@@ -115,7 +112,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     // Print Signals
     auto printRegSignals = [&ss](std::vector<Signal> const& signals) {
         for (const auto& sig : signals) {
-            ss << "\tsignal " << sig.name << "_reg: " << sig.type << ";\n";
+            ss << "\tsignal " << sig.getName(SubVarStyle::UL) << "_reg: " << sig.type << ";\n";
         }
     };
 
@@ -133,8 +130,8 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     ss << "\n\t-- HLS module output signals\n";
     auto printVldSignals = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << signal.name << "_out: " << signal.type << ";\n"
-               << "\tsignal " << signal.name << "_vld: " << "std_logic" << ";\n";
+            ss << "\tsignal " << signal.getName(SubVarStyle::UL) << "_out: " << signal.type << ";\n"
+               << "\tsignal " << signal.getName(SubVarStyle::UL) << "_vld: " << "std_logic" << ";\n";
         }
     };
     printVldSignals(signalFactory->getOutputs(true, true));
@@ -142,7 +139,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     auto printSignals = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << signal.name << ": " << signal.type << ";\n";
+            ss << "\tsignal " << signal.getName(SubVarStyle::UL) << ": " << signal.type << ";\n";
         }
     };
     ss << "\n\t-- Signals for handshaking protocol with hls module\n";
@@ -157,7 +154,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     ss << "\tport(\n";
     auto printControlSignals = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            ss << "\t\tap_" << signal.name << ": " << signal.direction << " " << signal.type << ";\n";
+            ss << "\t\tap_" << signal.getName(SubVarStyle::UL) << ": " << signal.direction << " " << signal.type << ";\n";
         }
     };
     printControlSignals(signalFactory->getBaseSignals());
@@ -165,10 +162,10 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     auto printComponentSignals = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            ss << "\t\t" << signal.name << (signal.isEnum ? "" : "_V" ) << ": " << signal.direction
+            ss << "\t\t" << signal.getName(SubVarStyle::UL) << (signal.isEnum ? "" : "_V" ) << ": " << signal.direction
                << " " << signal.type << ";\n";
             if (signal.direction == "out") {
-                ss << "\t\t" << signal.name << (signal.isEnum ? "_ap_vld" : "_V_ap_vld" ) << ": " << signal.direction
+                ss << "\t\t" << signal.getName(SubVarStyle::UL) << (signal.isEnum ? "_ap_vld" : "_V_ap_vld" ) << ": " << signal.direction
                    << " std_logic;\n";
             }
         }
@@ -191,7 +188,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\tport map(\n";
     auto printControlInstantiation = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            ss << "\t\tap_" << signal.name << " => " << signal.name << ",\n";
+            ss << "\t\tap_" << signal.getName(SubVarStyle::UL) << " => " << signal.getName(SubVarStyle::UL) << ",\n";
         }
     };
     printControlInstantiation(signalFactory->getHSProtocolSignals());
@@ -200,13 +197,13 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     auto printComponentInstantiation = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
             if (signal.direction == "out") {
-                ss << "\t\t" << signal.name << (signal.isEnum ? "" : "_V" ) << " => "
-                   << signal.name << "_out,\n";
-                ss << "\t\t" << signal.name << (signal.isEnum ? "_ap_vld" : "_V_ap_vld" ) << " => " << signal.name
-                   << "_vld,\n";
+                ss << "\t\t" << signal.getName(SubVarStyle::UL) << (signal.isEnum ? "" : "_V" ) << " => "
+                   << signal.getName(SubVarStyle::UL) << "_out,\n";
+                ss << "\t\t" << signal.getName(SubVarStyle::UL) << (signal.isEnum ? "_ap_vld" : "_V_ap_vld" )
+                   << " => " << signal.getName(SubVarStyle::UL) << "_vld,\n";
             } else {
-                ss << "\t\t" << signal.name << (signal.isEnum ? "" : "_V" ) << " => "
-                   << signal.name << "_reg,\n";
+                ss << "\t\t" << signal.getName(SubVarStyle::UL) << (signal.isEnum ? "" : "_V" ) << " => "
+                   << signal.getName(SubVarStyle::UL) << "_reg,\n";
             }
         }
     };
@@ -283,15 +280,15 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     ss << "\t-- Output_Vld Processes\n";
     auto printOutputProcess = [&](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            std::string registerName = utils->getCorrespondingRegisterName(signal.name);
-            ss << "\tprocess(rst, " << signal.name << "_vld)\n"
+            std::string registerName = utils->getCorrespondingRegisterName(signal.getName(SubVarStyle::UL));
+            ss << "\tprocess(rst, " << signal.getName(SubVarStyle::UL) << "_vld)\n"
                << "\tbegin\n"
                << "\t\tif (rst = \'1\') then\n"
                << "\t\t\t" << registerName << " <= " << signal.initialValue << ";\n"
-               << "\t\telsif (" << signal.name << "_vld = '1') then\n"
+               << "\t\telsif (" << signal.getName(SubVarStyle::UL) << "_vld = '1') then\n"
                << "\t\t\t" << registerName << " <= " << (signal.isEnum ?
-                                                         signal.type + "'val(to_integer(unsigned(" + signal.name + "_out)));\n" :
-                                                         signal.name + "_out;\n")
+                                                         signal.type + "'val(to_integer(unsigned(" + signal.getName(SubVarStyle::UL) + "_out)));\n" :
+                                                         signal.getName(SubVarStyle::UL) + "_out;\n")
                << "\t\tend if;\n"
                << "\tend process;\n\n";
         }
@@ -312,12 +309,13 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\tprocess(done)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& out : signalFactory->getOutputs(false, true, Separator::DOT)) {
-        ss << "\t\t\t" << out.name << " <= " << out.initialValue << ";\n";
+    for (const auto& out : signalFactory->getOutputs(false, true)) {
+        ss << "\t\t\t" << out.getName(SubVarStyle::DOT) << " <= " << out.initialValue << ";\n";
     }
        ss << "\t\telsif (done = '1') then\n";
-    for (const auto& out : signalFactory->getOutputs(false, true, Separator::DOT)) {
-        ss << "\t\t\t" << out.name << " <= " << utils->getCorrespondingRegisterName(out.name) << ";\n";
+    for (const auto& out : signalFactory->getOutputs(false, true)) {
+        ss << "\t\t\t" << out.getName(SubVarStyle::DOT) << " <= "
+           << utils->getCorrespondingRegisterName(out.getName(SubVarStyle::DOT)) << ";\n";
     }
     ss << "\t\tend if;\n"
        << "\tend process;\n\n";
@@ -352,10 +350,11 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     auto printModuleInput = [&ss](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            ss << "\t\t\t\t" << signal.name << "_reg <= "
+            ss << "\t\t\t\t" << signal.getName(SubVarStyle::UL) << "_reg <= "
                << (signal.isEnum ?
-                   "std_logic_vector(to_unsigned(" + signal.type + "'pos(" + signal.name + ")," + std::to_string(signal.vectorSize) + "))" :
-                   signal.name)
+                   "std_logic_vector(to_unsigned(" + signal.type + "'pos(" + signal.getName(SubVarStyle::DOT) + "), " +
+                   std::to_string(signal.vectorSize) + "))" :
+                   signal.getName(SubVarStyle::DOT))
                << ";\n";
         }
     };
@@ -404,14 +403,14 @@ std::string PrintVHDLForHLS::functions() {
     for (const auto& func : usedFunctions) {
         functionStream << "\tfunction " + func->getName() << "(";
 
-        auto paramMap = func->getParamMap();
-        for (auto param_it = paramMap.begin(); param_it != paramMap.end(); param_it++) {
-            if (param_it->second->getDataType()->isCompoundType()) {
-                functionStream << param_it->first << ": " << convertDataType(param_it->second->getDataType()->getName());
+        const auto& paramMap = func->getParamMap();
+        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
+            if (param->second->getDataType()->isCompoundType()) {
+                functionStream << param->first << ": " << convertDataType(param->second->getDataType()->getName());
             } else {
-                functionStream << param_it->first << ": " << convertDataType(param_it->second->getDataType()->getName());
+                functionStream << param->first << ": " << convertDataType(param->second->getDataType()->getName());
             }
-            if (param_it != --paramMap.end())
+            if (param != --paramMap.end())
                 functionStream << "; ";
         }
         functionStream << ") return " << convertDataType(func->getReturnType()->getName()) << ";\n";
@@ -466,7 +465,6 @@ std::string PrintVHDLForHLS::functions() {
 std::string PrintVHDLForHLS::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
-    // this function does not print duplicate data types (it remembers printed data types)
     static std::set<const DataType *> printedTypes;
 
     if (dataType->isEnumType()) {

@@ -22,10 +22,12 @@ void SignalFactory::setOperationSelector() {
     active_operation = {
             "active_operation",
             propertySuite->getName() + "_operation_t",
-            "",
             "in",
+            false,
+            "",
+            "",
+            true,
             vectorSize,
-            true
     };
 }
 
@@ -62,40 +64,41 @@ void SignalFactory::setMonitorSignals() {
     monitorSignals.push_back({"wait_state", "std_logic" , ""});
 }
 
-std::vector<Signal> SignalFactory::getInputs(bool asVector, bool destruct, Separator separator) const {
+std::vector<Signal> SignalFactory::getInputs(bool asVector, bool destruct) const {
     std::vector<Signal> ports;
     if (destruct) {
         for (const auto& in : inputs) {
-            getCompoundSignals(in, asVector, separator, ports);
+            getCompoundSignals(in, asVector, ports);
         }
     } else {
         for (const auto& in : inputs) {
-            std::string name = in->getName();
+            std::string name = in->getName() + "_sig";
             std::string type = asVector ? getEnumAsVector(in->getDataType()) : convertDataType(in->getDataType()->getName());
             std::string direction = in->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(in->getDataSignal()->getInitialValue());
             bool isEnum = in->isEnumType();
-            ports.push_back({name, type, direction, initialValue ,isEnum});
+            ports.push_back({name, type, direction, false, "", initialValue ,isEnum});
         }
     }
     return ports;
 }
 
-std::vector<Signal> SignalFactory::getOutputs(bool asVector, bool destruct, Separator separator) const{
+std::vector<Signal> SignalFactory::getOutputs(bool asVector, bool destruct) const{
     std::vector<Signal> ports;
     if (destruct) {
         for (const auto& out : outputs) {
-            getCompoundSignals(out, asVector, separator, ports);
+            getCompoundSignals(out, asVector, ports);
         }
     } else {
-        for (const auto& out : outputs) {
-            std::string name = out->getName();
-            std::string type = asVector ? getEnumAsVector(out->getDataType()) : convertDataType(out->getDataType()->getName());
+        for (const auto &out : outputs) {
+            std::string name = out->getName() + "_sig";
+            std::string type = asVector ? getEnumAsVector(out->getDataType()) : convertDataType(
+                    out->getDataType()->getName());
             std::string direction = out->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(out->getDataSignal()->getInitialValue());
             bool isEnum = out->isEnumType();
             uint32_t vectorSize = isEnum ? ceil(log2(out->getDataType()->getEnumValueMap().size())) : 32;
-            ports.push_back({name, type, direction, initialValue, vectorSize, isEnum});
+            ports.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
         }
     }
     return ports;
@@ -139,26 +142,27 @@ std::vector<Signal> SignalFactory::getAllPorts() const {
     return ports;
 }
 
-void SignalFactory::getCompoundSignals(Port *port, bool asVector, Separator separator, std::vector<Signal> &signals) const {
+void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Signal> &signals) const {
     std::vector<Signal> ports;
     if (port->isCompoundType()) {
         for (const auto& subVar : port->getDataSignal()->getSubVarList()) {
-            std::string name = port->getName() + "_sig" + separatorToString(separator) + subVar->getName();
+            std::string name = port->getName() + "_sig";
+            std::string subVarName = subVar->getName();
             std::string type = asVector ? getEnumAsVector(subVar->getDataType()) : convertDataType(subVar->getDataType()->getName());
             std::string direction = port->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(subVar->getInitialValue());
             bool isEnum = subVar->isEnumType();
             uint32_t vectorSize = isEnum ? ceil(log2(subVar->getDataType()->getEnumValueMap().size())) : 32;
-            signals.push_back({name, type, direction, initialValue, vectorSize, isEnum});
+            signals.push_back({name, type, direction, true, subVarName, initialValue, isEnum, vectorSize});
         }
     } else {
-        std::string name = port->getName();
+        std::string name = port->getName() + "_sig";
         std::string type = asVector ? getEnumAsVector(port->getDataType()) : convertDataType(port->getDataType()->getName());
         std::string direction = port->getInterface()->getDirection();
         std::string initialValue = VHDLPrintVisitorHLS::toString(port->getDataSignal()->getInitialValue());
         bool isEnum = port->isEnumType();
         uint32_t vectorSize = isEnum ? ceil(log2(port->getDataType()->getEnumValueMap().size())) : 32;
-        signals.push_back({name, type, direction, initialValue, vectorSize, isEnum});
+        signals.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
     }
 }
 
@@ -182,14 +186,3 @@ std::string SignalFactory::getEnumAsVector(const DataType *dataType) const {
         return convertDataType(dataType->getName());
     }
 }
-
-std::string SignalFactory::separatorToString(Separator separator) const{
-    switch (separator) {
-        case Separator::UNDERLINE :
-            return "_";
-        case Separator::DOT :
-            return  ".";
-    }
-}
-
-

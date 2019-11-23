@@ -8,19 +8,29 @@
 #include <string>
 
 #include <PluginFactory.h>
+#include <functional>
+
+enum class SubVarStyle {
+    DOT,
+    UL
+};
 
 struct Signal {
     std::string name;
     std::string type;
     std::string direction;
+    bool subVar = false;
+    std::string subVarName = "";
     std::string initialValue = "";
-    uint32_t vectorSize = 32;
     bool isEnum = false;
-};
-
-enum class Separator {
-    UNDERLINE,
-    DOT
+    uint32_t vectorSize = 32;
+    std::string getName(SubVarStyle style) const {
+        if (subVar) {
+            return style == SubVarStyle::UL ? name + "_" + subVarName : name + "." + subVarName;
+        } else {
+            return name;
+        }
+    };
 };
 
 class SignalFactory {
@@ -35,16 +45,8 @@ public:
 
     Signal getOperationSelector(bool asVector);
 
-    std::vector<Signal> getInputs(
-            bool asVector = false,
-            bool destruct = false,
-            Separator separator = Separator::UNDERLINE
-    ) const;
-    std::vector<Signal> getOutputs(
-            bool asVector = false,
-            bool destruct = false,
-            Separator separator = Separator::UNDERLINE
-    ) const;
+    std::vector<Signal> getInputs(bool asVector = false, bool destruct = false) const;
+    std::vector<Signal> getOutputs(bool asVector = false, bool destruct = false) const;
     std::vector<Signal> getNotify() const;
     std::vector<Signal> getSync() const;
     std::vector<Signal> getAllPorts() const;
@@ -54,9 +56,8 @@ private:
     void setMonitorSignals();
     void setOperationSelector();
     std::string getEnumAsVector(const DataType *dataType) const;
-    std::string separatorToString(Separator separator) const;
     std::string convertDataType(std::string dataTypeName) const;
-    void getCompoundSignals(Port *port, bool asVector, Separator separator, std::vector<Signal> &signals) const;
+    void getCompoundSignals(Port *port, bool asVector, std::vector<Signal> &signals) const;
 
     PropertySuite* propertySuite;
     Module* module;
@@ -69,12 +70,12 @@ private:
 
     Signal active_operation;
     const Signal START_SIGNAL = {"start", "std_logic", "in"};
-    const Signal DONE_SIGNAL = {"done", "std_logic", "out"};
+    const Signal DONE_SIGNAL = {"start",  "std_logic", "out"};
     const Signal IDLE_SIGNAL = {"idle", "std_logic", "out"};
-    const Signal READY_SIGNAL = {"ready", "std_logic", "out"};
+    const Signal READY_SIGNAL = {"ready","std_logic", "out"};
 
     const Signal CLK_SIGNAL = {"clk", "std_logic", "in"};
-    const Signal RESET_SIGNAL = {"rst", "std_logic", "in"};
+    const Signal RESET_SIGNAL = {"rst","std_logic", "in"};
 
     const std::vector<Signal> HANDSHAKING_PROTOCOL_SIGNALS {
             START_SIGNAL,
