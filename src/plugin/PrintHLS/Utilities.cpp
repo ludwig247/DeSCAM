@@ -4,6 +4,9 @@
 
 #include <memory>
 #include <algorithm>
+
+#include <boost/algorithm/string.hpp>
+
 #include "Utilities.h"
 #include "VisitInternalRegister.h"
 #include "InputRegisterVisitor.h"
@@ -76,9 +79,9 @@ void Utilities::removeRedundantConditions()
         auto branches = function.second->getReturnValueConditionList();
         for (auto branch = branches.begin(); std::next(branch) != branches.end(); ++branch) {
             auto conditionList = branch->second;
-            for (auto cond : conditionList) {
+//            for (auto cond : conditionList) {
 //                std::cout << "Find Conditions: " << *cond << std::endl;
-            }
+//            }
 //            std::cout << std::endl;
             for (auto otherBranches = std::next(branch); otherBranches != branches.end(); ++otherBranches) {
                 auto otherConditionList = otherBranches->second;
@@ -102,7 +105,6 @@ void Utilities::removeRedundantConditions()
                         allFound = false;
                     }
                 }
-                auto test = otherBranches->second;
                 if (allFound) {
 //                    std::cout << "All found!" << std::endl;
                     for (const auto &cond : conditionList) {
@@ -130,6 +132,66 @@ void Utilities::removeRedundantConditions()
         }
         function.second->setReturnValueConditionList(branches);
     }
+
+//    for (const auto& state : propertySuite->getStates()) {
+//        auto successorProperties = propertySuite->getSuccessorProperties(state);
+//        std::sort(successorProperties.begin(), successorProperties.end(), [](const AbstractProperty* prop1, const AbstractProperty* prop2) {
+//            return (prop1->getAssumptionList().size() < prop2->getAssumptionList().size());
+//        });
+//        for (auto property = successorProperties.begin(); property != successorProperties.end(); ++property) {
+//            auto assumptionList = (*property)->getAssumptionList();
+//            for (auto assumption : assumptionList) {
+//                std::cout << "Find Conditions: " << *assumption << std::endl;
+//            }
+//            std::cout << std::endl;
+//            for (auto otherProperty = std::next(property); otherProperty != successorProperties.end(); ++otherProperty) {
+//                auto otherAssumptionList = (*otherProperty)->getAssumptionList();
+//                for (auto &assumption : otherAssumptionList) {
+//                    if (NodePeekVisitor::nodePeekUnaryExpr(assumption) != nullptr) {
+//                        assumption = (dynamic_cast<UnaryExpr * >(assumption))->getExpr();
+//                    }
+//                }
+//                for (auto assumption : otherAssumptionList) {
+//                    std::cout << *assumption << std::endl;
+//                }
+//                bool allFound = true;
+//                for (auto assumption : assumptionList) {
+//                    bool found = false;
+//                    for (auto otherAssumption : otherAssumptionList) {
+//                        if (*assumption == *otherAssumption) {
+//                            found = true;
+//                        }
+//                    }
+//                    if (!found) {
+//                        allFound = false;
+//                    }
+//                }
+//                if (allFound) {
+//                    std::cout << "All found!" << std::endl;
+//                    for (const auto &assumption : assumptionList) {
+//                        (otherAssumptionList).erase(std::remove_if(
+//                                otherAssumptionList.begin(),
+//                                otherAssumptionList.end(),
+//                                [&assumption](Expr *expr) {
+//                                    if (NodePeekVisitor::nodePeekUnaryExpr(expr) != nullptr) {
+//                                        return (*assumption == *((dynamic_cast<UnaryExpr * >(expr))->getExpr()));
+//                                    }
+//                                    return false;
+//                                }), otherAssumptionList.end()
+//                        );
+//                    }
+//                    std::cout << std::endl << "New List" << std::endl;
+//                    for (auto assumption : otherAssumptionList) {
+//                        std::cout << *assumption << std::endl;
+//                    }
+//                } else {
+//                    std::cout << "Not all found!" << std::endl;
+//                }
+//                std::cout << std::endl << std::endl;
+//            }
+//            std::cout << std::endl << std::endl;
+//        }
+//    }
 }
 
 void Utilities::mapOutputRegistersToOutput() {
@@ -302,6 +364,25 @@ std::map<DataSignal*, Variable*> Utilities::getParentMap() {
         }
     }
     return parentMap;
+}
+
+std::string Utilities::getCorrespondingRegisterName(const std::string& name) {
+    std::map<std::string, std::string> names;
+    for (const auto& item : outputToRegisterMap) {
+        std::string outputName;
+        if (item.first->isSubVar()) {
+            outputName = item.first->getParent()->getName() + "_" + item.first->getName();
+        } else {
+            outputName = item.first->getName();
+        }
+        names.insert({outputName, item.second->getFullName()});
+    }
+    auto modifiedName = boost::algorithm::replace_all_copy(name, ".", "_");
+    if (names.find(modifiedName) != names.end()) {
+        return names.at(modifiedName);
+    } else {
+        return "";
+    }
 }
 
 std::string Utilities::convertDataType(const std::string& type) {

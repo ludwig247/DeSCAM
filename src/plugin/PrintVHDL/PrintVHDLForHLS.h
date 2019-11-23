@@ -25,22 +25,11 @@ private:
     Module *currentModule;
     std::unique_ptr<Utilities> utils;
     std::unique_ptr<SignalFactory> signalFactory;
-    std::map<std::string, std::string> enumDataSignal;
-
-    static void print(std::string& msg);
 
     std::string printTypes(Model *model);
     std::string printModule(Model *model);
     std::string functions();
-    std::string printComponent();
-    std::string printComponentInstantiation();
-    std::string printMonitor();
-    std::string printOutputProcesses();
-    std::string printAssumptions(const std::vector<Expr *> &exprList);
-    std::string mainProcess();
-    std::string getOperationVector();
     std::string printDataTypes(const DataType *dataType);
-    std::string convertSignalNames(const DataType *dataType);
     std::string convertDataTypeConstrained(std::string dataTypeName);
     std::string convertDataType(std::string dataTypeName);
     std::string printSensitivityList();

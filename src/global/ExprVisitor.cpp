@@ -172,6 +172,7 @@ void SCAM::ExprVisitor::visit(SCAM::FunctionOperand &node) {
         std::string test = PrintStmt::toString(param.second);
         param.second->accept(*this);
     }
+    this->usedFunctions.insert(node.getFunction());
     this->usedOperands.insert(&node);
 }
 
@@ -223,6 +224,11 @@ std::set<SCAM::SyncSignal *> SCAM::ExprVisitor::getUsedSynchSignals(SCAM::Expr *
 std::set<SCAM::DataSignal *> SCAM::ExprVisitor::getUsedDataSignals(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
     return exprVisitor.usedDataSignal;
+}
+
+std::set<SCAM::Function *> SCAM::ExprVisitor::getUsedFunctions(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedFunctions;
 }
 
 bool SCAM::ExprVisitor::isVar(SCAM::Expr *expr) {

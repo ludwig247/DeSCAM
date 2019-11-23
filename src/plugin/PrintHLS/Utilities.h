@@ -35,6 +35,7 @@ public:
 
     std::set<Variable* > getOutputRegisterParents();
     std::map<DataSignal*, Variable*> getParentMap();
+    std::string getCorrespondingRegisterName(const std::string& name);
 
     static std::string typeToString(StmtType type);
     static std::string subTypeBitwiseToString(SubTypeBitwise type);

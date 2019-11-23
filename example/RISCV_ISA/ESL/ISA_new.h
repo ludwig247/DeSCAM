@@ -37,7 +37,7 @@ public:
     blocking_in<MEtoCU_IF> fromMemoryPort;
 
     // ports for communication with register file
-    master_in<RegfileType> fromRegsPort;
+    master_in<unsigned int[32]> fromRegsPort;
     master_out<RegfileWriteType> toRegsPort;
 
     // data for communication with memory
@@ -46,7 +46,7 @@ public:
 
     // data for communication with register file
     RegfileWriteType regfileWrite;
-    RegfileType regfile;
+    unsigned int regfile[32];
     
     // ISA sections
     enum Phases {
@@ -70,11 +70,11 @@ public:
 
     InstrType getInstrType(unsigned int encodedInstr) const;
 
-    unsigned int getRs1Addr(unsigned int encodedInstr) const;
-
-    unsigned int getRs2Addr(unsigned int encodedInstr) const;
-
-    unsigned int getRdAddr(unsigned int encodedInstr) const;
+//    unsigned int getRs1Addr(unsigned int encodedInstr) const;
+//
+//    unsigned int getRs2Addr(unsigned int encodedInstr) const;
+//
+//    unsigned int getRdAddr(unsigned int encodedInstr) const;
 
     unsigned int getImmediate(unsigned int encodedInstr) const;
 
@@ -82,7 +82,7 @@ public:
 
     ME_MaskType getMemoryMask(InstrType instr) const;
 
-    unsigned int readRegfile(unsigned int src, RegfileType regfile) const; //! Return the value of a register of the input regfile
+    //unsigned int readRegfile(unsigned int src, RegfileType regfile) const; //! Return the value of a register of the input regfile
 
     unsigned int getALUresult(ALUfuncType aluFunction, unsigned int operand1, unsigned int operand2) const;
 
@@ -97,7 +97,7 @@ void ISA_new::run() {
     nextphase = Phases::fetch_PH;
     while (true) {
         phase = nextphase;
-        // fetch next instruc   tion
+        // fetch next instruction
         if (phase == Phases::fetch_PH) {
 
             // Set up memory access
@@ -135,11 +135,10 @@ void ISA_new::run() {
                 //|  ID (RF_READ)   |        EX       |    ---------    |  WB (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->master_read(regfile); //Read register contents
-
                 //Set-up operands for alu by reading from regfile
-                aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
-                aluOp2 = readRegfile(getRs2Addr(encodedInstr), regfile);
+                fromRegsPort->master_read(regfile);
+                aluOp1 = regfile[RS1_FIELD(encodedInstr)];
+                aluOp2 = regfile[RS2_FIELD(encodedInstr)];
 
                 aluResult = getALUresult(getALUfunc(getInstrType(encodedInstr)), aluOp1, aluOp2); //Compute result
 
@@ -147,7 +146,7 @@ void ISA_new::run() {
                 cout << "S3: @AL: Result = 0x" << hex << aluResult << "(hex) = " << dec << aluResult << "(dec)" << endl;
 #endif
                 //Set up write back
-                regfileWrite.dst = getRdAddr(encodedInstr);
+                regfileWrite.dst = RD_FIELD(encodedInstr);
                 regfileWrite.dstData = aluResult;
 
                 toRegsPort->master_write(regfileWrite); //Perform write back
@@ -160,11 +159,10 @@ void ISA_new::run() {
                 //|  ID (RF_READ)   |        EX       |    ---------    |    ---------    |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->master_read(regfile); //Read register contents
-
                 //Set-up operands for alu by reading from regfile
-                aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
-                aluOp2 = readRegfile(getRs2Addr(encodedInstr), regfile);
+                fromRegsPort->master_read(regfile);
+                aluOp1 = regfile[RS1_FIELD(encodedInstr)];
+                aluOp2 = regfile[RS2_FIELD(encodedInstr)];
 
                 aluResult = getALUresult(getALUfunc(getInstrType(encodedInstr)), aluOp1, aluOp2); //Compute result
 
@@ -179,10 +177,9 @@ void ISA_new::run() {
                 //|  ID (RF_READ)   |        EX       |       MEM       |    ---------    |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->master_read(regfile); //Read register contents
-
                 //Set-up operands for alu by reading from regfile
-                aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
+                fromRegsPort->master_read(regfile);
+                aluOp1 = regfile[RS1_FIELD(encodedInstr)];
                 aluOp2 = getImmediate(encodedInstr);
 
                 aluResult = getALUresult(ALU_ADD, aluOp1, aluOp2); //Compute result
@@ -194,7 +191,7 @@ void ISA_new::run() {
                 memoryAccess.req = ME_WR;
                 memoryAccess.mask = getMemoryMask(getInstrType(encodedInstr)); // set memory access mask
                 memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for stores
-                memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
+                memoryAccess.dataIn = aluOp2; // Set data for stores, rs2 = source for store
 
                 toMemoryPort->write(memoryAccess); // Request store
 
@@ -212,7 +209,7 @@ void ISA_new::run() {
 #ifdef LOGTOFILE
                 cout << "S3: @AL: Result = 0x" << hex << getEncUALUresult(encodedInstr, pcReg) << "(hex) = " << dec << getEncUALUresult(encodedInstr, pcReg) << "(dec)" << endl;
 #endif
-                regfileWrite.dst = getRdAddr(encodedInstr); //Compute destination
+                regfileWrite.dst = RD_FIELD(encodedInstr); //Compute destination
                 regfileWrite.dstData = getEncUALUresult(encodedInstr, pcReg);
 
                 toRegsPort->master_write(regfileWrite); //Perform write back
@@ -226,7 +223,7 @@ void ISA_new::run() {
                 /////////////////////////////////////////////////////////////////////////////
 
                 //Set up write back
-                regfileWrite.dst = getRdAddr(encodedInstr);
+                regfileWrite.dst = RD_FIELD(encodedInstr);
                 regfileWrite.dstData = pcReg + 4; //Compute result
 
                 toRegsPort->master_write(regfileWrite); //Perform write back
@@ -239,19 +236,17 @@ void ISA_new::run() {
                 //|  ID (RF_READ)   |        EX       |    ---------    |  WB (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->master_read(regfile); //Read register contents
-
                 //Set-up operands for alu by reading from regfile
-                aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
-                aluOp2 = getImmediate(encodedInstr);
-
+                fromRegsPort->master_read(regfile);
+                aluOp1 = regfile[RS1_FIELD(encodedInstr)];
+                aluOp2 = regfile[RS2_FIELD(encodedInstr)];
                 aluResult = getALUresult(getALUfunc(getInstrType(encodedInstr)), aluOp1, aluOp2);
 
 #ifdef LOGTOFILE
                 cout << "S3: @AL: Result = 0x" << hex << aluResult << "(hex) = " << dec << aluResult << "(dec)" << endl;
 #endif
                 //Set up write back
-                regfileWrite.dst = getRdAddr(encodedInstr);
+                regfileWrite.dst = RD_FIELD(encodedInstr);
                 regfileWrite.dstData = aluResult; //Compute result
 
                 toRegsPort->master_write(regfileWrite); //Perform write back
@@ -264,10 +259,9 @@ void ISA_new::run() {
                 //|  ID (RF_READ)   |        EX       |       MEM       |  ID (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->master_read(regfile); //Read register contents
-
                 //Set-up operands for alu by reading from regfile
-                aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
+                fromRegsPort->master_read(regfile);
+                aluOp1 = regfile[RS1_FIELD(encodedInstr)];
                 aluOp2 = getImmediate(encodedInstr);
 
                 aluResult = getALUresult(ALU_ADD, aluOp1, aluOp2);
@@ -281,7 +275,7 @@ void ISA_new::run() {
                 memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for loads
                 memoryAccess.dataIn = 0; // (not relevant for loads)
 
-                regfileWrite.dst = getRdAddr(encodedInstr);
+                regfileWrite.dst = RD_FIELD(encodedInstr);
 
                 // Request load
                 toMemoryPort->write(memoryAccess);
@@ -303,17 +297,16 @@ void ISA_new::run() {
                 //|  ID (RF_READ)   |    ---------    |    ---------    |  WB (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->master_read(regfile); //Read register contents
-
                 //Set up write back
-                regfileWrite.dst = getRdAddr(encodedInstr);
+                regfileWrite.dst = RD_FIELD(encodedInstr);
                 regfileWrite.dstData = pcReg + 4; //Compute result
 
                 //Perform write back
-                toRegsPort->master_write(regfileWrite);
 
                 //Set-up PC
-                pcReg = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
+                fromRegsPort->master_read(regfile);
+                aluOp1 = regfile[RS1_FIELD(encodedInstr)];
+                pcReg = aluOp1 + getImmediate(encodedInstr);
 
             } else {
 
@@ -469,40 +462,40 @@ InstrType ISA_new::getInstrType(unsigned int encodedInstr) const {
     }
 }
 
-unsigned int ISA_new::getRs1Addr(unsigned int encodedInstr) const {
-
-    if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_S   ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_B) {
-        return RS1_FIELD(encodedInstr);
-    } else {
-        return 0;
-    }
-}
-
-unsigned int ISA_new::getRs2Addr(unsigned int encodedInstr) const {
-
-    if (OPCODE_FIELD(encodedInstr) == OPCODE_R ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_S ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_B) {
-        return RS2_FIELD(encodedInstr);
-    } else {
-        return 0;
-    }
-}
-
-unsigned int ISA_new::getRdAddr(unsigned int encodedInstr) const {
-
-    if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_U1  || OPCODE_FIELD(encodedInstr) == OPCODE_U2  ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_J) {
-        return RD_FIELD(encodedInstr);
-    } else {
-        return 0;
-    }
-}
+//unsigned int ISA_new::getRs1Addr(unsigned int encodedInstr) const {
+//
+//    if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_S   ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_B) {
+//        return RS1_FIELD(encodedInstr);
+//    } else {
+//        return 0;
+//    }
+//}
+//
+//unsigned int ISA_new::getRs2Addr(unsigned int encodedInstr) const {
+//
+//    if (OPCODE_FIELD(encodedInstr) == OPCODE_R ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_S ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_B) {
+//        return RS2_FIELD(encodedInstr);
+//    } else {
+//        return 0;
+//    }
+//}
+//
+//unsigned int ISA_new::getRdAddr(unsigned int encodedInstr) const {
+//
+//    if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_U1  || OPCODE_FIELD(encodedInstr) == OPCODE_U2  ||
+//        OPCODE_FIELD(encodedInstr) == OPCODE_J) {
+//        return RD_FIELD(encodedInstr);
+//    } else {
+//        return 0;
+//    }
+//}
 
 unsigned int ISA_new::getImmediate(unsigned int encodedInstr) const {
 
@@ -584,74 +577,74 @@ ME_MaskType ISA_new::getMemoryMask(InstrType instr) const {
     } else return MT_X;
 }
 
-unsigned int ISA_new::readRegfile(unsigned int src, RegfileType regfile) const {
-
-    if (src == 0) {
-        return 0;
-    } else if (src == 1) {
-        return regfile.reg_file_01;
-    } else if (src == 2) {
-        return regfile.reg_file_02;
-    } else if (src == 3) {
-        return regfile.reg_file_03;
-    } else if (src == 4) {
-        return regfile.reg_file_04;
-    } else if (src == 5) {
-        return regfile.reg_file_05;
-    } else if (src == 6) {
-        return regfile.reg_file_06;
-    } else if (src == 7) {
-        return regfile.reg_file_07;
-    } else if (src == 8) {
-        return regfile.reg_file_08;
-    } else if (src == 9) {
-        return regfile.reg_file_09;
-    } else if (src == 10) {
-        return regfile.reg_file_10;
-    } else if (src == 11) {
-        return regfile.reg_file_11;
-    } else if (src == 12) {
-        return regfile.reg_file_12;
-    } else if (src == 13) {
-        return regfile.reg_file_13;
-    } else if (src == 14) {
-        return regfile.reg_file_14;
-    } else if (src == 15) {
-        return regfile.reg_file_15;
-    } else if (src == 16) {
-        return regfile.reg_file_16;
-    } else if (src == 17) {
-        return regfile.reg_file_17;
-    } else if (src == 18) {
-        return regfile.reg_file_18;
-    } else if (src == 19) {
-        return regfile.reg_file_19;
-    } else if (src == 20) {
-        return regfile.reg_file_20;
-    } else if (src == 21) {
-        return regfile.reg_file_21;
-    } else if (src == 22) {
-        return regfile.reg_file_22;
-    } else if (src == 23) {
-        return regfile.reg_file_23;
-    } else if (src == 24) {
-        return regfile.reg_file_24;
-    } else if (src == 25) {
-        return regfile.reg_file_25;
-    } else if (src == 26) {
-        return regfile.reg_file_26;
-    } else if (src == 27) {
-        return regfile.reg_file_27;
-    } else if (src == 28) {
-        return regfile.reg_file_28;
-    } else if (src == 29) {
-        return regfile.reg_file_29;
-    } else if (src == 30) {
-        return regfile.reg_file_30;
-    } else {
-        return regfile.reg_file_31;
-    }
-}
+//unsigned int ISA_new::readRegfile(unsigned int src, RegfileType regfile) const {
+//
+//    if (src == 0) {
+//        return 0;
+//    } else if (src == 1) {
+//        return regfile.reg_file_01;
+//    } else if (src == 2) {
+//        return regfile.reg_file_02;
+//    } else if (src == 3) {
+//        return regfile.reg_file_03;
+//    } else if (src == 4) {
+//        return regfile.reg_file_04;
+//    } else if (src == 5) {
+//        return regfile.reg_file_05;
+//    } else if (src == 6) {
+//        return regfile.reg_file_06;
+//    } else if (src == 7) {
+//        return regfile.reg_file_07;
+//    } else if (src == 8) {
+//        return regfile.reg_file_08;
+//    } else if (src == 9) {
+//        return regfile.reg_file_09;
+//    } else if (src == 10) {
+//        return regfile.reg_file_10;
+//    } else if (src == 11) {
+//        return regfile.reg_file_11;
+//    } else if (src == 12) {
+//        return regfile.reg_file_12;
+//    } else if (src == 13) {
+//        return regfile.reg_file_13;
+//    } else if (src == 14) {
+//        return regfile.reg_file_14;
+//    } else if (src == 15) {
+//        return regfile.reg_file_15;
+//    } else if (src == 16) {
+//        return regfile.reg_file_16;
+//    } else if (src == 17) {
+//        return regfile.reg_file_17;
+//    } else if (src == 18) {
+//        return regfile.reg_file_18;
+//    } else if (src == 19) {
+//        return regfile.reg_file_19;
+//    } else if (src == 20) {
+//        return regfile.reg_file_20;
+//    } else if (src == 21) {
+//        return regfile.reg_file_21;
+//    } else if (src == 22) {
+//        return regfile.reg_file_22;
+//    } else if (src == 23) {
+//        return regfile.reg_file_23;
+//    } else if (src == 24) {
+//        return regfile.reg_file_24;
+//    } else if (src == 25) {
+//        return regfile.reg_file_25;
+//    } else if (src == 26) {
+//        return regfile.reg_file_26;
+//    } else if (src == 27) {
+//        return regfile.reg_file_27;
+//    } else if (src == 28) {
+//        return regfile.reg_file_28;
+//    } else if (src == 29) {
+//        return regfile.reg_file_29;
+//    } else if (src == 30) {
+//        return regfile.reg_file_30;
+//    } else {
+//        return regfile.reg_file_31;
+//    }
+//}
 
 unsigned int ISA_new::getALUresult(ALUfuncType aluFunction, unsigned int operand1, unsigned int operand2) const {
 

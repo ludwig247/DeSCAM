@@ -62,7 +62,7 @@ void PrintHLS::operations() {
         }
     }
     ss << "\n";
-    ss << "\tswitch (activeOperation) {\n";
+    ss << "\tswitch (active_operation) {\n";
     // operation properties
     for (auto operationProperty : propertySuite->getOperationProperties()) {
         const std::string &operationName = operationProperty->getName();
@@ -132,7 +132,7 @@ void PrintHLS::functionParameters() {
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
     }
-    ss << "\toperation activeOperation\n)\n";
+    ss << "\toperation active_operation\n)\n";
 }
 
 void PrintHLS::assumptions(AbstractProperty* successorProperty) {
