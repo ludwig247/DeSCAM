@@ -25,7 +25,6 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
             auto init = varDecl->getAnyInitializer(varDecl)->IgnoreImpCasts();
             if (varDecl->getName().str() == "number") varDecl->getInit()->dump();
             if (init->getType()->isBuiltinType()) {
-
                 auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
                 try {
                     FindDataFlow checkForExpr(const_cast<clang::Expr *>(init), module, isUnsigned);
@@ -58,11 +57,18 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                             if (auto initVal = dynamic_cast<ConstValue *>(checkForExpr.getExpr())) {
                                 Variable *var = new Variable(name, descam_type, initVal);
                                 this->variableMap.insert(std::make_pair(name, var));
-                            }else throw std::runtime_error("Init value has to be const");
+                            }else {
+                                std::cout << "Global variable: " << name << " with value " << PrintStmt::toString(checkForExpr.getExpr()) << " is not added as global var." << std::endl;
+                                //std::cout << "The reason is that the initialvalue has to be of constant and simple type without expressions of any kind" << std::endl;
+                                //FIXME move back to exception
+                                //throw std::runtime_error("Init value has to be const");
+                            }
                         }
-
                     }
-                } catch (std::exception e) {}
+                } catch (std::runtime_error e) {
+                    std::cout << "HERE" << std::endl;
+
+                }
 
             }
         }

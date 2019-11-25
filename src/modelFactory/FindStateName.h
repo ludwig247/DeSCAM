@@ -6,8 +6,18 @@
 #define DESCAM_FINDSTATENAME_H
 
 
-class FindStateName {
+#include <clang/AST/RecursiveASTVisitor.h>
 
+class FindStateName: public clang::RecursiveASTVisitor<FindStateName> {
+public:
+    explicit FindStateName(clang::Stmt *stmt);
+    bool VisitStringLiteral(clang::StringLiteral * stringLiteral);
+    bool hasStateName() const;
+    const std::string &getStateName() const;
+
+private:
+    std::string stateName = "";
+    bool isSet = false;
 };
 
 

@@ -33,6 +33,8 @@ private:
 
     std::map<std::string, bool> plugin_Map;
     std::map<std::string, std::map<std::string, bool> > pluginOptions_Map;
+
+
 };
 
 

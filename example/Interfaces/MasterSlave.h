@@ -20,9 +20,9 @@ class MasterSlave : public sc_prim_channel,
 public:
     MasterSlave(const char *name);
 
-    void master_read(T &out);
+    void master_read(T &out,std::string stateName="");
 
-    void master_write(const T &val);
+    void master_write(const T &val,std::string stateName="");
 
 //    bool slave_read(T &out);
     void slave_read(T & out);

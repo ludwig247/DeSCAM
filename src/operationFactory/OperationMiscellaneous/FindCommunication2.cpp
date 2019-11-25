@@ -201,6 +201,8 @@ void SCAM::FindCommunication2::visit(struct Write &node) {
     this->commStmt = &node;
     this->stmt = &node;
     this->writeValue = node.getValue();
+    this->stateName = node.getStateName();
+    std::cout << "WRITE" << this->stateName  << std::endl;
 
 }
 
@@ -258,5 +260,13 @@ void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
     void FindCommunication2::visit(class ArrayExpr &node) {
         waitComm = false;
         communication = false;
+    }
+
+    const std::string &FindCommunication2::getStateName() const {
+        return stateName;
+    }
+
+    bool FindCommunication2::hasStateName() const {
+        return !this->stateName.empty();
     }
 }

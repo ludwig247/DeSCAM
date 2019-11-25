@@ -26,9 +26,15 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+        const std::string &getStateName() const;
+
+        void setStateName(const std::string &stateName);
+
     private:
         Expr *value;
         VariableOperand *status;
+
+        std::string stateName;
     };
 
 }

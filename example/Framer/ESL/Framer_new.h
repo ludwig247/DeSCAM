@@ -6,7 +6,7 @@
 #define PROJECT_FRAMER_UPDATE_H
 
 #include "systemc.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 
 //FIXME: ALL created types need to be put in a separate file (like FPI example)
 struct marker_t {
@@ -89,7 +89,7 @@ struct Framer_new : public sc_module {
                 if (newDataWord) {
                     //Notify monitor for 1 clock cycle
                     if (frm_cnt == FRM_PULSE_POS) {
-                        frame_pulse->master_write(true);
+                        frame_pulse->master_write(true, "find_sync");
                     }
                     is_pos = ((frm_cnt + 1) % WORDS_IN_FRAME) == 0;
                     is_align = data_word_tmp.isMarker && align == data_word_tmp.markerAlignment;

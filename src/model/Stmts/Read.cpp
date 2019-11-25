@@ -49,4 +49,8 @@ namespace SCAM {
         return this->status != nullptr;
     }
 
+    const std::string &Read::getStateName() const {
+        return stateName;
+    }
+
 }
