@@ -7,7 +7,7 @@
 
 #include <iomanip>
 #include "systemc.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "CPU_Interfaces.h"
 
 

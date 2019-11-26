@@ -15,6 +15,7 @@
 #include "ModuleInstance.h"
 #include "FindDataFlow.h"
 #include "FindFunctions.h"
+#include "../parser/CommandLineParameter.h"
 #include <OperationFactory.h>
 #include <Optimizer/Optimizer.h>
 
@@ -344,8 +345,9 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State2::state_cnt = 0;
     SCAM::Operation2::operations_cnt = 0;
-    if (ModelGlobal::useOptimizer()) {
-        SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module);
+    auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
+    if (!optOptionsSet.empty()) {
+        SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
         SCAM::OperationFactory operationFactory(opt.getCFG(), module);

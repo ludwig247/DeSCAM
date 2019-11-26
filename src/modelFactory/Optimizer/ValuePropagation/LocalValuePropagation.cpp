@@ -26,11 +26,13 @@ SCAM::LocalValuePropagation::LocalValuePropagation(const std::map<int, SCAM::Cfg
 #ifdef DEBUG_LOCAL_VARIABLE_PROPAGATION
                 //                std::cout << "Checking statement: " << PrintStmt::toString(statement) << std::endl;
 #endif
+
+
                 this->newExpr = nullptr;
                 this->varAlreadyCheckedSet.clear();
                 this->varValMap.clear();
                 this->pathsToStmtMap.clear();
-                this->pathsToStmtMap = this->makeResetPathsToNode(this->currentNodeID);
+                this->pathsToStmtMap = this->makeResetPathsToNode(currentNodeID);
                 statement->accept(*this);
             }
         }
@@ -49,6 +51,13 @@ const std::map<int, SCAM::CfgNode *> &SCAM::LocalValuePropagation::getCFG() cons
 void SCAM::LocalValuePropagation::visit(struct VariableOperand &node) {
 
     this->newExpr = nullptr;
+#ifdef DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
+    if(node.getVariable()->isCompoundType() || node.getVariable()->isArrayType()){
+        if(dynamic_cast<SCAM::Write*>(this->CFG.at(this->currentNodeID)->getStmt())){
+            return;
+        }
+    }
+#endif
     if (this->varAlreadyCheckedSet.find(node.getVariable()->getFullName()) != this->varAlreadyCheckedSet.end()) {
         if (this->varValMap.find(node.getVariable()->getFullName()) != this->varValMap.end()) {
             this->newExpr = this->varValMap.at(node.getVariable()->getFullName());

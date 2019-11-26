@@ -21,9 +21,8 @@ namespace SCAM {
     public:
         LivenessAnalysis() = delete;
 
-        LivenessAnalysis(const std::map<int, SCAM::CfgNode *> &CFG,
-                         const std::map<std::string, SCAM::Variable *> &ModuleVariables,
-                         const std::set<std::string> &variablesThatHaveReadSet);
+        LivenessAnalysis(std::map<int, SCAM::CfgNode *> CFG,
+                         const std::map<std::string, SCAM::Variable *> &ModuleVariables);
 
         ~LivenessAnalysis() = default;
 
@@ -39,10 +38,10 @@ namespace SCAM {
         std::map<std::string, SCAM::Variable *> moduleVariablesMap;
         std::map<std::string, std::map<int, std::pair<bool, bool>>> stmtInfoMap;  //contains propagated liveness analysis information for each stmt input and output
         std::map<std::string, std::set<int>> allAssignments;                      //stores for each variable in what nodes it is assigned
-        std::set<std::string> variablesThatHaveReadSet;                           // all variables that can't be optimized due to interprocedural behaviour
         std::vector<bool> toggledToTrueNodeVector;                                // true when a variable use detected/propagated at/to currentNode
         int numToTrueToggles;                                                     // if it doesn't change between runs,terminate algorithm
         std::set<int> deadAssignmentSet;
+        std::map<int,SCAM::Variable*> assignmentsToCompoundsVarsMap;
 
         void removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId);
 
@@ -69,7 +68,7 @@ namespace SCAM {
 
         void visit(struct If &node) override;
 
-        void visit(struct Read &node) override{};
+        void visit(struct Read &node) override;
 
         void visit(struct Write &node) override;
 

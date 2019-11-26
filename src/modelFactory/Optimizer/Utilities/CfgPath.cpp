@@ -32,8 +32,8 @@ namespace SCAM {
         while (Path.back()->getId() != NodeId) {
             Path.pop_back();
         }
+        Path.pop_back();
         return Path;
-
     }
 
     std::string CfgPath::print() {

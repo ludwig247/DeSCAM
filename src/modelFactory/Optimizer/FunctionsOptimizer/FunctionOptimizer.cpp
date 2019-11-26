@@ -182,6 +182,14 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     //check if already optimized a function with the same paramterslist
     if(auto optFunc = isAlreadyOptimizedFunction(node.getOperandName(),node.getParamValueMap())){
         this->newExpr = optFunc;
+//        std::cout << node.getOperandName() << std::endl;
+//        std::cout<< "function before optimization " << node.getFunction()->getReturnValueConditionList().size() << std::endl;
+//        if(auto func = dynamic_cast<FunctionOperand*>(this->newExpr)) {
+//            std::cout << "function after optimization " << func->getFunction()->getReturnValueConditionList().size()
+//                      << std::endl;
+//        }else {
+//            std::cout << "function after optimization 1" << std::endl;
+//        }
         return;
     }
     //optimize argument list
@@ -307,6 +315,12 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         }
     }
     function->setReturnValueConditionList(newReturnValueConditionList);
+//    std::cout << node.getOperandName() << std::endl;
+//    std::cout<< "function before optimization " << node.getFunction()->getReturnValueConditionList().size() << std::endl;
+//    std::cout<< "function after optimization " << function->getReturnValueConditionList().size() << std::endl;
+
+
+
     //inline function if it has one return value
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();

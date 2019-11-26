@@ -33,9 +33,9 @@ namespace SCAM {
     public:
         VariablesRangeAnalysis() = delete;
 
-        VariablesRangeAnalysis(std::map<int, SCAM::CfgNode *> CFG,
-                               std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap,
-                               std::set<std::string> variablesThatHaveReadSet);
+        VariablesRangeAnalysis(const std::map<int, SCAM::CfgNode *>& CFG,
+                               const std::map<std::string, std::set<SCAM::Expr *>>& variablesValuesMap,
+                               const std::set<std::string>& variablesThatHaveReadSet);
 
         ~VariablesRangeAnalysis() = default;
 

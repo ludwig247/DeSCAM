@@ -13,6 +13,8 @@
 #include "Optimizer/Utilities/PropagateConstantValue.h"
 #include "Optimizer/Utilities/OptUtilities.h"
 
+#define DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
+
 namespace SCAM {
 
     /***

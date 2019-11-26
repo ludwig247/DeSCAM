@@ -17,7 +17,7 @@ int main(int argc, const char **argv) {
     std::cout << "==================================================================" << std::endl;
     std::cout << "......................... Creating model ........................." << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
-    SCAM::ModelGlobal::createModel(argc, "DeSCAM", cml.getSourceFile(),CommandLineProcess::useOptimizer());
+    SCAM::ModelGlobal::createModel(argc, "DeSCAM", cml.getSourceFile());
 
     //Printing options according to commandline styles chosen
     std::cout << "==================================================================" << std::endl;

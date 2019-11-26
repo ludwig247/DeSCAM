@@ -4,7 +4,6 @@
 
 #include "CommandLineProcess.h"
 
-
 // main object of this formatter is to adjust the spacing when help command is executed
 class MyFormatter : public CLI::Formatter {
 public:
@@ -12,8 +11,6 @@ public:
 };
 
 namespace SCAM {
-
-    bool CommandLineProcess::optimize = false;
 
     CommandLineProcess::CommandLineProcess(int argc, const char **argv) {
 
@@ -33,6 +30,10 @@ namespace SCAM {
         return this->activePlugins;
     }
 
+    const std::set<std::string>& CommandLineProcess::getOptimizeOptions() const {
+        return this->optimizeOptions;
+    }
+
     void CommandLineProcess::commandLineInitialize() {
         app = new CLI::App("-- SCAM tool --");
         // we will need this to show the options available for each plugin
@@ -44,11 +45,11 @@ namespace SCAM {
 
         // adding a flag    //if add_flag used with a bool variable then it only takes a true or false value regardless of how many times it was used
 //        app->add_flag("-C,--CLANG", this->usingCLANG, "Use CLANG to compile the source file");
-        app->add_flag("-O,--optimize", CommandLineProcess::optimize, "Perform optimizations on the CFG of the SystemC-PPA module.");
 
         // option for input source file (can't keep the positional option because it's getting mixed up with other subCommands and options)
 //        app->add_option("-f,--file", this->sourceFile, "Source File")->required()->group("FILE");//option "file" without -/-- makes it positional in the commandline
-        app->add_option("-f,--file", this->sourceFile, "Source File")->group("FILE");//option "file" without -/-- makes it positional in the commandline
+        app->add_option("-f,--file", this->sourceFile, "Source File")->group(
+                "FILE");//option "file" without -/-- makes it positional in the commandline
         app->get_option("--file")->type_name("{.h .cpp}");
 
         // option for output directory subcommand and its following text referring to the directory
@@ -68,7 +69,18 @@ namespace SCAM {
         std::vector<std::string> pluginOptions = split(OPTION_NAMES, ';');
         std::vector<std::string> pluginOptionsDescriptions = split(OPTION_DESCRIPTIONS, ';');
         for (int i = 0; i < pluginOptions.size(); i = i + 2) {
-            app->get_subcommand("-" + pluginOptions[i])->add_flag("--" + pluginOptions[i + 1], pluginOptionsDescriptions[i + 1]);
+            app->get_subcommand("-" + pluginOptions[i])->add_flag("--" + pluginOptions[i + 1],
+                                                                  pluginOptionsDescriptions[i + 1]);
+        }
+        // add optimize as a subcommand and its options as flags
+       // app->add_subcommand("-Optimize", "Perform CFG optimizations");
+        app->add_subcommand("-Optimize", "Perform CFG optimizations")->group("Module optimization");
+        auto optimizeCmd = app->get_subcommand("-Optimize");
+        std::vector<std::string> optOptions = split(OPTIMIZE_OPTIONS, ';');
+        std::vector<std::string> optOptionsDescriptions = split(OPTIMIZE_OPTIONS_DESCRIPTIONS, ';');
+        for (int i = 0; i < optOptions.size(); i++) {
+            optimizeCmd->add_flag("--" + optOptions[i],
+                                  optOptionsDescriptions[i]);
         }
     }
 
@@ -97,10 +109,26 @@ namespace SCAM {
             exit(0);
         }
 
-        //check if the optimizer flag is set
-        if (app->count("--optimize")|| app->count("-O")) {
-            std::cout << "\033[1;94mOptimizer enabled.\033[0m\n";
-            CommandLineProcess::optimize = true;
+        //adding passed optmizer options
+        if (app->get_subcommand("-Optimize")->parsed()) {
+            std::cout << "\033[1;94mOptimizer enabled with the following options:\033[0;94m";
+            if (app->get_subcommand("-Optimize")->count("--help") ||
+                app->get_subcommand("-Optimize")->count("--help-all"))
+                exit(0);
+
+            std::vector<std::string> optOptions = split(OPTIMIZE_OPTIONS, ';');
+            for (int i = 0; i < optOptions.size(); i++) {
+                if (app->get_subcommand("-Optimize")->count("--" + optOptions[i]) > 0) {
+                      this->optimizeOptions.insert(optOptions[i]);
+                }
+                if(this->optimizeOptions.find("all")!=this->optimizeOptions.end()){ this->optimizeOptions.clear();}
+                if(this->optimizeOptions.empty()) {this->optimizeOptions.insert("all");}
+                CommandLineParameter::setOptimizeOptionsSet(this->optimizeOptions);
+            }
+            for(auto option: this->optimizeOptions){
+                std::cout << " " << option << " ";
+            }
+            std::cout << "\033[0m\n";
         }
 
         //Manage passed plugins
@@ -138,9 +166,5 @@ namespace SCAM {
             else
                 createOutputDirectory(this->outputDirectory);
         }
-    }
-
-    bool CommandLineProcess::useOptimizer() {
-        return CommandLineProcess::optimize;
     }
 }

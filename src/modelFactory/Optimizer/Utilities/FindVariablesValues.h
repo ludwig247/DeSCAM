@@ -24,7 +24,7 @@ namespace SCAM {
     public:
         FindVariablesValues() = delete;
 
-        FindVariablesValues(const std::map<int, CfgNode *> &CFG, std::set<std::string> readVariablesSet);
+        FindVariablesValues(const std::map<int, CfgNode *> &CFG, const std::set<std::string>& readVariablesSet);
 
         ~FindVariablesValues() = default;
 
