@@ -8,13 +8,13 @@
 
 using namespace SCAM;
 
-PrintVisibleRegisters::PrintVisibleRegisters(Stmt *stmt, Utilities *utils, unsigned int indentSize, unsigned int indentOffset) {
+PrintVisibleRegisters::PrintVisibleRegisters(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize, unsigned int indentOffset) {
     this->isRegister = false;
     this->utilities = utils;
     this->createString(stmt, indentSize, indentOffset);
 }
 
-std::string PrintVisibleRegisters::toString(Stmt *stmt, Utilities *utils, unsigned int indentSize, unsigned int indentOffset) {
+std::string PrintVisibleRegisters::toString(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize, unsigned int indentOffset) {
     PrintVisibleRegisters printer(stmt, utils, indentSize, indentOffset);
     return printer.getString();
 }
@@ -35,7 +35,7 @@ void PrintVisibleRegisters::visit(Assignment &node) {
 
 void PrintVisibleRegisters::visit(VariableOperand &node) {
     if (utilities) {
-        auto visibleRegisters = utilities->getRegisters();
+        auto visibleRegisters = utilities->getVariables();
         if (visibleRegisters.find(node.getVariable()) != visibleRegisters.end()) {
             isRegister = true;
         }
@@ -44,9 +44,9 @@ void PrintVisibleRegisters::visit(VariableOperand &node) {
         std::string dataType = node.getVariable()->getParent()->getDataType()->getName();
         std::size_t pos;
         if ((pos = dataType.find('_')) != std::string::npos) {
-            this->ss << Utilities::convertDataType(dataType.substr(0, pos)) << " ";
+            this->ss << OptimizeForHLS::convertDataType(dataType.substr(0, pos)) << " ";
         } else {
-            this->ss << Utilities::convertDataType(dataType) << " ";
+            this->ss << OptimizeForHLS::convertDataType(dataType) << " ";
         }
         this->ss << node.getVariable()->getParent()->getName();
 
@@ -73,7 +73,7 @@ void PrintVisibleRegisters::visit(VariableOperand &node) {
             this->ss << "}";
         }
     } else {
-        this->ss << Utilities::convertDataType(node.getDataType()->getName()) << " " << node.getVariable()->getName() << " = ";
+        this->ss << OptimizeForHLS::convertDataType(node.getDataType()->getName()) << " " << node.getVariable()->getName() << " = ";
         node.getVariable()->getInitialValue()->accept(*this);
     }
 }

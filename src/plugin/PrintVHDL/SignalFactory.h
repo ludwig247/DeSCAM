@@ -24,6 +24,7 @@ struct Signal {
     std::string initialValue = "";
     bool isEnum = false;
     uint32_t vectorSize = 32;
+
     std::string getName(SubVarStyle style) const {
         if (subVar) {
             return style == SubVarStyle::UL ? name + "_" + subVarName : name + "." + subVarName;
@@ -67,13 +68,12 @@ private:
     std::vector<PropertyMacro* > notifys;
     std::vector<PropertyMacro* > syncs;
     std::vector<Signal > monitorSignals;
-
     Signal active_operation;
+
     const Signal START_SIGNAL = {"start", "std_logic", "in"};
-    const Signal DONE_SIGNAL = {"start",  "std_logic", "out"};
+    const Signal DONE_SIGNAL = {"done",  "std_logic", "out"};
     const Signal IDLE_SIGNAL = {"idle", "std_logic", "out"};
     const Signal READY_SIGNAL = {"ready","std_logic", "out"};
-
     const Signal CLK_SIGNAL = {"clk", "std_logic", "in"};
     const Signal RESET_SIGNAL = {"rst","std_logic", "in"};
 

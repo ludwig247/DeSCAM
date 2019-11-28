@@ -11,7 +11,7 @@
 PrintVHDLForHLS::PrintVHDLForHLS() :
     propertySuite(nullptr),
     currentModule(nullptr),
-    utils(nullptr),
+    hlsModule(nullptr),
     signalFactory(nullptr)
 {
 }
@@ -20,7 +20,7 @@ std::map<std::string, std::string> PrintVHDLForHLS::printModel(Model *model) {
     for (auto &module : model->getModules()) {
         this->propertySuite = module.second->getPropertySuite();
         this->currentModule = module.second;
-        utils = std::make_unique<Utilities>(propertySuite, currentModule);
+        hlsModule = std::make_unique<HLSmodule>(propertySuite, currentModule);
         signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule);
 
         pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
@@ -102,7 +102,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
             ss << ";\n";
         }
     }
-    ss << ");\n";
+    ss << "\n);\n";
     ss << "end " + propertySuite->getName() << "_module;\n\n";
 
     ss << "architecture " << propertySuite->getName() << "_arch of " << propertySuite->getName() << "_module is\n";
@@ -121,10 +121,10 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     ss << "\tsignal " << operationSelectorVector.name << "_reg: " << operationSelectorVector.type << ";\n";
 
     ss << "\n\t-- Output registers\n";
-    for (const auto& outputReg : utils->getOutputRegisterParents()) {
-        ss << "\tsignal " << outputReg->getName() << ": "
-           << convertDataTypeConstrained(outputReg->getDataType()->getName()) << ";\n";
-    }
+//    for (const auto& outputReg : utils->getOutputRegisterParents()) {
+//        ss << "\tsignal " << outputReg->getName() << ": "
+//           << convertDataTypeConstrained(outputReg->getDataType()->getName()) << ";\n";
+//    }
     printRegSignals(signalFactory->getNotify());
 
     ss << "\n\t-- HLS module output signals\n";
@@ -177,11 +177,11 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
            << "\t\t" << notifySignal.name << "_ap_vld: out std_logic;\n";
     }
     ss << "\t\t" << operationSelectorVector.name << ": in " << operationSelectorVector.type << "\n";
-    ss << "\t);\n;"
+    ss << "\t);\n"
        << "\tend component;\n";
 
     // begin of architecture implementation
-    ss << "\nbegin\n";
+    ss << "\nbegin\n\n";
 
     // Print Component Instantiation
     ss << "\toperations_inst: operations\n"
@@ -280,13 +280,14 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     ss << "\t-- Output_Vld Processes\n";
     auto printOutputProcess = [&](std::vector<Signal> const& signals) {
         for (const auto& signal : signals) {
-            std::string registerName = utils->getCorrespondingRegisterName(signal.getName(SubVarStyle::UL));
+            std::string registerName;
+            bool hasReg = hlsModule->getCorrespondingRegisterName(signal.getName(SubVarStyle::UL), registerName);
             ss << "\tprocess(rst, " << signal.getName(SubVarStyle::UL) << "_vld)\n"
                << "\tbegin\n"
                << "\t\tif (rst = \'1\') then\n"
-               << "\t\t\t" << registerName << " <= " << signal.initialValue << ";\n"
+               << "\t\t\t" << (hasReg ? registerName + "_reg" : signal.getName(SubVarStyle::DOT)) << " <= " << signal.initialValue << ";\n"
                << "\t\telsif (" << signal.getName(SubVarStyle::UL) << "_vld = '1') then\n"
-               << "\t\t\t" << registerName << " <= " << (signal.isEnum ?
+               << "\t\t\t" << (hasReg ? registerName + "_reg" : signal.getName(SubVarStyle::DOT)) << " <= " << (signal.isEnum ?
                                                          signal.type + "'val(to_integer(unsigned(" + signal.getName(SubVarStyle::UL) + "_out)));\n" :
                                                          signal.getName(SubVarStyle::UL) + "_out;\n")
                << "\t\tend if;\n"
@@ -314,8 +315,8 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     }
        ss << "\t\telsif (done = '1') then\n";
     for (const auto& out : signalFactory->getOutputs(false, true)) {
-        ss << "\t\t\t" << out.getName(SubVarStyle::DOT) << " <= "
-           << utils->getCorrespondingRegisterName(out.getName(SubVarStyle::DOT)) << ";\n";
+//        ss << "\t\t\t" << out.getName(SubVarStyle::DOT) << " <= "
+//           << utils->getCorrespondingRegisterName(out.getName(SubVarStyle::DOT)) << ";\n";
     }
     ss << "\t\tend if;\n"
        << "\tend process;\n\n";

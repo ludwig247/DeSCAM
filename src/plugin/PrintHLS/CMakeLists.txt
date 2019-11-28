@@ -8,4 +8,4 @@ add_library(PrintHLS
             PrintVisibleRegisters.cpp
             VisitInternalRegister.cpp
             InputRegisterVisitor.cpp
-            Utilities.cpp)
+        OptimizeForHLS.cpp)

@@ -8,7 +8,7 @@
 #include <set>
 #include "Stmts_all.h"
 #include "StmtAbstractVisitor.h"
-#include "Utilities.h"
+#include "OptimizeForHLS.h"
 
 namespace SCAM {
 

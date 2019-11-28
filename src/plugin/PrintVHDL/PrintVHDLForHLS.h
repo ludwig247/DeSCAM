@@ -8,9 +8,9 @@
 #include <string>
 #include <memory>
 
-#include "PrintHLS/Utilities.h"
 #include "PluginFactory.h"
 #include "SignalFactory.h"
+#include "HLSmodule.h"
 
 class PrintVHDLForHLS : public PluginFactory{
 
@@ -23,7 +23,7 @@ public:
 private:
     PropertySuite *propertySuite;
     Module *currentModule;
-    std::unique_ptr<Utilities> utils;
+    std::unique_ptr<HLSmodule> hlsModule;
     std::unique_ptr<SignalFactory> signalFactory;
 
     std::string printTypes(Model *model);

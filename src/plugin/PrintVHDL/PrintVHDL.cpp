@@ -169,11 +169,6 @@ std::string PrintVHDL::printInternalSignals() {
     signalStream << "\t-- Declare signals\n";
     signalStream << "\tsignal active_state: " << propertySuite->getName() << "_state_t;\n";
     signalStream << "\tsignal active_operation: " << propertySuite->getName() << "_operation_t;\n";
-    
-    for (auto &reg : propertySuite->getVisibleRegisters()) {
-        std::cout << "\tsignal " << reg->getName() << ": " << convertDataTypeConstrained(reg->getDataType()->getName())
-            << std::endl;
-    }
 
     for (auto &reg : this->currentModule->getVariableMap()) {
         signalStream << "\tsignal " << reg.second->getName() << ": "

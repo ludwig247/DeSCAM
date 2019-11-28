@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "PrintStmt.h"
-#include "Utilities.h"
+#include "OptimizeForHLS.h"
 
 enum class PrintStyle {
     VHDL, HLS

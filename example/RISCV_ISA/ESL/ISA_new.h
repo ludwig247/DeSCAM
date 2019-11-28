@@ -6,7 +6,6 @@
 #define RISCV_ISA_H_
 
 #include "systemc.h"
-//#include "Interfaces.h"
 #include "../../Interfaces/Interfaces.h"
 #include "CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"

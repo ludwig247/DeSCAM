@@ -58,10 +58,10 @@ void SignalFactory::setAllPorts() {
 }
 
 void SignalFactory::setMonitorSignals() {
-    monitorSignals.push_back({"active_state", propertySuite->getName() + "_state_t", ""});
-    monitorSignals.push_back({"next_state", propertySuite->getName() + "_state_t" , ""});
-    monitorSignals.push_back({"active_operation", propertySuite->getName() + "_operation_t" , ""});
-    monitorSignals.push_back({"wait_state", "std_logic" , ""});
+    monitorSignals.push_back({"active_state", propertySuite->getName() + "_state_t"});
+    monitorSignals.push_back({"next_state", propertySuite->getName() + "_state_t"});
+    monitorSignals.push_back({"active_operation", propertySuite->getName() + "_operation_t"});
+    monitorSignals.push_back({"wait_state", "std_logic"});
 }
 
 std::vector<Signal> SignalFactory::getInputs(bool asVector, bool destruct) const {
@@ -77,7 +77,7 @@ std::vector<Signal> SignalFactory::getInputs(bool asVector, bool destruct) const
             std::string direction = in->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(in->getDataSignal()->getInitialValue());
             bool isEnum = in->isEnumType();
-            ports.push_back({name, type, direction, false, "", initialValue ,isEnum});
+            ports.push_back({name, type, direction, false, "", initialValue, isEnum});
         }
     }
     return ports;

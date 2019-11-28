@@ -12,6 +12,17 @@
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
 
+PrintITL::PrintITL() {
+    if (getOptionMap().at("adjustmacros")) {
+        usedITLOption = ADJUSTMACROS;
+    } else if (getOptionMap().at("pipelined")) {
+        usedITLOption = PIPELINED;
+    } else if (getOptionMap().at("hls")) {
+        usedITLOption = HLS;
+    } else {
+        usedITLOption = STANDARD;
+    }
+}
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 

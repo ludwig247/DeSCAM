@@ -5,13 +5,12 @@ add_library(PrintVHDL
         VHDLPrintVisitor.cpp
         OperationPruning.cpp
         VHDLPrintVisitorHLS.cpp
-        VHDLPrintReset.cpp
         VHDLPrintResetNotify.cpp
         PrintVHDLForHLS.cpp
         ../../global/SimplifyVisitor.cpp
         ../../global/NodePeekVisitor.cpp
         ../../global/StmtNodeAlloc.cpp
         ../PrintHLS/PrintOperations.cpp
-        ../PrintHLS/Utilities.cpp
+        HLSmodule.cpp
         SignalFactory.cpp)
 

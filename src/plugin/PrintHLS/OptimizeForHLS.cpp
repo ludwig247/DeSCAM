@@ -1,0 +1,540 @@
+//
+// Created by johannes on 27.10.19.
+//
+
+#include <algorithm>
+
+#include <boost/algorithm/string.hpp>
+#include <ExprVisitor.h>
+
+#include "OptimizeForHLS.h"
+#include "NodePeekVisitor.h"
+
+OptimizeForHLS::OptimizeForHLS(PropertySuite *propertySuite, Module* module) :
+    propertySuite(propertySuite),
+    module(module),
+    registerToOutputMap()
+{
+    // Save original commitment list
+    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
+        originalCommitmentLists.push(operationProperty->getCommitmentList());
+    }
+
+    removeRedundantConditions();
+    mapOutputRegistersToOutput();
+    replaceVariables();
+}
+
+OptimizeForHLS::~OptimizeForHLS() {
+    // Load original commitment list
+    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
+        operationProperty->setCommitmentList(originalCommitmentLists.front());
+        originalCommitmentLists.pop();
+    }
+}
+
+void OptimizeForHLS::removeRedundantConditions()
+{
+    for (auto &function : module->getFunctionMap()) {
+//        std::cout << "------ FUNCTION " << function.second->getName() << " --------" << std::endl;
+
+        auto branches = function.second->getReturnValueConditionList();
+        for (auto branch = branches.begin(); std::next(branch) != branches.end(); ++branch) {
+            auto conditionList = branch->second;
+//            for (auto cond : conditionList) {
+//                std::cout << "Find Conditions: " << *cond << std::endl;
+//            }
+//            std::cout << std::endl;
+            for (auto otherBranches = std::next(branch); otherBranches != branches.end(); ++otherBranches) {
+                auto otherConditionList = otherBranches->second;
+                for (auto &cond : otherConditionList) {
+                    if (NodePeekVisitor::nodePeekUnaryExpr(cond) != nullptr) {
+                        cond = (dynamic_cast<UnaryExpr * >(cond))->getExpr();
+                    }
+                }
+//                for (auto cond : otherConditionList) {
+//                    std::cout << *cond << std::endl;
+//                }
+                bool allFound = true;
+                for (auto cond : conditionList) {
+                    bool found = false;
+                    for (auto otherCond : otherConditionList) {
+                        if (*cond == *otherCond) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        allFound = false;
+                    }
+                }
+                if (allFound) {
+//                    std::cout << "All found!" << std::endl;
+                    for (const auto &cond : conditionList) {
+                        (otherBranches->second).erase(std::remove_if(
+                                (otherBranches->second).begin(),
+                                (otherBranches->second).end(),
+                                [&cond](Expr *expr) {
+                                    if (NodePeekVisitor::nodePeekUnaryExpr(expr) != nullptr) {
+                                        return (*cond == *((dynamic_cast<UnaryExpr * >(expr))->getExpr()));
+                                    }
+                                    return false;
+                                }), (otherBranches->second).end()
+                        );
+                    }
+//                    std::cout << std::endl << "New List" << std::endl;
+//                    for (auto cond : otherBranches->second) {
+//                        std::cout << *cond << std::endl;
+//                    }
+//                } else {
+//                    std::cout << "Not all found!" << std::endl;
+                }
+//                std::cout << std::endl << std::endl;
+            }
+//            std::cout << std::endl << std::endl;
+        }
+        function.second->setReturnValueConditionList(branches);
+    }
+}
+
+void OptimizeForHLS::mapOutputRegistersToOutput() {
+    const auto& outputSet = getOutputs();
+    auto candidates = getVariables();
+
+    // If for every operation assignment of Variable equals assignment of DataSignal
+    // we can map Variable -> DataSignal
+    auto compareAssignments = [this](DataSignal* output) -> std::set<Variable*> {
+
+        auto getOutputReg = [this](OperationProperty* operationProperty, Expr* expr, std::set<Variable*> &vars) -> void {
+            for (const auto &commitment : operationProperty->getCommitmentList()) {
+                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
+                    Variable *var = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
+                    if (!(*expr == *commitment->getRhs())) {
+                        auto pos = vars.find(var);
+                        if (pos != vars.end()) {
+                            vars.erase(pos);
+                        }
+                    }
+                }
+            }
+        };
+
+        auto candidates = getVariables();
+        for (const auto& operationProperty : propertySuite->getOperationProperties()) {
+            for (const auto &commitment : operationProperty->getCommitmentList()) {
+                if (*(commitment->getLhs()) == *(commitment->getRhs())) {
+                    continue;
+                }
+                if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
+                    const auto &dataSignal = dynamic_cast<DataSignalOperand *>(commitment->getLhs())->getDataSignal();
+                    if (dataSignal == output) {
+                        getOutputReg(operationProperty, commitment->getRhs(), candidates);
+                    }
+                }
+            }
+        }
+        return candidates;
+    };
+
+    std::multimap<Variable*, DataSignal*> registerToOutput;
+    for (const auto& output : outputSet) {
+        const auto& outputReg = compareAssignments(output);
+        if (outputReg.size() == 1) {
+            registerToOutput.insert({*outputReg.begin(), output});
+        } else {
+            moduleOutputs.insert(output);
+        }
+    }
+
+    const auto& parentMap = getParentMap(registerToOutput);
+    registerToOutput.clear();
+
+    for (const auto& parent : parentMap) {
+        std::cout << parent.first->getFullName() << " -> " << parent.second->getFullName() << std::endl;
+    }
+
+    // If we can map multiple DataSignals to one Variable, we can replace these DataSignal by a new DataSignal
+    // representing all these DataSignals
+    std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
+    for (auto it = parentMap.cbegin(); it != parentMap.cend();) {
+        Variable* reg = it->first;
+        if (parentMap.count(reg) > 1) {
+            std::vector<DataSignal*> outputs;
+            do {
+                outputs.emplace_back(it->second);
+                ++it;
+            } while (it != parentMap.cend() && reg == it->first);
+            const auto& combinedDataSignal = getCombinedDataSignal(outputs);
+            registerToOutputMap.insert({reg, combinedDataSignal});
+            moduleOutputs.insert(combinedDataSignal);
+            for (const auto& out : outputs) {
+                oldToNewDataSignalMap.insert({out, combinedDataSignal});
+            }
+        } else {
+            registerToOutputMap.insert({it->first, it->second});
+            moduleOutputs.insert(it->second);
+            ++it;
+        }
+    }
+
+    replaceDataSignals(oldToNewDataSignalMap);
+}
+
+void OptimizeForHLS::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap) {
+    const auto& subVarMap = getSubVarMap(dataSignalMap);
+
+    std::cout << "Replace DataSignal by new DataSignal" << std::endl;
+    for (const auto& subVar : subVarMap) {
+        std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
+
+        for (const auto& property : propertySuite->getOperationProperties()) {
+            std::vector<Assignment* > assignments;
+            for (const auto& commitment : property->getCommitmentList()) {
+                if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
+                    auto dataSignal = dynamic_cast<DataSignalOperand*>(commitment->getLhs())->getDataSignal();
+                    if (dataSignal == subVar.first) {
+                        assignments.emplace_back(
+                                new SCAM::Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                        continue;
+                    }
+                }
+                assignments.emplace_back(commitment);
+            }
+            property->setCommitmentList(assignments);
+        }
+    }
+}
+
+void OptimizeForHLS::replaceVariables() {
+    const auto& subVarMap = getSubVarMap(registerToOutputMap);
+
+    std::cout << "Replace OutputRegister by DataSignal" << std::endl;
+    for (const auto& subVar : subVarMap) {
+        std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
+
+        for (const auto& property : propertySuite->getOperationProperties()) {
+            std::vector<Assignment* > assignments;
+            for (const auto& commitment : property->getCommitmentList()) {
+                // Remove if LHS == RHS
+                if (*(commitment->getLhs()) == *(commitment->getRhs())) {
+                    continue;
+                }
+                // Replace OutputRegister by DataSignal
+                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
+                    auto dataSignal = dynamic_cast<VariableOperand*>(commitment->getLhs())->getVariable();
+                    if (dataSignal == subVar.first) {
+                        assignments.emplace_back(
+                                new SCAM::Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                        continue;
+                    }
+                }
+                // Remove assignments with OutputRegister at RHS
+                const auto& varSet = ExprVisitor::getUsedVariables(commitment->getRhs());
+                if (varSet.find(subVar.first) != varSet.end()) {
+                    continue;
+                }
+                assignments.emplace_back(commitment);
+            }
+            property->setCommitmentList(assignments);
+        }
+    }
+
+    // Remove duplicate assignments
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        std::vector<Assignment* > assignments;
+
+        auto equalAssignments = [&assignments](Assignment* commitment) -> bool {
+            for (const auto& assignment : assignments) {
+                if (*assignment == *commitment) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        for (const auto& commitment : property->getCommitmentList()) {
+            if(!equalAssignments(commitment)) {
+                assignments.push_back(commitment);
+            }
+        }
+        property->setCommitmentList(assignments);
+    }
+}
+
+template<typename Key, typename Value>
+std::map<Key *, Value *> OptimizeForHLS::getSubVarMap(const std::map<Key *, Value *> map) {
+    std::vector<Key* > keys;
+    for (const auto& var : map) {
+        if (var.first->isCompoundType()) {
+            for (const auto& subVar : var.first->getSubVarList()) {
+                keys.push_back(subVar);
+            }
+        } else {
+            keys.push_back(var.first);
+        }
+    }
+    std::vector<Value* > values;
+    for (const auto& var : map) {
+        if (var.second->isCompoundType()) {
+            for (const auto& subVar : var.second->getSubVarList()) {
+                values.push_back(subVar);
+            }
+        } else {
+            values.push_back(var.second);
+        }
+    }
+    std::map<Key *, Value *> subVarMap;
+    for (std::size_t it = 0; it < keys.size(); ++it) {
+        subVarMap.insert({keys.at(it), values.at(it)});
+    }
+    return subVarMap;
+}
+
+std::multimap<Variable*, DataSignal*> OptimizeForHLS::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
+    std::multimap<Variable*, DataSignal*> parentMap;
+    std::set<std::pair<Variable*, DataSignal*>> uniquePairs;
+    for (const auto& var : multimap) {
+        if (var.first->isSubVar()) {
+            if (uniquePairs.find({var.first->getParent(), var.second->getParent()}) == uniquePairs.end()) {
+                parentMap.insert({var.first->getParent(), var.second->getParent()});
+                uniquePairs.insert({var.first->getParent(), var.second->getParent()});
+            }
+        } else {
+            if (uniquePairs.find({var.first, var.second}) == uniquePairs.end()) {
+                parentMap.insert({var.first, var.second});
+                uniquePairs.insert({var.first, var.second});
+            }
+        }
+    }
+    return parentMap;
+}
+
+bool OptimizeForHLS::getCorrespondingRegisterName(const std::string& name, std::string& registerName) {
+    std::map<std::string, std::string> names;
+    for (const auto& item : outputToRegisterMap) {
+        std::string outputName;
+        if (item.first->isSubVar()) {
+            outputName = item.first->getParent()->getName() + "_" + item.first->getName();
+        } else {
+            outputName = item.first->getName();
+        }
+        names.insert({outputName, item.second->getFullName()});
+    }
+    auto modifiedName = boost::algorithm::replace_all_copy(name, ".", "_");
+    if (names.find(modifiedName) != names.end()) {
+        registerName = names.at(modifiedName);
+        return true;
+    }
+    return false;
+}
+
+std::set<DataSignal *> OptimizeForHLS::getOutputs() {
+    std::set<DataSignal*> outputSet;
+    for (const auto &port : module->getPorts()) {
+        if (port.second->getInterface()->isOutput()) {
+            if (port.second->isCompoundType()) {
+                for (const auto &subType : port.second->getDataSignal()->getSubVarList()) {
+                    outputSet.insert(subType);
+                }
+            } else {
+                outputSet.insert(port.second->getDataSignal());
+            }
+        }
+    }
+    return outputSet;
+}
+
+std::set<Variable *> OptimizeForHLS::getVariables() {
+    std::set<Variable* > variableSet;
+    for (const auto &var : module->getVariableMap()) {
+        if (var.second->isCompoundType()) {
+            for (const auto &subVar : var.second->getSubVarList()) {
+                variableSet.insert(subVar);
+            }
+        } else {
+            variableSet.insert(var.second);
+        }
+    }
+
+    // TODO: Not needed, if variableMap contains no unused variables anymore
+    auto eraseIfFunction = [this](Variable* var) {
+        for (const auto &operationProperties : propertySuite->getOperationProperties()) {
+            for (const auto &commitment : operationProperties->getCommitmentList()) {
+                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
+                    Variable* var2 = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
+                    if (var->getFullName() == var2->getFullName()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    };
+
+    for (auto var = variableSet.begin(); var != variableSet.end();) {
+        if(eraseIfFunction(*var)) {
+            variableSet.erase(var++);
+        } else {
+            ++var;
+        }
+    }
+
+    return variableSet;
+}
+
+DataSignal* OptimizeForHLS::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
+
+    std::string combinedName = dataSignal.front()->getFullName();
+    for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
+        std::string name1 = combinedName;
+        std::string name2 = (*it)->getFullName();
+
+        uint32_t m = combinedName.length();
+        uint32_t n = (*it)->getFullName().length();
+
+        uint32_t result = 0;
+        uint32_t end = 0;
+        uint32_t len[2][n];
+        uint32_t currRow = 0;
+
+        for (uint32_t i = 0; i <= m; i++) {
+            for (uint32_t j = 0; j <= n; j++) {
+                if (i == 0 || j == 0) {
+                    len[currRow][j] = 0;
+                } else if (name1[i - 1] == name2[j - 1]) {
+                    len[currRow][j] = len[1 - currRow][j - 1] + 1;
+                    if (len[currRow][j] > result) {
+                        result = len[currRow][j];
+                        end = i - 1;
+                    }
+                } else {
+                    len[currRow][j] = 0;
+                }
+            }
+            currRow = 1 - currRow;
+        }
+        combinedName = name1.substr(end - result + 1, result);
+    }
+
+    auto combinedDataSignal = new DataSignal(combinedName + "_sig", dataSignal.front()->getDataType());
+    return combinedDataSignal;
+}
+
+std::string OptimizeForHLS::convertDataType(const std::string& type) {
+    if (type == "int") {
+        return "ap_int<32>";
+    } else if (type == "unsigned") {
+        return "ap_uint<32>";
+    } else {
+        return type;
+    }
+}
+
+std::string OptimizeForHLS::typeToString(StmtType type) {
+    switch (type) {
+        case StmtType::ARITHMETIC:
+            return "arithmetic";
+        case StmtType::RELATIONAL:
+            return "relational";
+        case StmtType::LOGICAL:
+            return "logical";
+        case StmtType::BITWISE:
+            return "bitwise";
+        case StmtType::VARIABLE_OPERAND:
+            return "variable operand";
+        case StmtType::DATA_SIGNAL_OPERAND:
+            return "data signal operand";
+        case StmtType::ENUM_VALUE:
+            return "enum value";
+        case StmtType::UNARY_EXPR:
+            return "unary expr";
+        case StmtType::INTEGER_VALUE:
+            return "integer value";
+        case StmtType::UNSIGNED_VALUE:
+            return "unsigned value";
+        case StmtType::ARRAY_OPERAND:
+            return "array operand";
+        case StmtType::PARAM_OPERAND:
+            return "param operand";
+        case StmtType::ASSIGNMENT:
+            return "assignment";
+        case StmtType::UNKNOWN:
+            return "unknown type";
+    }
+}
+
+std::string OptimizeForHLS::subTypeBitwiseToString(SubTypeBitwise type) {
+    switch (type) {
+        case SubTypeBitwise::BITWISE_AND:
+            return "&";
+        case SubTypeBitwise::BITWISE_OR:
+            return "|";
+        case SubTypeBitwise::BITWISE_XOR:
+            return "^";
+        case SubTypeBitwise::LEFT_SHIFT:
+            return "<<";
+        case SubTypeBitwise::RIGHT_SHIFT:
+            return ">>";
+        case SubTypeBitwise::UNKNOWN:
+            return "unknown operation";
+    }
+}
+
+//    for (const auto& state : propertySuite->getStates()) {
+//        auto successorProperties = propertySuite->getSuccessorProperties(state);
+//        std::sort(successorProperties.begin(), successorProperties.end(), [](const AbstractProperty* prop1, const AbstractProperty* prop2) {
+//            return (prop1->getAssumptionList().size() < prop2->getAssumptionList().size());
+//        });
+//        for (auto property = successorProperties.begin(); property != successorProperties.end(); ++property) {
+//            auto assumptionList = (*property)->getAssumptionList();
+//            for (auto assumption : assumptionList) {
+//                std::cout << "Find Conditions: " << *assumption << std::endl;
+//            }
+//            std::cout << std::endl;
+//            for (auto otherProperty = std::next(property); otherProperty != successorProperties.end(); ++otherProperty) {
+//                auto otherAssumptionList = (*otherProperty)->getAssumptionList();
+//                for (auto &assumption : otherAssumptionList) {
+//                    if (NodePeekVisitor::nodePeekUnaryExpr(assumption) != nullptr) {
+//                        assumption = (dynamic_cast<UnaryExpr * >(assumption))->getExpr();
+//                    }
+//                }
+//                for (auto assumption : otherAssumptionList) {
+//                    std::cout << *assumption << std::endl;
+//                }
+//                bool allFound = true;
+//                for (auto assumption : assumptionList) {
+//                    bool found = false;
+//                    for (auto otherAssumption : otherAssumptionList) {
+//                        if (*assumption == *otherAssumption) {
+//                            found = true;
+//                        }
+//                    }
+//                    if (!found) {
+//                        allFound = false;
+//                    }
+//                }
+//                if (allFound) {
+//                    std::cout << "All found!" << std::endl;
+//                    for (const auto &assumption : assumptionList) {
+//                        (otherAssumptionList).erase(std::remove_if(
+//                                otherAssumptionList.begin(),
+//                                otherAssumptionList.end(),
+//                                [&assumption](Expr *expr) {
+//                                    if (NodePeekVisitor::nodePeekUnaryExpr(expr) != nullptr) {
+//                                        return (*assumption == *((dynamic_cast<UnaryExpr * >(expr))->getExpr()));
+//                                    }
+//                                    return false;
+//                                }), otherAssumptionList.end()
+//                        );
+//                    }
+//                    std::cout << std::endl << "New List" << std::endl;
+//                    for (auto assumption : otherAssumptionList) {
+//                        std::cout << *assumption << std::endl;
+//                    }
+//                } else {
+//                    std::cout << "Not all found!" << std::endl;
+//                }
+//                std::cout << std::endl << std::endl;
+//            }
+//            std::cout << std::endl << std::endl;
+//        }
+//    }

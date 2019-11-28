@@ -11,7 +11,7 @@
 
 #include "Model.h"
 #include "PrintSynthesisScripts.h"
-#include "Utilities.h"
+#include "OptimizeForHLS.h"
 
 class PrintHLS : public PluginFactory, public AbstractVisitor {
 public:
@@ -27,7 +27,7 @@ private:
     SCAM::Module *currentModule;
 
     std::unique_ptr<PrintSynthesisScripts> synthesisScript;
-    std::unique_ptr<Utilities> utils;
+    std::unique_ptr<OptimizeForHLS> utils;
 
     void dataTypes();
     void functions();

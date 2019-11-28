@@ -19,7 +19,7 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *node) {
     for (auto &module: node->getModules()) {
         this->currentModule = module.second;
         this->propertySuite = module.second->getPropertySuite();
-        utils = std::make_unique<Utilities>(propertySuite, currentModule);
+        utils = std::make_unique<OptimizeForHLS>(propertySuite, currentModule);
 
         dataTypes();
         pluginOutput.insert(std::make_pair("Data_Types.h", ss.str()));
@@ -50,9 +50,9 @@ void PrintHLS::operations() {
     ss << "{\n";
 
     for (auto visibleRegister : propertySuite->getVisibleRegisters()) {
-        auto regs = utils->getRegisters();
+        auto regs = utils->getVariables();
         if (regs.find(visibleRegister->getVariable()) != regs.end()) {
-            std::string type = Utilities::convertDataType(visibleRegister->getDataType()->getName());
+            std::string type = OptimizeForHLS::convertDataType(visibleRegister->getDataType()->getName());
             std::string name = visibleRegister->getName();
             if (visibleRegister->isCompoundType()) {
                 name += ("_" + visibleRegister->getSubVarName());
@@ -92,7 +92,7 @@ void PrintHLS::operations() {
     ss << "\t}\n\n";
 
     for (auto visibleRegister : propertySuite->getVisibleRegisters()) {
-        auto regs = utils->getRegisters();
+        auto regs = utils->getVariables();
         if (regs.find(visibleRegister->getVariable()) != regs.end()) {
             ss << "\t" << visibleRegister->getName();
             if (visibleRegister->isCompoundType()) {
@@ -110,21 +110,38 @@ void PrintHLS::operations() {
 
 void PrintHLS::functionParameters() {
     // input and output signals
-    for (auto port : currentModule->getPorts()) {
-        bool isArrayType = port.second->isArrayType();
-        if (isArrayType) {
-            ss << "\t" << Utilities::convertDataType(port.second->getDataType()->getSubVarMap().begin()->second->getName());
-        } else {
-            ss << "\t" << Utilities::convertDataType(port.second->getDataType()->getName());
-        }
+    for (const auto& port : currentModule->getPorts()) {
         if (port.second->getInterface()->isInput()) {
-            ss << " ";
-        } else {
-            ss << " &";
+            bool isArrayType = port.second->isArrayType();
+            if (isArrayType) {
+                ss << "\t"
+                   << OptimizeForHLS::convertDataType(port.second->getDataType()->getSubVarMap().begin()->second->getName());
+            } else {
+                ss << "\t" << OptimizeForHLS::convertDataType(port.second->getDataType()->getName());
+            }
+            if (port.second->getInterface()->isInput()) {
+                ss << " ";
+            } else {
+                ss << " &";
+            }
+            ss << port.second->getName() << "_sig";
+            if (isArrayType) {
+                ss << "[" << port.second->getDataType()->getSubVarMap().size() << "]";
+            }
+            ss << ",\n";
         }
-        ss << port.second->getName() << "_sig";
+    }
+    for (const auto& output : utils->getModuleOutputs()) {
+        bool isArrayType = output->isArrayType();
         if (isArrayType) {
-            ss << "[" << port.second->getDataType()->getSubVarMap().size() << "]";
+            ss << "\t"
+               << OptimizeForHLS::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\t" << OptimizeForHLS::convertDataType(output->getDataType()->getName());
+        }
+        ss << " &" << output->getName();
+        if (isArrayType) {
+            ss << "[" <<output->getDataType()->getSubVarMap().size() << "]";
         }
         ss << ",\n";
     }
@@ -136,10 +153,8 @@ void PrintHLS::functionParameters() {
 }
 
 void PrintHLS::assumptions(AbstractProperty* successorProperty) {
-    for (auto assumption = successorProperty->getAssumptionList().begin();
-         assumption != successorProperty->getAssumptionList().end();
-         ++assumption
-            ) {
+    const auto& assumptionList = successorProperty->getAssumptionList();
+    for (auto assumption = assumptionList.begin(); assumption != assumptionList.end(); ++assumption) {
         ss << PrintFunctionStatements::toString(*assumption);
         if (std::next(assumption) != successorProperty->getAssumptionList().end()) {
             ss << ") && (";
@@ -202,7 +217,7 @@ void PrintHLS::visit(DataType &node) {
     } else if (node.isCompoundType()) {
         ss << "struct " << node.getName() << " {\n";
         for (auto &subVar : node.getSubVarMap()) {
-            ss << "\t" << Utilities::convertDataType(subVar.second->getName()) << " " << subVar.first << ";\n";
+            ss << "\t" << OptimizeForHLS::convertDataType(subVar.second->getName()) << " " << subVar.first << ";\n";
         }
         ss << "};\n\n";
     }
@@ -216,10 +231,10 @@ void PrintHLS::functions() {
 
     auto functionMap = currentModule->getFunctionMap();
     for (auto &function :functionMap) {
-        this->ss << Utilities::convertDataType(function.second->getReturnType()->getName()) << " " << function.second->getName() << "(";
+        this->ss << OptimizeForHLS::convertDataType(function.second->getReturnType()->getName()) << " " << function.second->getName() << "(";
         auto parameterMap = function.second->getParamMap();
         for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); ++parameter) {
-            this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " " << parameter->first;
+            this->ss << OptimizeForHLS::convertDataType(parameter->second->getDataType()->getName()) << " " << parameter->first;
             if (std::next(parameter) != parameterMap.end()) {
                 this->ss << ", ";
             }
@@ -236,10 +251,10 @@ void PrintHLS::functions() {
 }
 
 void PrintHLS::visit(Function &node) {
-    this->ss << Utilities::convertDataType(node.getReturnType()->getName()) << " " << node.getName() << "(";
+    this->ss << OptimizeForHLS::convertDataType(node.getReturnType()->getName()) << " " << node.getName() << "(";
     auto parameterMap = node.getParamMap();
     for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
-        this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " " << parameter->first;
+        this->ss << OptimizeForHLS::convertDataType(parameter->second->getDataType()->getName()) << " " << parameter->first;
         if (parameter != --parameterMap.end())
             this->ss << ", ";
     }

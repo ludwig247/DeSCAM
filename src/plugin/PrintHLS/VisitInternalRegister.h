@@ -9,7 +9,7 @@
 #include <set>
 
 #include "StmtAbstractVisitor.h"
-#include "Utilities.h"
+#include "OptimizeForHLS.h"
 
 namespace SCAM {
 

@@ -6,16 +6,16 @@
 #define SCAM_PRINTVISIBLEREGISTERS_H
 
 #include "PrintStmt.h"
-#include "Utilities.h"
+#include "OptimizeForHLS.h"
 
 namespace SCAM {
 
     class PrintVisibleRegisters : public PrintStmt {
 
     public:
-        explicit PrintVisibleRegisters(SCAM::Stmt *stmt, Utilities *utils, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintVisibleRegisters(SCAM::Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
-        static std::string toString(Stmt *stmt, Utilities *utils, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        static std::string toString(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         std::string getString();
 
@@ -28,7 +28,7 @@ namespace SCAM {
     private:
         void printIndent();
 
-        Utilities *utilities;
+        OptimizeForHLS *utilities;
         bool isRegister;
     };
 

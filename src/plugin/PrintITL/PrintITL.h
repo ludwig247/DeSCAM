@@ -20,7 +20,7 @@ enum ITLOption {
 class PrintITL : public PluginFactory {
 
 public:
-    PrintITL() = default;
+    PrintITL();
 
     ~PrintITL() = default;
 

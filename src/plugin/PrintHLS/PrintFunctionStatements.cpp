@@ -10,8 +10,7 @@
 
 using namespace SCAM;
 
-PrintFunctionStatements::PrintFunctionStatements(Stmt *stmt, Utilities *utils, unsigned int indentSize, unsigned int indentOffset) {
-    skip = false;
+PrintFunctionStatements::PrintFunctionStatements(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize, unsigned int indentOffset) {
     side = Side::UNKNOWN;
     this->utilities = utils;
     this->createString(stmt, indentSize, indentOffset);
@@ -22,7 +21,7 @@ std::string PrintFunctionStatements::toString(Stmt *stmt, unsigned int indentSiz
     return printer.getString();
 }
 
-std::string PrintFunctionStatements::toString(Stmt *stmt, Utilities *utils, unsigned int indentSize, unsigned int indentOffset) {
+std::string PrintFunctionStatements::toString(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize, unsigned int indentOffset) {
     PrintFunctionStatements printer(stmt, utils, indentSize, indentOffset);
     return printer.getString();
 }
@@ -35,49 +34,41 @@ void PrintFunctionStatements::visit(Assignment &node) {
     printIndent();
     side = Side::LHS;
     node.getLhs()->accept(*this);
-    if (!skip) {
-        this->ss << " = ";
-        side = Side::RHS;
-        node.getRhs()->accept(*this);
-        this->ss << ";\n";
-    } else {
-        this->ss.str("");
-    }
+    this->ss << " = ";
+    side = Side::RHS;
+    node.getRhs()->accept(*this);
+    this->ss << ";\n";
 }
 
 void PrintFunctionStatements::visit(VariableOperand &node) {
     if (utilities) {
-        auto regs = utilities->getRegisters();
+        auto regs = utilities->getVariables();
         if(side == Side::LHS) {
-//            if (regs.find(node.getVariable()) == regs.end()) {
-//                skip = true;
-//            } else {
-                this->ss << "next_";
-//            }
+            this->ss << "next_";
         }
     }
-    if (!skip) {
-        if (node.getVariable()->isSubVar()) {
-            this->ss << node.getVariable()->getParent()->getName();
-            if (node.getVariable()->getParent()->isArrayType()) {
-                this->ss << "[" << node.getVariable()->getName() << "]";
-            } else {
-                this->ss << "_" << node.getVariable()->getName();
-            }
+    if (node.getVariable()->isSubVar()) {
+        this->ss << node.getVariable()->getParent()->getName();
+        if (node.getVariable()->getParent()->isArrayType()) {
+            this->ss << "[" << node.getVariable()->getName() << "]";
         } else {
-            this->ss << node.getVariable()->getName();
+            this->ss << "_" << node.getVariable()->getName();
         }
+    } else {
+        this->ss << node.getVariable()->getName();
     }
 }
 
 void PrintFunctionStatements::visit(DataSignalOperand &node) {
-    this->ss << node.getDataSignal()->getPort()->getName() << "_sig";
     if (node.getDataSignal()->isSubVar()) {
+        this->ss << node.getDataSignal()->getParent()->getName();
         if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << "[" << node.getDataSignal()->getName() << "]";
         } else {
             this->ss << "." << node.getDataSignal()->getName();
         }
+    } else {
+        this->ss << node.getDataSignal()->getName();
     }
 }
 
