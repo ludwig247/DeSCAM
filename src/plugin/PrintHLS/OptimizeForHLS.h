@@ -10,36 +10,14 @@
 
 #include <PluginFactory.h>
 
-enum class Side {
-    UNKNOWN,
-    LHS,
-    RHS
-};
-
-enum class StmtType {
-    UNKNOWN, ARITHMETIC, RELATIONAL, LOGICAL, BITWISE, VARIABLE_OPERAND, DATA_SIGNAL_OPERAND, ENUM_VALUE,
-    UNARY_EXPR, INTEGER_VALUE, UNSIGNED_VALUE, ARRAY_OPERAND, PARAM_OPERAND, ASSIGNMENT
-};
-
-enum class SubTypeBitwise {
-    UNKNOWN, BITWISE_AND, BITWISE_OR, BITWISE_XOR, LEFT_SHIFT, RIGHT_SHIFT
-};
-
 class OptimizeForHLS {
 
 public:
     explicit OptimizeForHLS(PropertySuite *propertySuite, Module* module);
     ~OptimizeForHLS();
 
-    static std::string convertDataType(const std::string& type);
-
-    bool getCorrespondingRegisterName(const std::string& outputName, std::string& registerName);
-
     std::set<DataSignal*> getOutputs();
     std::set<Variable* > getVariables();
-
-    static std::string typeToString(StmtType type);
-    static std::string subTypeBitwiseToString(SubTypeBitwise type);
 
     inline std::set<DataSignal*> getModuleOutputs() const ;
 

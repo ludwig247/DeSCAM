@@ -6,6 +6,7 @@
 #define SCAM_PRINTTESTVISITORS_H
 
 #include "PrintStmt.h"
+#include "Utilities.h"
 #include "OptimizeForHLS.h"
 
 namespace SCAM {
@@ -13,10 +14,10 @@ namespace SCAM {
     class PrintFunctionStatements : public PrintStmt {
 
     public:
-        explicit PrintFunctionStatements(SCAM::Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintFunctionStatements(SCAM::Stmt *stmt, OptimizeForHLS *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
-        static std::string toString(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        static std::string toString(Stmt *stmt, OptimizeForHLS *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         std::string getString();
 
@@ -36,7 +37,7 @@ namespace SCAM {
         void visit(Bitwise &node) override ;
 
     private:
-        OptimizeForHLS *utilities;
+        OptimizeForHLS *opt;
         Side side;
 
         void printIndent();

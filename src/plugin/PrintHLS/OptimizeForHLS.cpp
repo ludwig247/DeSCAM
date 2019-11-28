@@ -308,25 +308,6 @@ std::multimap<Variable*, DataSignal*> OptimizeForHLS::getParentMap(const std::mu
     return parentMap;
 }
 
-bool OptimizeForHLS::getCorrespondingRegisterName(const std::string& name, std::string& registerName) {
-    std::map<std::string, std::string> names;
-    for (const auto& item : outputToRegisterMap) {
-        std::string outputName;
-        if (item.first->isSubVar()) {
-            outputName = item.first->getParent()->getName() + "_" + item.first->getName();
-        } else {
-            outputName = item.first->getName();
-        }
-        names.insert({outputName, item.second->getFullName()});
-    }
-    auto modifiedName = boost::algorithm::replace_all_copy(name, ".", "_");
-    if (names.find(modifiedName) != names.end()) {
-        registerName = names.at(modifiedName);
-        return true;
-    }
-    return false;
-}
-
 std::set<DataSignal *> OptimizeForHLS::getOutputs() {
     std::set<DataSignal*> outputSet;
     for (const auto &port : module->getPorts()) {
@@ -417,66 +398,6 @@ DataSignal* OptimizeForHLS::getCombinedDataSignal(const std::vector<DataSignal*>
 
     auto combinedDataSignal = new DataSignal(combinedName + "_sig", dataSignal.front()->getDataType());
     return combinedDataSignal;
-}
-
-std::string OptimizeForHLS::convertDataType(const std::string& type) {
-    if (type == "int") {
-        return "ap_int<32>";
-    } else if (type == "unsigned") {
-        return "ap_uint<32>";
-    } else {
-        return type;
-    }
-}
-
-std::string OptimizeForHLS::typeToString(StmtType type) {
-    switch (type) {
-        case StmtType::ARITHMETIC:
-            return "arithmetic";
-        case StmtType::RELATIONAL:
-            return "relational";
-        case StmtType::LOGICAL:
-            return "logical";
-        case StmtType::BITWISE:
-            return "bitwise";
-        case StmtType::VARIABLE_OPERAND:
-            return "variable operand";
-        case StmtType::DATA_SIGNAL_OPERAND:
-            return "data signal operand";
-        case StmtType::ENUM_VALUE:
-            return "enum value";
-        case StmtType::UNARY_EXPR:
-            return "unary expr";
-        case StmtType::INTEGER_VALUE:
-            return "integer value";
-        case StmtType::UNSIGNED_VALUE:
-            return "unsigned value";
-        case StmtType::ARRAY_OPERAND:
-            return "array operand";
-        case StmtType::PARAM_OPERAND:
-            return "param operand";
-        case StmtType::ASSIGNMENT:
-            return "assignment";
-        case StmtType::UNKNOWN:
-            return "unknown type";
-    }
-}
-
-std::string OptimizeForHLS::subTypeBitwiseToString(SubTypeBitwise type) {
-    switch (type) {
-        case SubTypeBitwise::BITWISE_AND:
-            return "&";
-        case SubTypeBitwise::BITWISE_OR:
-            return "|";
-        case SubTypeBitwise::BITWISE_XOR:
-            return "^";
-        case SubTypeBitwise::LEFT_SHIFT:
-            return "<<";
-        case SubTypeBitwise::RIGHT_SHIFT:
-            return ">>";
-        case SubTypeBitwise::UNKNOWN:
-            return "unknown operation";
-    }
 }
 
 //    for (const auto& state : propertySuite->getStates()) {

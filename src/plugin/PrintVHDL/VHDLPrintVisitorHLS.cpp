@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "NodePeekVisitor.h"
-#include "PrintHLS/PrintOperations.h"
+#include "PrintHLS/BitSlicingHLS.h"
 #include "VHDLPrintVisitorHLS.h"
 
 using namespace SCAM;
@@ -31,15 +31,15 @@ void VHDLPrintVisitorHLS::visit(Bitwise &node) {
     bool tempUseParentheses = useParenthesesFlag;
     useParenthesesFlag = true;
 
-    std::unique_ptr<PrintOperations> printOperations = std::make_unique<PrintOperations>(&node);
+    std::unique_ptr<BitSlicingHLS> printOperations = std::make_unique<BitSlicingHLS>(&node);
     if (printOperations->isSlicingOp()) {
         this->ss << printOperations->getOpAsString(PrintStyle::VHDL);
     } else {
-        if ((node.getOperation() == OptimizeForHLS::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT)) ||
-            (node.getOperation() == OptimizeForHLS::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))) {
-            if (node.getOperation() == OptimizeForHLS::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT))
+        if ((node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT)) ||
+            (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))) {
+            if (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT))
                 this->ss << "shift_left(";
-            else if (node.getOperation() == OptimizeForHLS::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))
+            else if (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))
                 this->ss << "shift_right(";
             useParenthesesFlag = false;
             node.getLhs()->accept(*this);

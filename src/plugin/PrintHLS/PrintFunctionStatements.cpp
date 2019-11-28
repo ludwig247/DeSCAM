@@ -6,13 +6,13 @@
 
 #include "PrintFunctionStatements.h"
 #include "NodePeekVisitor.h"
-#include "PrintOperations.h"
+#include "BitSlicingHLS.h"
 
 using namespace SCAM;
 
-PrintFunctionStatements::PrintFunctionStatements(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize, unsigned int indentOffset) {
+PrintFunctionStatements::PrintFunctionStatements(Stmt *stmt, OptimizeForHLS *opt, unsigned int indentSize, unsigned int indentOffset) {
     side = Side::UNKNOWN;
-    this->utilities = utils;
+    this->opt = opt;
     this->createString(stmt, indentSize, indentOffset);
 }
 
@@ -41,8 +41,8 @@ void PrintFunctionStatements::visit(Assignment &node) {
 }
 
 void PrintFunctionStatements::visit(VariableOperand &node) {
-    if (utilities) {
-        auto regs = utilities->getVariables();
+    if (opt) {
+        auto regs = opt->getVariables();
         if(side == Side::LHS) {
             this->ss << "next_";
         }
@@ -199,7 +199,7 @@ void PrintFunctionStatements::visit(FunctionOperand &node) {
 }
 
 void PrintFunctionStatements::visit(Bitwise &node) {
-    std::unique_ptr<PrintOperations> printOperations = std::make_unique<PrintOperations>(&node);
+    std::unique_ptr<BitSlicingHLS> printOperations = std::make_unique<BitSlicingHLS>(&node);
     if (printOperations->isSlicingOp()) {
         this->ss << printOperations->getOpAsString(PrintStyle::HLS);
     } else {

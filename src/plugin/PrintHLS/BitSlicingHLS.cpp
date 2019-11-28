@@ -3,25 +3,25 @@
 //
 
 #include <set>
-#include "PrintOperations.h"
+#include "BitSlicingHLS.h"
 
 using namespace SCAM;
 
-PrintOperations::PrintOperations(Stmt *stmt)
+BitSlicingHLS::BitSlicingHLS(Stmt *stmt)
 {
     actualNode = std::make_shared<Node>();
     stmt->accept(*this);
 }
 
-bool PrintOperations::isSlicingOp() {
+bool BitSlicingHLS::isSlicingOp() {
     return slicing(actualNode.get());
 }
 
-std::string PrintOperations::getOpAsString(PrintStyle style) {
+std::string BitSlicingHLS::getOpAsString(PrintStyle style) {
     return getString(actualNode.get(), style);
 }
 
-void PrintOperations::visit(Arithmetic &node) {
+void BitSlicingHLS::visit(Arithmetic &node) {
     actualNode->type = StmtType::ARITHMETIC;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -33,7 +33,7 @@ void PrintOperations::visit(Arithmetic &node) {
     actualNode = tmpNode;
 }
 
-void PrintOperations::visit(Relational &node) {
+void BitSlicingHLS::visit(Relational &node) {
     actualNode->type = StmtType::RELATIONAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -45,7 +45,7 @@ void PrintOperations::visit(Relational &node) {
     actualNode = tmpNode;
 }
 
-void PrintOperations::visit(UnaryExpr &node) {
+void BitSlicingHLS::visit(UnaryExpr &node) {
     actualNode->type = StmtType::UNARY_EXPR;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -54,14 +54,14 @@ void PrintOperations::visit(UnaryExpr &node) {
     actualNode = tmpNode;
 }
 
-void PrintOperations::visit(Assignment &node) {
+void BitSlicingHLS::visit(Assignment &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void PrintOperations::visit(Bitwise &node) {
+void BitSlicingHLS::visit(Bitwise &node) {
     actualNode->type = StmtType::BITWISE;
-    actualNode->subType = getSubTypeBitwise(node.getOperation());
+    actualNode->subType = Utilities::getSubTypeBitwise(node.getOperation());
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
     tmpNode->child.push_back(actualNode);
@@ -76,7 +76,7 @@ void PrintOperations::visit(Bitwise &node) {
 //    }
 }
 
-void PrintOperations::visit(ArrayOperand &node) {
+void BitSlicingHLS::visit(ArrayOperand &node) {
     actualNode->type = StmtType::ARRAY_OPERAND;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -85,12 +85,12 @@ void PrintOperations::visit(ArrayOperand &node) {
     actualNode = tmpNode;
 }
 
-void PrintOperations::visit(ParamOperand &node) {
+void BitSlicingHLS::visit(ParamOperand &node) {
     actualNode->type = StmtType::PARAM_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-void PrintOperations::visit(Logical &node) {
+void BitSlicingHLS::visit(Logical &node) {
     actualNode->type = StmtType::LOGICAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -102,17 +102,17 @@ void PrintOperations::visit(Logical &node) {
     actualNode = tmpNode;
 }
 
-void PrintOperations::visit(UnsignedValue &node) {
+void BitSlicingHLS::visit(UnsignedValue &node) {
     actualNode->type = StmtType::UNSIGNED_VALUE;
     actualNode->value = node.getValue();
 }
 
-void PrintOperations::visit(IntegerValue &node) {
+void BitSlicingHLS::visit(IntegerValue &node) {
     actualNode->type = StmtType::INTEGER_VALUE;
     actualNode->value = node.getValue();
 }
 
-void PrintOperations::visit(DataSignalOperand &node) {
+void BitSlicingHLS::visit(DataSignalOperand &node) {
     actualNode->type = StmtType::DATA_SIGNAL_OPERAND;
     std::string name = node.getDataSignal()->getPort()->getName() + "_sig";
     if (node.getDataSignal()->isSubVar()) {
@@ -125,16 +125,16 @@ void PrintOperations::visit(DataSignalOperand &node) {
     actualNode->name = name;
 }
 
-void PrintOperations::visit(VariableOperand &node) {
+void BitSlicingHLS::visit(VariableOperand &node) {
     actualNode->type = StmtType::VARIABLE_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-bool PrintOperations::slicing(Node *node) {
+bool BitSlicingHLS::slicing(Node *node) {
     return sliceWithShift(node) || sliceWithoutShift(node) || shiftWithConstant(node);
 }
 
-bool PrintOperations::sliceWithShift(Node *node) {
+bool BitSlicingHLS::sliceWithShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {
@@ -168,7 +168,7 @@ bool PrintOperations::sliceWithShift(Node *node) {
     return true;
 }
 
-bool PrintOperations::sliceWithoutShift(Node *node) {
+bool BitSlicingHLS::sliceWithoutShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         std::set<StmtType > types;
         for (auto &child : node->child) {
@@ -199,7 +199,7 @@ bool PrintOperations::sliceWithoutShift(Node *node) {
     return true;
 }
 
-bool PrintOperations::shiftWithConstant(Node *node) {
+bool BitSlicingHLS::shiftWithConstant(Node *node) {
     if (node->type == StmtType::BITWISE) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
             std::set<StmtType > types;
@@ -224,7 +224,7 @@ bool PrintOperations::shiftWithConstant(Node *node) {
     return true;
 }
 
-std::string PrintOperations::getString(Node *node, PrintStyle style) {
+std::string BitSlicingHLS::getString(Node *node, PrintStyle style) {
     std::stringstream ss;
 
     int offset = 0;
@@ -298,7 +298,7 @@ std::string PrintOperations::getString(Node *node, PrintStyle style) {
     return ss.str();
 }
 
-bool PrintOperations::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
+bool BitSlicingHLS::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
     firstBit = -1;
     lastBit = -1;
     bool firstBitSet = false;
@@ -325,20 +325,4 @@ bool PrintOperations::getRange(unsigned int number, unsigned int &firstBit, unsi
         number /= 2;
     }
     return !((firstBit == -1) || (lastBit == -1));
-}
-
-SubTypeBitwise PrintOperations::getSubTypeBitwise(const std::string &name) {
-    if (name == "&") {
-        return SubTypeBitwise::BITWISE_AND;
-    } else if (name == "|") {
-        return SubTypeBitwise::BITWISE_OR;
-    } else if (name == "^") {
-        return SubTypeBitwise::BITWISE_XOR;
-    } else if (name == "<<") {
-        return SubTypeBitwise::LEFT_SHIFT;
-    } else if (name == ">>") {
-        return SubTypeBitwise::RIGHT_SHIFT;
-    } else {
-        return SubTypeBitwise::UNKNOWN;
-    }
 }

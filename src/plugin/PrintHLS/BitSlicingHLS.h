@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "PrintStmt.h"
-#include "OptimizeForHLS.h"
+#include "Utilities.h"
 
 enum class PrintStyle {
     VHDL, HLS
@@ -26,10 +26,10 @@ struct Node {
 
 namespace SCAM {
 
-    class PrintOperations : public StmtAbstractVisitor {
+    class BitSlicingHLS : public StmtAbstractVisitor {
 
     public:
-        explicit PrintOperations(Stmt *stmt);
+        explicit BitSlicingHLS(Stmt *stmt);
 
         bool isSlicingOp();
         std::string getOpAsString(PrintStyle style);

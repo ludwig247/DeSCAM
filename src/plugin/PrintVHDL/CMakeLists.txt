@@ -10,7 +10,7 @@ add_library(PrintVHDL
         ../../global/SimplifyVisitor.cpp
         ../../global/NodePeekVisitor.cpp
         ../../global/StmtNodeAlloc.cpp
-        ../PrintHLS/PrintOperations.cpp
+        ../PrintHLS/BitSlicingHLS.cpp
         HLSmodule.cpp
         SignalFactory.cpp)
 
