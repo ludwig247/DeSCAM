@@ -7,6 +7,9 @@
 #include "SignalFactory.h"
 #include "DataSignal.h"
 #include "VHDLPrintVisitorHLS.h"
+#include "OtherUtils.h"
+
+using namespace SCAM::VHDL;
 
 SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module) :
     propertySuite(propertySuite),
@@ -73,7 +76,7 @@ std::vector<Signal> SignalFactory::getInputs(bool asVector, bool destruct) const
     } else {
         for (const auto& in : inputs) {
             std::string name = in->getName() + "_sig";
-            std::string type = asVector ? getEnumAsVector(in->getDataType()) : convertDataType(in->getDataType()->getName());
+            std::string type = asVector ? OtherUtils::getEnumAsVector(in->getDataType()) : OtherUtils::convertDataType(in->getDataType()->getName());
             std::string direction = in->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(in->getDataSignal()->getInitialValue());
             bool isEnum = in->isEnumType();
@@ -92,7 +95,7 @@ std::vector<Signal> SignalFactory::getOutputs(bool asVector, bool destruct) cons
     } else {
         for (const auto &out : outputs) {
             std::string name = out->getName() + "_sig";
-            std::string type = asVector ? getEnumAsVector(out->getDataType()) : convertDataType(
+            std::string type = asVector ? OtherUtils::getEnumAsVector(out->getDataType()) : OtherUtils::convertDataType(
                     out->getDataType()->getName());
             std::string direction = out->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(out->getDataSignal()->getInitialValue());
@@ -148,7 +151,7 @@ void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Si
         for (const auto& subVar : port->getDataSignal()->getSubVarList()) {
             std::string name = port->getName() + "_sig";
             std::string subVarName = subVar->getName();
-            std::string type = asVector ? getEnumAsVector(subVar->getDataType()) : convertDataType(subVar->getDataType()->getName());
+            std::string type = asVector ? OtherUtils::getEnumAsVector(subVar->getDataType()) : OtherUtils::convertDataType(subVar->getDataType()->getName());
             std::string direction = port->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(subVar->getInitialValue());
             bool isEnum = subVar->isEnumType();
@@ -157,32 +160,11 @@ void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Si
         }
     } else {
         std::string name = port->getName() + "_sig";
-        std::string type = asVector ? getEnumAsVector(port->getDataType()) : convertDataType(port->getDataType()->getName());
+        std::string type = asVector ? OtherUtils::getEnumAsVector(port->getDataType()) : OtherUtils::convertDataType(port->getDataType()->getName());
         std::string direction = port->getInterface()->getDirection();
         std::string initialValue = VHDLPrintVisitorHLS::toString(port->getDataSignal()->getInitialValue());
         bool isEnum = port->isEnumType();
         uint32_t vectorSize = isEnum ? ceil(log2(port->getDataType()->getEnumValueMap().size())) : 32;
         signals.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
-    }
-}
-
-std::string SignalFactory::convertDataType(std::string dataTypeName) const {
-    if (dataTypeName == "bool") {
-        return "std_logic";
-    } else if (dataTypeName == "int" || dataTypeName == "unsigned") {
-        return "std_logic_vector(31 downto 0)";
-    } else if (nullptr != propertySuite && dataTypeName == propertySuite->getName() + "_SECTIONS") {
-        return propertySuite->getName() + "_sections_t";
-    } else {
-        return dataTypeName;
-    }
-}
-
-std::string SignalFactory::getEnumAsVector(const DataType *dataType) const {
-    if (dataType->isEnumType()) {
-        uint32_t vectorSize = ceil(log2(dataType->getEnumValueMap().size()));
-        return  ("std_logic_vector(" + std::to_string(vectorSize - 1) + " downto 0)");
-    } else {
-        return convertDataType(dataType->getName());
     }
 }

@@ -33,7 +33,7 @@ void VHDLPrintVisitorHLS::visit(Bitwise &node) {
 
     std::unique_ptr<BitSlicingHLS> printOperations = std::make_unique<BitSlicingHLS>(&node);
     if (printOperations->isSlicingOp()) {
-        this->ss << printOperations->getOpAsString(PrintStyle::VHDL);
+        this->ss << printOperations->getOpAsString();
     } else {
         if ((node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT)) ||
             (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))) {

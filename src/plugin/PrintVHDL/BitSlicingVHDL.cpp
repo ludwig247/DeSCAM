@@ -1,27 +1,29 @@
 //
-// Created by johannes on 12.08.19.
+// Created by johannes on 29.11.19.
 //
 
 #include <set>
-#include "BitSlicingHLS.h"
+
+#include "BitSlicingVHDL.h"
 
 using namespace SCAM;
+using namespace SCAM::VHDL;
 
-BitSlicingHLS::BitSlicingHLS(Stmt *stmt)
+BitSlicingVHDL::BitSlicingVHDL(Stmt *stmt)
 {
     actualNode = std::make_shared<Node>();
     stmt->accept(*this);
 }
 
-bool BitSlicingHLS::isSlicingOp() {
+bool BitSlicingVHDL::isSlicingOp() {
     return slicing(actualNode.get());
 }
 
-std::string BitSlicingHLS::getOpAsString() {
+std::string BitSlicingVHDL::getOpAsString() {
     return getString(actualNode.get());
 }
 
-void BitSlicingHLS::visit(Arithmetic &node) {
+void BitSlicingVHDL::visit(Arithmetic &node) {
     actualNode->type = StmtType::ARITHMETIC;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -33,7 +35,7 @@ void BitSlicingHLS::visit(Arithmetic &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(Relational &node) {
+void BitSlicingVHDL::visit(Relational &node) {
     actualNode->type = StmtType::RELATIONAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -45,7 +47,7 @@ void BitSlicingHLS::visit(Relational &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(UnaryExpr &node) {
+void BitSlicingVHDL::visit(UnaryExpr &node) {
     actualNode->type = StmtType::UNARY_EXPR;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -54,14 +56,14 @@ void BitSlicingHLS::visit(UnaryExpr &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(Assignment &node) {
+void BitSlicingVHDL::visit(Assignment &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void BitSlicingHLS::visit(Bitwise &node) {
+void BitSlicingVHDL::visit(Bitwise &node) {
     actualNode->type = StmtType::BITWISE;
-    actualNode->subType = Utilities::getSubTypeBitwise(node.getOperation());
+    actualNode->subType = OtherUtils::getSubTypeBitwise(node.getOperation());
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
     tmpNode->child.push_back(actualNode);
@@ -76,7 +78,7 @@ void BitSlicingHLS::visit(Bitwise &node) {
 //    }
 }
 
-void BitSlicingHLS::visit(ArrayOperand &node) {
+void BitSlicingVHDL::visit(ArrayOperand &node) {
     actualNode->type = StmtType::ARRAY_OPERAND;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -85,12 +87,12 @@ void BitSlicingHLS::visit(ArrayOperand &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(ParamOperand &node) {
+void BitSlicingVHDL::visit(ParamOperand &node) {
     actualNode->type = StmtType::PARAM_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-void BitSlicingHLS::visit(Logical &node) {
+void BitSlicingVHDL::visit(Logical &node) {
     actualNode->type = StmtType::LOGICAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -102,17 +104,17 @@ void BitSlicingHLS::visit(Logical &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(UnsignedValue &node) {
+void BitSlicingVHDL::visit(UnsignedValue &node) {
     actualNode->type = StmtType::UNSIGNED_VALUE;
     actualNode->value = node.getValue();
 }
 
-void BitSlicingHLS::visit(IntegerValue &node) {
+void BitSlicingVHDL::visit(IntegerValue &node) {
     actualNode->type = StmtType::INTEGER_VALUE;
     actualNode->value = node.getValue();
 }
 
-void BitSlicingHLS::visit(DataSignalOperand &node) {
+void BitSlicingVHDL::visit(DataSignalOperand &node) {
     actualNode->type = StmtType::DATA_SIGNAL_OPERAND;
     std::string name = node.getDataSignal()->getPort()->getName() + "_sig";
     if (node.getDataSignal()->isSubVar()) {
@@ -125,16 +127,16 @@ void BitSlicingHLS::visit(DataSignalOperand &node) {
     actualNode->name = name;
 }
 
-void BitSlicingHLS::visit(VariableOperand &node) {
+void BitSlicingVHDL::visit(VariableOperand &node) {
     actualNode->type = StmtType::VARIABLE_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-bool BitSlicingHLS::slicing(Node *node) {
+bool BitSlicingVHDL::slicing(Node *node) {
     return sliceWithShift(node) || sliceWithoutShift(node) || shiftWithConstant(node);
 }
 
-bool BitSlicingHLS::sliceWithShift(Node *node) {
+bool BitSlicingVHDL::sliceWithShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {
@@ -168,7 +170,7 @@ bool BitSlicingHLS::sliceWithShift(Node *node) {
     return true;
 }
 
-bool BitSlicingHLS::sliceWithoutShift(Node *node) {
+bool BitSlicingVHDL::sliceWithoutShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         std::set<StmtType > types;
         for (auto &child : node->child) {
@@ -199,7 +201,7 @@ bool BitSlicingHLS::sliceWithoutShift(Node *node) {
     return true;
 }
 
-bool BitSlicingHLS::shiftWithConstant(Node *node) {
+bool BitSlicingVHDL::shiftWithConstant(Node *node) {
     if (node->type == StmtType::BITWISE) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
             std::set<StmtType > types;
@@ -224,7 +226,7 @@ bool BitSlicingHLS::shiftWithConstant(Node *node) {
     return true;
 }
 
-std::string BitSlicingHLS::getString(Node *node) {
+std::string BitSlicingVHDL::getString(Node *node) {
     std::stringstream ss;
 
     int offset = 0;
@@ -239,7 +241,7 @@ std::string BitSlicingHLS::getString(Node *node) {
         for (auto &child : node->child) {
             if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND
             || child->type == StmtType::DATA_SIGNAL_OPERAND) {
-                ss << child->name << ".range(31, " << offset << ")";
+                ss << child->name << "(31 downto " << offset << ")";
             }
         }
     } else {
@@ -248,7 +250,7 @@ std::string BitSlicingHLS::getString(Node *node) {
                 for (auto &childChild : child->child) {
                     if (childChild->type == StmtType::VARIABLE_OPERAND || childChild->type == StmtType::PARAM_OPERAND
                     || childChild->type == StmtType::DATA_SIGNAL_OPERAND) {
-                        ss << childChild->name << ".range(";
+                        ss << childChild->name << "(";
                     }
                 }
                 for (auto &childChild : child->child) {
@@ -259,13 +261,13 @@ std::string BitSlicingHLS::getString(Node *node) {
                     }
                 }
             } else if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND
-            || child->type == StmtType::DATA_SIGNAL_OPERAND) {
-                ss << child->name << ".range(";
+                       || child->type == StmtType::DATA_SIGNAL_OPERAND) {
+                ss << child->name << "(";
             }
         }
         for (auto &child : node->child) {
             if (child->type == StmtType::UNSIGNED_VALUE) {
-                ss << (offset + node->lastBit) << ", " << (node->firstBit + offset) << ")";
+                ss << (offset + node->lastBit) << " downto " << (node->firstBit + offset) << ")";
 //
 //                unsigned int first;
 //                unsigned int last;
@@ -282,7 +284,7 @@ std::string BitSlicingHLS::getString(Node *node) {
     return ss.str();
 }
 
-bool BitSlicingHLS::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
+bool BitSlicingVHDL::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
     firstBit = -1;
     lastBit = -1;
     bool firstBitSet = false;

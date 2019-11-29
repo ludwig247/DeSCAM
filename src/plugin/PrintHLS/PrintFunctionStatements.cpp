@@ -199,9 +199,9 @@ void PrintFunctionStatements::visit(FunctionOperand &node) {
 }
 
 void PrintFunctionStatements::visit(Bitwise &node) {
-    std::unique_ptr<BitSlicingHLS> printOperations = std::make_unique<BitSlicingHLS>(&node);
+    auto printOperations = std::make_unique<BitSlicingHLS>(&node);
     if (printOperations->isSlicingOp()) {
-        this->ss << printOperations->getOpAsString(PrintStyle::HLS);
+        this->ss << printOperations->getOpAsString();
     } else {
         if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
             this->ss << "(";

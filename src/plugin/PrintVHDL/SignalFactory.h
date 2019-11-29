@@ -56,8 +56,6 @@ private:
     void setAllPorts();
     void setMonitorSignals();
     void setOperationSelector();
-    std::string getEnumAsVector(const DataType *dataType) const;
-    std::string convertDataType(std::string dataTypeName) const;
     void getCompoundSignals(Port *port, bool asVector, std::vector<Signal> &signals) const;
 
     PropertySuite* propertySuite;

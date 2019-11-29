@@ -7,10 +7,12 @@
 #include "VHDLPrintVisitor.h"
 #include "NodePeekVisitor.h"
 #include "OtherUtils.h"
+#include "BitSlicingVHDL.h"
 
 #define USE_ADDER_FOR_2xVAR 1
 
 using namespace SCAM;
+using namespace SCAM::VHDL;
 
 VHDLPrintVisitor::VHDLPrintVisitor(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->createString(stmt, indentSize, indentOffset);
@@ -158,9 +160,9 @@ void VHDLPrintVisitor::visit(Bitwise &node) {
     bool tempUseParentheses = useParenthesesFlag;
     useParenthesesFlag = true;
 
-    std::unique_ptr<BitSlicingHLS> printOperations = std::make_unique<BitSlicingHLS>(&node);
+    auto printOperations = std::make_unique<BitSlicingVHDL>(&node);
     if (printOperations->isSlicingOp()) {
-        this->ss << printOperations->getOpAsString(PrintStyle::VHDL);
+        this->ss << printOperations->getOpAsString();
     } else {
         if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
             if (node.getOperation() == "<<")
