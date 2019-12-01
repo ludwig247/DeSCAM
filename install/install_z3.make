@@ -7,7 +7,7 @@ else ()
 
     set(Z3_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/z3/install)
     set(Z3_INCLUDES ${Z3_INSTALL_DIR}/include)
-    set(Z3_LIBRARIES ${Z3_INSTALL_DIR}/lib)
+    set(Z3_LIBRARIES ${Z3_INSTALL_DIR}/lib64)
 
     include(ExternalProject)
     ExternalProject_add(Z3
