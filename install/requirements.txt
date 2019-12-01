@@ -1,0 +1,11 @@
+1. cmake (apt install cmake)
+2. boost (apt install libboost-all-dev)
+3. git (apt install git)
+4. unzip (apt install unzip)
+5. sed (apt install sed)
+
+### ----------------------------
+# CMAKE will install : gtest 1.8.0
+                       systemc - from archive
+                       z3 4.8.6
+                       llvm - from archive

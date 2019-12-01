@@ -6,6 +6,8 @@ add_subdirectory(CLI)
 
 add_executable(DESCAM main.cpp)
 
+add_dependencies(DESCAM SYSTEMC GTEST Z3 LLVM)
+
 target_compile_options(DESCAM PRIVATE -O2)
 
 
