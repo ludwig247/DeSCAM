@@ -4,14 +4,13 @@
 
 #include "DatapathVisitorSVA.h"
 
-
 void SCAM::DatapathVisitorSVA::visit(SCAM::VariableOperand &node) {
     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
     } else {
         this->ss << node.getVariable()->getName();
     }
-    this->ss << "_0";
+    if(!node.getVariable()->isConstant()) this->ss << "_0";
 }
 
 void SCAM::DatapathVisitorSVA::visit(SCAM::IntegerValue &node) {

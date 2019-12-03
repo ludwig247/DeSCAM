@@ -33,10 +33,15 @@ static std::vector<SCAM::Module *> parameter() {
     for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
         commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
     }
+<<<<<<< HEAD
 //    add optimizations
 //    std::set<std::string> optimizeOptions = {"all"};
 //    CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
     SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+=======
+
+    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1],false);
+>>>>>>> eaef50e72a7356733524fa586d8f759dacbf7ab9
 
     std::vector<SCAM::Module *> result;
     for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {

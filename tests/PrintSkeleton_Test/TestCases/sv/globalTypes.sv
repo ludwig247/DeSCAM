@@ -1,6 +1,6 @@
-package scam_model_types;
+package top_level_types;
 
-	import scam_model_types::*;
+	 import top_level_types::*;
 	typedef enum logic {
 		read,
 		write

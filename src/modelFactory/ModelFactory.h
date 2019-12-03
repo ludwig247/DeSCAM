@@ -78,7 +78,9 @@ namespace SCAM {
 
 
         //Methods
-        void addModules(clang::TranslationUnitDecl* decl);
+
+        void addModules(clang::TranslationUnitDecl *decl, SCAM::Module module);
+
 
         void addPorts(Module* module,clang::CXXRecordDecl* decl);
         void addFunctions(Module *module, CXXRecordDecl *pDecl);
@@ -90,6 +92,9 @@ namespace SCAM {
 
         bool moduleHasSections; //! True if the module that is currently processed has explicte state rep. need for section dection
 
+        void addGlobalVariables(TranslationUnitDecl *pDecl, Module *pModule);
+
+        void optimizeModel();
     };
 
 

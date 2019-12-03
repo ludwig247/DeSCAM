@@ -10,7 +10,11 @@
 #include "../Interfaces/Interfaces.h"
 #define ADD_HEX 0x100
 
-const unsigned int number = 0x111;
+const unsigned number = 0x111;
+const unsigned int number2 = 0x111;
+const int number3 = ADD_HEX;
+const bool number4 = true;
+
 
 SC_MODULE(Test_Nordic)
 {
@@ -36,7 +40,15 @@ SC_MODULE(Test_Nordic)
         {
           test_in->read(foo);
 
-          test_out->write(number);
+          if(number4){
+              bar = bar + number2;
+          }
+
+          bar = bar + test_var() + static_cast<unsigned int>(foo) + static_cast<unsigned int>(number3);
+
+          bar = number + bar;
+          test_out->write(bar);
+
         }
     }
 };

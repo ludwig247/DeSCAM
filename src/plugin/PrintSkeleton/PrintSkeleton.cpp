@@ -15,6 +15,10 @@ std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
     globalPackageName = node->getName();
 
     pluginOutput.insert(std::make_pair("globalTypes" + getFilenameExtention(), generateGlobalTypes()));
+    if(!node->getGlobalVariableMap().empty()){
+        pluginOutput.insert(std::make_pair("globalDefines" + getFilenameExtention(), generateGlobalDefs()));
+    }
+
 
     for (auto &module: node->getModules()) {
         this->module = module.second;
@@ -55,7 +59,7 @@ std::pair<std::string, std::string> PrintSkeleton::printModule(SCAM::Module *mod
 
 std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(SCAM::Module *module) {
     setLanguage();
-
+    globalPackageName = ModelGlobal::getModel()->getName();
     this->module = module;
     localPackageName = module->getName();
 
@@ -239,11 +243,11 @@ void PrintSkeleton::printPackageHeader(std::stringstream &ss, const std::string 
     if (language == VHDL) {
         ss << "library ieee;\n";
         ss << "use IEEE.numeric_std.all;\n";
-        ss << "use work.SCAM_Model_types.all;\n\n";
+        ss << "use work."<<globalPackageName <<"_types.all;\n\n";
         ss << "package " + packageName << "_types is\n";
     } else if (language == SV) {
         ss << "package " + convertToLower(packageName) << "_types;\n\n";
-        ss << "\timport scam_model_types::*;\n";
+        ss << "\t import "<< convertToLower(globalPackageName) << "_types::*;\n";
 
     }
 }
@@ -583,3 +587,24 @@ std::string PrintSkeleton::booleanWrapper(bool value) {
         else return "false";
     }
 }
+
+std::string PrintSkeleton::generateGlobalDefs() {
+    std::stringstream ss;
+    if(language == SV){
+        for(auto var :  ModelGlobal::getModel()->getGlobalVariableMap() ){
+            ss << "`ifndef " << var.first << std::endl;
+            ss << "\t`define " << var.first << " " <<  PrintStmt::toString(var.second->getInitialValue()) << std::endl;
+            ss << "`endif" << std::endl;
+            ss << std::endl;
+        }
+    }else if(language == VHDL){
+        for(auto var :  ModelGlobal::getModel()->getGlobalVariableMap() ){
+            ss << "constant " << var.first << " ";
+            ss << var.second->getDataType()->getName();
+            ss << " := " << PrintStmt::toString(var.second->getInitialValue()) << ";\n";
+        }
+    }
+    return ss.str();
+}
+
+
