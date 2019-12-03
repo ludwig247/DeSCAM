@@ -19,12 +19,15 @@
 
 namespace SCAM {
 
-    /***
-     * @brief: propagates parameters values inside functions in the control flow graph
-     *
-     *
-     */
-
+   /***
+   * \brief: Propagates parameters values from the parameter list to their use inside the body of the function
+   * \author:mi-alkoudsi
+   * \inputs:
+   *       - std::map<std::string, SCAM::Expr *> paramValMap;
+   *       - std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
+   * \outputs:
+   *       - std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> optimizedReturnValueConditionList;
+   */
 
     class ParamValuePropagation : public StmtAbstractVisitor {
 
@@ -62,7 +65,7 @@ namespace SCAM {
 
         void visit(class Assignment &node) override{};
 
-        void visit(struct UnaryExpr &node);
+        void visit(struct UnaryExpr &node) override;
 
         void visit(struct While &node) override{};
 
@@ -72,7 +75,7 @@ namespace SCAM {
 
         void visit(struct Write &node) override{};
 
-        void visit(struct SectionOperand &node){};
+        void visit(struct SectionOperand &node) override{};
 
         void visit(class SectionValue &node) override{};
 

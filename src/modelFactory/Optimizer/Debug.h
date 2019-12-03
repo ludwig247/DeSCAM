@@ -5,9 +5,6 @@
 #ifndef SCAM_OPTIMIZER_DEBUG_H
 #define SCAM_OPTIMIZER_DEBUG_H
 
-    #define DEBUG_OPTIMIZER
-
-    #ifdef DEBUG_OPTIMIZER
 //        #define DEBUG_MERGE_REDUNDANT_IF_ELSE
 //        #define DEBUG_RENUMBER_CFG
 //        #define DEBUG_FIND_READ_VARIABLES
@@ -25,7 +22,5 @@
 //        #define DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS
 //        #define DEBUG_OPERATOR_STRENGTH_REDUCTION_FUNCTIONS
 //        #define DEBUG_RANGE_ANALYSIS
-
-    #endif
 
 #endif //SCAM_OPTIMIZER_DEBUG_H

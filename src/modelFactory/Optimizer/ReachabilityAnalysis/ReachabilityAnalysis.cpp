@@ -188,7 +188,7 @@ namespace SCAM {
                 if (propagator.getNumLastAssignments() != 0 &&
                     propagator.getNumLastAssignments() == this->pathsToIfMap.size()) {
                     std::set<SCAM::Expr *> values;
-                    for (auto assignment : propagator.getLastAssignmentMap()) {
+                    for (auto assignment : propagator.getLastAssignmentsMap()) {
                         values.insert(assignment.second);
                     }
                     // add initial values from the reset sequence

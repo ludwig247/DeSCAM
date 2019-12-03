@@ -12,8 +12,12 @@
 
 namespace SCAM {
 /***
-   * @brief: Finds variables assigned by read and write(statusOperand) statements
-   * @author:M.I.Alkoudsi
+   * \brief: Finds variables assigned by read and write(statusOperand) statements
+   * \author: mi-alkoudsi
+   * \inputs:
+   *    - std::map<int, SCAM::CfgNode *> cfg;
+   * \outputs:
+   *    - std::set<std::string> readVariablesSet;
    */
     class FindReadVariables {
     public:
@@ -29,7 +33,6 @@ namespace SCAM {
         std::map<int, CfgNode *> CFG;
         std::set<std::string> readVariablesSet;                  //All variables that can't be optimized due to interprocedural behaviour
     };
-
 }
 
 #endif //SCAM_FINDREADVARIABLES_H

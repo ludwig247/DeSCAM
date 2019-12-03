@@ -10,12 +10,20 @@
 #include"ModelGlobal.h"
 #include "PrintStmt.h"
 
-
 namespace SCAM {
     /***
-     * @brief: looks for dead assignment and removes them from the control flow graph
-     * @author:M.I.Alkoudsi
-     *
+     * \brief: looks for dead assignments to variables and removes them from the control flow graph
+     * \author: mi-alkoudsi
+     * \inputs:
+     *       - std::map<int, CfgNode *> CFG;
+     *       - std::set<std::string> variablesThatHaveReadSet;
+     * \outputs:
+     *      - std::map<int, CfgNode *> optimizedCFG;
+     * \details: Every statement is given input and output information for each variable in it, which are represented by a boolean flag.
+     *  after initializing all flags with false, the CFG is repeatedly reversely traversed until the following rules are met:
+     *  1.if there is a use of a var, then toggle its in info to true at the stmt that uses it
+     *  2.if in info of any succ stmt = true  , current stmt out info = true
+     *  3.set in info of every variable not used in current stmt to the output of it
      */
     class LivenessAnalysis : public SCAM::StmtAbstractVisitor {
     public:
@@ -41,30 +49,30 @@ namespace SCAM {
         std::vector<bool> toggledToTrueNodeVector;                                // true when a variable use detected/propagated at/to currentNode
         int numToTrueToggles;                                                     // if it doesn't change between runs,terminate algorithm
         std::set<int> deadAssignmentSet;
-        std::map<int,SCAM::Variable*> assignmentsToCompoundsVarsMap;
+        std::map<int, SCAM::Variable *> assignmentsToCompoundsVarsMap;
 
         void removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId);
 
         //visitors
         void visit(struct VariableOperand &node) override;
 
-        void visit(struct IntegerValue &node) override{};
+        void visit(struct IntegerValue &node) override {};
 
-        void visit(struct UnsignedValue &node) override{};
+        void visit(struct UnsignedValue &node) override {};
 
-        void visit(struct BoolValue &node) override{};
+        void visit(struct BoolValue &node) override {};
 
-        void visit(struct EnumValue &node) override{};
+        void visit(struct EnumValue &node) override {};
 
-        void visit(struct CompoundValue &node) override{};
+        void visit(struct CompoundValue &node) override {};
 
-        void visit(class PortOperand &node) override{};
+        void visit(class PortOperand &node) override {};
 
         void visit(class Assignment &node) override;
 
         void visit(struct UnaryExpr &node) override;
 
-        void visit(struct While &node) override{};
+        void visit(struct While &node) override {};
 
         void visit(struct If &node) override;
 
@@ -72,11 +80,11 @@ namespace SCAM {
 
         void visit(struct Write &node) override;
 
-        void visit(struct SectionOperand &node) override{};
+        void visit(struct SectionOperand &node) override {};
 
-        void visit(class SectionValue &node) override{};
+        void visit(class SectionValue &node) override {};
 
-        void visit(struct ITE &node) override{};
+        void visit(struct ITE &node) override {};
 
         void visit(struct Arithmetic &node) override;
 
@@ -86,9 +94,9 @@ namespace SCAM {
 
         void visit(struct Bitwise &node) override;
 
-        void visit(struct SyncSignal &node) override{};
+        void visit(struct SyncSignal &node) override {};
 
-        void visit(struct DataSignalOperand &node) override{};
+        void visit(struct DataSignalOperand &node) override {};
 
         void visit(struct Cast &node) override;
 
@@ -100,15 +108,15 @@ namespace SCAM {
 
         void visit(class ArrayExpr &node) override;
 
-        void visit(class ParamOperand &node) override{};
+        void visit(class ParamOperand &node) override {};
 
-        void visit(class Return &node) override{};
+        void visit(class Return &node) override {};
 
-        void visit(class Notify &node) override{};
+        void visit(class Notify &node) override {};
 
-        void visit(class Wait &node) override{};
+        void visit(class Wait &node) override {};
 
-        void visit(class Peek &node) override{};
+        void visit(class Peek &node) override {};
     };
 }
 

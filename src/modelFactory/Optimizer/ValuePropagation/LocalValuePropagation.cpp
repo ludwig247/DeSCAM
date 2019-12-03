@@ -4,7 +4,13 @@
 
 #include "LocalValuePropagation.h"
 #include "Optimizer/Debug.h"
-
+/* Idea:
+ * Look for variables used in the CFG statements. For each found use:
+ * If variable in the same statement was checked before and has entry in varValMap. get its value from varValMap
+ * Otherwise, make paths from while(true) to the statement and call propagateConstantValue
+ * If propagation is valid and numLastAssignments on all paths is equal to the number of paths, update varValMap and the statement
+ * after each statement clear varValMap
+ * */
 
 SCAM::LocalValuePropagation::LocalValuePropagation(const std::map<int, SCAM::CfgNode *> &CFG) : CFG(CFG),
                                                                                                 propagationValid(false),

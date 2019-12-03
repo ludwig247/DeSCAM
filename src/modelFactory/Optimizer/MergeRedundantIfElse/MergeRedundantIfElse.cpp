@@ -5,6 +5,10 @@
 #include "MergeRedundantIfElse.h"
 #include "Optimizer/Debug.h"
 
+/* In each iteration, the algorithm first finds the true branches in a level of conditional statements,
+ * then it checks if all statements in a true branch of a conditional statement are equal to these
+ * in another conditional statement in same level.
+ */
 
 SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *> CFG)
         : blockCFG(std::move(CFG)), currentElseIfID(0),

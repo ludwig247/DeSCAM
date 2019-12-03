@@ -5,6 +5,10 @@
 #include "ParamValuePropagation.h"
 #include "Optimizer/Debug.h"
 
+/* Idea:
+ * for each expression in the return value condition list, look for a parameter operand
+ * if found, check the name of the operand and update it with its value from the parameter list
+ * */
 
 SCAM::ParamValuePropagation::ParamValuePropagation(std::map<std::string, SCAM::Expr *> paramValMap,
                                                    std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList)

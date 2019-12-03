@@ -19,7 +19,7 @@ namespace SCAM {
         return this->PathID;
     }
 
-    void CfgPath::insertatend(CfgNode *node) {
+    void CfgPath::insertAtEnd(CfgNode *node) {
         this->path.push_back(node);
     }
 

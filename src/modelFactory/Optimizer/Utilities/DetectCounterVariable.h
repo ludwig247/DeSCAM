@@ -14,10 +14,16 @@
 namespace SCAM {
 
     /***
-     * @brief: checks if a variable is in a counter assignment form and whether its value increments or decrements
-     *  for e.g. x = x + 1 => x is a counter variable in an assignment that increments its value
-     * @author:M.I.Alkoudsi
-     *
+     * \brief: Checks if a variable assigns itself and whether its value increments, decrements or not known
+     *  e.g., x = x + 1 => x is a counter variable in an assignment that increments its value
+     * \author: mi-alkoudsi
+     * \input:
+     *      - std::string variableName;
+     *      - SCAM::Expr *expr;
+     * \output:
+     *      - bool isCounterVariable;
+     *      - bool isVariableIncrements;
+     *      - bool isIncrementKnown;
      */
     class DetectCounterVariable : public StmtAbstractVisitor {
 

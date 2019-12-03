@@ -20,20 +20,31 @@
 namespace SCAM {
 
     /***
-     * @brief: performs compiler optimizations on functions inside the control flow graph
+     * \brief: Performs optimizations on functions inside the control flow graph(CFG)
      *
+     * \author: mi-alkoudsi
      *
+     * \input:
+     *      - std::map<int, SCAM::CfgNode *> cfg;
+     *      - SCAM::Module * module;
+     *      - std::set<std::string> variablesThatHaveReadSet;
+     * \output:
+     *      - std::map<int, CfgNode *> optimizedCFG;
+     *
+     * \details: Performs the following optimizations on every function used inside a statement or another function:
+     * Parameters value propagation
+     * Operator strength reduction
+     * Simplify expressions
+     * Reachability analysis
      */
 
     class FunctionsOptimizer : public StmtAbstractVisitor {
-
     public:
-
         //Constructors and Destructor
         FunctionsOptimizer() = delete;
 
         FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module,
-                std::set<std::string> variablesThatHaveReadSet);
+                           std::set<std::string> variablesThatHaveReadSet);
 
         ~FunctionsOptimizer() = default;
 
@@ -49,42 +60,44 @@ namespace SCAM {
         std::map<std::string, std::set<SCAM::Expr *>> allVarValuesMap;          //Contains all possible values that all variable can take
         std::set<std::string> variablesThatHaveReadSet;                         //All variables that can't be optimized due to interprocedural behaviour
         std::map<std::string, int> functionUseMap;                              //keeps the number of times a function is used in the blockCFG, for naming purposes
-        std::map<SCAM::FunctionOperand*,SCAM::Expr*> oldFuncOpOptimizedFuncPairsMap;   //Keeps a pointer to the optimized function to reuse an optimized function instead of creating a new one if paramter list is the same
+        std::map<SCAM::FunctionOperand *, SCAM::Expr *> oldFuncOpOptimizedFuncPairsMap;   //Keeps a pointer to the optimized function to reuse an optimized function instead of creating a new one if paramter list is the same
         std::string createFuncName(std::string funcOpName);
-        SCAM::Expr* isAlreadyOptimizedFunction(std::string operandName, const std::map<std::string,SCAM::Expr*>& paramValueMap);
+
+        SCAM::Expr *
+        isAlreadyOptimizedFunction(std::string operandName, const std::map<std::string, SCAM::Expr *> &paramValueMap);
 
         //visitors
-        void visit(class VariableOperand &node) override{};
+        void visit(class VariableOperand &node) override {};
 
-        void visit(class IntegerValue &node) override{};
+        void visit(class IntegerValue &node) override {};
 
-        void visit(class UnsignedValue &node) override{};
+        void visit(class UnsignedValue &node) override {};
 
-        void visit(class BoolValue &node) override{};
+        void visit(class BoolValue &node) override {};
 
-        void visit(class EnumValue &node) override{};
+        void visit(class EnumValue &node) override {};
 
-        void visit(class CompoundValue &node) override{};
+        void visit(class CompoundValue &node) override {};
 
-        void visit(class PortOperand &node) override{};
+        void visit(class PortOperand &node) override {};
 
         void visit(class Assignment &node) override;
 
         void visit(class UnaryExpr &node) override;
 
-        void visit(class While &node) override{};
+        void visit(class While &node) override {};
 
         void visit(class If &node) override;
 
-        void visit(class Read &node) override{};
+        void visit(class Read &node) override {};
 
         void visit(class Write &node) override;
 
-        void visit(class SectionOperand &node) override{};
+        void visit(class SectionOperand &node) override {};
 
-        void visit(class SectionValue &node) override{};
+        void visit(class SectionValue &node) override {};
 
-        void visit(class ITE &node) override{};
+        void visit(class ITE &node) override {};
 
         void visit(class Arithmetic &node) override;
 
@@ -94,9 +107,9 @@ namespace SCAM {
 
         void visit(class Bitwise &node) override;
 
-        void visit(class SyncSignal &node) override{};
+        void visit(class SyncSignal &node) override {};
 
-        void visit(class DataSignalOperand &node) override{};
+        void visit(class DataSignalOperand &node) override {};
 
         void visit(class Cast &node) override;
 
@@ -108,15 +121,15 @@ namespace SCAM {
 
         void visit(class ArrayExpr &node) override;
 
-        void visit(class ParamOperand &node) override{};
+        void visit(class ParamOperand &node) override {};
 
-        void visit(class Return &node) override{};
+        void visit(class Return &node) override {};
 
-        void visit(class Notify &node) override{};
+        void visit(class Notify &node) override {};
 
-        void visit(class Wait &node) override{};
+        void visit(class Wait &node) override {};
 
-        void visit(class Peek &node) override{};
+        void visit(class Peek &node) override {};
 
     };
 }

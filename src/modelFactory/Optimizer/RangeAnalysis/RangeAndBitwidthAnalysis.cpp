@@ -3,6 +3,29 @@
 //
 #include <Optimizer/Utilities/FindReadVariables.h>
 #include "RangeAndBitwidthAnalysis.h"
+/*   Idea:
+ *   After initializing the bitwidthMap with their default values, e.g., (bool 1, int 32)
+ *   The variableValuesMap is searched to detect counter variables and add them to the counterVariablesSet.
+ *   Values that represent the counter behaviour, e.g., x = x + 1 are also removed from the variableValuesMap,
+ *   This prevent such values from hindering the values substitution process.
+ *   The findVariablesValuesInRelationalExpressions procedure searches the control flow graph and functions for
+ *   relational expressions such as $x == 9$ or $x > getValue(v)$ and add them to the $variableValuesMap$.
+ *   These values serve as margins for a variable range in given paths in the CFG.
+ *   The SubstituteFunctionsWithTheirReturnValues procedure is used to replace every function inside values of
+ *   the variablesValuesMap with their returned values.If any of a function' x return values rx uses a function y,
+ *   y is also substituted with its return values in rx. This creates a number of return values that replace rx in function x.
+ *   The analyzeCounterVariables procedure looks for the conditional statement that checks the range of the counter variable and
+ *   analyzes it along with the assignment to the counter variable in its true branch.
+ *   every non constant value in the $variableValuesMap$ is substituted with its possible values.
+ *   For example, the value y in the assignment x = 2 + y is replaced with all its possible values.
+ *   Say the values of y are {0 and 5}, then we have x = 2 + 0 and x = 2 + 5. After the substitution,
+ *   all the values are simplified using the . The resulting values for x are {2 and 7}.
+ *   Now that we have all the possible values of the module variables. The bitwidth for each variable is equal to
+ *   the number of bits needed to represent the largest or smallest value(the one that requires more bits)
+ *   in the variableValuesMap plus the sign bit for signed integer variables.
+ *   The bitwidthMap is updated with the newly deduced variables bitwidths
+ *   Output ports bitwidths are deduced by analyzing write statements in the CFG
+ */
 
 SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
         : module(module), CFG(

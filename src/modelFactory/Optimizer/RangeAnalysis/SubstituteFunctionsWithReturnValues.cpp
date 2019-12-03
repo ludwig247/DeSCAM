@@ -3,9 +3,22 @@
 //
 #include "SubstituteFunctionsWithReturnValues.h"
 
+/*
+ * example:
+ * {
+ * ...
+ * x = div(y,z)
+ * ...
+ * }
+ * int div(int arg1, int arg2){
+ * return arg1 / arg2;
+ * }
+ * arg1 / arg2 replaces div(y,z) in the newVariableValuesMap
+ */
+
 SCAM::SubstituteFunctionsWithReturnValues::SubstituteFunctionsWithReturnValues(
-        const std::map<std::string, std::set<SCAM::Expr *>> &variablesValuesMap):functionHasRecursion(false) {
-    for (const auto& var : variablesValuesMap) {
+        const std::map<std::string, std::set<SCAM::Expr *>> &variablesValuesMap) : functionHasRecursion(false) {
+    for (const auto &var : variablesValuesMap) {
         for (auto val : var.second) {
             if (val != nullptr) {
                 val->accept(*this);
@@ -29,7 +42,7 @@ SCAM::SubstituteFunctionsWithReturnValues::SubstituteFunctionsWithReturnValues(
     }
     //construct the new variableValuesMap
     this->newVariablesValuesMap = this->variableValuesOfReturnsMap;
-    for (const auto& var : variablesValuesMap) {
+    for (const auto &var : variablesValuesMap) {
         for (auto val : var.second) {
             if (val != nullptr) {
                 SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(val);
@@ -68,7 +81,7 @@ const std::set<std::string> &SCAM::SubstituteFunctionsWithReturnValues::getVaria
     return this->variablesWithRecrusiveFunctions;
 }
 
-void SCAM::SubstituteFunctionsWithReturnValues::addValToVarValMap(const std::string& varName, SCAM::Expr *expr) {
+void SCAM::SubstituteFunctionsWithReturnValues::addValToVarValMap(const std::string &varName, SCAM::Expr *expr) {
     if (this->variableValuesOfReturnsMap.find(varName) !=
         this->variableValuesOfReturnsMap.end()) {
         bool isValAlreadyInSet = false;
@@ -119,12 +132,12 @@ void SCAM::SubstituteFunctionsWithReturnValues::visit(struct Cast &node) {
 
 void SCAM::SubstituteFunctionsWithReturnValues::visit(SCAM::FunctionOperand &node) {
     SCAM::Expr *functionOp = &node;
-    for (const auto& returnPath : node.getFunction()->getReturnValueConditionList()) {
+    for (const auto &returnPath : node.getFunction()->getReturnValueConditionList()) {
         auto returnVal = returnPath.first->getReturnValue();
         SCAM::FindVariablesAndFunctionsInStatement visf(returnVal);
         if (visf.hasFunctions()) {
             auto functionsInStmtMap = visf.getFunctionsInStmtMap();
-            for (const auto& function: functionsInStmtMap) {
+            for (const auto &function: functionsInStmtMap) {
                 if (function.first == node.getFunction()->getName()) {
                     this->functionHasRecursion = true;
                     return;
@@ -134,7 +147,7 @@ void SCAM::SubstituteFunctionsWithReturnValues::visit(SCAM::FunctionOperand &nod
             if (this->functionHasRecursion) {
                 return;
             } else {
-                for (const auto& returnVal: nestedReturnValSet) {
+                for (const auto &returnVal: nestedReturnValSet) {
                     addValToFunctionReturnsSubstitutionMap(functionOp, returnVal, this->functionReturnsSubstitutionMap);
                 }
             }
@@ -160,15 +173,15 @@ std::set<SCAM::Expr *>
 SCAM::SubstituteFunctionsWithReturnValues::substituteReturnValuesOfNestedFunctions(SCAM::Expr *returnValWithFunctions,
                                                                                    const std::map<std::string, FunctionOperand *> &functionsInStmtMap) {
     std::map<SCAM::Expr *, std::vector<SCAM::Expr *>> substitutionMap;
-    for (const auto& pair : functionsInStmtMap) {
+    for (const auto &pair : functionsInStmtMap) {
         SCAM::Expr *function = pair.second;
         std::set<SCAM::Expr *> returnsSet;
-        for (const auto& returnPath : pair.second->getFunction()->getReturnValueConditionList()) {
+        for (const auto &returnPath : pair.second->getFunction()->getReturnValueConditionList()) {
             auto returnVal = returnPath.first->getReturnValue();
             SCAM::FindVariablesAndFunctionsInStatement visf(returnVal);
             if (visf.hasFunctions()) {
                 auto functionsInStmtMap = visf.getFunctionsInStmtMap();
-                for (const auto& func: functionsInStmtMap) {
+                for (const auto &func: functionsInStmtMap) {
                     if (func.first == pair.second->getFunction()->getName()) {
                         this->functionHasRecursion = true;
                         returnsSet.clear();
@@ -180,7 +193,7 @@ SCAM::SubstituteFunctionsWithReturnValues::substituteReturnValuesOfNestedFunctio
                     returnsSet.clear();
                     return returnsSet;
                 } else {
-                    for (const auto& returnVal: nestedReturnSet) {
+                    for (const auto &returnVal: nestedReturnSet) {
                         addValToFunctionReturnsSubstitutionMap(function, returnVal, substitutionMap);
                     }
                 }

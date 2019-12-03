@@ -21,9 +21,13 @@
 
 namespace SCAM {
     /***
-        * @brief: combines the result of range analysis and bitwidth inference
-        *
-        * @author:M.I.Alkoudsi
+        * \brief: Analyzes variables and output ports bitwidth
+        * \author: mi-alkoudsi
+        * \inputs:
+        *       - SCAM::Module *module
+        * \outputs:
+        *       - std::map<std::string, int> variablesBitwidthMap
+        *       - std::map<SCAM::Port, int> outputPortsBitwidthMap
         */
     class RangeAndBitWidthAnalysis : public StmtAbstractVisitor {
     public:

@@ -31,10 +31,31 @@
 
 namespace SCAM {
     /***
-     * @brief: Represents an optimizer stage in a compiler, which performs optimizations on the control data flow graph(CDFG) and within functions
-     * @author:M.I.Alkoudsi
+     * \brief: Performs optimizations on the control flow graph(CFG)
      *
+     * \author: mi-alkoudsi
+     *
+     * \input:
+     *      - std::map<int, SCAM::CfgNode *> cfg;
+     *      - SCAM::Module * module;
+     *      - std::set<std::string> optimizeOptionsSet;
+     * \output:
+     *      - std::map<int, CfgNode *> optimizedCFG;
+     *      - std::map<std::string, int> deducedVariablesBitwidth;
+     *      - std::map<SCAM::Port *, int> deducedOutputPortsBitwidth;
+     *
+     * \details: Performs some or all of the following optimizations depending on the given optimization options
+     * Merge redundant conditions
+     * Local value propagation
+     * Global value propagation
+     * Variables liveness analysis
+     * Reachability analysis
+     * Functions optimization
+     * Operator strength reduction
+     * Simplify expressions
+     * Range and bitwidth analysis
      */
+
     class Optimizer {
     public:
         Optimizer() = delete;

@@ -16,14 +16,17 @@
 #define DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
 
 namespace SCAM {
-
-    /***
-     * @brief: checks the use of variables in each statement in the control flow graph and propagates the value to it
-     * can exploit chances more than that of inside single block value propagation
-     * relies on PropagateValue to safely propagate a value
-     * @author:M.I.Alkoudsi
-     */
-
+   /***
+   * \brief: Propagates the value of locally constant variables
+   * \author:mi-alkoudsi
+   * \inputs:
+   *       - std::map<int, CfgNode *> CFG;
+   * \outputs:
+   *      - std::map<int, CfgNode *> optimizedCFG;
+   * \details: Checks the use of variables in each statement in the control flow graph and propagates the value to it
+   * can exploit chances more than that of inside single block value propagation
+   * relies on PropagateValue to safely propagate a value
+   */
 
     class LocalValuePropagation : public SCAM::StmtAbstractVisitor, FindCfgPaths {
 
@@ -114,7 +117,6 @@ namespace SCAM {
 
         void visit(class Peek &node) override {};
     };
-
 }
 
 

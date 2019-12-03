@@ -241,7 +241,7 @@ namespace SCAM {
         return this->numLastAssignments;
     }
 
-    const std::map<int, SCAM::Expr *> &PropagateConstantValue::getLastAssignmentMap() const {
+    const std::map<int, SCAM::Expr *> &PropagateConstantValue::getLastAssignmentsMap() const {
         return this->LastAssignmentMap;
     }
 

@@ -17,10 +17,30 @@
 namespace SCAM {
 
     /***
-     * @brief: detects redundant if, elseif , else statements
-     *  for e.g.: when an if statement and one of related else if statements have exactly the same statement lists
-     *
-     */
+   * \brief: Detects redundant if, elseif , else statements and merges them together
+   *
+   * \author: mi-alkoudsi
+   *
+   * \input:
+   *      - std::map<int, SCAM::CfgBlock *> cfg;
+   * \output:
+   *      - std::map<int, CfgNode *> optimizedCFG;
+   *
+   * \details  If two conditional statements have exactly the same logic one of them is deleted and the condition of the other is updated e.g.,
+   *    1:if(x < y){
+   *    2: x+=y;
+   *    3: }else if(x == y){
+   *    4: x+=y;
+   *    5: }else{
+   *    6: y+=x;
+   *    7: }
+   *  becomes =>
+   *    1:if(x < y || x == y){
+   *    2: x+=y;
+   *    3: }else{
+   *    4: y+=x;
+   *    5: }
+   */
 
     class MergeRedundantIfElse {
 
@@ -42,11 +62,18 @@ namespace SCAM {
         std::map<int, std::vector<int>> trueBranchBlocksMap;
         std::set<int> toBeDeletedMap;              //when true the bool indicates the else if, otherwise else and the int reflects the redundant if or else if
         std::map<int, int> ifAndItsElseMap;
+
         bool notFromTheSameGroupIfStatement(int ifId);
-        void addStatementsInTrueBranch(int &firstBlockInTrueBranchId, int& elseIfblockId, bool isIfBranch);
+
+        void addStatementsInTrueBranch(int &firstBlockInTrueBranchId, int &elseIfblockId, bool isIfBranch);
+
         void addStatementsInElseBranch(int &currentBlockId, bool isElseBranch);
+
         void addNestedIfStatementsToStmtsMap(int &currentBlockID, std::vector<SCAM::Stmt *> &ifStmtList);
-        static void printWarning(const std::string& firstCondType, const std::string& firstCond, const std::string& secondCondType, const std::string& secondCond);
+
+        static void
+        printWarning(const std::string &firstCondType, const std::string &firstCond, const std::string &secondCondType,
+                     const std::string &secondCond);
     };
 
 

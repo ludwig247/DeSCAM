@@ -13,7 +13,6 @@ namespace SCAM {
     LivenessAnalysis::LivenessAnalysis(std::map<int, SCAM::CfgNode *> CFG,
                                        const std::map<std::string, SCAM::Variable *> &ModuleVariables) :
             CFG(std::move(CFG)), deadNodeDetected(false) {
-//        this->variablesThatHaveReadSet = variablesThatHaveReadSet;
         this->moduleVariablesMap.clear();
         initLA(ModuleVariables);
         this->numToTrueToggles = 0;
@@ -24,12 +23,11 @@ namespace SCAM {
              it != this->CFG.rend(); it++) {
             auto statement = (*it).second->getStmt();
             currentNodeID = (*it).second->getId();
-            //check if there is a use of a variable, then toggle it's in info to true at currentNode
+            //check if there is a use of a variable, then toggle its in info to true at currentNode
             if (statement != nullptr) {
                 statement->accept(*this);
             }
         }
-
         while (true) {
             for (int i = 0; i < 2; i++) {
                 // if in info of any succ stmt = true  , current stmt out info = true
@@ -145,10 +143,6 @@ namespace SCAM {
 
     void LivenessAnalysis::initLA(const std::map<std::string, SCAM::Variable *> &ModuleVariables) {
         for (auto var : ModuleVariables) {
-            /*if (this->variablesThatHaveReadSet.find(var.second->getFullName()) !=
-                this->variablesThatHaveReadSet.end()) {
-                continue;
-            }*/
             this->moduleVariablesMap.insert(std::make_pair(var.second->getFullName(), var.second));
             if (var.second->isCompoundType() || var.second->isArrayType()) {
                 for (auto subvar : var.second->getSubVarList()) {
@@ -171,9 +165,6 @@ namespace SCAM {
     }
 
     void LivenessAnalysis::visit(struct VariableOperand &node) {
-//        if (this->variablesThatHaveReadSet.find(node.getVariable()->getFullName()) !=
-//            this->variablesThatHaveReadSet.end()) { return; }
-
         if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
             this->variablesInStmtMap.at(this->currentNodeID).insert(node.getVariable()->getFullName());
         } else {
@@ -276,7 +267,6 @@ namespace SCAM {
             }
         }
     }
-
 
     void LivenessAnalysis::visit(struct UnaryExpr &node) {
         node.getExpr()->accept(*this);

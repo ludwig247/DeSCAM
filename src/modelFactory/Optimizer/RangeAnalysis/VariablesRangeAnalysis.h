@@ -25,9 +25,14 @@
 
 namespace SCAM {
     /***
-        * @brief: finds the ranges of unsigned and integer variables, which are not assigned by read operations
-        *
-        * @author:M.I.Alkoudsi
+        * \brief: Finds the ranges of unsigned and integer variables, which are not assigned by read operations
+        * \author:mi-alkoudsi
+        * \inputs:
+        *       - std::map<int, SCAM::CfgNode *> CFG;
+        *       - std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        *       - std::set<std::string>& variablesThatHaveReadSet;
+        * \outputs:
+        *       - std::map<std::string, int> variablesBitwidthMap
         */
     class VariablesRangeAnalysis {
     public:

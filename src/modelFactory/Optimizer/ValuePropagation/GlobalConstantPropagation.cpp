@@ -6,7 +6,12 @@
 
 #include "GlobalConstantPropagation.h"
 #include "Optimizer/Debug.h"
-
+/* Idea:
+ * Look for variables used in the CFG statements. For each found use:
+ * If variable was checked before and has entry in varValMap. get its value from varValMap
+ * Otherwise, make all paths to the statement and call propagateConstantValue
+ * If propagation is valid, update varValMap and the statement
+ * */
 namespace SCAM {
 
     GlobalConstantPropagation::GlobalConstantPropagation(const std::map<int, SCAM::CfgNode *> &CFG,

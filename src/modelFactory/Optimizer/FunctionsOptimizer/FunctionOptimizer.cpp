@@ -7,6 +7,12 @@
 #include <utility>
 #include "Optimizer/Debug.h"
 
+/* Idea:
+ * Iterates over all statements of the CFG looking for use of functions.
+ * Each found function is optimized along with the nested functions inside its body.
+ * The optimized function replaces the old one in the statement that uses it.
+ * The optimized function is also added to the module
+ */
 
 SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module,
                                              std::set<std::string> variablesThatHaveReadSet) : CFG(std::move(
@@ -182,14 +188,6 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     //check if already optimized a function with the same paramterslist
     if(auto optFunc = isAlreadyOptimizedFunction(node.getOperandName(),node.getParamValueMap())){
         this->newExpr = optFunc;
-//        std::cout << node.getOperandName() << std::endl;
-//        std::cout<< "function before optimization " << node.getFunction()->getReturnValueConditionList().size() << std::endl;
-//        if(auto func = dynamic_cast<FunctionOperand*>(this->newExpr)) {
-//            std::cout << "function after optimization " << func->getFunction()->getReturnValueConditionList().size()
-//                      << std::endl;
-//        }else {
-//            std::cout << "function after optimization 1" << std::endl;
-//        }
         return;
     }
     //optimize argument list
@@ -315,12 +313,6 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         }
     }
     function->setReturnValueConditionList(newReturnValueConditionList);
-//    std::cout << node.getOperandName() << std::endl;
-//    std::cout<< "function before optimization " << node.getFunction()->getReturnValueConditionList().size() << std::endl;
-//    std::cout<< "function after optimization " << function->getReturnValueConditionList().size() << std::endl;
-
-
-
     //inline function if it has one return value
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();
