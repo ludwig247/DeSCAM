@@ -91,7 +91,7 @@ void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::FunctionOperand &no
 
 void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
-    this->variablesInStmtSet.insert(node.getArrayVar()->getFullName());
+    this->variablesInStmtSet.insert(node.getArrayOperand()->getOperandName());
 }
 
 void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::CompoundExpr &node) {

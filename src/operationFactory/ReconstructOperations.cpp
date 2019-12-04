@@ -17,6 +17,7 @@ SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> sta
     this->assumptionsList.clear();
     this->commitmentsList.clear();
     this->variableAssignmentMap.clear();
+
     for (auto stmt: statementsList) {
         stmt->accept(*this);
     }
@@ -56,10 +57,11 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation2 *operation) {
     this->assumptionsList.clear();
     this->commitmentsList.clear();
     this->variableAssignmentMap.clear();
+    this->isWaitOperation = operation->IsWait();
     for (auto stmt: operation->getStatementsList()) {
         stmt->accept(*this);
     }
-
+    this->isWaitOperation=false;
     operation->setAssumptionsList(this->assumptionsList);
     /// Setting operation commitmentList
 
@@ -268,6 +270,13 @@ namespace SCAM {
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Write &node) {
+
+        if(this->isWaitOperation) {
+            auto portOp = new DataSignalOperand(node.getPort()->getDataSignal());
+            find_or_add_variable(portOp->getOperandName(),portOp);
+            return;
+        }
+
         node.getValue()->accept(*this);
         //Case for a write(var)
         if (ExprVisitor::getUsedOperands(this->newExpr).size() == 1) {
@@ -467,9 +476,18 @@ namespace SCAM {
 
     void SCAM::ReconstructOperations::visit(SCAM::ArrayOperand &node) {
 
+        //update idx
         node.getIdx()->accept(*this);
+
+        auto sig = reconstructArrayVar(node.getArrayOperand());
+        if(sig){
+            this->newExpr = new ArrayOperand(new DataSignalOperand(sig), this->newExpr);
+            return;
+        }
+
+        //Regular case from here
         if (!(*node.getIdx() == *this->newExpr)) {
-            this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
+            this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
         } else this->newExpr = &node;
     }
 
@@ -501,6 +519,43 @@ namespace SCAM {
 
     void SCAM::ReconstructOperations::visit(SCAM::Notify &node) {
         throw std::runtime_error("ReconstructOperations::Notify: Not implemented");
+    }
+
+    DataSignal *ReconstructOperations::reconstructArrayVar(Operand *operand) {
+        /*
+       * Special case:
+       * m_in->master_read(tmp);
+       * b_out->write(tmp[foobar(0)]);
+       *
+       * Every ArrayOperand is pointing to the same variable m_in_sig and this is why tmp has to be replaced with m_in_sig
+      */
+        //Step 1: find all entries in the variableAssignmentMap related to this array
+        std::map<std::string, SCAM::Expr *> arrayAssignemntMap;
+        for(auto element: operand->getDataType()->getSubVarMap()){
+            std::string name = operand->getOperandName()+"["+element.first+"]";
+            if(this->variableAssignmentMap.find(name) != this->variableAssignmentMap.end()){
+                arrayAssignemntMap.insert(*this->variableAssignmentMap.find(name));
+            }
+        }
+
+        //Step 2: For now we expect the assignment to be a ArrayOperand, if not exit and return original variable
+        DataSignal * check = nullptr;
+        bool isFirstIteratioin = true;
+        for(auto element: arrayAssignemntMap){
+            auto signal = NodePeekVisitor::nodePeekDataSignalOperand(element.second);
+            if(signal){
+                if(isFirstIteratioin){
+                    isFirstIteratioin = false;
+                    check = signal->getDataSignal()->getParent();
+                }else{
+                    if(check != signal->getDataSignal()->getParent()){
+                        return nullptr;
+                    }
+                    check = signal->getDataSignal()->getParent();
+                }
+            }
+        }
+        return check;
     }
 
     void ReconstructOperations::visit(ArrayExpr &node) {

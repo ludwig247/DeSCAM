@@ -302,7 +302,7 @@ std::string SCAM::PrintStmt::toString(const SCAM::Stmt *stmt, unsigned int inden
 void SCAM::PrintStmt::visit(SCAM::ArrayOperand &node) {
     useParenthesesFlag = true;
 
-    this->ss << node.getArrayVar()->getName();
+    this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "[";
     node.getIdx()->accept(*this);
     this->ss << "]";

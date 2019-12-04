@@ -130,10 +130,9 @@ void SCAM::ExprVisitor::visit(SCAM::ArrayOperand &node) {
     this->var = true;
     //this->usedOperands.insert(&node);
     node.getIdx()->accept(*this);
-    this->usedVar.insert(node.getArrayVar());
-    for (auto subvar: node.getArrayVar()->getSubVarList()) {
-        // this->usedVar.insert(subvar);
-    }
+    node.getArrayOperand()->accept(*this);
+    this->usedOperands.insert(node.getArrayOperand());
+
 }
 
 
