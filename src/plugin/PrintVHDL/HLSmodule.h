@@ -13,36 +13,30 @@
 class HLSmodule {
 public:
     explicit HLSmodule(PropertySuite *propertySuite, Module* module);
-    ~HLSmodule();
+    ~HLSmodule() = default;
 
-    bool getCorrespondingRegisterName(const std::string& outputName, std::string& registerName);
+    std::set<Variable *> getVariables();
 
-    std::set<DataSignal*> getOutputs();
-    std::set<Variable* > getVariables();
-
-    inline std::set<DataSignal*> getModuleOutputs() const ;
+    std::set<DataSignal *> getModuleOutputs() const ;
+    Variable* getCorrespondingRegister(DataSignal* dataSignal) const;
+    bool hasOutputReg(DataSignal* dataSignal) const;
+    bool isModuleSignal(DataSignal* dataSignal) const;
+    std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal* dataSignal) const;
 
 private:
     PropertySuite *propertySuite;
-    std::queue<std::vector<Assignment* > > originalCommitmentLists;
     Module* module;
 
-    std::set<DataSignal*> moduleOutputs;
-    std::map<Variable*, DataSignal*> registerToOutputMap;
-    std::map<DataSignal*, Variable*> outputToRegisterMap;
+    std::set<DataSignal *> moduleOutputs;
+    std::map<Variable *, DataSignal *> registerToOutputMap;
+    std::map<DataSignal *, Variable *> outputToRegisterMap;
+    std::map<DataSignal *, std::vector<DataSignal *>> moduleToTopSignalMap;
 
-    std::multimap<Variable*, DataSignal*> getParentMap(const std::multimap<Variable*, DataSignal*> &multimap);
-
-    DataSignal* getCombinedDataSignal(const std::vector<DataSignal*> &dataSignals);
     void removeRedundantConditions();
     void mapOutputRegistersToOutput();
-
-    template <typename Key, typename Value>
-    std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
+    void mapInputRegistersToInputs();
+    DataSignal* getCombinedDataSignal(const std::vector<DataSignal*> &dataSignals);
+    std::multimap<Variable *, DataSignal *> getParentMap(const std::multimap<Variable *, DataSignal *> &multimap);
 };
-
-inline std::set<DataSignal* > HLSmodule::getModuleOutputs() const {
-    return moduleOutputs;
-}
 
 #endif //DESCAM_HLSMODULE_H

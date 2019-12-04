@@ -6,6 +6,7 @@
 #define DESCAM_UTILITIES_H
 
 #include <string>
+#include <set>
 
 enum class Side {
     UNKNOWN,
@@ -29,7 +30,26 @@ public:
     static std::string subTypeBitwiseToString(SubTypeBitwise type);
     static std::string convertDataType(const std::string& type);
     static SubTypeBitwise getSubTypeBitwise(const std::string &name);
+
+    template <typename T>
+    static std::set<T *> getParents(const std::set<T *> &subVars);
 };
 
+template <typename T>
+std::set<T *> Utilities::getParents(const std::set<T *> &subVars) {
+    std::set<T *> parents;
+    for (const auto& var : subVars) {
+        if (var->isSubVar()) {
+            if (parents.find(var->getParent()) == parents.end()) {
+                parents.insert(var->getParent());
+            }
+        } else {
+            if (parents.find(var) == parents.end()) {
+                parents.insert(var);
+            }
+        }
+    }
+    return parents;
+}
 
 #endif //DESCAM_UTILITIES_H

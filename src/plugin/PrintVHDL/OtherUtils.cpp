@@ -38,6 +38,16 @@ namespace SCAM { namespace VHDL {
         }
     }
 
+    std::string OtherUtils::convertDataTypeConstrained(std::string dataTypeName) {
+        if (dataTypeName == "bool") {
+            return "std_logic";
+        } else if (dataTypeName == "int" || dataTypeName == "unsigned") {
+            return "std_logic_vector(31 downto 0)";
+        } else {
+            return dataTypeName;
+        }
+    }
+
     std::string OtherUtils::getEnumAsVector(const DataType *dataType) {
         if (dataType->isEnumType()) {
             uint32_t vectorSize = ceil(log2(dataType->getEnumValueMap().size()));

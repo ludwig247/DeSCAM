@@ -27,14 +27,12 @@ private:
     SCAM::Module *currentModule;
 
     std::unique_ptr<PrintSynthesisScripts> synthesisScript;
-    std::unique_ptr<OptimizeForHLS> utils;
+    std::unique_ptr<OptimizeForHLS> opt;
 
     void dataTypes();
     void functions();
     void operations();
-
-    void functionParameters();
-    void assumptions(AbstractProperty *successorProperty);
+    void interface();
 
     void visit(Model &node) override {};
     void visit(SCAM::Module &node) override {} ;

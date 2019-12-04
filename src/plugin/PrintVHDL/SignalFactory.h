@@ -52,6 +52,11 @@ public:
     std::vector<Signal> getSync() const;
     std::vector<Signal> getAllPorts() const;
 
+    static std::string vectorToEnum(DataSignal * dataSignal, const std::string &suffix = "");
+
+    template<typename T>
+    static std::string printWithUL(T * signal);
+
 private:
     void setAllPorts();
     void setMonitorSignals();
@@ -98,6 +103,15 @@ std::vector<Signal> SignalFactory::getHSProtocolSignals() const{
 
 std::vector<Signal> SignalFactory::getMonitorSignals() const{
     return monitorSignals;
+}
+
+template<typename T>
+std::string SignalFactory::printWithUL(T * signal) {
+    if (signal->isSubVar()) {
+        return signal->getParent()->getName() + "_" + signal->getName();
+    } else {
+        return signal->getName();
+    }
 }
 
 #endif //DESCAM_SIGNALFACTORY_H

@@ -21,8 +21,8 @@ std::string PrintFunctionStatements::toString(Stmt *stmt, unsigned int indentSiz
     return printer.getString();
 }
 
-std::string PrintFunctionStatements::toString(Stmt *stmt, OptimizeForHLS *utils, unsigned int indentSize, unsigned int indentOffset) {
-    PrintFunctionStatements printer(stmt, utils, indentSize, indentOffset);
+std::string PrintFunctionStatements::toString(Stmt *stmt, OptimizeForHLS *opt, unsigned int indentSize, unsigned int indentOffset) {
+    PrintFunctionStatements printer(stmt, opt, indentSize, indentOffset);
     return printer.getString();
 }
 
@@ -52,7 +52,7 @@ void PrintFunctionStatements::visit(VariableOperand &node) {
         if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << "[" << node.getVariable()->getName() << "]";
         } else {
-            this->ss << "_" << node.getVariable()->getName();
+            this->ss << "." << node.getVariable()->getName();
         }
     } else {
         this->ss << node.getVariable()->getName();
@@ -199,9 +199,9 @@ void PrintFunctionStatements::visit(FunctionOperand &node) {
 }
 
 void PrintFunctionStatements::visit(Bitwise &node) {
-    auto printOperations = std::make_unique<BitSlicingHLS>(&node);
-    if (printOperations->isSlicingOp()) {
-        this->ss << printOperations->getOpAsString();
+    auto bitSlicing = std::make_unique<BitSlicingHLS>(&node);
+    if (bitSlicing->isSlicingOp()) {
+        this->ss << bitSlicing->getOpAsString();
     } else {
         if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
             this->ss << "(";

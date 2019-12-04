@@ -7,7 +7,7 @@
 
 #include "systemc.h"
 #include "Types.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 
 struct requesteQ_new : public sc_module {
     enum Phases {

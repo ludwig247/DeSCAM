@@ -168,3 +168,7 @@ void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Si
         signals.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
     }
 }
+
+std::string SignalFactory::vectorToEnum(DataSignal *dataSignal, const std::string &suffix) {
+    return dataSignal->getDataType()->getName() + "'val(to_integer(unsigned(" + printWithUL(dataSignal) + suffix + ")))";
+}

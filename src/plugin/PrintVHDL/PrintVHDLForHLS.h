@@ -30,8 +30,6 @@ private:
     std::string printModule(Model *model);
     std::string functions();
     std::string printDataTypes(const DataType *dataType);
-    std::string convertDataTypeConstrained(std::string dataTypeName);
-    std::string convertDataType(std::string dataTypeName);
     std::string printSensitivityList();
 };
 

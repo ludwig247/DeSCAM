@@ -160,9 +160,9 @@ void VHDLPrintVisitor::visit(Bitwise &node) {
     bool tempUseParentheses = useParenthesesFlag;
     useParenthesesFlag = true;
 
-    auto printOperations = std::make_unique<BitSlicingVHDL>(&node);
-    if (printOperations->isSlicingOp()) {
-        this->ss << printOperations->getOpAsString();
+    auto bitSlicing = std::make_unique<BitSlicingVHDL>(&node);
+    if (bitSlicing->isSlicingOp()) {
+        this->ss << bitSlicing->getOpAsString();
     } else {
         if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
             if (node.getOperation() == "<<")

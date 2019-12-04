@@ -23,12 +23,11 @@ public:
 
 private:
     PropertySuite *propertySuite;
-    std::queue<std::vector<Assignment* > > originalCommitmentLists;
+    std::queue<std::vector<Assignment* >> originalCommitmentLists;
     Module* module;
 
     std::set<DataSignal*> moduleOutputs;
     std::map<Variable*, DataSignal*> registerToOutputMap;
-    std::map<DataSignal*, Variable*> outputToRegisterMap;
 
     std::multimap<Variable*, DataSignal*> getParentMap(const std::multimap<Variable*, DataSignal*> &multimap);
 

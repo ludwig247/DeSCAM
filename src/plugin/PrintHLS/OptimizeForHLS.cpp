@@ -4,7 +4,6 @@
 
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
 #include <ExprVisitor.h>
 
 #include "OptimizeForHLS.h"

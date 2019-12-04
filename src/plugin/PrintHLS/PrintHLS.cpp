@@ -12,7 +12,7 @@ PrintHLS::PrintHLS() :
     propertySuite(nullptr),
     currentModule(nullptr),
     synthesisScript(nullptr),
-    utils(nullptr)
+    opt(nullptr)
 {
 }
 
@@ -20,7 +20,7 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *node) {
     for (auto &module: node->getModules()) {
         this->currentModule = module.second;
         this->propertySuite = module.second->getPropertySuite();
-        utils = std::make_unique<OptimizeForHLS>(propertySuite, currentModule);
+        opt = std::make_unique<OptimizeForHLS>(propertySuite, currentModule);
 
         dataTypes();
         pluginOutput.insert(std::make_pair("Data_Types.h", ss.str()));
@@ -47,23 +47,20 @@ void PrintHLS::operations() {
     ss << "#include \"Data_Types.h\"\n\n";
 
     ss << "void operations(\n";
-    functionParameters();
+    interface();
     ss << "{\n";
 
-    for (auto visibleRegister : propertySuite->getVisibleRegisters()) {
-        auto regs = utils->getVariables();
-        if (regs.find(visibleRegister->getVariable()) != regs.end()) {
-            std::string type = Utilities::convertDataType(visibleRegister->getDataType()->getName());
-            std::string name = visibleRegister->getName();
-            if (visibleRegister->isCompoundType()) {
-                name += ("_" + visibleRegister->getSubVarName());
-            }
-            ss << "\tstatic " << type << " " << name << ";\n";
-            ss << "\t" << type << " " << "next_" << name << ";\n";
-        }
+    auto regs = Utilities::getParents(opt->getVariables());
+    for (const auto& reg : regs) {
+        std::string type = Utilities::convertDataType(reg->getDataType()->getName());
+        std::string name = reg->getName();
+        ss << "\tstatic " << type << " " << name << ";\n";
+        ss << "\t" << type << " " << "next_" << name << ";\n";
     }
+
     ss << "\n";
     ss << "\tswitch (active_operation) {\n";
+
     // operation properties
     for (auto operationProperty : propertySuite->getOperationProperties()) {
         const std::string &operationName = operationProperty->getName();
@@ -72,7 +69,7 @@ void PrintHLS::operations() {
             if (*(commitment->getRhs()) == *(commitment->getLhs())) {
                 continue;
             }
-            ss << PrintFunctionStatements::toString(commitment, utils.get(), 2, 2);
+            ss << PrintFunctionStatements::toString(commitment, opt.get(), 2, 2);
         }
         for (auto notifySignal : propertySuite->getNotifySignals()) {
             switch (operationProperty->getTiming(notifySignal->getPort())) {
@@ -92,24 +89,13 @@ void PrintHLS::operations() {
     }
     ss << "\t}\n\n";
 
-    for (auto visibleRegister : propertySuite->getVisibleRegisters()) {
-        auto regs = utils->getVariables();
-        if (regs.find(visibleRegister->getVariable()) != regs.end()) {
-            ss << "\t" << visibleRegister->getName();
-            if (visibleRegister->isCompoundType()) {
-                ss << "_" << visibleRegister->getSubVarName();
-            }
-            ss << " = next_" << visibleRegister->getName();
-            if (visibleRegister->isCompoundType()) {
-                ss << "_" << visibleRegister->getSubVarName();
-            }
-            ss << ";\n";
-        }
+    for (const auto& reg : regs) {
+        ss << "\t" << reg->getName() << " = next_" << reg->getName() << ";\n";
     }
     ss << "\n}";
 }
 
-void PrintHLS::functionParameters() {
+void PrintHLS::interface() {
     // input and output signals
     for (const auto& port : currentModule->getPorts()) {
         if (port.second->getInterface()->isInput()) {
@@ -132,7 +118,7 @@ void PrintHLS::functionParameters() {
             ss << ",\n";
         }
     }
-    for (const auto& output : utils->getModuleOutputs()) {
+    for (const auto& output : Utilities::getParents(opt->getModuleOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
             ss << "\t"
@@ -153,20 +139,18 @@ void PrintHLS::functionParameters() {
     ss << "\toperation active_operation\n)\n";
 }
 
-void PrintHLS::assumptions(AbstractProperty* successorProperty) {
-    const auto& assumptionList = successorProperty->getAssumptionList();
-    for (auto assumption = assumptionList.begin(); assumption != assumptionList.end(); ++assumption) {
-        ss << PrintFunctionStatements::toString(*assumption);
-        if (std::next(assumption) != successorProperty->getAssumptionList().end()) {
-            ss << ") && (";
-        }
-    }
-}
-
 void PrintHLS::dataTypes() {
     ss << "#ifndef DATA_TYPES_H\n";
     ss << "#define DATA_TYPES_H\n\n";
     ss << "#include \"ap_int.h\"\n";
+
+    // TODO: DeSCAM erkennt keine Konstanten
+    // Constants
+    for (const auto& var : currentModule->getVariableMap()) {
+        if (var.second->isConstant()) {
+            ss << "\tconst " << var.first << " " << var.second->getInitialValue()->getValueAsString() << ";\n";
+        }
+    }
 
     for (auto &dataType : DataTypes::getDataTypeMap()) {
         if (dataType.second->isEnumType())
@@ -230,6 +214,7 @@ void PrintHLS::functions() {
     this->ss << "#include \"ap_int.h\"\n";
     this->ss << "#include \"Data_Types.h\"\n\n";
 
+    // Function Prototypes
     auto functionMap = currentModule->getFunctionMap();
     for (auto &function :functionMap) {
         this->ss << Utilities::convertDataType(function.second->getReturnType()->getName()) << " " << function.second->getName() << "(";
