@@ -69,6 +69,7 @@ namespace SCAM {
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
             solver.add(translator.translate(condition));
+            solver.check();
         }
         // Check for SAT if unsat -> erase path
         return !(solver.check() == z3::unsat);

@@ -58,11 +58,15 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                             if (auto initVal = dynamic_cast<ConstValue *>(checkForExpr.getExpr())) {
                                 Variable *var = new Variable(name, descam_type, initVal);
                                 this->variableMap.insert(std::make_pair(name, var));
-                            }else throw std::runtime_error("Init value has to be const");
+                            }else {
+                                std::cout << "#" << std::endl;
+                                throw std::runtime_error("Init value has to be const");
+                            }
                         }
-
                     }
-                } catch (std::exception e) {}
+                } catch (std::runtime_error error) {
+                    std::cout << error.what() << std::endl;
+                }
 
             }
         }

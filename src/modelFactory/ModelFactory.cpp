@@ -535,7 +535,6 @@ void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Mo
         this->model->addGlobalVariable(var.second);
         var.second->setConstant(true);
     }
-
 }
 
 void SCAM::ModelFactory::optimizeModel() {
