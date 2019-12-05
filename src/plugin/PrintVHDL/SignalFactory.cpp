@@ -88,7 +88,8 @@ std::vector<Signal> SignalFactory::getInputs(bool asVector, bool destruct) const
             std::string direction = in->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(in->getDataSignal()->getInitialValue());
             bool isEnum = in->isEnumType();
-            ports.push_back({name, type, direction, false, "", initialValue, isEnum});
+            uint32_t vectorSize = getVectoSize(in->getDataType());
+            ports.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
         }
     }
     return ports;
@@ -108,7 +109,7 @@ std::vector<Signal> SignalFactory::getOutputs(bool asVector, bool destruct) cons
             std::string direction = out->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(out->getDataSignal()->getInitialValue());
             bool isEnum = out->isEnumType();
-            uint32_t vectorSize = isEnum ? ceil(log2(out->getDataType()->getEnumValueMap().size())) : 32;
+            uint32_t vectorSize = getVectoSize(out->getDataType());
             ports.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
         }
     }
@@ -129,7 +130,7 @@ std::vector<Signal> SignalFactory::getInternalRegs(bool asVector, bool destruct)
                     internalReg->getDataType()->getName());
             std::string initialValue = VHDLPrintVisitorHLS::toString(internalReg->getInitialValue());
             bool isEnum = internalReg->isEnumType();
-            uint32_t vectorSize = isEnum ? ceil(log2(internalReg->getDataType()->getEnumValueMap().size())) : 32;
+            uint32_t vectorSize = getVectoSize(internalReg->getDataType());
             registerSignals.push_back({name, type, "", false, "", initialValue, isEnum, vectorSize});
         }
     }
@@ -184,7 +185,7 @@ void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Si
             std::string direction = port->getInterface()->getDirection();
             std::string initialValue = VHDLPrintVisitorHLS::toString(subVar->getInitialValue());
             bool isEnum = subVar->isEnumType();
-            uint32_t vectorSize = isEnum ? ceil(log2(subVar->getDataType()->getEnumValueMap().size())) : 32;
+            uint32_t vectorSize = getVectoSize(subVar->getDataType());
             signals.push_back({name, type, direction, true, subVarName, initialValue, isEnum, vectorSize});
         }
     } else {
@@ -193,7 +194,7 @@ void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Si
         std::string direction = port->getInterface()->getDirection();
         std::string initialValue = VHDLPrintVisitorHLS::toString(port->getDataSignal()->getInitialValue());
         bool isEnum = port->isEnumType();
-        uint32_t vectorSize = isEnum ? ceil(log2(port->getDataType()->getEnumValueMap().size())) : 32;
+        uint32_t vectorSize = getVectoSize(port->getDataType());
         signals.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
     }
 }
@@ -207,7 +208,7 @@ void SignalFactory::getCompoundSignalsReg(Variable *signal, bool asVector, std::
             std::string type = asVector ? OtherUtils::getEnumAsVector(subVar->getDataType()) : OtherUtils::convertDataType(subVar->getDataType()->getName());
             std::string initialValue = VHDLPrintVisitorHLS::toString(subVar->getInitialValue());
             bool isEnum = subVar->isEnumType();
-            uint32_t vectorSize = isEnum ? ceil(log2(subVar->getDataType()->getEnumValueMap().size())) : 32;
+            uint32_t vectorSize = getVectoSize(subVar->getDataType());
             signals.push_back({name, type, "", true, subVarName, initialValue, isEnum, vectorSize});
         }
     } else {
@@ -215,8 +216,20 @@ void SignalFactory::getCompoundSignalsReg(Variable *signal, bool asVector, std::
         std::string type = asVector ? OtherUtils::getEnumAsVector(signal->getDataType()) : OtherUtils::convertDataType(signal->getDataType()->getName());
         std::string initialValue = VHDLPrintVisitorHLS::toString(signal->getInitialValue());
         bool isEnum = signal->isEnumType();
-        uint32_t vectorSize = isEnum ? ceil(log2(signal->getDataType()->getEnumValueMap().size())) : 32;
+        uint32_t vectorSize = getVectoSize(signal->getDataType());
         signals.push_back({name, type, "", false, "", initialValue, isEnum, vectorSize});
+    }
+}
+
+uint32_t SignalFactory::getVectoSize(DataType *type) const {
+    if (type->getName() == "int" || type->getName() == "unsigned") {
+        return 32;
+    } else if  (type->getName() == "bool") {
+        return 1;
+    } else if (type->isEnumType()) {
+        return ceil(log2(type->getEnumValueMap().size()));
+    } else {
+        return 0;
     }
 }
 

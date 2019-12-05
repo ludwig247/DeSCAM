@@ -66,6 +66,7 @@ private:
     void setOperationSelector();
     void getCompoundSignals(Port *port, bool asVector, std::vector<Signal> &signals) const;
     void getCompoundSignalsReg(Variable *var, bool asVector, std::vector<Signal> &signals) const;
+    uint32_t getVectoSize(DataType *type) const;
 
     PropertySuite *propertySuite;
     Module *module;

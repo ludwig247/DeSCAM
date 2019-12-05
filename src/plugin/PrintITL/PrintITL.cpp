@@ -914,7 +914,7 @@ std::string PrintITL::hls() {
         } else {
             // TODO: Make t_end dependent of hls output
             ss << "for timepoints:\n";
-            ss << "\tt_end = t+3..5 waits_for done = '1';\n";
+            ss << "\tt_end = t+1..5 waits_for done = '1';\n";
             t_end = "t_end";
         }
 

@@ -96,28 +96,21 @@ void PrintHLS::operations() {
 
 void PrintHLS::interface() {
     // input and output signals
-    for (const auto& port : currentModule->getPorts()) {
-        if (port.second->getInterface()->isInput()) {
-            bool isArrayType = port.second->isArrayType();
-            if (isArrayType) {
-                ss << "\t"
-                   << Utilities::convertDataType(port.second->getDataType()->getSubVarMap().begin()->second->getName());
-            } else {
-                ss << "\t" << Utilities::convertDataType(port.second->getDataType()->getName());
-            }
-            if (port.second->getInterface()->isInput()) {
-                ss << " ";
-            } else {
-                ss << " &";
-            }
-            ss << port.second->getName() << "_sig";
-            if (isArrayType) {
-                ss << "[" << port.second->getDataType()->getSubVarMap().size() << "]";
-            }
-            ss << ",\n";
+    for (const auto& input : Utilities::getParents(opt->getInputs())) {
+        bool isArrayType = input->isArrayType();
+        if (isArrayType) {
+            ss << "\t"
+               << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName());
         }
+        ss << " " << input->getName();
+        if (isArrayType) {
+            ss << "[" <<input->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << ",\n";
     }
-    for (const auto& output : Utilities::getParents(opt->getModuleOutputs())) {
+    for (const auto& output : Utilities::getParents(opt->getOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
             ss << "\t"

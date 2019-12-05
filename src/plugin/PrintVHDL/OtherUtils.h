@@ -9,6 +9,7 @@
 #include <set>
 
 #include "DataType.h"
+#include "DataSignal.h"
 
 namespace SCAM { namespace VHDL{
 
@@ -39,6 +40,8 @@ namespace SCAM { namespace VHDL{
         static std::string convertDataTypeConstrained(std::string dataTypeName);
         static std::string getEnumAsVector(const DataType *dataType);
         static SubTypeBitwise getSubTypeBitwise(const std::string &name);
+        static bool isVectorType(const uint32_t &size);
+        static bool isVectorType(const DataSignal *dataSignal);
 
         template <typename Key, typename Value>
         static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);

@@ -16,8 +16,9 @@ public:
     ~HLSmodule() = default;
 
     std::set<Variable *> getVariables();
+    std::set<DataSignal *> getOutputs();
+    std::set<DataSignal *> getInputs();
 
-    std::set<DataSignal *> getModuleOutputs() const ;
     Variable* getCorrespondingRegister(DataSignal* dataSignal) const;
     std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal* dataSignal) const;
     bool hasOutputReg(DataSignal* dataSignal) const;

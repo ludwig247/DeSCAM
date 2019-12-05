@@ -167,6 +167,7 @@ void OptimizeForHLS::mapOutputRegistersToOutput() {
             moduleOutputs.insert(combinedDataSignal);
             for (const auto& out : outputs) {
                 oldToNewDataSignalMap.insert({out, combinedDataSignal});
+                moduleToTopSignalMap.insert({combinedDataSignal, outputs});
             }
         } else {
             registerToOutputMap.insert({it->first, it->second});
@@ -174,7 +175,6 @@ void OptimizeForHLS::mapOutputRegistersToOutput() {
             ++it;
         }
     }
-
     replaceDataSignals(oldToNewDataSignalMap);
 }
 
@@ -308,19 +308,40 @@ std::multimap<Variable*, DataSignal*> OptimizeForHLS::getParentMap(const std::mu
 }
 
 std::set<DataSignal *> OptimizeForHLS::getOutputs() {
-    std::set<DataSignal*> outputSet;
-    for (const auto &port : module->getPorts()) {
-        if (port.second->getInterface()->isOutput()) {
-            if (port.second->isCompoundType()) {
-                for (const auto &subType : port.second->getDataSignal()->getSubVarList()) {
-                    outputSet.insert(subType);
-                }
-            } else {
-                outputSet.insert(port.second->getDataSignal());
+    std::set<DataSignal *> outputSet;
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& commitment : property->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
+            const auto& outputs = ExprVisitor::getUsedDataSignals(commitment->getLhs());
+            outputSet.insert(outputs.begin(), outputs.end());
+        }
+    }
+    for (const auto& moduleSignal : moduleToTopSignalMap) {
+        outputSet.insert(moduleSignal.first);
+        for (const auto& topSignal : moduleSignal.second) {
+            const auto& it = outputSet.find(topSignal);
+            if (it != outputSet.end()) {
+                outputSet.erase(it);
             }
         }
     }
     return outputSet;
+}
+
+std::set<DataSignal *> OptimizeForHLS::getInputs() {
+    std::set<DataSignal *> inputSet;
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& commitment : property->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
+            const auto& inputs = ExprVisitor::getUsedDataSignals(commitment->getRhs());
+            inputSet.insert(inputs.begin(), inputs.end());
+        }
+    }
+    return inputSet;
 }
 
 std::set<Variable *> OptimizeForHLS::getVariables() {

@@ -20,10 +20,6 @@ HLSmodule::HLSmodule(PropertySuite *propertySuite, Module* module) :
     mapInputRegistersToInputs();
 }
 
-std::set<DataSignal *> HLSmodule::getModuleOutputs() const {
-    return moduleOutputs;
-}
-
 bool HLSmodule::hasOutputReg(DataSignal* dataSignal) const {
     const auto& subVarMap = VHDL::OtherUtils::getSubVarMap(outputToRegisterMap);
     return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
@@ -227,6 +223,43 @@ std::multimap<Variable*, DataSignal*> HLSmodule::getParentMap(const std::multima
         }
     }
     return parentMap;
+}
+
+std::set<DataSignal *> HLSmodule::getOutputs() {
+    std::set<DataSignal *> outputSet;
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& commitment : property->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
+            const auto& outputs = ExprVisitor::getUsedDataSignals(commitment->getLhs());
+            outputSet.insert(outputs.begin(), outputs.end());
+        }
+    }
+    for (const auto& moduleSignal : moduleToTopSignalMap) {
+        outputSet.insert(moduleSignal.first);
+        for (const auto& topSignal : moduleSignal.second) {
+            const auto& it = outputSet.find(topSignal);
+            if (it != outputSet.end()) {
+                outputSet.erase(it);
+            }
+        }
+    }
+    return outputSet;
+}
+
+std::set<DataSignal *> HLSmodule::getInputs() {
+    std::set<DataSignal *> inputSet;
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& commitment : property->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
+            const auto& inputs = ExprVisitor::getUsedDataSignals(commitment->getRhs());
+            inputSet.insert(inputs.begin(), inputs.end());
+        }
+    }
+    return inputSet;
 }
 
 std::set<Variable *> HLSmodule::getVariables() {

@@ -48,6 +48,14 @@ namespace SCAM { namespace VHDL {
         }
     }
 
+    bool OtherUtils::isVectorType(const uint32_t &size) {
+        return (size == 32);
+    }
+
+    bool OtherUtils::isVectorType(const DataSignal *dataSignal) {
+        return (dataSignal->getDataType()->getName() == "int" || dataSignal->getDataType()->getName() == "unsinged");
+    }
+
     std::string OtherUtils::getEnumAsVector(const DataType *dataType) {
         if (dataType->isEnumType()) {
             uint32_t vectorSize = ceil(log2(dataType->getEnumValueMap().size()));
@@ -122,4 +130,5 @@ namespace SCAM { namespace VHDL {
             return SubTypeBitwise::UNKNOWN;
         }
     }
-} }
+
+    } }

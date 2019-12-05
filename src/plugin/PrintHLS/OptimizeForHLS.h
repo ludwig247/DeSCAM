@@ -16,33 +16,29 @@ public:
     explicit OptimizeForHLS(PropertySuite *propertySuite, Module* module);
     ~OptimizeForHLS();
 
-    std::set<DataSignal*> getOutputs();
-    std::set<Variable* > getVariables();
-
-    inline std::set<DataSignal*> getModuleOutputs() const ;
+    std::set<DataSignal *> getOutputs();
+    std::set<DataSignal *> getInputs();
+    std::set<Variable *> getVariables();
 
 private:
     PropertySuite *propertySuite;
     std::queue<std::vector<Assignment* >> originalCommitmentLists;
     Module* module;
 
-    std::set<DataSignal*> moduleOutputs;
-    std::map<Variable*, DataSignal*> registerToOutputMap;
+    std::set<DataSignal *> moduleOutputs;
+    std::map<Variable *, DataSignal *> registerToOutputMap;
+    std::map<DataSignal *, std::vector<DataSignal *>> moduleToTopSignalMap;
 
-    std::multimap<Variable*, DataSignal*> getParentMap(const std::multimap<Variable*, DataSignal*> &multimap);
+    std::multimap<Variable *, DataSignal *> getParentMap(const std::multimap<Variable *, DataSignal *> &multimap);
 
-    void replaceDataSignals(const std::map<DataSignal*, DataSignal*> &dataSignalMap);
+    void replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap);
     void replaceVariables();
-    DataSignal* getCombinedDataSignal(const std::vector<DataSignal*> &dataSignals);
+    DataSignal* getCombinedDataSignal(const std::vector<DataSignal *> &dataSignals);
     void removeRedundantConditions();
     void mapOutputRegistersToOutput();
 
     template <typename Key, typename Value>
     std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
 };
-
-inline std::set<DataSignal* > OptimizeForHLS::getModuleOutputs() const {
-    return moduleOutputs;
-}
 
 #endif //SCAM_UTILITIES_HLS_H
