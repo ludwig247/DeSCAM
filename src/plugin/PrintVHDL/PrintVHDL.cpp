@@ -54,7 +54,8 @@ std::string PrintVHDL::printTypes(Model *model) {
     typeStream << "package " + model->getName() << "_types is\n\n";
 
     // Operation enumeration
-    typeStream << "\ttype " << propertySuite->getName() << "_operation_t is (";
+    typeStream << "-- Operations\n"
+               << "\ttype " << propertySuite->getName() << "_operation_t is (";
     for (auto op_it = propertySuite->getOperationProperties().begin(); op_it != propertySuite->getOperationProperties().end(); op_it++) {
         typeStream << "op_" << (*op_it)->getName();
         if (std::next(op_it) != propertySuite->getOperationProperties().end())
@@ -70,31 +71,62 @@ std::string PrintVHDL::printTypes(Model *model) {
     typeStream << ");\n";
 
     // State enumeration
-    typeStream << "\ttype " + propertySuite->getName() << "_state_t is (";
+    typeStream << "-- States"
+               << "\ttype " + propertySuite->getName() << "_state_t is (";
     for (auto st_it = propertySuite->getStates().begin(); st_it != propertySuite->getStates().end(); st_it++) {
         typeStream << "st_" << (*st_it)->getName();
         if (std::next(st_it) != propertySuite->getStates().end())
             typeStream << ", ";
     }
-    typeStream << ");\n";
+    typeStream << ");\n\n";
+
+    std::set<const DataType *> enumTypes;
+    std::set<const DataType *> compoundTypes;
+    std::set<const DataType *> arrayTypes;
+
+    auto fillTypeSets = [&enumTypes, &compoundTypes, &arrayTypes](const DataType* dataType) {
+        if (dataType->isEnumType()) {
+            enumTypes.insert(dataType);
+        } else if (dataType->isCompoundType()) {
+            compoundTypes.insert(dataType);
+        }
+        else if (dataType->isArrayType()) {
+            arrayTypes.insert(dataType);
+        }
+    };
 
     for (auto &reg : propertySuite->getVisibleRegisters()) {
-        typeStream << printDataTypes(reg->getDataType());
+        fillTypeSets(reg->getDataType());
     }
 
     for (auto &func : propertySuite->getFunctions()) {
-        typeStream << printDataTypes(func->getReturnType());
+        fillTypeSets(func->getReturnType());
     }
-
-    typeStream << "\n";
-
     for (auto &module : model->getModules()) {
         for (auto &port : module.second->getPorts()) {
-            typeStream << printDataTypes(port.second->getDataType());
+            fillTypeSets(port.second->getDataType());
         }
     }
 
-    typeStream << "end package " + model->getName() << "_types;\n\n";
+    typeStream << "\t-- Enum Types\n";
+    for (const auto& type : enumTypes) {
+        typeStream << printDataTypes(type);
+    }
+
+    typeStream << "\n"
+               << "\t-- Compound Types\n";
+    for (const auto& type : compoundTypes) {
+        typeStream << printDataTypes(type);
+    }
+
+    typeStream << "\n"
+               << "\t-- Array Types\n";
+    for (const auto& type : arrayTypes) {
+        typeStream << printDataTypes(type);
+    }
+
+    typeStream << "\n"
+               << "end package " + model->getName() << "_types;";
     return typeStream.str();
 }
 
@@ -114,13 +146,6 @@ std::string PrintVHDL::entities() {
     std::stringstream entityStream;
     entityStream << "entity " + propertySuite->getName() + "_module is\n";
     entityStream << "port(\t\n";
-
-    //FIXME use propertySuite for ports
-//    for (auto &it : propertySuite->getDpSignals()) {
-//        auto port = it->getPort();
-//        entityStream << "\t" << port->getName() << "_sig: " << port->getInterface()->getDirection() << " "
-//                     << convertDataTypeConstrained(port->getDataType()->getName()) << ";\n";
-//    }
 
     for (auto &it : currentModule->getPorts()) {
         auto port = it.second;
@@ -454,37 +479,23 @@ std::string PrintVHDL::convertDataType(std::string dataTypeName) {
 std::string PrintVHDL::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
-    // this function does not print duplicate data types (it remembers printed data types)
-    static std::set<const DataType *> printedTypes;
-
     if (dataType->isEnumType()) {
-        if (printedTypes.find(dataType) == printedTypes.end()) {
-            printedTypes.insert(dataType);
-
-            dataTypeStream << "\ttype " << convertDataTypeConstrained(dataType->getName()) << " is (";
-            for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
-                dataTypeStream << enumVal->first;
-                if (enumVal != --dataType->getEnumValueMap().end()) dataTypeStream << ", ";
-            }
-            dataTypeStream << ");\n";
+        dataTypeStream << "\ttype " << convertDataTypeConstrained(dataType->getName()) << " is (";
+        for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
+            dataTypeStream << enumVal->first;
+            if (enumVal != --dataType->getEnumValueMap().end()) dataTypeStream << ", ";
         }
+        dataTypeStream << ");\n";
     } else if (dataType->isCompoundType()) {
-        if (printedTypes.find(dataType) == printedTypes.end()) {
-            printedTypes.insert(dataType);
-            dataTypeStream << "\ttype " + convertDataTypeConstrained(dataType->getName()) << " is record\n";
-            for (auto &subVar: dataType->getSubVarMap()) {
-                dataTypeStream << "\t\t" + subVar.first << ": " << convertDataTypeConstrained(subVar.second->getName()) << ";\n";
-            }
-            dataTypeStream << "\tend record;\n";
+        dataTypeStream << "\ttype " + convertDataTypeConstrained(dataType->getName()) << " is record\n";
+        for (auto &subVar: dataType->getSubVarMap()) {
+            dataTypeStream << "\t\t" + subVar.first << ": " << convertDataTypeConstrained(subVar.second->getName()) << ";\n";
         }
+        dataTypeStream << "\tend record;\n";
     } else if (dataType->isArrayType()) {
-        if (printedTypes.find(dataType) == printedTypes.end()) {
-            printedTypes.insert(dataType);
-
-            dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
-                << " downto 0) of " << convertDataTypeConstrained(dataType->getSubVarMap().begin()->second->getName())
-                << ";\n";
-        }
+        dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
+            << " downto 0) of " << convertDataTypeConstrained(dataType->getSubVarMap().begin()->second->getName())
+            << ";\n";
     }
     return dataTypeStream.str();
 }

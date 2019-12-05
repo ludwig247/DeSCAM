@@ -19,9 +19,9 @@ public:
 
     std::set<DataSignal *> getModuleOutputs() const ;
     Variable* getCorrespondingRegister(DataSignal* dataSignal) const;
+    std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal* dataSignal) const;
     bool hasOutputReg(DataSignal* dataSignal) const;
     bool isModuleSignal(DataSignal* dataSignal) const;
-    std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal* dataSignal) const;
 
 private:
     PropertySuite *propertySuite;

@@ -11,12 +11,14 @@
 
 using namespace SCAM::VHDL;
 
-SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module) :
+SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, HLSmodule *hlsModule) :
     propertySuite(propertySuite),
-    module(module)
+    module(module),
+    hlsModule(hlsModule)
 {
     setOperationSelector();
     setAllPorts();
+    setInternalRegister();
     setMonitorSignals();
 }
 
@@ -42,6 +44,12 @@ Signal SignalFactory::getOperationSelector(bool asVector) {
         active_operation.type = propertySuite->getName() + "_operation_t";
     }
     return active_operation;
+}
+
+void SignalFactory::setInternalRegister() {
+    for (const auto& internalReg : OtherUtils::getParents(hlsModule->getVariables())) {
+        internalRegs.push_back(internalReg);
+    }
 }
 
 void SignalFactory::setAllPorts() {
@@ -107,6 +115,27 @@ std::vector<Signal> SignalFactory::getOutputs(bool asVector, bool destruct) cons
     return ports;
 }
 
+std::vector<Signal> SignalFactory::getInternalRegs(bool asVector, bool destruct) const
+{
+    std::vector<Signal> registerSignals;
+    if (destruct) {
+        for (const auto& internalReg :internalRegs) {
+            getCompoundSignalsReg(internalReg, asVector, registerSignals);
+        }
+    } else {
+        for (const auto& internalReg :internalRegs) {
+            std::string name = internalReg->getFullName();
+            std::string type = asVector ? OtherUtils::getEnumAsVector(internalReg->getDataType()) : OtherUtils::convertDataType(
+                    internalReg->getDataType()->getName());
+            std::string initialValue = VHDLPrintVisitorHLS::toString(internalReg->getInitialValue());
+            bool isEnum = internalReg->isEnumType();
+            uint32_t vectorSize = isEnum ? ceil(log2(internalReg->getDataType()->getEnumValueMap().size())) : 32;
+            registerSignals.push_back({name, type, "", false, "", initialValue, isEnum, vectorSize});
+        }
+    }
+    return registerSignals;
+}
+
 std::vector<Signal> SignalFactory::getNotify() const {
     std::vector<Signal> ports;
     for (const auto& notify : notifys) {
@@ -166,6 +195,28 @@ void SignalFactory::getCompoundSignals(Port *port, bool asVector, std::vector<Si
         bool isEnum = port->isEnumType();
         uint32_t vectorSize = isEnum ? ceil(log2(port->getDataType()->getEnumValueMap().size())) : 32;
         signals.push_back({name, type, direction, false, "", initialValue, isEnum, vectorSize});
+    }
+}
+
+void SignalFactory::getCompoundSignalsReg(Variable *signal, bool asVector, std::vector<Signal> &signals) const {
+    std::vector<Signal> ports;
+    if (signal->isCompoundType()) {
+        for (const auto& subVar : signal->getSubVarList()) {
+            std::string name = signal->getName();
+            std::string subVarName = subVar->getName();
+            std::string type = asVector ? OtherUtils::getEnumAsVector(subVar->getDataType()) : OtherUtils::convertDataType(subVar->getDataType()->getName());
+            std::string initialValue = VHDLPrintVisitorHLS::toString(subVar->getInitialValue());
+            bool isEnum = subVar->isEnumType();
+            uint32_t vectorSize = isEnum ? ceil(log2(subVar->getDataType()->getEnumValueMap().size())) : 32;
+            signals.push_back({name, type, "", true, subVarName, initialValue, isEnum, vectorSize});
+        }
+    } else {
+        std::string name = signal->getName();
+        std::string type = asVector ? OtherUtils::getEnumAsVector(signal->getDataType()) : OtherUtils::convertDataType(signal->getDataType()->getName());
+        std::string initialValue = VHDLPrintVisitorHLS::toString(signal->getInitialValue());
+        bool isEnum = signal->isEnumType();
+        uint32_t vectorSize = isEnum ? ceil(log2(signal->getDataType()->getEnumValueMap().size())) : 32;
+        signals.push_back({name, type, "", false, "", initialValue, isEnum, vectorSize});
     }
 }
 

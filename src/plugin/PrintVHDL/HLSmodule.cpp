@@ -166,7 +166,7 @@ void HLSmodule::mapOutputRegistersToOutput() {
         return candidates;
     };
 
-    std::multimap<Variable*, DataSignal*> registerToOutput;
+    std::multimap<Variable *, DataSignal *> registerToOutput;
     for (const auto& output : outputSet) {
         const auto& outputReg = compareAssignments(output);
         if (outputReg.size() == 1) {

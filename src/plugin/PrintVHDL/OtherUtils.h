@@ -45,6 +45,9 @@ namespace SCAM { namespace VHDL{
 
         template<typename T>
         static std::vector<T *> getSubVars(const std::set<T *> &vars);
+
+        template <typename T>
+        static std::set<T *> getParents(const std::set<T *> &subVars);
     };
 
         template<typename Key, typename Value>
@@ -89,6 +92,23 @@ namespace SCAM { namespace VHDL{
                 }
             }
             return subVarSet;
+        }
+
+        template <typename T>
+        std::set<T *> OtherUtils::getParents(const std::set<T *> &subVars) {
+            std::set<T *> parents;
+            for (const auto& var : subVars) {
+                if (var->isSubVar()) {
+                    if (parents.find(var->getParent()) == parents.end()) {
+                        parents.insert(var->getParent());
+                    }
+                } else {
+                    if (parents.find(var) == parents.end()) {
+                        parents.insert(var);
+                    }
+                }
+            }
+            return parents;
         }
 
 } }

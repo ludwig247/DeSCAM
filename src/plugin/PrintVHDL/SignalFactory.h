@@ -5,10 +5,11 @@
 #ifndef DESCAM_SIGNALFACTORY_H
 #define DESCAM_SIGNALFACTORY_H
 
+#include <functional>
 #include <string>
 
 #include <PluginFactory.h>
-#include <functional>
+#include "HLSmodule.h"
 
 enum class SubVarStyle {
     DOT,
@@ -37,7 +38,7 @@ struct Signal {
 class SignalFactory {
 
 public:
-    SignalFactory(PropertySuite* propertySuite, Module* module);
+    SignalFactory(PropertySuite *propertySuite, Module *module, HLSmodule *hlsModule);
     ~SignalFactory() = default;
 
     inline std::vector<Signal> getBaseSignals() const;
@@ -48,6 +49,7 @@ public:
 
     std::vector<Signal> getInputs(bool asVector = false, bool destruct = false) const;
     std::vector<Signal> getOutputs(bool asVector = false, bool destruct = false) const;
+    std::vector<Signal> getInternalRegs(bool asVector = false, bool destruct = false) const;
     std::vector<Signal> getNotify() const;
     std::vector<Signal> getSync() const;
     std::vector<Signal> getAllPorts() const;
@@ -55,22 +57,26 @@ public:
     static std::string vectorToEnum(DataSignal * dataSignal, const std::string &suffix = "");
 
     template<typename T>
-    static std::string printWithUL(T * signal);
+    static std::string printWithUL(T *signal);
 
 private:
     void setAllPorts();
+    void setInternalRegister();
     void setMonitorSignals();
     void setOperationSelector();
     void getCompoundSignals(Port *port, bool asVector, std::vector<Signal> &signals) const;
+    void getCompoundSignalsReg(Variable *var, bool asVector, std::vector<Signal> &signals) const;
 
-    PropertySuite* propertySuite;
-    Module* module;
+    PropertySuite *propertySuite;
+    Module *module;
+    HLSmodule *hlsModule;
 
-    std::vector<Port* > inputs;
-    std::vector<Port* > outputs;
-    std::vector<PropertyMacro* > notifys;
-    std::vector<PropertyMacro* > syncs;
-    std::vector<Signal > monitorSignals;
+    std::vector<Port *> inputs;
+    std::vector<Port *> outputs;
+    std::vector<Variable *> internalRegs;
+    std::vector<PropertyMacro *> notifys;
+    std::vector<PropertyMacro *> syncs;
+    std::vector<Signal> monitorSignals;
     Signal active_operation;
 
     const Signal START_SIGNAL = {"start", "std_logic", "in"};
@@ -106,7 +112,7 @@ std::vector<Signal> SignalFactory::getMonitorSignals() const{
 }
 
 template<typename T>
-std::string SignalFactory::printWithUL(T * signal) {
+std::string SignalFactory::printWithUL(T *signal) {
     if (signal->isSubVar()) {
         return signal->getParent()->getName() + "_" + signal->getName();
     } else {

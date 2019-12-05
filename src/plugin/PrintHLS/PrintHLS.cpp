@@ -50,15 +50,14 @@ void PrintHLS::operations() {
     interface();
     ss << "{\n";
 
-    auto regs = Utilities::getParents(opt->getVariables());
-    for (const auto& reg : regs) {
-        std::string type = Utilities::convertDataType(reg->getDataType()->getName());
-        std::string name = reg->getName();
-        ss << "\tstatic " << type << " " << name << ";\n";
-        ss << "\t" << type << " " << "next_" << name << ";\n";
-    }
+//    auto regs = Utilities::getParents(opt->getVariables());
+//    for (const auto& reg : regs) {
+//        std::string type = Utilities::convertDataType(reg->getDataType()->getName());
+//        std::string name = reg->getName();
+//        ss << "\tstatic " << type << " " << name << ";\n";
+//        ss << "\t" << type << " " << "next_" << name << ";\n";
+//    }
 
-    ss << "\n";
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
@@ -87,12 +86,12 @@ void PrintHLS::operations() {
         }
         ss << "\t\tbreak;\n";
     }
-    ss << "\t}\n\n";
+    ss << "\t}\n";
 
-    for (const auto& reg : regs) {
-        ss << "\t" << reg->getName() << " = next_" << reg->getName() << ";\n";
-    }
-    ss << "\n}";
+//    for (const auto& reg : regs) {
+//        ss << "\t" << reg->getName() << " = next_" << reg->getName() << ";\n";
+//    }
+    ss << "}";
 }
 
 void PrintHLS::interface() {
@@ -132,9 +131,13 @@ void PrintHLS::interface() {
         }
         ss << ",\n";
     }
-    // sync signals
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
+    }
+    for (const auto regs : Utilities::getParents(opt->getVariables()))
+    {
+        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " " << regs->getFullName() << "_in,\n";
+        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " &" << regs->getFullName() << "_out,\n";
     }
     ss << "\toperation active_operation\n)\n";
 }
@@ -142,7 +145,30 @@ void PrintHLS::interface() {
 void PrintHLS::dataTypes() {
     ss << "#ifndef DATA_TYPES_H\n";
     ss << "#define DATA_TYPES_H\n\n";
-    ss << "#include \"ap_int.h\"\n";
+    ss << "#include \"ap_int.h\"\n\n";
+
+    // enum of states
+    ss << "// States\n"
+       << "enum state {";
+    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
+        ss << (*state)->getName();
+        if (std::next(state) != propertySuite->getStates().end()) {
+            ss << ", ";
+        }
+    }
+    ss << "};\n\n";
+
+    // enum of operations
+    ss << "// Operations\n"
+       << "enum operation {";
+    auto operationVector = propertySuite->getOperationProperties();
+    for (auto operationProperty = operationVector.begin(); operationProperty != operationVector.end(); ++operationProperty) {
+        ss << (*operationProperty)->getName();
+        if (std::next(operationProperty) != operationVector.end()) {
+            ss << ", ";
+        }
+    }
+    ss << "};\n\n";
 
     // TODO: DeSCAM erkennt keine Konstanten
     // Constants
@@ -152,36 +178,18 @@ void PrintHLS::dataTypes() {
         }
     }
 
+    ss << "// Enum Types\n";
     for (auto &dataType : DataTypes::getDataTypeMap()) {
         if (dataType.second->isEnumType())
             dataType.second->accept(*this);
     }
+    ss << "// Compound Types\n";
     for (auto &dataType : DataTypes::getDataTypeMap()) {
         if (dataType.second->isCompoundType())
             dataType.second->accept(*this);
     }
 
-    // enum of states
-    ss << "enum state {\n";
-    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
-        ss << "\t" << (*state)->getName();
-        if (std::next(state) != propertySuite->getStates().end())
-            ss << ", \n";
-    }
-    ss << "\n};\n\n";
-
-    // enum of operations
-    ss << "enum operation {\n";
-    auto operationVector = propertySuite->getOperationProperties();
-    for (auto operationProperty = operationVector.begin(); operationProperty != operationVector.end(); ++operationProperty) {
-        ss << "\t" << (*operationProperty)->getName();
-        if (std::next(operationProperty) != operationVector.end()) {
-            ss << ",\n";
-        }
-    }
-    ss << "\n};";
-
-    ss << "\n\n#endif //DATA_TYPES_H";
+    ss << "#endif //DATA_TYPES_H";
 }
 
 void PrintHLS::visit(DataType &node) {
@@ -189,13 +197,11 @@ void PrintHLS::visit(DataType &node) {
     if (node.isEnumType()) {
         if (node.getName().find("_SECTIONS") < node.getName().size())
             return;
-        ss << "enum " << node.getName() << " {\n";
+        ss << "enum " << node.getName() << " {";
         for (auto enumValue = node.getEnumValueMap().begin(); enumValue != node.getEnumValueMap().end(); enumValue++) {
-            ss << "\t" << enumValue->first;
-            if (enumValue == --node.getEnumValueMap().end())
-                ss << "\n";
-            else
-                ss << ",\n";
+            ss << enumValue->first;
+            if (std::next(enumValue) != node.getEnumValueMap().end())
+                ss << ", ";
         }
         ss << "};\n\n";
     // Structs

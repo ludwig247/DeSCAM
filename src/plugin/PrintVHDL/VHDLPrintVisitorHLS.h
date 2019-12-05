@@ -19,6 +19,9 @@ namespace SCAM {
         void visit(SyncSignal &node) override ;
         void visit(Bitwise &node) override;
         void visit(ArrayOperand &node) override ;
+        void visit(VariableOperand &node) override ;
+        void visit(BoolValue &node) override ;
+        void visit(DataSignalOperand &node) override ;
 
         std::string getString() override ;
     };

@@ -82,3 +82,49 @@ void VHDLPrintVisitorHLS::visit(ArrayOperand &node) {
     node.getIdx()->accept(*this);
     this->ss << ")))";
 }
+
+void VHDLPrintVisitorHLS::visit(VariableOperand& node)
+{
+    bool isBoolean = node.getDataType()->isBoolean();
+    if(isBoolean) {
+        this->ss << "(";
+    }
+    if (node.getVariable()->isSubVar()) {
+        if (node.getVariable()->getParent()->isCompoundType()) {
+            this->ss << node.getVariable()->getParent()->getName() << "." << node.getVariable()->getName();
+        } else if (node.getVariable()->getParent()->isArrayType()) {
+            this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
+        } else throw std::runtime_error("Unknown Type for SubVar");
+    } else {
+        this->ss << node.getVariable()->getName();
+    }
+    if (isBoolean) {
+        this->ss << " = '1')";
+    }
+}
+
+void VHDLPrintVisitorHLS::visit(BoolValue &node) {
+    if (node.getValue()) {
+        this->ss << "\'1\'";
+    } else {
+        this->ss << "\'0\'";
+    }
+}
+
+void VHDLPrintVisitorHLS::visit(DataSignalOperand &node) {
+    bool isBoolean = node.getDataType()->isBoolean();
+    if(isBoolean) {
+        this->ss << "(";
+    }
+    this->ss << node.getDataSignal()->getPort()->getName() << "_sig";
+    if (node.getDataSignal()->isSubVar()) {
+        if (node.getDataSignal()->getParent()->isCompoundType()) {
+            this->ss << "." << node.getDataSignal()->getName();
+        } else if (node.getDataSignal()->getParent()->isArrayType()) {
+            this->ss << "(" << node.getDataSignal()->getName() << ")";
+        } else throw std::runtime_error("Unknown Type for SubVar");
+    }
+    if (isBoolean) {
+        this->ss << " = '1')";
+    }
+}
