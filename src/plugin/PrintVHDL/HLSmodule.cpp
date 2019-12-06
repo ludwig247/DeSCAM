@@ -437,3 +437,22 @@ void HLSmodule::mapInputRegistersToInputs() {
     }
 }
 
+std::set<Variable*> HLSmodule::getInternalRegister() {
+    std::set<Variable *> internalRegister = VHDL::OtherUtils::getParents(getVariables());
+    for (const auto& outputRegister : registerToOutputMap) {
+        const auto& it = internalRegister.find(outputRegister.first);
+        if (it != internalRegister.end()) {
+            internalRegister.erase(it);
+        }
+    }
+    return internalRegister;
+}
+
+std::set<Variable*> HLSmodule::getOutputRegister() {
+    std::set<Variable *> outputRegister;
+    for (const auto& reg : registerToOutputMap) {
+        outputRegister.insert(reg.first);
+    }
+    return VHDL::OtherUtils::getParents(outputRegister);
+}
+

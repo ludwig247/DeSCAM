@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "OtherUtils.h"
+#include "SignalFactoryNew.h"
 #include <assert.h>
 
 namespace SCAM { namespace VHDL {
@@ -28,41 +29,12 @@ namespace SCAM { namespace VHDL {
         }
     }
 
-    std::string OtherUtils::convertDataType(const std::string& type) {
-        if (type == "bool") {
-            return "std_logic";
-        } else if (type == "int" || type == "unsigned") {
-            return "std_logic_vector(31 downto 0)";
-        } else {
-            return type;
-        }
-    }
-
-    std::string OtherUtils::convertDataTypeConstrained(std::string dataTypeName) {
-        if (dataTypeName == "bool") {
-            return "std_logic";
-        } else if (dataTypeName == "int" || dataTypeName == "unsigned") {
-            return "std_logic_vector(31 downto 0)";
-        } else {
-            return dataTypeName;
-        }
-    }
-
     bool OtherUtils::isVectorType(const uint32_t &size) {
         return (size == 32);
     }
 
     bool OtherUtils::isVectorType(const DataSignal *dataSignal) {
         return (dataSignal->getDataType()->getName() == "int" || dataSignal->getDataType()->getName() == "unsinged");
-    }
-
-    std::string OtherUtils::getEnumAsVector(const DataType *dataType) {
-        if (dataType->isEnumType()) {
-            uint32_t vectorSize = ceil(log2(dataType->getEnumValueMap().size()));
-            return  ("std_logic_vector(" + std::to_string(vectorSize - 1) + " downto 0)");
-        } else {
-            return OtherUtils::convertDataType(dataType->getName());
-        }
     }
 
     std::string OtherUtils::typeToString(StmtType type) {

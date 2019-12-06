@@ -9,5 +9,6 @@ add_library(PrintVHDL
         PrintVHDLForHLS.cpp
         BitSlicingVHDL.cpp
         HLSmodule.cpp
-        SignalFactory.cpp)
+        SignalFactory.cpp
+        SignalFactoryNew.cpp)
 

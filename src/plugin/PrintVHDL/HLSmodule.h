@@ -15,7 +15,8 @@ public:
     explicit HLSmodule(PropertySuite *propertySuite, Module* module);
     ~HLSmodule() = default;
 
-    std::set<Variable *> getVariables();
+    std::set<Variable *> getInternalRegister();
+    std::set<Variable *> getOutputRegister();
     std::set<DataSignal *> getOutputs();
     std::set<DataSignal *> getInputs();
 
@@ -36,6 +37,7 @@ private:
     void removeRedundantConditions();
     void mapOutputRegistersToOutput();
     void mapInputRegistersToInputs();
+    std::set<Variable *> getVariables();
     DataSignal* getCombinedDataSignal(const std::vector<DataSignal*> &dataSignals);
     std::multimap<Variable *, DataSignal *> getParentMap(const std::multimap<Variable *, DataSignal *> &multimap);
 };

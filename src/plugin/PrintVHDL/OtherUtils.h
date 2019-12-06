@@ -36,9 +36,6 @@ namespace SCAM { namespace VHDL{
 
         static std::string typeToString(StmtType type);
         static std::string subTypeBitwiseToString(SubTypeBitwise type);
-        static std::string convertDataType(const std::string& type);
-        static std::string convertDataTypeConstrained(std::string dataTypeName);
-        static std::string getEnumAsVector(const DataType *dataType);
         static SubTypeBitwise getSubTypeBitwise(const std::string &name);
         static bool isVectorType(const uint32_t &size);
         static bool isVectorType(const DataSignal *dataSignal);
@@ -47,7 +44,7 @@ namespace SCAM { namespace VHDL{
         static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
 
         template<typename T>
-        static std::vector<T *> getSubVars(const std::set<T *> &vars);
+        static std::set<T *> getSubVars(const std::set<T *> &vars);
 
         template <typename T>
         static std::set<T *> getParents(const std::set<T *> &subVars);
@@ -83,15 +80,15 @@ namespace SCAM { namespace VHDL{
         }
 
         template<typename T>
-        std::vector<T *> OtherUtils::getSubVars(const std::set<T *> &vars) {
-            std::vector<T *> subVarSet;
+        std::set<T *> OtherUtils::getSubVars(const std::set<T *> &vars) {
+            std::set<T *> subVarSet;
             for (const auto& var : vars) {
                 if (var->isCompoundType()) {
                     for (const auto& subVar : var->getSubVarList()) {
-                        subVarSet.push_back(subVar);
+                        subVarSet.insert(subVar);
                     }
                 } else {
-                    subVarSet.push_back(var);
+                    subVarSet.insert(var);
                 }
             }
             return subVarSet;
