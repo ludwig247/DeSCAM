@@ -32,6 +32,7 @@ namespace SCAM {
         std::cout << "Create Operations: " << std::endl;
         this->createOperations();
         std::cout << "\tCreated: " << this->operations.size() << std::endl;
+
         std::cout << "Reconstruct Operations: " << std::endl;
         this->reconstructOperations();
         std::cout << "Valid Operations: " << std::endl;
@@ -79,6 +80,7 @@ namespace SCAM {
     void OperationFactory::reconstructOperations() {
         SCAM::ReconstructOperations rOperations(this->statesMap, this->module);
         for (auto op : this->operations) {
+
             rOperations.sortOperation(op);
         }
     }

@@ -36,6 +36,7 @@ SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::S
         if (port.second->getInterface()->isShared()) continue;
 
         if (port.second->getDataType()->isCompoundType()) {
+            this->dpSignalsList.push_back(port.first + "_sig");
             for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
                 std::string name = port.first + "_sig." + subVar.first;
                 this->dpSignalsList.push_back(name);
@@ -57,6 +58,7 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation2 *operation) {
     this->assumptionsList.clear();
     this->commitmentsList.clear();
     this->variableAssignmentMap.clear();
+
     this->isWaitOperation = operation->IsWait();
     for (auto stmt: operation->getStatementsList()) {
         stmt->accept(*this);
