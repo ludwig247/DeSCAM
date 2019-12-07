@@ -35,6 +35,12 @@ public:
     template <typename T>
     static std::string getName(T *dataSignal, const Style &style, const std::string &suffix = "");
 
+    template <typename T>
+    static std::string vectorToEnum(T *dataSignal, const std::string &suffix, const std::string &prefix = "");
+
+    template <typename T>
+    static std::string enumToVector(T *dataSignal);
+
     inline Variable * getActiveOperation() const;
     inline std::set<Variable *> getMonitorSignals() const;
     inline std::set<Variable *> getInternalRegister() const;
@@ -104,6 +110,19 @@ std::string SignalFactoryNew::getName(T *dataSignal, const Style& style, const s
     } else {
         return dataSignal->getName() + suffix;
     }
+}
+
+template <typename T>
+std::string SignalFactoryNew::vectorToEnum(T *dataSignal, const std::string &suffix, const std::string &prefix) {
+    return dataSignal->getDataType()->getName() + "'val(to_integer(unsigned(" + prefix + getName(dataSignal, Style::UL) + suffix + ")))";
+}
+
+template<typename T>
+std::string SignalFactoryNew::enumToVector(T* dataSignal)
+{
+    return "std_logic_vector(to_unsigned(" + dataSignal->getDataType()->getName() + "\'pos(" +
+    SignalFactoryNew::getName(dataSignal, Style::DOT) + "), " +
+    std::to_string(static_cast<uint32_t>(ceil(log2(dataSignal->getDataType()->getEnumValueMap().size())))) + "))";
 }
 
 Variable * SignalFactoryNew::getActiveOperation() const{

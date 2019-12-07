@@ -236,6 +236,7 @@ std::set<DataSignal *> HLSmodule::getOutputs() {
             outputSet.insert(outputs.begin(), outputs.end());
         }
     }
+    outputSet = VHDL::OtherUtils::getParents(outputSet);
     for (const auto& moduleSignal : moduleToTopSignalMap) {
         outputSet.insert(moduleSignal.first);
         for (const auto& topSignal : moduleSignal.second) {
@@ -334,7 +335,12 @@ DataSignal* HLSmodule::getCombinedDataSignal(const std::vector<DataSignal*> &dat
         combinedName = name1.substr(end - result + 1, result);
     }
 
-    auto combinedDataSignal = new DataSignal(combinedName + "_sig", dataSignal.front()->getDataType());
+    auto combinedDataSignal = new DataSignal(
+            combinedName + "_sig",
+            dataSignal.front()->getDataType(),
+            nullptr,
+            nullptr,
+            dataSignal.front()->getPort());
     return combinedDataSignal;
 }
 

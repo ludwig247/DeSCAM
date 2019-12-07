@@ -10,7 +10,6 @@
 
 #include "PluginFactory.h"
 #include "SignalFactoryNew.h"
-#include "SignalFactory.h"
 #include "HLSmodule.h"
 
 class PrintVHDLForHLS : public PluginFactory{
@@ -25,13 +24,14 @@ private:
     PropertySuite *propertySuite;
     Module *currentModule;
     std::unique_ptr<HLSmodule> hlsModule;
-    std::unique_ptr<SignalFactory> signalFactory;
     std::unique_ptr<SignalFactoryNew> signalFactoryNew;
 
     std::string printTypes(Model *model);
     std::string printModule(Model *model);
-    std::string monitor(std::stringstream &ss);
-    std::string functions();
+    void entity(std::stringstream &ss);
+    void signals(std::stringstream &ss);
+    void monitor(std::stringstream &ss);
+    void functions(std::stringstream &ss);
     std::string printDataTypes(const DataType *dataType);
     std::string printSensitivityList();
 };

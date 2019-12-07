@@ -37,8 +37,6 @@ namespace SCAM { namespace VHDL{
         static std::string typeToString(StmtType type);
         static std::string subTypeBitwiseToString(SubTypeBitwise type);
         static SubTypeBitwise getSubTypeBitwise(const std::string &name);
-        static bool isVectorType(const uint32_t &size);
-        static bool isVectorType(const DataSignal *dataSignal);
 
         template <typename Key, typename Value>
         static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
