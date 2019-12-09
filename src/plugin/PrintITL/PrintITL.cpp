@@ -148,7 +148,7 @@ std::string PrintITL::propertySuite() {
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()) {
-        ss << "macro " << dp->getName();
+        ss << "macro " << dp->getParentName();
         if (dp->isCompoundType()) {
             ss << "_" + dp->getSubVarName();
         }
@@ -234,7 +234,7 @@ std::string PrintITL::propertySuite() {
                     ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
                     ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
                 } else {
-                    ss << freeze.first << "_at_t = " << freeze.first << "@t";
+                    ss << freeze.second->getFullName() << "_at_t = " << freeze.second->getFullName() << "@t";
                 }
 
                 if (freezeVarSize > 1) {
