@@ -325,9 +325,9 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::FunctionOperand &node) {
 }
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayOperand &node) {
-    this->propagatedBitWidth = this->variableBitWidthMap.at(node.getArrayVar()->getFullName());
+    this->propagatedBitWidth = this->variableBitWidthMap.at(node.getArrayOperand()->getOperandName());
     if(this->propagatedBitWidth != 0){
-        this->propagatedBitWidth = this->propagatedBitWidth / node.getArrayVar()->getSubVarList().size();
+        this->propagatedBitWidth = this->propagatedBitWidth / node.getDataType()->getArraySize();
     }
 }
 

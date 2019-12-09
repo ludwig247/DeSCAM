@@ -200,7 +200,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
     }
 }
 
