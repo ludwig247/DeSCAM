@@ -3,6 +3,7 @@ macro frame_pulse_sync : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro config_in_sig : Config := end macro;
 macro config_in_sig_LOFreset : signed := end macro;
 macro config_in_sig_LOFset : signed := end macro;
 macro frame_pulse_sig : boolean := end macro;

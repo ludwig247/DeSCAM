@@ -43,7 +43,7 @@ namespace SCAM {
         const std::vector<PropertyMacro *> &getVisibleRegisters() const;
         const std::vector<PropertyMacro *> &getStates() const;
         PropertyMacro * findSignal(const std::string &signalName) const;
-        PropertyMacro * findSignal(const std::string &signalName, const std::string &subVarName) const;
+        PropertyMacro * findSignal(const std::string &parentlName, const std::string &subVarName) const;
         PropertyMacro * findSignal(Variable * var) const;
 
         // Functions

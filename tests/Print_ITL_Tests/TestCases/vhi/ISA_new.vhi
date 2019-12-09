@@ -7,7 +7,9 @@ macro toRegsPort_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro fromMemoryPort_sig : MEtoCU_IF := end macro;
 macro fromMemoryPort_sig_loadedData : unsigned := end macro;
+macro fromRegsPort_sig : RegfileType := end macro;
 macro fromRegsPort_sig_reg_file_01 : unsigned := end macro;
 macro fromRegsPort_sig_reg_file_02 : unsigned := end macro;
 macro fromRegsPort_sig_reg_file_03 : unsigned := end macro;
@@ -39,10 +41,12 @@ macro fromRegsPort_sig_reg_file_28 : unsigned := end macro;
 macro fromRegsPort_sig_reg_file_29 : unsigned := end macro;
 macro fromRegsPort_sig_reg_file_30 : unsigned := end macro;
 macro fromRegsPort_sig_reg_file_31 : unsigned := end macro;
+macro toMemoryPort_sig : CUtoME_IF := end macro;
 macro toMemoryPort_sig_addrIn : unsigned := end macro;
 macro toMemoryPort_sig_dataIn : unsigned := end macro;
 macro toMemoryPort_sig_mask : ME_MaskType := end macro;
 macro toMemoryPort_sig_req : ME_AccessType := end macro;
+macro toRegsPort_sig : RegfileWriteType := end macro;
 macro toRegsPort_sig_dst : unsigned := end macro;
 macro toRegsPort_sig_dstData : unsigned := end macro;
 
@@ -52,10 +56,6 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro memoryAccess_addrIn : unsigned := end macro;
-macro memoryAccess_dataIn : unsigned := end macro;
-macro memoryAccess_mask : ME_MaskType := end macro;
-macro memoryAccess_req : ME_AccessType := end macro;
 macro pcReg : unsigned := end macro;
 macro phase : Phases := end macro;
 macro regfileWrite_dst : unsigned := end macro;
@@ -77,10 +77,6 @@ assume:
 	 reset_sequence;
 prove:
 	 at t: state_1;
-	 at t: memoryAccess_addrIn = resize(0,32);
-	 at t: memoryAccess_dataIn = resize(0,32);
-	 at t: memoryAccess_mask = MT_W;
-	 at t: memoryAccess_req = ME_RD;
 	 at t: pcReg = resize(0,32);
 	 at t: phase = fetch_PH;
 	 at t: regfileWrite_dst = resize(0,32);
@@ -100,10 +96,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
@@ -113,10 +105,6 @@ assume:
 	at t: toMemoryPort_sync;
 prove:
 	at t_end: state_6;
-	at t_end: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t_end: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t_end: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t_end: memoryAccess_req = memoryAccess_req_at_t;
 	at t_end: pcReg = pcReg_at_t;
 	at t_end: phase = phase_at_t;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -141,10 +129,6 @@ assume:
 	at t: fromMemoryPort_sync;
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -168,10 +152,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
@@ -181,10 +161,6 @@ assume:
 	at t: toMemoryPort_sync;
 prove:
 	at t_end: state_2;
-	at t_end: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t_end: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t_end: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t_end: memoryAccess_req = memoryAccess_req_at_t;
 	at t_end: pcReg = pcReg_at_t;
 	at t_end: phase = phase_at_t;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -241,10 +217,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_R);
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
@@ -311,10 +283,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_B);
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t))),fromMemoryPort_sig_loadedData_at_t,pcReg_at_t);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t))),fromMemoryPort_sig_loadedData_at_t,pcReg_at_t);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -379,10 +347,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_S);
 prove:
 	at t_end: state_3;
-	at t_end: memoryAccess_addrIn = getALUresult(ALU_ADD,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
-	at t_end: memoryAccess_dataIn = readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t));
-	at t_end: memoryAccess_mask = getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_at_t));
-	at t_end: memoryAccess_req = ME_WR;
 	at t_end: pcReg = pcReg_at_t;
 	at t_end: phase = execute_PH;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -415,10 +379,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_U);
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
@@ -455,10 +415,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_J);
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (pcReg_at_t + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (pcReg_at_t + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
@@ -527,10 +483,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I);
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
@@ -601,10 +553,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_I_L);
 prove:
 	at t_end: state_5;
-	at t_end: memoryAccess_addrIn = getALUresult(ALU_ADD,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_at_t));
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = pcReg_at_t;
 	at t_end: phase = execute_PH;
 	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
@@ -672,10 +620,6 @@ assume:
 	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_I_J);
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)) + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)) + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
@@ -716,10 +660,6 @@ assume:
 	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_J));
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = pcReg_at_t;
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = pcReg_at_t;
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -740,10 +680,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
@@ -753,10 +689,6 @@ assume:
 	at t: toMemoryPort_sync;
 prove:
 	at t_end: state_4;
-	at t_end: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t_end: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t_end: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t_end: memoryAccess_req = memoryAccess_req_at_t;
 	at t_end: pcReg = pcReg_at_t;
 	at t_end: phase = phase_at_t;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -781,10 +713,6 @@ assume:
 	at t: fromMemoryPort_sync;
 prove:
 	at t_end: state_1;
-	at t_end: memoryAccess_addrIn = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: memoryAccess_dataIn = 0;
-	at t_end: memoryAccess_mask = MT_W;
-	at t_end: memoryAccess_req = ME_RD;
 	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
 	at t_end: phase = fetch_PH;
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -803,31 +731,21 @@ end property;
 property wait_state_5 is
 dependencies: no_reset;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
-	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
 assume:
 	at t: state_5;
 	at t: not(toMemoryPort_sync);
 prove:
 	at t+1: state_5;
-	at t+1: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t+1: memoryAccess_req = memoryAccess_req_at_t;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
 	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	at t+1: toMemoryPort_sig_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: toMemoryPort_sig_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: toMemoryPort_sig_mask = memoryAccess_mask_at_t;
-	at t+1: toMemoryPort_sig_req = memoryAccess_req_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
 	at t+1: fromMemoryPort_notify = false;
 	at t+1: toMemoryPort_notify = true;
 	at t+1: toRegsPort_notify = false;
@@ -837,10 +755,6 @@ end property;
 property wait_state_6 is
 dependencies: no_reset;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
@@ -850,10 +764,6 @@ assume:
 	at t: not(fromMemoryPort_sync);
 prove:
 	at t+1: state_6;
-	at t+1: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t+1: memoryAccess_req = memoryAccess_req_at_t;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -867,31 +777,21 @@ end property;
 property wait_state_1 is
 dependencies: no_reset;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
-	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
 assume:
 	at t: state_1;
 	at t: not(toMemoryPort_sync);
 prove:
 	at t+1: state_1;
-	at t+1: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t+1: memoryAccess_req = memoryAccess_req_at_t;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
 	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	at t+1: toMemoryPort_sig_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: toMemoryPort_sig_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: toMemoryPort_sig_mask = memoryAccess_mask_at_t;
-	at t+1: toMemoryPort_sig_req = memoryAccess_req_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
 	at t+1: fromMemoryPort_notify = false;
 	at t+1: toMemoryPort_notify = true;
 	at t+1: toRegsPort_notify = false;
@@ -901,10 +801,6 @@ end property;
 property wait_state_2 is
 dependencies: no_reset;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
@@ -914,10 +810,6 @@ assume:
 	at t: not(fromMemoryPort_sync);
 prove:
 	at t+1: state_2;
-	at t+1: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t+1: memoryAccess_req = memoryAccess_req_at_t;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
@@ -931,31 +823,21 @@ end property;
 property wait_state_3 is
 dependencies: no_reset;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
-	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
 assume:
 	at t: state_3;
 	at t: not(toMemoryPort_sync);
 prove:
 	at t+1: state_3;
-	at t+1: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t+1: memoryAccess_req = memoryAccess_req_at_t;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
 	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	at t+1: toMemoryPort_sig_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: toMemoryPort_sig_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: toMemoryPort_sig_mask = memoryAccess_mask_at_t;
-	at t+1: toMemoryPort_sig_req = memoryAccess_req_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
 	at t+1: fromMemoryPort_notify = false;
 	at t+1: toMemoryPort_notify = true;
 	at t+1: toRegsPort_notify = false;
@@ -965,10 +847,6 @@ end property;
 property wait_state_4 is
 dependencies: no_reset;
 freeze:
-	memoryAccess_addrIn_at_t = memoryAccess_addrIn@t,
-	memoryAccess_dataIn_at_t = memoryAccess_dataIn@t,
-	memoryAccess_mask_at_t = memoryAccess_mask@t,
-	memoryAccess_req_at_t = memoryAccess_req@t,
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
@@ -978,10 +856,6 @@ assume:
 	at t: not(fromMemoryPort_sync);
 prove:
 	at t+1: state_4;
-	at t+1: memoryAccess_addrIn = memoryAccess_addrIn_at_t;
-	at t+1: memoryAccess_dataIn = memoryAccess_dataIn_at_t;
-	at t+1: memoryAccess_mask = memoryAccess_mask_at_t;
-	at t+1: memoryAccess_req = memoryAccess_req_at_t;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;

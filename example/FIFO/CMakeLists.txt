@@ -14,6 +14,6 @@ include_directories(Interfaces_new)
 
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
-add_executable(FIFO_Simulation ${R_SRC} ../RISCV_ISA/ESL/ISA_test.h)
+add_executable(FIFO_Simulation ${R_SRC} ../RISCV_ISA/ESL/ISA_test.h ../RISCV_ISA/ESL/ISA_Array.h)
 
 target_link_libraries(FIFO_Simulation systemc)

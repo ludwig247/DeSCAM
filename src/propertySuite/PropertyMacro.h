@@ -20,12 +20,12 @@ namespace SCAM {
 
         // Constructor
         PropertyMacro(const std::string &name, Port* port, const DataType * type);
-        PropertyMacro(const std::string &name, Port* port, const DataType * type, std::string subVarName);
+        PropertyMacro(const std::string &parentName, Port* port, const DataType * type, std::string subVarName);
         PropertyMacro(const std::string &name, Port* port, SyncSignal* syncSignal, const DataType * type);
         PropertyMacro(const std::string &name, Port* port, Notify* notifySignal, const DataType * type);
         PropertyMacro(const std::string &name, Variable* variable, const DataType * type);
         PropertyMacro(const std::string &name, Variable* state);
-        PropertyMacro(const std::string &name, Variable* variable, const DataType * type, std::string subVarName);
+        PropertyMacro(const std::string &parentName, Variable* variable, const DataType * type, std::string subVarName);
         PropertyMacro(const std::string &name, Variable* variable, PropertyMacro* parent, const DataType * type);
 
         // Getter
@@ -36,6 +36,10 @@ namespace SCAM {
         Variable *getVariable() const;
         VariableOperand *getVariableOperand() const;
         PropertyMacro *getParent() const;
+
+
+        std::string getFullName() const; //TODO: use constexpr
+        const std::string &getParentName() const;
         const std::string &getSubVarName() const;
 
         // Setter
@@ -48,7 +52,7 @@ namespace SCAM {
         void setParent(PropertyMacro *parent);
 
         // Array-Type
-        bool isCompoundType();
+        bool isCompoundType() const;
         bool isArrayType();
 
 
@@ -62,13 +66,12 @@ namespace SCAM {
 
         std::string subVarName;
 
-    private:
-
         PropertyMacro * parent = nullptr;
 
         enum MacroType {portType, notifyType, syncType, varType, stateType, arrayType};
         MacroType macroType;
 
+        std::string parentName = "";
     };
 
 }

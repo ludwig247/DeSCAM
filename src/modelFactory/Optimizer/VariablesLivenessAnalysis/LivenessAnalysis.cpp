@@ -315,14 +315,14 @@ namespace SCAM {
 
     void LivenessAnalysis::visit(struct ArrayOperand &node) {
         node.getIdx()->accept(*this);
-        if (this->stmtInfoMap.find(node.getArrayVar()->getFullName()) != this->stmtInfoMap.end()) {
-            this->stmtInfoMap.at(node.getArrayVar()->getFullName()).at(currentNodeID).first = true;
+        if (this->stmtInfoMap.find(node.getArrayOperand()->getOperandName()) != this->stmtInfoMap.end()) {
+            this->stmtInfoMap.at(node.getArrayOperand()->getOperandName()).at(currentNodeID).first = true;
         }
         if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
-            this->variablesInStmtMap.at(this->currentNodeID).insert(node.getArrayVar()->getFullName());
+            this->variablesInStmtMap.at(this->currentNodeID).insert(node.getArrayOperand()->getOperandName());
         } else {
             std::set<std::string> variablesInStmtSet;
-            variablesInStmtSet.insert(node.getArrayVar()->getFullName());
+            variablesInStmtSet.insert(node.getArrayOperand()->getOperandName());
             this->variablesInStmtMap.insert(std::make_pair(this->currentNodeID, variablesInStmtSet));
         }
     }

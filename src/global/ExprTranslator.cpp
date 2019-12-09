@@ -684,7 +684,7 @@ void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
 
 void SCAM::ExprTranslator::visit(struct ArrayOperand &node) {
 
-    auto name = (node.getArrayVar()->getName() + "[" + PrintStmt::toString(node.getIdx()) + "]");
+    auto name = (node.getArrayOperand()->getOperandName() + "[" + PrintStmt::toString(node.getIdx()) + "]");
     if (node.getDataType()->isBuiltInType()) {
         if (node.getDataType() == DataTypes::getDataType("int")) {
             if (bitvector_flag) z3_expr = context->bv_const(name.c_str(), 32);

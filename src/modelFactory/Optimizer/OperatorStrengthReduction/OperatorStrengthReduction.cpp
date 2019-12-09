@@ -523,7 +523,7 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (this->newExpr) {
-        this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
     }
 }
 
