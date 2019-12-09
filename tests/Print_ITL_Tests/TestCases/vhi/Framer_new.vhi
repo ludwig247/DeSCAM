@@ -4,6 +4,7 @@ macro frame_pulse_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro data_word_sig : marker_t := end macro;
 macro data_word_sig_isMarker : boolean := end macro;
 macro data_word_sig_markerAlignment : signed := end macro;
 macro frame_pulse_sig : boolean := end macro;
