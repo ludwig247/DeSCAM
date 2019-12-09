@@ -80,7 +80,6 @@ namespace SCAM {
     void OperationFactory::reconstructOperations() {
         SCAM::ReconstructOperations rOperations(this->statesMap, this->module);
         for (auto op : this->operations) {
-
             rOperations.sortOperation(op);
         }
     }
@@ -156,10 +155,7 @@ namespace SCAM {
         for (const auto& port: module->getPorts()) {
             if (port.second->getDataType()->isVoid()) continue;
 
-            if (!port.second->getDataType()->isCompoundType()) {
-                PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
-                propertySuite->addDpSignal(pm);
-            } else {
+            if(port.second->getDataType()->isCompoundType() || port.second->getDataType()->isArrayType()){
                 //Add compound type signal
                 PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
                 propertySuite->addDpSignal(pm);
@@ -168,6 +164,9 @@ namespace SCAM {
                     PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, subVar.second, subVar.first);
                     propertySuite->addDpSignal(pm);
                 }
+            }else{
+                PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
+                propertySuite->addDpSignal(pm);
             }
         }
 
@@ -286,7 +285,6 @@ namespace SCAM {
                     auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
                     syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
                     auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
-
                     variables.insert(newVariables.begin(), newVariables.end());
                     auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
                     dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
@@ -308,7 +306,7 @@ namespace SCAM {
                     if(dataSig->isSubVar()){
                         signalMacro = propertySuite->findSignal(dataSig->getPort()->getName()+"_sig" , dataSig->getName());
                     }else{
-                        signalMacro = propertySuite->findSignal(dataSig->getParent()->getName());
+                        signalMacro = propertySuite->findSignal(dataSig->getName());
                     }
 
 //                    try {

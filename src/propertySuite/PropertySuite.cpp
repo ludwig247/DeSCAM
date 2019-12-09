@@ -121,12 +121,11 @@ namespace SCAM {
             if (dpSignal->isCompoundType()) {
                 auto name = parentName + "." + subVarName;
                 std::string test = dpSignal->getFullName();
-
-                std::cout << test << std::endl;
                 if (dpSignal->getFullName() == name) {
                     return dpSignal;
                 }
             }
+
         }
 
         for (auto visibleRegister : visibleRegisters) {
