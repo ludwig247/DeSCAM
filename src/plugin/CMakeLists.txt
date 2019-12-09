@@ -55,8 +55,9 @@ add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
 
 
 add_optimize_option(all; "Enable all optimizations")
+add_optimize_option(gvp; "Propagate the value of constant global variables")
 add_optimize_option(lvp; "Propagate locally constant values")
-add_optimize_option(gvp; "Propagate globally constant values")
+add_optimize_option(gcp; "Propagate globally constant values")
 add_optimize_option(rda; "Remove dead assignments")
 add_optimize_option(are; "Analyze reachability of CFG paths")
 add_optimize_option(fun; "Optimize functions")

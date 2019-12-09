@@ -14,6 +14,7 @@
 #include "Behavior/CfgNode.h"
 #include <CreateRealCFG.h>
 #include "Optimizer/Utilities/FindReadVariables.h"
+#include <Optimizer/ValuePropagation/GlobalConstantVariablePropagation.h>
 #include "Optimizer/Utilities/CfgPath.h"
 #include "Optimizer/Utilities/FindCfgPaths.h"
 #include "Optimizer/Utilities/PropagateConstantValue.h"
@@ -61,7 +62,7 @@ namespace SCAM {
         Optimizer() = delete;
 
         Optimizer(std::map<int, SCAM::CfgBlock *> CFG,
-                  SCAM::Module *module, const std::set<std::string>& optimizeOptionsSet);
+                  SCAM::Module *module, const std::map<std::string, Variable *> &globalVariableMap , const std::set<std::string>& optimizeOptionsSet);
 
         ~Optimizer() = default;
 
@@ -75,6 +76,7 @@ namespace SCAM {
         std::map<int, SCAM::CfgBlock *> blockCFG;
         std::map<int, SCAM::CfgNode *> nodeCFG;
         SCAM::Module *module;
+        std::map<std::string, Variable *> globalVariableMap;
         std::set<std::string> optimizeOptionsSet;
         std::map<std::string, int> variableBitWidthMap;
         std::map<SCAM::Port *, int> portBitWidthMap;

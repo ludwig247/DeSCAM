@@ -116,8 +116,6 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
         if(PrintStmt::toString(this->newExpr).find("*")!=std::string::npos){this->newExpr = nullptr;}
     }
     catch (z3::exception e) {
-        std::cout << "Translation warning for: " << PrintStmt::toString(expr) << std::endl;
-        std::cout << "\t ->" << e << std::endl;
         this->newExpr = nullptr;
         return;
     }

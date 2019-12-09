@@ -16,6 +16,7 @@
 #include "OperationOptimizations/OptimizeOperations2.h"
 #include "PropertySuite.h"
 #include "CreateOperationsSlave.h"
+#include "../parser/CommandLineParameter.h"
 #include <thread>
 
 namespace SCAM {
@@ -38,10 +39,15 @@ namespace SCAM {
         this->findValidOperations();
         std::cout << "\tValid: " << this->operations.size() << std::endl;
         this->checkStates();
-        std::cout << "Optimizing conditions" << std::endl;
-        this->optimizeConditions();
-        std::cout << "Optimizing Assignments" << std::endl;
-        this->optimizeAssignments();
+        auto optimizerOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
+        if(optimizerOptionsSet.find("all")==optimizerOptionsSet.end() && optimizerOptionsSet.find("are")==optimizerOptionsSet.end()) {
+            std::cout << "Optimizing conditions" << std::endl;
+            this->optimizeConditions();
+        }
+        if(optimizerOptionsSet.find("all")==optimizerOptionsSet.end() && optimizerOptionsSet.find("sim")==optimizerOptionsSet.end()) {
+            std::cout << "Optimizing Assignments" << std::endl;
+            this->optimizeAssignments();
+        }
         std::cout << "Optimization:" << std::endl;
         this->optimizeOperations();
         std::cout << "Generating PropertySuite:" << std::endl;

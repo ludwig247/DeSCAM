@@ -23,6 +23,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
             this->currentElseIfID = node.first;
             bool hasElseIfOrElse = false;
             auto secondSucc = node.second->getSuccessorList()[1];
+            if(!secondSucc){continue;}
             if (secondSucc->hasIf()) {
                 if (notFromTheSameGroupIfStatement(secondSucc->getBlockID())) { continue; }
                 //adding else if statements and their true branches to the stmtsMap

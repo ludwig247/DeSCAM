@@ -36,7 +36,9 @@ namespace SCAM {
         //Constructors and Destructor
         ParamValuePropagation() = delete;
 
-        ParamValuePropagation(std::map<std::string, SCAM::Expr *> paramValMap,
+        ParamValuePropagation(
+                              std::map<std::string, SCAM::Expr *> paramValMap,
+                              const std::map<std::string, Variable *> &globalVariableMap,
                               std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList);
 
         ~ParamValuePropagation() = default;
@@ -46,10 +48,11 @@ namespace SCAM {
     private:
         std::map<std::string, SCAM::Expr *> paramValMap;
         std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
+        std::map<std::string, Variable *> globalVariableMap;
         SCAM::Expr *newExpr;
 
         //visitors
-        void visit(struct VariableOperand &node) override{};
+        void visit(struct VariableOperand &node) override;
 
         void visit(struct IntegerValue &node) override{};
 

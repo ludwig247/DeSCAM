@@ -43,7 +43,7 @@ namespace SCAM {
         //Constructors and Destructor
         FunctionsOptimizer() = delete;
 
-        FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module,
+        FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module, const std::map<std::string, Variable *> &globalVariableMap ,
                            std::set<std::string> variablesThatHaveReadSet);
 
         ~FunctionsOptimizer() = default;
@@ -54,6 +54,7 @@ namespace SCAM {
     private:
         SCAM::Module *module;
         std::map<int, SCAM::CfgNode *> CFG;
+        std::map<std::string, Variable *> globalVariableMap;
         bool hasFunction;
         SCAM::Stmt *newStmt;                                                     //used to propagate statements and the modified functionOperands
         SCAM::Expr *newExpr;

@@ -2,13 +2,16 @@
 // Created by M.I.Alkoudsi on 08.08.19.
 //
 
+
 #include "Optimizer.h"
 
 
 SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module,
-                           const std::set<std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
-                                                                              module(module),
-                                                                              optimizeOptionsSet(optimizeOptionsSet) {
+                           const std::map<std::string, Variable *> &globalVariableMap,
+                           const std::set <std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
+                                                                               module(module),
+                                                                               globalVariableMap(globalVariableMap),
+                                                                               optimizeOptionsSet(optimizeOptionsSet) {
 
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("mrc") != this->optimizeOptionsSet.end()) {
@@ -21,7 +24,14 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     CreateRealCFG crNodeCFG(this->blockCFG);
     module->setCFG(crNodeCFG.getCFG());
     SCAM::FindReadVariables frv(crNodeCFG.getCFG());
-    this->nodeCFG = crNodeCFG.getCFG();
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("gvp") != this->optimizeOptionsSet.end()) {
+        SCAM::GlobalConstantVariablePropagation gcvp(crNodeCFG.getCFG(), this->globalVariableMap);
+        this->nodeCFG = gcvp.getCFG();
+    } else {
+        this->nodeCFG = crNodeCFG.getCFG();
+    }
+//    std::cout << SCAM::OptUtilities::printCFG(this->nodeCFG);
     for (int i = 0; i < 2; i++) {
         SCAM::FindCfgPaths fcp(crNodeCFG.getCFG(), 0);
         if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
@@ -30,7 +40,7 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
             this->nodeCFG = lvp.getCFG();
         }
         if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
-            this->optimizeOptionsSet.find("gvp") != this->optimizeOptionsSet.end()) {
+            this->optimizeOptionsSet.find("gcp") != this->optimizeOptionsSet.end()) {
             SCAM::GlobalConstantPropagation gcp(this->nodeCFG, fcp, frv.getReadVariablesSet());
             this->nodeCFG = gcp.getCFG();
         }
@@ -53,8 +63,8 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     }
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("ros") != this->optimizeOptionsSet.end()) {
-    SCAM::OperatorStrengthReduction osr(this->nodeCFG);
-    this->nodeCFG = osr.getCFG();
+        SCAM::OperatorStrengthReduction osr(this->nodeCFG);
+        this->nodeCFG = osr.getCFG();
     }
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("rda") != this->optimizeOptionsSet.end()) {
@@ -64,10 +74,9 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("fun") != this->optimizeOptionsSet.end()) {
         module->setCFG(this->nodeCFG);
-        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, frv.getReadVariablesSet());
+        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, globalVariableMap, frv.getReadVariablesSet());
         this->nodeCFG = fo.getCFG();
     }
-
     SCAM::RenumberCFG rcn(this->nodeCFG);
     this->nodeCFG = rcn.getNewNodeCFG();
     SCAM::FindUnusedFunctions uff2(this->nodeCFG, module);
