@@ -19,6 +19,8 @@ public:
     std::set<DataSignal *> getOutputs();
     std::set<DataSignal *> getInputs();
     std::set<Variable *> getVariables();
+    std::set<Variable *> getInternalRegisterIn();
+    std::set<Variable *> getInternalOut();
 
 private:
     PropertySuite *propertySuite;

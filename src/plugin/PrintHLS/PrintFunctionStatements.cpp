@@ -41,23 +41,22 @@ void PrintFunctionStatements::visit(Assignment &node) {
 }
 
 void PrintFunctionStatements::visit(VariableOperand &node) {
-    std::string suffix;
     if (opt) {
         if(side == Side::LHS) {
-            suffix = "_out";
+            this->ss << "out_";
         } else if (side == Side::RHS) {
-            suffix = "_in";
+            this->ss << "in_";
         }
     }
     if (node.getVariable()->isSubVar()) {
-        this->ss << node.getVariable()->getParent()->getName() << suffix;
+        this->ss << node.getVariable()->getParent()->getName();
         if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << "[" << node.getVariable()->getName() << "]";
         } else {
             this->ss << "." << node.getVariable()->getName();
         }
     } else {
-        this->ss << node.getVariable()->getName() << suffix;
+        this->ss << node.getVariable()->getName();
     }
 }
 

@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include "OtherUtils.h"
-#include "SignalFactoryNew.h"
+#include "SignalFactory.h"
 #include <assert.h>
 
 namespace SCAM { namespace VHDL {

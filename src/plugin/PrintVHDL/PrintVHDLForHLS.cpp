@@ -23,7 +23,7 @@ std::map<std::string, std::string> PrintVHDLForHLS::printModel(Model *model) {
         this->propertySuite = module.second->getPropertySuite();
         this->currentModule = module.second;
         hlsModule = std::make_unique<HLSmodule>(propertySuite, currentModule);
-        signalFactoryNew = std::make_unique<SignalFactoryNew>(propertySuite, currentModule, hlsModule.get());
+        signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get());
 
         pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
         pluginOutput.insert(std::make_pair(propertySuite->getName() + ".vhd", printModule(model)));
@@ -47,13 +47,6 @@ std::string PrintVHDLForHLS::printTypes(Model *model) {
     for (auto op = propertySuite->getOperationProperties().begin(); op != propertySuite->getOperationProperties().end(); ++op) {
         typeStream << "op_" << (*op)->getName();
         if (std::next(op) != propertySuite->getOperationProperties().end())
-            typeStream << ", ";
-    }
-    if (!propertySuite->getWaitProperties().empty())
-        typeStream << ", ";
-    for (auto op = propertySuite->getWaitProperties().begin(); op != propertySuite->getWaitProperties().end(); ++op) {
-        typeStream << "op_" << (*op)->getName();
-        if (std::next(op) != propertySuite->getWaitProperties().end())
             typeStream << ", ";
     }
     typeStream << ");\n\n";
@@ -83,17 +76,19 @@ std::string PrintVHDLForHLS::printTypes(Model *model) {
         }
     };
 
-    for (auto &reg : propertySuite->getVisibleRegisters()) {
+    for (const auto& reg : propertySuite->getVisibleRegisters()) {
         fillTypeSets(reg->getDataType());
     }
-
-    for (auto &func : propertySuite->getFunctions()) {
+    for (const auto& func : propertySuite->getFunctions()) {
         fillTypeSets(func->getReturnType());
     }
-    for (auto &module : model->getModules()) {
+    for (const auto& module : model->getModules()) {
         for (auto &port : module.second->getPorts()) {
             fillTypeSets(port.second->getDataType());
         }
+    }
+    for (const auto& var : currentModule->getVariableMap()) {
+        fillTypeSets(var.second->getDataType());
     }
 
     typeStream << "\t-- Enum Types\n";
@@ -134,134 +129,48 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     signals(ss);
     functions(ss);
-
-    // Print Component
-    ss << "\n\tcomponent operations is\n";
-    ss << "\tport(\n";
-
-    auto printComponentSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix, bool const& vld) {
-        for (const auto& signal : signals) {
-            std::string type = signal->getDataType()->getName();
-            std::string suffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactoryNew::getName(signal, Style::UL, suffix) << ": "
-               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactoryNew::getDataTypeName(signal, true)
-               << ";\n";
-            if (vld) {
-                ss << "\t\t" << prefix << SignalFactoryNew::getName(signal, Style::UL, suffix + "_ap_vld")
-                    << ": out std_logic;\n";
-            }
-        }
-    };
-
-    auto printComponentVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix, bool const& vld) {
-        for (const auto& var : vars) {
-            std::string type = var->getDataType()->getName();
-            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix + "_" << SignalFactoryNew::getName(var, Style::UL, suffix) << ": "
-               << prefix << " " << SignalFactoryNew::getDataTypeName(var, true)
-               << ";\n";
-            if (vld) {
-                ss << "\t\t" << prefix + "_" << SignalFactoryNew::getName(var, Style::UL, suffix + "_ap_vld")
-                   << ": out std_logic;\n";
-            }
-        }
-    };
-
-    printComponentSignal(signalFactoryNew->getControlSignals(), "ap_", false);
-    printComponentSignal(signalFactoryNew->getHandshakingProtocolSignals(), "ap_", false);
-    printComponentSignal(OtherUtils::getSubVars(signalFactoryNew->getOperationModuleInputs()), "", false);
-    printComponentSignal(OtherUtils::getSubVars(signalFactoryNew->getOperationModuleOutputs()), "", true);
-    printComponentVars(OtherUtils::getSubVars(signalFactoryNew->getInternalRegister()), "in", false);
-    printComponentVars(OtherUtils::getSubVars(signalFactoryNew->getInternalRegister()), "out", true);
-    const auto& activeOp = signalFactoryNew->getActiveOperation();
-    // TODO: notify signals
-    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactoryNew::getDataTypeName(activeOp, true) << "\n";
-
-    ss << "\t);\n"
-       << "\tend component;\n";
+    component(ss);
 
     // begin of architecture implementation
     ss << "\nbegin\n\n";
 
-    // Print Component Instantiation
-    ss << "\toperations_inst: operations\n"
-       << "\tport map(\n";
-
-    auto printComponentInstSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix, bool const& vld) {
-        for (const auto& signal : signals) {
-            std::string type = signal->getDataType()->getName();
-            std::string suffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactoryNew::getName(signal, Style::UL, suffix) << " => "
-               << SignalFactoryNew::getName(signal, Style::UL, "") << ",\n";
-            if (vld) {
-                ss << "\t\t" << prefix << SignalFactoryNew::getName(signal, Style::UL, suffix + "_ap_vld")
-                   << " => " << SignalFactoryNew::getName(signal, Style::UL, "_vld") << ",\n";
-            }
-        }
-    };
-
-    auto printComponentInstVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix, bool const& vld) {
-        for (const auto& var : vars) {
-            std::string type = var->getDataType()->getName();
-            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactoryNew::getName(var, Style::UL, suffix) << " => "
-               << prefix << SignalFactoryNew::getName(var, Style::UL, "") << ",\n";
-            if (vld) {
-                ss << "\t\t" << prefix << SignalFactoryNew::getName(var, Style::UL, suffix + "_ap_vld")
-                   << " => " << prefix << SignalFactoryNew::getName(var, Style::UL, "_vld") << ",\n";
-            }
-        }
-    };
-
-    printComponentInstSignal(signalFactoryNew->getControlSignals(), "ap_", false);
-    printComponentInstSignal(signalFactoryNew->getHandshakingProtocolSignals(), "ap_", false);
-    printComponentInstSignal(OtherUtils::getSubVars(signalFactoryNew->getOperationModuleInputs()), "", false);
-    printComponentInstSignal(OtherUtils::getSubVars(signalFactoryNew->getOperationModuleOutputs()), "", true);
-    printComponentInstVars(OtherUtils::getSubVars(signalFactoryNew->getInternalRegister()), "in_", false);
-    printComponentInstVars(OtherUtils::getSubVars(signalFactoryNew->getInternalRegister()), "out_", true);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
-        ss << "\t\t" << notifySignal->getName() << "_ap_vld  => " << notifySignal->getName() << "_vld,\n";
-    }
-    ss << "\t\t" << activeOp->getFullName() << " => " << SignalFactoryNew::getName(activeOp, Style::UL, "_in") << "\n"
-       << "\t);\n\n";
-
+    componentInst(ss);
     monitor(ss);
 
     // Print Output_Vld Processes
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool hasOutputReg = hlsModule->hasOutputReg(dataSignal);
         bool isEnum = dataSignal->isEnumType();
-        ss << "\tprocess (rst, " << SignalFactoryNew::getName(dataSignal, Style::UL, "_vld") << ")\n"
+        ss << "\tprocess (rst, " << SignalFactory::getName(dataSignal, Style::UL, "_vld") << ")\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactoryNew::getName(dataSignal, Style::DOT))
+           << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
            << " <= " << VHDLPrintVisitorHLS::toString(dataSignal->getInitialValue()) << ";\n"
-           << "\t\telsif (" << SignalFactoryNew::getName(dataSignal, Style::UL, "_vld") << " = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactoryNew::getName(dataSignal, Style::DOT))
-           << " <= " << (isEnum ? SignalFactoryNew::vectorToEnum(dataSignal, "_out") : SignalFactoryNew::getName(dataSignal, Style::UL, "_out")) << ";\n"
+           << "\t\telsif (" << SignalFactory::getName(dataSignal, Style::UL, "_vld") << " = \'1\') then\n"
+           << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
+           << " <= " << (isEnum ? SignalFactory::vectorToEnum(dataSignal, "_out") : SignalFactory::getName(dataSignal, Style::UL, "_out")) << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
     ss << "\t-- Output_Vld Processes\n";
-    for (const auto& out : OtherUtils::getSubVars(signalFactoryNew->getOperationModuleOutputs())) {
+    for (const auto& out : OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs())) {
         printOutputProcess(out);
     }
 
     auto printOutputProcessRegs = [&](Variable* var) {
         bool isEnum = var->isEnumType();
-        ss << "\tprocess (rst, out_" << SignalFactoryNew::getName(var, Style::UL, "_vld") << ")\n"
+        ss << "\tprocess (rst, out_" << SignalFactory::getName(var, Style::UL, "_vld") << ")\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << SignalFactoryNew::getName(var, Style::DOT) << " <= " << VHDLPrintVisitorHLS::toString(var->getInitialValue()) << ";\n"
-           << "\t\telsif (out_" << SignalFactoryNew::getName(var, Style::UL, "_vld") << " = \'1\') then\n"
-           << "\t\t\t" << SignalFactoryNew::getName(var, Style::DOT) << " <= " << (isEnum ?
-           SignalFactoryNew::vectorToEnum(var, "", "out_") :
-           SignalFactoryNew::getName(var, Style::UL, "_out")) << ";\n"
+           << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << VHDLPrintVisitorHLS::toString(var->getInitialValue()) << ";\n"
+           << "\t\telsif (out_" << SignalFactory::getName(var, Style::UL, "_vld") << " = \'1\') then\n"
+           << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << (isEnum ?
+                                                SignalFactory::vectorToEnum(var, "", "out_") :
+                                                "out_" + SignalFactory::getName(var, Style::UL, "")) << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
-    for (const auto& internalRegs : OtherUtils::getSubVars(signalFactoryNew->getInternalRegister())) {
+    for (const auto& internalRegs : OtherUtils::getSubVars(signalFactory->getInternalRegister())) {
         printOutputProcessRegs(internalRegs);
     }
 
@@ -276,17 +185,17 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     // Print Output Processes
     ss << "\t-- Output Processes\n"
-       << "\tprocess(rst, done)\n"
+       << "\tprocess(rst, done_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& out : OtherUtils::getSubVars(signalFactoryNew->getOperationModuleOutputs())) {
+    for (const auto& out : OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs())) {
         if (hlsModule->hasOutputReg(out)) {
-            ss << "\t\t\t" << SignalFactoryNew::getName(out, Style::DOT) << " <= "
+            ss << "\t\t\t" << SignalFactory::getName(out, Style::DOT) << " <= "
                << VHDLPrintVisitorHLS::toString(out->getInitialValue()) << ";\n";
         }
     }
-    ss << "\t\telsif (done = '1') then\n";
-    for (const auto& out : signalFactoryNew->getOperationModuleOutputs()) {
+    ss << "\t\telsif (done_sig = '1') then\n";
+    for (const auto& out : signalFactory->getOperationModuleOutputs()) {
         if (hlsModule->hasOutputReg(out)) {
             if (hlsModule->isModuleSignal(out)) {
                 for (const auto& sig : hlsModule->getCorrespondingTopSignals(out)) {
@@ -300,7 +209,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     ss << "\t\tend if;\n"
        << "\tend process;\n\n";
 
-    ss << "\tprocess(rst, done, idle)\n"
+    ss << "\tprocess(rst, done_sig, idle_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
@@ -310,11 +219,11 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
         }
     }
     ss << "\t\telse\n"
-       << "\t\t\tif (done = '1') then\n";
+       << "\t\t\tif (done_sig = '1') then\n";
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_reg;\n";
     }
-    ss << "\t\t\telsif (idle = '1') then\n";
+    ss << "\t\t\telsif (idle_sig = '1') then\n";
     for (const auto& port : currentModule->getPorts()) {
         if (port.second->getInterface()->isMasterOut()) {
             ss << "\t\t\t\t" << port.second->getName() << "_notify <= '0';\n";
@@ -330,20 +239,20 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     auto printModuleInputSignals = [&ss](std::set<DataSignal*> const& dataSignals) {
         for (const auto& dataSignal : dataSignals) {
-            ss << "\t\t\t\t" << SignalFactoryNew::getName(dataSignal, Style::UL) << "_in <= "
+            ss << "\t\t\t\t" << SignalFactory::getName(dataSignal, Style::UL) << "_in <= "
                << (dataSignal->isEnumType() ?
-                   SignalFactoryNew::enumToVector(dataSignal) :
-                   SignalFactoryNew::getName(dataSignal, Style::DOT))
+                   SignalFactory::enumToVector(dataSignal) :
+                   SignalFactory::getName(dataSignal, Style::DOT))
                << ";\n";
         }
     };
 
     auto printModuleInputVars = [&ss](std::set<Variable*> const& vars, std::string const& prefix, std::string const& suffix) {
         for (const auto& var : vars) {
-            ss << "\t\t\t\t" << prefix << SignalFactoryNew::getName(var, Style::UL) << suffix << " <= "
+            ss << "\t\t\t\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
                << (var->isEnumType() ?
-                   SignalFactoryNew::enumToVector(var) :
-                   SignalFactoryNew::getName(var, Style::DOT))
+                   SignalFactory::enumToVector(var) :
+                   SignalFactory::getName(var, Style::DOT))
                << ";\n";
         }
     };
@@ -353,19 +262,19 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
-       << "\t\t\tstart <= '0';\n"
+       << "\t\t\tstart_sig <= '0';\n"
        << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getNextState()->getName() << ";\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
-       << "\t\t\tif ((idle = '1' or ready = '1') and wait_state = '0') then\n"
-       << "\t\t\t\tstart <= '1';\n"
+       << "\t\t\tif ((idle_sig = '1' or ready_sig = '1') and wait_state = '0') then\n"
+       << "\t\t\t\tstart_sig <= '1';\n"
        << "\t\t\t\tactive_state <= next_state;\n";
 
-    printModuleInputVars({signalFactoryNew->getActiveOperation()}, "" , "_in");
-    printModuleInputSignals(signalFactoryNew->getOperationModuleInputs());
-    printModuleInputVars(signalFactoryNew->getInternalRegister(), "in_", "");
+    printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
+    printModuleInputSignals(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()));
+    printModuleInputVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "in_", "");
 
-    ss << "\t\t\telsif ((idle = '1' or  ready = '1') and wait_state = '1') then\n"
-       << "\t\t\t\tstart <= '0';\n"
+    ss << "\t\t\telsif ((idle_sig = '1' or  ready_sig = '1') and wait_state = '1') then\n"
+       << "\t\t\t\tstart_sig <= '0';\n"
        << "\t\t\tend if;\n"
        << "\t\tend if;\n"
        << "\tend process;\n\n"
@@ -382,26 +291,27 @@ void PrintVHDLForHLS::entity(std::stringstream &ss) {
     auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
         for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); ++dataSignal) {
             ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
-               << " " << SignalFactoryNew::getDataTypeName(*dataSignal, false);
+               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
             if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
                 ss << ";\n";
             }
         }
     };
-    printPortSignals(signalFactoryNew->getInputs(), false);
-    printPortSignals(signalFactoryNew->getOutputs(), false);
+    printPortSignals(signalFactory->getInputs(), false);
+    printPortSignals(signalFactory->getOutputs(), false);
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
     }
     for (const auto syncSignal : propertySuite->getSyncSignals()) {
         ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
     }
-    printPortSignals(signalFactoryNew->getControlSignals(), true);
+    printPortSignals(signalFactory->getControlSignals(), true);
 
     ss << "\n);\n";
     ss << "end " + propertySuite->getName() << "_module;\n\n";
 }
 
+// Print Signals
 void PrintVHDLForHLS::signals(std::stringstream &ss) {
     auto printVars = [&ss](
             std::set<Variable *> const& vars,
@@ -411,10 +321,10 @@ void PrintVHDLForHLS::signals(std::stringstream &ss) {
             bool const& vld,
             bool const& asVector) {
         for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << SignalFactoryNew::getName(var, style, suffix)
-               << ": " << SignalFactoryNew::getDataTypeName(var, asVector) << ";\n";
+            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix)
+               << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
             if (vld) {
-                ss << "\tsignal " << prefix << SignalFactoryNew::getName(var, style, "_vld") << ": std_logic;\n";
+                ss << "\tsignal " << prefix << SignalFactory::getName(var, style, "_vld") << ": std_logic;\n";
             }
         }
     };
@@ -426,39 +336,152 @@ void PrintVHDLForHLS::signals(std::stringstream &ss) {
             bool const& vld,
             bool const& asVector) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << SignalFactoryNew::getName(signal, style, suffix)
-               << ": " << SignalFactoryNew::getDataTypeName(signal, asVector) << ";\n";
+            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix)
+               << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
             if (vld) {
-                ss << "\tsignal " << SignalFactoryNew::getName(signal, style, "_out_vld") << ": std_logic;\n";
+                ss << "\tsignal " << SignalFactory::getName(signal, style, "_vld") << ": std_logic;\n";
             }
         }
     };
 
-    // Print Signals
     ss << "\n\t-- Internal Registers\n";
-    printVars(signalFactoryNew->getInternalRegister(), Style::DOT, "", "", false, false);
-    printVars(OtherUtils::getSubVars(signalFactoryNew->getInternalRegister()), Style::UL, "in_", "", false, true);
-    printVars(OtherUtils::getSubVars(signalFactoryNew->getInternalRegister()), Style::UL, "out_", "", true, true);
+    printVars(signalFactory->getInternalRegister(), Style::DOT, "", "", false, false);
+    printVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()),
+            Style::UL, "in_", "", false, true);
+    printVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()),
+            Style::UL, "out_", "", true, true);
 
     ss << "\n\t-- Input Registers\n";
-    printSignal(OtherUtils::getSubVars(signalFactoryNew->getOperationModuleInputs()), Style::UL, "_in", false, true);
-    printVars({signalFactoryNew->getActiveOperation()}, Style::DOT, "", "_in", false, true);
+    printSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()),
+            Style::UL, "_in", false, true);
+    printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", false, true);
 
     ss << "\n\t-- Output Register\n";
-    printVars(signalFactoryNew->getOutputRegister(), Style::DOT, "", "", false, false);
+    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false, false);
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
+    }
 
     ss << "\n\t-- Module Outputs\n";
-    printSignal(OtherUtils::getSubVars(signalFactoryNew->getOperationModuleOutputs()), Style::UL, "_out", true, true);
-    // TODO: notify signals (reg, out, vld)
+    printSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()),
+            Style::UL, "_out", true, true);
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
+        ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
+    }
 
     ss << "\n\t-- Handshaking Protocol Signals (Communication between top and operations_inst)\n";
-    printSignal(signalFactoryNew->getHandshakingProtocolSignals(), Style::DOT, "", false, false);
+    printSignal(signalFactory->getHandshakingProtocolSignals(), Style::DOT, "_sig", false, false);
     ss << "\n\t-- Monitor Signals\n";
-    printVars(signalFactoryNew->getMonitorSignals(), Style::DOT, "", "", false, false);
+    printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false, false);
 }
 
+void PrintVHDLForHLS::component(std::stringstream& ss) {
+    // Print Component
+    ss << "\n\tcomponent operations is\n";
+    ss << "\tport(\n";
+
+    auto printComponentSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix, bool const& vld) {
+        for (const auto& signal : signals) {
+            bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
+            std::string suffix = (vectorType ? "_V" : "");
+            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix) << ": "
+               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::getDataTypeName(signal, true)
+               << ";\n";
+            if (vld) {
+                ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix + "_ap_vld")
+                   << ": out std_logic;\n";
+            }
+        }
+    };
+
+    auto printComponentVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix, bool const& vld) {
+        for (const auto& var : vars) {
+            std::string type = var->getDataType()->getName();
+            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
+            ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix) << ": "
+               << prefix << " " << SignalFactory::getDataTypeName(var, true)
+               << ";\n";
+            if (vld) {
+                ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix + "_ap_vld")
+                   << ": out std_logic;\n";
+            }
+        }
+    };
+
+    printComponentSignal(signalFactory->getControlSignals(), "ap_", false);
+    printComponentSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", false);
+    printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", false);
+    printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", true);
+    printComponentVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "in", false);
+    printComponentVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "out", true);
+
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
+        ss << "\t\t" << notifySignal->getName() << "_ap_vld: out std_logic;\n";
+    }
+
+    const auto& activeOp = signalFactory->getActiveOperation();
+    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactory::getDataTypeName(activeOp, true) << "\n";
+
+    ss << "\t);\n"
+       << "\tend component;\n";
+}
+
+// Print Component Instantiation
+void PrintVHDLForHLS::componentInst(std::stringstream& ss) {
+    ss << "\toperations_inst: operations\n"
+       << "\tport map(\n";
+
+    auto printComponentInstSignal = [&ss](
+            std::set<DataSignal *> const& signals,
+            std::string const& prefix,
+            std::string const& suffix,
+            bool const& vld) {
+        for (const auto& signal : signals) {
+            std::string type = signal->getDataType()->getName();
+            std::string moduleSuffix = (type == "int" || type == "unsigned" ? "_V" : "");
+            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix) << " => "
+               << SignalFactory::getName(signal, Style::UL, suffix) << ",\n";
+            if (vld) {
+                ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix + "_ap_vld")
+                   << " => " << SignalFactory::getName(signal, Style::UL, "_vld") << ",\n";
+            }
+        }
+    };
+
+    auto printComponentInstVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix, bool const& vld) {
+        for (const auto& var : vars) {
+            std::string type = var->getDataType()->getName();
+            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
+            ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix) << " => "
+               << prefix << SignalFactory::getName(var, Style::UL, "") << ",\n";
+            if (vld) {
+                ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix + "_ap_vld")
+                   << " => " << prefix << SignalFactory::getName(var, Style::UL, "_vld") << ",\n";
+            }
+        }
+    };
+
+    printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "", false);
+    printComponentInstSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", "_sig", false);
+    printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in", false);
+    printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out", true);
+    printComponentInstVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "in_", false);
+    printComponentInstVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "out_", true);
+
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
+        ss << "\t\t" << notifySignal->getName() << "_ap_vld  => " << notifySignal->getName() << "_vld,\n";
+    }
+
+    const auto& activeOp = signalFactory->getActiveOperation();
+    ss << "\t\t" << activeOp->getFullName() << " => " << SignalFactory::getName(activeOp, Style::UL, "_in") << "\n"
+       << "\t);\n\n";
+}
+
+// Print Monitor
 void PrintVHDLForHLS::monitor(std::stringstream &ss) {
-    // Print Monitor
     ss << "\t-- Monitor\n"
        << "\tprocess (" << printSensitivityList() << ")\n"
        << "\tbegin\n"
@@ -538,11 +561,11 @@ void PrintVHDLForHLS::functions(std::stringstream &ss) {
 
         const auto& paramMap = func->getParamMap();
         for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
-            ss << param->first << ": " << SignalFactoryNew::convertDataType(param->second->getDataType()->getName());
+            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
             if (std::next(param) != paramMap.end())
                 ss << "; ";
         }
-        ss << ") return " << SignalFactoryNew::convertDataType(func->getReturnType()->getName()) << ";\n";
+        ss << ") return " << SignalFactory::convertDataType(func->getReturnType()->getName()) << ";\n";
     }
     ss << "\n";
 
@@ -551,11 +574,11 @@ void PrintVHDLForHLS::functions(std::stringstream &ss) {
 
         auto paramMap = func->getParamMap();
         for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
-            ss << param->first << ": " << SignalFactoryNew::convertDataType(param->second->getDataType()->getName());
+            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
             if (std::next(param) != paramMap.end())
                 ss << "; ";
         }
-        ss << ") return " << SignalFactoryNew::convertDataType(func->getReturnType()->getName()) << " is\n";
+        ss << ") return " << SignalFactory::convertDataType(func->getReturnType()->getName()) << " is\n";
         ss << "\tbegin\n";
 
         if (func->getReturnValueConditionList().empty())
@@ -590,21 +613,21 @@ std::string PrintVHDLForHLS::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
     if (dataType->isEnumType()) {
-        dataTypeStream << "\ttype " << SignalFactoryNew::convertDataType(dataType->getName()) << " is (";
+        dataTypeStream << "\ttype " << SignalFactory::convertDataType(dataType->getName()) << " is (";
         for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
             dataTypeStream << enumVal->first;
             if (enumVal != --dataType->getEnumValueMap().end()) dataTypeStream << ", ";
         }
         dataTypeStream << ");\n";
     } else if (dataType->isCompoundType()) {
-        dataTypeStream << "\ttype " + SignalFactoryNew::convertDataType(dataType->getName()) << " is record\n";
+        dataTypeStream << "\ttype " + SignalFactory::convertDataType(dataType->getName()) << " is record\n";
         for (auto &subVar: dataType->getSubVarMap()) {
-            dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactoryNew::convertDataType(subVar.second->getName()) << ";\n";
+            dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataType(subVar.second->getName()) << ";\n";
         }
         dataTypeStream << "\tend record;\n";
     } else if (dataType->isArrayType()) {
         dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
-                       << " downto 0) of " << SignalFactoryNew::convertDataType(dataType->getSubVarMap().begin()->second->getName())
+                       << " downto 0) of " << SignalFactory::convertDataType(dataType->getSubVarMap().begin()->second->getName())
                        << ";\n";
     }
     return dataTypeStream.str();

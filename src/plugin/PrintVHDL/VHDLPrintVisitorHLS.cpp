@@ -5,12 +5,14 @@
 #include <memory>
 
 #include "NodePeekVisitor.h"
-#include "PrintHLS/BitSlicingHLS.h"
 #include "VHDLPrintVisitorHLS.h"
+#include "BitSlicingVHDL.h"
+#include "OtherUtils.h"
 
 using namespace SCAM;
 
 VHDLPrintVisitorHLS::VHDLPrintVisitorHLS(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+    arithmeticOp = false;
     this->createString(stmt, indentSize, indentOffset);
 }
 
@@ -31,15 +33,15 @@ void VHDLPrintVisitorHLS::visit(Bitwise &node) {
     bool tempUseParentheses = useParenthesesFlag;
     useParenthesesFlag = true;
 
-    std::unique_ptr<BitSlicingHLS> printOperations = std::make_unique<BitSlicingHLS>(&node);
+    std::unique_ptr<VHDL::BitSlicingVHDL> printOperations = std::make_unique<VHDL::BitSlicingVHDL>(&node);
     if (printOperations->isSlicingOp()) {
         this->ss << printOperations->getOpAsString();
     } else {
-        if ((node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT)) ||
-            (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))) {
-            if (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::LEFT_SHIFT))
+        if ((node.getOperation() == VHDL::OtherUtils::subTypeBitwiseToString(VHDL::SubTypeBitwise::LEFT_SHIFT)) ||
+            (node.getOperation() == VHDL::OtherUtils::subTypeBitwiseToString(VHDL::SubTypeBitwise::RIGHT_SHIFT))) {
+            if (node.getOperation() == VHDL::OtherUtils::subTypeBitwiseToString(VHDL::SubTypeBitwise::LEFT_SHIFT))
                 this->ss << "shift_left(";
-            else if (node.getOperation() == Utilities::subTypeBitwiseToString(SubTypeBitwise::RIGHT_SHIFT))
+            else if (node.getOperation() == VHDL::OtherUtils::subTypeBitwiseToString(VHDL::SubTypeBitwise::RIGHT_SHIFT))
                 this->ss << "shift_right(";
             useParenthesesFlag = false;
             node.getLhs()->accept(*this);
@@ -89,6 +91,13 @@ void VHDLPrintVisitorHLS::visit(VariableOperand& node)
     if(isBoolean) {
         this->ss << "(";
     }
+    if (arithmeticOp) {
+        if (node.getDataType()->isInteger()) {
+            this->ss << "signed(";
+        } else if (node.getDataType()->isUnsigned()) {
+            this->ss << "unsigned(";
+        }
+    }
     if (node.getVariable()->isSubVar()) {
         if (node.getVariable()->getParent()->isCompoundType()) {
             this->ss << node.getVariable()->getParent()->getName() << "." << node.getVariable()->getName();
@@ -97,6 +106,9 @@ void VHDLPrintVisitorHLS::visit(VariableOperand& node)
         } else throw std::runtime_error("Unknown Type for SubVar");
     } else {
         this->ss << node.getVariable()->getName();
+    }
+    if(arithmeticOp) {
+        this->ss << ")";
     }
     if (isBoolean) {
         this->ss << " = '1')";
@@ -113,8 +125,15 @@ void VHDLPrintVisitorHLS::visit(BoolValue &node) {
 
 void VHDLPrintVisitorHLS::visit(DataSignalOperand &node) {
     bool isBoolean = node.getDataType()->isBoolean();
-    if(isBoolean) {
+    if (isBoolean) {
         this->ss << "(";
+    }
+    if (arithmeticOp) {
+        if (node.getDataType()->isInteger()) {
+            this->ss << "signed(";
+        } else if (node.getDataType()->isUnsigned()) {
+            this->ss << "unsigned(";
+        }
     }
     this->ss << node.getDataSignal()->getPort()->getName() << "_sig";
     if (node.getDataSignal()->isSubVar()) {
@@ -124,7 +143,93 @@ void VHDLPrintVisitorHLS::visit(DataSignalOperand &node) {
             this->ss << "(" << node.getDataSignal()->getName() << ")";
         } else throw std::runtime_error("Unknown Type for SubVar");
     }
+    if(arithmeticOp) {
+        this->ss << ")";
+    }
     if (isBoolean) {
         this->ss << " = '1')";
+    }
+}
+
+void VHDLPrintVisitorHLS::visit(Arithmetic &node) {
+    bool subArithmeticOp = false;
+    if (arithmeticOp) {
+        subArithmeticOp = true;
+    } else {
+        arithmeticOp = true;
+    }
+    bool tempUseParentheses = useParenthesesFlag;
+    useParenthesesFlag = true;
+    if (tempUseParentheses) this->ss << "(";
+    if (node.getOperation() == "*") {
+        NodePeekVisitor nodePeekLhs(node.getLhs());
+        NodePeekVisitor nodePeekRhs(node.getRhs());
+        if (nodePeekLhs.isConstTypeNode() || nodePeekRhs.isConstTypeNode()) {
+            if (nodePeekLhs.nodePeekUnsignedValue() && (nodePeekLhs.nodePeekUnsignedValue()->getValue() == 2)) {
+                node.getRhs()->accept(*this);
+                this->ss << " + ";
+                node.getRhs()->accept(*this);
+            } else if (nodePeekRhs.nodePeekUnsignedValue() &&
+                       (nodePeekRhs.nodePeekUnsignedValue()->getValue() == 2)) {
+                node.getLhs()->accept(*this);
+                this->ss << " + ";
+                node.getLhs()->accept(*this);
+            } else
+            if (nodePeekLhs.nodePeekUnsignedValue() &&
+                    VHDL::OtherUtils::isPowerOfTwo(nodePeekLhs.nodePeekUnsignedValue()->getValue())) {
+                //lShiftByConst
+                this->ss << "shift_left(";
+                node.getRhs()->accept(*this);
+                this->ss << ", ";
+                this->ss << VHDL::OtherUtils::bitPosition(nodePeekLhs.nodePeekUnsignedValue()->getValue());
+                this->ss << ")";
+            } else if (nodePeekLhs.nodePeekIntegerValue() &&
+                    (nodePeekLhs.nodePeekIntegerValue()->getValue() > 0) &&
+                    VHDL::OtherUtils::isPowerOfTwo(nodePeekLhs.nodePeekIntegerValue()->getValue())) {
+                //lShiftByConst
+                this->ss << "shift_left(";
+                node.getRhs()->accept(*this);
+                this->ss << ", ";
+                this->ss << VHDL::OtherUtils::bitPosition(nodePeekLhs.nodePeekIntegerValue()->getValue());
+                this->ss << ")";
+            } else if (nodePeekRhs.nodePeekUnsignedValue() &&
+                    VHDL::OtherUtils::isPowerOfTwo(nodePeekRhs.nodePeekUnsignedValue()->getValue())) {
+                //lShiftByConst
+                this->ss << "shift_left(";
+                node.getLhs()->accept(*this);
+                this->ss << ", ";
+                this->ss << VHDL::OtherUtils::bitPosition(nodePeekRhs.nodePeekIntegerValue()->getValue());
+                this->ss << ")";
+            } else if (nodePeekRhs.nodePeekIntegerValue() &&
+                    (nodePeekRhs.nodePeekIntegerValue()->getValue() > 0) &&
+                    VHDL::OtherUtils::isPowerOfTwo(nodePeekRhs.nodePeekIntegerValue()->getValue())) {
+                //lShiftByConst
+                this->ss << "shift_left(";
+                node.getLhs()->accept(*this);
+                this->ss << ", ";
+                this->ss << VHDL::OtherUtils::bitPosition(nodePeekRhs.nodePeekIntegerValue()->getValue());
+                this->ss << ")";
+            } else {
+                node.getLhs()->accept(*this);
+                this->ss << " * ";
+                node.getRhs()->accept(*this);
+            }
+        } else {
+            node.getLhs()->accept(*this);
+            this->ss << " * ";
+            node.getRhs()->accept(*this);
+        }
+    } else {
+        node.getLhs()->accept(*this);
+        if (node.getOperation() == "%") {
+            this->ss << " rem ";
+        } else {
+            this->ss << " " << node.getOperation() << " ";
+        }
+        node.getRhs()->accept(*this);
+    }
+    if (tempUseParentheses) this->ss << ")";
+    if (!subArithmeticOp) {
+        arithmeticOp = false;
     }
 }

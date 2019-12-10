@@ -4,7 +4,7 @@
 
 #include <tuple>
 
-#include "SignalFactoryNew.h"
+#include "SignalFactory.h"
 
 const std::set<std::tuple<std::string, std::string, std::string>> HANDSHAKING_PROTOCOL_SIGNALS = {
         {"start", "bool", "in"},
@@ -18,7 +18,7 @@ const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNAL
         {"rst", "bool", "in"}
 };
 
-SignalFactoryNew::SignalFactoryNew(PropertySuite* propertySuite, Module* module, HLSmodule* hlsModule) :
+SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, HLSmodule* hlsModule) :
     propertySuite(propertySuite),
     module(module),
     hlsModule(hlsModule)
@@ -34,7 +34,7 @@ SignalFactoryNew::SignalFactoryNew(PropertySuite* propertySuite, Module* module,
     setOperationModuleOutputs();
 }
 
-void SignalFactoryNew::setOperationSelector() {
+void SignalFactory::setOperationSelector() {
     auto operationSelectorType = new DataType(propertySuite->getName() + "_operation_t");
     for (const auto& property : propertySuite->getOperationProperties()) {
         operationSelectorType->addEnumValue(property->getName());
@@ -42,7 +42,7 @@ void SignalFactoryNew::setOperationSelector() {
     activeOperation = new Variable("active_operation", operationSelectorType);
 }
 
-void SignalFactoryNew::setControlSignals() {
+void SignalFactory::setControlSignals() {
     for (const auto& signal : HANDSHAKING_PROTOCOL_SIGNALS) {
         handshakingProtocolSignals.insert( new DataSignal(std::get<0>(signal),
                 DataTypes::getDataType(std::get<1>(signal)),
@@ -67,18 +67,22 @@ void SignalFactoryNew::setControlSignals() {
     }
 }
 
-void SignalFactoryNew::setMonitorSignals() {
-    auto stateType = new DataType(propertySuite->getName() + "_operation_t");
+void SignalFactory::setMonitorSignals() {
+    auto stateType = new DataType(propertySuite->getName() + "_state_t");
     for (const auto& state : propertySuite->getStates()) {
         stateType->addEnumValue(state->getName());
     }
+    auto operationType = new DataType(propertySuite->getName() + "_operation_t");
+    for (const auto& operation : propertySuite->getOperationProperties()) {
+        operationType->addEnumValue(operation->getName());
+    }
     monitorSignals.insert(new Variable("active_state", stateType));
     monitorSignals.insert(new Variable("next_state", stateType));
-    monitorSignals.insert(new Variable("active_operation", stateType));
+    monitorSignals.insert(new Variable("active_operation", operationType));
     monitorSignals.insert(new Variable("wait_state", new DataType("bool")));
 }
 
-void SignalFactoryNew::setInputs() {
+void SignalFactory::setInputs() {
     for (const auto& port : module->getPorts()) {
         if (port.second->getInterface()->isInput()) {
             inputs.insert(port.second->getDataSignal());
@@ -86,7 +90,7 @@ void SignalFactoryNew::setInputs() {
     }
 }
 
-void SignalFactoryNew::setOutputs() {
+void SignalFactory::setOutputs() {
     for (const auto& port : module->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
             inputs.insert(port.second->getDataSignal());
@@ -94,23 +98,23 @@ void SignalFactoryNew::setOutputs() {
     }
 }
 
-void SignalFactoryNew::setInternalRegister() {
+void SignalFactory::setInternalRegister() {
     internalRegister = hlsModule->getInternalRegister();
 }
 
-void SignalFactoryNew::setOutputRegister() {
+void SignalFactory::setOutputRegister() {
     outputRegister = hlsModule->getOutputRegister();
 }
 
-void SignalFactoryNew::setOperationModuleInputs() {
+void SignalFactory::setOperationModuleInputs() {
     operationModuleInputs = hlsModule->getInputs();
 }
 
-void SignalFactoryNew::setOperationModuleOutputs() {
+void SignalFactory::setOperationModuleOutputs() {
     operationModuleOutputs = hlsModule->getOutputs();
 }
 
-std::string SignalFactoryNew::convertDataType(const std::string& dataType)
+std::string SignalFactory::convertDataType(const std::string& dataType)
 {
     if (dataType == "bool") {
         return "std_logic";
@@ -121,7 +125,7 @@ std::string SignalFactoryNew::convertDataType(const std::string& dataType)
     }
 }
 
-std::string SignalFactoryNew::styleToString(const Style& style)
+std::string SignalFactory::styleToString(const Style& style)
 {
     if (style == Style::UL) {
         return "_";

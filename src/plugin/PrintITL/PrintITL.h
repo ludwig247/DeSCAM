@@ -8,10 +8,9 @@
 #include <PluginFactory.h>
 #include <sstream>
 #include "Model.h"
-//#include <PropertyFactory.h>
 
-enum ITLOption {
-    STANDARD,
+enum class ITLOption {
+    DEFAULT,
     ADJUSTMACROS,
     PIPELINED,
     HLS

@@ -420,6 +420,30 @@ DataSignal* OptimizeForHLS::getCombinedDataSignal(const std::vector<DataSignal*>
     return combinedDataSignal;
 }
 
+std::set<Variable*> OptimizeForHLS::getInternalRegisterIn()
+{
+    std::set<Variable *> vars;
+    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getCommitmentList()) {
+            auto foundVars = ExprVisitor::getUsedVariables(commitment->getRhs());
+            vars.insert(foundVars.begin(), foundVars.end());
+        }
+    }
+    return vars;
+}
+
+std::set<Variable*> OptimizeForHLS::getInternalOut()
+{
+    std::set<Variable *> vars;
+    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getCommitmentList()) {
+            auto foundVars = ExprVisitor::getUsedVariables(commitment->getLhs());
+            vars.insert(foundVars.begin(), foundVars.end());
+        }
+    }
+    return vars;
+}
+
 //    for (const auto& state : propertySuite->getStates()) {
 //        auto successorProperties = propertySuite->getSuccessorProperties(state);
 //        std::sort(successorProperties.begin(), successorProperties.end(), [](const AbstractProperty* prop1, const AbstractProperty* prop2) {

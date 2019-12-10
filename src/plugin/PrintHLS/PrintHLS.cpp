@@ -16,13 +16,13 @@ PrintHLS::PrintHLS() :
 {
 }
 
-std::map<std::string, std::string> PrintHLS::printModel(Model *node) {
-    for (auto &module: node->getModules()) {
+std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
+    for (auto &module: model->getModules()) {
         this->currentModule = module.second;
         this->propertySuite = module.second->getPropertySuite();
         opt = std::make_unique<OptimizeForHLS>(propertySuite, currentModule);
 
-        dataTypes();
+        dataTypes(model);
         pluginOutput.insert(std::make_pair("Data_Types.h", ss.str()));
 
         ss.str("");
@@ -35,7 +35,7 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *node) {
     }
 
     synthesisScript = std::make_unique<PrintSynthesisScripts>();
-    auto scripts = synthesisScript->printModel(node);
+    auto scripts = synthesisScript->printModel(model);
     pluginOutput.insert(scripts.begin(), scripts.end());
 
     return pluginOutput;
@@ -49,14 +49,6 @@ void PrintHLS::operations() {
     ss << "void operations(\n";
     interface();
     ss << "{\n";
-
-//    auto regs = Utilities::getParents(opt->getVariables());
-//    for (const auto& reg : regs) {
-//        std::string type = Utilities::convertDataType(reg->getDataType()->getName());
-//        std::string name = reg->getName();
-//        ss << "\tstatic " << type << " " << name << ";\n";
-//        ss << "\t" << type << " " << "next_" << name << ";\n";
-//    }
 
     ss << "\tswitch (active_operation) {\n";
 
@@ -86,12 +78,8 @@ void PrintHLS::operations() {
         }
         ss << "\t\tbreak;\n";
     }
-    ss << "\t}\n";
-
-//    for (const auto& reg : regs) {
-//        ss << "\t" << reg->getName() << " = next_" << reg->getName() << ";\n";
-//    }
-    ss << "}";
+    ss << "\t}\n"
+       << "}";
 }
 
 void PrintHLS::interface() {
@@ -124,18 +112,21 @@ void PrintHLS::interface() {
         }
         ss << ",\n";
     }
+    for (const auto regs : Utilities::getParents(opt->getInternalRegisterIn()))
+    {
+        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " in_" << regs->getFullName() << ",\n";
+    }
+    for (const auto regs : Utilities::getParents(opt->getInternalOut()))
+    {
+        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " &out_" << regs->getFullName() << ",\n";
+    }
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
-    }
-    for (const auto regs : Utilities::getParents(opt->getVariables()))
-    {
-        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " " << regs->getFullName() << "_in,\n";
-        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " &" << regs->getFullName() << "_out,\n";
     }
     ss << "\toperation active_operation\n)\n";
 }
 
-void PrintHLS::dataTypes() {
+void PrintHLS::dataTypes(Model *model) {
     ss << "#ifndef DATA_TYPES_H\n";
     ss << "#define DATA_TYPES_H\n\n";
     ss << "#include \"ap_int.h\"\n\n";
@@ -163,26 +154,44 @@ void PrintHLS::dataTypes() {
     }
     ss << "};\n\n";
 
-    // TODO: DeSCAM erkennt keine Konstanten
-    // Constants
-    for (const auto& var : currentModule->getVariableMap()) {
-        if (var.second->isConstant()) {
-            ss << "\tconst " << var.first << " " << var.second->getInitialValue()->getValueAsString() << ";\n";
+    std::set<DataType *> enumTypes;
+    std::set<DataType *> compoundTypes;
+
+    auto fillTypeSets = [&enumTypes, &compoundTypes](DataType* dataType) {
+        if (dataType->isEnumType()) {
+            enumTypes.insert(dataType);
+        } else if (dataType->isCompoundType()) {
+            compoundTypes.insert(dataType);
         }
+    };
+
+    for (const auto& reg : propertySuite->getVisibleRegisters()) {
+        fillTypeSets((DataType *)(reg->getDataType()));
+    }
+    for (const auto& func : propertySuite->getFunctions()) {
+        fillTypeSets(func->getReturnType());
+    }
+    for (const auto& module : model->getModules()) {
+        for (auto &port : module.second->getPorts()) {
+            fillTypeSets(port.second->getDataType());
+        }
+    }
+    for (const auto& var : currentModule->getVariableMap()) {
+        fillTypeSets(var.second->getDataType());
     }
 
     ss << "// Enum Types\n";
-    for (auto &dataType : DataTypes::getDataTypeMap()) {
-        if (dataType.second->isEnumType())
-            dataType.second->accept(*this);
-    }
-    ss << "// Compound Types\n";
-    for (auto &dataType : DataTypes::getDataTypeMap()) {
-        if (dataType.second->isCompoundType())
-            dataType.second->accept(*this);
+    for (auto type : enumTypes) {
+        type->accept(*this);
     }
 
-    ss << "#endif //DATA_TYPES_H";
+    ss << "\n"
+       << "// Compound Types\n";
+    for (auto type : compoundTypes) {
+        type->accept(*this);
+    }
+
+    ss << "\n#endif //DATA_TYPES_H";
 }
 
 void PrintHLS::visit(DataType &node) {

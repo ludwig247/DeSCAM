@@ -39,11 +39,6 @@ void VHDLPrintVisitor::visit(VariableOperand &node) {
     } else {
         this->ss << node.getVariable()->getName();
     }
-//    if (node.getVariable()->isSubVar()) {
-//        this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
-//    } else {
-//        this->ss << node.getVariable()->getName();
-//    }
 }
 
 void VHDLPrintVisitor::visit(SyncSignal &node) {

@@ -18,7 +18,7 @@ public:
     PrintHLS();
     ~PrintHLS() override = default;
 
-    std::map<std::string, std::string> printModel(Model *node) override ;
+    std::map<std::string, std::string> printModel(Model *model) override ;
 
 private:
     std::stringstream ss;
@@ -29,7 +29,7 @@ private:
     std::unique_ptr<PrintSynthesisScripts> synthesisScript;
     std::unique_ptr<OptimizeForHLS> opt;
 
-    void dataTypes();
+    void dataTypes(Model *model);
     void functions();
     void operations();
     void interface();

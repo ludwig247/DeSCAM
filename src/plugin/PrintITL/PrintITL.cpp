@@ -3,24 +3,21 @@
 //
 
 
-#include <fstream>
 #include <ExprVisitor.h>
 
-
 #include "PrintITL.h"
-#include "Config.h"
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
 
 PrintITL::PrintITL() {
     if (getOptionMap().at("adjustmacros")) {
-        usedITLOption = ADJUSTMACROS;
+        usedITLOption = ITLOption::ADJUSTMACROS;
     } else if (getOptionMap().at("pipelined")) {
-        usedITLOption = PIPELINED;
+        usedITLOption = ITLOption::PIPELINED;
     } else if (getOptionMap().at("hls")) {
-        usedITLOption = HLS;
+        usedITLOption = ITLOption::HLS;
     } else {
-        usedITLOption = STANDARD;
+        usedITLOption = ITLOption::DEFAULT;
     }
 }
 
@@ -31,16 +28,16 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
         this->module = module.second;
 
         switch (usedITLOption) {
-            case STANDARD:
+            case ITLOption::DEFAULT:
                 pluginOutput.insert(std::make_pair(module.first + ".vhi", propertySuite()));
                 break;
-            case ADJUSTMACROS:
+            case ITLOption::ADJUSTMACROS:
                 pluginOutput.insert(std::make_pair(module.first + ".vhi", adjustmacros()));
                 break;
-            case PIPELINED:
+            case ITLOption::PIPELINED:
                 pluginOutput.insert(std::make_pair(module.first + ".vhi", pipelined()));
                 break;
-            case HLS:
+            case ITLOption::HLS:
                 pluginOutput.insert(std::make_pair(module.first + ".vhi", hls()));
                 break;
         }
@@ -55,16 +52,16 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
     this->module = node;
 
     switch (usedITLOption) {
-        case STANDARD:
+        case ITLOption::DEFAULT:
             pluginOutput.insert(std::make_pair(node->getName() + ".vhi", propertySuite()));
             break;
-        case ADJUSTMACROS:
+        case ITLOption::ADJUSTMACROS:
             pluginOutput.insert(std::make_pair(node->getName() + ".vhi", adjustmacros()));
             break;
-        case PIPELINED:
+        case ITLOption::PIPELINED:
             pluginOutput.insert(std::make_pair(node->getName() + ".vhi", pipelined()));
             break;
-        case HLS:
+        case ITLOption::HLS:
             pluginOutput.insert(std::make_pair(node->getName() + ".vhi", hls()));
             break;
     }
@@ -908,11 +905,9 @@ std::string PrintITL::hls() {
             constraintSize--;
         }
 
-        //TODO: Make function independent of module
         if (module->isSlave()) {
             t_end = "t+1";
         } else {
-            // TODO: Make t_end dependent of hls output
             ss << "for timepoints:\n";
             ss << "\tt_end = t+1..5 waits_for done = '1';\n";
             t_end = "t_end";

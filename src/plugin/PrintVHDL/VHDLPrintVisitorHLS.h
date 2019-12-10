@@ -22,8 +22,12 @@ namespace SCAM {
         void visit(VariableOperand &node) override ;
         void visit(BoolValue &node) override ;
         void visit(DataSignalOperand &node) override ;
+        void visit(Arithmetic &node) override ;
 
         std::string getString() override ;
+
+    private:
+        bool arithmeticOp;
     };
 
 }
