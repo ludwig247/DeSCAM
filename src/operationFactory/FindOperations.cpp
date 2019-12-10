@@ -41,11 +41,13 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
             //TODO: in the future, the name will represent the line of code
             SCAM::FindCommunication2 findComm;
             node->getStmt()->accept(findComm);
+            std::cout << PrintStmt::toString(node->getStmt()) << std::endl;
 
-            std::string stateName = node->getName();
-//            if(findComm.hasStateName()) {
-//                stateName = findComm.getStateName();
-//            }
+
+            std::string stateName = "state";
+            if(findComm.hasStateName()) {
+                stateName = findComm.getStateName();
+            }
             auto *state = new SCAM::State2(stateName);
 
             if(findComm.isWaitComm()) {

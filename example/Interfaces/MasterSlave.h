@@ -22,7 +22,8 @@ public:
 
     void master_read(T &out,std::string stateName="");
 
-    void master_write(const T &val,std::string stateName="");
+    void master_write(const T &val,std::string stateName) override;
+    void master_write(const T &val) override ;
 
 //    bool slave_read(T &out);
     void slave_read(T & out);

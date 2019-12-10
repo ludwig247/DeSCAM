@@ -331,8 +331,6 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         if (memberCallExpr->getNumArgs() == 2) {
                             FindStateName findStateName(memberCallExpr->getArg(1));
                             if(findStateName.hasStateName()){
-                                memberCallExpr->dumpColor();
-                                std::cout << findStateName.getStateName() << std::endl;
                                 write->setStateName(findStateName.getStateName());
                             }
                         }

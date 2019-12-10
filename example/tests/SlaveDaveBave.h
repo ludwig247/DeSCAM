@@ -8,13 +8,13 @@
 
 #include "systemc.h"
 #include "../Interfaces/Interfaces.h"
+
 #define ADD_HEX 0x100
 
 
-SC_MODULE(Test_Nordic)
-{
-    blocking_in <int> test_in;
-    blocking_out<unsigned int> test_out;
+SC_MODULE(Test_Nordic) {
+    blocking_in<int> test_in;
+    master_out<unsigned int> test_out;
 
     int foo;
     unsigned int bar;
@@ -23,20 +23,18 @@ SC_MODULE(Test_Nordic)
         return ADD_HEX;
     }
 
-    SC_CTOR(Test_Nordic):
+    SC_CTOR(Test_Nordic) :
             test_in("test_in"),
-            test_out("test_out")
-    {
+            test_out("test_out") {
         SC_THREAD(fsm);
     }
-    void fsm()
-    {
-        while(true)
-        {
-          test_in->read(foo);
 
-          bar = bar + test_var();
-          test_out->write(bar);
+    void fsm() {
+        while (true) {
+            test_in->read(foo);
+            //bar = bar + test_var();
+            test_out->master_write(bar);
+            test_out->master_write(bar+2, "test");
         }
     }
 };

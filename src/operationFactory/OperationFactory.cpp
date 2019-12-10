@@ -46,8 +46,9 @@ namespace SCAM {
         this->optimizeOperations();
         std::cout << "Generating PropertySuite:" << std::endl;
         std::map<int,State2*> stateMap;
-        for(auto foo: this->statesMap){
-            stateMap.insert(std::make_pair(foo.second->getStateId(),foo.second));
+        for(auto state: this->statesMap){
+            state.second->setName(state.second->getName() + "_" + std::to_string(state.second->getStateId()));
+            stateMap.insert(std::make_pair(state.second->getStateId(), state.second));
         }
         this->module->getFSM()->setStateMap(stateMap);
         this->generatePropertySuite();
@@ -196,7 +197,8 @@ namespace SCAM {
         for (const auto& state: this->statesMap) {
             if (state.second->isInit()) continue;
             //std::cout << state.second->getName() << std::endl;
-            state.second->setName("state_"+std::to_string(state.second->getStateId()));
+
+            state.second->setName(state.second->getName());
             Variable *stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
             PropertyMacro *pm = new PropertyMacro(state.second->getName(), stateVar);
             pm->setExpression(new BoolValue(true));

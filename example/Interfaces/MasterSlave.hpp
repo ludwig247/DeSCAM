@@ -6,6 +6,8 @@
 #define INTERFACES_MASTERSLAVE_HPP
 
 
+#include "MasterSlave.h"
+
 template<typename T>
 MasterSlave<T>::MasterSlave (const char *name) : sc_prim_channel(name) {
     reader = nullptr;
@@ -270,6 +272,11 @@ void MasterSlave<T>::register_port(sc_port_base &port, const char *if_typename) 
         writer = &port;
         writer_if = nm;
     }
+}
+
+template<typename T>
+void MasterSlave<T>::master_write(const T &val) {
+    this->master_write(val,"");
 }
 
 #endif //INTERFACES_MASTERSLAVE_HPP

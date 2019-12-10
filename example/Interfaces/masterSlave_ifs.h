@@ -10,7 +10,8 @@
 template<typename T>class master_out_if : virtual public sc_interface
 {
 public:
-    virtual void master_write(const T & val,std::string stateName="") = 0;
+    virtual void master_write(const T & val,std::string stateName) = 0;
+    virtual void master_write(const T & val) = 0;
 //    virtual bool poke() = 0;
 };
 
@@ -18,7 +19,7 @@ template<typename T>
 class master_in_if : virtual public sc_interface
 {
 public:
-    virtual void master_read(T & out,std::string stateName="") = 0;
+    virtual void master_read(T & out,std::string stateName) = 0;
 //    virtual bool peek() = 0;
 };
 

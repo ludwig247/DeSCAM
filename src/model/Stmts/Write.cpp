@@ -53,11 +53,4 @@ namespace SCAM {
         return this->status != nullptr;
     }
 
-    const std::string &Write::getStateName() const {
-        return stateName;
-    }
-
-    void Write::setStateName(const std::string &stateName) {
-        Write::stateName = stateName;
-    }
 }
