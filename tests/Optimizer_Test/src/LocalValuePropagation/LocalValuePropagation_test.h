@@ -9,8 +9,6 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-auto file_path = std::string(SCAM_HOME"/tests/Optimizer_Test/src/LocalValuePropagation/test_files/Tests.h");
-
 class LocalVariablePropagation_Test : public ::testing::TestWithParam<SCAM::Module *> {
 public:
     void SetUp() override {};
@@ -18,7 +16,7 @@ public:
     void TearDown() override {};
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, LocalVariablePropagation_Test, ::testing::ValuesIn(createModules(file_path)));
+INSTANTIATE_TEST_CASE_P(Basic, LocalVariablePropagation_Test, ::testing::ValuesIn(createModules(std::string(SCAM_HOME"/tests/Optimizer_Test/src/LocalValuePropagation/test_files/Tests.h"))));
 
 TEST_P(LocalVariablePropagation_Test, propagate_locally_constant_values) {
     auto module = GetParam();

@@ -8,7 +8,7 @@
 #include "Optimizer_Test/src/CfgPath/CfgPath_test.h"
 #include "Optimizer_Test/src/FindCfgPaths/FindCfgPaths_test.h"
 #include "Optimizer_Test/src/LocalValuePropagation/LocalValuePropagation_test.h"
-#include "Optimizer_Test/src/GlobalValuePropagation/GlobalValuePropagation_test.h"
+#include "Optimizer_Test/src/GlobalConstantPropagation/GlobalConstantPropagation_test.h"
 #include "Optimizer_Test/src/LivenessAnalysis/LivenessAnalysis_test.h"
 //#include "Optimizer_Test/src/GlobalVariablePropagation/GlobalVariablePropagation_test.h"
 #endif //OPTIMIZER_TEST_OPTIONS_H

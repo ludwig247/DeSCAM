@@ -8,9 +8,6 @@
 
 #include "Optimizer_Test/src/CreateModel.h"
 
-
-auto file_path = std::string(SCAM_HOME"/tests/Optimizer_Test/src/FindCfgPaths/test_files/Tests.h");
-
 class FindCFGPaths_Test : public ::testing::TestWithParam<SCAM::Module *> {
 public:
     void SetUp() override {};
@@ -18,7 +15,7 @@ public:
     void TearDown() override {};
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, FindCFGPaths_Test, ::testing::ValuesIn(createModules(file_path)));
+INSTANTIATE_TEST_CASE_P(Basic, FindCFGPaths_Test, ::testing::ValuesIn(createModules(std::string(SCAM_HOME"/tests/Optimizer_Test/src/FindCfgPaths/test_files/Tests.h"))));
 
 TEST_P(FindCFGPaths_Test, find_paths) {
     auto module = GetParam();

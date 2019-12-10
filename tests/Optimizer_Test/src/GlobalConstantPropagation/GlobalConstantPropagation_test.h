@@ -9,8 +9,6 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-auto file_path = std::string(SCAM_HOME"/tests/Optimizer_Test/src/GlobalConstantPropagation/test_files/Tests.h");
-
 class GlobalConstantPropagation_Test : public ::testing::TestWithParam<SCAM::Module *> {
 public:
     void SetUp() override {};
@@ -18,7 +16,7 @@ public:
     void TearDown() override {};
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, GlobalConstantPropagation_Test, ::testing::ValuesIn(createModules(file_path)));
+INSTANTIATE_TEST_CASE_P(Basic, GlobalConstantPropagation_Test, ::testing::ValuesIn(createModules(std::string(SCAM_HOME"/tests/Optimizer_Test/src/GlobalConstantPropagation/test_files/Tests.h"))));
 
 TEST_P(GlobalConstantPropagation_Test, propagate_globally_constant_values) {
     auto module = GetParam();
