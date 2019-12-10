@@ -41,9 +41,12 @@ public:
     template <typename T>
     static std::string enumToVector(T *dataSignal);
 
+    std::set<Variable *> getInternalRegister() const;
+
     inline Variable * getActiveOperation() const;
     inline std::set<Variable *> getMonitorSignals() const;
-    inline std::set<Variable *> getInternalRegister() const;
+    inline std::set<Variable *> getInternalRegisterIn() const;
+    inline std::set<Variable *> getInternalRegisterOut() const;
     inline std::set<Variable *> getOutputRegister() const;
     inline std::set<DataSignal *> getInputs() const;
     inline std::set<DataSignal *> getOutputs() const;
@@ -60,7 +63,8 @@ private:
 
     Variable *activeOperation;
     std::set<Variable *> monitorSignals;
-    std::set<Variable *> internalRegister;
+    std::set<Variable *> internalRegisterIn;
+    std::set<Variable *> internalRegisterOut;
     std::set<Variable *> outputRegister;
     std::set<DataSignal *> inputs;
     std::set<DataSignal *> outputs;
@@ -132,8 +136,12 @@ std::set<Variable *> SignalFactory::getMonitorSignals() const {
     return monitorSignals;
 }
 
-std::set<Variable *> SignalFactory::getInternalRegister() const {
-    return internalRegister;
+std::set<Variable *> SignalFactory::getInternalRegisterIn() const {
+    return internalRegisterIn;
+}
+
+std::set<Variable * > SignalFactory::getInternalRegisterOut() const {
+    return internalRegisterOut;
 }
 
 std::set<Variable *> SignalFactory::getOutputRegister() const {

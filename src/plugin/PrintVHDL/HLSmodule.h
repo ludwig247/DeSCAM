@@ -15,7 +15,8 @@ public:
     explicit HLSmodule(PropertySuite *propertySuite, Module* module);
     ~HLSmodule() = default;
 
-    std::set<Variable *> getInternalRegister();
+    std::set<Variable *> getInternalRegisterIn();
+    std::set<Variable *> getInternalRegisterOut();
     std::set<Variable *> getOutputRegister();
     std::set<DataSignal *> getOutputs();
     std::set<DataSignal *> getInputs();

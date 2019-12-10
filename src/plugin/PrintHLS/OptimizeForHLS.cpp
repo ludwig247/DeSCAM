@@ -425,6 +425,9 @@ std::set<Variable*> OptimizeForHLS::getInternalRegisterIn()
     std::set<Variable *> vars;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
             auto foundVars = ExprVisitor::getUsedVariables(commitment->getRhs());
             vars.insert(foundVars.begin(), foundVars.end());
         }
@@ -432,11 +435,14 @@ std::set<Variable*> OptimizeForHLS::getInternalRegisterIn()
     return vars;
 }
 
-std::set<Variable*> OptimizeForHLS::getInternalOut()
+std::set<Variable*> OptimizeForHLS::getInternalRegisterOut()
 {
     std::set<Variable *> vars;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
             auto foundVars = ExprVisitor::getUsedVariables(commitment->getLhs());
             vars.insert(foundVars.begin(), foundVars.end());
         }

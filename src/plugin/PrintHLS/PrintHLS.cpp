@@ -116,7 +116,7 @@ void PrintHLS::interface() {
     {
         ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " in_" << regs->getFullName() << ",\n";
     }
-    for (const auto regs : Utilities::getParents(opt->getInternalOut()))
+    for (const auto regs : Utilities::getParents(opt->getInternalRegisterOut()))
     {
         ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " &out_" << regs->getFullName() << ",\n";
     }

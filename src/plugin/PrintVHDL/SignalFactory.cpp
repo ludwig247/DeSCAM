@@ -99,7 +99,8 @@ void SignalFactory::setOutputs() {
 }
 
 void SignalFactory::setInternalRegister() {
-    internalRegister = hlsModule->getInternalRegister();
+    internalRegisterIn = hlsModule->getInternalRegisterIn();
+    internalRegisterOut = hlsModule->getInternalRegisterOut();
 }
 
 void SignalFactory::setOutputRegister() {
@@ -112,6 +113,13 @@ void SignalFactory::setOperationModuleInputs() {
 
 void SignalFactory::setOperationModuleOutputs() {
     operationModuleOutputs = hlsModule->getOutputs();
+}
+
+std::set<Variable *> SignalFactory::getInternalRegister() const {
+    std::set<Variable *> vars;
+    vars.insert(internalRegisterIn.begin(), internalRegisterIn.end());
+    vars.insert(internalRegisterOut.begin(), internalRegisterOut.end());
+    return vars;
 }
 
 std::string SignalFactory::convertDataType(const std::string& dataType)

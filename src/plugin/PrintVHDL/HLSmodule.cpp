@@ -443,15 +443,52 @@ void HLSmodule::mapInputRegistersToInputs() {
     }
 }
 
-std::set<Variable*> HLSmodule::getInternalRegister() {
-    std::set<Variable *> internalRegister = VHDL::OtherUtils::getParents(getVariables());
-    for (const auto& outputRegister : registerToOutputMap) {
-        const auto& it = internalRegister.find(outputRegister.first);
-        if (it != internalRegister.end()) {
-            internalRegister.erase(it);
+std::set<Variable *> HLSmodule::getInternalRegisterIn() {
+    std::set<Variable *> vars;
+    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
+            auto foundVars = ExprVisitor::getUsedVariables(commitment->getRhs());
+            vars.insert(foundVars.begin(), foundVars.end());
         }
     }
-    return internalRegister;
+    std::set<Variable *> outputRegisters;
+    for (const auto& outputRegister : registerToOutputMap) {
+        outputRegisters.insert(outputRegister.first);
+    }
+    for (const auto& outputRegister : VHDL::OtherUtils::getSubVars(outputRegisters)) {
+        const auto it = vars.find(outputRegister);
+        if (it != vars.end()) {
+            vars.erase(it);
+        }
+    }
+    return vars;
+}
+
+std::set<Variable *> HLSmodule::getInternalRegisterOut() {
+    std::set<Variable *> vars;
+    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getCommitmentList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
+            }
+            auto foundVars = ExprVisitor::getUsedVariables(commitment->getLhs());
+            vars.insert(foundVars.begin(), foundVars.end());
+        }
+    }
+    std::set<Variable *> outputRegisters;
+    for (const auto& outputRegister : registerToOutputMap) {
+        outputRegisters.insert(outputRegister.first);
+    }
+    for (const auto& outputRegister : VHDL::OtherUtils::getSubVars(outputRegisters)) {
+        const auto it = vars.find(outputRegister);
+        if (it != vars.end()) {
+            vars.erase(it);
+        }
+    }
+    return vars;
 }
 
 std::set<Variable*> HLSmodule::getOutputRegister() {

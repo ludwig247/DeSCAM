@@ -170,7 +170,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
-    for (const auto& internalRegs : OtherUtils::getSubVars(signalFactory->getInternalRegister())) {
+    for (const auto& internalRegs : signalFactory->getInternalRegisterOut()) {
         printOutputProcessRegs(internalRegs);
     }
 
@@ -271,7 +271,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
 
     printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
     printModuleInputSignals(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()));
-    printModuleInputVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "in_", "");
+    printModuleInputVars(signalFactory->getInternalRegisterIn(), "in_", "");
 
     ss << "\t\t\telsif ((idle_sig = '1' or  ready_sig = '1') and wait_state = '1') then\n"
        << "\t\t\t\tstart_sig <= '0';\n"
@@ -345,11 +345,10 @@ void PrintVHDLForHLS::signals(std::stringstream &ss) {
     };
 
     ss << "\n\t-- Internal Registers\n";
-    printVars(signalFactory->getInternalRegister(), Style::DOT, "", "", false, false);
-    printVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()),
-            Style::UL, "in_", "", false, true);
-    printVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()),
-            Style::UL, "out_", "", true, true);
+    printVars(OtherUtils::getParents(signalFactory->getInternalRegister()),
+            Style::DOT, "", "", false, false);
+    printVars(signalFactory->getInternalRegisterIn(),Style::UL, "in_", "", false, true);
+    printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true, true);
 
     ss << "\n\t-- Input Registers\n";
     printSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()),
@@ -413,8 +412,8 @@ void PrintVHDLForHLS::component(std::stringstream& ss) {
     printComponentSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", false);
     printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", false);
     printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", true);
-    printComponentVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "in", false);
-    printComponentVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "out", true);
+    printComponentVars(signalFactory->getInternalRegisterIn(), "in", false);
+    printComponentVars(signalFactory->getInternalRegisterOut(), "out", true);
 
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
@@ -467,8 +466,8 @@ void PrintVHDLForHLS::componentInst(std::stringstream& ss) {
     printComponentInstSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", "_sig", false);
     printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in", false);
     printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out", true);
-    printComponentInstVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "in_", false);
-    printComponentInstVars(OtherUtils::getSubVars(signalFactory->getInternalRegister()), "out_", true);
+    printComponentInstVars(signalFactory->getInternalRegisterIn(), "in_", false);
+    printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_", true);
 
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
