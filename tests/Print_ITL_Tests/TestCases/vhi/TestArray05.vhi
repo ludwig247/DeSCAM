@@ -8,6 +8,8 @@ macro b_out_notify : boolean := end macro;
 -- DP SIGNALS --
 macro b_in_sig : signed := end macro;
 macro b_out_sig : int_2 := end macro;
+macro b_out_sig_0 : signed := end macro;
+macro b_out_sig_1 : signed := end macro;
 
 
 -- CONSTRAINTS --

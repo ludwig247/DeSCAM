@@ -96,6 +96,7 @@ end property;
 property wait_state_2 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	myArray_0_at_t = myArray(0)@t,
 	myArray_1_at_t = myArray(1)@t,
 	myArray_2_at_t = myArray(2)@t,
@@ -106,7 +107,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_2;
-	at t+1: b_out_sig = myArray_0_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: myArray(0) = myArray_0_at_t;
 	at t+1: myArray(1) = myArray_1_at_t;
 	at t+1: myArray(2) = myArray_2_at_t;

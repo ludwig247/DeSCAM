@@ -86,13 +86,14 @@ end property;
 property wait_state_1 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	var1_at_t = var1@t;
 assume:
 	at t: state_1;
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_1;
-	at t+1: b_out_sig = var1_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: var1 = var1_at_t;
 	at t+1: alu_out_notify = false;
 	at t+1: b_out_notify = true;

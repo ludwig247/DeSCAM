@@ -186,11 +186,11 @@ std::string PrintSVA::signals() {
 
     ss << "\n// DP SIGNALS //\n";
     for (auto dp: ps->getDpSignals()) {
-        ss << "function " << convertDataType(dp->getDataType()) << " " << dp->getName();
+        ss << "function " << convertDataType(dp->getDataType()) << " " << dp->getParentName();
         if (dp->isCompoundType()) {
             ss << "_" + dp->getSubVarName();
         }
-        ss << ";\n\t" << dp->getName();
+        ss << ";\n\t" << dp->getParentName();
         if (dp->isCompoundType()) {
             ss << "_" + dp->getSubVarName();
         }
@@ -205,17 +205,18 @@ std::string PrintSVA::registers() {
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
         if (!vr->isArrayType()) {
-            ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getName();
+            ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getParentName();
             if (vr->isCompoundType()) {
                 ss << "_" + vr->getSubVarName();
             }
-            ss << ";\n\t" << vr->getName();
+            ss << ";\n\t" << vr->getParentName();
             if (vr->isCompoundType()) {
                 ss << "_" + vr->getSubVarName();
             }
             ss << " = ;\nendfunction\n";
         }
     }
+    //TODO: add array types
     return ss.str();
 }
 

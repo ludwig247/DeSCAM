@@ -709,6 +709,7 @@ end property;
 property wait_state_2 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -717,7 +718,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_2;
-	at t+1: b_out_sig = (shift_left(val_unsigned_at_t,2));
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -729,6 +730,7 @@ end property;
 property wait_state_3 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -737,7 +739,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_3;
-	at t+1: b_out_sig = (val_unsigned_at_t and 2);
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -749,6 +751,7 @@ end property;
 property wait_state_4 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -757,7 +760,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_4;
-	at t+1: b_out_sig = (val_unsigned_at_t or 2);
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -769,6 +772,7 @@ end property;
 property wait_state_5 is
 dependencies: no_reset;
 freeze:
+	b_out2_sig_at_t = b_out2_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -777,7 +781,7 @@ assume:
 	at t: not(b_out2_sync);
 prove:
 	at t+1: state_5;
-	at t+1: b_out2_sig = (shift_right(val_signed_at_t,2));
+	at t+1: b_out2_sig = b_out2_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -789,6 +793,7 @@ end property;
 property wait_state_6 is
 dependencies: no_reset;
 freeze:
+	b_out2_sig_at_t = b_out2_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -797,7 +802,7 @@ assume:
 	at t: not(b_out2_sync);
 prove:
 	at t+1: state_6;
-	at t+1: b_out2_sig = (shift_left(val_signed_at_t,2));
+	at t+1: b_out2_sig = b_out2_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -809,6 +814,7 @@ end property;
 property wait_state_7 is
 dependencies: no_reset;
 freeze:
+	b_out2_sig_at_t = b_out2_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -817,7 +823,7 @@ assume:
 	at t: not(b_out2_sync);
 prove:
 	at t+1: state_7;
-	at t+1: b_out2_sig = (val_signed_at_t and 2);
+	at t+1: b_out2_sig = b_out2_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -829,6 +835,7 @@ end property;
 property wait_state_8 is
 dependencies: no_reset;
 freeze:
+	b_out2_sig_at_t = b_out2_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -837,7 +844,7 @@ assume:
 	at t: not(b_out2_sync);
 prove:
 	at t+1: state_8;
-	at t+1: b_out2_sig = (val_signed_at_t or 2);
+	at t+1: b_out2_sig = b_out2_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;
@@ -849,6 +856,7 @@ end property;
 property wait_state_1 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
@@ -857,7 +865,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_1;
-	at t+1: b_out_sig = (shift_right(val_unsigned_at_t,2));
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: val_signed = val_signed_at_t;
 	at t+1: val_unsigned = val_unsigned_at_t;

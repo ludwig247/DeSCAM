@@ -6,18 +6,22 @@ macro slave_to_agent_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro agent_to_bus_sig : slave_signals := end macro;
 macro agent_to_bus_sig_ack : boolean := end macro;
 macro agent_to_bus_sig_data : signed := end macro;
 macro agent_to_bus_sig_err : boolean := end macro;
+macro agent_to_slave_sig : bus_req_t := end macro;
 macro agent_to_slave_sig_addr : signed := end macro;
 macro agent_to_slave_sig_data : signed := end macro;
 macro agent_to_slave_sig_trans_type : trans_t := end macro;
+macro bus_to_agent_sig : master_signals := end macro;
 macro bus_to_agent_sig_addr : signed := end macro;
 macro bus_to_agent_sig_cyc : boolean := end macro;
 macro bus_to_agent_sig_data : signed := end macro;
 macro bus_to_agent_sig_stb : boolean := end macro;
 macro bus_to_agent_sig_we : boolean := end macro;
 macro clk_sig : boolean := end macro;
+macro slave_to_agent_sig : bus_resp_t := end macro;
 macro slave_to_agent_sig_ack : ack_t := end macro;
 macro slave_to_agent_sig_data : signed := end macro;
 
@@ -27,9 +31,6 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro agent_to_slave_req_addr : signed := end macro;
-macro agent_to_slave_req_data : signed := end macro;
-macro agent_to_slave_req_trans_type : trans_t := end macro;
 macro nextphase : Phases := end macro;
 macro slave_to_agent_resp_ack : ack_t := end macro;
 macro slave_to_agent_resp_data : signed := end macro;
@@ -53,9 +54,6 @@ prove:
 	 at t: agent_to_bus_sig_ack = false;
 	 at t: agent_to_bus_sig_data = resize(0,32);
 	 at t: agent_to_bus_sig_err = false;
-	 at t: agent_to_slave_req_addr = resize(0,32);
-	 at t: agent_to_slave_req_data = resize(0,32);
-	 at t: agent_to_slave_req_trans_type = SINGLE_READ;
 	 at t: nextphase = IDLE;
 	 at t: slave_to_agent_resp_ack = ERR;
 	 at t: slave_to_agent_resp_data = resize(0,32);
@@ -85,9 +83,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = bus_to_agent_sig_addr_at_t;
-	at t_end: agent_to_slave_req_data = 0;
-	at t_end: agent_to_slave_req_trans_type = SINGLE_READ;
 	at t_end: agent_to_slave_sig_addr = bus_to_agent_sig_addr_at_t;
 	at t_end: agent_to_slave_sig_data = 0;
 	at t_end: agent_to_slave_sig_trans_type = SINGLE_READ;
@@ -122,9 +117,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = bus_to_agent_sig_addr_at_t;
-	at t_end: agent_to_slave_req_data = bus_to_agent_sig_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = SINGLE_WRITE;
 	at t_end: agent_to_slave_sig_addr = bus_to_agent_sig_addr_at_t;
 	at t_end: agent_to_slave_sig_data = bus_to_agent_sig_data_at_t;
 	at t_end: agent_to_slave_sig_trans_type = SINGLE_WRITE;
@@ -145,9 +137,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -160,9 +149,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = nextphase_at_t;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -179,9 +165,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -193,9 +176,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = nextphase_at_t;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -213,9 +193,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	slave_to_agent_sig_ack_at_t = slave_to_agent_sig_ack@t,
 	slave_to_agent_sig_data_at_t = slave_to_agent_sig_data@t;
 assume:
@@ -226,9 +203,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = DONE;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_sig_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_sig_data_at_t;
@@ -245,9 +219,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -259,9 +230,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = nextphase_at_t;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -279,9 +247,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	slave_to_agent_sig_ack_at_t = slave_to_agent_sig_ack@t;
 assume:
 	at t: state_4;
@@ -291,9 +256,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = DONE;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_sig_ack_at_t;
 	at t_end: slave_to_agent_resp_data = 0;
@@ -307,9 +269,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
 assume:
@@ -321,9 +280,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = false;
 	at t_end: agent_to_bus_sig_data = 0;
 	at t_end: agent_to_bus_sig_err = false;
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = IDLE;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -337,9 +293,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -353,9 +306,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = true;
 	at t_end: agent_to_bus_sig_data = slave_to_agent_resp_data_at_t;
 	at t_end: agent_to_bus_sig_err = not((slave_to_agent_resp_ack_at_t = OK));
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = nextphase_at_t;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -369,9 +319,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -385,9 +332,6 @@ prove:
 	at t_end: agent_to_bus_sig_ack = true;
 	at t_end: agent_to_bus_sig_data = 0;
 	at t_end: agent_to_bus_sig_err = not((slave_to_agent_resp_ack_at_t = OK));
-	at t_end: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t_end: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t_end: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t_end: nextphase = nextphase_at_t;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -402,9 +346,7 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
+	agent_to_slave_sig_at_t = agent_to_slave_sig@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -416,12 +358,7 @@ prove:
 	at t+1: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t+1: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t+1: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t+1: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t+1: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t+1: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
-	at t+1: agent_to_slave_sig_addr = agent_to_slave_req_addr_at_t;
-	at t+1: agent_to_slave_sig_data = agent_to_slave_req_data_at_t;
-	at t+1: agent_to_slave_sig_trans_type = agent_to_slave_req_trans_type_at_t;
+	at t+1: agent_to_slave_sig = agent_to_slave_sig_at_t;
 	at t+1: nextphase = nextphase_at_t;
 	at t+1: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t+1: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -436,9 +373,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -450,9 +384,6 @@ prove:
 	at t+1: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t+1: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t+1: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t+1: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t+1: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t+1: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t+1: nextphase = nextphase_at_t;
 	at t+1: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t+1: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -467,9 +398,7 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
+	agent_to_slave_sig_at_t = agent_to_slave_sig@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -481,12 +410,7 @@ prove:
 	at t+1: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t+1: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t+1: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t+1: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t+1: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t+1: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
-	at t+1: agent_to_slave_sig_addr = agent_to_slave_req_addr_at_t;
-	at t+1: agent_to_slave_sig_data = agent_to_slave_req_data_at_t;
-	at t+1: agent_to_slave_sig_trans_type = agent_to_slave_req_trans_type_at_t;
+	at t+1: agent_to_slave_sig = agent_to_slave_sig_at_t;
 	at t+1: nextphase = nextphase_at_t;
 	at t+1: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t+1: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
@@ -501,9 +425,6 @@ freeze:
 	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	agent_to_slave_req_addr_at_t = agent_to_slave_req_addr@t,
-	agent_to_slave_req_data_at_t = agent_to_slave_req_data@t,
-	agent_to_slave_req_trans_type_at_t = agent_to_slave_req_trans_type@t,
 	nextphase_at_t = nextphase@t,
 	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
 	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
@@ -515,9 +436,6 @@ prove:
 	at t+1: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
 	at t+1: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t+1: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t+1: agent_to_slave_req_addr = agent_to_slave_req_addr_at_t;
-	at t+1: agent_to_slave_req_data = agent_to_slave_req_data_at_t;
-	at t+1: agent_to_slave_req_trans_type = agent_to_slave_req_trans_type_at_t;
 	at t+1: nextphase = nextphase_at_t;
 	at t+1: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
 	at t+1: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;

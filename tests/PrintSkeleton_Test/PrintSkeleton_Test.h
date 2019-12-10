@@ -42,7 +42,6 @@ public:
 
     virtual void TearDown() {
     }
-
 };
 
 
