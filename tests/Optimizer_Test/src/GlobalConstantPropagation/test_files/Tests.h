@@ -7,5 +7,4 @@
 
 
 #include "Test_Module.h"
-#include "VCORE.h"
 #endif //PROJECT_TESTS_H

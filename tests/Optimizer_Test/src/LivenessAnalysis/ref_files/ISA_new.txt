@@ -1,0 +1,280 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID4]
+[ID4]
+		encodedInstr = 0
+		Pred:[ID0]
+		Succ:[ID11]
+[ID11]
+		pcReg = 0
+		Pred:[ID4]
+		Succ:[ID46]
+[ID46]
+		nextphase = fetch_PH
+		Pred:[ID11]
+		Succ:[ID47]
+[ID47]
+		while (true)
+		Pred:[ID46], [ID69]
+		Succ:[ID49]
+[ID49]
+		if ((nextphase == fetch_PH))
+		Pred:[ID47]
+		Succ:[ID50], [ID58]
+[ID50]
+		memoryAccess.req = ME_RD
+		Pred:[ID49]
+		Succ:[ID51]
+[ID51]
+		memoryAccess.mask = MT_W
+		Pred:[ID50]
+		Succ:[ID52]
+[ID52]
+		memoryAccess.addrIn = pcReg
+		Pred:[ID51]
+		Succ:[ID53]
+[ID53]
+		memoryAccess.dataIn = 0
+		Pred:[ID52]
+		Succ:[ID54]
+[ID54]
+		toMemoryPort.write(memoryAccess)
+		Pred:[ID53]
+		Succ:[ID55]
+[ID55]
+		fromMemoryPort.read(fromMemoryData)
+		Pred:[ID54]
+		Succ:[ID56]
+[ID56]
+		encodedInstr = fromMemoryData.loadedData
+		Pred:[ID55]
+		Succ:[ID57]
+[ID57]
+		nextphase = execute_PH
+		Pred:[ID56]
+		Succ:[ID58]
+[ID58]
+		if ((nextphase == execute_PH))
+		Pred:[ID49], [ID57]
+		Succ:[ID59], [ID69]
+[ID59]
+		if ((getEncType(encodedInstr) == ENC_R))
+		Pred:[ID58]
+		Succ:[ID60], [ID70]
+[ID60]
+		fromRegsPort.master_read(regfile)
+		Pred:[ID59]
+		Succ:[ID64]
+[ID64]
+		regfileWrite.dst = getRdAddr(encodedInstr)
+		Pred:[ID60]
+		Succ:[ID65]
+[ID65]
+		regfileWrite.dstData = getALUresult(getALUfunc(getInstrType(encodedInstr)),readRegfile(regfile,getRs1Addr(encodedInstr)),readRegfile(regfile,getRs2Addr(encodedInstr)))
+		Pred:[ID64]
+		Succ:[ID66]
+[ID66]
+		toRegsPort.master_write(regfileWrite)
+		Pred:[ID65]
+		Succ:[ID67]
+[ID67]
+		pcReg = (pcReg + 4)
+		Pred:[ID66]
+		Succ:[ID68]
+[ID68]
+		nextphase = fetch_PH
+		Pred:[ID67], [ID75], [ID87], [ID92], [ID97], [ID106], [ID121], [ID122], [ID127]
+		Succ:[ID69]
+[ID69]
+		nullptr
+		Pred:[ID58], [ID68]
+		Succ:[ID47]
+[ID70]
+		if ((getEncType(encodedInstr) == ENC_B))
+		Pred:[ID59]
+		Succ:[ID71], [ID76]
+[ID71]
+		fromRegsPort.master_read(regfile)
+		Pred:[ID70]
+		Succ:[ID74]
+[ID74]
+		aluResult = getALUresult(getALUfunc(getInstrType(encodedInstr)),readRegfile(regfile,getRs1Addr(encodedInstr)),readRegfile(regfile,getRs2Addr(encodedInstr)))
+		Pred:[ID71]
+		Succ:[ID75]
+[ID75]
+		pcReg = branchPCcalculation(aluResult,encodedInstr,pcReg)
+		Pred:[ID74]
+		Succ:[ID68]
+[ID76]
+		if ((getEncType(encodedInstr) == ENC_S))
+		Pred:[ID70]
+		Succ:[ID77], [ID88]
+[ID77]
+		fromRegsPort.master_read(regfile)
+		Pred:[ID76]
+		Succ:[ID81]
+[ID81]
+		memoryAccess.req = ME_WR
+		Pred:[ID77]
+		Succ:[ID82]
+[ID82]
+		memoryAccess.mask = getMemoryMask(getInstrType(encodedInstr))
+		Pred:[ID81]
+		Succ:[ID83]
+[ID83]
+		memoryAccess.addrIn = getALUresult(ALU_ADD,readRegfile(regfile,getRs1Addr(encodedInstr)),getImmediate(encodedInstr))
+		Pred:[ID82]
+		Succ:[ID84]
+[ID84]
+		memoryAccess.dataIn = readRegfile(regfile,getRs2Addr(encodedInstr))
+		Pred:[ID83]
+		Succ:[ID85]
+[ID85]
+		toMemoryPort.write(memoryAccess)
+		Pred:[ID84]
+		Succ:[ID86]
+[ID86]
+		fromMemoryPort.read(fromMemoryData)
+		Pred:[ID85]
+		Succ:[ID87]
+[ID87]
+		pcReg = (pcReg + 4)
+		Pred:[ID86]
+		Succ:[ID68]
+[ID88]
+		if ((getEncType(encodedInstr) == ENC_U))
+		Pred:[ID76]
+		Succ:[ID89], [ID93]
+[ID89]
+		regfileWrite.dst = getRdAddr(encodedInstr)
+		Pred:[ID88]
+		Succ:[ID90]
+[ID90]
+		regfileWrite.dstData = getEncUALUresult(encodedInstr,pcReg)
+		Pred:[ID89]
+		Succ:[ID91]
+[ID91]
+		toRegsPort.master_write(regfileWrite)
+		Pred:[ID90]
+		Succ:[ID92]
+[ID92]
+		pcReg = (pcReg + 4)
+		Pred:[ID91]
+		Succ:[ID68]
+[ID93]
+		if ((getEncType(encodedInstr) == ENC_J))
+		Pred:[ID88]
+		Succ:[ID94], [ID98]
+[ID94]
+		regfileWrite.dst = getRdAddr(encodedInstr)
+		Pred:[ID93]
+		Succ:[ID95]
+[ID95]
+		regfileWrite.dstData = (pcReg + 4)
+		Pred:[ID94]
+		Succ:[ID96]
+[ID96]
+		toRegsPort.master_write(regfileWrite)
+		Pred:[ID95]
+		Succ:[ID97]
+[ID97]
+		pcReg = (pcReg + getImmediate(encodedInstr))
+		Pred:[ID96]
+		Succ:[ID68]
+[ID98]
+		if ((getEncType(encodedInstr) == ENC_I_I))
+		Pred:[ID93]
+		Succ:[ID99], [ID107]
+[ID99]
+		fromRegsPort.master_read(regfile)
+		Pred:[ID98]
+		Succ:[ID103]
+[ID103]
+		regfileWrite.dst = getRdAddr(encodedInstr)
+		Pred:[ID99]
+		Succ:[ID104]
+[ID104]
+		regfileWrite.dstData = getALUresult(getALUfunc(getInstrType(encodedInstr)),readRegfile(regfile,getRs1Addr(encodedInstr)),getImmediate(encodedInstr))
+		Pred:[ID103]
+		Succ:[ID105]
+[ID105]
+		toRegsPort.master_write(regfileWrite)
+		Pred:[ID104]
+		Succ:[ID106]
+[ID106]
+		pcReg = (pcReg + 4)
+		Pred:[ID105]
+		Succ:[ID68]
+[ID107]
+		if ((getEncType(encodedInstr) == ENC_I_L))
+		Pred:[ID98]
+		Succ:[ID108], [ID122]
+[ID108]
+		fromRegsPort.master_read(regfile)
+		Pred:[ID107]
+		Succ:[ID112]
+[ID112]
+		memoryAccess.req = ME_RD
+		Pred:[ID108]
+		Succ:[ID113]
+[ID113]
+		memoryAccess.mask = getMemoryMask(getInstrType(encodedInstr))
+		Pred:[ID112]
+		Succ:[ID114]
+[ID114]
+		memoryAccess.addrIn = getALUresult(ALU_ADD,readRegfile(regfile,getRs1Addr(encodedInstr)),getImmediate(encodedInstr))
+		Pred:[ID113]
+		Succ:[ID115]
+[ID115]
+		memoryAccess.dataIn = 0
+		Pred:[ID114]
+		Succ:[ID116]
+[ID116]
+		regfileWrite.dst = getRdAddr(encodedInstr)
+		Pred:[ID115]
+		Succ:[ID117]
+[ID117]
+		toMemoryPort.write(memoryAccess)
+		Pred:[ID116]
+		Succ:[ID118]
+[ID118]
+		fromMemoryPort.read(fromMemoryData)
+		Pred:[ID117]
+		Succ:[ID119]
+[ID119]
+		regfileWrite.dstData = fromMemoryData.loadedData
+		Pred:[ID118]
+		Succ:[ID120]
+[ID120]
+		toRegsPort.master_write(regfileWrite)
+		Pred:[ID119]
+		Succ:[ID121]
+[ID121]
+		pcReg = (pcReg + 4)
+		Pred:[ID120]
+		Succ:[ID68]
+[ID122]
+		if ((getEncType(encodedInstr) == ENC_I_J))
+		Pred:[ID107]
+		Succ:[ID123], [ID68]
+[ID123]
+		fromRegsPort.master_read(regfile)
+		Pred:[ID122]
+		Succ:[ID124]
+[ID124]
+		regfileWrite.dst = getRdAddr(encodedInstr)
+		Pred:[ID123]
+		Succ:[ID125]
+[ID125]
+		regfileWrite.dstData = (pcReg + 4)
+		Pred:[ID124]
+		Succ:[ID126]
+[ID126]
+		toRegsPort.master_write(regfileWrite)
+		Pred:[ID125]
+		Succ:[ID127]
+[ID127]
+		pcReg = (readRegfile(regfile,getRs1Addr(encodedInstr)) + getImmediate(encodedInstr))
+		Pred:[ID126]
+		Succ:[ID68]

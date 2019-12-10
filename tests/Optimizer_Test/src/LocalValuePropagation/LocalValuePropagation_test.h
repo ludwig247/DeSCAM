@@ -2,8 +2,8 @@
 // Created by mi-alkoudsi on 8.12.19.
 //
 
-#ifndef PROJECT_FINDCFGPATHS_TEST_H
-#define PROJECT_FINDCFGPATHS_TEST_H
+#ifndef PROJECT_LOCALCONSTANTPROPAGATION_TEST_H
+#define PROJECT_LOCALCONSTANTPROPAGATION_TEST_H
 
 
 #include "Optimizer_Test/src/CreateModel.h"
@@ -18,9 +18,9 @@ public:
     void TearDown() override {};
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, LocalVariablePropagation_Test, ::testing::ValuesIn(createModel(file_path)));
+INSTANTIATE_TEST_CASE_P(Basic, LocalVariablePropagation_Test, ::testing::ValuesIn(createModules(file_path)));
 
-TEST_P(LocalVariablePropagation_Test, find_paths) {
+TEST_P(LocalVariablePropagation_Test, propagate_locally_constant_values) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
 
@@ -31,8 +31,14 @@ TEST_P(LocalVariablePropagation_Test, find_paths) {
 
 
     std::string CFG_str = SCAM::OptUtilities::printCFG(localValuePropagation.getCFG());
-
     std::string refFilePath =
+            SCAM_HOME"/tests/Optimizer_Test/src/LocalValuePropagation/ref_files/" + GetParam()->getName() + "_out.txt";
+/*
+    std::ofstream oFile(refFilePath);
+    oFile << CFG_str;
+    oFile.close();
+*/
+    refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/LocalValuePropagation/ref_files/" + GetParam()->getName() + ".txt";
 
     std::ifstream refFile(refFilePath);
@@ -41,8 +47,8 @@ TEST_P(LocalVariablePropagation_Test, find_paths) {
     std::string content((std::istreambuf_iterator<char>(refFile)),
                         (std::istreambuf_iterator<char>()));
     refFile.close();
-    ASSERT_EQ(content, CFG_str) << "finding correct paths for module " << GetParam()->getName() << " failed\n";
+    ASSERT_EQ(content, CFG_str) << "local propagation of constant values for module " << module->getName() << " is not correct\n";
 }
 
 
-#endif //PROJECT_FINDCFGPATHS_TEST_H
+#endif //PROJECT_LOCALCONSTANTPROPAGATION_TEST_H
