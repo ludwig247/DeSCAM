@@ -313,35 +313,31 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                 "Unsupported method: " + methodString + " for interface " + interface->getName());
 
                 } else if (interface->isMaster()) {
-                    if (methodString == "master_read" && memberCallExpr->getNumArgs() == 1) {
-                        SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, false);
-                        if (findArgument.getExpr() != nullptr) {
+                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 &&  "Wrong number of arguments arguments");
+
+                    SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, operand->getDataType()->isUnsigned());
+                    if (findArgument.getExpr() != nullptr) {
+                        auto getStateName = [] (clang::Stmt * stmt) -> std::string{
+                            FindStateName findStateName(stmt);
+                            return findStateName.getStateName();
+                        };
+
+                        if (methodString == "master_read") {
                             if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument.getExpr())) {
                                 this->stmt = new Read(operand->getPort(), variableOp);
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        } else return exitVisitor("Could not find parameter");
-                    } else if (methodString == "master_write") {
-                        SCAM::Write * write;
-                        assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 &&  "Wrong number of arguments arguments");
-                        SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module,
-                                                        operand->getDataType()->isUnsigned());
-                        if (findArgument.getExpr() != nullptr) {
-                            write = new Write(operand->getPort(), findArgument.getExpr());
-                        } else return exitVisitor("Argument 1 is not analyzeable");
-                        if (memberCallExpr->getNumArgs() == 2) {
-                            FindStateName findStateName(memberCallExpr->getArg(1));
-                            if(findStateName.hasStateName()){
-                                write->setStateName(findStateName.getStateName());
+                        }else if (methodString == "master_write") {
+                            SCAM::Write * write = new Write(operand->getPort(), findArgument.getExpr());
+                            this->stmt = write;
+                            if (memberCallExpr->getNumArgs() == 2) {
+                                //FindStateName findStateName(memberCallExpr->getArg(1));
+                                //if(findStateName.hasStateName()){
+                                    write->setStateName(getStateName(memberCallExpr->getArg(1)));
+                                //}
                             }
-                        }
-                        this->stmt = write;
+                        } else  return exitVisitor("Unsupported method: " + methodString + " for interface " + interface->getName());
 
-
-                    } else {
-                        memberCallExpr->dumpColor();
-                        return exitVisitor(
-                                "Unsupported method: " + methodString + " for interface " + interface->getName());
-                    }
+                    } else return exitVisitor("Argument 1 is not analyzeable");
 
                 } else if (interface->isSlave()) {
                     if (methodString == "slave_read" && memberCallExpr->getNumArgs() == 1) {

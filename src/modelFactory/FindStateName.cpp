@@ -15,7 +15,6 @@ bool FindStateName::VisitStringLiteral(clang::StringLiteral *stringLiteral) {
 }
 
 const std::string &FindStateName::getStateName() const {
-
     return stateName;
 }
 

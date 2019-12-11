@@ -20,7 +20,8 @@ class MasterSlave : public sc_prim_channel,
 public:
     MasterSlave(const char *name);
 
-    void master_read(T &out,std::string stateName="");
+    void master_read(T &out,std::string stateName) override;
+    void master_read(T &out) override;
 
     void master_write(const T &val,std::string stateName) override;
     void master_write(const T &val) override ;

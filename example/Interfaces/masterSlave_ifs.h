@@ -20,6 +20,7 @@ class master_in_if : virtual public sc_interface
 {
 public:
     virtual void master_read(T & out,std::string stateName) = 0;
+    virtual void master_read(T & out) = 0;
 //    virtual bool peek() = 0;
 };
 

@@ -14,6 +14,7 @@
 
 SC_MODULE(Test_Nordic) {
     blocking_in<int> test_in;
+    master_in<int> test_in2;
     master_out<unsigned int> test_out;
 
     int foo;
@@ -32,9 +33,11 @@ SC_MODULE(Test_Nordic) {
     void fsm() {
         while (true) {
             test_in->read(foo);
+            //test_in2->master_read(foo,"reader");
+            //test_in2->master_read(foo,"reader");
             //bar = bar + test_var();
-            test_out->master_write(bar);
             test_out->master_write(bar+2, "test");
+            test_out->master_write(bar);
         }
     }
 };

@@ -31,7 +31,6 @@ namespace SCAM {
         bool isNonBlockingAccess() const;
 
         const std::string &getStateName() const;
-
         void setStateName(const std::string &stateName);
 
     private:

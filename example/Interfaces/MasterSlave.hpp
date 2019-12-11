@@ -186,6 +186,12 @@ void MasterSlave<T>::master_read(T & out,std::string stateName) {
 }
 
 template<typename T>
+void MasterSlave<T>::master_read(T &out) {
+    this->master_read(out,"");
+
+}
+
+template<typename T>
 void MasterSlave<T>::slave_write(const T &val) {
 //    std::cout << "@" << this->name() << ": MasterSlave->slave_write: writing something\n";
     shared_data = &val;
@@ -194,15 +200,7 @@ void MasterSlave<T>::slave_write(const T &val) {
 //    std::cout << "@" << this->name() << ": MasterSlave->master_write: done writing\n";
 }
 
-//template<typename T>
-//bool MasterSlave<T>::peek() {
-//    return available_data;
-//}
-//
-//template<typename T>
-//bool MasterSlave<T>::poke() {
-//    return !available_data;
-//}
+
 
 template<typename T>
 void MasterSlave<T>::register_port(sc_port_base &port, const char *if_typename) {
@@ -278,5 +276,9 @@ template<typename T>
 void MasterSlave<T>::master_write(const T &val) {
     this->master_write(val,"");
 }
+
+
+
+
 
 #endif //INTERFACES_MASTERSLAVE_HPP

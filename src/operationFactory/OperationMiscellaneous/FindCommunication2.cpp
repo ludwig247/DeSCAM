@@ -202,7 +202,6 @@ void SCAM::FindCommunication2::visit(struct Write &node) {
     this->stmt = &node;
     this->writeValue = node.getValue();
     this->stateName = node.getStateName();
-    std::cout << "WRITE" << this->stateName  << std::endl;
 
 }
 
