@@ -222,6 +222,9 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     if (memberCallExpr->getNumArgs() == 2) {
                         FindStateName findStateName(memberCallExpr->getArg(1));
                         return findStateName.getStateName();
+                    } else if (memberCallExpr->getNumArgs() == 3) {
+                        FindStateName findStateName(memberCallExpr->getArg(2));
+                        return findStateName.getStateName();
                     } else return "";
                 };
 
@@ -237,7 +240,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                 auto interface = operand->getPort()->getInterface();
 
                 if (interface->isBlocking()) {
-                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 && "Wrong number of arguments arguments");
+                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 4 && "Wrong number of arguments arguments");
                     if (methodString == "peek" && memberCallExpr->getNumArgs() == 0) {
                         this->expr = new Peek(operand->getPort());
                     } else if (methodString == "poke" && memberCallExpr->getNumArgs() == 0) {
@@ -246,49 +249,45 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         //Blocking read
                         if (methodString == "read") {
                             //add variable as parameter
-                            if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg((0))))) {
-                                auto *read = new Read(operand->getPort(), variableOp);
+                            if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg((0))))) {
+                                auto read = new Read(operand->getPort(), variableOp);
                                 read->setStateName(getStateName());
                                 this->stmt = read;
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
                             //non Blocking read
                         } else if (methodString == "try_read" && memberCallExpr->getNumArgs() == 1) {
                             //add variable as parameter
-                            if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg((0))))) {
-                                auto *read = new Read(operand->getPort(), variableOp, true);
-                                //read->setStateName(getStateName());
+                            if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg((0))))) {
+                                auto read = new Read(operand->getPort(), variableOp, true);
                                 this->stmt = read;
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        } else if (methodString == "try_read" && memberCallExpr->getNumArgs() == 2) {
+                        } else if (methodString == "try_read" && memberCallExpr->getNumArgs() > 1) {
                             //add variable as parameter
                             if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(0)))) {
                                 if (hasValidArgument(memberCallExpr->getArg(1))) {
-                                    if (auto *statusOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(1)))) {
-                                        auto *read = new Read(operand->getPort(), variableOp, true, statusOp);
+                                    if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(1)))) {
+                                        auto read = new Read(operand->getPort(), variableOp, true, statusOp);
+                                        read->setStateName(getStateName());
                                         this->stmt = read;
                                     } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
                                 } else return exitVisitor("Could not find parameter");
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        }
-                        if (methodString == "write" && memberCallExpr->getNumArgs() == 1) {
-                            if (memberCallExpr->getNumArgs() == 1) {
-                                SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module,
-                                                                operand->getDataType()->isUnsigned());
-                                if (findArgument.getExpr() != nullptr) {
-                                    this->stmt = new Write(operand->getPort(), findArgument.getExpr());
-                                } else return exitVisitor("Could not find parameter");
-                            } else return exitVisitor("Only one parameter for write(obj) supported");
+                        }else if (methodString == "write") {
+                            auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)));
+                            write->setStateName(getStateName());
+                            this->stmt = write;
                         }
                             //non Blocking write
                         else if (methodString == "try_write" && memberCallExpr->getNumArgs() == 1) {
-                            auto *write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)), true);
+                            auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)), true);
                             this->stmt = write;
                         }
                             //non Blocking write with status flag
-                        else if (methodString == "try_write" && memberCallExpr->getNumArgs() == 2) {
+                        else if (methodString == "try_write" && memberCallExpr->getNumArgs() > 2) {
                             if (hasValidArgument(memberCallExpr->getArg(1))) {
-                                if (auto *statusOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(1)))) {
-                                    auto *write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)), true, statusOp);
+                                if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(1)))) {
+                                    auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)), true, statusOp);
+                                    write->setStateName(getStateName());
                                     this->stmt = write;
                                 } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
                             } else return exitVisitor("Could not find parameter");
