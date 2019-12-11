@@ -19,7 +19,7 @@ namespace SCAM {
         return this->PathID;
     }
 
-    void CfgPath::insertatend(CfgNode *node) {
+    void CfgPath::insertAtEnd(CfgNode *node) {
         this->path.push_back(node);
     }
 
@@ -32,8 +32,8 @@ namespace SCAM {
         while (Path.back()->getId() != NodeId) {
             Path.pop_back();
         }
+        Path.pop_back();
         return Path;
-
     }
 
     std::string CfgPath::print() {

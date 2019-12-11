@@ -19,18 +19,21 @@
 namespace SCAM {
 
     /***
-     * @brief: transforms heavy operations such as multiplications,divisions into simpler operations such as shifts and additions, if possible.
-     *  e.g. converts  x = y * 4 into x = y << 2
-     *       converts  x = y * 3 into x = (y << 2) - y
-     *       converts  x = y / 8 into x = (Y >> 3)
-     *       converts  x = y % 16 into x = y & 15
-     */
-
+      * \brief: Transforms heavy operations such as multiplications,divisions into simpler operations such as shifts and additions, if possible.
+      *
+      * \author: mi-alkoudsi
+      *
+      * \details:
+      *      example: the following statements are converted using OperatorStrengthReduction as follows:
+      *        x = y * 4 => x = y << 2
+      *        x = y * 3 => x = (y << 2) - y
+      *        x = y / 8 => x = (Y >> 3)
+      *        x = y % 16 => x = y & 15
+      */
 
     class OperatorStrengthReduction : public StmtAbstractVisitor {
 
     public:
-
         //Constructors and Destructor
         OperatorStrengthReduction() = delete;
 

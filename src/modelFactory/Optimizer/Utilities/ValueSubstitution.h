@@ -15,19 +15,37 @@
 
 namespace SCAM {
 
-    /***
-    * @brief: Substitutes a variable inside an expression or a statement with an expression
-    *
-    *
-    */
-
     class ValueSubstitution : public StmtAbstractVisitor {
 
     public:
         ValueSubstitution();
 
+        /***
+        * \brief: Substitutes a variable inside an expression with another expression
+        *
+        * \author: mi-alkoudsi
+        *
+        * \input:
+        *      - SCAM::Expr *oldExpr;
+        *      - std::string *varName;
+        *      - SCAM::Expr *varVal;
+        * \output:
+        *      - SCAM::Expr *newExpr;
+        */
         SCAM::Expr *substituteExpr(SCAM::Expr *oldExpr, std::string varName, SCAM::Expr *varVal);
 
+        /***
+        * \brief: Substitutes a variable inside a statement with another expression
+        *
+        * \author: mi-alkoudsi
+        *
+        * \input:
+        *      - SCAM::Stmt *oldStmt;
+        *      - std::string *varName;
+        *      - SCAM::Expr *varVal;
+        * \output:
+        *      - SCAM::Stmt *newStmt;
+        */
         SCAM::Stmt *substituteStmt(SCAM::Stmt *oldStmt, std::string varName, SCAM::Expr *varVal);
 
 

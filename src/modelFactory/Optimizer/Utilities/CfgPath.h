@@ -11,9 +11,8 @@
 
 namespace SCAM {
     /***
-     * @brief: represents a path of connected CfgNode nodes
-     * @author:M.I.Alkoudsi
-     *
+     * \brief: Represents a data structure containing a sequence of connected CfgNode nodes and a unique ID
+     * \author: mi-alkoudsi
      */
 
 
@@ -32,7 +31,7 @@ namespace SCAM {
         const int &getPathID() const;
 
         //Functions to add a node to a path
-        void insertatend(CfgNode *node);
+        void insertAtEnd(CfgNode *node);
 
         //Function to remove the last node from a path
         void deleteNodeBackward();

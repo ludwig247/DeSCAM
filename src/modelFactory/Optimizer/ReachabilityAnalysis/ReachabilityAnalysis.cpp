@@ -36,8 +36,8 @@ namespace SCAM {
             if (statement != nullptr) {
                 if (auto ifStmt = dynamic_cast<SCAM::If *>(statement)) {
 #ifdef DEBUG_REACHABILITY_ANALYSIS
-                    std::cout << "Checking statement: " << SCAM::PrintStmt::toString(statement)
-                              << std::endl;
+//                    std::cout << "Checking statement: " << SCAM::PrintStmt::toString(statement)
+//                              << std::endl;
 #endif
                     currentNodeID = node.second->getId();
                     if (auto insideIf = ifStmt->getConditionStmt()) {
@@ -75,10 +75,10 @@ namespace SCAM {
                                     insideIf);
 
 #ifdef DEBUG_REACHABILITY_ANALYSIS
-                            for (auto exp : toBeAssertedExpr) {
-                                std::cout << "exp is: " << exp << std::endl;
-
-                            }
+//                            for (auto exp : toBeAssertedExpr) {
+//                                std::cout << "exp is: " << exp << std::endl;
+//
+//                            }
 #endif
                             if (!toBeAssertedExpr.empty()) {//check each stmt in the vector alone
                                 bool notfalse = true;
@@ -188,7 +188,7 @@ namespace SCAM {
                 if (propagator.getNumLastAssignments() != 0 &&
                     propagator.getNumLastAssignments() == this->pathsToIfMap.size()) {
                     std::set<SCAM::Expr *> values;
-                    for (auto assignment : propagator.getLastAssignmentMap()) {
+                    for (auto assignment : propagator.getLastAssignmentsMap()) {
                         values.insert(assignment.second);
                     }
                     // add initial values from the reset sequence
@@ -419,9 +419,9 @@ namespace SCAM {
 
     void ReachabilityAnalysis::printWarning(SCAM::Expr *insideIfExpression, bool cannotBe) {
         std::string trueOrFalse = cannotBe ? "true!" : "false!";
-        std::cout << "\t\033[1;33mWarning\033[0m: " << "The statemente: \033[1;33m'if"
+        std::cout << "\t\033[1;33mWarning\033[0m: " << "The statement: \033[1;33m'if("
                   << SCAM::PrintStmt::toString(insideIfExpression)
-                  << "'\033[0m in Node" << currentNodeID << " cannot be " << trueOrFalse << std::endl;
+                  << ")'\033[0m in Node" << currentNodeID << " cannot be " << trueOrFalse << std::endl;
     }
 
     //ReachabilityAnalysis for functions
@@ -437,8 +437,8 @@ namespace SCAM {
                 if (condExpr) {
                     if (condExpr->getDataType() == DataTypes::getDataType("bool")) {
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
-                std::cout << "Checking condExpr: " << SCAM::PrintStmt::toString(condExpr)
-                          << std::endl;
+//                std::cout << "Checking condExpr: " << SCAM::PrintStmt::toString(condExpr)
+//                          << std::endl;
 #endif
                         RA_solver_t.reset();
                         this->substitutionMap.clear();
@@ -470,10 +470,10 @@ namespace SCAM {
                                     condExpr);
 
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
-                            for (auto exp : toBeAssertedExpressions) {
-                                std::cout << "exp is: " << exp << std::endl;
-
-                            }
+//                            for (auto exp : toBeAssertedExpressions) {
+//                                std::cout << "exp is: " << exp << std::endl;
+//
+//                            }
 #endif
                             if (!toBeAssertedExpressions.empty()) {
                                 bool nottrue = true;

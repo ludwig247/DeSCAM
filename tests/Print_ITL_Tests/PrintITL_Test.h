@@ -34,7 +34,10 @@ static std::vector<SCAM::Module *> parameter() {
         commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
     }
 
-    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1],false);
+//    add optimizations
+//    std::set<std::string> optimizeOptions = {"all"};
+//    CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
+    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
 
     std::vector<SCAM::Module *> result;
     for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
@@ -43,7 +46,7 @@ static std::vector<SCAM::Module *> parameter() {
     return result;
 }
 
-class PrintITL_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class Optimizer_Test : public ::testing::TestWithParam<SCAM::Module *> {
 public:
     static void SetUpTestCase() {
     }
@@ -58,9 +61,9 @@ public:
     }
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, PrintITL_Test, ::testing::ValuesIn(parameter()));
+INSTANTIATE_TEST_CASE_P(Basic, Optimizer_Test, ::testing::ValuesIn(parameter()));
 
-TEST_P(PrintITL_Test, Basic) {
+TEST_P(Optimizer_Test, Basic) {
 
     PrintITL printITL;
 //    SCAM::Module * module = GetParam();

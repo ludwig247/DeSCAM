@@ -17,9 +17,12 @@
 namespace SCAM {
 
     /***
-    * @brief: simplifies DeSCAM expressions in the CFG or Functions using Z3++ Solver.
-    * e.g.: 3+2 becomes 5
+    * \brief: Simplifies expressions in the CFG or Functions using the Z3++ Solver.
     *
+    * \author: mi-alkoudsi
+    *
+    * \details: Folds constants inside an expression e.g., (((x + 1) + 2) + 3)  => (x + 6).
+    *   can also simplify conditions, e.g., if(10 > 4) => if(true)
     */
 
     class SimplifyExpressions : public StmtAbstractVisitor {

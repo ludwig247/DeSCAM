@@ -187,7 +187,7 @@ freeze:
 assume:
 	at t: state_2;
 	at t: not(b_in_sync);
-	at t: (cnt = resize(0,32));
+	at t: (cnt = resize(1,32));
 prove:
 	at t_end: state_1;
 	at t_end: cnt = (-1 + cnt_at_t)(31 downto 0);
@@ -216,7 +216,7 @@ freeze:
 assume:
 	at t: state_2;
 	at t: not(b_in_sync);
-	at t: not((cnt = resize(0,32)));
+	at t: not((cnt = resize(1,32)));
 	at t: (nextPhase = frame_data);
 prove:
 	at t_end: state_2;

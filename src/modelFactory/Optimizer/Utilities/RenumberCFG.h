@@ -18,7 +18,9 @@
 namespace SCAM {
 
     /***
-     * @brief: Give the nodes in the CFG sequential IDs.
+     * \brief: Give the nodes in the CFG sequential IDs.
+     * \author: mi-alkoudsi
+     * \details: Implements a DFS like algorithm to renumber the nodes in the CFG.
      * Especially helpful when a given algorithm implementation relies on sequential IDs
      * but removal of some nodes in the CFG happened due to optimizations, which affected the sequential numbering of the CFG
      */

@@ -95,27 +95,27 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
         z3::expr z3Expr(contxt);
         z3Expr = translator.translate(expr);
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
-        std::cout << "before simplification Expr is " << z3Expr << std::endl;
+//        std::cout << "before simplification Expr is " << z3Expr << std::endl;
 #endif
         z3Expr = z3Expr.simplify(params);
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
-        std::cout << "after simplification Expr is " << z3Expr << std::endl;
+//        std::cout << "after simplification Expr is " << z3Expr << std::endl;
 #endif
         bool abort = SCAM::OptUtilities::isAbortTranslation(z3Expr);
         if (abort) {
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
-            std::cout << "translation aborted" << std::endl;
+//            std::cout << "translation aborted" << std::endl;
 #endif
             return;
         }
         this->newExpr = translator.translate(z3Expr, module);
         if (translator.isAbort() || *expr == *this->newExpr) {
             this->newExpr = nullptr;
+            return;
         }
+        if(PrintStmt::toString(this->newExpr).find("*")!=std::string::npos){this->newExpr = nullptr;}
     }
     catch (z3::exception e) {
-        std::cout << "Translation warning for: " << PrintStmt::toString(expr) << std::endl;
-        std::cout << "\t ->" << e << std::endl;
         this->newExpr = nullptr;
         return;
     }

@@ -6,7 +6,7 @@
 #define PROJECT_PAPER_H
 //Enum Datatype
 #include "systemc.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 
 
 enum status_t{in_frame,oof_frame};
@@ -49,10 +49,10 @@ struct Example : public sc_module {
                 b_in->try_read(msg,ready);
 				if (!ready) {
 					m_out->master_write(msg.data);
-					if (cnt == 0) {
-						nextPhase = idle;
-					}
-					cnt = cnt - 1;
+                    cnt = cnt - 1;
+                    if (cnt == 0) {
+                        nextPhase = idle;
+                    }
 				}
 			}
 		}}};

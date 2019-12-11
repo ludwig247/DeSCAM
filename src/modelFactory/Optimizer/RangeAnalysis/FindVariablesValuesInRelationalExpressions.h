@@ -15,9 +15,13 @@
 
 namespace SCAM {
     /***
-        * @brief: collects the values of variables in relational expressions in if stmts
-        *
-        * @author:M.I.Alkoudsi
+        * \brief: collects the values compared to variables values in relational expressions of If statements
+        * \author:mi-alkoudsi
+        * \inputs:
+        *       - std::map<int, SCAM::CfgNode *> CFG;
+        * \outputs:
+        *       - std::map<std::string, std::set<SCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
+        *       - std::set<std::string> difficultToAnalyseVariablesSet;
         */
     class FindVariablesValuesInRelationalExpressions : public StmtAbstractVisitor {
     public:

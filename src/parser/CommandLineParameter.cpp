@@ -54,4 +54,12 @@ void CommandLineParameter::setPluginOptionParameter(std::string pluginName, std:
     } else throw std::runtime_error("Unknown Plugin: " + pluginName + " or Option: " + parameter);
 }
 
+void CommandLineParameter::setOptimizeOptionsSet(const std::set<std::string> &optimizeOptionsSet) {
+    CommandLineParameter::getInstance().optimizeOptionsSet = optimizeOptionsSet;
+}
+
+std::set<std::string> &CommandLineParameter::getOptimizeOptionsSet() {
+    return  CommandLineParameter::getInstance().optimizeOptionsSet;
+}
+
 #endif //PROJECT_COMMANDLINEPARAMETER_CPP
