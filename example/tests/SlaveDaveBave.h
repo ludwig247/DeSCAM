@@ -13,7 +13,7 @@
 
 
 SC_MODULE(Test_Nordic) {
-    blocking_in<int> test_in;
+    //blocking_in<int> test_in;
     master_in<int> test_in2;
     master_out<unsigned int> test_out;
 
@@ -25,19 +25,25 @@ SC_MODULE(Test_Nordic) {
     }
 
     SC_CTOR(Test_Nordic) :
-            test_in("test_in"),
+            //test_in("test_in"),
             test_out("test_out") {
         SC_THREAD(fsm);
     }
 
     void fsm() {
         while (true) {
-            test_in->read(foo);
-            //test_in2->master_read(foo,"reader");
-            //test_in2->master_read(foo,"reader");
-            //bar = bar + test_var();
-            test_out->master_write(bar+2, "test");
-            test_out->master_write(bar);
+            //insert_state("idle");
+            //insert_state("");
+            insert_state();
+            insert_state("abc");
+            test_out->master_write(0, "test");
+            test_in2->master_read(foo, "foo0");
+            test_in2->master_read(foo, "foo1");
+            test_in2->master_read(foo, "foo2");
+            test_in2->master_read(foo, "foo3");
+            test_in2->master_read(foo, "foo4");
+            test_in2->master_read(foo, "foo5");
+            test_in2->master_read(foo, "foo6");
         }
     }
 };

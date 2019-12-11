@@ -5,19 +5,11 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
-
-//state
-//#define WAIT_TIME std::rand()%5
-//#define WAIT_TIME std::rand()%5
-#define WAIT_TIME 0
-
+#include "ImportantState.h"
 #include "Blocking.h"
 #include "MasterSlave.h"
 #include "Shared.h"
 
-
-
-#define important_state  wait(WAIT_TIME, SC_PS);
 
 //Blocking
 template<typename T>

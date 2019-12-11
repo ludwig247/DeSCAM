@@ -217,10 +217,40 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
 
         if (this->lhsExpr != nullptr) {
             if (PortOperand *operand = dynamic_cast<PortOperand *>(this->lhsExpr)) {
+                //Lambda for finding the stateName
+                auto getStateName = [=]() -> std::string {
+                    if (memberCallExpr->getNumArgs() == 2) {
+                        FindStateName findStateName(memberCallExpr->getArg(1));
+                        return findStateName.getStateName();
+                    }else return "";
+                };
+
+                auto getArgument = [=]() {
+                    SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, operand->getDataType()->isUnsigned());
+                    return findArgument.getExpr();
+                };
+
+                auto hasValidArgument = [=](){
+                    return getArgument() != nullptr;
+                };
 
                 auto interface = operand->getPort()->getInterface();
+
                 if (interface->isBlocking()) {
+                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 && "Wrong number of arguments arguments");
                     //Blocking read
+//                    if(hasValidArgument()){
+//                        if (methodString == "read") {
+//                                //add variable as parameter
+//                                if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument())) {
+//                                    auto * read = new Read(operand->getPort(), variableOp);
+//                                    read->setStateName(getStateName());
+//                                    this->stmt = read;
+//                                } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
+//                            }
+//                        }else return exitVisitor("Could not find parameter");
+//                    }
+
                     if (methodString == "read" && memberCallExpr->getNumArgs() == 1) {
                         SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, false);
                         if (findArgument.getExpr() != nullptr) {
@@ -313,30 +343,22 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                 "Unsupported method: " + methodString + " for interface " + interface->getName());
 
                 } else if (interface->isMaster()) {
-                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 &&  "Wrong number of arguments arguments");
-
-                    SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, operand->getDataType()->isUnsigned());
-                    if (findArgument.getExpr() != nullptr) {
-                        auto getStateName = [] (clang::Stmt * stmt) -> std::string{
-                            FindStateName findStateName(stmt);
-                            return findStateName.getStateName();
-                        };
-
+                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 && "Wrong number of arguments arguments");
+                    if (hasValidArgument()) {
+                        // evaluate parameters
                         if (methodString == "master_read") {
-                            if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument.getExpr())) {
-                                this->stmt = new Read(operand->getPort(), variableOp);
+                            if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument())) {
+                                auto *read = new Read(operand->getPort(), variableOp);
+                                this->stmt = read;
+                                read->setStateName(getStateName());
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        }else if (methodString == "master_write") {
-                            SCAM::Write * write = new Write(operand->getPort(), findArgument.getExpr());
+                        } else if (methodString == "master_write") {
+                            auto write = new Write(operand->getPort(), getArgument());
                             this->stmt = write;
-                            if (memberCallExpr->getNumArgs() == 2) {
-                                //FindStateName findStateName(memberCallExpr->getArg(1));
-                                //if(findStateName.hasStateName()){
-                                    write->setStateName(getStateName(memberCallExpr->getArg(1)));
-                                //}
-                            }
-                        } else  return exitVisitor("Unsupported method: " + methodString + " for interface " + interface->getName());
-
+                            write->setStateName(getStateName());
+                        } else
+                            return exitVisitor(
+                                    "Unsupported method: " + methodString + " for interface " + interface->getName());
                     } else return exitVisitor("Argument 1 is not analyzeable");
 
                 } else if (interface->isSlave()) {
@@ -358,8 +380,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
                         } else return exitVisitor("Could not find parameter");
                     } else if (methodString == "slave_write" && memberCallExpr->getNumArgs() == 1) {
-                        SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module,
-                                                        operand->getDataType()->isUnsigned());
+                        SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, operand->getDataType()->isUnsigned());
                         if (findArgument.getExpr() != nullptr) {
                             this->stmt = new Write(operand->getPort(), findArgument.getExpr(), true);
                         } else return exitVisitor("Could not find parameter");
@@ -655,11 +676,25 @@ bool SCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *op
 
 bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
     if (callExpr->getDirectCallee() == nullptr) return true;
-    if (callExpr->getDirectCallee()->isCXXClassMember()) return true;
-    else {
-        std::string functionName = callExpr->getDirectCallee()->getNameAsString();
-        //std::string functionName = callExpr->getDirectCallee()->getName().str();
-        return exitVisitor(functionName + "() is not a valid function");
+    else if (callExpr->getDirectCallee()->isCXXClassMember()) return true;
+    else if(callExpr->getDirectCallee()->getNameAsString() == "insert_state"){
+        if(callExpr->getNumArgs() == 0){
+            this->stmt = new Wait();
+            return false;
+        }else if(callExpr->getNumArgs() == 1){
+            callExpr->dumpColor();
+            auto wait = new Wait();
+            FindStateName findStateName(callExpr->getArg(0));
+            wait->setStateName(findStateName.getStateName());
+            this->stmt = wait;
+            return false;
+        }else{
+            return exitVisitor("Unallowed number of param for important_state()");
+        }
+
+    } else {
+        std::string funcName = callExpr->getDirectCallee()->getNameAsString();
+        return exitVisitor(funcName + "() is not a valid function");
     }
 }
 

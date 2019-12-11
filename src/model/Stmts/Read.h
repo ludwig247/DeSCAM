@@ -28,13 +28,12 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
-        const std::string &getStateName() const;
+
 
     private:
         VariableOperand *variable;
         VariableOperand *status;
 
-        std::string stateName;
     };
 
 }

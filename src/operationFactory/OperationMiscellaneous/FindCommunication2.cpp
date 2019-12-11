@@ -192,6 +192,7 @@ void SCAM::FindCommunication2::visit(struct Read &node) {
     this->commStmt = &node;
     this->stmt = &node;
     this->readVariable = node.getVariableOperand();
+    this->stateName = node.getStateName();
 }
 
 void SCAM::FindCommunication2::visit(struct Write &node) {
@@ -248,6 +249,7 @@ void SCAM::FindCommunication2::visit(SCAM::Notify &node) {
 
 void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
     waitComm = true;
+    this->stateName = node.getStateName();
     communication = false;
 }
 
