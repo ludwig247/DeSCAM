@@ -274,16 +274,6 @@ void MasterSlave<T>::master_write(const T &val) {
     this->master_write(val,"");
 }
 
-template<typename T>
-void MasterSlave<T>::slave_read(T &out, bool &success, std::string stateName) {
-    this->slave_read(out,success);
-}
-
-template<typename T>
-void MasterSlave<T>::slave_write(const T &val, std::string stateName) {
-    this->slave_rwrite(val);
-
-}
 
 
 #endif //INTERFACES_MASTERSLAVE_HPP

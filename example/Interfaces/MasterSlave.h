@@ -29,10 +29,8 @@ public:
 
     void slave_read(T & out) override;
     void slave_read(T & out, bool & success) override;
-    void slave_read(T &out, bool &success, std::string stateName) override;
 
     void slave_write(const T &val) override ;
-    void slave_write(const T &val, std::string stateName) override;
 
     void register_port(sc_port_base &port, const char *if_typename);
 

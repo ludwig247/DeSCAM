@@ -332,7 +332,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     } else return exitVisitor("Argument 1 is not analyzeable");
 
                 } else if (interface->isSlave()) {
-                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 4 && "Wrong number of arguments arguments");
+                    assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 3 && "Wrong number of arguments arguments");
                     if (hasValidArgument(memberCallExpr->getArg((0)))) {
                         if (methodString == "slave_read" && memberCallExpr->getNumArgs() == 1) {
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(0)))) {
@@ -349,9 +349,8 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                     } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
                                 } else return exitVisitor("Could not find parameter");
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        } else if (methodString == "slave_write" && memberCallExpr->getNumArgs() == 1) {
+                        } else if (methodString == "slave_write") {
                             auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)));
-                            write->setStateName(getStateName());
                             this->stmt = write;
                         } else return exitVisitor("Unsupported method: " + methodString + "for interface " + interface->getName());
                     } else {
@@ -652,7 +651,6 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
             this->stmt = new Wait();
             return false;
         } else if (callExpr->getNumArgs() == 1) {
-            callExpr->dumpColor();
             auto wait = new Wait();
             FindStateName findStateName(callExpr->getArg(0));
             wait->setStateName(findStateName.getStateName());

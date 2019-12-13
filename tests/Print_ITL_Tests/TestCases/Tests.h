@@ -18,8 +18,8 @@
 #include "requestQueue_new.h"
 #include "Framer_new.h"
 #include "Monitor_new.h"
-//#include "Interconnect.h"
-//#include "MasterAgent.h"
-//#include "SlaveAgent.h"
+#include "Interconnect.h"
+#include "MasterAgent.h"
+#include "SlaveAgent.h"
 
 #endif //PROJECT_TESTS_H
