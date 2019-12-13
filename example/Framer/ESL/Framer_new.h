@@ -151,7 +151,6 @@ struct Framer_new : public sc_module {
                 }
             }
             else{}
-            wait(SC_ZERO_TIME);
         }
     }
 

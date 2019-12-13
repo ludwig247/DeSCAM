@@ -283,7 +283,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                             this->stmt = write;
                         }
                             //non Blocking write with status flag
-                        else if (methodString == "try_write" && memberCallExpr->getNumArgs() > 2) {
+                        else if (methodString == "try_write" && memberCallExpr->getNumArgs() > 1) {
                             if (hasValidArgument(memberCallExpr->getArg(1))) {
                                 if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(1)))) {
                                     auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)), true, statusOp);
@@ -338,7 +338,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(0)))) {
                                 this->stmt = new Read(operand->getPort(), variableOp, true);
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        } else if (methodString == "slave_read" && memberCallExpr->getNumArgs() > 2) {
+                        } else if (methodString == "slave_read" && memberCallExpr->getNumArgs() >1 ) {
                             //add variable as parameter
                             if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(0)))) {
                                 if (hasValidArgument(memberCallExpr->getArg(1))) {
