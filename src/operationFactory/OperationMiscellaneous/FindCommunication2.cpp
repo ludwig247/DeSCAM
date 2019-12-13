@@ -192,6 +192,7 @@ void SCAM::FindCommunication2::visit(struct Read &node) {
     this->commStmt = &node;
     this->stmt = &node;
     this->readVariable = node.getVariableOperand();
+    this->stateName = node.getStateName();
 }
 
 void SCAM::FindCommunication2::visit(struct Write &node) {
@@ -201,6 +202,7 @@ void SCAM::FindCommunication2::visit(struct Write &node) {
     this->commStmt = &node;
     this->stmt = &node;
     this->writeValue = node.getValue();
+    this->stateName = node.getStateName();
 
 }
 
@@ -247,6 +249,7 @@ void SCAM::FindCommunication2::visit(SCAM::Notify &node) {
 
 void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
     waitComm = true;
+    this->stateName = node.getStateName();
     communication = false;
 }
 
@@ -258,5 +261,13 @@ void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
     void FindCommunication2::visit(class ArrayExpr &node) {
         waitComm = false;
         communication = false;
+    }
+
+    const std::string &FindCommunication2::getStateName() const {
+        return stateName;
+    }
+
+    bool FindCommunication2::hasStateName() const {
+        return !this->stateName.empty();
     }
 }

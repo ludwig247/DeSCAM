@@ -6,19 +6,18 @@
 #define INTERFACES_MASTERSLAVE_HPP
 
 
+#include "MasterSlave.h"
+
 template<typename T>
 MasterSlave<T>::MasterSlave (const char *name) : sc_prim_channel(name) {
     reader = nullptr;
     writer = nullptr;
-    shared_data = malloc(sizeof(T));
+    shared_data = (T*)malloc(sizeof(T));
     available_data = false;
-    data_read = true;
-    writer_ready = true;
-    reader_ready = false;
 }
 
 template<typename T>
-void MasterSlave<T>::master_write(const T &val) {
+void MasterSlave<T>::master_write(const T &val,std::string stateName) {
     /**
      * @breaf: Master write should definitely be read
      *
@@ -144,7 +143,7 @@ void MasterSlave<T>::slave_read(T &out, bool &success) {
 }
 
 template<typename T>
-void MasterSlave<T>::master_read(T & out) {
+void MasterSlave<T>::master_read(T & out,std::string stateName) {
     /**
      * @breaf: Master read should always have a value to read
      *
@@ -184,6 +183,12 @@ void MasterSlave<T>::master_read(T & out) {
 }
 
 template<typename T>
+void MasterSlave<T>::master_read(T &out) {
+    this->master_read(out,"");
+
+}
+
+template<typename T>
 void MasterSlave<T>::slave_write(const T &val) {
 //    std::cout << "@" << this->name() << ": MasterSlave->slave_write: writing something\n";
     shared_data = &val;
@@ -192,15 +197,7 @@ void MasterSlave<T>::slave_write(const T &val) {
 //    std::cout << "@" << this->name() << ": MasterSlave->master_write: done writing\n";
 }
 
-//template<typename T>
-//bool MasterSlave<T>::peek() {
-//    return available_data;
-//}
-//
-//template<typename T>
-//bool MasterSlave<T>::poke() {
-//    return !available_data;
-//}
+
 
 template<typename T>
 void MasterSlave<T>::register_port(sc_port_base &port, const char *if_typename) {
@@ -271,5 +268,12 @@ void MasterSlave<T>::register_port(sc_port_base &port, const char *if_typename) 
         writer_if = nm;
     }
 }
+
+template<typename T>
+void MasterSlave<T>::master_write(const T &val) {
+    this->master_write(val,"");
+}
+
+
 
 #endif //INTERFACES_MASTERSLAVE_HPP

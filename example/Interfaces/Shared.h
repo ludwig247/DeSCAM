@@ -23,7 +23,7 @@ public:
     virtual void register_port(sc_port_base &port, const char *if_typename);
 
 private:
-    T* shared_data;
+    T shared_data;
     bool available_data;
 
     sc_port_base *reader, *writer;

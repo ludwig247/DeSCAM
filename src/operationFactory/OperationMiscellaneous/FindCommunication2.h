@@ -72,6 +72,10 @@ namespace SCAM {
         virtual void visit(class Notify &node) override;
         virtual void visit(class ArrayExpr &node);
 
+    public:
+        const std::string &getStateName() const;
+        bool hasStateName() const;
+
     private:
         bool waitComm;
         bool communication;
@@ -80,6 +84,7 @@ namespace SCAM {
         SCAM::Stmt * stmt;
         SCAM::Expr * writeValue; //! Value that is written on the port
         SCAM::VariableOperand * readVariable;
+        std::string stateName = "";
     };
 }
 

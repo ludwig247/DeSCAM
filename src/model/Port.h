@@ -24,13 +24,13 @@ namespace SCAM {
     class Port : public TypeInterface, public AbstractNode {
     public:
         Port(const std::string &name, Interface *_interface, DataType *datatype);
-
         Port() = delete;
+        Port(Port&)= delete;
 
-        virtual ~Port();
+        ~Port() override ;
 
         //Accept
-        void accept(AbstractVisitor &visitor);
+        void accept(AbstractVisitor &visitor) override ;
 
         //Get
         Notify *getNotify() const;

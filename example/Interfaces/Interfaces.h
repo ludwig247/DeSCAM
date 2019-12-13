@@ -5,12 +5,11 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
-//#define WAIT_TIME std::rand()%2
-#define WAIT_TIME 0
-
+#include "ImportantState.h"
 #include "Blocking.h"
 #include "MasterSlave.h"
 #include "Shared.h"
+
 
 //Blocking
 template<typename T>

@@ -9,13 +9,7 @@ namespace SCAM {
 
     int State2::state_cnt = 0;
 
-    State2::State2() :
-            stateId(State2::state_cnt++),
-            name(""),
-            commStmt(nullptr),
-            wait(false),
-            init(false) {
-    }
+
 
     State2::State2(std::string name) :
             stateId(State2::state_cnt++),

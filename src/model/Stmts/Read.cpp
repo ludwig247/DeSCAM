@@ -49,4 +49,5 @@ namespace SCAM {
         return this->status != nullptr;
     }
 
+
 }

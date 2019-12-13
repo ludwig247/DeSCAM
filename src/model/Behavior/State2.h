@@ -15,8 +15,7 @@ namespace SCAM {
 
     class State2 {
     public:
-        State2();
-
+        State2() = delete;
         explicit State2(std::string name);
 
         ~State2() = default;

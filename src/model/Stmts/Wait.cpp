@@ -23,3 +23,11 @@ std::ostream &SCAM::Wait::print(std::ostream &ostream) const {
     ostream << PrintStmt::toString(this);
     return ostream;
 }
+
+const std::string &SCAM::Wait::getStateName() const {
+    return stateName;
+}
+
+void SCAM::Wait::setStateName(const std::string &stateName) {
+    Wait::stateName = stateName;
+}
