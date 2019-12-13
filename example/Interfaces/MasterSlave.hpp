@@ -14,9 +14,6 @@ MasterSlave<T>::MasterSlave (const char *name) : sc_prim_channel(name) {
     writer = nullptr;
     shared_data = (T*)malloc(sizeof(T));
     available_data = false;
-    data_read = true;
-    writer_ready = true;
-    reader_ready = false;
 }
 
 template<typename T>
@@ -277,8 +274,16 @@ void MasterSlave<T>::master_write(const T &val) {
     this->master_write(val,"");
 }
 
+template<typename T>
+void MasterSlave<T>::slave_read(T &out, bool &success, std::string stateName) {
+    this->slave_read(out,success);
+}
 
+template<typename T>
+void MasterSlave<T>::slave_write(const T &val, std::string stateName) {
+    this->slave_rwrite(val);
 
+}
 
 
 #endif //INTERFACES_MASTERSLAVE_HPP

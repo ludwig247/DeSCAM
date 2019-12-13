@@ -31,6 +31,7 @@ public:
 //    virtual bool slave_read(T & out) = 0;
     virtual void slave_read(T & out) = 0;
     virtual void slave_read(T & out, bool & success) = 0;
+    virtual void slave_read(T & out, bool & success, std::string stateName) = 0;
 //    virtual bool peek() = 0;
 };
 
@@ -39,6 +40,7 @@ class slave_out_if : virtual public sc_interface
 {
 public:
     virtual void slave_write(const T &val) = 0;
+    virtual void slave_write(const T &val, std::string stateName) = 0;
 //    virtual bool poke() = 0;
 };
 
