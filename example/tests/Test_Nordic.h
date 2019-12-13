@@ -12,11 +12,12 @@
 
 const unsigned number = 0x111;
 const unsigned int number2 = 0x111;
-const int number3 = ADD_HEX;
+const int number3 = 20;
+//TODO: allow negativ numbers for integer ..
 const bool number4 = true;
 
 
-SC_MODULE(Test_Nordic)
+SC_MODULE(ModuleGlobalVars)
 {
     blocking_in <int> test_in;
     blocking_out<unsigned int> test_out;
@@ -24,11 +25,11 @@ SC_MODULE(Test_Nordic)
     int foo;
     unsigned int bar;
 
-    unsigned int test_var() const {
-        return ADD_HEX;
+    unsigned int test_var(unsigned int val) const {
+        return val+3+number;
     }
 
-    SC_CTOR(Test_Nordic):
+    SC_CTOR(ModuleGlobalVars):
             test_in("test_in"),
             test_out("test_out")
     {
@@ -38,15 +39,18 @@ SC_MODULE(Test_Nordic)
     {
         while(true)
         {
-          test_in->read(foo);
+          //test_in->read(foo);
 
           if(number4){
-              bar = bar + number2;
-          }
-
-          bar = bar + test_var() + static_cast<unsigned int>(foo) + static_cast<unsigned int>(number3);
 
           bar = number + bar;
+
+          bar = bar + number2;
+
+          bar = bar + static_cast<unsigned>(number3);
+
+          bar = bar + test_var(number2);
+          }
           test_out->write(bar);
 
         }

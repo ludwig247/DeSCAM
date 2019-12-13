@@ -23,7 +23,6 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
         if (varDecl->getAnyInitializer(varDecl) != nullptr) {
 
             auto init = varDecl->getAnyInitializer(varDecl)->IgnoreImpCasts();
-            if (varDecl->getName().str() == "number") varDecl->getInit()->dump();
             if (init->getType()->isBuiltinType()) {
                 auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
                 try {
@@ -55,10 +54,11 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                         if(checkForExpr.getExpr()->getDataType() == descam_type){
                             //set initval && create new global constant variable
                             if (auto initVal = dynamic_cast<ConstValue *>(checkForExpr.getExpr())) {
-                                Variable *var = new Variable(name, descam_type, initVal);
+                                auto var = new Variable(name, descam_type, initVal);
+                                var->setConstant(true);
                                 this->variableMap.insert(std::make_pair(name, var));
                             }else {
-                                std::cout << "Global variable: " << name << " with value " << PrintStmt::toString(checkForExpr.getExpr()) << " is not added as global var." << std::endl;
+                                //std::cout << "Global variable: " << name << " with value " << PrintStmt::toString(checkForExpr.getExpr()) << " is not added as global var." << std::endl;
                                 //std::cout << "The reason is that the initialvalue has to be of constant and simple type without expressions of any kind" << std::endl;
                                 //FIXME move back to exception
                                 //throw std::runtime_error("Init value has to be const");
@@ -66,7 +66,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                         }
                     }
                 } catch (std::runtime_error e) {
-                    std::cout << "HERE" << std::endl;
+                    std::cout << e.what() << std::endl;
 
                 }
 

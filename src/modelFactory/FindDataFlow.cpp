@@ -491,7 +491,6 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
     //Name
     std::string name = declRefExpr->getDecl()->getNameAsString();
-
     //Check for global variables
     auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
     if (!globalVars.empty() && globalVars.find(name) != globalVars.end()) {
@@ -731,21 +730,18 @@ bool SCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *static
     if (staticCastExpr->getType()->isUnsignedIntegerType() &&
         staticCastExpr->getType().getAsString() == "unsigned int") {
         FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, false);
-        if (ExprVisitor::isVar(subExpr.getExpr()) || true) {
+        if (subExpr.getExpr() != nullptr ) {
             switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("unsigned")));
         } else return exitVisitor("static_cast: only variables are allowed as parameter");
         return false;
     } else if (staticCastExpr->getType()->isIntegerType() && staticCastExpr->getType().getAsString() == "int") {
         FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, false);
-        //FIXME: || true!
-        if (ExprVisitor::isVar(subExpr.getExpr()) || ExprVisitor::isParameter(subExpr.getExpr()) || true) {
+        if (subExpr.getExpr() != nullptr ) {
             switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("int")));
         } else return exitVisitor("static_cast: only variables are allowed as parameter");
         return false;
     } else return exitVisitor("static_cast: unallowed static cast");
 
-
-    return true;
 }
 
 bool SCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {

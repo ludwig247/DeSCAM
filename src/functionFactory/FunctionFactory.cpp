@@ -34,6 +34,11 @@ SCAM::FunctionFactory::FunctionFactory(const std::map<int, CfgBlock *> &controlF
     for (auto &&path : pathsToReturn.getPathList()) {
         auto returnValue = ReconstructOperations::getReturnValue(path->getStmtList(),module);
         auto conditions = ReconstructOperations::extractConditions(path->getStmtList(),module);
+        if(returnValue == nullptr){
+            for(auto stmt: path->getStmtList()){
+                std::cout << PrintStmt::toString(stmt) << std::endl;
+            }
+        }
         assert(returnValue != nullptr && "Return value is null");
         returnValueConditionList.push_back((std::make_pair(returnValue, conditions)));
     }

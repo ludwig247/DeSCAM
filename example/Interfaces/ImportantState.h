@@ -19,5 +19,4 @@ void insert_state(std::string stateName){
 void insert_state(){
     important_state;
 }
-
 #endif //DESCAM_IMPORTANTSTATE_H

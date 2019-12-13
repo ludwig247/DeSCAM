@@ -57,7 +57,6 @@ namespace SCAM {
     void Model::addGlobalVariable(Variable *variable) {
         if(variable == nullptr) throw std::runtime_error("Passing nullptr to var");
         this->globalVariableMap.insert(std::make_pair(variable->getName(),variable));
-
     }
 
     const std::map<std::string, Variable *> &Model::getGlobalVariableMap() const {
