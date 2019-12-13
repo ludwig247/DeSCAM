@@ -133,6 +133,10 @@ namespace SCAM {
         std::vector<std::string> dpSignalsList;
         SCAM::Module *module;
         Return *returnValue = nullptr;
+
+        DataSignal *reconstructArrayVar(Operand *operand);
+
+        bool isWaitOperation =false;
     };
 
 }

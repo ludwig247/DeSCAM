@@ -5,10 +5,11 @@
 #include <PrintStmt.h>
 #include "FindVariablesValues.h"
 #include "Optimizer/Debug.h"
+#include "FindVariablesAndFunctionsInStatement.h"
 
 SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode *> &CFG,
-                                               std::set<std::string> readVariablesSet) : readVariablesSet(std::move(
-        readVariablesSet)) {
+                                               const std::set<std::string>& readVariablesSet) : readVariablesSet(
+        readVariablesSet) {
     std::map<std::string, std::map<std::string, std::set<SCAM::Expr *>>> compoundVariablesT;
     for (auto node: CFG) {
         auto statement = node.second->getStmt();
@@ -41,7 +42,7 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
     for(auto variable : this->variablesValuesMap)
         {   std::cout << "Variable " << variable.first << ": ";
             for(auto value : variable.second){
-                std::cout << value  << ", " ;
+                std::cout << SCAM::PrintStmt::toString(value)  << ", " ;
             }
             std::cout << std::endl;
         }

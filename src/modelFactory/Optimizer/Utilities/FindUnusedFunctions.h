@@ -16,8 +16,8 @@
 namespace SCAM {
 
 /***
- * @brief: Finds Unused functions in the block CFG and prompts a warning for each one and delete them from the module
- * @author:M.I.Alkoudsi
+ * \brief: Finds Unused functions in the CFG, prompts a warning for each of them, then delete them from the module
+ * \author:mi-lkoudsi
  */
 
     class FindUnusedFunctions : public SCAM::StmtAbstractVisitor {

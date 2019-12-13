@@ -6,7 +6,7 @@
 #define PROJECT_DATA_PATH__H
 
 #include "systemc.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"
 

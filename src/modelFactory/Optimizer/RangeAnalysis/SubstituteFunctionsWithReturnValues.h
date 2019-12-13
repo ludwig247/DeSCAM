@@ -16,16 +16,23 @@
 
 namespace SCAM {
     /***
-        * @brief: replaces the use of a function with all possible return values and stores the result in a map
-        *
-        * @author:M.I.Alkoudsi
+        * \brief: Replaces the use of a function inside an expression with its all possible return values and stores the result in a map
+        * \author:mi-alkoudsi
+        * \inputs:
+        *       - std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        * \outputs:
+        *       - std::map<std::string, std::set<SCAM::Expr *>> newVariablesValuesMap;
+        * \details: Replaces every function inside values in the variablesValuesMap with their returned values.
+        * If any of a function' x return values rx uses a function y, y is also substituted with its return values in rx.
+        * This creates a number of return values that replace rx in function x inside the newVariableValuesMap.
         */
+
     class SubstituteFunctionsWithReturnValues : public StmtAbstractVisitor {
     public:
         SubstituteFunctionsWithReturnValues() = delete;
         explicit SubstituteFunctionsWithReturnValues(const std::map<std::string, std::set<SCAM::Expr*>>& variablesValuesMap);
         ~SubstituteFunctionsWithReturnValues() = default;
-               const std::map<std::string, std::set<SCAM::Expr*>> &getNewVariableValuesMap() const;
+        const std::map<std::string, std::set<SCAM::Expr*>> &getNewVariableValuesMap() const;
         const std::set<std::string>&  getVariablesWithRecrusiveFunctions() const;
     private:
         bool functionHasRecursion;

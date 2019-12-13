@@ -19,14 +19,21 @@
 namespace SCAM {
 
 /**
- *  @brief check assignments of a specific variable through each path of all possible paths in the CFG
- *
- *  Idea: on each Path, keep only the last assignment to the variable,
+ *  \brief check assignments of a specific variable through each path of all possible paths in the CFG
+ *  \author:mi-alkoudsi
+ *  \inputs:
+ *    - std::map<int, std::vector<SCAM::CfgNode *>> allPathsToNodeMap;
+ *    - SCAM::Variable *var;
+ *    - int stmtId;
+ *  \outputs:
+ *    - SCAM::Expr *propagatedValue;
+ *    - int numLastAssignments;
+ *    - std::map<int, SCAM::Expr *> lastAssignmentsMap;
+ *  \details: On each Path, only the last assignment to the variable kept.
  *  if there was no read to the variable on any of the paths =>
  *  the result is map containing all last assignments, and if and only if they are all equal then propagation is valid
- *  @author:M.I.Alkoudsi
+ *  Note: if the assignment contains another variable which is assigned before the statement to which we want to propagate, propagation is not valid.
  */
-
 
     class PropagateConstantValue : public SCAM::StmtAbstractVisitor {
     public:
@@ -38,8 +45,7 @@ namespace SCAM {
 
         int getNumLastAssignments() const;
 
-        const std::map<int, SCAM::Expr *> &getLastAssignmentMap() const;
-
+        const std::map<int, SCAM::Expr *> &getLastAssignmentsMap() const;
 
     private:
         SCAM::Variable *variable;
@@ -50,7 +56,7 @@ namespace SCAM {
         bool lastAssignmentAlreadyStored;
         int numLastAssignments;
         bool isVarRead;                                                                  // true when the last assignment of a specific path to the variable at hands is a read
-        bool wasRhsVarOp{};                                                                 // true when the right handside of an assignment is a variable operand
+        bool wasRhsVarOp{};                                                              // true when the right handside of an assignment is a variable operand
         std::map<std::string,std::set<int>> rhsVariableAssignmentsIds;                   // used when wasRhsVarOp is true to keep track of assignments to the rhs variable
         std::map<std::string, SCAM::Expr *> variableValueMap;                            // Contains the current pointer to the value/s of a variable
         std::map<int, SCAM::Expr *> LastAssignmentMap;                                   // Contains last assignments for a variable at a path n

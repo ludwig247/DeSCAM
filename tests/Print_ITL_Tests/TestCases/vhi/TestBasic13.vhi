@@ -6,9 +6,11 @@ macro b_out_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro b_in_sig : CompoundType := end macro;
 macro b_in_sig_mode : Mode := end macro;
 macro b_in_sig_x : signed := end macro;
 macro b_in_sig_y : boolean := end macro;
+macro b_out_sig : CompoundType := end macro;
 macro b_out_sig_mode : Mode := end macro;
 macro b_out_sig_x : signed := end macro;
 macro b_out_sig_y : boolean := end macro;

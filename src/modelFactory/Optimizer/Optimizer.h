@@ -14,6 +14,7 @@
 #include "Behavior/CfgNode.h"
 #include <CreateRealCFG.h>
 #include "Optimizer/Utilities/FindReadVariables.h"
+#include <Optimizer/ValuePropagation/GlobalConstantVariablePropagation.h>
 #include "Optimizer/Utilities/CfgPath.h"
 #include "Optimizer/Utilities/FindCfgPaths.h"
 #include "Optimizer/Utilities/PropagateConstantValue.h"
@@ -31,25 +32,54 @@
 
 namespace SCAM {
     /***
-     * @brief: Represents an optimizer stage in a compiler, which performs optimizations on the control data flow graph(CDFG) and within functions
-     * @author:M.I.Alkoudsi
+     * \brief: Performs optimizations on the control flow graph(CFG)
      *
+     * \author: mi-alkoudsi
+     *
+     * \input:
+     *      - std::map<int, SCAM::CfgNode *> cfg;
+     *      - SCAM::Module * module;
+     *      - std::set<std::string> optimizeOptionsSet;
+     * \output:
+     *      - std::map<int, CfgNode *> optimizedCFG;
+     *      - std::map<std::string, int> deducedVariablesBitwidth;
+     *      - std::map<SCAM::Port *, int> deducedOutputPortsBitwidth;
+     *
+     * \details: Performs some or all of the following optimizations depending on the given optimization options
+     * Merge redundant conditions
+     * Local value propagation
+     * Global value propagation
+     * Variables liveness analysis
+     * Reachability analysis
+     * Functions optimization
+     * Operator strength reduction
+     * Simplify expressions
+     * Range and bitwidth analysis
      */
+
     class Optimizer {
     public:
         Optimizer() = delete;
 
         Optimizer(std::map<int, SCAM::CfgBlock *> CFG,
-                  SCAM::Module *module);
+                  SCAM::Module *module, const std::map<std::string, Variable *> &globalVariableMap , const std::set<std::string>& optimizeOptionsSet);
 
         ~Optimizer() = default;
 
         const std::map<int, CfgNode *> &getCFG() const;
 
+        const std::map<std::string, int> &getVariableBitWidthMap() const;
+
+        const std::map<SCAM::Port *, int> &getPortsBitWidthMap() const;
+
     private:
         std::map<int, SCAM::CfgBlock *> blockCFG;
         std::map<int, SCAM::CfgNode *> nodeCFG;
         SCAM::Module *module;
+        std::map<std::string, Variable *> globalVariableMap;
+        std::set<std::string> optimizeOptionsSet;
+        std::map<std::string, int> variableBitWidthMap;
+        std::map<SCAM::Port *, int> portBitWidthMap;
     };
 }
 

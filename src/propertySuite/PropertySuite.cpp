@@ -116,24 +116,27 @@ namespace SCAM {
         throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + signalName);
     }
 
-    PropertyMacro * PropertySuite::findSignal(const std::string &signalName, const std::string &subVarName) const {
+    PropertyMacro * PropertySuite::findSignal(const std::string &parentName, const std::string &subVarName) const {
         for (auto dpSignal : dpSignals) {
             if (dpSignal->isCompoundType()) {
-                if ((dpSignal->getName() == signalName) && (dpSignal->getSubVarName() == subVarName)) {
+                auto name = parentName + "." + subVarName;
+                std::string test = dpSignal->getFullName();
+                if (dpSignal->getFullName() == name) {
                     return dpSignal;
                 }
             }
+
         }
 
         for (auto visibleRegister : visibleRegisters) {
             if (visibleRegister->isCompoundType()) {
-                if ((visibleRegister->getName() == signalName) && (visibleRegister->getSubVarName() == subVarName)) {
+                if ((visibleRegister->getName() == parentName) && (visibleRegister->getSubVarName() == subVarName)) {
                     return visibleRegister;
                 }
             }
         }
 
-        throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + signalName + "." +subVarName);
+        throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + parentName + "." + subVarName);
     }
 
     PropertyMacro * PropertySuite::findSignal(Variable * var) const {

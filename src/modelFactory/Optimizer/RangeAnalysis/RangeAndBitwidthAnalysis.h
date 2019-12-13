@@ -12,7 +12,6 @@
 #include "Optimizer/Utilities/FindVariablesAndFunctionsInStatement.h"
 #include "ModelGlobal.h"
 #include "VariablesRangeAnalysis.h"
-#include "BitWidthInference.h"
 #include "Optimizer/Utilities/FindVariablesValues.h"
 #include <Optimizer/Utilities/OptUtilities.h>
 #include <ctgmath>
@@ -22,15 +21,19 @@
 
 namespace SCAM {
     /***
-        * @brief: combines the result of range analysis and bitwidth inference
-        *
-        * @author:M.I.Alkoudsi
+        * \brief: Analyzes variables and output ports bitwidth
+        * \author: mi-alkoudsi
+        * \inputs:
+        *       - SCAM::Module *module
+        * \outputs:
+        *       - std::map<std::string, int> variablesBitwidthMap
+        *       - std::map<SCAM::Port, int> outputPortsBitwidthMap
         */
     class RangeAndBitWidthAnalysis : public StmtAbstractVisitor {
     public:
         RangeAndBitWidthAnalysis() = delete;
 
-        RangeAndBitWidthAnalysis(SCAM::Module *module, std::set<std::string> variablesThatHaveReadSet);
+        explicit RangeAndBitWidthAnalysis(SCAM::Module *module);
 
         ~RangeAndBitWidthAnalysis() = default;
 
@@ -59,7 +62,7 @@ namespace SCAM {
 
         void visit(struct BoolValue &node) override;
 
-        void visit(struct EnumValue &node) override{};
+        void visit(struct EnumValue &node) override;
 
         void visit(struct CompoundValue &node) override;
 

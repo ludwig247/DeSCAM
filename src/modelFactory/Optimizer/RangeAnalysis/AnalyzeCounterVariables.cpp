@@ -4,7 +4,20 @@
 
 
 #include "AnalyzeCounterVariables.h"
-
+/* Idea:
+ * Iterates over the CFG looking for the conditional statement whose true branch contains the counter variable assignment
+ * The conditional statement is analyzed to determine if the value of x is limited to a specific range.
+ * example 1:
+ *  if ( x < 10){
+ *  x++
+ *  }
+ *  increment is limited by the value 10
+ *  example 2:
+ *  if( x == 9 ){
+ *  x = 0;
+ *  }
+ *  x value is limited by the value 9
+ */
 
 SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> counterVariablesSet,
                                                        std::map<int, SCAM::CfgNode *> CFG) : CFG(std::move(CFG)),

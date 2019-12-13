@@ -72,11 +72,7 @@ namespace SCAM {
     // ------------------------------------------------------------------------------
 
     void AbstractProperty::addFreezeSignal(SCAM::PropertyMacro *freezeSignal) {
-        if (freezeSignal->isCompoundType()) {
-            this->freezeSignals[freezeSignal->getName()+"_"+freezeSignal->getSubVarName()] = freezeSignal;
-        } else {
-            this->freezeSignals[freezeSignal->getName()] = freezeSignal;
-        }
+        this->freezeSignals.insert(std::make_pair(freezeSignal->getFullName(),freezeSignal));
     }
 
     const std::map<std::string, SCAM::PropertyMacro*> &AbstractProperty::getFreezeSignals() const {

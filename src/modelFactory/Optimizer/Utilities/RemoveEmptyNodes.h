@@ -18,9 +18,8 @@
 namespace SCAM {
 
     /***
-     * @brief: Removes nodes in the CfgBlock graph that have no statements and terminator
-     *
-     *
+     * \brief: Removes nodes in the CfgBlock graph that have no statements and terminator
+     * \author: mi-alkoudsi
      */
 
     class RemoveEmptyNodes {

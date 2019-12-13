@@ -106,6 +106,7 @@ public:
                 if (status == start) nextsection = request;
                 else if (status == stop) nextsection = idle;
             }
+	}
     }
 };
 

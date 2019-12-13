@@ -4,7 +4,11 @@
 
 #include "OperatorStrengthReduction.h"
 #include "Optimizer/Debug.h"
-
+/* The algorithm iterates over statements of the CFG looking for expensive arithmetic operations,
+ * If found, the algorithm checks whether the lhs and/or rhs of the expression is ^2 number.
+ * If true, the arithmetic expensive operation is converted into cheaper operation/s
+ * e.g., x * 65 => ((x << 6) + x)
+ */
 
 SCAM::OperatorStrengthReduction::OperatorStrengthReduction(std::map<int, CfgNode *> CFG) : isCFGOptimizer(true),
                                                                                            CFG(std::move(CFG)),
@@ -519,7 +523,7 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (this->newExpr) {
-        this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
     }
 }
 

@@ -59,9 +59,9 @@ struct Bus_new : public sc_module {
             24 - 31 TEMP_BOT
              */
             master_in->read(req);
-	    std::cout << "req addrs:" << req.addr << std::endl;
-	    std::cout << "req data:" << req.data << std::endl;
-	    std::cout << "req mode:" << req.trans_type << std::endl;
+//	    std::cout << "req addrs:" << req.addr << std::endl;
+//	    std::cout << "req data:" << req.data << std::endl;
+//	    std::cout << "req mode:" << req.trans_type << std::endl;
 
             if(SINGLE_READ == req.trans_type){
                 req.data = 0;

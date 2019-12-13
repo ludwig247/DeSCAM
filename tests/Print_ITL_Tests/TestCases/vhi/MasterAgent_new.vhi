@@ -6,17 +6,21 @@ macro master_to_agent_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro agent_to_bus_sig : master_signals := end macro;
 macro agent_to_bus_sig_addr : signed := end macro;
 macro agent_to_bus_sig_cyc : boolean := end macro;
 macro agent_to_bus_sig_data : signed := end macro;
 macro agent_to_bus_sig_stb : boolean := end macro;
 macro agent_to_bus_sig_we : boolean := end macro;
+macro agent_to_master_sig : bus_resp_t := end macro;
 macro agent_to_master_sig_ack : ack_t := end macro;
 macro agent_to_master_sig_data : signed := end macro;
+macro bus_to_agent_sig : slave_signals := end macro;
 macro bus_to_agent_sig_ack : boolean := end macro;
 macro bus_to_agent_sig_data : signed := end macro;
 macro bus_to_agent_sig_err : boolean := end macro;
 macro clk_sig : boolean := end macro;
+macro master_to_agent_sig : bus_req_t := end macro;
 macro master_to_agent_sig_addr : signed := end macro;
 macro master_to_agent_sig_data : signed := end macro;
 macro master_to_agent_sig_trans_type : trans_t := end macro;
@@ -410,6 +414,7 @@ freeze:
 	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
 	agent_to_bus_sig_stb_at_t = agent_to_bus_sig_stb@t,
 	agent_to_bus_sig_we_at_t = agent_to_bus_sig_we@t,
+	agent_to_master_sig_at_t = agent_to_master_sig@t,
 	nextphase_at_t = nextphase@t;
 assume:
 	at t: state_2;
@@ -424,8 +429,7 @@ prove:
 	at t+1: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
 	at t+1: agent_to_bus_sig_stb = agent_to_bus_sig_stb_at_t;
 	at t+1: agent_to_bus_sig_we = agent_to_bus_sig_we_at_t;
-	at t+1: agent_to_master_sig_ack = agent_to_bus_resp_ack_at_t;
-	at t+1: agent_to_master_sig_data = agent_to_bus_resp_data_at_t;
+	at t+1: agent_to_master_sig = agent_to_master_sig_at_t;
 	at t+1: nextphase = nextphase_at_t;
 	at t+1: agent_to_master_notify = true;
 	at t+1: master_to_agent_notify = false;

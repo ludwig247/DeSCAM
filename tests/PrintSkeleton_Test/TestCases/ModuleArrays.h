@@ -164,4 +164,8 @@ struct TestArray5 : public sc_module {
         }
     }
 };
+
+
+
+
 #endif //PROJECT_MODULEARRAYS_H

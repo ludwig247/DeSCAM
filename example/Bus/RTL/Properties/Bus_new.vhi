@@ -25,24 +25,33 @@
 macro master_in_sig_addr : signed := master_in.addr end macro;
 macro master_in_sig_data : signed := master_in.data end macro;
 macro master_in_sig_trans_type : trans_t := master_in.trans_type end macro;
+macro master_out_sig : bus_resp_t :=  master_out end macro;
 macro master_out_sig_ack : ack_t := master_out.ack end macro;
 macro master_out_sig_data : signed := master_out.data end macro;
+macro slave_in0_sig : bus_resp_t := slave_in0 end macro;
 macro slave_in0_sig_ack : ack_t := slave_in0.ack end macro;
 macro slave_in0_sig_data : signed := slave_in0.data end macro;
+macro slave_in1_sig : bus_resp_t := slave_in1 end macro;
 macro slave_in1_sig_ack : ack_t := slave_in1.ack end macro;
 macro slave_in1_sig_data : signed := slave_in1.data end macro;
+macro slave_in2_sig : bus_resp_t :=  slave_in2 end macro;
 macro slave_in2_sig_ack : ack_t := slave_in2.ack end macro;
 macro slave_in2_sig_data : signed := slave_in2.data end macro;
+macro slave_in3_sig : bus_resp_t := slave_in3 end macro;
 macro slave_in3_sig_ack : ack_t := slave_in3.ack end macro;
 macro slave_in3_sig_data : signed := slave_in3.data end macro;
+macro slave_out0_sig : bus_req_t := slave_out0 end macro;
 macro slave_out0_sig_addr : signed := slave_out0.addr end macro;
 macro slave_out0_sig_data : signed := slave_out0.data end macro;
 macro slave_out0_sig_trans_type : trans_t := slave_out0.trans_type end macro;
+macro slave_out1_sig : bus_req_t := slave_out1 end macro;
 macro slave_out1_sig_addr : signed := slave_out1.addr end macro;
 macro slave_out1_sig_data : signed := slave_out1.data end macro;
 macro slave_out1_sig_trans_type : trans_t := slave_out1.trans_type end macro;
+macro slave_out2_sig : bus_req_t := slave_out2 end macro;
 macro slave_out2_sig_addr : signed := slave_out2.addr end macro;
 macro slave_out2_sig_data : signed := slave_out2.data end macro;
+macro slave_out3_sig : bus_req_t := slave_out3 end macro;
 macro slave_out2_sig_trans_type : trans_t := slave_out2.trans_type end macro;
 macro slave_out3_sig_addr : signed := slave_out3.addr end macro;
 macro slave_out3_sig_data : signed := slave_out3.data end macro;
@@ -54,15 +63,13 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro req_addr : signed := req_signal.addr end macro;
-macro req_data : signed := req_signal.data end macro;
 macro req_trans_type : trans_t := req_signal.trans_type end macro;
 macro resp_ack : ack_t := resp_signal.ack end macro;
 macro resp_data : signed := resp_signal.data end macro;
 
 
 -- STATES --
-macro state_8 : boolean :=
+macro state_1 : boolean :=
 	section=run and
 	master_in_notify = true and
 	master_out_notify = false and
@@ -76,7 +83,7 @@ macro state_8 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_13 : boolean :=
+macro state_2 : boolean :=
 	section=run and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -90,7 +97,7 @@ macro state_13 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_14 : boolean :=
+macro state_3 : boolean :=
 	section=run and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -104,7 +111,7 @@ macro state_14 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_17 : boolean :=
+macro state_4 : boolean :=
 	section=run and
 	master_in_notify = false and
 	master_out_notify = true and
@@ -118,7 +125,7 @@ macro state_17 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_22 : boolean :=
+macro state_5 : boolean :=
 	section=run and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -132,7 +139,7 @@ macro state_22 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_23 : boolean :=
+macro state_6 : boolean :=
 	section=run  and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -146,7 +153,7 @@ macro state_23 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_27 : boolean :=
+macro state_7 : boolean :=
 	section=run and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -160,7 +167,7 @@ macro state_27 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_28 : boolean :=
+macro state_8 : boolean :=
 	section=run  and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -174,7 +181,7 @@ macro state_28 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-macro state_32 : boolean :=
+macro state_9 : boolean :=
 	section=run and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -188,7 +195,7 @@ macro state_32 : boolean :=
 	slave_out3_notify = true
 end macro;
 
-macro state_33 : boolean :=
+macro state_10 : boolean :=
 	section=run  and
 	master_in_notify = false and
 	master_out_notify = false and
@@ -202,1210 +209,796 @@ macro state_33 : boolean :=
 	slave_out3_notify = false
 end macro;
 
-
 -- OPERATIONS --
 property reset is
 assume:
 	 reset_sequence;
 prove:
-	 at t: state_8;
-	 at t: req_addr = resize(0,32);
-	 at t: req_data = resize(0,32);
-	 at t: req_trans_type = SINGLE_READ;
-	 at t: resp_ack = ERR;
-	 at t: resp_data = resize(0,32);
-	 at t: master_in_notify = true;
-	 at t: master_out_notify = false;
-	 at t: slave_in0_notify = false;
-	 at t: slave_in1_notify = false;
-	 at t: slave_in2_notify = false;
-	 at t: slave_in3_notify = false;
-	 at t: slave_out0_notify = false;
-	 at t: slave_out1_notify = false;
-	 at t: slave_out2_notify = false;
-	 at t: slave_out3_notify = false;
+	 at t: state_1;
+	 at t: pcReg = resize(0,32);
+	 at t: phase = fetch_PH;
+	 at t: regfileWrite_dst = resize(0,32);
+	 at t: regfileWrite_dstData = resize(0,32);
+	 at t: toMemoryPort_sig_addrIn = resize(0,32);
+	 at t: toMemoryPort_sig_dataIn = resize(0,32);
+	 at t: toMemoryPort_sig_mask = MT_W;
+	 at t: toMemoryPort_sig_req = ME_RD;
+	 at t: fromMemoryPort_notify = false;
+	 at t: toMemoryPort_notify = true;
+	 at t: toRegsPort_notify = false;
 end property;
 
 
-property state_13_11 is
+property state_5_13 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_13;
-	at t: slave_out0_sync;
+	at t: state_5;
+	at t: toMemoryPort_sync;
 prove:
-	at t_end: state_14;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end-1]: slave_in0_notify = false;
-	at t_end: slave_in0_notify = true;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_6;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = phase_at_t;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	during[t+1, t_end-1]: fromMemoryPort_notify = false;
+	at t_end: fromMemoryPort_notify = true;
+	during[t+1, t_end]: toMemoryPort_notify = false;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_14_12 is
+property state_6_14 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in0_sig_ack_at_t = slave_in0_sig_ack@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t;
 assume:
-	at t: state_14;
-	at t: slave_in0_sync;
-	at t: (SINGLE_WRITE = req_trans_type);
+	at t: state_6;
+	at t: fromMemoryPort_sync;
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in0_sig_ack_at_t;
-	at t_end: master_out_sig_data = 0;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in0_sig_ack_at_t;
-	at t_end: resp_data = 0;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = fromMemoryPort_sig_loadedData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = regfileWrite_dst_at_t;
+	at t_end: toRegsPort_sig_dstData = fromMemoryPort_sig_loadedData_at_t;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
-property state_14_13 is
+property state_1_1 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in0_sig_ack_at_t = slave_in0_sig_ack@t,
-	slave_in0_sig_data_at_t = slave_in0_sig_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_14;
-	at t: slave_in0_sync;
-	at t: not((SINGLE_WRITE = req_trans_type));
+	at t: state_1;
+	at t: toMemoryPort_sync;
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in0_sig_ack_at_t;
-	at t_end: master_out_sig_data = slave_in0_sig_data_at_t;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in0_sig_ack_at_t;
-	at t_end: resp_data = slave_in0_sig_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_2;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = phase_at_t;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	during[t+1, t_end-1]: fromMemoryPort_notify = false;
+	at t_end: fromMemoryPort_notify = true;
+	during[t+1, t_end]: toMemoryPort_notify = false;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_17_14 is
+property state_2_2 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	pcReg_at_t = pcReg@t;
 assume:
-	at t: state_17;
-	at t: master_out_sync;
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_R);
 prove:
-	at t_end: state_8;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	during[t+1, t_end-1]: master_in_notify = false;
-	at t_end: master_in_notify = true;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: regfileWrite_dstData = getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t)));
+	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: toRegsPort_sig_dstData = getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t)));
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
-property state_22_15 is
+property state_2_3 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_22;
-	at t: slave_out1_sync;
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_B);
 prove:
-	at t_end: state_23;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end-1]: slave_in1_notify = false;
-	at t_end: slave_in1_notify = true;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t))),fromMemoryPort_sig_loadedData_at_t,pcReg_at_t);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t))),fromMemoryPort_sig_loadedData_at_t,pcReg_at_t);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_23_16 is
+property state_2_4 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in1_sig_ack_at_t = slave_in1_sig_ack@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_23;
-	at t: slave_in1_sync;
-	at t: (SINGLE_WRITE = req_trans_type);
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_S);
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in1_sig_ack_at_t;
-	at t_end: master_out_sig_data = 0;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in1_sig_ack_at_t;
-	at t_end: resp_data = 0;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_3;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = execute_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = getALUresult(ALU_ADD,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_dataIn = readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_mask = getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_req = ME_WR;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_23_17 is
+property state_2_5 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in1_sig_ack_at_t = slave_in1_sig_ack@t,
-	slave_in1_sig_data_at_t = slave_in1_sig_data@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	pcReg_at_t = pcReg@t;
 assume:
-	at t: state_23;
-	at t: slave_in1_sync;
-	at t: not((SINGLE_WRITE = req_trans_type));
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_U);
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in1_sig_ack_at_t;
-	at t_end: master_out_sig_data = slave_in1_sig_data_at_t;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in1_sig_ack_at_t;
-	at t_end: resp_data = slave_in1_sig_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: regfileWrite_dstData = getEncUALUresult(fromMemoryPort_sig_loadedData_at_t,pcReg_at_t);
+	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: toRegsPort_sig_dstData = getEncUALUresult(fromMemoryPort_sig_loadedData_at_t,pcReg_at_t);
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
-property state_27_18 is
+property state_2_6 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	pcReg_at_t = pcReg@t;
 assume:
-	at t: state_27;
-	at t: slave_out2_sync;
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_J);
 prove:
-	at t_end: state_28;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end-1]: slave_in2_notify = false;
-	at t_end: slave_in2_notify = true;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (pcReg_at_t + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: regfileWrite_dstData = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_addrIn = (pcReg_at_t + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: toRegsPort_sig_dstData = (4 + pcReg_at_t)(31 downto 0);
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
-property state_28_19 is
+property state_2_7 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in2_sig_ack_at_t = slave_in2_sig_ack@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	pcReg_at_t = pcReg@t;
 assume:
-	at t: state_28;
-	at t: slave_in2_sync;
-	at t: (SINGLE_WRITE = req_trans_type);
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_J));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I);
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in2_sig_ack_at_t;
-	at t_end: master_out_sig_data = 0;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in2_sig_ack_at_t;
-	at t_end: resp_data = 0;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: regfileWrite_dstData = getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: toRegsPort_sig_dstData = getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
-property state_28_20 is
+property state_2_8 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in2_sig_ack_at_t = slave_in2_sig_ack@t,
-	slave_in2_sig_data_at_t = slave_in2_sig_data@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_28;
-	at t: slave_in2_sync;
-	at t: not((SINGLE_WRITE = req_trans_type));
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_J));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_I_L);
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in2_sig_ack_at_t;
-	at t_end: master_out_sig_data = slave_in2_sig_data_at_t;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in2_sig_ack_at_t;
-	at t_end: resp_data = slave_in2_sig_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_5;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = execute_PH;
+	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = getALUresult(ALU_ADD,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_32_21 is
+property state_2_9 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	pcReg_at_t = pcReg@t;
 assume:
-	at t: state_32;
-	at t: slave_out3_sync;
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_J));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_L));
+	at t: (getEncType(fromMemoryPort_sig_loadedData) = ENC_I_J);
 prove:
-	at t_end: state_33;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end-1]: slave_in3_notify = false;
-	at t_end: slave_in3_notify = true;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)) + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: regfileWrite_dstData = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_addrIn = (readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)) + getImmediate(fromMemoryPort_sig_loadedData_at_t))(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = getRdAddr(fromMemoryPort_sig_loadedData_at_t);
+	at t_end: toRegsPort_sig_dstData = (4 + pcReg_at_t)(31 downto 0);
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
-property state_33_22 is
+property state_2_10 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in3_sig_ack_at_t = slave_in3_sig_ack@t;
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_33;
-	at t: slave_in3_sync;
-	at t: (SINGLE_WRITE = req_trans_type);
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_J));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_L));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_J));
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in3_sig_ack_at_t;
-	at t_end: master_out_sig_data = 0;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in3_sig_ack_at_t;
-	at t_end: resp_data = 0;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = pcReg_at_t;
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_33_23 is
+property state_3_11 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	slave_in3_sig_ack_at_t = slave_in3_sig_ack@t,
-	slave_in3_sig_data_at_t = slave_in3_sig_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_33;
-	at t: slave_in3_sync;
-	at t: not((SINGLE_WRITE = req_trans_type));
+	at t: state_3;
+	at t: toMemoryPort_sync;
 prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = slave_in3_sig_ack_at_t;
-	at t_end: master_out_sig_data = slave_in3_sig_data_at_t;
-	at t_end: req_addr = req_addr_at_t;
-	at t_end: req_data = req_data_at_t;
-	at t_end: req_trans_type = req_trans_type_at_t;
-	at t_end: resp_ack = slave_in3_sig_ack_at_t;
-	at t_end: resp_data = slave_in3_sig_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_4;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = phase_at_t;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	during[t+1, t_end-1]: fromMemoryPort_notify = false;
+	at t_end: fromMemoryPort_notify = true;
+	during[t+1, t_end]: toMemoryPort_notify = false;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_8_1 is
+property state_4_12 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: (master_in_sig_addr >= resize(0,32));
-	at t: (master_in_sig_addr <= resize(7,32));
+	at t: state_4;
+	at t: fromMemoryPort_sync;
 prove:
-	at t_end: state_13;
-	at t_end: req_addr = master_in_sig_addr_at_t;
-	at t_end: req_data = 0;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out0_sig_addr = master_in_sig_addr_at_t;
-	at t_end: slave_out0_sig_data = 0;
-	at t_end: slave_out0_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end-1]: slave_out0_notify = false;
-	at t_end: slave_out0_notify = true;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
+	at t_end: state_1;
+	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
 
-property state_8_2 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: (master_in_sig_addr >= resize(8,32));
-	at t: (master_in_sig_addr <= resize(15,32));
-prove:
-	at t_end: state_22;
-	at t_end: req_addr = (-8 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: req_data = 0;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out1_sig_addr = (-8 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: slave_out1_sig_data = 0;
-	at t_end: slave_out1_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end-1]: slave_out1_notify = false;
-	at t_end: slave_out1_notify = true;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property state_8_3 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: (master_in_sig_addr >= resize(16,32));
-	at t: (master_in_sig_addr <= resize(23,32));
-prove:
-	at t_end: state_27;
-	at t_end: req_addr = (-16 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: req_data = 0;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out2_sig_addr = (-16 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: slave_out2_sig_data = 0;
-	at t_end: slave_out2_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end-1]: slave_out2_notify = false;
-	at t_end: slave_out2_notify = true;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property state_8_4 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: (master_in_sig_addr >= resize(24,32));
-	at t: (master_in_sig_addr <= resize(31,32));
-prove:
-	at t_end: state_32;
-	at t_end: req_addr = (-24 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: req_data = 0;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out3_sig_addr = (-24 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: slave_out3_sig_data = 0;
-	at t_end: slave_out3_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end-1]: slave_out3_notify = false;
-	at t_end: slave_out3_notify = true;
-end property;
-
-
-property state_8_5 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: not(((master_in_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_in_sig_addr))));
-prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = resp_ack_at_t;
-	at t_end: master_out_sig_data = resp_data_at_t;
-	at t_end: req_addr = master_in_sig_addr_at_t;
-	at t_end: req_data = 0;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property state_8_6 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_data_at_t = master_in_sig_data@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: not((SINGLE_READ = master_in_sig_trans_type));
-	at t: (master_in_sig_addr >= resize(0,32));
-	at t: (master_in_sig_addr <= resize(7,32));
-prove:
-	at t_end: state_13;
-	at t_end: req_addr = master_in_sig_addr_at_t;
-	at t_end: req_data = master_in_sig_data_at_t;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out0_sig_addr = master_in_sig_addr_at_t;
-	at t_end: slave_out0_sig_data = master_in_sig_data_at_t;
-	at t_end: slave_out0_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end-1]: slave_out0_notify = false;
-	at t_end: slave_out0_notify = true;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property state_8_7 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_data_at_t = master_in_sig_data@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: not((SINGLE_READ = master_in_sig_trans_type));
-	at t: (master_in_sig_addr >= resize(8,32));
-	at t: (master_in_sig_addr <= resize(15,32));
-prove:
-	at t_end: state_22;
-	at t_end: req_addr = (-8 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: req_data = master_in_sig_data_at_t;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out1_sig_addr = (-8 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: slave_out1_sig_data = master_in_sig_data_at_t;
-	at t_end: slave_out1_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end-1]: slave_out1_notify = false;
-	at t_end: slave_out1_notify = true;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property state_8_8 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_data_at_t = master_in_sig_data@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: not((SINGLE_READ = master_in_sig_trans_type));
-	at t: (master_in_sig_addr >= resize(16,32));
-	at t: (master_in_sig_addr <= resize(23,32));
-prove:
-	at t_end: state_27;
-	at t_end: req_addr = (-16 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: req_data = master_in_sig_data_at_t;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out2_sig_addr = (-16 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: slave_out2_sig_data = master_in_sig_data_at_t;
-	at t_end: slave_out2_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end-1]: slave_out2_notify = false;
-	at t_end: slave_out2_notify = true;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property state_8_9 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_data_at_t = master_in_sig_data@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: not((SINGLE_READ = master_in_sig_trans_type));
-	at t: (master_in_sig_addr >= resize(24,32));
-	at t: (master_in_sig_addr <= resize(31,32));
-prove:
-	at t_end: state_32;
-	at t_end: req_addr = (-24 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: req_data = master_in_sig_data_at_t;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = resp_data_at_t;
-	at t_end: slave_out3_sig_addr = (-24 + master_in_sig_addr_at_t)(31 downto 0);
-	at t_end: slave_out3_sig_data = master_in_sig_data_at_t;
-	at t_end: slave_out3_sig_trans_type = master_in_sig_trans_type_at_t;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end]: master_out_notify = false;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end-1]: slave_out3_notify = false;
-	at t_end: slave_out3_notify = true;
-end property;
-
-
-property state_8_10 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	master_in_sig_addr_at_t = master_in_sig_addr@t,
-	master_in_sig_data_at_t = master_in_sig_data@t,
-	master_in_sig_trans_type_at_t = master_in_sig_trans_type@t,
-	resp_ack_at_t = resp_ack@t;
-assume:
-	at t: state_8;
-	at t: master_in_sync;
-	at t: not(((master_in_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_in_sig_addr))));
-	at t: (SINGLE_WRITE = master_in_sig_trans_type);
-prove:
-	at t_end: state_17;
-	at t_end: master_out_sig_ack = resp_ack_at_t;
-	at t_end: master_out_sig_data = 0;
-	at t_end: req_addr = master_in_sig_addr_at_t;
-	at t_end: req_data = master_in_sig_data_at_t;
-	at t_end: req_trans_type = master_in_sig_trans_type_at_t;
-	at t_end: resp_ack = resp_ack_at_t;
-	at t_end: resp_data = 0;
-	during[t+1, t_end]: master_in_notify = false;
-	during[t+1, t_end-1]: master_out_notify = false;
-	at t_end: master_out_notify = true;
-	during[t+1, t_end]: slave_in0_notify = false;
-	during[t+1, t_end]: slave_in1_notify = false;
-	during[t+1, t_end]: slave_in2_notify = false;
-	during[t+1, t_end]: slave_in3_notify = false;
-	during[t+1, t_end]: slave_out0_notify = false;
-	during[t+1, t_end]: slave_out1_notify = false;
-	during[t+1, t_end]: slave_out2_notify = false;
-	during[t+1, t_end]: slave_out3_notify = false;
-end property;
-
-
-property wait_state_13 is
+property wait_state_5 is
 dependencies: no_reset;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
 assume:
-	at t: state_13;
-	at t: not(slave_out0_sync);
+	at t: state_5;
+	at t: not(toMemoryPort_sync);
 prove:
-	at t+1: state_13;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: slave_out0_sig_addr = req_addr_at_t;
-	at t+1: slave_out0_sig_data = req_data_at_t;
-	at t+1: slave_out0_sig_trans_type = req_trans_type_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = true;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
+	at t+1: state_5;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
+	at t+1: fromMemoryPort_notify = false;
+	at t+1: toMemoryPort_notify = true;
+	at t+1: toRegsPort_notify = false;
 end property;
 
 
-property wait_state_14 is
+property wait_state_6 is
 dependencies: no_reset;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_14;
-	at t: not(slave_in0_sync);
+	at t: state_6;
+	at t: not(fromMemoryPort_sync);
 prove:
-	at t+1: state_14;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = true;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
+	at t+1: state_6;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: fromMemoryPort_notify = true;
+	at t+1: toMemoryPort_notify = false;
+	at t+1: toRegsPort_notify = false;
 end property;
 
 
-property wait_state_17 is
+property wait_state_1 is
 dependencies: no_reset;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
 assume:
-	at t: state_17;
-	at t: not(master_out_sync);
+	at t: state_1;
+	at t: not(toMemoryPort_sync);
 prove:
-	at t+1: state_17;
-	at t+1: master_out_sig_ack = resp_ack_at_t;
-	at t+1: master_out_sig_data = resp_data_at_t;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = true;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
+	at t+1: state_1;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
+	at t+1: fromMemoryPort_notify = false;
+	at t+1: toMemoryPort_notify = true;
+	at t+1: toRegsPort_notify = false;
 end property;
 
 
-property wait_state_22 is
+property wait_state_2 is
 dependencies: no_reset;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_22;
-	at t: not(slave_out1_sync);
+	at t: state_2;
+	at t: not(fromMemoryPort_sync);
 prove:
-	at t+1: state_22;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: slave_out1_sig_addr = req_addr_at_t;
-	at t+1: slave_out1_sig_data = req_data_at_t;
-	at t+1: slave_out1_sig_trans_type = req_trans_type_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = true;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
+	at t+1: state_2;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: fromMemoryPort_notify = true;
+	at t+1: toMemoryPort_notify = false;
+	at t+1: toRegsPort_notify = false;
 end property;
 
 
-property wait_state_23 is
+property wait_state_3 is
 dependencies: no_reset;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
 assume:
-	at t: state_23;
-	at t: not(slave_in1_sync);
+	at t: state_3;
+	at t: not(toMemoryPort_sync);
 prove:
-	at t+1: state_23;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = true;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
+	at t+1: state_3;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
+	at t+1: fromMemoryPort_notify = false;
+	at t+1: toMemoryPort_notify = true;
+	at t+1: toRegsPort_notify = false;
 end property;
 
 
-property wait_state_27 is
+property wait_state_4 is
 dependencies: no_reset;
 freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_27;
-	at t: not(slave_out2_sync);
+	at t: state_4;
+	at t: not(fromMemoryPort_sync);
 prove:
-	at t+1: state_27;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: slave_out2_sig_addr = req_addr_at_t;
-	at t+1: slave_out2_sig_data = req_data_at_t;
-	at t+1: slave_out2_sig_trans_type = req_trans_type_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = true;
-	at t+1: slave_out3_notify = false;
+	at t+1: state_4;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: fromMemoryPort_notify = true;
+	at t+1: toMemoryPort_notify = false;
+	at t+1: toRegsPort_notify = false;
 end property;
-
-
-property wait_state_28 is
-dependencies: no_reset;
-freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_28;
-	at t: not(slave_in2_sync);
-prove:
-	at t+1: state_28;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = true;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
-end property;
-
-
-property wait_state_32 is
-dependencies: no_reset;
-freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_32;
-	at t: not(slave_out3_sync);
-prove:
-	at t+1: state_32;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: slave_out3_sig_addr = req_addr_at_t;
-	at t+1: slave_out3_sig_data = req_data_at_t;
-	at t+1: slave_out3_sig_trans_type = req_trans_type_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = true;
-end property;
-
-
-property wait_state_33 is
-dependencies: no_reset;
-freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_33;
-	at t: not(slave_in3_sync);
-prove:
-	at t+1: state_33;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: master_in_notify = false;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = true;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
-end property;
-
-
-property wait_state_8 is
-dependencies: no_reset;
-freeze:
-	req_addr_at_t = req_addr@t,
-	req_data_at_t = req_data@t,
-	req_trans_type_at_t = req_trans_type@t,
-	resp_ack_at_t = resp_ack@t,
-	resp_data_at_t = resp_data@t;
-assume:
-	at t: state_8;
-	at t: not(master_in_sync);
-prove:
-	at t+1: state_8;
-	at t+1: req_addr = req_addr_at_t;
-	at t+1: req_data = req_data_at_t;
-	at t+1: req_trans_type = req_trans_type_at_t;
-	at t+1: resp_ack = resp_ack_at_t;
-	at t+1: resp_data = resp_data_at_t;
-	at t+1: master_in_notify = true;
-	at t+1: master_out_notify = false;
-	at t+1: slave_in0_notify = false;
-	at t+1: slave_in1_notify = false;
-	at t+1: slave_in2_notify = false;
-	at t+1: slave_in3_notify = false;
-	at t+1: slave_out0_notify = false;
-	at t+1: slave_out1_notify = false;
-	at t+1: slave_out2_notify = false;
-	at t+1: slave_out3_notify = false;
-end property;
-
-

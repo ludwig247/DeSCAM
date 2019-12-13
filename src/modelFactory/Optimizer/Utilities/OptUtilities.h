@@ -6,11 +6,16 @@
 #ifndef SCAM_OPTUTILITIES_H
 #define SCAM_OPTUTILITIES_H
 
-#include "Behavior/CfgNode.h"
-#include <CfgBlock.h>
-#include "PrintStmt.h"
-#include "z3++.h"
 #include <map>
+#include "z3++.h"
+#include <CfgBlock.h>
+#include "Behavior/CfgNode.h"
+#include "PrintStmt.h"
+
+/***
+   * \brief: provides useful functions for the optimizer stage library
+   * \author: mi-alkoudsi
+   */
 
 
 namespace SCAM {
