@@ -30,9 +30,14 @@ namespace SCAM {
 
         bool isNonBlockingAccess() const;
 
+        const std::string &getStateName() const;
+        void setStateName(const std::string &stateName);
+
     private:
         Port *port;
         bool is_non_blocking_access;
+
+        std::string stateName = "";
 
     };
 

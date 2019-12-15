@@ -6,7 +6,7 @@
 #define PROJECT_CORE_H
 
 #include "systemc.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "CPU_Interfaces.h"
 #include "Control_unit_new.h"
 #include "Data_path_new.h"

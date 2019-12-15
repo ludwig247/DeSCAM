@@ -11,25 +11,25 @@ namespace SCAM {
     // ------------------------------------------------------------------------------
 
     PropertyMacro::PropertyMacro(const std::string &name, Port * port, const DataType * type) :
+        port(port),
+        parentName(name),
+        portOperand(new PortOperand(port)),
+        macroType(portType),
         AbstractMacro(name, type){
-
-        this->port = port;
-        this->portOperand = new PortOperand(port);
-        this->macroType = portType;
-
     }
 
-    PropertyMacro::PropertyMacro(const std::string &name, Port * port, const DataType * type, const std::string subVarName) :
-        AbstractMacro(name, type){
-
-        this->port = port;
-        this->portOperand = new PortOperand(port);
-        this->macroType = portType;
-        this->subVarName = subVarName;
-
+    PropertyMacro::PropertyMacro(const std::string &parentName, Port * port, const DataType * type, const std::string subVarName) :
+        port(port),
+        portOperand(new PortOperand(port)),
+        macroType(portType),
+        subVarName(subVarName),
+        parentName(parentName),
+        AbstractMacro(subVarName, type){
     }
 
     PropertyMacro::PropertyMacro(const std::string &name, Port * port, Notify * notifySignal, const DataType * type) :
+        parentName(name),
+        subVarName(""),
         AbstractMacro(name, type){
 
         this->port = port;
@@ -39,6 +39,7 @@ namespace SCAM {
     }
 
     PropertyMacro::PropertyMacro(const std::string &name, Port * port, SyncSignal * syncSignal, const DataType * type) :
+        parentName(name),
         AbstractMacro(name, type){
 
         this->port = port;
@@ -48,6 +49,7 @@ namespace SCAM {
     }
 
     PropertyMacro::PropertyMacro(const std::string &name, Variable * variable, const DataType * type) :
+            parentName(name),
             AbstractMacro(name, type){
 
         this->variable = variable;
@@ -57,6 +59,7 @@ namespace SCAM {
     }
 
     PropertyMacro::PropertyMacro(const std::string &name, Variable * state) :
+            parentName(name),
             AbstractMacro(name, DataTypes::getDataType("bool")){
 
         this->variable = state;
@@ -64,8 +67,9 @@ namespace SCAM {
 
     }
 
-    PropertyMacro::PropertyMacro(const std::string &name, Variable * variable, const DataType * type, std::string subVarName) :
-            AbstractMacro(name, type){
+    PropertyMacro::PropertyMacro(const std::string &parentName, Variable * variable, const DataType * type, std::string subVarName) :
+            parentName(parentName),
+            AbstractMacro(subVarName, type){
 
         this->variable = variable;
         this->variableOperand = new VariableOperand(variable);
@@ -75,6 +79,7 @@ namespace SCAM {
     }
 
     PropertyMacro::PropertyMacro(const std::string &name, Variable * variable, PropertyMacro * parent, const DataType * type) :
+            parentName(name),
             AbstractMacro(name, type){
 
         this->variable = variable;
@@ -200,7 +205,7 @@ namespace SCAM {
     //                      CompoundType/ArrayType-Functions
     // ------------------------------------------------------------------------------
 
-    bool PropertyMacro::isCompoundType() {
+    bool PropertyMacro::isCompoundType() const {
         return !subVarName.empty();
     }
 
@@ -208,6 +213,15 @@ namespace SCAM {
         return macroType == arrayType;
     }
 
+    const std::string &PropertyMacro::getParentName() const {
+        return parentName;
+    }
+
+    std::string PropertyMacro::getFullName() const {
+        if(this->isCompoundType()){
+            return this->parentName+"."+this->subVarName;
+        }else return this->parentName;
+    }
 }
 
 

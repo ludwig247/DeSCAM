@@ -13,18 +13,22 @@
 
 namespace SCAM {
     /***
-   * @brief: checks assignments to variables that are not read in the CFG and stores them
-   *
-   * Important!: compound expressions values are not stored, only the values of their sub variables!
-   *
-   */
+    * \brief: Collects values from assignments to variables that are not read in the CFG
+    * \author:mi-alkoudsi
+    * \inputs:
+    *    - std::map<int, SCAM::CfgNode *> cfg;
+    *    - std::set<std::string> readVariablesSet;
+    * \outputs:
+    *    - std::map<std::string, std::set<SCAM::Expr *>> variableValuesMap;
+    * \note: compound expressions values are not stored, only the values of their sub variables.
+    */
 
     class FindVariablesValues {
 
     public:
         FindVariablesValues() = delete;
 
-        FindVariablesValues(const std::map<int, CfgNode *> &CFG, std::set<std::string> readVariablesSet);
+        FindVariablesValues(const std::map<int, CfgNode *> &CFG, const std::set<std::string>& readVariablesSet);
 
         ~FindVariablesValues() = default;
 

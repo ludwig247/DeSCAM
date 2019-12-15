@@ -20,6 +20,18 @@
 
 namespace SCAM {
 
+    /***
+    * \brief: Finds vacuous paths inside the CFG or function and correctly removes them
+    *
+    * \author: mi-alkoudsi
+    *
+    * \details: Finding redundant conditions is achieved by performing the following check:
+    *           First it all assignments to variables inside the condition from while(true) to the condition statement are stored.
+    *           If the number of paths(arcs) to the condition and the number of assignments to variable on each path are equal, only these assignments are used
+    *           Otherwise, all assignments to the variables are taken into consideration
+    *           Values from all variables are substituted inside the condition and all the resulting conditions are then checked using the Z3++ solver
+    */
+
     class ReachabilityAnalysis {
     public:
         ReachabilityAnalysis() = delete;
@@ -33,6 +45,7 @@ namespace SCAM {
                 std::set<std::string> variablesThatHaveReadSet);
 
         const std::map<int, CfgNode *> &getCFG() const;
+
         std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> getReturnValueConditionList() const;
 
     private:

@@ -6,6 +6,7 @@ macro b_out_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro b_in_sig : record := end macro;
 macro b_in_sig_x : signed := end macro;
 macro b_in_sig_y : unsigned := end macro;
 macro b_out_sig : unsigned := end macro;
@@ -16,8 +17,6 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro record_var_x : signed := end macro;
-macro record_var_y : unsigned := end macro;
 
 
 -- STATES --
@@ -31,8 +30,6 @@ assume:
 	 reset_sequence;
 prove:
 	 at t: state_1;
-	 at t: record_var_x = resize(0,32);
-	 at t: record_var_y = resize(0,32);
 	 at t: b_in_notify = true;
 	 at t: b_out_notify = false;
 end property;
@@ -51,8 +48,6 @@ assume:
 prove:
 	at t_end: state_2;
 	at t_end: b_out_sig = foo(b_in_sig_x_at_t,b_in_sig_y_at_t);
-	at t_end: record_var_x = b_in_sig_x_at_t;
-	at t_end: record_var_y = b_in_sig_y_at_t;
 	during[t+1, t_end]: b_in_notify = false;
 	during[t+1, t_end-1]: b_out_notify = false;
 	at t_end: b_out_notify = true;
@@ -63,16 +58,11 @@ property state_2_2 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
-freeze:
-	record_var_x_at_t = record_var_x@t,
-	record_var_y_at_t = record_var_y@t;
 assume:
 	at t: state_2;
 	at t: b_out_sync;
 prove:
 	at t_end: state_1;
-	at t_end: record_var_x = record_var_x_at_t;
-	at t_end: record_var_y = record_var_y_at_t;
 	during[t+1, t_end-1]: b_in_notify = false;
 	at t_end: b_in_notify = true;
 	during[t+1, t_end]: b_out_notify = false;
@@ -81,16 +71,11 @@ end property;
 
 property wait_state_1 is
 dependencies: no_reset;
-freeze:
-	record_var_x_at_t = record_var_x@t,
-	record_var_y_at_t = record_var_y@t;
 assume:
 	at t: state_1;
 	at t: not(b_in_sync);
 prove:
 	at t+1: state_1;
-	at t+1: record_var_x = record_var_x_at_t;
-	at t+1: record_var_y = record_var_y_at_t;
 	at t+1: b_in_notify = true;
 	at t+1: b_out_notify = false;
 end property;
@@ -99,16 +84,13 @@ end property;
 property wait_state_2 is
 dependencies: no_reset;
 freeze:
-	record_var_x_at_t = record_var_x@t,
-	record_var_y_at_t = record_var_y@t;
+	b_out_sig_at_t = b_out_sig@t;
 assume:
 	at t: state_2;
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_2;
-	at t+1: b_out_sig = foo(record_var_x_at_t,record_var_y_at_t);
-	at t+1: record_var_x = record_var_x_at_t;
-	at t+1: record_var_y = record_var_y_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: b_in_notify = false;
 	at t+1: b_out_notify = true;
 end property;

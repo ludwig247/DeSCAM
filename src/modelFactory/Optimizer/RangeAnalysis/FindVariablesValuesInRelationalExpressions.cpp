@@ -3,9 +3,14 @@
 //
 
 #include "FindVariablesValuesInRelationalExpressions.h"
-
+/* Idea:
+ * Looks for relational expressions inside conditional statements and inside functions
+ * example
+ * if(x == 10)
+ * if(x > y)
+ * the algorithm returns the values y and 10 for variable x
+ */
 SCAM::FindVariablesValuesInRelationalExpressions::FindVariablesValuesInRelationalExpressions(const std::map<int, SCAM::CfgNode *> &CFG) : CFG(CFG) {
-
     for (auto node : this->CFG) {
         auto stmt = node.second->getStmt();
         if (stmt != nullptr) {

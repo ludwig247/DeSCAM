@@ -1,0 +1,284 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID2]
+[ID2]
+		dec_pc = 0
+		Pred:[ID0]
+		Succ:[ID3]
+[ID3]
+		ex_dest_reg = 0
+		Pred:[ID2]
+		Succ:[ID5]
+[ID5]
+		ex_op_b = 0
+		Pred:[ID3]
+		Succ:[ID6]
+[ID6]
+		ex_result = 0
+		Pred:[ID5]
+		Succ:[ID8]
+[ID8]
+		from_reset = true
+		Pred:[ID6]
+		Succ:[ID11]
+[ID11]
+		memRequest.data = 0
+		Pred:[ID8]
+		Succ:[ID27]
+[ID27]
+		tmp = 0
+		Pred:[ID11]
+		Succ:[ID28]
+[ID28]
+		while (true)
+		Pred:[ID27], [ID52]
+		Succ:[ID29]
+[ID29]
+		if (from_reset)
+		Pred:[ID28]
+		Succ:[ID30], [ID32]
+[ID30]
+		instr_in.master_read(instr)
+		Pred:[ID29]
+		Succ:[ID31]
+[ID31]
+		instr_req.master_write(2)
+		Pred:[ID30]
+		Succ:[ID32]
+[ID32]
+		from_reset = false
+		Pred:[ID29], [ID31]
+		Succ:[ID33]
+[ID33]
+		wait(SC_ZERO_TIME)
+		Pred:[ID32]
+		Succ:[ID34]
+[ID34]
+		instr_in.master_read(instr)
+		Pred:[ID33]
+		Succ:[ID36]
+[ID36]
+		dec_pc = (dec_pc + 2)
+		Pred:[ID34]
+		Succ:[ID37]
+[ID37]
+		instr_req.master_write((dec_pc + 2))
+		Pred:[ID36]
+		Succ:[ID38]
+[ID38]
+		branch = false
+		Pred:[ID37]
+		Succ:[ID39]
+[ID39]
+		if ((getOpCode(instr) == 0))
+		Pred:[ID38]
+		Succ:[ID40], [ID59]
+[ID40]
+		reg_in.master_read(regfile)
+		Pred:[ID39]
+		Succ:[ID41]
+[ID41]
+		ex_write_reg = true
+		Pred:[ID40]
+		Succ:[ID42]
+[ID42]
+		ex_dest_reg = getDest(instr)
+		Pred:[ID41]
+		Succ:[ID44]
+[ID44]
+		ex_result = ~(regfile[getOpA(instr)])
+		Pred:[ID42]
+		Succ:[ID45]
+[ID45]
+		if (ex_write_reg)
+		Pred:[ID44], [ID65], [ID72], [ID79], [ID85], [ID92], [ID94]
+		Succ:[ID46], [ID56]
+[ID46]
+		if ((getOpCode(instr) != 4))
+		Pred:[ID45]
+		Succ:[ID47], [ID53]
+[ID47]
+		wait(SC_ZERO_TIME)
+		Pred:[ID46]
+		Succ:[ID48]
+[ID48]
+		regWrite.dest = ex_dest_reg
+		Pred:[ID47]
+		Succ:[ID49]
+[ID49]
+		regWrite.value = ex_result
+		Pred:[ID48]
+		Succ:[ID50]
+[ID50]
+		reg_out.master_write(regWrite)
+		Pred:[ID49]
+		Succ:[ID51]
+[ID51]
+		wait(SC_ZERO_TIME)
+		Pred:[ID50], [ID55], [ID56], [ID58]
+		Succ:[ID52]
+[ID52]
+		nullptr
+		Pred:[ID51]
+		Succ:[ID28]
+[ID53]
+		regWrite.dest = ex_dest_reg
+		Pred:[ID46]
+		Succ:[ID54]
+[ID54]
+		regWrite.value = tmp
+		Pred:[ID53]
+		Succ:[ID55]
+[ID55]
+		reg_out.master_write(regWrite)
+		Pred:[ID54]
+		Succ:[ID51]
+[ID56]
+		if (branch)
+		Pred:[ID45]
+		Succ:[ID57], [ID51]
+[ID57]
+		wait(SC_ZERO_TIME)
+		Pred:[ID56]
+		Succ:[ID58]
+[ID58]
+		dec_pc = (dec_pc + ex_op_b)
+		Pred:[ID57]
+		Succ:[ID51]
+[ID59]
+		if ((getOpCode(instr) == 1))
+		Pred:[ID39]
+		Succ:[ID60], [ID66]
+[ID60]
+		reg_in.master_read(regfile)
+		Pred:[ID59]
+		Succ:[ID61]
+[ID61]
+		ex_write_reg = true
+		Pred:[ID60]
+		Succ:[ID62]
+[ID62]
+		ex_dest_reg = getDest(instr)
+		Pred:[ID61]
+		Succ:[ID64]
+[ID64]
+		ex_op_b = regfile[getOpB(instr)]
+		Pred:[ID62]
+		Succ:[ID65]
+[ID65]
+		ex_result = (regfile[getOpA(instr)] + regfile[getOpB(instr)])
+		Pred:[ID64]
+		Succ:[ID45]
+[ID66]
+		if ((getOpCode(instr) == 2))
+		Pred:[ID59]
+		Succ:[ID67], [ID73]
+[ID67]
+		reg_in.master_read(regfile)
+		Pred:[ID66]
+		Succ:[ID68]
+[ID68]
+		ex_write_reg = true
+		Pred:[ID67]
+		Succ:[ID69]
+[ID69]
+		ex_dest_reg = getDest(instr)
+		Pred:[ID68]
+		Succ:[ID71]
+[ID71]
+		ex_op_b = regfile[getOpB(instr)]
+		Pred:[ID69]
+		Succ:[ID72]
+[ID72]
+		ex_result = (regfile[getOpA(instr)] - regfile[getOpB(instr)])
+		Pred:[ID71]
+		Succ:[ID45]
+[ID73]
+		if ((getOpCode(instr) == 4))
+		Pred:[ID66]
+		Succ:[ID74], [ID80]
+[ID74]
+		memRequest.addr = (regfile[getOpB(instr)] + getImm(instr))
+		Pred:[ID73]
+		Succ:[ID75]
+[ID75]
+		memRequest.write = false
+		Pred:[ID74]
+		Succ:[ID76]
+[ID76]
+		ex_write_reg = true
+		Pred:[ID75]
+		Succ:[ID77]
+[ID77]
+		ex_dest_reg = getDest(instr)
+		Pred:[ID76]
+		Succ:[ID78]
+[ID78]
+		mem_write.write(memRequest)
+		Pred:[ID77]
+		Succ:[ID79]
+[ID79]
+		mem_read.get(tmp)
+		Pred:[ID78]
+		Succ:[ID45]
+[ID80]
+		if ((getOpCode(instr) == 6))
+		Pred:[ID73]
+		Succ:[ID81], [ID86]
+[ID81]
+		memRequest.addr = (regfile[getOpB(instr)] + getImm(instr))
+		Pred:[ID80]
+		Succ:[ID82]
+[ID82]
+		memRequest.data = regfile[getOpA(instr)]
+		Pred:[ID81]
+		Succ:[ID83]
+[ID83]
+		memRequest.write = true
+		Pred:[ID82]
+		Succ:[ID84]
+[ID84]
+		ex_write_reg = false
+		Pred:[ID83]
+		Succ:[ID85]
+[ID85]
+		mem_write.write(memRequest)
+		Pred:[ID84]
+		Succ:[ID45]
+[ID86]
+		if ((getOpCode(instr) == 7))
+		Pred:[ID80]
+		Succ:[ID87], [ID94]
+[ID87]
+		reg_in.master_read(regfile)
+		Pred:[ID86]
+		Succ:[ID88]
+[ID88]
+		tmp = regfile[getOpA(instr)]
+		Pred:[ID87]
+		Succ:[ID89]
+[ID89]
+		if ((regfile[getOpA(instr)] == 0))
+		Pred:[ID88]
+		Succ:[ID90], [ID93]
+[ID90]
+		branch = true
+		Pred:[ID89]
+		Succ:[ID91]
+[ID91]
+		ex_op_b = getImm(instr)
+		Pred:[ID90]
+		Succ:[ID92]
+[ID92]
+		ex_write_reg = false
+		Pred:[ID91], [ID93]
+		Succ:[ID45]
+[ID93]
+		dec_pc = (dec_pc + 2)
+		Pred:[ID89]
+		Succ:[ID92]
+[ID94]
+		ex_write_reg = false
+		Pred:[ID86]
+		Succ:[ID45]

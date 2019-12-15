@@ -16,8 +16,9 @@
 #include "FindDataFlow.h"
 #include "FindFunctions.h"
 #include "FindGlobal.h"
-#include <OperationFactory.h>
+#include "../parser/CommandLineParameter.h"
 #include <Optimizer/Optimizer.h>
+#include <OperationFactory.h>
 
 
 //Constructor
@@ -351,12 +352,14 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         }
         ErrorMsg::clear();
     }
+    if(cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State2::state_cnt = 0;
     SCAM::Operation2::operations_cnt = 0;
-    if (ModelGlobal::useOptimizer()) {
-        SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module);
+    auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
+    if (!optOptionsSet.empty()) {
+        SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model->getGlobalVariableMap(), optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
         SCAM::OperationFactory operationFactory(opt.getCFG(), module);
@@ -529,12 +532,7 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *pDecl
 }
 
 void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Module *pModule) {
-    FindGlobal findGlobal(pDecl, pModule);
-
-    for(auto var: findGlobal.getVariableMap()){
-        this->model->addGlobalVariable(var.second);
-        var.second->setConstant(true);
-    }
+    //FindGlobal findGlobal(pDecl, pModule);
 
 }
 

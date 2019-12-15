@@ -3,16 +3,16 @@
 //
 
 #include "LivenessAnalysis.h"
+
+#include <utility>
 #include "Optimizer/Debug.h"
 
 
 namespace SCAM {
 
-    LivenessAnalysis::LivenessAnalysis(const std::map<int, SCAM::CfgNode *> &CFG,
-                                       const std::map<std::string, SCAM::Variable *> &ModuleVariables,
-                                       const std::set<std::string> &variablesThatHaveReadSet) :
-            CFG(CFG), deadNodeDetected(false) {
-        this->variablesThatHaveReadSet = variablesThatHaveReadSet;
+    LivenessAnalysis::LivenessAnalysis(std::map<int, SCAM::CfgNode *> CFG,
+                                       const std::map<std::string, SCAM::Variable *> &ModuleVariables) :
+            CFG(std::move(CFG)), deadNodeDetected(false) {
         this->moduleVariablesMap.clear();
         initLA(ModuleVariables);
         this->numToTrueToggles = 0;
@@ -23,12 +23,11 @@ namespace SCAM {
              it != this->CFG.rend(); it++) {
             auto statement = (*it).second->getStmt();
             currentNodeID = (*it).second->getId();
-            //check if there is a use of a variable, then toggle it's in info to true at currentNode
+            //check if there is a use of a variable, then toggle its in info to true at currentNode
             if (statement != nullptr) {
                 statement->accept(*this);
             }
         }
-
         while (true) {
             for (int i = 0; i < 2; i++) {
                 // if in info of any succ stmt = true  , current stmt out info = true
@@ -68,12 +67,12 @@ namespace SCAM {
 
 #ifdef DEBUG_LIVENESS_ANALYSIS
         std::cout << std::endl << "******************* Variables liveness analysis ******************* " << std::endl;
-        /*for (auto stmtinfo : this->stmtInfoMap) {
-            for (auto node: stmtinfo.second) {
-                std::cout << stmtinfo.first << " at " << node.first << " in " << node.second.first << " out "
-                          << node.second.second << std::endl;
-            }
-        }*/
+//        for (auto stmtinfo : this->stmtInfoMap) {
+//            for (auto node: stmtinfo.second) {
+//                std::cout << stmtinfo.first << " at " << node.first << " in " << node.second.first << " out "
+//                          << node.second.second << std::endl;
+//            }
+//        }
 #endif
         // Deleting dead assignments
         for (auto element : this->allAssignments) {
@@ -81,14 +80,35 @@ namespace SCAM {
                 continue;
             }
             for (auto nodeId : element.second) {
-
-                if (!this->stmtInfoMap.at(element.first).at(nodeId).second) {
+                if(dynamic_cast<SCAM::Read*>(this->CFG.at(nodeId)->getStmt())){continue;}
+                if (this->assignmentsToCompoundsVarsMap.find(nodeId) == this->assignmentsToCompoundsVarsMap.end()) {
+                    if (!this->stmtInfoMap.at(element.first).at(nodeId).second) {
+                        if (this->CFG.find(nodeId) != this->CFG.end()) {
 #ifdef DEBUG_LIVENESS_ANALYSIS
-                    std::cout << "The assignment: " << PrintStmt::toString(this->CFG.at(nodeId)->getStmt())
-                              << " is dead" << std::endl;
+                            std::cout << "The assignment: " << PrintStmt::toString(this->CFG.at(nodeId)->getStmt())
+                                      << " at node"<< nodeId <<" is dead" << std::endl;
 #endif
-                    deadNodeDetected = true;
-                    removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(nodeId);
+                            deadNodeDetected = true;
+                            removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(nodeId);
+                        }
+                    }
+                } else {
+                    bool isDead = true;
+                    for (auto subVar : this->assignmentsToCompoundsVarsMap.at(nodeId)->getSubVarList()) {
+                        if (this->stmtInfoMap.at(subVar->getFullName()).at(nodeId).second) {
+                            isDead = false;
+                        }
+                    }
+                    if (isDead) {
+                        if (this->CFG.find(nodeId) != this->CFG.end()) {
+#ifdef DEBUG_LIVENESS_ANALYSIS
+                            std::cout << "The assignment: " << PrintStmt::toString(this->CFG.at(nodeId)->getStmt())
+                                      << " is dead" << std::endl;
+#endif
+                            deadNodeDetected = true;
+                            removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(nodeId);
+                        }
+                    }
                 }
             }
         }
@@ -108,7 +128,7 @@ namespace SCAM {
                           << "'\033[0m is pointless and has been deleted!" << std::endl;
                 removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(pointlessIfStmtNodeId);
             }
-            for( auto deadAssignment : deadAssignmentSet){
+            for (auto deadAssignment : deadAssignmentSet) {
                 std::cout << "\t\033[1;33mWarning\033[0m: The statement: \033[1;33m'"
                           << PrintStmt::toString(this->CFG.at(deadAssignment)->getStmt())
                           << "'\033[0m is pointless and has been deleted!" << std::endl;
@@ -123,10 +143,6 @@ namespace SCAM {
 
     void LivenessAnalysis::initLA(const std::map<std::string, SCAM::Variable *> &ModuleVariables) {
         for (auto var : ModuleVariables) {
-            if (this->variablesThatHaveReadSet.find(var.second->getFullName()) !=
-                this->variablesThatHaveReadSet.end()) {
-                continue;
-            }
             this->moduleVariablesMap.insert(std::make_pair(var.second->getFullName(), var.second));
             if (var.second->isCompoundType() || var.second->isArrayType()) {
                 for (auto subvar : var.second->getSubVarList()) {
@@ -149,9 +165,6 @@ namespace SCAM {
     }
 
     void LivenessAnalysis::visit(struct VariableOperand &node) {
-        if (this->variablesThatHaveReadSet.find(node.getVariable()->getFullName()) !=
-            this->variablesThatHaveReadSet.end()) { return; }
-
         if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
             this->variablesInStmtMap.at(this->currentNodeID).insert(node.getVariable()->getFullName());
         } else {
@@ -179,6 +192,40 @@ namespace SCAM {
         }
     }
 
+    void LivenessAnalysis::visit(struct Read &node) {
+        //store at which node the variable gets assigned
+        auto variable = node.getVariableOperand()->getVariable();
+        if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
+            this->variablesInStmtMap.at(this->currentNodeID).insert(variable->getFullName());
+        } else {
+            std::set<std::string> variablesInStmtSet;
+            variablesInStmtSet.insert(variable->getFullName());
+            this->variablesInStmtMap.insert(std::make_pair(this->currentNodeID, variablesInStmtSet));
+        }
+        if (variable->isCompoundType() || variable->isArrayType()) {
+            for (auto subVar : variable->getSubVarList()) {
+                this->variablesInStmtMap.at(this->currentNodeID).insert(subVar->getFullName());
+                if (this->allAssignments.find(subVar->getFullName()) ==
+                    this->allAssignments.end()) {
+                    std::set<int> nodesVec;
+                    nodesVec.insert(currentNodeID);
+                    this->allAssignments.insert(std::make_pair(subVar->getFullName(), nodesVec));
+                } else {
+                    this->allAssignments.at(subVar->getFullName()).insert(currentNodeID);
+                }
+            }
+            this->assignmentsToCompoundsVarsMap.insert(std::make_pair(this->currentNodeID, variable));
+        }
+        if (this->allAssignments.find(variable->getFullName()) ==
+            this->allAssignments.end()) {
+            std::set<int> nodesVec;
+            nodesVec.insert(currentNodeID);
+            this->allAssignments.insert(std::make_pair(variable->getFullName(), nodesVec));
+        } else {
+            this->allAssignments.at(variable->getFullName()).insert(currentNodeID);
+        }
+    }
+
     void LivenessAnalysis::visit(class Assignment &node) {
         // if the lhs of the assignment is a variableoperand set it inittialy to not used then check if there is a use of a variable in the rhs
         if (auto lhs = dynamic_cast<SCAM::VariableOperand *>(node.getLhs())) {
@@ -189,12 +236,6 @@ namespace SCAM {
                 variablesInStmtSet.insert(lhs->getVariable()->getFullName());
                 this->variablesInStmtMap.insert(std::make_pair(this->currentNodeID, variablesInStmtSet));
             }
-            if (lhs->getVariable()->isCompoundType() || lhs->getVariable()->isArrayType()) {
-                for (auto subVar : lhs->getVariable()->getSubVarList()) {
-                    this->variablesInStmtMap.at(this->currentNodeID).insert(subVar->getFullName());
-                }
-            }
-
             //store at which node the variable gets assigned
             if (this->allAssignments.find(lhs->getVariable()->getFullName()) ==
                 this->allAssignments.end()) {
@@ -204,14 +245,28 @@ namespace SCAM {
             } else {
                 this->allAssignments.at(lhs->getVariable()->getFullName()).insert(currentNodeID);
             }
+            if (lhs->getVariable()->isCompoundType() || lhs->getVariable()->isArrayType()) {
+                for (auto subVar : lhs->getVariable()->getSubVarList()) {
+                    this->variablesInStmtMap.at(this->currentNodeID).insert(subVar->getFullName());
+                    if (this->allAssignments.find(subVar->getFullName()) ==
+                        this->allAssignments.end()) {
+                        std::set<int> nodesVec;
+                        nodesVec.insert(currentNodeID);
+                        this->allAssignments.insert(std::make_pair(subVar->getFullName(), nodesVec));
+                    } else {
+                        this->allAssignments.at(subVar->getFullName()).insert(currentNodeID);
+                    }
+                }
+                this->assignmentsToCompoundsVarsMap.insert(std::make_pair(this->currentNodeID, lhs->getVariable()));
+            }
+
             node.getRhs()->accept(*this);
-            if(*node.getLhs() == *node.getRhs()){
+            if (*node.getLhs() == *node.getRhs()) {
                 deadAssignmentSet.insert(currentNodeID);
                 this->deadNodeDetected = true;
             }
         }
     }
-
 
     void LivenessAnalysis::visit(struct UnaryExpr &node) {
         node.getExpr()->accept(*this);
@@ -260,14 +315,14 @@ namespace SCAM {
 
     void LivenessAnalysis::visit(struct ArrayOperand &node) {
         node.getIdx()->accept(*this);
-        if (this->stmtInfoMap.find(node.getArrayVar()->getFullName()) != this->stmtInfoMap.end()) {
-            this->stmtInfoMap.at(node.getArrayVar()->getFullName()).at(currentNodeID).first = true;
+        if (this->stmtInfoMap.find(node.getArrayOperand()->getOperandName()) != this->stmtInfoMap.end()) {
+            this->stmtInfoMap.at(node.getArrayOperand()->getOperandName()).at(currentNodeID).first = true;
         }
         if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
-            this->variablesInStmtMap.at(this->currentNodeID).insert(node.getArrayVar()->getFullName());
+            this->variablesInStmtMap.at(this->currentNodeID).insert(node.getArrayOperand()->getOperandName());
         } else {
             std::set<std::string> variablesInStmtSet;
-            variablesInStmtSet.insert(node.getArrayVar()->getFullName());
+            variablesInStmtSet.insert(node.getArrayOperand()->getOperandName());
             this->variablesInStmtMap.insert(std::make_pair(this->currentNodeID, variablesInStmtSet));
         }
     }

@@ -16,6 +16,7 @@
 #include "OperationOptimizations/OptimizeOperations2.h"
 #include "PropertySuite.h"
 #include "CreateOperationsSlave.h"
+#include "../parser/CommandLineParameter.h"
 #include <thread>
 
 namespace SCAM {
@@ -32,22 +33,29 @@ namespace SCAM {
         std::cout << "Create Operations: " << std::endl;
         this->createOperations();
         std::cout << "\tCreated: " << this->operations.size() << std::endl;
+
         std::cout << "Reconstruct Operations: " << std::endl;
         this->reconstructOperations();
         std::cout << "Valid Operations: " << std::endl;
         this->findValidOperations();
         std::cout << "\tValid: " << this->operations.size() << std::endl;
         this->checkStates();
-        std::cout << "Optimizing conditions" << std::endl;
-        this->optimizeConditions();
-        std::cout << "Optimizing Assignments" << std::endl;
-        this->optimizeAssignments();
+        auto optimizerOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
+        if(optimizerOptionsSet.find("all")==optimizerOptionsSet.end() && optimizerOptionsSet.find("are")==optimizerOptionsSet.end()) {
+            std::cout << "Optimizing conditions" << std::endl;
+            this->optimizeConditions();
+        }
+        if(optimizerOptionsSet.find("all")==optimizerOptionsSet.end() && optimizerOptionsSet.find("sim")==optimizerOptionsSet.end()) {
+            std::cout << "Optimizing Assignments" << std::endl;
+            this->optimizeAssignments();
+        }
         std::cout << "Optimization:" << std::endl;
         this->optimizeOperations();
         std::cout << "Generating PropertySuite:" << std::endl;
         std::map<int,State2*> stateMap;
-        for(auto foo: this->statesMap){
-            stateMap.insert(std::make_pair(foo.second->getStateId(),foo.second));
+        for(auto state: this->statesMap){
+            state.second->setName(state.second->getName() + "_" + std::to_string(state.second->getStateId()));
+            stateMap.insert(std::make_pair(state.second->getStateId(), state.second));
         }
         this->module->getFSM()->setStateMap(stateMap);
         this->generatePropertySuite();
@@ -154,14 +162,18 @@ namespace SCAM {
         for (const auto& port: module->getPorts()) {
             if (port.second->getDataType()->isVoid()) continue;
 
-            if (!port.second->getDataType()->isCompoundType()) {
+            if(port.second->getDataType()->isCompoundType() || port.second->getDataType()->isArrayType()){
+                //Add compound type signal
                 PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
                 propertySuite->addDpSignal(pm);
-            } else {
+                //Add all subignals of the compound type
                 for (const auto& subVar: port.second->getDataType()->getSubVarMap()) {
                     PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, subVar.second, subVar.first);
                     propertySuite->addDpSignal(pm);
                 }
+            }else{
+                PropertyMacro *pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
+                propertySuite->addDpSignal(pm);
             }
         }
 
@@ -173,6 +185,7 @@ namespace SCAM {
                 // Check if Macro for parent already exists
                 Variable *parent = var.second->getParent();
                 PropertyMacro *parentMacro;
+                //TODO: remove try/Write
                 try {
                     parentMacro = propertySuite->findSignal(parent);
                 } catch (const std::runtime_error &e) {
@@ -196,7 +209,8 @@ namespace SCAM {
         for (const auto& state: this->statesMap) {
             if (state.second->isInit()) continue;
             //std::cout << state.second->getName() << std::endl;
-            state.second->setName("state_"+std::to_string(state.second->getStateId()));
+
+            state.second->setName(state.second->getName());
             Variable *stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
             PropertyMacro *pm = new PropertyMacro(state.second->getName(), stateVar);
             pm->setExpression(new BoolValue(true));
@@ -279,7 +293,6 @@ namespace SCAM {
                     auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
                     syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
                     auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
-
                     variables.insert(newVariables.begin(), newVariables.end());
                     auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
                     dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
@@ -297,14 +310,21 @@ namespace SCAM {
                 }
                 for (auto dataSig: dataSignals) {
                     PropertyMacro *signalMacro;
-                    try {
-                        if(dataSig->isSubVar() && dataSig->getParent()->isArrayType())
-                            signalMacro = propertySuite->findSignal(dataSig->getParent()->getName());
-                        else
-                            signalMacro = propertySuite->findSignal(dataSig->getName());
-                    } catch (const std::runtime_error &e) {
-                        signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
+                    //TODO remove try/catch
+                    if(dataSig->isSubVar()){
+                        signalMacro = propertySuite->findSignal(dataSig->getPort()->getName()+"_sig" , dataSig->getName());
+                    }else{
+                        signalMacro = propertySuite->findSignal(dataSig->getName());
                     }
+
+//                    try {
+//                        if(dataSig->isSubVar() && dataSig->getParent()->isArrayType())
+//                            signalMacro = propertySuite->findSignal(dataSig->getParent()->getName());
+//                        else
+//                            signalMacro = propertySuite->findSignal(dataSig->getName());
+//                    } catch (const std::runtime_error &e) {
+//                        signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() , dataSig->getName());
+//                    }
                     newOperationProperty->addFreezeSignal(signalMacro);
                 }
 
@@ -403,7 +423,9 @@ namespace SCAM {
                         newWaitProperty->addFreezeSignal(signalMacro);
                 }
                 for (auto dataSig: dataSignals) {
+                    //TODO: remove try/catch
                     PropertyMacro *signalMacro;
+
                     try {
                         if(dataSig->isSubVar() && dataSig->getParent()->isArrayType())
                             signalMacro = propertySuite->findSignal(dataSig->getParent()->getName());

@@ -8,13 +8,13 @@
 #include <list>
 #include <string>
 #include <fstream>
+#include <set>
 #include <sys/stat.h>//for managing directory commands
 #include "CLI/CLI.hpp"
 #include "CommandLineParameter.cpp"
 #include "CommandLineParametersConfig.h"
 
 namespace SCAM {
-//    enum class OptimizeLevel : int { High, Medium, Low };
 //
 //    std::istream &operator>>(std::istream &in, OptimizeLevel &optimizelevel) {
 //        int i;
@@ -38,7 +38,7 @@ namespace SCAM {
 
         const std::list<std::string> &getActivePlugins() const;
 
-        static bool useOptimizer();
+        const std::set<std::string> &getOptimizeOptions() const;
 
 //        static bool ProcessCommandLine(int argc, const char **argv, std::list<std::string> &styles, std::string &sourceFile, std::string &outputDirectory) {
 //            std::string tempArg;
@@ -98,12 +98,12 @@ namespace SCAM {
         }
 
         CLI::App *app;
-//        bool usingCLANG;
-        static bool optimize;
         std::string sourceFile;
         std::string outputDirectory;
 //        OptimizeLevel optimizeLevel;
         std::list<std::string> activePlugins;
+//        bool usingCLANG;
+        std::set<std::string> optimizeOptions;
     };
 }
 #endif //PROJECT_COMMANDLINEPROCESS_H

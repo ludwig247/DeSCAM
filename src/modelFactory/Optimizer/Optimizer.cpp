@@ -2,69 +2,102 @@
 // Created by M.I.Alkoudsi on 08.08.19.
 //
 
+
 #include "Optimizer.h"
 
 
+SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module,
+                           const std::map<std::string, Variable *> &globalVariableMap,
+                           const std::set <std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
+                                                                               module(module),
+                                                                               globalVariableMap(globalVariableMap),
+                                                                               optimizeOptionsSet(optimizeOptionsSet) {
 
-SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module) : blockCFG(std::move(CFG)),
-                                                                                        module(module) {
-
-//-------------------------Block CFG optimizations--------------------------
-//    std::cout << SCAM::OptUtilities::printCFG(this->blockCFG);
-
-    SCAM::RemoveEmptyNodes rem(this->blockCFG);
-
-    SCAM::MergeRedundantIfElse sie(rem.getNewBlockCFG());
-
-    SCAM::RenumberCFG renumBlockCFG(sie.getNewBlockCFG());
-
-    SCAM::FindUnusedFunctions uff(renumBlockCFG.getNewBlockCFG(), module);
-
-    CreateRealCFG crNodeCFG(
-            renumBlockCFG.getNewBlockCFG());
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("mrc") != this->optimizeOptionsSet.end()) {
+        SCAM::RemoveEmptyNodes rem(this->blockCFG);
+        SCAM::MergeRedundantIfElse sie(rem.getNewBlockCFG());
+        SCAM::RenumberCFG renumBlockCFG(sie.getNewBlockCFG());
+        SCAM::FindUnusedFunctions uff(renumBlockCFG.getNewBlockCFG(), module);
+        this->blockCFG = renumBlockCFG.getNewBlockCFG();
+    }
+    CreateRealCFG crNodeCFG(this->blockCFG);
     module->setCFG(crNodeCFG.getCFG());
-
     SCAM::FindReadVariables frv(crNodeCFG.getCFG());
-
-    SCAM::FindCfgPaths fcp(crNodeCFG.getCFG(), 0);
-
-    SCAM::LocalValuePropagation lvp(crNodeCFG.getCFG());
-
-    SCAM::GlobalConstantPropagation gcp(lvp.getCFG(), fcp, frv.getReadVariablesSet());
-
-    SCAM::LivenessAnalysis la(gcp.getCFG(), module->getVariableMap(), frv.getReadVariablesSet());
-
-    SCAM::FindCfgPaths fcp2(la.getCFG(), 0);
-
-    SCAM::LocalValuePropagation lvp2(la.getCFG());
-
-    SCAM::GlobalConstantPropagation gcp2(lvp2.getCFG(), fcp2, frv.getReadVariablesSet());
-
-    SCAM::ReachabilityAnalysis ra(gcp2.getCFG(), frv.getReadVariablesSet());
-
-    SCAM::SimplifyExpressions se(ra.getCFG(), module);
-
-    SCAM::OperatorStrengthReduction osr(se.getCFG());
-
-    SCAM::LivenessAnalysis la2(osr.getCFG(), module->getVariableMap(), frv.getReadVariablesSet());
-
-    SCAM::FunctionsOptimizer fo(la2.getCFG(), module, frv.getReadVariablesSet());
-    module->setCFG(fo.getCFG());
-
-    SCAM::RenumberCFG rcn(fo.getCFG());
-
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("gvp") != this->optimizeOptionsSet.end()) {
+        SCAM::GlobalConstantVariablePropagation gcvp(crNodeCFG.getCFG(), this->globalVariableMap);
+        this->nodeCFG = gcvp.getCFG();
+    } else {
+        this->nodeCFG = crNodeCFG.getCFG();
+    }
+//    std::cout << SCAM::OptUtilities::printCFG(this->nodeCFG);
+    for (int i = 0; i < 2; i++) {
+        SCAM::FindCfgPaths fcp(crNodeCFG.getCFG(), 0);
+        if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+            this->optimizeOptionsSet.find("lvp") != this->optimizeOptionsSet.end()) {
+            SCAM::LocalValuePropagation lvp(this->nodeCFG);
+            this->nodeCFG = lvp.getCFG();
+        }
+        if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+            this->optimizeOptionsSet.find("gcp") != this->optimizeOptionsSet.end()) {
+            SCAM::GlobalConstantPropagation gcp(this->nodeCFG, fcp, frv.getReadVariablesSet());
+            this->nodeCFG = gcp.getCFG();
+        }
+        if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+            this->optimizeOptionsSet.find("rda") != this->optimizeOptionsSet.end()) {
+            SCAM::LivenessAnalysis la(this->nodeCFG, module->getVariableMap());
+            this->nodeCFG = la.getCFG();
+        }
+    }
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("are") != this->optimizeOptionsSet.end()) {
+        SCAM::ReachabilityAnalysis ra(this->nodeCFG, frv.getReadVariablesSet());
+        this->nodeCFG = ra.getCFG();
+    }
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("sim") != this->optimizeOptionsSet.end()) {
+        module->setCFG(this->nodeCFG);
+        SCAM::SimplifyExpressions se(this->nodeCFG, module);
+        this->nodeCFG = se.getCFG();
+    }
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("ros") != this->optimizeOptionsSet.end()) {
+        SCAM::OperatorStrengthReduction osr(this->nodeCFG);
+        this->nodeCFG = osr.getCFG();
+    }
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("rda") != this->optimizeOptionsSet.end()) {
+        SCAM::LivenessAnalysis la(this->nodeCFG, module->getVariableMap());
+        this->nodeCFG = la.getCFG();
+    }
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("fun") != this->optimizeOptionsSet.end()) {
+        module->setCFG(this->nodeCFG);
+        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, globalVariableMap, frv.getReadVariablesSet());
+        this->nodeCFG = fo.getCFG();
+    }
+    SCAM::RenumberCFG rcn(this->nodeCFG);
     this->nodeCFG = rcn.getNewNodeCFG();
-
     SCAM::FindUnusedFunctions uff2(this->nodeCFG, module);
-
-//    std::cout << OptUtilities::printCFG(this->nodeCFG);
     module->setCFG(this->nodeCFG);
-
-//     SCAM::RangeAndBitWidthAnalysis raba(module, frv.getReadVariablesSet());
-
+    if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
+        this->optimizeOptionsSet.find("arb") != this->optimizeOptionsSet.end()) {
+        SCAM::RangeAndBitWidthAnalysis raba(module);
+        this->variableBitWidthMap = raba.getVariableBitWidthMap();
+        this->portBitWidthMap = raba.getPortsBitWidthMap();
+    }
 }
 
 const std::map<int, SCAM::CfgNode *> &SCAM::Optimizer::getCFG() const {
     return this->nodeCFG;
+}
+
+const std::map<std::string, int> &SCAM::Optimizer::getVariableBitWidthMap() const {
+    return this->variableBitWidthMap;
+}
+
+const std::map<SCAM::Port *, int> &SCAM::Optimizer::getPortsBitWidthMap() const {
+    return this->portBitWidthMap;
 }
 

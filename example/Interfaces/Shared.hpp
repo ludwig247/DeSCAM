@@ -9,19 +9,21 @@ template<typename T>
 Shared<T>::Shared (const char *name) : sc_prim_channel(name) {
         reader = nullptr;
         writer = nullptr;
-        shared_data = malloc(sizeof(T));
+        //shared_data = malloc(sizeof(T));
         available_data = false;
 }
 
 template<typename T>
 void Shared<T>::get(T & out) {
-    if(available_data)
-        out = *shared_data;
+    if(available_data){
+        out = shared_data;
+        available_data = false;
+    }
 }
 
 template<typename T>
 void Shared<T>::set(const T &val) {
-    shared_data = &val;
+    shared_data = val;
     available_data = true;
 }
 

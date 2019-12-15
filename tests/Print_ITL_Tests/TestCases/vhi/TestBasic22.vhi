@@ -3,6 +3,7 @@ macro m_out_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro m_out_sig : test_compound := end macro;
 macro m_out_sig_x : signed := end macro;
 macro m_out_sig_y : unsigned := end macro;
 
@@ -44,8 +45,8 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	test2_at_t = test2@t,
-	test_x_at_t = test_x@t;
+	test_x_at_t = test_x@t,
+	test2_at_t = test2@t;
 assume:
 	at t: state_1;
 	at t: not((phase = SECTION_B));
@@ -71,8 +72,8 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	test2_at_t = test2@t,
-	test_x_at_t = test_x@t;
+	test_x_at_t = test_x@t,
+	test2_at_t = test2@t;
 assume:
 	at t: state_1;
 	at t: not((phase = SECTION_B));
@@ -98,8 +99,8 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	test2_at_t = test2@t,
-	test_x_at_t = test_x@t;
+	test_x_at_t = test_x@t,
+	test2_at_t = test2@t;
 assume:
 	at t: state_2;
 	at t: not((phase = SECTION_B));
@@ -125,8 +126,8 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	test2_at_t = test2@t,
-	test_x_at_t = test_x@t;
+	test_x_at_t = test_x@t,
+	test2_at_t = test2@t;
 assume:
 	at t: state_2;
 	at t: not((phase = SECTION_B));

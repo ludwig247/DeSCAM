@@ -36,13 +36,12 @@ public:
 
     void fsm() {
         while (true) {
-
+            //std::cout << this->name() << std::endl;
             bus_req->read(req);
             resp.data = req.data;
             resp.ack = OK;
             bus_resp->write(resp);
 
-            wait(SC_ZERO_TIME);
         }
     }
 };

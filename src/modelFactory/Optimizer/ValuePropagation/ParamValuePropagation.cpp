@@ -5,10 +5,16 @@
 #include "ParamValuePropagation.h"
 #include "Optimizer/Debug.h"
 
+/* Idea:
+ * for each expression in the return value condition list, look for a parameter operand
+ * if found, check the name of the operand and update it with its value from the parameter list
+ * */
 
 SCAM::ParamValuePropagation::ParamValuePropagation(std::map<std::string, SCAM::Expr *> paramValMap,
+                                                   const std::map<std::string, Variable *> &globalVariableMap,
                                                    std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList)
-        : paramValMap(std::move(paramValMap)), returnValueConditionList(std::move(returnValueConditionList)),
+        : paramValMap(std::move(paramValMap)), globalVariableMap(globalVariableMap),
+          returnValueConditionList(std::move(returnValueConditionList)),
           newExpr(nullptr) {
 
     std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> tempList;
@@ -48,6 +54,55 @@ SCAM::ParamValuePropagation::getReturnValueConditionList() const {
     return this->returnValueConditionList;
 }
 
+
+void SCAM::ParamValuePropagation::visit(SCAM::VariableOperand &node) {
+    this->newExpr = nullptr;
+    if (!this->globalVariableMap.empty()) {
+        if (this->globalVariableMap.find(node.getOperandName()) != this->globalVariableMap.end()) {
+            auto var = this->globalVariableMap.at(node.getOperandName());
+            if (var->isConstant()) {
+                if (var->getInitialValue()) {
+                    this->newExpr = var->getInitialValue();
+                    return;
+                }
+            }
+        } else {
+            for (auto pair : this->globalVariableMap) {
+                if (pair.second->isCompoundType() || pair.second->isArrayType()) {
+                    for (auto subVar : pair.second->getSubVarList()) {
+                        if (subVar->getName() == node.getOperandName()) {
+                            if (subVar->isConstant()) {
+                                if (subVar->getInitialValue()) {
+                                    this->newExpr = subVar->getInitialValue();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (const auto &param : this->paramValMap) {
+        if (node.getVariable()->getName() == param.first) {
+            this->newExpr = param.second;
+            return;
+        } else if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(param.second)) {
+            auto var = varOp->getVariable();
+            if (node.getVariable()->isSubVar() && (var->isCompoundType() || var->isArrayType())) {
+                for (auto subVar : var->getSubVarList()) {
+                    if (node.getVariable()->getName() == subVar->getName()) {
+                        this->newExpr = new VariableOperand(subVar);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 void SCAM::ParamValuePropagation::visit(SCAM::UnaryExpr &node) {
     node.getExpr()->accept(*this);
     if (this->newExpr) {
@@ -74,7 +129,10 @@ void SCAM::ParamValuePropagation::visit(SCAM::Arithmetic &node) {
     Expr *rhs = node.getRhs();
     node.getRhs()->accept(*this);
     if (this->newExpr) { rhs = this->newExpr; }
-
+    if(lhs->getDataType() != rhs->getDataType()) {
+        this->newExpr = nullptr;
+        return;
+    }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
         this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
     }
@@ -92,7 +150,10 @@ void SCAM::ParamValuePropagation::visit(SCAM::Logical &node) {
     Expr *rhs = node.getRhs();
     node.getRhs()->accept(*this);
     if (this->newExpr) { rhs = this->newExpr; }
-
+    if(lhs->getDataType() != rhs->getDataType()) {
+        this->newExpr = nullptr;
+        return;
+    }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
         this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
     }
@@ -110,7 +171,10 @@ void SCAM::ParamValuePropagation::visit(SCAM::Relational &node) {
     Expr *rhs = node.getRhs();
     node.getRhs()->accept(*this);
     if (this->newExpr) { rhs = this->newExpr; }
-
+    if(lhs->getDataType() != rhs->getDataType()) {
+        this->newExpr = nullptr;
+        return;
+    }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
         this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
     }
@@ -128,7 +192,10 @@ void SCAM::ParamValuePropagation::visit(SCAM::Bitwise &node) {
     Expr *rhs = node.getRhs();
     node.getRhs()->accept(*this);
     if (this->newExpr) { rhs = this->newExpr; }
-
+    if(lhs->getDataType() != rhs->getDataType()) {
+        this->newExpr = nullptr;
+        return;
+    }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
         this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
     }
@@ -164,7 +231,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::FunctionOperand &node) {
 void SCAM::ParamValuePropagation::visit(SCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayVar(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
     } else this->newExpr = nullptr;
 }
 
@@ -201,6 +268,33 @@ void SCAM::ParamValuePropagation::visit(SCAM::ArrayExpr &node) {
 }
 
 void SCAM::ParamValuePropagation::visit(SCAM::ParamOperand &node) {
+    this->newExpr = nullptr;
+    if (!this->globalVariableMap.empty()) {
+        if (this->globalVariableMap.find(node.getOperandName()) != this->globalVariableMap.end()) {
+            auto var = this->globalVariableMap.at(node.getOperandName());
+            if (var->isConstant()) {
+                if (var->getInitialValue()) {
+                    this->newExpr = var->getInitialValue();
+                    return;
+                }
+            }
+        } else {
+            for (auto pair : this->globalVariableMap) {
+                if (pair.second->isCompoundType() || pair.second->isArrayType()) {
+                    for (auto subVar : pair.second->getSubVarList()) {
+                        if (subVar->getName() == node.getOperandName()) {
+                            if (subVar->isConstant()) {
+                                if (subVar->getInitialValue()) {
+                                    this->newExpr = subVar->getInitialValue();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     for (const auto &param : this->paramValMap) {
         if (node.getOperandName() == param.first) {
             this->newExpr = param.second;
@@ -215,8 +309,6 @@ void SCAM::ParamValuePropagation::visit(SCAM::ParamOperand &node) {
                     }
                 }
             }
-        } else {
-            this->newExpr = nullptr;
         }
     }
 }

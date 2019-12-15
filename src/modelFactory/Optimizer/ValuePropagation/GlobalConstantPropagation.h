@@ -17,13 +17,17 @@
 namespace SCAM {
 
     /***
-     * @brief: checks the use of variables in each statement in the CFG
-     *
+     * \brief: Propagates the value of globally constant variables
+     * \author:mi-alkoudsi
+     * \inputs:
+     *       - std::map<int, CfgNode *> CFG;
+     *       - FindCfgPaths findCfgPaths;
+     *       - std::set<std::string> variablesThatHaveReadSet;
+     * \outputs:
+     *      - std::map<int, CfgNode *> optimizedCFG;
+     * \details: Checks the use of variables in each statement in the CFG
      * and propagates the value to it if and only if the variable turns out to be globally constant
-     *
      * Uses PropagateValue to safely propagate a value
-     *
-     * @author:M.I.Alkoudsi
      */
 
 

@@ -132,7 +132,7 @@ void SCAM::DatapathVisitor2::visit(SCAM::CompoundExpr &node) {
 
 
 void SCAM::DatapathVisitor2::visit(SCAM::ArrayOperand &node) {
-    this->ss << node.getArrayVar()->getName();
+    this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "(";
     node.getIdx()->accept(*this);
     this->ss << ")";

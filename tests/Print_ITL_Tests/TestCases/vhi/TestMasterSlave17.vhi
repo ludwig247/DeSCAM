@@ -2,12 +2,15 @@
 
 
 -- DP SIGNALS --
+macro s_out_1_sig : bus_req_t := end macro;
 macro s_out_1_sig_addr : signed := end macro;
 macro s_out_1_sig_data : signed := end macro;
 macro s_out_1_sig_trans_type : trans_t := end macro;
+macro s_out_2_sig : bus_req_t := end macro;
 macro s_out_2_sig_addr : signed := end macro;
 macro s_out_2_sig_data : signed := end macro;
 macro s_out_2_sig_trans_type : trans_t := end macro;
+macro s_out_3_sig : bus_req_t := end macro;
 macro s_out_3_sig_addr : signed := end macro;
 macro s_out_3_sig_data : signed := end macro;
 macro s_out_3_sig_trans_type : trans_t := end macro;

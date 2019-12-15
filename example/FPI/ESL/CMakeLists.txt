@@ -13,5 +13,8 @@ include_directories(Interfaces)
 
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
+add_executable(FPI ${R_SRC})
+target_link_libraries(FPI systemc)
+
 #add_executable(FPI_Master ${R_SRC})
 

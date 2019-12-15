@@ -48,14 +48,16 @@ std::string SCAM::OptUtilities::printCFG(const std::map<int, SCAM::CfgNode *> &C
             ss << "\t\t" << PrintStmt::toString(sus->getStmt()) << "\n";
         } else { ss << "\t\t" << "nullptr" << "\n"; }
 
-        ss << "\t\tPred: ";
+        ss << "\t\tPred:";
         for (auto pred: sus->getPredecessorList()) {
-            ss << "[ID" << pred->getId() << "], ";
+            if(sus->getPredecessorList().back() == pred) {ss << "[ID" << pred->getId() << "]";}
+            else{ss << "[ID" << pred->getId() << "], ";}
         }
         ss << "\n";;
-        ss << "\t\tSucc: ";
+        ss << "\t\tSucc:";
         for (auto succ: sus->getSuccessorList()) {
-            ss << "[ID" << succ->getId() << "], ";
+            if(sus->getSuccessorList().back() == succ) {ss << "[ID" << succ->getId() << "]";}
+            else{ss << "[ID" << succ->getId() << "], ";}
         }
         ss << "\n";
     }

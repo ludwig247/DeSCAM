@@ -39,6 +39,7 @@ add_plugin(PrintHLS; "Print C++ Files and scripts for Vivado High Level Synthesi
 #add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
 
 
+
 #NOT WORKING ANYMORE
 #add_plugin(PrintAML; "Structure and FSM in AML")
 #add_plugin(PrintXML; "Dumps the structure of each module as XML")
@@ -56,6 +57,19 @@ add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
 
 add_plugin_option(PrintVHDL; hls; "Print VHDL with HLS module")
+
+add_optimize_option(all; "Enable all optimizations")
+add_optimize_option(gvp; "Propagate the value of constant global variables")
+add_optimize_option(lvp; "Propagate locally constant values")
+add_optimize_option(gcp; "Propagate globally constant values")
+add_optimize_option(rda; "Remove dead assignments")
+add_optimize_option(are; "Analyze reachability of CFG paths")
+add_optimize_option(fun; "Optimize functions")
+add_optimize_option(sim; "Simplify expressions")
+add_optimize_option(ros; "Reduce operators strength")
+add_optimize_option(arb; "Analyze range and bitwidth")
+add_optimize_option(mrc; "Merge redundant conditions")
+
 
 #Please don't change the code below.
 add_library(PluginFactory

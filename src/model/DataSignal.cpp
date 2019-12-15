@@ -7,8 +7,9 @@
 SCAM::DataSignal::DataSignal(std::string name, SCAM::DataType *type, SCAM::ConstValue *initialValue, SCAM::DataSignal *parent, SCAM::Port *port) :
         port(port),
         VariableTemplate(name, type, initialValue, parent) {
-    if (parent != nullptr) this->port = parent->getPort();
-
+    if (parent != nullptr) {
+        this->port = parent->getPort();
+    }
 }
 
 SCAM::Port *SCAM::DataSignal::getPort() const {

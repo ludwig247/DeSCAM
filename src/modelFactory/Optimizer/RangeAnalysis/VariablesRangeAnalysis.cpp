@@ -6,13 +6,13 @@
 #include "Optimizer/Debug.h"
 
 
-SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(std::map<int, SCAM::CfgNode *> CFG,
-                                                     std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap,
-                                                     std::set<std::string> variablesThatHaveReadSet) : CFG(std::move(CFG)),
-                                                                                                              variablesValuesMap(std::move(
-                                                                                                                      variablesValuesMap)),
-                                                                                                              variablesThatHaveReadSet(std::move(
-                                                                                                                      variablesThatHaveReadSet)) {
+SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::CfgNode *>& CFG,
+                                                     const std::map<std::string, std::set<SCAM::Expr *>>& variablesValuesMap,
+                                                     const std::set<std::string>& variablesThatHaveReadSet) : CFG(CFG),
+                                                                                                              variablesValuesMap(
+                                                                                                                      variablesValuesMap),
+                                                                                                              variablesThatHaveReadSet(
+                                                                                                                      variablesThatHaveReadSet) {
 #ifdef DEBUG_RANGE_ANALYSIS
     std::cout << "valuesMap" << std::endl;
     for (auto var : this->variablesValuesMap) {
@@ -35,7 +35,15 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(std::map<int, SCAM::CfgNode
             this->variablesDataTypesMap.insert(std::make_pair(var.first, "unsigned"));
         }
         std::set<SCAM::Expr *> valuesSet;
+        bool assignedByReadVar = false;
         for (auto val : var.second) {
+            SCAM::FindVariablesAndFunctionsInStatement fvf(val);
+            for(auto vari : fvf.getVariablesInStmtSet()){
+                if(this->variablesThatHaveReadSet.find(vari)!=this->variablesThatHaveReadSet.end()){
+                    assignedByReadVar = true;
+                    break;
+                }
+            }
             SCAM::DetectCounterVariable counterDetector(var.first, val);
             if (counterDetector.isCounterVariable()) {
                 this->toBeAnalysedCounterVariablesSet.insert(var.first);
@@ -43,7 +51,9 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(std::map<int, SCAM::CfgNode
                 valuesSet.insert(val);
             }
         }
-        integerAndUnsignedVariablesWithNoCounterValuesMap.insert(std::make_pair(var.first, valuesSet));
+        if(!assignedByReadVar) {
+            integerAndUnsignedVariablesWithNoCounterValuesMap.insert(std::make_pair(var.first, valuesSet));
+        }
     }
     this->variablesValuesMap = integerAndUnsignedVariablesWithNoCounterValuesMap;
 #ifdef DEBUG_RANGE_ANALYSIS
@@ -195,7 +205,9 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(std::map<int, SCAM::CfgNode
                         if (this->difficultToAnalyzeVariablesSet.find(variable) !=
                             this->difficultToAnalyzeVariablesSet.end() ||
                             this->variablesThatHaveReadSet.find(variable) != this->variablesThatHaveReadSet.end()) {
+                            substitutedValuesSet.clear();
                             noReadOrDifficultVariables = false;
+                            break;
                         }
                         if (this->toBeAnalysedCounterVariablesSet.find(variable) !=
                             this->toBeAnalysedCounterVariablesSet.end()) {

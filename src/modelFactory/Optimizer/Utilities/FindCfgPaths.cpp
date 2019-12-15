@@ -33,7 +33,7 @@ namespace SCAM {
         //Create an initial path and insert the entry node into it
         CfgPath *Path = new CfgPath();
         int pathid = 1;
-        Path->insertatend(entryNode);
+        Path->insertAtEnd(entryNode);
 
         std::vector<CfgNode *> succList = entryNode->getSuccessorList();
         bool stillToVisit;
@@ -57,12 +57,12 @@ namespace SCAM {
                                 if (nodeInSuccVec[Path->getPath().back()->getId()] == 0) {
                                     if (isVisted[Path->getPath().back()->getSuccessorList().front()->getId()] ==
                                         false) {
-                                        Path->insertatend(Path->getPath().back()->getSuccessorList().front());
+                                        Path->insertAtEnd(Path->getPath().back()->getSuccessorList().front());
                                         stillToVisit = true;
                                     }
                                 } else if (nodeInSuccVec[Path->getPath().back()->getId()] == 1) {
                                     if (isVisted[Path->getPath().back()->getSuccessorList().back()->getId()] == false) {
-                                        Path->insertatend(Path->getPath().back()->getSuccessorList().back());
+                                        Path->insertAtEnd(Path->getPath().back()->getSuccessorList().back());
                                         stillToVisit = true;
                                     }
                                 }
@@ -73,12 +73,12 @@ namespace SCAM {
                             if (nodeInSuccVec[Path->getPath().back()->getId()] == 0) {
                                 if (isVisted[Path->getPath().back()->getSuccessorList().front()->getId()] ==
                                     false) {
-                                    Path->insertatend(Path->getPath().back()->getSuccessorList().front());
+                                    Path->insertAtEnd(Path->getPath().back()->getSuccessorList().front());
                                     stillToVisit = true;
                                 }
                             } else if (nodeInSuccVec[Path->getPath().back()->getId()] == 1) {
                                 if (isVisted[Path->getPath().back()->getSuccessorList().back()->getId()] == false) {
-                                    Path->insertatend(Path->getPath().back()->getSuccessorList().back());
+                                    Path->insertAtEnd(Path->getPath().back()->getSuccessorList().back());
                                     stillToVisit = true;
                                 }
                             }

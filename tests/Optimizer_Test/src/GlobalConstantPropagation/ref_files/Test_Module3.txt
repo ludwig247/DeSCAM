@@ -1,0 +1,84 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		nextphase = SECTION_A
+		Pred:[ID0]
+		Succ:[ID2]
+[ID2]
+		phase = SECTION_A
+		Pred:[ID1]
+		Succ:[ID3]
+[ID3]
+		x.ack = ERR
+		Pred:[ID2]
+		Succ:[ID4]
+[ID4]
+		x.data = 0
+		Pred:[ID3]
+		Succ:[ID5]
+[ID5]
+		y.ack = ERR
+		Pred:[ID4]
+		Succ:[ID6]
+[ID6]
+		y.data = 0
+		Pred:[ID5]
+		Succ:[ID7]
+[ID7]
+		nextphase = SECTION_A
+		Pred:[ID6]
+		Succ:[ID8]
+[ID8]
+		x.data = 5
+		Pred:[ID7]
+		Succ:[ID9]
+[ID9]
+		x.ack = OK
+		Pred:[ID8]
+		Succ:[ID10]
+[ID10]
+		while (true)
+		Pred:[ID9], [ID16]
+		Succ:[ID11]
+[ID11]
+		phase = nextphase
+		Pred:[ID10]
+		Succ:[ID12]
+[ID12]
+		if ((nextphase == SECTION_A))
+		Pred:[ID11]
+		Succ:[ID13], [ID17]
+[ID13]
+		y = {OK,5}
+		Pred:[ID12]
+		Succ:[ID14]
+[ID14]
+		b_out.write(y)
+		Pred:[ID13]
+		Succ:[ID15]
+[ID15]
+		nextphase = SECTION_B
+		Pred:[ID14]
+		Succ:[ID16]
+[ID16]
+		nullptr
+		Pred:[ID15], [ID20]
+		Succ:[ID10]
+[ID17]
+		b_in.read(y)
+		Pred:[ID12]
+		Succ:[ID18]
+[ID18]
+		if ((y.data > 5))
+		Pred:[ID17]
+		Succ:[ID19], [ID20]
+[ID19]
+		b_out.write(y)
+		Pred:[ID18]
+		Succ:[ID20]
+[ID20]
+		nextphase = SECTION_A
+		Pred:[ID18], [ID19]
+		Succ:[ID16]

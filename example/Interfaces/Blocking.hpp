@@ -302,4 +302,25 @@ void Blocking<T>::register_port(sc_port_base &port, const char *if_typename) {
     }
 }
 
+template<typename T>
+void Blocking<T>::read(T &out, std::string stateName) {
+    this->read(out);
+}
+
+template<typename T>
+void Blocking<T>::try_read(T &out, bool &success, std::string stateName) {
+    this->try_read(out,success);
+}
+
+template<typename T>
+void Blocking<T>::try_write(const T &val, bool &success, std::string stateName) {
+    this->try_write(val,success);
+}
+
+template<typename T>
+void Blocking<T>::write(const T &val, std::string stateName) {
+    this->write(val);
+
+}
+
 #endif //INTERFACES_BLOCKING_HPP

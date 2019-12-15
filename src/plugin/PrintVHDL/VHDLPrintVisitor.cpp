@@ -317,7 +317,7 @@ void VHDLPrintVisitor::visit(Return &node) {
 
 void VHDLPrintVisitor::visit(ArrayOperand &node) {
     useParenthesesFlag = true;
-    this->ss << node.getArrayVar()->getName();
+    this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "(to_integer(unsigned(";
     node.getIdx()->accept(*this);
     this->ss << ")))";

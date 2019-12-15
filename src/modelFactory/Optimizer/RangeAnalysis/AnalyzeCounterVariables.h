@@ -16,9 +16,13 @@
 
 namespace SCAM {
     /***
-        * @brief: analyzes counter variables values margins
-        *
-        * @author:M.I.Alkoudsi
+        * \brief: Analyzes counter variable values margins
+        * \author:mi-alkoudsi
+        * \inputs:
+        *       - std::set<std::string> counterVariablesSet;
+        *       - std::map<int, SCAM::CfgNode *> CFG;
+        * \outputs:
+        *       - std::map<std::string, std::string> marginalValuesMap;
         */
     class AnalyzeCounterVariables : public StmtAbstractVisitor {
     public:

@@ -52,4 +52,5 @@ namespace SCAM {
     bool Write::hasStatusOperand() const {
         return this->status != nullptr;
     }
+
 }

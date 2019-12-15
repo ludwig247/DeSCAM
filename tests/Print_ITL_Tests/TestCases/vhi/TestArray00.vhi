@@ -8,6 +8,8 @@ macro b_out_notify : boolean := end macro;
 -- DP SIGNALS --
 macro b_in_sig : signed := end macro;
 macro b_out_sig : int_2 := end macro;
+macro b_out_sig_0 : signed := end macro;
+macro b_out_sig_1 : signed := end macro;
 
 
 -- CONSTRAINTS --
@@ -29,7 +31,6 @@ assume:
 	 reset_sequence;
 prove:
 	 at t: state_1;
-	 at t: myArray(0) = resize(0,32);
 	 at t: myArray(1) = resize(0,32);
 	 at t: b_in_notify = true;
 	 at t: b_out_notify = false;
@@ -50,7 +51,6 @@ prove:
 	at t_end: state_2;
 	at t_end: b_out_sig(0) = (b_in_sig_at_t + myArray_1_at_t)(31 downto 0);
 	at t_end: b_out_sig(1) = b_in_sig_at_t;
-	at t_end: myArray(0) = (b_in_sig_at_t + myArray_1_at_t)(31 downto 0);
 	at t_end: myArray(1) = b_in_sig_at_t;
 	during[t+1, t_end]: b_in_notify = false;
 	during[t+1, t_end-1]: b_out_notify = false;
@@ -63,14 +63,12 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	myArray_0_at_t = myArray(0)@t,
 	myArray_1_at_t = myArray(1)@t;
 assume:
 	at t: state_2;
 	at t: b_out_sync;
 prove:
 	at t_end: state_1;
-	at t_end: myArray(0) = myArray_0_at_t;
 	at t_end: myArray(1) = myArray_1_at_t;
 	during[t+1, t_end-1]: b_in_notify = false;
 	at t_end: b_in_notify = true;
@@ -81,14 +79,12 @@ end property;
 property wait_state_1 is
 dependencies: no_reset;
 freeze:
-	myArray_0_at_t = myArray(0)@t,
 	myArray_1_at_t = myArray(1)@t;
 assume:
 	at t: state_1;
 	at t: not(b_in_sync);
 prove:
 	at t+1: state_1;
-	at t+1: myArray(0) = myArray_0_at_t;
 	at t+1: myArray(1) = myArray_1_at_t;
 	at t+1: b_in_notify = true;
 	at t+1: b_out_notify = false;
@@ -98,16 +94,14 @@ end property;
 property wait_state_2 is
 dependencies: no_reset;
 freeze:
-	myArray_0_at_t = myArray(0)@t,
+	b_out_sig_at_t = b_out_sig@t,
 	myArray_1_at_t = myArray(1)@t;
 assume:
 	at t: state_2;
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_2;
-	at t+1: b_out_sig(0) = myArray_0_at_t;
-	at t+1: b_out_sig(1) = myArray_1_at_t;
-	at t+1: myArray(0) = myArray_0_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: myArray(1) = myArray_1_at_t;
 	at t+1: b_in_notify = false;
 	at t+1: b_out_notify = true;

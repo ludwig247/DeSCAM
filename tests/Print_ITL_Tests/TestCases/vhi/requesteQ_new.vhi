@@ -3,18 +3,22 @@ macro updateQ_i_sync : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro buffer1_sig : req_t := end macro;
 macro buffer1_sig_abort : boolean := end macro;
 macro buffer1_sig_addr : signed := end macro;
 macro buffer1_sig_data : signed := end macro;
 macro buffer1_sig_opc : opc_t := end macro;
+macro buffer2_sig : req_t := end macro;
 macro buffer2_sig_abort : boolean := end macro;
 macro buffer2_sig_addr : signed := end macro;
 macro buffer2_sig_data : signed := end macro;
 macro buffer2_sig_opc : opc_t := end macro;
+macro buffer3_sig : req_t := end macro;
 macro buffer3_sig_abort : boolean := end macro;
 macro buffer3_sig_addr : signed := end macro;
 macro buffer3_sig_data : signed := end macro;
 macro buffer3_sig_opc : opc_t := end macro;
+macro peripheral_request_i_sig : req_t := end macro;
 macro peripheral_request_i_sig_abort : boolean := end macro;
 macro peripheral_request_i_sig_addr : signed := end macro;
 macro peripheral_request_i_sig_data : signed := end macro;

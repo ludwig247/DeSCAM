@@ -16,7 +16,6 @@ SCAM::Bitwise::Bitwise(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs) 
     } else if (lhs->getDataType() != rhs->getDataType()) {
         std::string msg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs) + "\n";
         throw std::runtime_error(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype");
-
     } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw std::runtime_error("operands must be numeric");
 
 }

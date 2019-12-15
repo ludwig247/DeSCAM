@@ -34,7 +34,6 @@ using namespace clang::tooling;
 using namespace clang;
 
 
-
 namespace SCAM {
 
     bool containsSubstring(std::string,std::string);

@@ -70,7 +70,7 @@ namespace SCAM {
 
         std::map<int, SCAM::CfgNode *> getCFG() const;
 
-        std::multimap<std::string, std::vector<SCAM::CfgNode *>> getcommGroups() const;
+        std::multimap<std::string, std::vector<SCAM::CfgNode *>> getcommGroups() const; //TODO: delete
 
 //    std::map<int, SCAM::CfgNode *> getCFG_Original() const;
 //    std::map<int, SCAM::CfgNode *> getCFG_Implicit() const;

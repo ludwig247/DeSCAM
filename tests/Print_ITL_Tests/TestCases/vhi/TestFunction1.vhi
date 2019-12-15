@@ -6,6 +6,7 @@ macro b_out_notify : boolean := end macro;
 
 
 -- DP SIGNALS --
+macro b_in_sig : record := end macro;
 macro b_in_sig_x : signed := end macro;
 macro b_in_sig_y : unsigned := end macro;
 macro b_out_sig : unsigned := end macro;
@@ -115,8 +116,9 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	x_at_t = x@t,
-	y_at_t = y@t;
+	b_in_sig_x_at_t = b_in_sig_x@t,
+	b_in_sig_y_at_t = b_in_sig_y@t,
+	x_at_t = x@t;
 assume:
 	at t: state_1;
 	at t: b_in_sync;
@@ -157,6 +159,7 @@ end property;
 property wait_state_3 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	record_var_y_at_t = record_var_y@t,
 	x_at_t = x@t,
 	y_at_t = y@t;
@@ -165,7 +168,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_3;
-	at t+1: b_out_sig = y_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: record_var_y = record_var_y_at_t;
 	at t+1: x = x_at_t;
 	at t+1: y = y_at_t;
@@ -177,6 +180,7 @@ end property;
 property wait_state_4 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	record_var_y_at_t = record_var_y@t,
 	x_at_t = x@t,
 	y_at_t = y@t;
@@ -185,7 +189,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_4;
-	at t+1: b_out_sig = y_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: record_var_y = record_var_y_at_t;
 	at t+1: x = x_at_t;
 	at t+1: y = y_at_t;
@@ -197,6 +201,7 @@ end property;
 property wait_state_5 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	record_var_y_at_t = record_var_y@t,
 	x_at_t = x@t,
 	y_at_t = y@t;
@@ -205,7 +210,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_5;
-	at t+1: b_out_sig = y_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: record_var_y = record_var_y_at_t;
 	at t+1: x = x_at_t;
 	at t+1: y = y_at_t;
@@ -236,6 +241,7 @@ end property;
 property wait_state_2 is
 dependencies: no_reset;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	record_var_y_at_t = record_var_y@t,
 	x_at_t = x@t,
 	y_at_t = y@t;
@@ -244,7 +250,7 @@ assume:
 	at t: not(b_out_sync);
 prove:
 	at t+1: state_2;
-	at t+1: b_out_sig = y_at_t;
+	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: record_var_y = record_var_y_at_t;
 	at t+1: x = x_at_t;
 	at t+1: y = y_at_t;
