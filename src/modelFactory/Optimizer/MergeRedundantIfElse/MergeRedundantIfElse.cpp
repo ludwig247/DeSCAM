@@ -221,13 +221,15 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
             auto elseifnode = this->blockCFG.at(ifStatement);
             for (auto pred : this->blockCFG.at(ifStatement)->getPredecessorList()) {
                 pred->replaceSuccessor(elseifnode, elseifnode->getSuccessorList()[1]);
+                elseifnode->getSuccessorList()[1]->replacePredecessor(elseifnode,pred);
             }
             this->blockCFG.erase(ifStatement);
+
             for (auto insideNode : this->trueBranchBlocksMap.at(ifStatement)) {
                 if (this->blockCFG.find(insideNode) != this->blockCFG.end()) {
                     this->blockCFG.erase(insideNode);
                 }
-            }
+           }
         }
     }
 }

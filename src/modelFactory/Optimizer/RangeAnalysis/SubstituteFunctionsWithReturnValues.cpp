@@ -45,7 +45,7 @@ SCAM::SubstituteFunctionsWithReturnValues::SubstituteFunctionsWithReturnValues(
     for (const auto &var : variablesValuesMap) {
         for (auto val : var.second) {
             if (val != nullptr) {
-                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(val);
+                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(val,std::set<std::string>{});
                 if (variablesInStmtFinder.hasFunctions()) {
                     continue;
                 } else {
@@ -134,7 +134,7 @@ void SCAM::SubstituteFunctionsWithReturnValues::visit(SCAM::FunctionOperand &nod
     SCAM::Expr *functionOp = &node;
     for (const auto &returnPath : node.getFunction()->getReturnValueConditionList()) {
         auto returnVal = returnPath.first->getReturnValue();
-        SCAM::FindVariablesAndFunctionsInStatement visf(returnVal);
+        SCAM::FindVariablesAndFunctionsInStatement visf(returnVal,std::set<std::string>{});
         if (visf.hasFunctions()) {
             auto functionsInStmtMap = visf.getFunctionsInStmtMap();
             for (const auto &function: functionsInStmtMap) {
@@ -178,7 +178,7 @@ SCAM::SubstituteFunctionsWithReturnValues::substituteReturnValuesOfNestedFunctio
         std::set<SCAM::Expr *> returnsSet;
         for (const auto &returnPath : pair.second->getFunction()->getReturnValueConditionList()) {
             auto returnVal = returnPath.first->getReturnValue();
-            SCAM::FindVariablesAndFunctionsInStatement visf(returnVal);
+            SCAM::FindVariablesAndFunctionsInStatement visf(returnVal,std::set<std::string>{});
             if (visf.hasFunctions()) {
                 auto functionsInStmtMap = visf.getFunctionsInStmtMap();
                 for (const auto &func: functionsInStmtMap) {

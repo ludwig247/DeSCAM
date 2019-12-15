@@ -1,0 +1,36 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		x = 0
+		Pred:[ID0]
+		Succ:[ID2]
+[ID2]
+		y = 0
+		Pred:[ID1]
+		Succ:[ID3]
+[ID3]
+		while (true)
+		Pred:[ID2], [ID7]
+		Succ:[ID4]
+[ID4]
+		b_in.read(y)
+		Pred:[ID3]
+		Succ:[ID5]
+[ID5]
+		if (((y == 0) or (y == 1)))
+		Pred:[ID4]
+		Succ:[ID6], [ID8]
+[ID6]
+		b_out.write(x)
+		Pred:[ID5]
+		Succ:[ID7]
+[ID7]
+		nullptr
+		Pred:[ID6], [ID8]
+		Succ:[ID3]
+[ID8]
+		b_out.write(-(x))
+		Pred:[ID5]
+		Succ:[ID7]

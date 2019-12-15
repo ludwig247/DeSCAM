@@ -121,10 +121,10 @@ namespace SCAM {
                 if (app->get_subcommand("-Optimize")->count("--" + optOptions[i]) > 0) {
                       this->optimizeOptions.insert(optOptions[i]);
                 }
-                if(this->optimizeOptions.find("all")!=this->optimizeOptions.end()){ this->optimizeOptions.clear();}
-                if(this->optimizeOptions.empty()) {this->optimizeOptions.insert("all");}
-                CommandLineParameter::setOptimizeOptionsSet(this->optimizeOptions);
             }
+            if(this->optimizeOptions.find("all")!=this->optimizeOptions.end()){ this->optimizeOptions.clear();}
+            if(this->optimizeOptions.empty()) {this->optimizeOptions.insert("all");}
+            CommandLineParameter::setOptimizeOptionsSet(this->optimizeOptions);
             for(auto option: this->optimizeOptions){
                 std::cout << " " << option << " ";
             }
