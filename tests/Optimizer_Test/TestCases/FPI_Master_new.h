@@ -8,23 +8,21 @@
 #include "systemc.h"
 
 #include "Types.h"
-#include "../../Interfaces/Interfaces.h"
+#include "../../../example/Interfaces/Interfaces.h"
 
 #define is_BTR(opc) (opc==BTR2_OPC || opc==BTR4_OPC || opc==BTR8_OPC)
 
-struct FPI_Master : public sc_module {
+struct FPI_Master_new : public sc_module {
 
-    enum Sections {
+    enum Phases {
         IDLE, ADDR, DATA, DATA_ADDR, BTR_CONT, WAIT_BEFORE_RETRY
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
 
     //Constructor
-    FPI_Master(sc_module_name name):
-            section(IDLE),
-            nextsection(IDLE),
+    FPI_Master_new(sc_module_name name):
             ready_i("ready_i"),
             gnt_i("gnt_i"),
             ack_i("ack_i"),
@@ -47,7 +45,7 @@ struct FPI_Master : public sc_module {
             master_done("master_done"){
         SC_THREAD(fsm);
     }
-    SC_HAS_PROCESS(FPI_Master);
+    SC_HAS_PROCESS(FPI_Master_new);
 
 
     //Ports
@@ -101,10 +99,12 @@ struct FPI_Master : public sc_module {
 
 
     void fsm() {
+        nextphase = IDLE;
         while (true) {
-            section = nextsection;
-            if (section == IDLE) {
-                ready_i->nb_read(tmp_bool); //block until ready
+            phase = nextphase;
+            if (phase == IDLE) {
+                wait(WAIT_TIME, SC_PS);//state
+                ready_i->slave_read(tmp_bool); //block until ready
 
                 updateQ_cycle_tmp = false;
                 buffer1->get(buffer1_tmp);
@@ -137,7 +137,7 @@ struct FPI_Master : public sc_module {
                         addr_o->set(buffer1_tmp.addr);
                         opc_o->set(buffer1_tmp.opc);
                         nop = false;
-                        nextsection = ADDR;
+                        nextphase = ADDR;
                     } else {
                         addr_en_o->set(true);
                         addr_o->set(0);
@@ -149,12 +149,13 @@ struct FPI_Master : public sc_module {
                     nop = false;
                 }
 
-                if (updateQ_cycle_tmp) { updateQ_o->write(updateQ_msg_tmp); }
+                if (updateQ_cycle_tmp) { updateQ_o->master_write(updateQ_msg_tmp); }
 
 
             }
-            else if (section == ADDR) { //buffer1 is the active one
-                ready_i->nb_read(tmp_bool); //block until ready
+            else if (phase == ADDR) { //buffer1 is the active one
+                wait(WAIT_TIME, SC_PS);//state
+                ready_i->slave_read(tmp_bool); //block until ready
                 updateQ_cycle_tmp = false;
                 buffer1->get(buffer1_tmp);
                 buffer2->get(buffer2_tmp);
@@ -182,7 +183,7 @@ struct FPI_Master : public sc_module {
                         addr_en_o->set(true);
                         addr_o->set(buffer1_tmp.addr + 1);
                         opc_o->set(buffer1_tmp.opc);
-                        nextsection = BTR_CONT;
+                        nextphase = BTR_CONT;
                         btrCnt = 0;
                     } else {
                         if (status2_tmp == REQ_STATUS) {
@@ -192,7 +193,7 @@ struct FPI_Master : public sc_module {
                             addr_o->set(buffer2_tmp.addr);
                             opc_o->set(buffer2_tmp.opc);
                             nop = false;
-                            nextsection = DATA_ADDR;
+                            nextphase = DATA_ADDR;
                         } else {
                             updateQ_cycle_tmp = true;
                             updateQ_msg_tmp = NXT_PHASE_Q;
@@ -200,7 +201,7 @@ struct FPI_Master : public sc_module {
                             addr_o->set(0);
                             opc_o->set(NOP_OPC);
                             nop = true;
-                            nextsection = DATA;
+                            nextphase = DATA;
                         }
                     }
                 } else {
@@ -208,15 +209,16 @@ struct FPI_Master : public sc_module {
                     updateQ_msg_tmp = NXT_PHASE_Q;
                     addr_en_o->set(false);
                     nop = false;
-                    nextsection = DATA;
+                    nextphase = DATA;
                 }
 
-                if (updateQ_cycle_tmp) { updateQ_o->write(updateQ_msg_tmp); }
+                if (updateQ_cycle_tmp) { updateQ_o->master_write(updateQ_msg_tmp); }
 
 
             }
-            else if (section == DATA) {
-                ready_i->nb_read(tmp_bool); //block until ready
+            else if (phase == DATA) {
+                wait(WAIT_TIME, SC_PS);//state
+                ready_i->slave_read(tmp_bool); //block until ready
                 updateQ_cycle_tmp = false;
                 buffer1->get(buffer1_tmp);
                 buffer2->get(buffer2_tmp);
@@ -241,12 +243,12 @@ struct FPI_Master : public sc_module {
                 if (ack_tmp == RTY && !(is_BTR(buffer1_tmp.opc) || buffer1_tmp.opc != RMW_OPC)) {
                     updateQ_cycle_tmp = true;
                     updateQ_msg_tmp = RTY_Q;
-                    nextsection = WAIT_BEFORE_RETRY;
+                    nextphase = WAIT_BEFORE_RETRY;
                     nop = gnt;
                 } else {
                     result_tmp.err = (ack_tmp != OK);
                     data_i->get(result_tmp.data);
-                    master_done->write(result_tmp);
+                    master_done->master_write(result_tmp);
 
                     if (gnt) {
                         if (status2_tmp == REQ_STATUS) {
@@ -256,7 +258,7 @@ struct FPI_Master : public sc_module {
                             addr_o->set(buffer2_tmp.addr);
                             opc_o->set(buffer2_tmp.opc);
                             nop = false;
-                            nextsection = ADDR;
+                            nextphase = ADDR;
                         } else {
                             updateQ_cycle_tmp = true;
                             updateQ_msg_tmp = NXT_PHASE_Q;
@@ -264,23 +266,24 @@ struct FPI_Master : public sc_module {
                             addr_o->set(0);
                             opc_o->set(NOP_OPC);
                             nop = true;
-                            nextsection = IDLE;
+                            nextphase = IDLE;
                         }
                     } else {
                         updateQ_cycle_tmp = true;
                         updateQ_msg_tmp = NXT_PHASE_Q;
                         addr_en_o->set(false);
                         nop = false;
-                        nextsection = IDLE;
+                        nextphase = IDLE;
                     }
 
                 }
-                if (updateQ_cycle_tmp) { updateQ_o->write(updateQ_msg_tmp); }
+                if (updateQ_cycle_tmp) { updateQ_o->master_write(updateQ_msg_tmp); }
 
 
             }
-            else if (section == DATA_ADDR) {
-                ready_i->nb_read(tmp_bool); //block until ready
+            else if (phase == DATA_ADDR) {
+                wait(WAIT_TIME, SC_PS);//state
+                ready_i->slave_read(tmp_bool); //block until ready
                 updateQ_cycle_tmp = false;
                 buffer1->get(buffer1_tmp);
                 buffer2->get(buffer2_tmp);
@@ -315,7 +318,7 @@ struct FPI_Master : public sc_module {
                 if (ack_tmp == RTY && !(is_BTR(buffer1_tmp.opc) || buffer1_tmp.opc != RMW_OPC)) {
                     updateQ_cycle_tmp = true;
                     updateQ_msg_tmp = RTY_Q;
-                    nextsection = WAIT_BEFORE_RETRY;
+                    nextphase = WAIT_BEFORE_RETRY;
                     if (gnt) {
                         nop = true;
                         addr_en_o->set(true);
@@ -329,7 +332,7 @@ struct FPI_Master : public sc_module {
                     result_tmp.err = (ack_tmp != OK);
                     data_i->get(result_tmp.data);
 
-                    master_done->write(result_tmp);
+                    master_done->master_write(result_tmp);
 
                     if (gnt) {
                         if (is_BTR(buffer2_tmp.opc)) {
@@ -338,7 +341,7 @@ struct FPI_Master : public sc_module {
                             addr_en_o->set(true);
                             addr_o->set(buffer2_tmp.addr + 1);
                             opc_o->set(buffer2_tmp.opc);
-                            nextsection = BTR_CONT;
+                            nextphase = BTR_CONT;
                             btrCnt = 0;
                         } else {
                             if (status3_tmp == REQ_STATUS) {
@@ -348,7 +351,7 @@ struct FPI_Master : public sc_module {
                                 addr_o->set(buffer3_tmp.addr);
                                 opc_o->set(buffer3_tmp.opc);
                                 nop = false;
-                                nextsection = DATA_ADDR;
+                                nextphase = DATA_ADDR;
                             } else {
                                 updateQ_cycle_tmp = true;
                                 updateQ_msg_tmp = NXT_PHASE_Q;
@@ -356,24 +359,25 @@ struct FPI_Master : public sc_module {
                                 addr_o->set(0);
                                 opc_o->set(NOP_OPC);
                                 nop = true;
-                                nextsection = DATA;
+                                nextphase = DATA;
                             }
                         }
                     } else {
                         addr_en_o->set(false);
                         nop = false;
-                        nextsection = DATA;
+                        nextphase = DATA;
                     }
 
                 }
-                if (updateQ_cycle_tmp) { updateQ_o->write(updateQ_msg_tmp); }
+                if (updateQ_cycle_tmp) { updateQ_o->master_write(updateQ_msg_tmp); }
 
 
             }
-            else if (section == BTR_CONT) {
-                ready_i->nb_read(tmp_bool); //block until ready
+            else if (phase == BTR_CONT) {
+                wait(WAIT_TIME, SC_PS);//state
+                ready_i->slave_read(tmp_bool); //block until ready
                 updateQ_cycle_tmp = false;
-                buffer1->get(buffer1_tmp);
+                buffer1->get(buffer1_tmp);//FIXME: this variable should be replaced by port signal
                 buffer2->get(buffer2_tmp);
                 buffer3->get(buffer3_tmp);
                 status1->get(status1_tmp);
@@ -397,7 +401,7 @@ struct FPI_Master : public sc_module {
                 if (btrCnt == 0 && ack_tmp == RTY) {
                     updateQ_cycle_tmp = true;
                     updateQ_msg_tmp = RTY_Q;
-                    nextsection = WAIT_BEFORE_RETRY;
+                    nextphase = WAIT_BEFORE_RETRY;
                     if (gnt) {
                         addr_en_o->set(true);
                         addr_o->set(0);
@@ -410,7 +414,7 @@ struct FPI_Master : public sc_module {
                 } else {
                     result_tmp.err = (ack_tmp != OK);
                     data_i->get(result_tmp.data);
-                    master_done->write(result_tmp);
+                    master_done->master_write(result_tmp);
                     btrCnt = btrCnt + 1;
 
                     if ((buffer1_tmp.opc == BTR2_OPC && btrCnt == 1) || (buffer1_tmp.opc == BTR4_OPC && btrCnt == 3) || (buffer1_tmp.opc == BTR8_OPC && btrCnt == 7)) {
@@ -422,7 +426,7 @@ struct FPI_Master : public sc_module {
                                 addr_o->set(buffer2_tmp.addr);
                                 opc_o->set(buffer2_tmp.opc);
                                 nop = false;
-                                nextsection = DATA_ADDR;
+                                nextphase = DATA_ADDR;
                             } else {
                                 updateQ_cycle_tmp = true;
                                 updateQ_msg_tmp = NXT_PHASE_Q;
@@ -430,21 +434,20 @@ struct FPI_Master : public sc_module {
                                 addr_o->set(0);
                                 opc_o->set(NOP_OPC);
                                 nop = true;
-                                nextsection = DATA;
+                                nextphase = DATA;
                             }
                         } else {
                             updateQ_cycle_tmp = true;
                             updateQ_msg_tmp = NXT_PHASE_Q;
                             addr_en_o->set(false);
                             nop = false;
-                            nextsection = DATA;
+                            nextphase = DATA;
                         }
 
                     } else {
                         if (gnt) {
                             addr_en_o->set(true);
-			    buffer1_tmp.addr = buffer1_tmp.addr + btrCnt + 1;
-                            addr_o->set(buffer1_tmp.addr);
+                            addr_o->set(buffer1_tmp.addr + btrCnt + 1);//FIXME: mismatching with original properties
                             opc_o->set(buffer1_tmp.opc);
                         } else {
                             //assert(false);// "BCU should have granted within a block transfer"); //should not be reachable, BCU lock should ensure a grant
@@ -453,11 +456,12 @@ struct FPI_Master : public sc_module {
 
 
                 }
-                if (updateQ_cycle_tmp) { updateQ_o->write(updateQ_msg_tmp); }
+                if (updateQ_cycle_tmp) { updateQ_o->master_write(updateQ_msg_tmp); }
 
             }
-            else if (section == WAIT_BEFORE_RETRY) {
-                ready_i->nb_read(tmp_bool); //block until ready
+            else if (phase == WAIT_BEFORE_RETRY) {
+                wait(WAIT_TIME, SC_PS);//state
+                ready_i->slave_read(tmp_bool); //block until ready
                 gnt_i->get(gnt);
                 //drive dataphase with nop, if last was a nop address phase
                 if (nop) {
@@ -481,7 +485,7 @@ struct FPI_Master : public sc_module {
                 }
                 wait_cnt_end->get(tmp_bool);
                 if (tmp_bool) {
-                    nextsection = IDLE;
+                    nextphase = IDLE;
                 }
             }
             wait(SC_ZERO_TIME);

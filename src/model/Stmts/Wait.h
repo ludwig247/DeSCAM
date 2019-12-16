@@ -20,7 +20,13 @@ namespace SCAM {
 
         virtual std::ostream &print(std::ostream &) const;
 
+        const std::string &getStateName() const;
+
+        void setStateName(const std::string &stateName);
+
     private:
+
+        std::string stateName ="";
 
     };
 

@@ -18,28 +18,25 @@ class MasterSlave : public sc_prim_channel,
                     virtual  public slave_in_if<T>,
                     virtual public slave_out_if<T> {
 public:
-    MasterSlave(const char *name);
+    explicit MasterSlave(const char *name);
+    MasterSlave() = delete;
 
-    void master_read(T &out);
+    void master_read(T &out,std::string stateName) override;
+    void master_read(T &out) override;
 
-    void master_write(const T &val);
+    void master_write(const T &val,std::string stateName) override;
+    void master_write(const T &val) override ;
 
-//    bool slave_read(T &out);
-    void slave_read(T & out);
-    void slave_read(T & out, bool & success);
+    void slave_read(T & out) override;
+    void slave_read(T & out, bool & success) override;
 
-    void slave_write(const T &val);
-
-//    bool peek();
-//
-//    bool poke();
+    void slave_write(const T &val) override ;
 
     void register_port(sc_port_base &port, const char *if_typename);
 
 private:
-    T *shared_data;
-    bool available_data, data_read;
-    bool reader_ready, writer_ready;
+    const T *shared_data;
+    bool available_data;
 
     sc_event reader_notify, writer_notify;
     sc_port_base *reader, *writer;

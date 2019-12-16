@@ -1,6 +1,6 @@
 project(PrintITL_Test_Run C CXX)
 cmake_minimum_required(VERSION 2.8)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ${LLVM_CXX_FLAGS} ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ${LLVM_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 
 
 #DIRECTORIES
@@ -19,7 +19,7 @@ set(GLOBAL_FILES
         ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
         ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
         ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
-        PrintITL_Test.h)
+        PrintITL_Test.h TestCases/ModuleStateNames.h)
 
 add_executable(PrintITL_Test_Run ${SOURCE_FILES} ${GLOBAL_FILES})
 

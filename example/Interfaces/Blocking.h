@@ -26,6 +26,14 @@ public:
     void try_write(const T &val);
     void try_write(const T &val, bool & success);
 
+    void read(T &out, std::string stateName) override;
+
+    void try_read(T &out, bool &success, std::string stateName) override;
+
+    void try_write(const T &val, bool &success, std::string stateName) override;
+
+    void write(const T &val, std::string stateName) override;
+
     void register_port(sc_port_base &port, const char *if_typename);
 
 private:

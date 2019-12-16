@@ -36,7 +36,7 @@ struct Environment : public sc_module {
             data_word_tmp.isMarker = rand() % 2;
             data_word_tmp.markerAlignment = rand() % 5;
             //std::cout << data_word_tmp.isMarker << "," << data_word_tmp.markerAlignment << std::endl;
-            data_word->write(data_word_tmp);
+            data_word->master_write(data_word_tmp);
             if (cnt < 10000000) {
                 ++cnt;
             } else {

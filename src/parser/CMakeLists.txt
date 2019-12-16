@@ -16,7 +16,6 @@ foreach (plugin_lib ${PLUGIN_NAMES})
     target_link_libraries(DESCAM ${plugin_lib})
 endforeach ()
 
-
 target_link_libraries(DESCAM PluginFactory)
 target_link_libraries(DESCAM tinyXML)
 target_link_libraries(DESCAM modelFactory)
@@ -25,7 +24,6 @@ target_link_libraries(DESCAM optimizer)
 target_link_libraries(DESCAM global)
 target_link_libraries(DESCAM Model)
 target_link_libraries(DESCAM pthread)
-
 
 #include LLVM,z3,SystemC CLANG
 include(DefineLibs.cmake)

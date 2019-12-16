@@ -7,23 +7,21 @@
 
 #include "systemc.h"
 #include "Types.h"
-#include "../../Interfaces/Interfaces.h"
+#include "../../../example/Interfaces/Interfaces.h"
 
-struct requesteQ : public sc_module {
-    enum Sections {
+struct requesteQ_new : public sc_module {
+    enum Phases {
         STARTUP, EMPTY, NON_EMPTY
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
 
-    requesteQ(sc_module_name name) :
-            section(STARTUP),
-            nextsection(STARTUP) {
+    requesteQ_new(sc_module_name name) {
         SC_THREAD(fsm);
     }
 
-    SC_HAS_PROCESS(requesteQ);
+    SC_HAS_PROCESS(requesteQ_new);
 
     master_in<req_t> peripheral_request_i; //a new request from peripheral //FIXME: in .vhi it says a new value in each clock cycle
     shared_out<bool> req_o; //the request signal for the master agent
@@ -53,28 +51,31 @@ struct requesteQ : public sc_module {
     req_status_t status3_var;
 
     void fsm() {
-        status1_var = EMPTY_STATUS;//FIXME: how can you initialize them from constructor?
-        status2_var = EMPTY_STATUS;//       though DeSCAM throws an error
+        nextphase = STARTUP;
+        status1_var = EMPTY_STATUS;
+        status2_var = EMPTY_STATUS;
         status3_var = EMPTY_STATUS;
         while (true) {
-            section = nextsection;//FIXME: This was missing yet the properties generated successfully
-            if (section == STARTUP) {
+            phase = nextphase;
+            if (phase == STARTUP) {
                 status1->set(EMPTY_STATUS);
                 status2->set(EMPTY_STATUS);
                 status3->set(EMPTY_STATUS);
                 req_o->set(false);
-                nextsection = EMPTY;
-            } else if (section == EMPTY) {
-                tmp_bool_update = updateQ_i->nb_read(tmp_update);
+                nextphase = EMPTY;
+            } else if (phase == EMPTY) {
+                wait(WAIT_TIME, SC_PS);//state
+                updateQ_i->slave_read(tmp_update, tmp_bool_update);
                 //assert(tmp_bool_update == false); // "Wrong use of updateQ, no requests to update");
-                peripheral_request_i->read(buffer1_var);
+                peripheral_request_i->master_read(buffer1_var);
                 status1->set(REQ_STATUS);
                 req_o->set(true);
-                nextsection = NON_EMPTY;
+                nextphase = NON_EMPTY;
 
 
-            } else if (section == NON_EMPTY) {
-                tmp_bool_update = updateQ_i->nb_read(tmp_update);
+            } else if (phase == NON_EMPTY) {
+                wait(WAIT_TIME, SC_PS);//state
+                updateQ_i->slave_read(tmp_update, tmp_bool_update);
                 //assert(tmp_bool_update == false); // "Wrong use of updateQ, no requests to update");
                 if (tmp_bool_update) {
                     if (tmp_update == NXT_GRANT_Q) {
@@ -145,7 +146,7 @@ struct requesteQ : public sc_module {
                      * FIXME: Here it's not completly necessary to have all properties to be one cycle long because the other side is required to provide a new value each cycle ...
                      * FIXME:
                     */
-                    peripheral_request_i->read(tmp_buffer);
+                    peripheral_request_i->master_read(tmp_buffer);
                 }
 
                 //FIXME: missing assertion? what if  status1_var != EMPTY_STATUS && status2_var != EMPTY_STATUS ... status3_var doesn't matter then?
@@ -163,7 +164,7 @@ struct requesteQ : public sc_module {
                 }
             } else {
                 if (status1_var == EMPTY_STATUS) {
-                    nextsection = EMPTY;
+                    nextphase = EMPTY;
                 }
                 value = status1_var == REQ_STATUS || status2_var == REQ_STATUS || status3_var == REQ_STATUS;
                 req_o->set(value);

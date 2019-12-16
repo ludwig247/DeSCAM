@@ -43,3 +43,11 @@ bool SCAM::Communication::isSlave() const {
 bool SCAM::Communication::isNonBlockingAccess() const {
     return is_non_blocking_access;
 }
+
+const std::string &SCAM::Communication::getStateName() const {
+    return stateName;
+}
+
+void SCAM::Communication::setStateName(const std::string &stateName) {
+    Communication::stateName = stateName;
+}

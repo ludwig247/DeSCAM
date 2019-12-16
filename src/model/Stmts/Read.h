@@ -28,9 +28,12 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+
+
     private:
         VariableOperand *variable;
         VariableOperand *status;
+
     };
 
 }

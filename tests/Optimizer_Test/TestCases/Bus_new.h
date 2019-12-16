@@ -1,10 +1,10 @@
 //
 // Created by ludwig on 30.01.17.
 //
-#include <Interfaces.h>
+#include "../../../example/Interfaces/Interfaces.h"
 #include "systemc.h"
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "Types.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
@@ -59,7 +59,6 @@ struct Bus : public sc_module {
             24 - 31 TEMP_BOT
              */
             master_in->read(req);
-
 	    std::cout << "req addrs:" << req.addr << std::endl;
 	    std::cout << "req data:" << req.data << std::endl;
 	    std::cout << "req mode:" << req.trans_type << std::endl;

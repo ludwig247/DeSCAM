@@ -534,10 +534,6 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *pDecl
 void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Module *pModule) {
     //FindGlobal findGlobal(pDecl, pModule);
 
-    //for(auto var: findGlobal.getVariableMap()){
-    //    this->model->addGlobalVariable(var.second);
-    //    var.second->setConstant(true);
-    //}
 }
 
 void SCAM::ModelFactory::optimizeModel() {

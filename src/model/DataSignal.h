@@ -13,6 +13,8 @@ namespace SCAM {
 
     class DataSignal : public VariableTemplate<DataSignal> {
     public:
+        DataSignal()= delete;
+        DataSignal(DataSignal&) = delete;
         DataSignal(std::string name, DataType *type, ConstValue *initialValue = nullptr, DataSignal *parent = nullptr, SCAM::Port *port = nullptr);
 
         Port *getPort() const;
@@ -20,7 +22,6 @@ namespace SCAM {
         virtual void accept(AbstractVisitor &visitor);
 
     private:
-
         Port *port;
     };
 }

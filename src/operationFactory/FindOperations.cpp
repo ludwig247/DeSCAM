@@ -39,9 +39,15 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
             this->statesMap.insert(std::make_pair("init",state));
         } else {
             //TODO: in the future, the name will represent the line of code
-            auto *state = new SCAM::State2(node->getName());
             SCAM::FindCommunication2 findComm;
             node->getStmt()->accept(findComm);
+
+            std::string stateName = "state";
+            if(findComm.hasStateName()) {
+                stateName = findComm.getStateName();
+            }
+            auto *state = new SCAM::State2(stateName);
+
             if(findComm.isWaitComm()) {
                 state->setWait();
                 this->statesMap.insert(std::make_pair(node->getName(), state));
