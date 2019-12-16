@@ -17,6 +17,7 @@ namespace SCAM{
         FindGlobal() = delete;
         ~FindGlobal() = default;
         virtual bool VisitVarDecl(const clang::VarDecl * varDecl);
+        virtual bool VisitFunctionDecl(const clang::FunctionDecl * funDecl);
 
         const std::map<std::string, Variable *> &getVariableMap() const;
 

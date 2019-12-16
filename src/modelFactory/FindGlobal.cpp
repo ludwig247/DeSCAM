@@ -12,6 +12,7 @@ SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, SCAM::Module *mod
         module(module) {
     assert(!(decl == NULL));
     TraverseDecl(decl);
+
 }
 
 bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
@@ -78,5 +79,40 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
 
 const std::map<std::string, SCAM::Variable *> &SCAM::FindGlobal::getVariableMap() const {
     return variableMap;
+}
+
+bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
+
+    std::string name = funDecl->getNameAsString();
+
+    auto valid_result_type = [=](){
+        auto res = funDecl->getResultType();
+        return((res->isIntegerType()||res->isBooleanType()) && !res->isReferenceType() && !res->isAnyPointerType());
+
+    };
+
+    auto valid_function_type = [=](){
+        return funDecl->isGlobal() && funDecl->isUsed() && funDecl->getResultType()->isBuiltinType()  && !funDecl->isCXXClassMember();
+    };
+
+    auto valid_parameters = [=](){
+        for(int i=0;i<funDecl->getNumParams();i++) {
+            auto type = funDecl->getParamDecl((i))->getType();
+            if (type->isReferenceType() || type->isAnyPointerType()) {
+                return false;
+                if (!type->isIntegerType() && !type->isBooleanType()) {
+
+                }
+            }
+        }
+        return true;
+    };
+
+    if(result_type() && fun_type()){
+
+        }
+        funDecl->dumpColor();
+    }
+    return true;
 }
 

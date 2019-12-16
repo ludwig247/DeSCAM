@@ -16,45 +16,76 @@ const int number3 = 20;
 //TODO: allow negativ numbers for integer ..
 const bool number4 = true;
 
+unsigned int compute(unsigned int param) {
+    return param;
+}
 
-SC_MODULE(ModuleGlobalVars)
-{
-    blocking_in <int> test_in;
+SC_MODULE(ModuleGlobalVars) {
+    blocking_in<int> test_in;
     blocking_out<unsigned int> test_out;
 
     int foo;
     unsigned int bar;
 
     unsigned int test_var(unsigned int val) const {
-        return val+3+number;
+        return val + 3 + number;
     }
 
-    SC_CTOR(ModuleGlobalVars):
+    SC_CTOR(ModuleGlobalVars) :
             test_in("test_in"),
-            test_out("test_out")
-    {
+            test_out("test_out") {
         SC_THREAD(fsm);
     }
-    void fsm()
-    {
-        while(true)
-        {
-          //test_in->read(foo);
 
-          if(number4){
+    void fsm() {
+        while (true) {
+            //test_in->read(foo);
 
-          bar = number + bar;
+            bar = bar + compute(3);
 
-          bar = bar + number2;
-
-          bar = bar + static_cast<unsigned>(number3);
-
-          bar = bar + test_var(number2);
-          }
-          test_out->write(bar);
+            test_out->write(bar);
 
         }
     }
 };
+//};SC_MODULE(ModuleGlobalVars)
+//{
+//    blocking_in <int> test_in;
+//    blocking_out<unsigned int> test_out;
+//
+//    int foo;
+//    unsigned int bar;
+//
+//    unsigned int test_var(unsigned int val) const {
+//        return val+3+number;
+//    }
+//
+//    SC_CTOR(ModuleGlobalVars):
+//            test_in("test_in"),
+//            test_out("test_out")
+//    {
+//        SC_THREAD(fsm);
+//    }
+//    void fsm()
+//    {
+//        while(true)
+//        {
+//          //test_in->read(foo);
+//
+//          if(number4){
+//
+//          bar = number + bar;
+//
+//          bar = bar + number2;
+//
+//          bar = bar + static_cast<unsigned>(number3);
+//
+//          bar = bar + test_var(number2);
+//          }
+//          test_out->write(bar);
+//
+//        }
+//    }
+//};
 
 #endif //PROJECT_SLAVEDAVEBAVE_H_H
