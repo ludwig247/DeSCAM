@@ -67,4 +67,17 @@ namespace SCAM {
         this->globalVariableMap.erase(variable->getName());
     }
 
+    void Model::removeGlobalFunction(Function * function) {
+        this->globalVariableMap.erase(function->getName());
+    }
+
+    void Model::addGlobalFunction(Function * function) {
+        if(function == nullptr) throw std::runtime_error("Passing nullptr as functino");
+        this->globalFunctionMap.insert(std::make_pair(function->getName(),function));
+    }
+
+    const std::map<std::string, Function *> &Model::getGlobalFunctionMap() const {
+        return globalFunctionMap;
+    }
+
 }

@@ -7,11 +7,14 @@
 #include "FindDataFlow.h"
 #include "FindNewDatatype.h"
 
+
 SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, SCAM::Module *module) :
         decl(decl),
         module(module) {
     assert(!(decl == NULL));
     TraverseDecl(decl);
+
+
 
 }
 
@@ -81,38 +84,69 @@ const std::map<std::string, SCAM::Variable *> &SCAM::FindGlobal::getVariableMap(
     return variableMap;
 }
 
+/***
+ * Find all relevant functions within an AST
+ * Return types are only allowed to be bool or (unisgned) int as well as the parameters
+ * Furthermore, the parametrs have to be a call by value
+ *
+ * @param funDecl
+ * @return
+ */
+
 bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
-
-    std::string name = funDecl->getNameAsString();
-
+     //Define lambdas for checking the function
     auto valid_result_type = [=](){
         auto res = funDecl->getResultType();
-        return((res->isIntegerType()||res->isBooleanType()) && !res->isReferenceType() && !res->isAnyPointerType());
-
+        return((res->isIntegerType()||res->isBooleanType()) && !res->isReferenceType() && !res->isAnyPointerType() && !res->isEnumeralType());
     };
 
     auto valid_function_type = [=](){
-        return funDecl->isGlobal() && funDecl->isUsed() && funDecl->getResultType()->isBuiltinType()  && !funDecl->isCXXClassMember();
+        return funDecl->isGlobal() && funDecl->isUsed() && !funDecl->isCXXClassMember();
     };
 
     auto valid_parameters = [=](){
         for(int i=0;i<funDecl->getNumParams();i++) {
-            auto type = funDecl->getParamDecl((i))->getType();
-            if (type->isReferenceType() || type->isAnyPointerType()) {
+            auto type = funDecl->getParamDecl((i))->getType().getCanonicalType();
+            if (!type->isIntegerType() && !type->isBooleanType() && !type->isEnumeralType()) {
                 return false;
-                if (!type->isIntegerType() && !type->isBooleanType()) {
-
-                }
             }
         }
         return true;
     };
 
-    if(result_type() && fun_type()){
 
+    //Ensure, that all conditions are correct
+    if(valid_result_type() && valid_function_type() && valid_parameters()){
+        std::map<std::string,Parameter*> parameterMap;
+        for(int i=0;i<funDecl->getNumParams();i++){
+            auto param = funDecl->getParamDecl(i);
+            std::string paraName = param->getNameAsString();
+            auto newParam = new Parameter(paraName,getDataType(param->getType()));
+            parameterMap.insert(std::make_pair(paraName,newParam));
         }
-        funDecl->dumpColor();
+        std::string name = funDecl->getNameAsString();
+        auto function = new Function(name,getDataType(funDecl->getResultType()),parameterMap);
+        this->functionMap.insert(std::make_pair(name,function));
+        //TODO: add behavior of the function
     }
     return true;
 }
+
+SCAM::DataType * SCAM::FindGlobal::getDataType(const clang::QualType& type) const {
+    SCAM::DataType * dataType;
+    if(type->isUnsignedIntegerType()){
+        dataType = SCAM::DataTypes::getDataType("unsigned");
+    }else if(type->isIntegerType()){
+        dataType = SCAM::DataTypes::getDataType("int");
+    }else if(type->isBooleanType()){
+        dataType = SCAM::DataTypes::getDataType("bool");
+    }else throw std::runtime_error("Type: "+type.getAsString() + "not allowed");
+    return dataType;
+}
+
+const std::map<std::string, SCAM::Function *> &SCAM::FindGlobal::getFunctionMap() const {
+    return functionMap;
+}
+
+
 

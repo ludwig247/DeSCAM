@@ -20,18 +20,20 @@ unsigned int compute(unsigned int param) {
     return param;
 }
 
+int compute2(int param, unsigned int param2){
+    return param;
+}
+
 SC_MODULE(ModuleGlobalVars) {
     blocking_in<int> test_in;
     blocking_out<unsigned int> test_out;
 
     int foo;
     unsigned int bar;
+    unsigned int list[5];
 
-    unsigned int test_var(unsigned int val) const {
-        return val + 3 + number;
-    }
 
-    SC_CTOR(ModuleGlobalVars) :
+    SC_CTOR(ModuleGlobalVars):
             test_in("test_in"),
             test_out("test_out") {
         SC_THREAD(fsm);
@@ -39,9 +41,10 @@ SC_MODULE(ModuleGlobalVars) {
 
     void fsm() {
         while (true) {
-            //test_in->read(foo);
-
+            test_in->read(foo);
+            bar = bar + static_cast<unsigned int>(compute2(foo,bar));
             bar = bar + compute(3);
+            bar = bar + compute(list[0]);
 
             test_out->write(bar);
 

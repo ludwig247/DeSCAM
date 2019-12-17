@@ -35,6 +35,7 @@ namespace SCAM {
 
         std::string clangToScamType(clang::QualType qualType);
 
+
         std::map<std::string,std::vector<std::string>> functionParamNameMap;
         std::map<std::string,std::vector<std::string>> functionParamTypeMap;
     };

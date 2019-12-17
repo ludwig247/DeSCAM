@@ -5,10 +5,10 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
-#include "ImportantState.h"
 #include "Blocking.h"
 #include "MasterSlave.h"
 #include "Shared.h"
+//#include "ImportantState.h"
 
 
 //Blocking

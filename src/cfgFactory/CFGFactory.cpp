@@ -293,6 +293,7 @@ namespace SCAM {
 
         //Is stmt properly initialized?
         if (dataFlow.getStmt() == nullptr) {
+            clangStmt->dumpColor();
             //Get the source code as string
             std::string msg = clang::Lexer::getSourceText(clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
                                                           ci.getSourceManager(), ci.getLangOpts()).str();

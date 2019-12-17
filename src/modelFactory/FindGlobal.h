@@ -21,12 +21,15 @@ namespace SCAM{
 
         const std::map<std::string, Variable *> &getVariableMap() const;
 
+        const std::map<std::string, Function *> &getFunctionMap() const;
+
     private:
+
+        SCAM::DataType * getDataType(const clang::QualType& type) const;
         clang::TranslationUnitDecl* decl;
         SCAM::Module * module;
-
-
         std::map<std::string,Variable*> variableMap;
+        std::map<std::string,Function*> functionMap;
     };
 }
 

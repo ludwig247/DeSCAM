@@ -6,7 +6,8 @@
 #define INTERFACES_BLOCKING_HPP
 
 
-#include "Interfaces.h"
+//#include "Interfaces.h"
+#include "ImportantState.h"
 
 template<typename T>
 Blocking<T>::Blocking (const char *name) :
