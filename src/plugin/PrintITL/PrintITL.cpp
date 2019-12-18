@@ -830,14 +830,14 @@ std::string PrintITL::hls() {
         if (!dp->isCompoundType()){
             ss << "--";
         }
-        ss << "macro " << dp->getName();
+        ss << "macro " << dp->getParentName();
         if (dp->isCompoundType()) {
             ss << "_" << dp->getSubVarName();
         }
         std::string dataType = convertDataType(dp->getDataType()->getName());
         ss << " : " << convertDataTypeForHLS(dp->getDataType()->getName()) << " := ";
         if (dp->isCompoundType()){
-            ss << dp->getName() << "." << dp->getSubVarName() << " ";
+            ss << dp->getParentName() << "." << dp->getSubVarName() << " ";
         }
         ss << "end macro;" << std::endl;
     }
@@ -858,16 +858,8 @@ std::string PrintITL::hls() {
         if (vr->isCompoundType()) {
             ss << "macro " << vr->getName() << "_" << vr->getSubVarName();
             ss << " : " << convertDataTypeForHLS(vr->getDataType()->getName()) << " := ";
-            ss << vr->getName() << "." << vr->getSubVarName();
+            ss << vr->getParentName() << "." << vr->getSubVarName();
             ss << " end macro;" << std::endl;
-//            if (vr->getDataType()->isEnumType())
-//            {
-//                ss << vr->getDataType()->getName() << "_function(";
-//            }
-//            ss << "operations_inst/" << vr->getName();
-//            if (vr->getDataType()->isEnumType()) {
-//                ss << ")";
-//            }
         }
     }
     ss << std::endl << std::endl;
@@ -877,7 +869,7 @@ std::string PrintITL::hls() {
     for (auto st: ps->getStates()){
         ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
         ss << " := " << "active_state = st_" << st->getName();
-        ss << " and (ready = '1' or idle = '1') end macro;" << std::endl;
+        ss << " and (ready_sig = '1' or idle_sig = '1') end macro;" << std::endl;
         stateNumber++;
     }
     ss << std::endl << std::endl;
@@ -916,7 +908,7 @@ std::string PrintITL::hls() {
             t_end = "t+1";
         } else {
             ss << "for timepoints:\n";
-            ss << "\tt_end = t+1..5 waits_for done = '1';\n";
+            ss << "\tt_end = t+1..5 waits_for done_sig = '1';\n";
             t_end = "t_end";
         }
 
