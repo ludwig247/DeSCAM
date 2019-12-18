@@ -856,7 +856,7 @@ std::string PrintITL::hls() {
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()){
         if (vr->isCompoundType()) {
-            ss << "macro " << vr->getName() << "_" << vr->getSubVarName();
+            ss << "macro " << vr->getParentName() << "_" << vr->getSubVarName();
             ss << " : " << convertDataTypeForHLS(vr->getDataType()->getName()) << " := ";
             ss << vr->getParentName() << "." << vr->getSubVarName();
             ss << " end macro;" << std::endl;
@@ -916,15 +916,17 @@ std::string PrintITL::hls() {
         if (freezeVarSize > 0) {
             ss << "freeze:\n";
             for (auto freeze : op->getFreezeSignals()) {
-
                 ss << "\t";
                 if (freeze.second->isArrayType()) {
                     ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
                     ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
+                }else if(freeze.second->isCompoundType()){
+                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "_at_t";
+                    ss << " = ";
+                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() <<"@t";
                 } else {
                     ss << freeze.first << "_at_t = " << freeze.first << "@t";
                 }
-
                 if (freezeVarSize > 1) {
                     ss << ",\n";
                 } else {
@@ -935,7 +937,7 @@ std::string PrintITL::hls() {
         }
         ss << "assume:\n";
         ss << "\tat t: " << op->getState()->getName() << ";\n";
-        for (auto assumption : op->getAssumptionList()){
+        for (auto assumption : op->getAssumptionList()) {
             ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
@@ -943,13 +945,21 @@ std::string PrintITL::hls() {
         for (auto commitment : op->getCommitmentList()) {
             ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
         }
-        for (auto notify : ps->getNotifySignals()){
-            switch(op->getTiming(notify->getPort())){
-                case TT_1: ss << "\tat t+1: " << notify->getName() << " = true;\n"; break;
-                case FF_1: ss << "\tat t+1: " << notify->getName() << " = false;\n"; break;
-                case FF_e: ss << "\tduring[t+1, t_end]: " << notify->getName() << " = false;\n"; break;
-                case FT_e: ss << "\tduring[t+1, t_end-1]: " << notify->getName() << " = false;\n";
-                    ss << "\tat t_end: " << notify->getName() << " = true;\n"; break;
+        for (auto notify : ps->getNotifySignals()) {
+            switch (op->getTiming(notify->getPort())) {
+                case TT_1:
+                    ss << "\tat t+1: " << notify->getName() << " = true;\n";
+                    break;
+                case FF_1:
+                    ss << "\tat t+1: " << notify->getName() << " = false;\n";
+                    break;
+                case FF_e:
+                    ss << "\tduring[t+1, t_end]: " << notify->getName() << " = false;\n";
+                    break;
+                case FT_e:
+                    ss << "\tduring[t+1, t_end-1]: " << notify->getName() << " = false;\n";
+                    ss << "\tat t_end: " << notify->getName() << " = true;\n";
+                    break;
             }
         }
         ss << "end property;\n";
@@ -957,7 +967,7 @@ std::string PrintITL::hls() {
     }
 
     // Wait properties
-    for (auto wp : ps->getWaitProperties()){
+    for (auto wp : ps->getWaitProperties()) {
         ss << "property " << wp->getName() << " is\n";
 
         unsigned long constraintSize = wp->getConstraints().size();
@@ -980,6 +990,10 @@ std::string PrintITL::hls() {
                 if (freeze.second->isArrayType()) {
                     ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
                     ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
+                }else if(freeze.second->isCompoundType()){
+                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "_at_t";
+                    ss << " = ";
+                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "@t" ;
                 } else {
                     ss << freeze.first << "_at_t = " << freeze.first << "@t";
                 }
@@ -993,7 +1007,7 @@ std::string PrintITL::hls() {
         }
         ss << "assume:\n";
         ss << "\tat t: " << wp->getState()->getName() << ";\n";
-        for (auto assumption : wp->getAssumptionList()){
+        for (auto assumption : wp->getAssumptionList()) {
             ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
         }
         ss << "prove:\n";
