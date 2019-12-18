@@ -6,10 +6,8 @@
 #define INTERFACES_BLOCKING_HPP
 
 
-//#include "Interfaces.h"
-#include "ImportantState.h"
 
-template<typename T>
+template<typename T> inline
 Blocking<T>::Blocking (const char *name) :
     sc_prim_channel(name),
     reader(nullptr),
@@ -21,7 +19,7 @@ Blocking<T>::Blocking (const char *name) :
 }
 
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::read(T &out) {
     /**
      * @breaf: Blocking read implies an important state and issues a wait property
@@ -70,7 +68,7 @@ void Blocking<T>::read(T &out) {
     reader_notify.notify();
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::try_read(T &out) {
     /**
      * @breaf: non Blocking read implies an important state but doesn't issues a wait property
@@ -111,7 +109,7 @@ void Blocking<T>::try_read(T &out) {
      *      }
      */
     if (!available_data) {
-        wait(WAIT_TIME, SC_PS);
+        insert_state();
     }
     if (available_data) {
         out = *shared_data;
@@ -120,7 +118,7 @@ void Blocking<T>::try_read(T &out) {
     }
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::try_read(T &out, bool &success) {
     /**
      * @breaf: non Blocking read implies an important state but doesn't issues a wait property
@@ -147,7 +145,7 @@ void Blocking<T>::try_read(T &out, bool &success) {
      *      success = readerPort_sync
      */
     if (!available_data) {
-        wait(WAIT_TIME, SC_PS);
+        insert_state();
     }
     if (available_data) {
         out = *shared_data;
@@ -158,7 +156,7 @@ void Blocking<T>::try_read(T &out, bool &success) {
         success = false;
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::write(const T &val) {
     /**
      * @breaf: Blocking write implies an important state and issues a wait property
@@ -204,7 +202,7 @@ void Blocking<T>::write(const T &val) {
     assert(!available_data && "blocking_write: data hasn't been read yet!");
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::try_write(const T &val) {
     /**
      * @breaf: non Blocking write implies an important state but doesn't issue a wait property
@@ -229,10 +227,10 @@ void Blocking<T>::try_write(const T &val) {
     shared_data = &val;
     available_data = true;
     writer_notify.notify();
-    wait(WAIT_TIME, SC_PS);
+    insert_state();
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::try_write(const T &val, bool & success) {
     /**
      * @breaf: non Blocking write implies an important state but doesn't issue a wait property
@@ -264,24 +262,24 @@ void Blocking<T>::try_write(const T &val, bool & success) {
     shared_data = &val;
     available_data = true;
     writer_notify.notify();
-    wait(WAIT_TIME, SC_PS);
+    insert_state();
     success = !available_data; //FIXME: is this the right indicator for successful write? refer to the details above
     available_data = false;
 }
 
 
-template<typename T>
+template<typename T> inline
 bool Blocking<T>::peek() {
     return available_data;
 }
 
-template<typename T>
+template<typename T> inline
 bool Blocking<T>::poke() {
     return !available_data;
 }
 
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::register_port(sc_port_base &port, const char *if_typename) {
     std::string nm(if_typename);
     if (nm == typeid(blocking_in_if<T>).name()) {
@@ -303,22 +301,22 @@ void Blocking<T>::register_port(sc_port_base &port, const char *if_typename) {
     }
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::read(T &out, std::string stateName) {
     this->read(out);
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::try_read(T &out, bool &success, std::string stateName) {
     this->try_read(out,success);
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::try_write(const T &val, bool &success, std::string stateName) {
     this->try_write(val,success);
 }
 
-template<typename T>
+template<typename T> inline
 void Blocking<T>::write(const T &val, std::string stateName) {
     this->write(val);
 
