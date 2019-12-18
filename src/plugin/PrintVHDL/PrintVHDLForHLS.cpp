@@ -84,6 +84,11 @@ std::string PrintVHDLForHLS::printTypes(Model *model) {
     }
     for (const auto& module : model->getModules()) {
         for (auto &port : module.second->getPorts()) {
+            if (port.second->isCompoundType()) {
+                for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+                    fillTypeSets(subVar->getDataType());
+                }
+            }
             fillTypeSets(port.second->getDataType());
         }
     }
@@ -188,11 +193,11 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\tprocess(rst, done_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& out : OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs())) {
-        if (hlsModule->hasOutputReg(out)) {
+    for (const auto& out : OtherUtils::getSubVars(signalFactory->getOutputs())) {
+//        if (hlsModule->hasOutputReg(out)) {
             ss << "\t\t\t" << SignalFactory::getName(out, Style::DOT) << " <= "
                << VHDLPrintVisitorHLS::toString(out->getInitialValue()) << ";\n";
-        }
+//        }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
     for (const auto& out : signalFactory->getOperationModuleOutputs()) {

@@ -173,6 +173,11 @@ void PrintHLS::dataTypes(Model *model) {
     }
     for (const auto& module : model->getModules()) {
         for (auto &port : module.second->getPorts()) {
+            if (port.second->isCompoundType()) {
+                for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+                    fillTypeSets(subVar->getDataType());
+                }
+            }
             fillTypeSets(port.second->getDataType());
         }
     }

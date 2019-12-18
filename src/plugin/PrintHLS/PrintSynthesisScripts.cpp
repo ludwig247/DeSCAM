@@ -53,13 +53,13 @@ std::string PrintSynthesisScripts::directivesScript() {
     std::stringstream ss;
 
     ss << "config_rtl -reset all -reset_async -reset_level high\n";
-    ss << "config_schedule -effort medium -relax_ii_for_timing=0 -verbose=0\n";
+    ss << "config_schedule -effort high -relax_ii_for_timing=0 -verbose=0\n";
     ss << "config_bind -effort high\n";
-    ss << "set_directive_latency -max=4 -min=4 operations\n";
+    ss << "set_directive_latency -min=1 operations\n";
     ss << setDirectivesReset();
     ss << setDirectiveInterface();
     ss << setDirectiveAllocation();
-    // ss << setDirectivePipeline();
+//    ss << setDirectivePipeline();
 
     return ss.str();
 }
@@ -84,11 +84,11 @@ std::string PrintSynthesisScripts::setDirectiveInterface() {
     std::stringstream ss;
     for (auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
-            ss << "set_directive_interface -mode ap_none -register operations " << port.second->getName() << "_sig\n";
+            ss << "set_directive_interface -mode ap_vld operations " << port.second->getName() << "_sig\n";
         }
     }
     for (auto notifySignal : propertySuite->getNotifySignals()) {
-        ss << "set_directive_interface -mode ap_none -register operations " << notifySignal->getName() << "\n";
+        ss << "set_directive_interface -mode ap_vld operations " << notifySignal->getName() << "\n";
     }
     return ss.str();
 }

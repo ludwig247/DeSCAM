@@ -207,7 +207,7 @@ void PrintFunctionStatements::visit(Bitwise &node) {
         if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
             this->ss << "(";
             if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
-                this->ss << "static_cast<ap_uint>(";
+                this->ss << "static_cast<" << node.getDataType()->getName() <<  ">(";
             }
             node.getLhs()->accept(*this);
             if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
@@ -215,7 +215,7 @@ void PrintFunctionStatements::visit(Bitwise &node) {
             }
             this->ss << " " + node.getOperation() << " ";
             if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
-                this->ss << "static_cast<ap_uint>(";
+                this->ss << "static_cast<" << node.getDataType()->getName() <<  ">(";
             }
             node.getRhs()->accept(*this);
             if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
