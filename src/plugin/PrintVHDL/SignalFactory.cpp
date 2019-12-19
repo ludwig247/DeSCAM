@@ -93,7 +93,7 @@ void SignalFactory::setInputs() {
 void SignalFactory::setOutputs() {
     for (const auto& port : module->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
-            inputs.insert(port.second->getDataSignal());
+            outputs.insert(port.second->getDataSignal());
         }
     }
 }

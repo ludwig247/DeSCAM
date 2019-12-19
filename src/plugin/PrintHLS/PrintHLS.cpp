@@ -108,17 +108,37 @@ void PrintHLS::interface() {
         }
         ss << " &" << output->getName();
         if (isArrayType) {
-            ss << "[" <<output->getDataType()->getSubVarMap().size() << "]";
+            ss << "[" << output->getDataType()->getSubVarMap().size() << "]";
         }
         ss << ",\n";
     }
-    for (const auto regs : Utilities::getParents(opt->getInternalRegisterIn()))
+    for (const auto reg : Utilities::getParents(opt->getInternalRegisterIn()))
     {
-        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " in_" << regs->getFullName() << ",\n";
+        bool isArrayType = reg->isArrayType();
+        if (isArrayType) {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
+        }
+        ss << " in_" << reg->getFullName();
+        if (isArrayType) {
+            ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << ",\n";
     }
-    for (const auto regs : Utilities::getParents(opt->getInternalRegisterOut()))
+    for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut()))
     {
-        ss << "\t" << Utilities::convertDataType(regs->getDataType()->getName()) << " &out_" << regs->getFullName() << ",\n";
+        bool isArrayType = reg->isArrayType();
+        if (isArrayType) {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
+        }
+        ss << " out_" << reg->getFullName();
+        if (isArrayType) {
+            ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << ",\n";
     }
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
@@ -283,7 +303,9 @@ void PrintHLS::visit(Function &node) {
             ss << "else {\n";
         }
         ss <<  PrintFunctionStatements::toString(returnValue.first, 2, 2) << ";";
-        ss << "\n\t} ";
+        if (node.getReturnValueConditionList().size() > 1) {
+            ss << "\n\t} ";
+        }
         --numberOfBranches;
     }
     this->ss << "\n}\n\n";

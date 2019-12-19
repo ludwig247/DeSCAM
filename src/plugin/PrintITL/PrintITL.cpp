@@ -904,13 +904,13 @@ std::string PrintITL::hls() {
             constraintSize--;
         }
 
-        if (module->isSlave()) {
-            t_end = "t+1";
-        } else {
+//        if (module->isSlave()) {
+//            t_end = "t+1";
+//        } else {
             ss << "for timepoints:\n";
             ss << "\tt_end = t+1..5 waits_for done_sig = '1';\n";
             t_end = "t_end";
-        }
+//        }
 
         unsigned long freezeVarSize = op->getFreezeSignals().size();
         if (freezeVarSize > 0) {
