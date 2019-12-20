@@ -3,6 +3,8 @@
 //
 
 #include <memory>
+#include <iomanip>
+#include <cmath>
 
 #include "NodePeekVisitor.h"
 #include "VHDLPrintVisitorHLS.h"
@@ -13,6 +15,7 @@ using namespace SCAM;
 
 VHDLPrintVisitorHLS::VHDLPrintVisitorHLS(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     arithmeticOp = false;
+    slice = false;
     this->createString(stmt, indentSize, indentOffset);
 }
 
@@ -232,4 +235,83 @@ void VHDLPrintVisitorHLS::visit(Arithmetic &node) {
     if (!subArithmeticOp) {
         arithmeticOp = false;
     }
+}
+
+void VHDLPrintVisitorHLS::visit(Relational &node) {
+    std::unique_ptr<VHDL::BitSlicingVHDL> sliceOp;
+    if (NodePeekVisitor::nodePeekBitwise(node.getRhs())) {
+        auto rhs = dynamic_cast<Bitwise *>(node.getRhs());
+        sliceOp = std::make_unique<VHDL::BitSlicingVHDL>(rhs);
+        if (sliceOp->isSlicingOp()) {
+            slice = true;
+        }
+    } else if (NodePeekVisitor::nodePeekBitwise(node.getLhs())) {
+        auto lhs = dynamic_cast<Bitwise *>(node.getLhs());
+        sliceOp = std::make_unique<VHDL::BitSlicingVHDL>(lhs);
+        if (sliceOp->isSlicingOp()) {
+            slice = true;
+        }
+    }
+    if (slice) {
+        firstBit = sliceOp->getFirstBit();
+        lastBit = sliceOp->getLastBit();
+    }
+    bool tempUseParentheses = useParenthesesFlag;
+    useParenthesesFlag = true;
+    if (tempUseParentheses) this->ss << "(";
+    node.getLhs()->accept(*this);
+    if (node.getOperation() == "==") {
+        this->ss << " = ";
+    } else if (node.getOperation() == "!=") {
+        this->ss << " /= ";
+    } else {
+        this->ss << " " << node.getOperation() << " ";
+    }
+    node.getRhs()->accept(*this);
+    if (tempUseParentheses) this->ss << ")";
+    slice = false;
+}
+
+void VHDLPrintVisitorHLS::visit(IntegerValue &node) {
+    useParenthesesFlag = true;
+    if (slice) {
+        printBinaryVector(node.getValue());
+    } else if (useHexFlag)
+        this->ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    else {
+        this->ss << "to_signed(";
+        this->ss << node.getValue();
+        this->ss << ", 32)";
+    }
+}
+
+void VHDLPrintVisitorHLS::visit(UnsignedValue &node) {
+    useParenthesesFlag = true;
+    if (slice) {
+        printBinaryVector(node.getValue());
+    } else if (useHexFlag)
+        this->ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    else {
+        this->ss << "to_unsigned(";
+        this->ss << node.getValue();
+        this->ss << ", 32)";
+    }
+}
+
+void VHDLPrintVisitorHLS::printBinaryVector(const unsigned int &value) {
+    unsigned int tmpLastBit = lastBit;
+    this->ss << "\"";
+    while (tmpLastBit >= firstBit) {
+        if (static_cast<unsigned int>(pow(2, tmpLastBit)) & value) {
+            this->ss << "1";
+        } else {
+            this->ss << "0";
+        }
+        if (tmpLastBit == 0) {
+            break;
+        } else {
+            tmpLastBit--;
+        }
+    }
+    this->ss << "\"";
 }

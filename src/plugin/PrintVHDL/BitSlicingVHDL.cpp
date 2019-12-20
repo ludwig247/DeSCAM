@@ -312,3 +312,11 @@ bool BitSlicingVHDL::getRange(unsigned int number, unsigned int &firstBit, unsig
     }
     return !((firstBit == -1) || (lastBit == -1));
 }
+
+unsigned int BitSlicingVHDL::getFirstBit() const {
+    return actualNode->firstBit;
+}
+
+unsigned int BitSlicingVHDL::getLastBit() const {
+    return actualNode->lastBit;
+}

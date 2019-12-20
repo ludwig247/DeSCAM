@@ -25,6 +25,7 @@ public:
     ~SignalFactory() = default;
 
     static std::string convertDataType(const std::string &dataType);
+    static std::string convertReturnType(const std::string &returnType);
 
     template <typename T>
     static std::string asVector(T *dataSignal);

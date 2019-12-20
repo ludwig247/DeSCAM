@@ -569,7 +569,7 @@ void PrintVHDLForHLS::functions(std::stringstream &ss) {
             if (std::next(param) != paramMap.end())
                 ss << "; ";
         }
-        ss << ") return " << SignalFactory::convertDataType(func->getReturnType()->getName()) << ";\n";
+        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << ";\n";
     }
     ss << "\n";
 
@@ -582,7 +582,7 @@ void PrintVHDLForHLS::functions(std::stringstream &ss) {
             if (std::next(param) != paramMap.end())
                 ss << "; ";
         }
-        ss << ") return " << SignalFactory::convertDataType(func->getReturnType()->getName()) << " is\n";
+        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << " is\n";
         ss << "\tbegin\n";
 
         if (func->getReturnValueConditionList().empty())
@@ -601,12 +601,12 @@ void PrintVHDLForHLS::functions(std::stringstream &ss) {
                     ss << "elsif ";
                 }
                 for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
-                    ss << VHDLPrintVisitor::toString(*cond);
+                    ss << VHDLPrintVisitorHLS::toString(*cond);
                     if (cond != --retValData->second.end()) ss << " and ";
                 }
                 ss << " then ";
             }
-            ss << VHDLPrintVisitor::toString(retValData->first) << ";\n";
+            ss << VHDLPrintVisitorHLS::toString(retValData->first) << ";\n";
         }
         if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
         ss << "\tend " + func->getName() + ";\n\n";

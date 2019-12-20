@@ -133,6 +133,16 @@ std::string SignalFactory::convertDataType(const std::string& dataType)
     }
 }
 
+std::string SignalFactory::convertReturnType(const std::string &returnType) {
+    if (returnType == "bool") {
+        return "boolean";
+    } else if (returnType == "int" || returnType == "unsigned") {
+        return "std_logic_vector";
+    } else {
+        return returnType;
+    }
+}
+
 std::string SignalFactory::styleToString(const Style& style)
 {
     if (style == Style::UL) {

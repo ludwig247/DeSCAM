@@ -30,6 +30,9 @@ namespace SCAM { namespace VHDL {
 
         std::string getOpAsString();
 
+        unsigned int getFirstBit() const;
+        unsigned int getLastBit() const;
+
     private:
         bool slicing(Node *node);
 

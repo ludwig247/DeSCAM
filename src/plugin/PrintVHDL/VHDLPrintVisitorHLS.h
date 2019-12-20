@@ -23,11 +23,20 @@ namespace SCAM {
         void visit(BoolValue &node) override ;
         void visit(DataSignalOperand &node) override ;
         void visit(Arithmetic &node) override ;
+        void visit(Relational &node) override ;
+        void visit(UnsignedValue &node) override ;
+        void visit(IntegerValue &node) override ;
 
         std::string getString() override ;
 
     private:
+
+        void printBinaryVector(const unsigned int &value);
+
         bool arithmeticOp;
+        bool slice;
+        unsigned int firstBit;
+        unsigned int lastBit;
     };
 
 }
