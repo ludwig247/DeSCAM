@@ -27,7 +27,7 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
         if (auto stmt = node.second->getStmt()) {
             if (auto ifStmt = dynamic_cast<SCAM::If *>(stmt)) {
                 this->counterVariablesInIfStmt.clear();
-                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(ifStmt);
+                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(ifStmt, std::set<std::string>{});
                 for (auto variable : variablesInStmtFinder.getVariablesInStmtSet()) {
                     if (this->counterVariablesSet.find(variable) != this->counterVariablesSet.end()) {
                         counterVariablesInIfStmt.insert(variable);
@@ -83,7 +83,7 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                             }
                         } else if (auto nestedIfStmt = dynamic_cast<SCAM::If *> (stmtInTrueBranch)) {
 
-                            SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt);
+                            SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt,std::set<std::string>{});
                             for (auto variable : variablesInStmtFinder.getVariablesInStmtSet()) {
                                 if (this->counterVariablesSet.find(variable) != this->counterVariablesSet.end()) {
                                     counterVariablesInIfStmt.insert(variable);
@@ -150,7 +150,7 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                                     }
                                 } else if (auto nestedIfStmt = dynamic_cast<SCAM::If *> (stmtInTrueBranch)) {
 
-                                    SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt);
+                                    SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt,std::set<std::string>{});
                                     for (auto var : variablesInStmtFinder.getVariablesInStmtSet()) {
                                         if (this->counterVariablesSet.find(var) !=
                                             this->counterVariablesSet.end()) {

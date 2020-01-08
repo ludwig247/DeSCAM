@@ -26,6 +26,7 @@ SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM:
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
     std::cout << std::endl << "********************** Functions Optimizer *********************** " << std::endl;
 #endif
+    if (module->getFunctionMap().empty()) return;
     //Finding all variable values
     SCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
     this->allVarValuesMap = valuesFinder.getVariableValuesMap();
@@ -207,6 +208,7 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     //check if already optimized a function with the same paramterslist
     if (auto optFunc = isAlreadyOptimizedFunction(node.getOperandName(), node.getParamValueMap())) {
         this->newExpr = optFunc;
+        if (&node == this->newExpr) { this->newExpr = nullptr; }
         return;
     }
     //optimize argument list
@@ -332,12 +334,15 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         }
     }
     function->setReturnValueConditionList(newReturnValueConditionList);
+    //if no optimizations achieved save the name of the function and its parameter list and return
+    if (noOptimizationAchieved(pvp.getReturnValueConditionList(), newReturnValueConditionList)) {
+        this->newExpr = nullptr;
+        this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, &node));
+    }
     //inline function if it has one return value
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();
         this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, this->newExpr));
-    } else if (function->getReturnValueConditionList() == pvp.getReturnValueConditionList()) {
-        this->newExpr = nullptr;
     } else {//create new function and add it to the module
         function->setName(createFuncName(node.getOperandName()));
         this->newExpr = new SCAM::FunctionOperand(function, newParamValueMap);
@@ -422,6 +427,27 @@ SCAM::FunctionsOptimizer::isAlreadyOptimizedFunction(std::string operandName,
         }
     }
     return nullptr;
+}
+
+bool SCAM::FunctionsOptimizer::noOptimizationAchieved(
+        const std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector1,
+        std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector2) {
+    if (returnValConditionListPairVector1.size() != returnValConditionListPairVector2.size()) return false;
+    auto pairItr = returnValConditionListPairVector2.begin();
+    for (auto pair : returnValConditionListPairVector1) {
+        if (!((*pair.first) == (*pairItr->first))) {
+            return false;
+        }
+        auto exprItr = pairItr->second.begin();
+        for (auto expr : pair.second) {
+            if (!((*expr) == (**exprItr))) {
+                return false;
+            }
+            exprItr++;
+        }
+        pairItr++;
+    }
+    return true;
 }
 
 

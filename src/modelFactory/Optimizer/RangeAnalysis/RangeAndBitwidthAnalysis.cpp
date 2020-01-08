@@ -145,7 +145,7 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
 }
 
 const std::map<std::string, int> &SCAM::RangeAndBitWidthAnalysis::getVariableBitWidthMap() const {
-    this->variableBitWidthMap;
+    return this->variableBitWidthMap;
 }
 
 
@@ -327,7 +327,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::FunctionOperand &node) {
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayOperand &node) {
     this->propagatedBitWidth = this->variableBitWidthMap.at(node.getArrayOperand()->getOperandName());
     if(this->propagatedBitWidth != 0){
-        this->propagatedBitWidth = this->propagatedBitWidth / node.getDataType()->getArraySize();
+        this->propagatedBitWidth = this->propagatedBitWidth / node.getArrayOperand()->getDataType()->getArraySize();
     }
 }
 

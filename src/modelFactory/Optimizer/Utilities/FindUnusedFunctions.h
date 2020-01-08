@@ -38,6 +38,7 @@ namespace SCAM {
         std::set<std::string> usedFunctionsSet;
         std::set<std::string> unusedFunctionSet;
 
+
         //visitors
         void visit(struct VariableOperand &node) override{};
 

@@ -1,0 +1,8 @@
+Variables bitwidths map:
+op : 3
+x : 6
+y : 32
+z : 5
+
+Output ports bitwidths map:
+b_out : 6

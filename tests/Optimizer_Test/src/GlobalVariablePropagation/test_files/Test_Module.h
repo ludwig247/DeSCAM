@@ -11,12 +11,6 @@
 const int glob1 = 10;
 const int glob2 = 0x23;
 const unsigned glob4 = 0x20U;
-/*const struct x_t{
-	const int xi;
-	const unsigned xu;
-	};
-x_t xx = {4,4};
-*/
 struct Test_Module0 : public sc_module {
     //Sections
     enum Phases {
@@ -56,7 +50,6 @@ struct Test_Module0 : public sc_module {
                 nextphase = SECTION_B;
             }
             if (phase == SECTION_B) {
-           //     b_out->write(x * xx.xi);
                 nextphase = SECTION_A;
             }
         }
@@ -102,7 +95,6 @@ struct Test_Module1 : public sc_module {
                 nextphase = SECTION_B;
             }
             if (phase == SECTION_B) {
-             //   b_out->write(x * xx.xu);
                 nextphase = SECTION_A;
             }
         }

@@ -51,7 +51,13 @@ SCAM::SimplifyExpressions::SimplifyExpressions(
 #endif
                 simplifiedExpressions.push_back(this->newExpr);
             } else {
-                simplifiedExpressions.push_back(expr);
+                this->newExpr= nullptr;
+                expr->accept(*this);
+                if (this->newExpr) {
+                    simplifiedExpressions.push_back(this->newExpr);
+                }else {
+                    simplifiedExpressions.push_back(expr);
+                }
             }
         }
         if (!pair.first->getReturnValue()) { continue; }
@@ -65,7 +71,14 @@ SCAM::SimplifyExpressions::SimplifyExpressions(
 #endif
             newReturnValueConditionList.emplace_back(newReturn, simplifiedExpressions);
         } else {
-            newReturnValueConditionList.emplace_back(pair.first, simplifiedExpressions);
+            this->newExpr = nullptr;
+            pair.first->getReturnValue()->accept(*this);
+            if(this->newExpr){
+                auto newReturn = new Return(this->newExpr);
+                newReturnValueConditionList.emplace_back(newReturn, simplifiedExpressions);
+            }else{
+                newReturnValueConditionList.emplace_back(pair.first, simplifiedExpressions);
+            }
         }
     }
     this->returnValueConditionList = newReturnValueConditionList;
@@ -95,17 +108,18 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
         z3::expr z3Expr(contxt);
         z3Expr = translator.translate(expr);
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
-//        std::cout << "before simplification Expr is " << z3Expr << std::endl;
+        //        std::cout << "before simplification Expr is " << z3Expr << std::endl;
 #endif
         z3Expr = z3Expr.simplify(params);
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
-//        std::cout << "after simplification Expr is " << z3Expr << std::endl;
+        //        std::cout << "after simplification Expr is " << z3Expr << std::endl;
 #endif
         bool abort = SCAM::OptUtilities::isAbortTranslation(z3Expr);
         if (abort) {
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
-//            std::cout << "translation aborted" << std::endl;
+            //            std::cout << "translation aborted" << std::endl;
 #endif
+            this->newExpr = nullptr;
             return;
         }
         this->newExpr = translator.translate(z3Expr, module);
@@ -113,24 +127,28 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
             this->newExpr = nullptr;
             return;
         }
-        if(PrintStmt::toString(this->newExpr).find("*")!=std::string::npos){this->newExpr = nullptr;}
+        if (PrintStmt::toString(this->newExpr).find("*") != std::string::npos) { this->newExpr = nullptr; }
     }
     catch (z3::exception e) {
         this->newExpr = nullptr;
         return;
     }
-    catch (std::runtime_error e){
+    catch (std::runtime_error e) {
         this->newExpr = nullptr;
         return;
     }
 }
 
 void SCAM::SimplifyExpressions::visit(SCAM::Assignment &node) {
-    if (!dynamic_cast<SCAM::VariableOperand *>(node.getLhs())) { return; }
-    translateExpression(node.getRhs());
-    if (this->newExpr) {
+    if (!dynamic_cast<SCAM::VariableOperand *>(node.getLhs())) return;
+    auto rhs = node.getRhs();
+    translateExpression(rhs);
+    if (this->newExpr && !((*this->newExpr) == (*rhs))){
         this->newStmt = new SCAM::Assignment(node.getLhs(), this->newExpr);
-    }
+        return;}
+    rhs->accept(*this);
+    if (this->newExpr && !((*this->newExpr) == (*rhs)))
+        this->newStmt = new SCAM::Assignment(node.getLhs(), this->newExpr);
 }
 
 void SCAM::SimplifyExpressions::visit(SCAM::If &node) {
@@ -142,9 +160,71 @@ void SCAM::SimplifyExpressions::visit(SCAM::If &node) {
 }
 
 void SCAM::SimplifyExpressions::visit(SCAM::Write &node) {
-    translateExpression(node.getValue());
-    if (this->newExpr) {
+    auto exprInsideWrite = node.getValue();
+    translateExpression(exprInsideWrite);
+    if (this->newExpr && !((*this->newExpr) == (*exprInsideWrite))){
+        this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand());
+        return;
+    }
+    node.getValue()->accept(*this);
+    if (this->newExpr && !((*this->newExpr) == (*exprInsideWrite))){
         this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand());
     }
+}
+
+void SCAM::SimplifyExpressions::visit(SCAM::Arithmetic &node) {
+    translateExpression(&node);
+    if (this->newExpr) return;
+    auto lhs = node.getLhs();
+    lhs->accept(*this);
+    if (this->newExpr) lhs = this->newExpr;
+    this->newExpr = nullptr;
+    auto rhs = node.getRhs();
+    rhs->accept(*this);
+    if (this->newExpr) rhs = this->newExpr;
+    if ((!(*lhs == *node.getLhs())) || (!(*rhs == *node.getRhs())))
+        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
+}
+
+void SCAM::SimplifyExpressions::visit(SCAM::Logical &node) {
+    translateExpression(&node);
+    if (this->newExpr) return;
+    auto lhs = node.getLhs();
+    lhs->accept(*this);
+    if (this->newExpr) lhs = this->newExpr;
+    this->newExpr = nullptr;
+    auto rhs = node.getRhs();
+    rhs->accept(*this);
+    if (this->newExpr) rhs = this->newExpr;
+    if ((!(*lhs == *node.getLhs())) || (!(*rhs == *node.getRhs())))
+        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
+}
+
+void SCAM::SimplifyExpressions::visit(SCAM::Relational &node) {
+    translateExpression(&node);
+    if (this->newExpr) return;
+    auto lhs = node.getLhs();
+    lhs->accept(*this);
+    if (this->newExpr) lhs = this->newExpr;
+    this->newExpr = nullptr;
+    auto rhs = node.getRhs();
+    rhs->accept(*this);
+    if (this->newExpr) rhs = this->newExpr;
+    if ((!(*lhs == *node.getLhs())) || (!(*rhs == *node.getRhs())))
+        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
+}
+
+void SCAM::SimplifyExpressions::visit(SCAM::Bitwise &node) {
+    translateExpression(&node);
+    if (this->newExpr) return;
+    auto lhs = node.getLhs();
+    lhs->accept(*this);
+    if (this->newExpr) lhs = this->newExpr;
+    this->newExpr = nullptr;
+    auto rhs = node.getRhs();
+    rhs->accept(*this);
+    if (this->newExpr) rhs = this->newExpr;
+    if ((!(*lhs == *node.getLhs())) || (!(*rhs == *node.getRhs())))
+        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
 }
 
