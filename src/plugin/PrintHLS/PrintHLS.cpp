@@ -134,7 +134,7 @@ void PrintHLS::interface() {
         } else {
             ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
         }
-        ss << " out_" << reg->getFullName();
+        ss << " &out_" << reg->getFullName();
         if (isArrayType) {
             ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
         }
