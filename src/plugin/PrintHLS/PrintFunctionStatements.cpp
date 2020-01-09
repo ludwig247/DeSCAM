@@ -199,6 +199,29 @@ void PrintFunctionStatements::visit(FunctionOperand &node) {
     this->ss << ")";
 }
 
+void PrintFunctionStatements::visit(ArrayOperand &node) {
+    if (opt) {
+        const auto arrayPorts = opt->getArrayPorts();
+        for (const auto &arrayPort : arrayPorts) {
+            if (arrayPort.first->getDataSignal()->getName() == node.getArrayOperand()->getOperandName()) {
+                uint32_t pos = 0;
+                for (const auto &expr : arrayPort.second) {
+                    if (*expr == *node.getIdx()) {
+                        this->ss << arrayPort.first->getName() << "_" << pos;
+                        break;
+                    }
+                    pos++;
+                }
+            }
+        }
+    } else {
+        this->ss << node.getArrayOperand()->getOperandName();
+        this->ss << "[";
+        node.getIdx()->accept(*this);
+        this->ss << "]";
+    }
+}
+
 void PrintFunctionStatements::visit(Bitwise &node) {
     auto bitSlicing = std::make_unique<BitSlicingHLS>(&node);
     if (bitSlicing->isSlicingOp()) {

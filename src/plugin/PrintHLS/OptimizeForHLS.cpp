@@ -8,6 +8,7 @@
 
 #include "OptimizeForHLS.h"
 #include "NodePeekVisitor.h"
+#include "PrintArrayStatements.h"
 
 OptimizeForHLS::OptimizeForHLS(PropertySuite *propertySuite, Module* module) :
     propertySuite(propertySuite),
@@ -22,6 +23,7 @@ OptimizeForHLS::OptimizeForHLS(PropertySuite *propertySuite, Module* module) :
     removeRedundantConditions();
     mapOutputRegistersToOutput();
     replaceVariables();
+    arraySlicing();
 }
 
 OptimizeForHLS::~OptimizeForHLS() {
@@ -341,6 +343,14 @@ std::set<DataSignal *> OptimizeForHLS::getInputs() {
             inputSet.insert(inputs.begin(), inputs.end());
         }
     }
+//    for (const auto &arrayPort : arrayPorts) {
+//        for (unsigned int i = 0; i < arrayPort.second.size(); ++i) {
+//            auto dataSignalCopy = new DataSignal(
+//                    arrayPort.first->getName() + "_" + std::to_string(i),
+//                    arrayPort.first->getDataType());
+//            inputSet.insert(dataSignalCopy);
+//        }
+//    }
     return inputSet;
 }
 
@@ -448,6 +458,45 @@ std::set<Variable*> OptimizeForHLS::getInternalRegisterOut()
         }
     }
     return vars;
+}
+
+std::set<Port *> OptimizeForHLS::setArrayPorts()
+{
+    std::set<Port *> arrayPorts;
+    for (const auto &port : module->getPorts()) {
+        if (port.second->isArrayType()) {
+            arrayPorts.insert(port.second);
+        }
+    }
+    return arrayPorts;
+}
+
+void OptimizeForHLS::arraySlicing() {
+    const auto ports = setArrayPorts();
+
+    for (const auto &port : ports) {
+        std::list<Expr *> expressions;
+        for (const auto &operationProperty: propertySuite->getOperationProperties()) {
+            for (const auto &commitment :  operationProperty->getCommitmentList()) {
+                const auto foundExpressions = PrintArrayStatements::getArrayExprs(commitment->getRhs(), port);
+                for (const auto &foundExpression : foundExpressions) {
+                    bool alreadyFound = false;
+                    for (const auto &expression : expressions) {
+                        if (*foundExpression == *expression) {
+                            alreadyFound = true;
+                        }
+                    }
+                    if (!alreadyFound) {
+                        expressions.push_back(foundExpression);
+                    }
+                }
+            }
+        }
+        for (const auto &expression : expressions) {
+            std::cout << *expression << std::endl;
+        }
+        arrayPorts.insert({port, expressions});
+    }
 }
 
 //    for (const auto& state : propertySuite->getStates()) {

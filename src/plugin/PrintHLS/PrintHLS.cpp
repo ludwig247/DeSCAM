@@ -85,18 +85,29 @@ void PrintHLS::operations() {
 void PrintHLS::interface() {
     // input and output signals
     for (const auto& input : Utilities::getParents(opt->getInputs())) {
+//        bool isArrayType = input->isArrayType();
+//        if (isArrayType) {
+//            ss << "\t"
+//               << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName());
+//        } else {
+//            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName());
+//        }
+//        ss << " " << input->getName();
+//        if (isArrayType) {
+//            ss << "[" <<input->getDataType()->getSubVarMap().size() << "]";
+//        }
+//        ss << ",\n";
         bool isArrayType = input->isArrayType();
-        if (isArrayType) {
-            ss << "\t"
-               << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName());
-        } else {
-            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName());
+        if (!isArrayType) {
+            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName())
+               << " " << input->getName() << ",\n";
         }
-        ss << " " << input->getName();
-        if (isArrayType) {
-            ss << "[" <<input->getDataType()->getSubVarMap().size() << "]";
+    }
+    for (const auto& arrayPort : opt->getArrayPorts()) {
+        for (unsigned long i = 0; i < arrayPort.second.size(); ++i) {
+            ss << "\t" << Utilities::convertDataType(arrayPort.first->getDataType()->getName())
+               << " " << arrayPort.first->getName() << "_" << i << ",\n";
         }
-        ss << ",\n";
     }
     for (const auto& output : Utilities::getParents(opt->getOutputs())) {
         bool isArrayType = output->isArrayType();

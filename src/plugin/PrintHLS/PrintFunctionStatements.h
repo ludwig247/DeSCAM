@@ -35,6 +35,7 @@ namespace SCAM {
         void visit(FunctionOperand &node) override ;
         void visit(Assignment &node) override ;
         void visit(Bitwise &node) override ;
+        void visit(ArrayOperand &node) override;
 
     private:
         OptimizeForHLS *opt;

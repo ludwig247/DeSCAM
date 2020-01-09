@@ -6,4 +6,4 @@ add_library(PrintHLS
             PrintSynthesisScripts.cpp
             InputRegisterVisitor.cpp
             OptimizeForHLS.cpp
-            Utilities.cpp)
+            Utilities.cpp PrintArrayStatements.cpp PrintArrayStatements.h)
