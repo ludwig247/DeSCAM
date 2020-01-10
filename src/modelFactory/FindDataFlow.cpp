@@ -514,14 +514,17 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
         }
 
     }
-    if (clang::ParmVarDecl *parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
+    if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
         if (FindDataFlow::isFunction) {
-            auto function = this->module->getFunctionMap().find(FindDataFlow::functionName)->second;
-            auto paramMap = function->getParamMap();
-            if (paramMap.find(name) != paramMap.end()) {
-                this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
-                return false;
-            } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
+            auto moduleFuncMap = this->module->getFunctionMap();
+            if(moduleFuncMap.find(FindDataFlow::functionName) != moduleFuncMap.end()){
+                auto function = moduleFuncMap.find(FindDataFlow::functionName)->second;
+                auto paramMap = function->getParamMap();
+                if (paramMap.find(name) != paramMap.end()) {
+                    this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
+                    return false;
+                } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
+            }else exitVisitor("Function " + FindDataFlow::functionName + " is not defined");
         }
     }
     return true;

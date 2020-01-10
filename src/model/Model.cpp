@@ -68,7 +68,7 @@ namespace SCAM {
     }
 
     void Model::removeGlobalFunction(Function * function) {
-        this->globalVariableMap.erase(function->getName());
+        this->globalFunctionMap.erase(function->getName());
     }
 
     void Model::addGlobalFunction(Function * function) {

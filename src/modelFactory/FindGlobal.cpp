@@ -3,12 +3,15 @@
 //
 
 #include <iostream>
+#include <CFGFactory.h>
+#include <FunctionFactory.h>
 #include "FindGlobal.h"
 #include "FindDataFlow.h"
 #include "FindNewDatatype.h"
 
 
-SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, SCAM::Module *module) :
+SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci, SCAM::Module *module) :
+        ci(ci),
         decl(decl),
         module(module) {
     assert(!(decl == NULL));
@@ -70,7 +73,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                         }
                     }
                 } catch (std::runtime_error e) {
-                    std::cout << e.what() << std::endl;
+                    //std::cout << e.what() << std::endl;
 
                 }
 
@@ -127,7 +130,23 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
         std::string name = funDecl->getNameAsString();
         auto function = new Function(name,getDataType(funDecl->getResultType()),parameterMap);
         this->functionMap.insert(std::make_pair(name,function));
-        //TODO: add behavior of the function
+
+        try {
+        //Create blockCFG for this process
+        //Active searching only for functions
+        //If fails ... function is not SystemC-PPA compliant
+        FindDataFlow::functionName = name;
+        FindDataFlow::isFunction = true;
+        SCAM::CFGFactory cfgFactory(funDecl, ci,  module);
+        FindDataFlow::functionName = "";
+        FindDataFlow::isFunction = false;
+
+        //Transfor blockCFG back to code
+        FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), function, nullptr);
+        function->setStmtList(functionFactory.getStmtList());
+        }catch(std::runtime_error e){
+        }
+
     }
     return true;
 }

@@ -13,7 +13,7 @@
 namespace SCAM{
     class FindGlobal: public clang::RecursiveASTVisitor<FindGlobal> {
     public:
-        explicit FindGlobal(clang::TranslationUnitDecl* decl, SCAM::Module * module);
+        explicit FindGlobal(clang::TranslationUnitDecl* decl, clang::CompilerInstance &ci,  SCAM::Module * module);
         FindGlobal() = delete;
         ~FindGlobal() = default;
         virtual bool VisitVarDecl(const clang::VarDecl * varDecl);
@@ -24,7 +24,7 @@ namespace SCAM{
         const std::map<std::string, Function *> &getFunctionMap() const;
 
     private:
-
+        clang::CompilerInstance & ci;
         SCAM::DataType * getDataType(const clang::QualType& type) const;
         clang::TranslationUnitDecl* decl;
         SCAM::Module * module;

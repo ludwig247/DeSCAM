@@ -16,7 +16,6 @@ namespace SCAM {
             methodDecl(decl),
             ci(ci),
             module(module) {
-
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
         clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(), b);
@@ -24,11 +23,24 @@ namespace SCAM {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
         }
-
-
         this->translateToScamCFG();
+    }
 
+    CFGFactory::CFGFactory(const clang::FunctionDecl * functionDecl, clang::CompilerInstance &ci, Module *module, bool sourceModule):
+            sourceModule(sourceModule),
+            methodDecl(nullptr),
+            ci(ci),
+            module(module) {
 
+        //TODO: remove ci and methodDecl from class
+        //Create Control flow graph(blockCFG)
+        clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(), &functionDecl->getASTContext(), b);
+        if (clangCFG == NULL) {
+            llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
+            return;
+        }
+        this->translateToScamCFG();
     }
 
     CFGFactory::~CFGFactory() {
@@ -114,15 +126,19 @@ namespace SCAM {
                 } else {
                     clang::LangOptions LO;
                     LO.CPlusPlus = true;
-                    block->dump(clangCFG, LO, false);
-                    block->getTerminator().getStmt()->dump();
-                    throw std::runtime_error("Can't translate terminator");
+                    //block->dump(clangCFG, LO, false);
+                    //block->getTerminator().getStmt()->dump();
+                    //std::string location = ci.getSourceManager().getFilename(block->getTerminator()->getLocStart());
+                    std::string location = block->getTerminator()->getLocStart().printToString(ci.getSourceManager());
+                    std::string errorMsg = "Error: " + location + "\n";
+                    errorMsg += "\tProblem with an terminator (if,while, else if) statement.\n";
+                    errorMsg += "\tMake sure only SystemC-PPA valid statements are used.\n";
+                    throw std::runtime_error(errorMsg);
                 }
             }
         }
 
         //Assign unique ID for each node
-
         int blockID = this->controlFlowMap.size();
         cfgNode->setBlockID(blockID);
         //
@@ -290,10 +306,8 @@ namespace SCAM {
     //! Methods that translates a Clang::Stmt into a SCAM::Stmt
     SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
         SCAM::FindDataFlow dataFlow(clangStmt, module, false);
-
         //Is stmt properly initialized?
         if (dataFlow.getStmt() == nullptr) {
-            clangStmt->dumpColor();
             //Get the source code as string
             std::string msg = clang::Lexer::getSourceText(clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
                                                           ci.getSourceManager(), ci.getLangOpts()).str();
@@ -415,5 +429,7 @@ namespace SCAM {
         return false;
 
     }
+
+
 
 }

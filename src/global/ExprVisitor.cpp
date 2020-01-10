@@ -172,6 +172,7 @@ void SCAM::ExprVisitor::visit(SCAM::FunctionOperand &node) {
         param.second->accept(*this);
     }
     this->usedOperands.insert(&node);
+    this->usedFunction.insert(node.getFunction());
 }
 
 bool SCAM::ExprVisitor::isConstVal(SCAM::Expr *expr) {
@@ -213,6 +214,12 @@ std::set<SCAM::Variable *> SCAM::ExprVisitor::getUsedVariables(SCAM::Expr *expr)
     SCAM::ExprVisitor exprVisitor(expr);
     return exprVisitor.usedVar;
 }
+
+std::set<SCAM::Function *> SCAM::ExprVisitor::getUsedFunction(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedFunction;
+}
+
 
 std::set<SCAM::SyncSignal *> SCAM::ExprVisitor::getUsedSynchSignals(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
@@ -256,6 +263,7 @@ void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
     this->constVal = false;
 
 }
+
 
 
 
