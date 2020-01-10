@@ -20,8 +20,9 @@ namespace SCAM{
         virtual bool VisitFunctionDecl(const clang::FunctionDecl * funDecl);
 
         const std::map<std::string, Variable *> &getVariableMap() const;
-
         const std::map<std::string, Function *> &getFunctionMap() const;
+
+        const std::map<std::string, const clang::FunctionDecl *> &getFunctionDeclMap() const;
 
     private:
         clang::CompilerInstance & ci;
@@ -30,6 +31,7 @@ namespace SCAM{
         SCAM::Module * module;
         std::map<std::string,Variable*> variableMap;
         std::map<std::string,Function*> functionMap;
+        std::map<std::string,const clang::FunctionDecl*> functionDeclMap;
     };
 }
 

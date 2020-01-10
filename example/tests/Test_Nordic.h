@@ -16,12 +16,15 @@ const int number3 = 20;
 //TODO: allow negativ numbers for integer ..
 const bool number4 = true;
 
-unsigned int compute(unsigned int param) {
-    return param;
+unsigned int compute(unsigned int param, int param2) {
+    if(param > 10 && param2 > 10){
+        return param +1 ;
+    }else return param + static_cast<unsigned int>(param2);
 }
 
 int compute2(int param, unsigned int param2){
-    return param;
+    //param = param + static_cast<int>(param);
+    return param+3;
 }
 
 SC_MODULE(ModuleGlobalVars) {
@@ -43,8 +46,8 @@ SC_MODULE(ModuleGlobalVars) {
         while (true) {
             test_in->read(foo);
             bar = bar + static_cast<unsigned int>(compute2(foo,bar));
-            bar = bar + compute(3);
-            bar = bar + compute(list[0]);
+            bar = bar + compute(3,compute2(foo,bar));
+            bar = bar + compute(list[0],5);
 
             test_out->write(bar);
 

@@ -517,14 +517,22 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
     if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
         if (FindDataFlow::isFunction) {
             auto moduleFuncMap = this->module->getFunctionMap();
-            if(moduleFuncMap.find(FindDataFlow::functionName) != moduleFuncMap.end()){
+            auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
+            if (moduleFuncMap.find(FindDataFlow::functionName) != moduleFuncMap.end()) {
                 auto function = moduleFuncMap.find(FindDataFlow::functionName)->second;
                 auto paramMap = function->getParamMap();
                 if (paramMap.find(name) != paramMap.end()) {
                     this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
                     return false;
                 } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
-            }else exitVisitor("Function " + FindDataFlow::functionName + " is not defined");
+            } else if (globalFunctionMap.find(FindDataFlow::functionName) != globalFunctionMap.end()) {
+                auto function = globalFunctionMap.find(FindDataFlow::functionName)->second;
+                auto paramMap = function->getParamMap();
+                if (paramMap.find(name) != paramMap.end()) {
+                    this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
+                    return false;
+                } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
+            } else exitVisitor("Function " + FindDataFlow::functionName + " is not defined");
         }
     }
     return true;
@@ -669,11 +677,11 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
         auto function = globalFunctionMap.find((functionName))->second;
         std::map<std::string, SCAM::Expr *> paramExprMap;
         for (int i = 0; i < callExpr->getNumArgs(); i++) {
-                std::string paramName = callee->getParamDecl(i)->getName();
-                SCAM::FindDataFlow findArgument(callExpr->getArg(i), this->module, false);
-                if (findArgument.getExpr() == nullptr)
-                    return exitVisitor(functionName + "() has unsupported params");
-                SCAM::Expr *paramExpr = findArgument.getExpr();
+            std::string paramName = callee->getParamDecl(i)->getName();
+            SCAM::FindDataFlow findArgument(callExpr->getArg(i), this->module, false);
+            if (findArgument.getExpr() == nullptr)
+                return exitVisitor(functionName + "() has unsupported params");
+            SCAM::Expr *paramExpr = findArgument.getExpr();
             paramExprMap.insert(std::make_pair(paramName, paramExpr));
         }
         this->expr = new FunctionOperand(function, paramExprMap);

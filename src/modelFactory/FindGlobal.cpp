@@ -118,6 +118,7 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
     };
 
 
+
     //Ensure, that all conditions are correct
     if(valid_result_type() && valid_function_type() && valid_parameters()){
         std::map<std::string,Parameter*> parameterMap;
@@ -130,23 +131,7 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
         std::string name = funDecl->getNameAsString();
         auto function = new Function(name,getDataType(funDecl->getResultType()),parameterMap);
         this->functionMap.insert(std::make_pair(name,function));
-
-        try {
-        //Create blockCFG for this process
-        //Active searching only for functions
-        //If fails ... function is not SystemC-PPA compliant
-        FindDataFlow::functionName = name;
-        FindDataFlow::isFunction = true;
-        SCAM::CFGFactory cfgFactory(funDecl, ci,  module);
-        FindDataFlow::functionName = "";
-        FindDataFlow::isFunction = false;
-
-        //Transfor blockCFG back to code
-        FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), function, nullptr);
-        function->setStmtList(functionFactory.getStmtList());
-        }catch(std::runtime_error e){
-        }
-
+        this->functionDeclMap.insert(std::make_pair(name,funDecl));
     }
     return true;
 }
@@ -166,6 +151,12 @@ SCAM::DataType * SCAM::FindGlobal::getDataType(const clang::QualType& type) cons
 const std::map<std::string, SCAM::Function *> &SCAM::FindGlobal::getFunctionMap() const {
     return functionMap;
 }
+
+const std::map<std::string, const clang::FunctionDecl *> &SCAM::FindGlobal::getFunctionDeclMap() const {
+    return functionDeclMap;
+}
+
+
 
 
 

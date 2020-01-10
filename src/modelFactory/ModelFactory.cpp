@@ -538,7 +538,28 @@ void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Mo
 
     for(auto func: findGlobal.getFunctionMap()){
         this->model->addGlobalFunction(func.second);
+        std::string name = func.first;
+        try {
+            //Create blockCFG for this process
+            //Active searching only for functions
+            //If fails ... function is not SystemC-PPA compliant
+            FindDataFlow::functionName = func.first;
+            FindDataFlow::isFunction = true;
+            SCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci,  pModule);
+            FindDataFlow::functionName = "";
+            FindDataFlow::isFunction = false;
+
+            //Transfor blockCFG back to code
+            FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
+            func.second->setStmtList(functionFactory.getStmtList());
+
+
+
+        }catch(std::runtime_error e){
+        }
+
     }
+
 }
 
 void SCAM::ModelFactory::optimizeModel() {
@@ -604,7 +625,6 @@ void SCAM::ModelFactory::optimizeModel() {
             this->model->removeGlobalFunction(func.first);
         }
     }
-
 }
 
 
