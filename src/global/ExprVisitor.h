@@ -37,6 +37,8 @@ namespace SCAM {
 
         static std::set<Function *> getUsedFunctions(SCAM::Expr *expr);
 
+        static std::set<ArrayOperand *> getUsedArrayOperands(SCAM::Expr *expr);
+
         static Operand *getOperand(SCAM::Expr *expr);
 
         void visit(class ArrayExpr &node) override;
@@ -55,6 +57,7 @@ namespace SCAM {
         std::set<Variable *> usedVar;
         std::set<Port *> usedPorts;
         std::set<Function *> usedFunctions;
+        std::set<ArrayOperand *> usedArrayOperands;
         CompoundValue *compoundValue;
 
         virtual void visit(struct VariableOperand &node);

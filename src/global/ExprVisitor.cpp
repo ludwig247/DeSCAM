@@ -132,7 +132,7 @@ void SCAM::ExprVisitor::visit(SCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     node.getArrayOperand()->accept(*this);
     this->usedOperands.insert(node.getArrayOperand());
-
+    this->usedArrayOperands.insert(&node);
 }
 
 
@@ -228,6 +228,11 @@ std::set<SCAM::DataSignal *> SCAM::ExprVisitor::getUsedDataSignals(SCAM::Expr *e
 std::set<SCAM::Function *> SCAM::ExprVisitor::getUsedFunctions(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
     return exprVisitor.usedFunctions;
+}
+
+std::set<SCAM::ArrayOperand *> SCAM::ExprVisitor::getUsedArrayOperands(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedArrayOperands;
 }
 
 bool SCAM::ExprVisitor::isVar(SCAM::Expr *expr) {

@@ -207,7 +207,7 @@ void PrintFunctionStatements::visit(ArrayOperand &node) {
                 uint32_t pos = 0;
                 for (const auto &expr : arrayPort.second) {
                     if (*expr == *node.getIdx()) {
-                        this->ss << arrayPort.first->getName() << "_" << pos;
+                        this->ss << arrayPort.first->getDataSignal()->getName() << "_" << pos;
                         break;
                     }
                     pos++;

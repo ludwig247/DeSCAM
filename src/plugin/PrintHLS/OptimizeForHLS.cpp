@@ -462,13 +462,13 @@ std::set<Variable*> OptimizeForHLS::getInternalRegisterOut()
 
 std::set<Port *> OptimizeForHLS::setArrayPorts()
 {
-    std::set<Port *> arrayPorts;
+    std::set<Port *> ports;
     for (const auto &port : module->getPorts()) {
         if (port.second->isArrayType()) {
-            arrayPorts.insert(port.second);
+            ports.insert(port.second);
         }
     }
-    return arrayPorts;
+    return ports;
 }
 
 void OptimizeForHLS::arraySlicing() {

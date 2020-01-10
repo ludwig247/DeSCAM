@@ -105,8 +105,8 @@ void PrintHLS::interface() {
     }
     for (const auto& arrayPort : opt->getArrayPorts()) {
         for (unsigned long i = 0; i < arrayPort.second.size(); ++i) {
-            ss << "\t" << Utilities::convertDataType(arrayPort.first->getDataType()->getName())
-               << " " << arrayPort.first->getName() << "_" << i << ",\n";
+            ss << "\t" << Utilities::convertDataType(arrayPort.first->getDataType()->getSubVarMap().begin()->second->getName())
+               << " " << arrayPort.first->getDataSignal()->getName() << "_" << i << ",\n";
         }
     }
     for (const auto& output : Utilities::getParents(opt->getOutputs())) {

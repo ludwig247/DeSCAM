@@ -18,6 +18,7 @@ HLSmodule::HLSmodule(PropertySuite *propertySuite, Module* module) :
     removeRedundantConditions();
     mapOutputRegistersToOutput();
     mapInputRegistersToInputs();
+    arraySlicing();
 }
 
 bool HLSmodule::hasOutputReg(DataSignal* dataSignal) const {
@@ -36,11 +37,20 @@ Variable* HLSmodule::getCorrespondingRegister(DataSignal* dataSignal) const {
 }
 
 bool HLSmodule::isModuleSignal(DataSignal *dataSignal) const {
-    return  (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
+    return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
 }
 
 std::vector<DataSignal *> HLSmodule::getCorrespondingTopSignals(DataSignal *dataSignal) const {
     return moduleToTopSignalMap.at(dataSignal);
+}
+
+bool HLSmodule::isArrayPort(DataSignal *dataSignal) const {
+    for (const auto& arrayPort : arrayPorts) {
+        if (dataSignal->getName() == arrayPort.first->getDataSignal()->getName()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void HLSmodule::removeRedundantConditions()
@@ -257,8 +267,22 @@ std::set<DataSignal *> HLSmodule::getInputs() {
                 continue;
             }
             const auto& inputs = ExprVisitor::getUsedDataSignals(commitment->getRhs());
-            inputSet.insert(inputs.begin(), inputs.end());
+            for (const auto &input : inputs) {
+                if (!input->isArrayType()) {
+                    inputSet.insert(input);
+                }
+            }
         }
+    }
+    for (const auto &arrayPort : arrayPorts) {
+        for (uint64_t i = 0; i < arrayPort.second.size(); ++i)
+        inputSet.insert(new DataSignal(
+                arrayPort.first->getDataSignal()->getName() + "_" + std::to_string(i),
+                arrayPort.first->getDataType()->getSubVarMap().begin()->second,
+                nullptr,
+                nullptr,
+                arrayPort.first
+                ));
     }
     return inputSet;
 }
@@ -345,16 +369,6 @@ DataSignal* HLSmodule::getCombinedDataSignal(const std::vector<DataSignal*> &dat
 }
 
 void HLSmodule::mapInputRegistersToInputs() {
-//    auto getAllInputs = [this]() -> std::set<DataSignal *> {
-//        std::set<DataSignal*> outputSet;
-//        for (const auto &port : module->getPorts()) {
-//            if (port.second->getInterface()->isInput()) {
-//                outputSet.insert(port.second->getDataSignal());
-//            }
-//        }
-//        return outputSet;
-//    };
-
     std::set<DataSignal* > inputs;
     for (const auto& property : propertySuite->getOperationProperties()) {
         std::cout << "Property " << property->getName() << ": " << std::endl;
@@ -497,5 +511,48 @@ std::set<Variable*> HLSmodule::getOutputRegister() {
         outputRegister.insert(reg.first);
     }
     return VHDL::OtherUtils::getParents(outputRegister);
+}
+
+std::set<Port *> HLSmodule::setArrayPorts() {
+    std::set<Port *> ports;
+    for (const auto &port : module->getPorts()) {
+        if (port.second->isArrayType()) {
+            ports.insert(port.second);
+        }
+    }
+    return ports;
+}
+
+void HLSmodule::arraySlicing() {
+    const auto ports = setArrayPorts();
+
+    for (const auto &port : ports) {
+        std::list<Expr *> expressions;
+        for (const auto &operationProperty: propertySuite->getOperationProperties()) {
+            for (const auto &commitment :  operationProperty->getCommitmentList()) {
+                const auto arrayOperands = ExprVisitor::getUsedArrayOperands(commitment->getRhs());
+                for (const auto &arrayOperand : arrayOperands) {
+                    bool alreadyFound = false;
+                    if (arrayOperand->getArrayOperand()->getOperandName() != port->getDataSignal()->getName()) {
+                        continue;
+                    }
+                    for (const auto &expression : expressions) {
+                        if (*arrayOperand->getIdx() == *expression) {
+                            alreadyFound = true;
+                        }
+                    }
+                    if (!alreadyFound) {
+                        expressions.push_back(arrayOperand->getIdx());
+                    }
+                }
+            }
+        }
+        arrayPorts.insert({port, expressions});
+
+        std::cout << port->getName() << ": " << std::endl;
+        for (const auto &expression : expressions) {
+            std::cout << *expression << std::endl;
+        }
+    }
 }
 

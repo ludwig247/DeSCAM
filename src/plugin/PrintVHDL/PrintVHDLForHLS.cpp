@@ -242,13 +242,15 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\t\tend if;\n"
        << "\tend process;\n\n";
 
-    auto printModuleInputSignals = [&ss](std::set<DataSignal*> const& dataSignals) {
+    auto printModuleInputSignals = [this, &ss](std::set<DataSignal*> const& dataSignals) {
         for (const auto& dataSignal : dataSignals) {
-            ss << "\t\t\t\t" << SignalFactory::getName(dataSignal, Style::UL) << "_in <= "
-               << (dataSignal->isEnumType() ?
-                   SignalFactory::enumToVector(dataSignal) :
-                   SignalFactory::getName(dataSignal, Style::DOT))
-               << ";\n";
+            if (!dataSignal->getPort()->isArrayType()) {
+                ss << "\t\t\t\t" << SignalFactory::getName(dataSignal, Style::UL) << "_in <= "
+                   << (dataSignal->isEnumType() ?
+                       SignalFactory::enumToVector(dataSignal) :
+                       SignalFactory::getName(dataSignal, Style::DOT))
+                   << ";\n";
+            }
         }
     };
 
@@ -277,6 +279,16 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
     printModuleInputSignals(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()));
     printModuleInputVars(signalFactory->getInternalRegisterIn(), "in_", "");
+
+    for (const auto &arrayPort : hlsModule->getArrayPorts()) {
+        uint32_t exprNumber = 0;
+        for (const auto &expr : arrayPort.second) {
+            ss << "\t\t\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
+               << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
+               << VHDLPrintVisitorHLS::toString(expr) << ")));\n";
+            exprNumber++;
+        }
+    }
 
     ss << "\t\t\telsif ((idle_sig = '1' or  ready_sig = '1') and wait_state = '1') then\n"
        << "\t\t\t\tstart_sig <= '0';\n"
