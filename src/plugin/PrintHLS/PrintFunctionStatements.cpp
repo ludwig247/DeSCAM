@@ -223,8 +223,29 @@ void PrintFunctionStatements::visit(ArrayOperand &node) {
 }
 
 void PrintFunctionStatements::visit(Bitwise &node) {
+    bool bitConcatenation = true;
+    if (NodePeekVisitor::nodePeekBitwise(node.getRhs())) {
+        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node.getRhs());
+        if (!bitSlicingRHS->isSlicingOp()) {
+            bitConcatenation = false;
+        }
+    } else {
+        bitConcatenation = false;
+    }
+    if (NodePeekVisitor::nodePeekBitwise(node.getLhs())) {
+        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node.getLhs());
+        if (!bitSlicingLHS->isSlicingOp()) {
+            bitConcatenation = false;
+        }
+    } else {
+        bitConcatenation = false;
+    }
+    if (Utilities::getSubTypeBitwise(node.getOperation()) != SubTypeBitwise::BITWISE_OR) {
+        bitConcatenation = false;
+    }
+
     auto bitSlicing = std::make_unique<BitSlicingHLS>(&node);
-    if (bitSlicing->isSlicingOp()) {
+    if (bitSlicing->isSlicingOp() && !bitConcatenation) {
         this->ss << bitSlicing->getOpAsString();
     } else {
         if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
@@ -248,7 +269,7 @@ void PrintFunctionStatements::visit(Bitwise &node) {
         } else {
             this->ss << "(";
             node.getLhs()->accept(*this);
-            this->ss << " " + node.getOperation() << " ";
+            this->ss << (bitConcatenation ? "," : " " +     node.getOperation()) << " ";
             node.getRhs()->accept(*this);
             this->ss << ")";
         }

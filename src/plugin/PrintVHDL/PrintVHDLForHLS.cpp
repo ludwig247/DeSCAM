@@ -194,10 +194,10 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
     for (const auto& out : OtherUtils::getSubVars(signalFactory->getOutputs())) {
-//        if (hlsModule->hasOutputReg(out)) {
+        if (hlsModule->hasOutputReg(out)) {
             ss << "\t\t\t" << SignalFactory::getName(out, Style::DOT) << " <= "
                << VHDLPrintVisitorHLS::toString(out->getInitialValue()) << ";\n";
-//        }
+        }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
     for (const auto& out : signalFactory->getOperationModuleOutputs()) {
