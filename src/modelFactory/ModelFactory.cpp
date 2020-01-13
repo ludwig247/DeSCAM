@@ -359,7 +359,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     SCAM::Operation2::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
     if (!optOptionsSet.empty()) {
-        SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model->getGlobalVariableMap(), optOptionsSet);
+        SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
         SCAM::OperationFactory operationFactory(opt.getCFG(), module);

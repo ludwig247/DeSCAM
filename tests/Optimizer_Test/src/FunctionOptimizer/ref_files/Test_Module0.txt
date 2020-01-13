@@ -1,0 +1,84 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		opType = ADD
+		Pred:[ID0]
+		Succ:[ID2]
+[ID2]
+		x = 0
+		Pred:[ID1]
+		Succ:[ID3]
+[ID3]
+		y = 0
+		Pred:[ID2]
+		Succ:[ID4]
+[ID4]
+		while (true)
+		Pred:[ID3], [ID8]
+		Succ:[ID5]
+[ID5]
+		b_in.read(y)
+		Pred:[ID4]
+		Succ:[ID6]
+[ID6]
+		if ((y == 1))
+		Pred:[ID5]
+		Succ:[ID7], [ID9]
+[ID7]
+		b_out.write(30)
+		Pred:[ID6]
+		Succ:[ID8]
+[ID8]
+		nullptr
+		Pred:[ID7], [ID10], [ID12], [ID14], [ID16], [ID18], [ID19], [ID20]
+		Succ:[ID4]
+[ID9]
+		if ((y == 2))
+		Pred:[ID6]
+		Succ:[ID10], [ID11]
+[ID10]
+		b_out.write((x + 10))
+		Pred:[ID9]
+		Succ:[ID8]
+[ID11]
+		if ((y == 3))
+		Pred:[ID9]
+		Succ:[ID12], [ID13]
+[ID12]
+		b_out.write(10)
+		Pred:[ID11]
+		Succ:[ID8]
+[ID13]
+		if ((y == 4))
+		Pred:[ID11]
+		Succ:[ID14], [ID15]
+[ID14]
+		b_out.write(((x << 4) - x))
+		Pred:[ID13]
+		Succ:[ID8]
+[ID15]
+		if ((y == 5))
+		Pred:[ID13]
+		Succ:[ID16], [ID17]
+[ID16]
+		b_out.write(((x << 4) + x))
+		Pred:[ID15]
+		Succ:[ID8]
+[ID17]
+		if ((y == 6))
+		Pred:[ID15]
+		Succ:[ID18], [ID19]
+[ID18]
+		b_out.write((x >> 2))
+		Pred:[ID17]
+		Succ:[ID8]
+[ID19]
+		if ((y == 7))
+		Pred:[ID17]
+		Succ:[ID20], [ID8]
+[ID20]
+		b_out.write((x & 7))
+		Pred:[ID19]
+		Succ:[ID8]

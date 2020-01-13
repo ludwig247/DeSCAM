@@ -5,12 +5,11 @@
 
 #include "Optimizer.h"
 
-
 SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module,
-                           const std::map<std::string, Variable *> &globalVariableMap,
+                           SCAM::Model *model,
                            const std::set <std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
                                                                                module(module),
-                                                                               globalVariableMap(globalVariableMap),
+                                                                               globalVariableMap(model->getGlobalVariableMap()),
                                                                                optimizeOptionsSet(optimizeOptionsSet) {
 
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
@@ -18,9 +17,9 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
         SCAM::RemoveEmptyNodes rem(this->blockCFG);
         SCAM::MergeRedundantIfElse sie(rem.getNewBlockCFG());
         SCAM::RenumberCFG renumBlockCFG(sie.getNewBlockCFG());
-        SCAM::FindUnusedFunctions uff(renumBlockCFG.getNewBlockCFG(), module);
         this->blockCFG = renumBlockCFG.getNewBlockCFG();
     }
+    SCAM::FindUnusedFunctions uff(this->blockCFG, module);
     CreateRealCFG crNodeCFG(this->blockCFG);
     module->setCFG(crNodeCFG.getCFG());
     SCAM::FindReadVariables frv(crNodeCFG.getCFG());
@@ -31,7 +30,6 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     } else {
         this->nodeCFG = crNodeCFG.getCFG();
     }
-//    std::cout << SCAM::OptUtilities::printCFG(this->nodeCFG);
     for (int i = 0; i < 2; i++) {
         SCAM::FindCfgPaths fcp(crNodeCFG.getCFG(), 0);
         if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
@@ -74,7 +72,7 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("fun") != this->optimizeOptionsSet.end()) {
         module->setCFG(this->nodeCFG);
-        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, globalVariableMap, frv.getReadVariablesSet());
+        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, model, frv.getReadVariablesSet());
         this->nodeCFG = fo.getCFG();
     }
     SCAM::RenumberCFG rcn(this->nodeCFG);
@@ -100,4 +98,3 @@ const std::map<std::string, int> &SCAM::Optimizer::getVariableBitWidthMap() cons
 const std::map<SCAM::Port *, int> &SCAM::Optimizer::getPortsBitWidthMap() const {
     return this->portBitWidthMap;
 }
-
