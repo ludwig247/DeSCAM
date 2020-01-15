@@ -46,7 +46,7 @@ static std::vector<SCAM::Module *> parameter() {
     return result;
 }
 
-class Optimizer_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class ITL_Test : public ::testing::TestWithParam<SCAM::Module *> {
 public:
     static void SetUpTestCase() {
     }
@@ -61,9 +61,9 @@ public:
     }
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, Optimizer_Test, ::testing::ValuesIn(parameter()));
+INSTANTIATE_TEST_CASE_P(Basic, ITL_Test, ::testing::ValuesIn(parameter()));
 
-TEST_P(Optimizer_Test, Basic) {
+TEST_P(ITL_Test, Basic) {
 
     PrintITL printITL;
 //    SCAM::Module * module = GetParam();

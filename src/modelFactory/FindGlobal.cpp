@@ -3,12 +3,15 @@
 //
 
 #include <iostream>
+#include <CFGFactory.h>
+#include <FunctionFactory.h>
 #include "FindGlobal.h"
 #include "FindDataFlow.h"
 #include "FindNewDatatype.h"
 
 
-SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, SCAM::Module *module) :
+SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci, SCAM::Module *module) :
+        ci(ci),
         decl(decl),
         module(module) {
     assert(!(decl == NULL));
@@ -70,7 +73,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                         }
                     }
                 } catch (std::runtime_error e) {
-                    std::cout << e.what() << std::endl;
+                    //std::cout << e.what() << std::endl;
 
                 }
 
@@ -115,6 +118,7 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
     };
 
 
+
     //Ensure, that all conditions are correct
     if(valid_result_type() && valid_function_type() && valid_parameters()){
         std::map<std::string,Parameter*> parameterMap;
@@ -127,7 +131,7 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
         std::string name = funDecl->getNameAsString();
         auto function = new Function(name,getDataType(funDecl->getResultType()),parameterMap);
         this->functionMap.insert(std::make_pair(name,function));
-        //TODO: add behavior of the function
+        this->functionDeclMap.insert(std::make_pair(name,funDecl));
     }
     return true;
 }
@@ -147,6 +151,12 @@ SCAM::DataType * SCAM::FindGlobal::getDataType(const clang::QualType& type) cons
 const std::map<std::string, SCAM::Function *> &SCAM::FindGlobal::getFunctionMap() const {
     return functionMap;
 }
+
+const std::map<std::string, const clang::FunctionDecl *> &SCAM::FindGlobal::getFunctionDeclMap() const {
+    return functionDeclMap;
+}
+
+
 
 
 
