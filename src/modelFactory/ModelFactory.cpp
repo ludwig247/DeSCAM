@@ -122,13 +122,13 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl, SCAM::Modu
 //! Add structure ...
 void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     FindSCMain scmain(tu);
-
+        
     //The top instance is the sc_main. It doesn't contain any ports
     //Create empty dummy module for sc_main
-    Module *sc_main = new Module("main");
+    auto sc_main = new Module("main");
     //this->model->addModule(sc_main);
     //Create instance for sc_main and add to model
-    ModuleInstance *topInstance = new ModuleInstance("TopInstance", sc_main);
+    auto topInstance = new ModuleInstance("TopInstance", sc_main);
     //std::cout << model->getModuleInstance() << std::cout;
     model->addTopInstance(topInstance);
     if (!scmain.isScMainFound()) {
