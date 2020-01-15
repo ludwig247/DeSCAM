@@ -7,7 +7,7 @@ add_subdirectory(tests)
 add_subdirectory(Whishbone)
 add_subdirectory(I2C)
 add_subdirectory(Comm_Test_newInterfaces)
-
+add_subdirectory(Uart_aashild_v3)
 
 
 
