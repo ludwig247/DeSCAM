@@ -188,7 +188,7 @@ void PrintHLS::dataTypes(Model *model) {
     std::set<DataType *> enumTypes;
     std::set<DataType *> compoundTypes;
 
-    auto fillTypeSets = [&enumTypes, &compoundTypes](DataType* dataType) {
+    auto addDataType = [&enumTypes, &compoundTypes](DataType* dataType) {
         if (dataType->isEnumType()) {
             enumTypes.insert(dataType);
         } else if (dataType->isCompoundType()) {
@@ -197,23 +197,23 @@ void PrintHLS::dataTypes(Model *model) {
     };
 
     for (const auto& reg : propertySuite->getVisibleRegisters()) {
-        fillTypeSets((DataType *)(reg->getDataType()));
+        addDataType((DataType *)(reg->getDataType()));
     }
     for (const auto& func : propertySuite->getFunctions()) {
-        fillTypeSets(func->getReturnType());
+        addDataType(func->getReturnType());
     }
     for (const auto& module : model->getModules()) {
         for (auto &port : module.second->getPorts()) {
             if (port.second->isCompoundType()) {
                 for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
-                    fillTypeSets(subVar->getDataType());
+                    addDataType(subVar->getDataType());
                 }
             }
-            fillTypeSets(port.second->getDataType());
+            addDataType(port.second->getDataType());
         }
     }
     for (const auto& var : currentModule->getVariableMap()) {
-        fillTypeSets(var.second->getDataType());
+        addDataType(var.second->getDataType());
     }
 
     ss << "// Enum Types\n";

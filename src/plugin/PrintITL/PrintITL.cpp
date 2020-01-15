@@ -1018,7 +1018,5 @@ std::string PrintITL::hls() {
         ss << "end property;\n";
         ss << "\n\n";
     }
-
-
     return ss.str();
 }
