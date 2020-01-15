@@ -1,0 +1,68 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		f = 0
+		Pred:[ID0]
+		Succ:[ID6]
+[ID6]
+		nextphase = SECTION_A
+		Pred:[ID1]
+		Succ:[ID7]
+[ID7]
+		while (true)
+		Pred:[ID6], [ID16]
+		Succ:[ID8]
+[ID8]
+		phase = nextphase
+		Pred:[ID7]
+		Succ:[ID9]
+[ID9]
+		if ((phase == SECTION_A))
+		Pred:[ID8]
+		Succ:[ID10], [ID19]
+[ID10]
+		b_in.read(y)
+		Pred:[ID9]
+		Succ:[ID11]
+[ID11]
+		if (y)
+		Pred:[ID10]
+		Succ:[ID12], [ID18]
+[ID12]
+		x = (1 - f)
+		Pred:[ID11]
+		Succ:[ID14]
+[ID14]
+		b_out.write(x)
+		Pred:[ID12], [ID18]
+		Succ:[ID15]
+[ID15]
+		nextphase = SECTION_B
+		Pred:[ID14]
+		Succ:[ID16]
+[ID16]
+		nullptr
+		Pred:[ID15], [ID22]
+		Succ:[ID7]
+[ID18]
+		x = (8 + f)
+		Pred:[ID11]
+		Succ:[ID14]
+[ID19]
+		f = -(1)
+		Pred:[ID9]
+		Succ:[ID20]
+[ID20]
+		x = -(5)
+		Pred:[ID19]
+		Succ:[ID21]
+[ID21]
+		b_out.write((f + x))
+		Pred:[ID20]
+		Succ:[ID22]
+[ID22]
+		nextphase = SECTION_A
+		Pred:[ID21]
+		Succ:[ID16]

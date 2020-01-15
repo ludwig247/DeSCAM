@@ -37,12 +37,9 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
         std::set<SCAM::Expr *> valuesSet;
         bool assignedByReadVar = false;
         for (auto val : var.second) {
-            SCAM::FindVariablesAndFunctionsInStatement fvf(val);
-            for(auto vari : fvf.getVariablesInStmtSet()){
-                if(this->variablesThatHaveReadSet.find(vari)!=this->variablesThatHaveReadSet.end()){
-                    assignedByReadVar = true;
-                    break;
-                }
+            SCAM::FindVariablesAndFunctionsInStatement fvf(val, this->variablesThatHaveReadSet);
+            if(fvf.hasReadVariable()){
+                assignedByReadVar = true;
             }
             SCAM::DetectCounterVariable counterDetector(var.first, val);
             if (counterDetector.isCounterVariable()) {
@@ -57,7 +54,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
     }
     this->variablesValuesMap = integerAndUnsignedVariablesWithNoCounterValuesMap;
 #ifdef DEBUG_RANGE_ANALYSIS
-    std::cout << "valuesMap without bool and enum variables and values containing functions" << std::endl;
+    std::cout << "valuesMap without bool and enum variables and values containing read variables" << std::endl;
     for (auto var : this->variablesValuesMap) {
         std::cout << "variable " << var.first << " :" << std::endl;
         for (auto val : var.second) {
@@ -190,7 +187,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
         for (auto pair : this->variablesValuesMap) {
             std::set<SCAM::Expr *> substitutedValuesSet;
             for (auto variableValue : pair.second) {
-                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(variableValue);
+                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(variableValue,this->variablesThatHaveReadSet);
                 if (variablesInStmtFinder.hasFunctions()) {
                     substitutedValuesSet.clear();
                     break;
@@ -277,7 +274,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 //              std::cout << "after simplification z3Expr is" << z3Expr << std::endl;
                 if (this->variablesDataTypesMap.at(var.first) == "int") {
                     intValuesVector.push_back(z3Expr.get_numeral_int());
-                } else if (this->variablesDataTypesMap.at(var.first) == "int") {
+                } else if (this->variablesDataTypesMap.at(var.first) == "unsigned") {
                     unsignedValuesVector.push_back(z3Expr.get_numeral_uint());
                 } else {
                     intValuesVector.clear();

@@ -202,12 +202,12 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 } else if (isPowerOfTwo<unsigned int>(lhsVal - 1)) {
                     hasReduction = true;
                     this->newExpr = new Arithmetic(
-                            new Bitwise(arithNode->getRhs(), "<<", new UnsignedValue(log2(lhsVal))), "+",
+                            new Bitwise(arithNode->getRhs(), "<<", new UnsignedValue(log2(lhsVal-1))), "+",
                             arithNode->getRhs());
                 } else if (isPowerOfTwo<unsigned int>(lhsVal + 1)) {
                     hasReduction = true;
                     this->newExpr = new Arithmetic(
-                            new Bitwise(arithNode->getRhs(), "<<", new UnsignedValue(log2(lhsVal))), "-",
+                            new Bitwise(arithNode->getRhs(), "<<", new UnsignedValue(log2(lhsVal+1))), "-",
                             arithNode->getRhs());
                 }
             } else if (auto lhs = NodePeekVisitor::nodePeekIntegerValue(arithNode->getLhs())) {
@@ -227,12 +227,12 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                     } else if (isPowerOfTwo<int>(lhsVal - 1)) {
                         hasReduction = true;
                         this->newExpr = new Arithmetic(
-                                new Bitwise(arithNode->getRhs(), "<<", new IntegerValue(log2(lhsVal))), "+",
+                                new Bitwise(arithNode->getRhs(), "<<", new IntegerValue(log2(lhsVal-1))), "+",
                                 arithNode->getRhs());
                     } else if (isPowerOfTwo<int>(lhsVal + 1)) {
                         hasReduction = true;
                         this->newExpr = new Arithmetic(
-                                new Bitwise(arithNode->getRhs(), "<<", new IntegerValue(log2(lhsVal))), "-",
+                                new Bitwise(arithNode->getRhs(), "<<", new IntegerValue(log2(lhsVal+1))), "-",
                                 arithNode->getRhs());
                     }
                 }
@@ -255,12 +255,12 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 } else if (isPowerOfTwo<unsigned int>(rhsVal - 1)) {
                     hasReduction = true;
                     this->newExpr = new Arithmetic(
-                            new Bitwise(arithNode->getLhs(), "<<", new UnsignedValue(log2(rhsVal))), "+",
+                            new Bitwise(arithNode->getLhs(), "<<", new UnsignedValue(log2(rhsVal-1))), "+",
                             arithNode->getLhs());
                 } else if (isPowerOfTwo<unsigned int>(rhsVal + 1)) {
                     hasReduction = true;
                     this->newExpr = new Arithmetic(
-                            new Bitwise(arithNode->getLhs(), "<<", new UnsignedValue(log2(rhsVal))), "-",
+                            new Bitwise(arithNode->getLhs(), "<<", new UnsignedValue(log2(rhsVal+1))), "-",
                             arithNode->getLhs());
                 }
             } else if (auto rhs = NodePeekVisitor::nodePeekIntegerValue(arithNode->getRhs())) {
@@ -280,12 +280,12 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                     } else if (isPowerOfTwo<int>(rhsVal - 1)) {
                         hasReduction = true;
                         this->newExpr = new Arithmetic(
-                                new Bitwise(arithNode->getLhs(), "<<", new IntegerValue(log2(rhsVal))), "+",
+                                new Bitwise(arithNode->getLhs(), "<<", new IntegerValue(log2(rhsVal-1))), "+",
                                 arithNode->getLhs());
                     } else if (isPowerOfTwo<int>(rhsVal + 1)) {
                         hasReduction = true;
                         this->newExpr = new Arithmetic(
-                                new Bitwise(arithNode->getLhs(), "<<", new IntegerValue(log2(rhsVal))), "-",
+                                new Bitwise(arithNode->getLhs(), "<<", new IntegerValue(log2(rhsVal+1))), "-",
                                 arithNode->getLhs());
                     }
                 }
