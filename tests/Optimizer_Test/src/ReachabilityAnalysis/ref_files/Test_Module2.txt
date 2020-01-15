@@ -1,0 +1,52 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID5]
+[ID5]
+		nextphase = SECTION_A
+		Pred:[ID0]
+		Succ:[ID6]
+[ID6]
+		while (true)
+		Pred:[ID5], [ID15]
+		Succ:[ID7]
+[ID7]
+		phase = nextphase
+		Pred:[ID6]
+		Succ:[ID8]
+[ID8]
+		if ((phase == SECTION_A))
+		Pred:[ID7]
+		Succ:[ID9], [ID19]
+[ID9]
+		b_in.read(y)
+		Pred:[ID8]
+		Succ:[ID10]
+[ID10]
+		if (y)
+		Pred:[ID9]
+		Succ:[ID11], [ID17]
+[ID11]
+		x = 5
+		Pred:[ID10]
+		Succ:[ID13]
+[ID13]
+		b_out.write(x)
+		Pred:[ID11], [ID17]
+		Succ:[ID14]
+[ID14]
+		nextphase = SECTION_B
+		Pred:[ID13]
+		Succ:[ID15]
+[ID15]
+		nullptr
+		Pred:[ID14], [ID19]
+		Succ:[ID6]
+[ID17]
+		x = 8
+		Pred:[ID10]
+		Succ:[ID13]
+[ID19]
+		nextphase = SECTION_A
+		Pred:[ID8]
+		Succ:[ID15]

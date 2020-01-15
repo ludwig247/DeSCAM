@@ -1,0 +1,20 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		x = 0
+		Pred:[ID0]
+		Succ:[ID2]
+[ID2]
+		y = 0
+		Pred:[ID1]
+		Succ:[ID3]
+[ID3]
+		while (true)
+		Pred:[ID2], [ID4]
+		Succ:[ID4]
+[ID4]
+		b_out.write(x)
+		Pred:[ID3]
+		Succ:[ID3]

@@ -28,53 +28,45 @@
 		Succ:[ID7]
 [ID7]
 		while (true)
-		Pred:[ID6], [ID18]
+		Pred:[ID6], [ID16]
 		Succ:[ID8]
 [ID8]
 		phase = nextphase
 		Pred:[ID7]
 		Succ:[ID9]
 [ID9]
-		if ((nextphase == SECTION_A))
+		if ((phase == SECTION_A))
 		Pred:[ID8]
-		Succ:[ID10], [ID15]
+		Succ:[ID10], [ID14]
 [ID10]
 		b_in.read(y)
 		Pred:[ID9]
 		Succ:[ID11]
 [ID11]
-		x = 6
-		Pred:[ID10]
-		Succ:[ID12]
-[ID12]
 		if (y)
+		Pred:[ID10]
+		Succ:[ID12], [ID17]
+[ID12]
+		b_out.write((x + 32))
 		Pred:[ID11]
-		Succ:[ID13], [ID19]
+		Succ:[ID13]
 [ID13]
-		b_out.write(x)
-		Pred:[ID12]
+		nextphase = SECTION_B
+		Pred:[ID12], [ID17]
 		Succ:[ID14]
 [ID14]
-		nextphase = SECTION_B
-		Pred:[ID13], [ID19]
-		Succ:[ID15]
+		if ((phase == SECTION_B))
+		Pred:[ID9], [ID13]
+		Succ:[ID15], [ID16]
 [ID15]
-		if ((nextphase == SECTION_B))
-		Pred:[ID9], [ID14]
-		Succ:[ID16], [ID18]
-[ID16]
-		b_out.write((x * x))
-		Pred:[ID15]
-		Succ:[ID17]
-[ID17]
 		nextphase = SECTION_A
-		Pred:[ID16]
-		Succ:[ID18]
-[ID18]
+		Pred:[ID14]
+		Succ:[ID16]
+[ID16]
 		nullptr
-		Pred:[ID15], [ID17]
+		Pred:[ID14], [ID15]
 		Succ:[ID7]
-[ID19]
-		b_out.write(-(x))
-		Pred:[ID12]
-		Succ:[ID14]
+[ID17]
+		b_out.write((x - 32))
+		Pred:[ID11]
+		Succ:[ID13]

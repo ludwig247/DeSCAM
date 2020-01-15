@@ -2,6 +2,7 @@
 // Created by M.I.Alkoudsi on 11.06.19.
 //
 
+#include <Optimizer/Utilities/ExpressionSubstitution.h>
 #include "ReachabilityAnalysis.h"
 #include "Optimizer/Debug.h"
 
@@ -55,7 +56,7 @@ namespace SCAM {
                         RA_solver_t.reset();
                         this->assignmentsToIfValuesMap.clear();
                         this->substitutionMap.clear();
-                        SCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(insideIf);
+                        SCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(insideIf,std::set<std::string>{});
                         if (findVariablesAndFunctionsInStatement.hasFunctions()) { continue; }
                         for (auto varOp : findVariablesAndFunctionsInStatement.getVarOpInStmtSet()) {
                             checkAndAddVariableToSubstitutionMap(varOp);
@@ -71,8 +72,56 @@ namespace SCAM {
                             continue;
                         }
                         if (!this->substitutionMap.empty()) {
-                            std::vector<z3::expr> toBeAssertedExpr = substituteVariablesInsideIfExpressionWithTheirValues(
+                            auto firstSubstitutedSet = substituteVariablesInsideIfExpressionWithTheirValues(
                                     insideIf);
+                            std::vector<SCAM::Expr *> newSet;
+                            for (auto se: firstSubstitutedSet) {
+                                SCAM::FindVariablesAndFunctionsInStatement fv(se,std::set<std::string>{});
+                                if (fv.hasFunctions() || fv.getVariablesInStmtSet().empty() ||
+                                    (*fv.getVarOpInStmtSet().begin())->getDataType()->isEnumType() ||
+                                    (*fv.getVarOpInStmtSet().begin())->getDataType()->isBoolean()) {
+                                    newSet.push_back(se);
+                                    continue;
+                                }
+                                substitutionMap.clear();
+                                for (auto varOp : fv.getVarOpInStmtSet()) {
+                                    checkAndAddVariableToSubstitutionMap(varOp);
+                                    if (RA_hasRead) {
+                                        newSet.push_back(se);
+                                        break;
+                                    }
+                                }
+                                if (RA_hasRead) {
+                                    RA_hasRead = false;
+                                    continue;
+                                }
+                                auto newExprsSet = substituteVariablesInsideIfExpressionWithTheirValues(
+                                        se);
+                                for (auto nExpr : newExprsSet) {
+                                    newSet.push_back(nExpr);
+                                }
+                            }
+
+                            std::vector<z3::expr> toBeAssertedExpressions;
+                            for(auto scamExpr : newSet){
+                                z3::expr newZ3Expr(RA_z3Context);
+                                try {
+                                    newZ3Expr = RA_translator.translate(scamExpr);
+                                    toBeAssertedExpressions.push_back(newZ3Expr);
+                                }
+                                catch (z3::exception &e) {
+                                    std::cout << "\t\033[1;33mWarning\033[0m: "
+                                              << "Translation warning for: "
+                                              << PrintStmt::toString(scamExpr) << std::endl;
+                                    std::cout << "\t ->" << e << std::endl;
+                                    toBeAssertedExpressions.clear();
+                                    break;
+                                }
+                                catch (std::runtime_error &e) {
+                                    toBeAssertedExpressions.clear();
+                                    break;
+                                }
+                            }
 
 #ifdef DEBUG_REACHABILITY_ANALYSIS
 //                            for (auto exp : toBeAssertedExpr) {
@@ -80,10 +129,10 @@ namespace SCAM {
 //
 //                            }
 #endif
-                            if (!toBeAssertedExpr.empty()) {//check each stmt in the vector alone
+                            if (!toBeAssertedExpressions.empty()) {//check each stmt in the vector alone
                                 bool notfalse = true;
                                 bool nottrue = true;
-                                for (const auto &expr : toBeAssertedExpr) {
+                                for (const auto &expr : toBeAssertedExpressions) {
                                     RA_solver_f.reset();
                                     RA_solver_f.add(!expr);
                                     if (RA_solver_f.check() == z3::sat || RA_solver_f.check() == z3::unknown) {
@@ -98,7 +147,7 @@ namespace SCAM {
                                     this->ifNodesToBeDeleted.insert(node.second->getId());
                                 }
 
-                                for (const auto &expr : toBeAssertedExpr) {
+                                for (const auto &expr : toBeAssertedExpressions) {
                                     RA_solver_t.reset();
                                     RA_solver_t.add(expr);
                                     if (RA_solver_t.check() == z3::sat || RA_solver_t.check() == z3::unknown) {
@@ -178,7 +227,7 @@ namespace SCAM {
         if (this->variablesThatHaveReadSet.find(varName) ==
             this->variablesThatHaveReadSet.end()) {
             this->substitutionMap.insert(
-                    std::make_pair(varName, RA_translator.translate(varOp)));
+                    std::make_pair(varName, varOp));
             if (this->assignmentsToIfValuesMap.find(varName) ==
                 this->assignmentsToIfValuesMap.end()) { // use only assignment values to the variable that can be used in the If statement
                 PropagateConstantValue propagator(this->pathsToIfMap, varOp->getVariable(), this->currentNodeID);
@@ -219,7 +268,7 @@ namespace SCAM {
     }
 
 
-    std::vector<z3::expr>
+    std::vector<SCAM::Expr *>
     ReachabilityAnalysis::substituteVariablesInsideIfExpressionWithTheirValues(SCAM::Expr *ExpressionInsideIf) {
         int numberOfVariables = this->substitutionMap.size();
         auto pairItr = this->substitutionMap.begin();
@@ -227,7 +276,7 @@ namespace SCAM {
         std::vector<int> currentValueIndex(numberOfVariables, 0);
         std::stack<SCAM::Expr *> expressionStack;
         expressionStack.push(ExpressionInsideIf);
-        std::vector<z3::expr> toBeAssertedExpr;
+        std::vector<SCAM::Expr *> toBeAssertedExpr;
         while (!expressionStack.empty()) {
             std::string currentVarName = (*pairItr).first;
             if (this->assignmentsToIfValuesMap.find(currentVarName) !=
@@ -237,29 +286,12 @@ namespace SCAM {
                 for (int i = 0; i < currentValueIndex[currentVariableIndicator]; i++) { valptr++; }
                 if (this->assignmentsToIfValuesMap.at(currentVarName).end() != valptr) {
                     SCAM::Expr *expression = expressionStack.top();
-                    SCAM::ValueSubstitution valueSubstitution;
-                    SCAM::Expr *newExpression = valueSubstitution.substituteExpr(expression,
-                                                                                 currentVarName,
-                                                                                 *valptr);
+                    SCAM::Expr *newExpression = SCAM::ExpressionSubstitution::substituteExpr(expression,pairItr->second,*valptr);
                     currentValueIndex[currentVariableIndicator] += 1;
-                    z3::expr newZ3Expr(RA_z3Context);
                     if (currentVariableIndicator ==
                         numberOfVariables -
                         1) { //we currently have the last variable in the substitution map
-                        try { newZ3Expr = RA_translator.translate(newExpression); }
-                        catch (z3::exception& e) {
-                            std::cout << "\t\033[1;33mWarning\033[0m: "
-                                      << "Translation warning for: "
-                                      << PrintStmt::toString(newExpression) << std::endl;
-                            std::cout << "\t ->" << e << std::endl;
-                            toBeAssertedExpr.clear();
-                            break;
-                        }
-                        catch (std::runtime_error& e){
-                            toBeAssertedExpr.clear();
-                            break;
-                        }
-                        toBeAssertedExpr.push_back(newZ3Expr);
+                        toBeAssertedExpr.push_back(newExpression);
                     } else {
                         currentVariableIndicator += 1;
                         pairItr++;
@@ -276,31 +308,12 @@ namespace SCAM {
                 for (int i = 0; i < currentValueIndex[currentVariableIndicator]; i++) { valptr++; }
                 if (this->allVarValuesMap.at(currentVarName).end() != valptr) {
                     SCAM::Expr *expression = expressionStack.top();
-                    SCAM::ValueSubstitution valueSubstitution;
-                    SCAM::Expr *newExpression = valueSubstitution.substituteExpr(expression,
-                                                                                 currentVarName,
-                                                                                 *valptr);
-
-
+                    SCAM::Expr *newExpression = SCAM::ExpressionSubstitution::substituteExpr(expression,pairItr->second,*valptr);
                     currentValueIndex[currentVariableIndicator] += 1;
-                    z3::expr newZ3Expr(RA_z3Context);
                     if (currentVariableIndicator ==
                         numberOfVariables -
                         1) { //we currently have the last variable in the substitution map
-                        try { newZ3Expr = RA_translator.translate(newExpression); }
-                        catch (z3::exception& e) {
-                            std::cout << "\t\033[1;33mWarning\033[0m: "
-                                      << "Translation warning for: "
-                                      << PrintStmt::toString(newExpression) << std::endl;
-                            std::cout << "\t ->" << e << std::endl;
-                            toBeAssertedExpr.clear();
-                            break;
-                        }
-                        catch (std::runtime_error& e){
-                            toBeAssertedExpr.clear();
-                            break;
-                        }
-                        toBeAssertedExpr.push_back(newZ3Expr);
+                        toBeAssertedExpr.push_back(newExpression);
                     } else {
                         currentVariableIndicator += 1;
                         pairItr++;
@@ -443,13 +456,13 @@ namespace SCAM {
                         RA_solver_t.reset();
                         this->substitutionMap.clear();
 
-                        SCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(condExpr);
+                        SCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(condExpr,std::set<std::string>{});
                         if (findVariablesAndFunctionsInStatement.hasFunctions()) { continue; }
                         for (const auto& varOp : findVariablesAndFunctionsInStatement.getVarOpInStmtSet()) {
                             auto varName = varOp->getVariable()->getFullName();
                             if (this->variablesThatHaveReadSet.find(varName) ==
                                 this->variablesThatHaveReadSet.end()) {
-                                this->substitutionMap.insert(std::make_pair(varName,RA_translator.translate(varOp)));
+                                this->substitutionMap.insert(std::make_pair(varName,varOp));
                             } else if (this->variablesThatHaveReadSet.find(varName) !=
                                        this->variablesThatHaveReadSet.end()) {
                                 RA_hasRead = true;
@@ -466,8 +479,28 @@ namespace SCAM {
                             continue;
                         }
                         if (!this->substitutionMap.empty()) {
-                            std::vector<z3::expr> toBeAssertedExpressions = substituteVariablesInsideIfExpressionWithTheirValues(
+                            auto newSet = substituteVariablesInsideIfExpressionWithTheirValues(
                                     condExpr);
+                            std::vector<z3::expr> toBeAssertedExpressions;
+                            for(auto scamExpr : newSet){
+                                z3::expr newZ3Expr(RA_z3Context);
+                                try {
+                                    newZ3Expr = RA_translator.translate(scamExpr);
+                                    toBeAssertedExpressions.push_back(newZ3Expr);
+                                }
+                                catch (z3::exception &e) {
+                                    std::cout << "\t\033[1;33mWarning\033[0m: "
+                                              << "Translation warning for: "
+                                              << PrintStmt::toString(scamExpr) << std::endl;
+                                    std::cout << "\t ->" << e << std::endl;
+                                    toBeAssertedExpressions.clear();
+                                    break;
+                                }
+                                catch (std::runtime_error &e) {
+                                    toBeAssertedExpressions.clear();
+                                    break;
+                                }
+                            }
 
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
 //                            for (auto exp : toBeAssertedExpressions) {

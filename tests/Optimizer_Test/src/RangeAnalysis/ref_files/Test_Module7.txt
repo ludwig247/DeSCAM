@@ -1,0 +1,5 @@
+Variables bitwidths map:
+x : 5
+
+Output ports bitwidths map:
+b_out : 5

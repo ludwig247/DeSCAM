@@ -1,0 +1,52 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		x = 0
+		Pred:[ID0]
+		Succ:[ID2]
+[ID2]
+		y = false
+		Pred:[ID1]
+		Succ:[ID3]
+[ID3]
+		while (true)
+		Pred:[ID2], [ID9]
+		Succ:[ID4]
+[ID4]
+		a_in.read(y)
+		Pred:[ID3]
+		Succ:[ID5]
+[ID5]
+		if (not(y))
+		Pred:[ID4]
+		Succ:[ID6], [ID10]
+[ID6]
+		a_out.write(16)
+		Pred:[ID5]
+		Succ:[ID7]
+[ID7]
+		b_out.write((2 + x))
+		Pred:[ID6]
+		Succ:[ID8]
+[ID8]
+		c_out.write((1 + x))
+		Pred:[ID7]
+		Succ:[ID9]
+[ID9]
+		nullptr
+		Pred:[ID8], [ID12]
+		Succ:[ID3]
+[ID10]
+		a_out.write(6)
+		Pred:[ID5]
+		Succ:[ID11]
+[ID11]
+		b_out.write(((x & 3) << 2))
+		Pred:[ID10]
+		Succ:[ID12]
+[ID12]
+		c_out.write(((2 + x) | 4))
+		Pred:[ID11]
+		Succ:[ID9]

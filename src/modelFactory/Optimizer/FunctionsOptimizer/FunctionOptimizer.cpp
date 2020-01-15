@@ -15,9 +15,9 @@
  */
 
 SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module,
-                                             const std::map<std::string, Variable *> &globalVariableMap,
+                                             SCAM::Model *model,
                                              std::set<std::string> variablesThatHaveReadSet) : CFG(std::move(
-        CFG)), module(module), globalVariableMap(globalVariableMap), hasFunction(false), newStmt(nullptr),
+        CFG)), module(module), model(model), globalVariableMap(model->getGlobalVariableMap()), hasFunction(false), newStmt(nullptr),
                                                                                                newExpr(nullptr),
                                                                                                variablesThatHaveReadSet(
                                                                                                        std::move(
@@ -26,6 +26,7 @@ SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM:
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
     std::cout << std::endl << "********************** Functions Optimizer *********************** " << std::endl;
 #endif
+    if (module->getFunctionMap().empty() && model->getGlobalFunctionMap().empty()) return;
     //Finding all variable values
     SCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
     this->allVarValuesMap = valuesFinder.getVariableValuesMap();
@@ -207,6 +208,7 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     //check if already optimized a function with the same paramterslist
     if (auto optFunc = isAlreadyOptimizedFunction(node.getOperandName(), node.getParamValueMap())) {
         this->newExpr = optFunc;
+        if (&node == this->newExpr) { this->newExpr = nullptr; }
         return;
     }
     //optimize argument list
@@ -336,12 +338,19 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     if (function->getReturnValueConditionList().size() == 1) {
         this->newExpr = (*function->getReturnValueConditionList().begin()).first->getReturnValue();
         this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, this->newExpr));
-    } else if (function->getReturnValueConditionList() == pvp.getReturnValueConditionList()) {
+    } else if (noOptimizationAchieved(pvp.getReturnValueConditionList(), newReturnValueConditionList)) {
+        //if no optimizations achieved save the name of the function and its parameter list and return
         this->newExpr = nullptr;
+        this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, &node));
     } else {//create new function and add it to the module
         function->setName(createFuncName(node.getOperandName()));
         this->newExpr = new SCAM::FunctionOperand(function, newParamValueMap);
-        this->module->addFunction(function);
+        auto moduleFunctionMap = this->module->getFunctionMap();
+        if(moduleFunctionMap.find(node.getOperandName())!=moduleFunctionMap.end()) {
+            this->module->addFunction(function);
+        }else{
+            this->model->addGlobalFunction(function);
+        }
         this->oldFuncOpOptimizedFuncPairsMap.insert(std::make_pair(&node, this->newExpr));
     }
 }
@@ -422,6 +431,27 @@ SCAM::FunctionsOptimizer::isAlreadyOptimizedFunction(std::string operandName,
         }
     }
     return nullptr;
+}
+
+bool SCAM::FunctionsOptimizer::noOptimizationAchieved(
+        const std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector1,
+        std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector2) {
+    if (returnValConditionListPairVector1.size() != returnValConditionListPairVector2.size()) return false;
+    auto pairItr = returnValConditionListPairVector2.begin();
+    for (auto pair : returnValConditionListPairVector1) {
+        if (!((*pair.first) == (*pairItr->first))) {
+            return false;
+        }
+        auto exprItr = pairItr->second.begin();
+        for (auto expr : pair.second) {
+            if (!((*expr) == (**exprItr))) {
+                return false;
+            }
+            exprItr++;
+        }
+        pairItr++;
+    }
+    return true;
 }
 
 

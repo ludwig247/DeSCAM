@@ -1,0 +1,6 @@
+Variables bitwidths map:
+x : 4
+y : 32
+
+Output ports bitwidths map:
+b_out : 4
