@@ -10,15 +10,11 @@
 #include "FindNewDatatype.h"
 
 
-SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci, SCAM::Module *module) :
+SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci) :
         ci(ci),
-        decl(decl),
-        module(module) {
-    assert(!(decl == NULL));
+        decl(decl){
+    assert(!(decl == nullptr));
     TraverseDecl(decl);
-
-
-
 }
 
 bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
@@ -33,7 +29,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
             if (init->getType()->isBuiltinType()) {
                 auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
                 try {
-                    FindDataFlow checkForExpr(const_cast<clang::Expr *>(init), module, isUnsigned);
+                    FindDataFlow checkForExpr(const_cast<clang::Expr *>(init), &module, isUnsigned);
                     ErrorMsg::clear();
                     if (checkForExpr.getExpr()) {
                         std::string typeName = init->getType().getAsString();

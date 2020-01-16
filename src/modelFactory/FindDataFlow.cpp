@@ -129,16 +129,18 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
             case clang::BinaryOperator::Opcode::BO_Shl:
                 //Special case ... shiftings depends on LHS Datatype
                 if (binaryOperator->getType()->isUnsignedIntegerType()) {
-                    FindDataFlow findRHS(binaryOperator->getRHS(), this->module, true);
-                    this->rhsExpr = findRHS.getExpr();
+
+                    FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, true);
+
+                    this->rhsExpr = findRHS2.getExpr();
                 }
                 this->expr = new Bitwise(this->lhsExpr, "<<", this->rhsExpr);
                 break;
             case clang::BinaryOperator::Opcode::BO_Shr:
                 //Special case ... shiftings depends on LHS Datatype
                 if (binaryOperator->getType()->isUnsignedIntegerType()) {
-                    FindDataFlow findRHS(binaryOperator->getRHS(), this->module, true);
-                    this->rhsExpr = findRHS.getExpr();
+                    FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, true);
+                    this->rhsExpr = findRHS2.getExpr();
                 }
                 this->expr = new Bitwise(this->lhsExpr, ">>", this->rhsExpr);
                 break;

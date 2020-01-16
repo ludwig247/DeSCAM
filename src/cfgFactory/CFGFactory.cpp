@@ -19,7 +19,7 @@ namespace SCAM {
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
         clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(), b);
-        if (clangCFG == NULL) {
+        if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
         }
@@ -36,14 +36,11 @@ namespace SCAM {
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
         clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(), &functionDecl->getASTContext(), b);
-        if (clangCFG == NULL) {
+        if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
         }
         this->translateToScamCFG();
-    }
-
-    CFGFactory::~CFGFactory() {
     }
 
 /*
@@ -65,7 +62,7 @@ namespace SCAM {
 
         if (sourceModule) {
             //Init Block
-            SCAM::CfgBlock *initBlock = new SCAM::CfgBlock();
+            auto initBlock = new SCAM::CfgBlock();
             initBlock->setBlockID(this->controlFlowMap.size());
             std::vector<SCAM::Stmt *> initList = SCAM::CreateInitSection2::createInitSection2(module);
             for (auto stmt:initList) {
@@ -101,7 +98,7 @@ namespace SCAM {
         std::vector<clang::Stmt *> statementList = this->getCleanStmtList(block);
 
         //Create empty cfgNode
-        CfgBlock *cfgNode = new CfgBlock(-1, block->getBlockID());
+        auto cfgNode = new CfgBlock(-1, block->getBlockID());
         //Translate CLANG::Stms to SCAM:Stmts and add to node
         for (auto clangStmt: statementList) {
             SCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
@@ -343,7 +340,7 @@ namespace SCAM {
                 if (currentBlock->getSuccessorList().at(0) != currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[0];
                 }
-                    //OR
+                //OR
                 else if (currentBlock->getSuccessorList().at(0) == currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[1];
                 } else {
