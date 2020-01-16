@@ -28,7 +28,6 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     if(!node->getGlobalFunctionMap().empty()){
         pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.vhi", globalFunctions()));
     }
-    return pluginOutput;
 
     return pluginOutput;
 }
@@ -44,7 +43,7 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
 }
 
 std::string PrintITL::print() {
-    return (propertySuite() + functions());
+    return (propertySuite() + functions() + globalFunctions());
 }
 
 std::string PrintITL::functions() {
@@ -781,7 +780,7 @@ std::string PrintITL::pipelined() {
 
 std::string PrintITL::globalFunctions() {
     std::stringstream globalss;
-
+    if (module->getFunctionMap().empty()) return globalss.str();
     globalss << "-- GLOBAL FUNCTIONS --\n";
     for (auto function: model->getGlobalFunctionMap()) {
         globalss << "macro " + function.first << "(";

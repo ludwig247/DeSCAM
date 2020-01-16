@@ -91,7 +91,7 @@ SC_MODULE(TestGlobal2) {
             bar = bar + static_cast<unsigned int>(compute2(foo,bar));
             bar = bar + compute(3,compute2(foo,bar));
             bar = bar + compute(list[0],5);
-            if(compute3(foo>5,foo)){
+            if(compute3(foo>5,bar)){
                 test_out->write(bar);
             }else test_out->write(bar+1);
 
