@@ -19,7 +19,7 @@ set(GLOBAL_FILES
         ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
         ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
         ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
-        PrintITL_Test.h TestCases/ModuleStateNames.h)
+        PrintITL_Test.h TestCases/ModuleStateNames.h TestCases/ModulesGlobal.h)
 
 add_executable(PrintITL_Test_Run ${SOURCE_FILES} ${GLOBAL_FILES})
 

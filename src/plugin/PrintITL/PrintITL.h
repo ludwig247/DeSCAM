@@ -26,7 +26,11 @@ public:
 private:
     std::stringstream ss;
 
+    Model *model;
+
     std::string functions();
+
+    std::string globalFunctions();
 
     std::string convertDataType(std::string dataTypeName);
 
@@ -40,7 +44,6 @@ private:
 
 //        std::string hideConstants();
     SCAM::Module *module;
-
 };
 
 

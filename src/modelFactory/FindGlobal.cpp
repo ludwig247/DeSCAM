@@ -113,8 +113,6 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
         return true;
     };
 
-
-
     //Ensure, that all conditions are correct
     if(valid_result_type() && valid_function_type() && valid_parameters()){
         std::map<std::string,Parameter*> parameterMap;
@@ -134,12 +132,12 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
 
 SCAM::DataType * SCAM::FindGlobal::getDataType(const clang::QualType& type) const {
     SCAM::DataType * dataType;
-    if(type->isUnsignedIntegerType()){
+    if(type->isBooleanType()){
+        dataType = SCAM::DataTypes::getDataType("bool");
+    }else if(type->isUnsignedIntegerType()){
         dataType = SCAM::DataTypes::getDataType("unsigned");
     }else if(type->isIntegerType()){
         dataType = SCAM::DataTypes::getDataType("int");
-    }else if(type->isBooleanType()){
-        dataType = SCAM::DataTypes::getDataType("bool");
     }else throw std::runtime_error("Type: "+type.getAsString() + "not allowed");
     return dataType;
 }

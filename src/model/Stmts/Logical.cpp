@@ -2,6 +2,7 @@
 // Created by ludwig on 03.11.16.
 //
 
+#include <PrintStmt.h>
 #include "Logical.h"
 #include "NodePeekVisitor.h"
 
@@ -10,8 +11,11 @@ SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs) 
         rhs(rhs),
         operation(operation),
         Expr(lhs->getDataType()) {
-    if (lhs->getDataType() != rhs->getDataType())
-        throw std::runtime_error("Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype");
+    if (lhs->getDataType() != rhs->getDataType()){
+        std::string message = PrintStmt::toString(lhs) +":" + lhs->getDataType()->getName() + " " + operation + " " +  PrintStmt::toString(rhs) + ":" +  rhs->getDataType()->getName() + "\n";
+        throw std::runtime_error(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype");
+    }
+
     if (lhs->getDataType()->getName() != "bool") throw std::runtime_error("operands must be boolean");
     if (!(operation == "and" || operation == "nand" || operation == "or" || operation == "nor" || operation == "xor" || operation == "xnor")) {
         throw std::runtime_error("Logical: unsuported operator");

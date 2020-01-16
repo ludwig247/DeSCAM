@@ -545,6 +545,10 @@ void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
             func.second->setStmtList(functionFactory.getStmtList());
 
         }catch(std::runtime_error& e){
+//            std::cout << e.what() << std::endl;
+//            for(auto msg:  ErrorMsg::getErrorList()){
+//                std::cout << msg.msg << std::endl;
+//            }
             ErrorMsg::clear();
             this->model->removeGlobalFunction(func.second);
         }

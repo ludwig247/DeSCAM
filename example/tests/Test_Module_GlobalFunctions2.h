@@ -49,8 +49,7 @@ struct Test_Module_GlobalFunctions0 : public sc_module {
     //Constructor
     SC_HAS_PROCESS(Test_Module_GlobalFunctions0);
 
-    Test_Module_GlobalFunctions0(sc_module_name
-    name) :
+    Test_Module_GlobalFunctions0(sc_module_name name) :
     b_out("b_out") {
         SC_THREAD(fsm);
     }

@@ -10,11 +10,6 @@
 #include "../Interfaces/Interfaces.h"
 #define ADD_HEX 0x100
 
-const unsigned number = 0x111;
-const unsigned int number2 = 0x111;
-const int number3 = 20;
-//TODO: allow negativ numbers for integer ..
-const bool number4 = true;
 
 unsigned int compute(unsigned int param, int param2) {
     if(param > 10 && param2 > 10){
@@ -27,16 +22,22 @@ int compute2(int param, unsigned int param2){
     return param+3;
 }
 
-SC_MODULE(ModuleGlobalVars) {
+bool compute3(bool param, unsigned int val){
+
+    if( (val > 0) && !param) return false;
+    else return true;
+}
+
+SC_MODULE(TestGlobal2) {
     blocking_in<int> test_in;
     blocking_out<unsigned int> test_out;
 
     int foo;
     unsigned int bar;
     unsigned int list[5];
+    bool test;
 
-
-    SC_CTOR(ModuleGlobalVars):
+    SC_CTOR(TestGlobal2):
             test_in("test_in"),
             test_out("test_out") {
         SC_THREAD(fsm);
@@ -49,49 +50,16 @@ SC_MODULE(ModuleGlobalVars) {
             bar = bar + compute(3,compute2(foo,bar));
             bar = bar + compute(list[0],5);
 
-            test_out->write(bar);
+            if(compute3(true,bar)){
+                test_out->write(bar);
+            }else test_out->write(bar+1);
 
         }
     }
 };
-//};SC_MODULE(ModuleGlobalVars)
-//{
-//    blocking_in <int> test_in;
-//    blocking_out<unsigned int> test_out;
-//
-//    int foo;
-//    unsigned int bar;
-//
-//    unsigned int test_var(unsigned int val) const {
-//        return val+3+number;
-//    }
-//
-//    SC_CTOR(ModuleGlobalVars):
-//            test_in("test_in"),
-//            test_out("test_out")
-//    {
-//        SC_THREAD(fsm);
-//    }
-//    void fsm()
-//    {
-//        while(true)
-//        {
-//          //test_in->read(foo);
-//
-//          if(number4){
-//
-//          bar = number + bar;
-//
-//          bar = bar + number2;
-//
-//          bar = bar + static_cast<unsigned>(number3);
-//
-//          bar = bar + test_var(number2);
-//          }
-//          test_out->write(bar);
-//
-//        }
-//    }
 //};
+//
+//
+
 
 #endif //PROJECT_SLAVEDAVEBAVE_H_H
