@@ -7,5 +7,5 @@ set(PROPERTY_SUITE_FILES
         PropertyMacro.cpp
         PropertySuite.cpp
         ResetProperty.cpp
-        WaitProperty.cpp)
+        WaitProperty.cpp TemporalExpr.cpp TemporalExpr.h)
 add_library(propertySuite ${PROPERTY_SUITE_FILES})

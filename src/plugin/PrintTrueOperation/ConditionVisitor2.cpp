@@ -198,4 +198,8 @@ void SCAM::ConditionVisitor2::visit(SCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify";
 }
 
+void SCAM::ConditionVisitor2::visit(SCAM::TimeExprOperand &node) {
 
+        this->ss << node.getTimeExpr()->getName();
+
+}

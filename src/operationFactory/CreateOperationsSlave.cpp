@@ -274,6 +274,10 @@ namespace SCAM {
         throw std::runtime_error("CreateOperationsSlave: Not allowed ");
     }
 
+    void SCAM::CreateOperationsSlave::visit(SCAM::TimeExprOperand &node) {
+        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+    }
+
     void SCAM::CreateOperationsSlave::visit(SCAM::UnaryExpr &node) {
         this->newExpr = &node;
     }

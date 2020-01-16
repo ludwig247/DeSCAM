@@ -79,6 +79,9 @@ namespace SCAM {
 
         static FunctionOperand *simplifyNode(FunctionOperand &node);
 
+        static TimeExprOperand *simplifyNode(TimeExprOperand &node);
+
+
     private:
         Stmt *nodePointer;
         bool nodeSimplified = false;
@@ -137,6 +140,8 @@ namespace SCAM {
         void visit(class FunctionOperand &node) override;
 
         void visit(class ArrayOperand &node) override;
+
+        void visit(class TimeExprOperand &node) override;
 
     public:
         void visit(class ArrayExpr &node) override;

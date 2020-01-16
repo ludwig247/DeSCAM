@@ -42,6 +42,8 @@ private:
 
     void visit(Interface &node) {};
 
+    void visit(TimeExpr &node) {};
+
 };
 
 #endif //PROJECT_PRINTTEMPLATE_H

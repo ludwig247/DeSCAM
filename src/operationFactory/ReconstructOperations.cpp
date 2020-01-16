@@ -173,6 +173,10 @@ namespace SCAM {
         throw std::runtime_error("ReconstructOperations::PortOperand: Not allowed ");
     }
 
+    void SCAM::ReconstructOperations::visit(SCAM::TimeExprOperand &node) {
+        throw std::runtime_error("ReconstructOperations::TimeExprOperand: Not allowed ");
+    }
+
     void SCAM::ReconstructOperations::visit(SCAM::Assignment &node) {
         reset();
         //LHS

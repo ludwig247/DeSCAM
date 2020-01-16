@@ -118,6 +118,8 @@ namespace SCAM {
 
         virtual void visit(Peek &node);
 
+        virtual void visit(struct TimeExprOperand &node);
+
     };
 }
 
