@@ -43,7 +43,7 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
 }
 
 std::string PrintITL::print() {
-    return (propertySuite() + functions() + globalFunctions());
+    return (propertySuite() + functions());
 }
 
 std::string PrintITL::functions() {
@@ -780,7 +780,7 @@ std::string PrintITL::pipelined() {
 
 std::string PrintITL::globalFunctions() {
     std::stringstream globalss;
-    if (module->getFunctionMap().empty()) return globalss.str();
+    if (model->getGlobalFunctionMap().empty()) return globalss.str();
     globalss << "-- GLOBAL FUNCTIONS --\n";
     for (auto function: model->getGlobalFunctionMap()) {
         globalss << "macro " + function.first << "(";
