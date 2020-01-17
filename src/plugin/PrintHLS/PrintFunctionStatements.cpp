@@ -221,13 +221,9 @@ void PrintFunctionStatements::visit(ArrayOperand &node) {
 }
 
 void PrintFunctionStatements::visit(Bitwise &node) {
-    bool bitConcatenation = isBitConcatenationOp(&node);
-    if (bitConcatenation) {
-        auto bitSlicingOps = getBitConcatenationOp(&node);
-        for (auto&& bitSlicingOp : bitSlicingOps) {
-            std::cout << bitSlicingOp->getOpAsString() << "\t";
-        }
-        std::cout << std::endl;
+    auto bitConcatenation = std::make_unique<BitConcatenation>(&node);
+    if (bitConcatenation->isBitConcatenationOp()) {
+        this->ss << bitConcatenation->getOpAsString();
     } else {
         auto bitSlicing = std::make_unique<BitSlicingHLS>(&node);
         if (bitSlicing->isSlicingOp()) {
@@ -260,97 +256,6 @@ void PrintFunctionStatements::visit(Bitwise &node) {
             }
         }
     }
-}
-
-bool PrintFunctionStatements::isBitConcatenationOp(Bitwise* node) {
-    if (Utilities::getSubTypeBitwise(node->getOperation()) != SubTypeBitwise::BITWISE_OR) {
-        return false;
-    }
-
-    bool bitConcatenation = true;
-    uint32_t constValue = 0;
-    if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
-        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node->getRhs());
-        if (!bitSlicingRHS->isSlicingOp()) {
-            bitConcatenation = isBitConcatenationOp(dynamic_cast<Bitwise* >(node->getRhs()));
-        }
-    } else {
-        if (!isConsValue(node->getRhs())) {
-            return false;
-        } else {
-            constValue |= getConstValue(node->getRhs());
-        }
-    }
-    if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
-        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node->getLhs());
-        if (!bitSlicingLHS->isSlicingOp()) {
-            bitConcatenation &= isBitConcatenationOp(dynamic_cast<Bitwise* >(node->getLhs()));
-        }
-    } else if (!isConsValue(node->getLhs())) {
-        if (!isConsValue(node->getLhs())) {
-            return false;
-        } else {
-            constValue |= getConstValue(node->getLhs());
-        }
-    }
-
-    std::cout << "Const Value: " << constValue << std::endl;
-
-    return bitConcatenation;
-}
-
-bool PrintFunctionStatements::isConsValue(Expr *node) {
-    if (NodePeekVisitor::nodePeekIntegerValue(node)) {
-        return true;
-    }
-    if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
-        return true;
-    }
-    if (NodePeekVisitor::nodePeekCast(node)) {
-        auto castNode = dynamic_cast<Cast* >(node);
-        return isConsValue(castNode->getSubExpr());
-    }
-    return false;
-}
-
-uint32_t PrintFunctionStatements::getConstValue(Expr *node) {
-    if (NodePeekVisitor::nodePeekIntegerValue(node)) {
-        return (dynamic_cast<IntegerValue* >(node)->getValue());
-    }
-    if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
-        return (dynamic_cast<UnsignedValue* >(node)->getValue());
-    }
-    auto castNode = dynamic_cast<Cast* >(node);
-    return isConsValue(castNode->getSubExpr());
-}
-
-std::vector<std::unique_ptr<BitSlicingHLS>> PrintFunctionStatements::getBitConcatenationOp(Bitwise* node) {
-    std::vector<std::unique_ptr<BitSlicingHLS>> bitSlicingOps;
-
-    if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
-        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node->getRhs());
-        if (!bitSlicingRHS->isSlicingOp()) {
-            auto ops = getBitConcatenationOp(dynamic_cast<Bitwise * >(node->getRhs()));
-            for (auto &&op : ops) {
-                bitSlicingOps.emplace_back(std::move(op));
-            }
-        } else {
-            bitSlicingOps.emplace_back(std::move(bitSlicingRHS));
-        }
-    }
-    if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
-        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node->getLhs());
-        if (!bitSlicingLHS->isSlicingOp()) {
-            auto ops = getBitConcatenationOp(dynamic_cast<Bitwise* >(node->getLhs()));
-            for (auto&& op : ops) {
-                bitSlicingOps.emplace_back(std::move(op));
-            }
-        } else {
-            bitSlicingOps.emplace_back(std::move(bitSlicingLHS));
-        }
-    }
-
-    return bitSlicingOps;
 }
 
 void PrintFunctionStatements::printIndent() {

@@ -13,9 +13,9 @@
 struct Node {
     StmtType type = StmtType::UNKNOWN;
     SubTypeBitwise subType = SubTypeBitwise::UNKNOWN;
-    unsigned int value;
-    unsigned int firstBit;
-    unsigned int lastBit;
+    uint32_t value;
+    uint32_t firstBit;
+    uint32_t lastBit;
     std::string name;
     std::vector<std::shared_ptr<Node>> child;
 };
@@ -29,16 +29,18 @@ namespace SCAM {
 
         bool isSlicingOp();
         std::string getOpAsString();
+        uint32_t getRangeAsValue();
 
     private:
+        std::shared_ptr<Node> actualNode;
+        uint32_t rangeValue;
+
         bool slicing(Node *node);
         bool sliceWithShift(Node *node);
         bool sliceWithoutShift(Node *node);
         bool shiftWithConstant(Node *node);
         std::string getString(Node *node);
-        bool getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit);
-
-        std::shared_ptr<Node> actualNode;
+        bool getRange(uint32_t number, uint32_t &firstBit, uint32_t &lastBit);
 
         void visit(Arithmetic &node) override ;
         void visit(VariableOperand &node) override ;
@@ -72,6 +74,29 @@ namespace SCAM {
         void visit(Wait &node) override {};
         void visit(Peek &node) override {};
         void visit(ArrayExpr &node) override {};
+    };
+
+    class BitConcatenation {
+
+    public:
+        explicit BitConcatenation(Bitwise* node);
+
+        bool isBitConcatenationOp();
+        std::string getOpAsString();
+
+    private:
+        using slicing_ops = std::vector<std::unique_ptr<BitSlicingHLS>>;
+
+        Bitwise* bitwiseNode;
+        slicing_ops bitSlicingOps;
+        uint32_t constValue;
+        std::string opAsString;
+
+        bool evaluateOps(Bitwise* node);
+        bool isConstValue(Expr* node);
+        uint32_t getConstValue(Expr* node);
+        void getBitConcatenationOp(Bitwise* node);
+        void setOpAsString();
     };
 
 }

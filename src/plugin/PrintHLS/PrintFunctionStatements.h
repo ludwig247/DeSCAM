@@ -42,10 +42,6 @@ namespace SCAM {
         OptimizeForHLS *opt;
         Side side;
 
-        bool isBitConcatenationOp(Bitwise* node);
-        bool isConsValue(Expr* node);
-        uint32_t getConstValue(Expr* node);
-        std::vector<std::unique_ptr<BitSlicingHLS>> getBitConcatenationOp(Bitwise* node);
         void printIndent();
     };
 

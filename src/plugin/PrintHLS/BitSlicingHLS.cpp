@@ -2,8 +2,11 @@
 // Created by johannes on 12.08.19.
 //
 
-#include <set>
 #include "BitSlicingHLS.h"
+
+#include <set>
+
+#include "NodePeekVisitor.h"
 
 using namespace SCAM;
 
@@ -134,6 +137,10 @@ bool BitSlicingHLS::slicing(Node *node) {
     return sliceWithShift(node) || sliceWithoutShift(node) || shiftWithConstant(node);
 }
 
+uint32_t BitSlicingHLS::getRangeAsValue() {
+    return rangeValue;
+}
+
 bool BitSlicingHLS::sliceWithShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         for (auto &child : node->child) {
@@ -152,8 +159,9 @@ bool BitSlicingHLS::sliceWithShift(Node *node) {
                 return false;
             }
             if (child->type == StmtType::UNSIGNED_VALUE) {
-                unsigned int firstBit;
-                unsigned int lastBit;
+                uint32_t firstBit;
+                uint32_t lastBit;
+                rangeValue = child->value;
                 if (!getRange(child->value, firstBit, lastBit)) {
                     return false;
                 } else {
@@ -173,8 +181,9 @@ bool BitSlicingHLS::sliceWithoutShift(Node *node) {
         std::set<StmtType > types;
         for (auto &child : node->child) {
             if (child->type == StmtType::UNSIGNED_VALUE) {
-                unsigned int firstBit;
-                unsigned int lastBit;
+                uint32_t firstBit;
+                uint32_t lastBit;
+                rangeValue = child->value;
                 if (!getRange(child->value, firstBit, lastBit)) {
                     return false;
                 } else {
@@ -204,6 +213,13 @@ bool BitSlicingHLS::shiftWithConstant(Node *node) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
             std::set<StmtType > types;
             for (auto &child : node->child) {
+                if (child->type == StmtType::UNSIGNED_VALUE) {
+                    if (node->subType == SubTypeBitwise::RIGHT_SHIFT) {
+                        rangeValue = UINT32_MAX >> child->value;
+                    } else {
+                        rangeValue = UINT32_MAX << child->value;
+                    }
+                }
                 types.insert(child->type);
             }
             if (types.find(StmtType::UNSIGNED_VALUE) == types.end()) {
@@ -282,7 +298,7 @@ std::string BitSlicingHLS::getString(Node *node) {
     return ss.str();
 }
 
-bool BitSlicingHLS::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
+bool BitSlicingHLS::getRange(uint32_t number, uint32_t &firstBit, uint32_t &lastBit) {
     firstBit = -1;
     lastBit = -1;
     bool firstBitSet = false;
@@ -309,4 +325,148 @@ bool BitSlicingHLS::getRange(unsigned int number, unsigned int &firstBit, unsign
         number /= 2;
     }
     return !((firstBit == -1) || (lastBit == -1));
+}
+
+BitConcatenation::BitConcatenation(Bitwise* node) :
+    bitwiseNode(node),
+    constValue(0)
+{
+}
+
+bool BitConcatenation::isBitConcatenationOp() {
+    bool eval = evaluateOps(bitwiseNode);
+    if (!eval) {
+        return false;
+    }
+    getBitConcatenationOp(bitwiseNode);
+    setOpAsString();
+    return true;
+}
+
+bool BitConcatenation::evaluateOps(Bitwise* node) {
+    if (Utilities::getSubTypeBitwise(node->getOperation()) != SubTypeBitwise::BITWISE_OR) {
+        return false;
+    }
+
+    bool bitConcatenation = true;
+    if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
+        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node->getRhs());
+        if (!bitSlicingRHS->isSlicingOp()) {
+            bitConcatenation = evaluateOps(dynamic_cast<Bitwise* >(node->getRhs()));
+        }
+    } else if (!isConstValue(node->getRhs())) {
+        return false;
+    }
+    if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
+        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node->getLhs());
+        if (!bitSlicingLHS->isSlicingOp()) {
+            bitConcatenation &= evaluateOps(dynamic_cast<Bitwise* >(node->getLhs()));
+        }
+    } else if (!isConstValue(node->getLhs())) {
+        return false;
+    }
+
+    return bitConcatenation;
+}
+
+bool BitConcatenation::isConstValue(Expr *node) {
+    if (NodePeekVisitor::nodePeekIntegerValue(node)) {
+        return true;
+    }
+    if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
+        return true;
+    }
+    if (NodePeekVisitor::nodePeekCast(node)) {
+        auto castNode = dynamic_cast<Cast* >(node);
+        return isConstValue(castNode->getSubExpr());
+    }
+    return false;
+}
+
+void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
+    if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
+        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node->getRhs());
+        if (!bitSlicingRHS->isSlicingOp()) {
+            getBitConcatenationOp(dynamic_cast<Bitwise * >(node->getRhs()));
+        } else {
+            bitSlicingOps.emplace_back(std::move(bitSlicingRHS));
+        }
+    } else if (isConstValue(node->getRhs())) {
+        constValue = constValue | getConstValue(node->getRhs());
+    }
+    if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
+        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node->getLhs());
+        if (!bitSlicingLHS->isSlicingOp()) {
+            getBitConcatenationOp(dynamic_cast<Bitwise* >(node->getLhs()));
+        } else {
+            bitSlicingOps.emplace_back(std::move(bitSlicingLHS));
+        }
+    } else if (isConstValue(node->getLhs())) {
+        constValue = constValue | getConstValue(node->getLhs());
+    }
+}
+
+uint32_t BitConcatenation::getConstValue(Expr *node) {
+    if (NodePeekVisitor::nodePeekIntegerValue(node)) {
+        return (dynamic_cast<IntegerValue* >(node)->getValue());
+    }
+    if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
+        return (dynamic_cast<UnsignedValue* >(node)->getValue());
+    }
+    auto castNode = dynamic_cast<Cast* >(node);
+    return getConstValue(castNode->getSubExpr());
+}
+
+void BitConcatenation::setOpAsString() {
+    std::stringstream ss;
+    ss << "(";
+    uint32_t i = 32;
+    uint32_t value = 0;
+    uint32_t bitCounter = 0;
+    BitSlicingHLS* slicingOp = nullptr;
+    BitSlicingHLS* lastSlicingOp = nullptr;
+    do {
+        i--;
+        slicingOp = nullptr;
+        bool bitSet;
+        for (auto&& op : bitSlicingOps) {
+            bitSet = (1 << i) & op->getRangeAsValue();
+            if (bitSet) {
+                slicingOp = op.get();
+            }
+        }
+
+        bitSet = (1 << i) & constValue;
+        if (bitSet) {
+            value = (value << 1) + 1;
+            bitCounter++;
+        } else if (slicingOp == nullptr) {
+            value = (value << 1);
+            bitCounter++;
+        }
+
+        if (slicingOp != nullptr && bitCounter > 0) {
+            ss << "ap_uint<" << bitCounter << ">(" << value << ")" << ", ";
+            value = 0;
+            bitCounter = 0;
+        }
+
+        if (slicingOp != lastSlicingOp && lastSlicingOp != nullptr) {
+            ss << lastSlicingOp->getOpAsString() << ", ";
+        }
+        lastSlicingOp = slicingOp;
+    } while (i != 0);
+    if (bitCounter != 0) {
+        ss << "ap_uint<" << bitCounter << ">(" << value << ")";
+    }
+    if (lastSlicingOp != nullptr) {
+        ss << lastSlicingOp->getOpAsString();
+    }
+    ss << ")";
+
+    opAsString = ss.str();
+}
+
+std::string BitConcatenation::getOpAsString() {
+    return opAsString;
 }
