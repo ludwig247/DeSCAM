@@ -1,8 +1,9 @@
 #!/bin/bash
 
-SCAM_BIN="$HOME/SCAM/bin/SCAM"
-VIVADO_HLS="/opt/Xilinx/Vivado/2019.1/bin/vivado_hls"
-ONESPIN=""
+DESCAM_BIN="$HOME/DeSCAM/bin/DESCAM"
+VIVADO_HLS="/import/software/Xilinx/Vivado/2018.2/bin/vivado_hls"
+ONESPIN="/import/software/onespin/OneSpin360_2019.2.2/bin/onespin"
+PYTHON3="python3"
 
 OUTPUT_DIR="VHDLwithHLS"
 
@@ -11,9 +12,8 @@ BLUE="\e[44m"
 GREEN="\e[30;48;5;82m"
 DEFAULT="\e[0m"
 
-
-files=''
 output=''
+input=''
 
 print_usage() {
 	echo "-------- SCAM Tool with Vivado HLS --------"
@@ -25,12 +25,13 @@ print_usage() {
 	echo ""
 	echo "Options:"
 	echo "-o				Output directory (default: current directory)"
-	echo "-h                show brief help"
+	echo "-h				show brief help"
 }
 
-while getopts 'f:h' flag; do
+while getopts 'f:o:h' flag; do
   case "${flag}" in
-    f) 	files="${OPTARG}" ;;
+    f) 	input="${OPTARG}" ;;
+	o)  output="${OPTARG}" && mkdir ${OPTARG};;
     h) 	print_usage
 	 	exit 0 ;;
     *) 	print_usage
@@ -38,7 +39,7 @@ while getopts 'f:h' flag; do
   esac
 done
 
-if [ -z "$files" ]
+if [ -z "$input" ]
 then
 	echo "Source file is required"
 	echo "Run with -h for more information"
@@ -51,35 +52,35 @@ then
 fi
 
 # Remove old files
-if [ -d PrintHLS ]; then rm -Rf PrintHLS; fi
-if [ -d PrintVHDL ]; then rm -Rf PrintVHDL; fi
-if [ -d PrintITL ]; then rm -Rf PrintITL; fi
-if [ -d VHDLwithHLS ]; then rm -Rf VHDLwithHLS; fi
+if [ -d $output/PrintHLS ]; then rm -Rf $output/PrintHLS; fi
+if [ -d $output/PrintVHDL ]; then rm -Rf $output/PrintVHDL; fi
+if [ -d $output/PrintITL ]; then rm -Rf $output/PrintITL; fi
+if [ -d $output/VHDLwithHLS ]; then rm -Rf $output/VHDLwithHLS; fi
 
 # Start SCAM tool and generated files for HLS and Properties
 echo -e "${BLUE}Generating High Level Synthesis and ITL files${DEFAULT}"
-# shellcheck disable=SC2086
-($SCAM_BIN -f $files -o $output -PrintHLS -PrintVHDL --hls -PrintITL --hls && echo -e "${GREEN}Generated High Level Synthesis and ITL files${DEFAULT}") || (echo -e "${RED}Error generating High Level Synthesis and ITL files${DEFAULT}" && exit 1) ;
+($DESCAM_BIN -f $input -o $output -PrintHLS -PrintVHDL --hls -PrintITL --hls && echo -e "${GREEN}Generated High Level Synthesis and ITL files${DEFAULT}") || (echo -e "${RED}Error generating High Level Synthesis and ITL files${DEFAULT}" && exit 1) ;
 
 # Create directory for RTL and Properties and HLS
-mkdir $OUTPUT_DIR
-mkdir $OUTPUT_DIR/RTL
-mkdir $OUTPUT_DIR/Properties
-mkdir $OUTPUT_DIR/HLS
+mkdir $output/$OUTPUT_DIR
+mkdir $output/$OUTPUT_DIR/RTL
+mkdir $output/$OUTPUT_DIR/Properties
+mkdir $output/$OUTPUT_DIR/HLS
 
 # Copy all VHDL files in RTL directory
-cp PrintVHDL/*.vhd $OUTPUT_DIR/RTL
+cp $output/PrintVHDL/*.vhd $output/$OUTPUT_DIR/RTL
 
 # Copy all HLS files to HLS directory
-cp PrintHLS/*.cpp $OUTPUT_DIR/HLS
-cp PrintHLS/*.h $OUTPUT_DIR/HLS
-cp PrintHLS/*.tcl $OUTPUT_DIR/HLS
+cp $output/PrintHLS/*.cpp $output/$OUTPUT_DIR/HLS
+cp $output/PrintHLS/*.h $output/$OUTPUT_DIR/HLS
+cp $output/PrintHLS/*.tcl $output/$OUTPUT_DIR/HLS
 
 # Copy all ITL files in Properties directory
-cp PrintITL/* $OUTPUT_DIR/Properties
+cp $output/PrintITL/* $output/$OUTPUT_DIR/Properties
 
 # Start High Level Synthesis
-cd $OUTPUT_DIR/HLS || (echo -e "${RED}Directory $OUTPUT_DIR/HLS does not exist${DEFAULT}" && exit 1)
+cp test.py $output/$OUTPUT_DIR 
+cd $output/$OUTPUT_DIR/HLS || (echo -e "${RED}Directory $output/$OUTPUT_DIR/HLS does not exist${DEFAULT}" && exit 1)
 mkdir directives
 mv *directives.tcl directives
 mkdir hls_script
@@ -102,8 +103,12 @@ echo -e "${BLUE}Start High Level Synthesis${DEFAULT}"
 #	cat $TOP_FUNCTION/synthesis/*/syn/report/*.rpt
 #done && echo -e "${GREEN}High Level Synthesis finished${DEFAULT}") || (echo -e "${RED}High Level Synthesis failed${DEFAULT}" && exit 1) ;
 
-# Create script for onespin
+# Use Python Script
 cd ..
+FILE_NAME=$(echo ${input##*/} | cut -d'.' -f1)
+$PYTHON3 test.py -f $FILE_NAME
+
+# Create script for onespin
 cat <<EOF >Onespin_Script.tcl
 read_vhdl RTL/*.vhd
 elaborate
@@ -113,5 +118,10 @@ read_itl Properties/*vhi
 check -all [get_checks]
 EOF
 
-#$ONESPIN -i Onespin_Script.tcl
+$ONESPIN -i Onespin_Script.tcl
+
+# Remove redundant directories
+rm -Rf ../PrintHLS
+rm -Rf ../PrintVHDL
+rm -Rf ../PrintITL
 
