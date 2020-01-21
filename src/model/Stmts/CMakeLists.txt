@@ -38,4 +38,5 @@ add_library(Stmts
         Notify.cpp
         Wait.cpp
         Peek.cpp
-        ArrayExpr.cpp TimeExprOperand.cpp TimeExprOperand.h)
+        ArrayExpr.cpp
+        TimeExprOperand.cpp)

@@ -4,6 +4,20 @@
 
 #include "TemporalExpr.h"
 
+
+SCAM::TemporalExpr::TemporalExpr(Expr* timeExpr, Stmt *statement) :
+    statement(statement) {
+    type = AT;
+    timeExprs.push_back(timeExpr);
+}
+
+SCAM::TemporalExpr::TemporalExpr(Expr* timeExpr1, Expr* timeExpr2, Stmt *statement) :
+    statement(statement) {
+    type = DURING;
+    timeExprs.push_back(timeExpr1);
+    timeExprs.push_back(timeExpr2);
+}
+
 SCAM::TemporalExprType SCAM::TemporalExpr::getType() const {
     return type;
 }

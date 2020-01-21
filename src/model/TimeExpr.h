@@ -20,7 +20,10 @@ namespace SCAM {
      */
     class TimeExpr : public VariableTemplate<TimeExpr> {
     public:
-        TimeExpr(std::string name);
+        TimeExpr() = delete;
+        TimeExpr(TimeExpr&) = delete;
+
+        explicit TimeExpr(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, TimeExpr *parent = nullptr);
 
         //Visitor
         virtual void accept(AbstractVisitor &visitor);

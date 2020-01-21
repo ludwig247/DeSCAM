@@ -17,6 +17,10 @@ namespace SCAM {
 
     public:
 
+        TemporalExpr(Expr * timeExpr, Stmt *statement);
+
+        TemporalExpr(Expr * timeExpr1, Expr * timeExpr2, Stmt *statement);
+
         TemporalExprType getType() const;
 
         void setType(TemporalExprType type);

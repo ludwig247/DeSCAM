@@ -4,8 +4,8 @@
 
 #include "TimeExpr.h"
 
-SCAM::TimeExpr::TimeExpr(std::string name) :
-        VariableTemplate(name, DataTypes::getDataType("unsigned"), nullptr, nullptr) {
+SCAM::TimeExpr::TimeExpr(std::string name, DataType *type, ConstValue *initialValue, TimeExpr *parent) :
+        VariableTemplate(std::move(name), DataTypes::getDataType("unsigned"), nullptr, nullptr) {
 
 }
 

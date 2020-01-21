@@ -4,6 +4,7 @@
 #include "VariableTemplate.h"
 #include "Variable.h"
 #include "DataSignal.h"
+#include "TimeExpr.h"
 #include "Parameter.h"
 
 namespace SCAM {
