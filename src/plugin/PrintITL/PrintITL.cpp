@@ -124,13 +124,95 @@ std::string PrintITL::location(bool loc) {
     } else return "";
 }
 
+std::string PrintITL::printTemporalExpr(TemporalExpr* temporalExpr) {
+
+    std::stringstream ss;
+
+    ss << "\t";
+    if (temporalExpr->isAt()) {
+        ss << "at ";
+        ss << ConditionVisitor::toString(temporalExpr->getTiming().at(0));
+        ss << ": ";
+    } else if (temporalExpr->isDuring()) {
+        ss << "during[";
+        ss << ConditionVisitor::toString(temporalExpr->getTiming().at(0));
+        ss << ", ";
+        ss << ConditionVisitor::toString(temporalExpr->getTiming().at(1));
+        ss << "]: ";
+    }
+    ss << ConditionVisitor::toString(temporalExpr->getStatement());
+    ss << ";\n";
+
+    return ss.str();
+}
+
+std::string PrintITL::printProperty(Property *property) {
+
+    std::stringstream ss;
+
+    ss << "property " << property->getName() << " is\n";
+
+    if (!property->getConstraints().empty()) {
+        ss << "dependencies: ";
+        for (auto c : property->getConstraints()) {
+            ss << c->getName();
+            if (c != *(property->getConstraints().end()-1)){
+                ss << ", ";
+            }
+        }
+        ss << ";\n";
+    }
+
+    if (!property->getTimePoints().empty()) {
+        ss << "for timepoints:\n";
+        for (auto tp = property->getTimePoints().begin(); tp != property->getTimePoints().end(); tp++) {
+            ss << "\t" << tp->first->getName() << " = " << DatapathVisitor::toString(tp->second);
+            if (std::next(tp) != property->getTimePoints().end()) {
+                ss << ",\n";
+            }
+        }
+        ss << ";\n";
+    }
+
+    //TODO: Overload < operator of PropertyMacro class for sorted output
+    //TODO: Array Types probably wont work as expected yet
+    if (!property->getFreezeSignals().empty()) {
+        ss << "freeze:\n";
+        for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
+            ss << "\t" << f->first->getName() << "_at_" << f->second->getName() << " = " << f->first->getName() << "@" << f->second->getName();
+            if (std::next(f) != property->getFreezeSignals().end()) {
+                ss << ",\n";
+            }
+        }
+        ss << ";\n";
+    }
+
+    if (!property->getAssumptionList().empty()){
+        ss << "assume:\n";
+        for (auto a : property->getAssumptionList()) {
+            ss << printTemporalExpr(a);
+        }
+    }
+
+    if (!property->getCommitmentList().empty()) {
+        ss << "prove:\n";
+        for (auto c : property->getCommitmentList()) {
+            ss << printTemporalExpr(c);
+        }
+    }
+    
+    ss << "end property;\n\n\n";
+
+    return ss.str();
+}
+
 std::string PrintITL::propertySuite() {
 
-    if (getOptionMap()["adjustmacros"]) {
+/*    if (getOptionMap()["adjustmacros"]) {
         return adjustmacros();
     } else if (getOptionMap()["pipelined"]) {
         return pipelined();
-    }
+    }*/
 
     PropertySuite *ps = this->module->getPropertySuite();
 
@@ -192,13 +274,18 @@ std::string PrintITL::propertySuite() {
     ss << "assume:\n";
     ss << "\t reset_sequence;\n";
     ss << "prove:\n";
-    ss << "\t at t: " << ps->getResetProperty()->getNextState()->getName() << ";\n";
+    //ss << "\t at t: " << ps->getResetProperty()->getNextState()->getName() << ";\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
+        //ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
+        ss << printTemporalExpr(commitment);
     }
     ss << "end property;\n";
     ss << std::endl << std::endl;
 
+    for (auto p : ps->getProperties()) {
+        ss << printProperty(p);
+    }
+/*
     // Operation properties
     for (auto op : ps->getOperationProperties()) {
         ss << "property " << op->getName() << " is\n";
@@ -276,67 +363,15 @@ std::string PrintITL::propertySuite() {
         }
         ss << "end property;\n";
         ss << "\n\n";
-    }
+    }*/
 
-    // Wait properties
-    for (auto wp : ps->getWaitProperties()) {
-        ss << "property " << wp->getName() << " is\n";
-
-        unsigned long constraintSize = wp->getConstraints().size();
-        ss << "dependencies: ";
-        for (auto co : wp->getConstraints()) {
-            ss << co->getName();
-            if (constraintSize > 1) {
-                ss << ",";
-            } else {
-                ss << ";\n";
-            }
-            constraintSize--;
-        }
-
-        unsigned long freezeVarSize = wp->getFreezeSignals().size();
-        if (freezeVarSize > 0) {
-            ss << "freeze:\n";
-            for (auto freeze : wp->getFreezeSignals()) {
-                ss << "\t";
-                if (freeze.second->isArrayType()) {
-                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
-                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
-                }else if(freeze.second->isCompoundType()){
-                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "_at_t";
-                    ss << " = ";
-                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "@t" ;
-                } else {
-                    ss << freeze.first << "_at_t = " << freeze.first << "@t";
-                }
-                if (freezeVarSize > 1) {
-                    ss << ",\n";
-                } else {
-                    ss << ";\n";
-                }
-                freezeVarSize--;
-            }
-        }
-        ss << "assume:\n";
-        ss << "\tat t: " << wp->getState()->getName() << ";\n";
-        for (auto assumption : wp->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
-        }
-        ss << "prove:\n";
-        ss << "\tat t+1: " << wp->getNextState()->getName() << ";\n";
-        for (auto commitment : wp->getCommitmentList()) {
-            ss << "\tat t+1: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
-        }
-        ss << "end property;\n";
-        ss << "\n\n";
-    }
 
 
     return ss.str();
 }
 
 
-std::string PrintITL::adjustmacros() {
+/*std::string PrintITL::adjustmacros() {
 
     PropertySuite *ps = this->module->getPropertySuite();
 
@@ -771,4 +806,4 @@ std::string PrintITL::pipelined() {
 
 
     return ss.str();
-}
+}*/

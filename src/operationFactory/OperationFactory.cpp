@@ -211,8 +211,8 @@ namespace SCAM {
             //std::cout << state.second->getName() << std::endl;
 
             state.second->setName(state.second->getName());
-            Variable *stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
-            PropertyMacro *pm = new PropertyMacro(state.second->getName(), stateVar);
+            auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
+            auto pm = new PropertyMacro(state.second->getName(), stateVar, DataTypes::getDataType("bool"));
             pm->setExpression(new BoolValue(true));
             propertySuite->addState(pm);
         }
@@ -235,7 +235,7 @@ namespace SCAM {
                 auto t_var = new TimeExpr("t");
                 auto t = new TimeExprOperand(t_var);
                 PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-                auto nextStateExpr = new TemporalExpr(t, nextState->getVariableOperand());
+                auto nextStateExpr = new TemporalExpr(t, nextState->getOperand());
 
                 propertySuite->getResetProperty()->addCommitment(nextStateExpr);
                 //propertySuite->getResetProperty()->setNextState(nextState);
@@ -294,7 +294,7 @@ namespace SCAM {
                 auto t_end_var = new TimeExpr("t_end");
                 auto t_end = new TimeExprOperand(t_end_var);
 
-                newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", new IntegerValue(1)));
+                newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
 
                 newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
@@ -347,8 +347,8 @@ namespace SCAM {
                 PropertyMacro *nextState  = propertySuite->findSignal(operation->getNextState()->getName());
                 auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
                 auto nextStateExpr  = new TemporalExpr(t,  nextState->getVariableOperand());
-                propertySuite->getResetProperty()->addAssumption(startStateExpr);
-                propertySuite->getResetProperty()->addCommitment( nextStateExpr);
+                newProperty->addAssumption(startStateExpr);
+                newProperty->addCommitment( nextStateExpr);
 
                 for (auto assumption : operation->getAssumptionsList()) {
                     newProperty->addAssumption(new TemporalExpr(t, assumption));
@@ -379,8 +379,8 @@ namespace SCAM {
                     }
                 }
 
-                auto t_plus_1 = new Arithmetic(t, "+", new IntegerValue(1));
-                auto t_end_minus_1 = new Arithmetic(t_end, "-", new IntegerValue(1));
+                auto t_plus_1 = new Arithmetic(t, "+", new UnsignedValue(1));
+                auto t_end_minus_1 = new Arithmetic(t_end, "-", new UnsignedValue(1));
 
                 //Notify&Sync Signals, no notification for shareds, alwaysReady in ...
                 for (auto port: module->getPorts()) {
@@ -431,7 +431,7 @@ namespace SCAM {
                 auto t_var = new TimeExpr("t");
                 auto t = new TimeExprOperand(t_var);
 
-                auto t_plus_1 = new Arithmetic(t, "+", new IntegerValue(1));
+                auto t_plus_1 = new Arithmetic(t, "+", new UnsignedValue(1));
 
                 newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
@@ -479,8 +479,8 @@ namespace SCAM {
                 PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
                 auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
                 auto nextStateExpr  = new TemporalExpr(t,  nextState->getVariableOperand());
-                propertySuite->getResetProperty()->addAssumption(startStateExpr);
-                propertySuite->getResetProperty()->addCommitment( nextStateExpr);
+                newProperty->addAssumption(startStateExpr);
+                newProperty->addCommitment( nextStateExpr);
 
                 for (auto assumption : operation->getAssumptionsList()) {
                     newProperty->addAssumption(new TemporalExpr(t, assumption));

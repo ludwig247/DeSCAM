@@ -24,7 +24,6 @@ namespace SCAM {
         PropertyMacro(const std::string &name, Port* port, SyncSignal* syncSignal, const DataType * type);
         PropertyMacro(const std::string &name, Port* port, Notify* notifySignal, const DataType * type);
         PropertyMacro(const std::string &name, Variable* variable, const DataType * type);
-        PropertyMacro(const std::string &name, Variable* state);
         PropertyMacro(const std::string &parentName, Variable* variable, const DataType * type, std::string subVarName);
         PropertyMacro(const std::string &name, Variable* variable, PropertyMacro* parent, const DataType * type);
 
@@ -36,6 +35,8 @@ namespace SCAM {
         Variable *getVariable() const;
         VariableOperand *getVariableOperand() const;
         PropertyMacro *getParent() const;
+
+        Expr *getOperand() const;
 
 
         std::string getFullName() const; //TODO: use constexpr
@@ -68,7 +69,7 @@ namespace SCAM {
 
         PropertyMacro * parent = nullptr;
 
-        enum MacroType {portType, notifyType, syncType, varType, stateType, arrayType};
+        enum MacroType {portType, notifyType, syncType, varType, arrayType};
         MacroType macroType;
 
         std::string parentName = "";
