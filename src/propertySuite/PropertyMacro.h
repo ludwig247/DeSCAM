@@ -40,6 +40,7 @@ namespace SCAM {
 
 
         std::string getFullName() const; //TODO: use constexpr
+        std::string getFullName(std::string delimiter) const;
         const std::string &getParentName() const;
         const std::string &getSubVarName() const;
 

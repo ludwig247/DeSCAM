@@ -7,13 +7,13 @@
 
 SCAM::TemporalExpr::TemporalExpr(Expr* timeExpr, Stmt *statement) :
     statement(statement) {
-    type = AT;
+    type = TemporalExprType::AT;
     timeExprs.push_back(timeExpr);
 }
 
 SCAM::TemporalExpr::TemporalExpr(Expr* timeExpr1, Expr* timeExpr2, Stmt *statement) :
     statement(statement) {
-    type = DURING;
+    type = TemporalExprType::DURING;
     timeExprs.push_back(timeExpr1);
     timeExprs.push_back(timeExpr2);
 }
@@ -58,9 +58,9 @@ void SCAM::TemporalExpr::setTiming(SCAM::Expr *timeExpr1, SCAM::Expr *timeExpr2)
 }
 
 bool SCAM::TemporalExpr::isAt() {
-    return (type == AT);
+    return (type == TemporalExprType::AT);
 }
 
 bool SCAM::TemporalExpr::isDuring() {
-    return (type == DURING);
+    return (type == TemporalExprType::DURING);
 }

@@ -11,7 +11,7 @@
 
 namespace SCAM {
 
-    enum TemporalExprType{AT, DURING};
+    enum class TemporalExprType{AT, DURING};
 
     class TemporalExpr {
 

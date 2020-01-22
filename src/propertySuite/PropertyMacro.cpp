@@ -231,6 +231,12 @@ namespace SCAM {
             return this->parentName+"."+this->subVarName;
         }else return this->parentName;
     }
+
+    std::string PropertyMacro::getFullName(std::string delimiter) const {
+        if(this->isCompoundType()){
+            return this->parentName+delimiter+this->subVarName;
+        }else return this->parentName;
+    }
 }
 
 
