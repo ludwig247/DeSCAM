@@ -50,13 +50,18 @@ const bool SCAM::DataType::isVoid() const {
 }
 
 SCAM::ConstValue *SCAM::DataType::getDefaultVal() const {
-    ConstValue *initVal;
+    ConstValue *initVal = nullptr;
     if (this->getName() == "int") initVal = new IntegerValue(0);
     else if (this->getName() == "bool") initVal = new BoolValue(false);
     else if (this->getName() == "unsigned") initVal = new UnsignedValue(0);
     else if (this->isEnumType()) {
-        auto firstEnumVal = *(this->getEnumValueMap().begin());
-        initVal = new EnumValue(firstEnumVal.first, this);
+        for(auto val: this->getEnumValueMap() ){
+            if(val.second == 0){
+                initVal = new EnumValue(val.first, this);
+            }
+        }
+        assert(initVal != nullptr);
+
     } else if (this->isCompoundType()) {
         std::vector<ConstValue *> compoundValueList;
         for (auto subVar: this->getSubVarMap()) {
