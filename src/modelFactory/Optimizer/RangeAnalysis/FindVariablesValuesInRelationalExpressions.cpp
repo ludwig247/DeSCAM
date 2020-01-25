@@ -84,7 +84,7 @@ void SCAM::FindVariablesValuesInRelationalExpressions::visit(struct Relational &
             addValToVarValMap(varName, node.getLhs());
         }
     } else {
-        SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(&node);
+        SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(&node,std::set<std::string>{});
         for (auto varName : variablesInStmtFinder.getVariablesInStmtSet()) {
             this->difficultToAnalyseVariablesSet.insert(varName);
         }

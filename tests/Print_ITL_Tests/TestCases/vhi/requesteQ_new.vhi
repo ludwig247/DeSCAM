@@ -75,7 +75,7 @@ prove:
 	 at t: buffer2_var_abort = false;
 	 at t: buffer2_var_addr = resize(0,32);
 	 at t: buffer2_var_data = resize(0,32);
-	 at t: buffer2_var_opc = BTR2_OPC;
+	 at t: buffer2_var_opc = NOP_OPC;
 	 at t: buffer3_sig_abort = false;
 	 at t: buffer3_sig_addr = resize(0,32);
 	 at t: buffer3_sig_data = resize(0,32);
@@ -83,7 +83,7 @@ prove:
 	 at t: buffer3_var_abort = false;
 	 at t: buffer3_var_addr = resize(0,32);
 	 at t: buffer3_var_data = resize(0,32);
-	 at t: buffer3_var_opc = BTR2_OPC;
+	 at t: buffer3_var_opc = NOP_OPC;
 	 at t: nextphase = EMPTY;
 	 at t: req_o_sig = false;
 	 at t: status1_sig = EMPTY_STATUS;
@@ -95,7 +95,7 @@ prove:
 	 at t: tmp_buffer_abort = false;
 	 at t: tmp_buffer_addr = resize(0,32);
 	 at t: tmp_buffer_data = resize(0,32);
-	 at t: tmp_buffer_opc = BTR2_OPC;
+	 at t: tmp_buffer_opc = NOP_OPC;
 end property;
 
 

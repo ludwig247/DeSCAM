@@ -83,19 +83,19 @@ namespace SCAM {
 
         void visit(struct ITE &node) override {};
 
-        void visit(struct Arithmetic &node) override {};
+        void visit(struct Arithmetic &node) override;
 
-        void visit(struct Logical &node) override {};
+        void visit(struct Logical &node) override;
 
-        void visit(struct Relational &node) override {};
+        void visit(struct Relational &node) override;
 
-        void visit(struct Bitwise &node) override {};
+        void visit(struct Bitwise &node) override;
 
         void visit(struct SyncSignal &node) override {};
 
         void visit(struct DataSignalOperand &node) override {};
 
-        void visit(struct Cast &node) override {};
+        void visit(struct Cast &node) override{};
 
         void visit(struct SCAM::FunctionOperand &node) override {};
 

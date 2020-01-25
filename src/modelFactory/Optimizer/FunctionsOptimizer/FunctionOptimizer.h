@@ -63,10 +63,9 @@ namespace SCAM {
         std::map<std::string, int> functionUseMap;                              //keeps the number of times a function is used in the blockCFG, for naming purposes
         std::map<SCAM::FunctionOperand *, SCAM::Expr *> oldFuncOpOptimizedFuncPairsMap;   //Keeps a pointer to the optimized function to reuse an optimized function instead of creating a new one if paramter list is the same
         std::string createFuncName(std::string funcOpName);
-
         SCAM::Expr *
         isAlreadyOptimizedFunction(std::string operandName, const std::map<std::string, SCAM::Expr *> &paramValueMap);
-
+        static bool noOptimizationAchieved(const std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector1, std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector2);
         //visitors
         void visit(class VariableOperand &node) override {};
 

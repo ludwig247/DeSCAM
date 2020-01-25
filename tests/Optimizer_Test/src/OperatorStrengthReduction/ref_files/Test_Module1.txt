@@ -1,0 +1,200 @@
+[ID0]
+		nullptr
+		Pred:
+		Succ:[ID1]
+[ID1]
+		nextphase = SECTION_A
+		Pred:[ID0]
+		Succ:[ID2]
+[ID2]
+		op = 0
+		Pred:[ID1]
+		Succ:[ID3]
+[ID3]
+		phase = SECTION_A
+		Pred:[ID2]
+		Succ:[ID4]
+[ID4]
+		x = 0
+		Pred:[ID3]
+		Succ:[ID5]
+[ID5]
+		while (true)
+		Pred:[ID4], [ID10]
+		Succ:[ID6]
+[ID6]
+		op_in.read(op)
+		Pred:[ID5]
+		Succ:[ID7]
+[ID7]
+		b_in.read(x)
+		Pred:[ID6]
+		Succ:[ID8]
+[ID8]
+		if ((op == 0))
+		Pred:[ID7]
+		Succ:[ID9], [ID11]
+[ID9]
+		b_out.write((x << 2))
+		Pred:[ID8]
+		Succ:[ID10]
+[ID10]
+		nullptr
+		Pred:[ID9], [ID12], [ID14], [ID16], [ID18], [ID20], [ID22], [ID24], [ID26], [ID28], [ID30], [ID32], [ID34], [ID36], [ID38], [ID40], [ID42], [ID44], [ID46], [ID48], [ID49]
+		Succ:[ID5]
+[ID11]
+		if ((op == 1))
+		Pred:[ID8]
+		Succ:[ID12], [ID13]
+[ID12]
+		b_out.write(((x << 4) - x))
+		Pred:[ID11]
+		Succ:[ID10]
+[ID13]
+		if ((op == 2))
+		Pred:[ID11]
+		Succ:[ID14], [ID15]
+[ID14]
+		b_out.write(((x << 1) + x))
+		Pred:[ID13]
+		Succ:[ID10]
+[ID15]
+		if ((op == 3))
+		Pred:[ID13]
+		Succ:[ID16], [ID17]
+[ID16]
+		b_out.write((x * 6))
+		Pred:[ID15]
+		Succ:[ID10]
+[ID17]
+		if ((op == 4))
+		Pred:[ID15]
+		Succ:[ID18], [ID19]
+[ID18]
+		b_out.write((x * -(2)))
+		Pred:[ID17]
+		Succ:[ID10]
+[ID19]
+		if ((op == 5))
+		Pred:[ID17]
+		Succ:[ID20], [ID21]
+[ID20]
+		b_out.write((x * -(6)))
+		Pred:[ID19]
+		Succ:[ID10]
+[ID21]
+		if ((op == 6))
+		Pred:[ID19]
+		Succ:[ID22], [ID23]
+[ID22]
+		b_out.write((x << 2))
+		Pred:[ID21]
+		Succ:[ID10]
+[ID23]
+		if ((op == 7))
+		Pred:[ID21]
+		Succ:[ID24], [ID25]
+[ID24]
+		b_out.write(((x << 1) + x))
+		Pred:[ID23]
+		Succ:[ID10]
+[ID25]
+		if ((op == 8))
+		Pred:[ID23]
+		Succ:[ID26], [ID27]
+[ID26]
+		b_out.write(((x << 2) + x))
+		Pred:[ID25]
+		Succ:[ID10]
+[ID27]
+		if ((op == 9))
+		Pred:[ID25]
+		Succ:[ID28], [ID29]
+[ID28]
+		b_out.write((6 * x))
+		Pred:[ID27]
+		Succ:[ID10]
+[ID29]
+		if ((op == 10))
+		Pred:[ID27]
+		Succ:[ID30], [ID31]
+[ID30]
+		b_out.write((-(2) * x))
+		Pred:[ID29]
+		Succ:[ID10]
+[ID31]
+		if ((op == 11))
+		Pred:[ID29]
+		Succ:[ID32], [ID33]
+[ID32]
+		b_out.write(0)
+		Pred:[ID31]
+		Succ:[ID10]
+[ID33]
+		if ((op == 12))
+		Pred:[ID31]
+		Succ:[ID34], [ID35]
+[ID34]
+		b_out.write((x >> 3))
+		Pred:[ID33]
+		Succ:[ID10]
+[ID35]
+		if ((op == 13))
+		Pred:[ID33]
+		Succ:[ID36], [ID37]
+[ID36]
+		b_out.write((x / 6))
+		Pred:[ID35]
+		Succ:[ID10]
+[ID37]
+		if ((op == 14))
+		Pred:[ID35]
+		Succ:[ID38], [ID39]
+[ID38]
+		b_out.write((4 / x))
+		Pred:[ID37]
+		Succ:[ID10]
+[ID39]
+		if ((op == 15))
+		Pred:[ID37]
+		Succ:[ID40], [ID41]
+[ID40]
+		b_out.write(x)
+		Pred:[ID39]
+		Succ:[ID10]
+[ID41]
+		if ((op == 16))
+		Pred:[ID39]
+		Succ:[ID42], [ID43]
+[ID42]
+		b_out.write((x & 15))
+		Pred:[ID41]
+		Succ:[ID10]
+[ID43]
+		if ((op == 17))
+		Pred:[ID41]
+		Succ:[ID44], [ID45]
+[ID44]
+		b_out.write((x % 6))
+		Pred:[ID43]
+		Succ:[ID10]
+[ID45]
+		if ((op == 18))
+		Pred:[ID43]
+		Succ:[ID46], [ID47]
+[ID46]
+		b_out.write((8 % x))
+		Pred:[ID45]
+		Succ:[ID10]
+[ID47]
+		if ((op == 19))
+		Pred:[ID45]
+		Succ:[ID48], [ID49]
+[ID48]
+		b_out.write(0)
+		Pred:[ID47]
+		Succ:[ID10]
+[ID49]
+		b_out.write(x)
+		Pred:[ID47]
+		Succ:[ID10]

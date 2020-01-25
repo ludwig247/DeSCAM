@@ -246,7 +246,7 @@ namespace SCAM {
     }
 
     void PropagateConstantValue::checkIfRhsOfAssignmentIsAVarOp(SCAM::Expr *rhs) {
-        SCAM::FindVariablesAndFunctionsInStatement findVars(rhs);
+        SCAM::FindVariablesAndFunctionsInStatement findVars(rhs,std::set<std::string>{});
         if (!findVars.getVariablesInStmtSet().empty()) {// a new assignment to the variable from another variable
             this->wasRhsVarOp = true;
             std::set<int> assignmentsIds;

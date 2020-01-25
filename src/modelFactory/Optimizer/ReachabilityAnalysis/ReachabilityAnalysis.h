@@ -36,8 +36,8 @@ namespace SCAM {
     public:
         ReachabilityAnalysis() = delete;
 
-        ReachabilityAnalysis(const std::map<int, CfgNode *> &CFG,
-                             std::set<std::string> variablesThatHaveReadSet);
+        ReachabilityAnalysis(const std::map<int, CfgNode *> &CFG
+                ,std::set<std::string> variablesThatHaveReadSet);
 
         ReachabilityAnalysis(
                 std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList,
@@ -58,7 +58,7 @@ namespace SCAM {
         std::map<std::string, std::set<SCAM::Expr *>> assignmentsToIfValuesMap;       //Stores last assignments from while to if statements
         std::map<std::string, std::set<SCAM::Expr *>> allVarValuesMap;                //Contains all possible values that all variable can take
         std::set<std::string> variablesThatHaveReadSet;                               //All variables that can't be optimized due to interprocedural behaviour
-        std::map<std::string, z3::expr> substitutionMap;                              //variables to be substituted in each if statement
+        std::map<std::string, SCAM::VariableOperand*> substitutionMap;                              //variables to be substituted in each if statement
         std::set<int> unreachableNodes;                                               //The entry node to the path where the preceding if statement never leads to it
         std::set<int> ifNodesToBeDeleted;                                             //Nodes with if statements that should be deleted
         std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
@@ -66,7 +66,7 @@ namespace SCAM {
 
         void checkAndAddVariableToSubstitutionMap(SCAM::VariableOperand *varOp);
 
-        std::vector<z3::expr> substituteVariablesInsideIfExpressionWithTheirValues(SCAM::Expr *ExpressionInsideIf);
+        std::vector<SCAM::Expr*> substituteVariablesInsideIfExpressionWithTheirValues(SCAM::Expr *ExpressionInsideIf);
 
         void printWarning(SCAM::Expr *insideIfExpression, bool cannotBe);
 

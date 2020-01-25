@@ -81,8 +81,8 @@ assume:
 	at t: b_in_sync;
 prove:
 	at t_end: state_2;
-	at t_end: b_out_sig = myArray(b_in_sig_at_t);
-	at t_end: myArray(0) = myArray(b_in_sig_at_t);
+	at t_end: b_out_sig = myArray_at_t(b_in_sig_at_t);
+	at t_end: myArray(0) = myArray_at_t(b_in_sig_at_t);
 	at t_end: myArray(1) = myArray_1_at_t;
 	at t_end: myArray(2) = myArray_2_at_t;
 	at t_end: myArray(3) = myArray_3_at_t;
