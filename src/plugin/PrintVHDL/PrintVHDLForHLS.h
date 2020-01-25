@@ -28,12 +28,16 @@ private:
 
     std::string printTypes(Model *model);
     std::string printModule(Model *model);
+
     void entity(std::stringstream &ss);
     void signals(std::stringstream &ss);
     void component(std::stringstream &ss);
     void componentInst(std::stringstream &ss);
     void monitor(std::stringstream &ss);
     void functions(std::stringstream &ss);
+
+    std::string getResetValue(Variable *variable);
+    std::string getResetValue(DataSignal* dataSignal);
     std::string printDataTypes(const DataType *dataType);
     std::string printSensitivityList();
 };

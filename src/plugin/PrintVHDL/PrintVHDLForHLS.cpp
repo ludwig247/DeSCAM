@@ -5,7 +5,7 @@
 #include "ExprVisitor.h"
 #include "PrintVHDLForHLS.h"
 #include "VHDLPrintVisitor.h"
-#include "VHDLPrintResetNotify.h"
+#include "VHDLPrintReset.h"
 #include "VHDLPrintVisitorHLS.h"
 #include "OtherUtils.h"
 
@@ -150,7 +150,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
            << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
-           << " <= " << VHDLPrintVisitorHLS::toString(dataSignal->getInitialValue()) << ";\n"
+           << " <= " << getResetValue(dataSignal) << ";\n"
            << "\t\telsif (" << SignalFactory::getName(dataSignal, Style::UL, "_vld") << " = \'1\') then\n"
            << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
            << " <= " << (isEnum ? SignalFactory::vectorToEnum(dataSignal, "_out") : SignalFactory::getName(dataSignal, Style::UL, "_out")) << ";\n"
@@ -167,7 +167,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
         ss << "\tprocess (rst, out_" << SignalFactory::getName(var, Style::UL, "_vld") << ")\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << VHDLPrintVisitorHLS::toString(var->getInitialValue()) << ";\n"
+           << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << getResetValue(var) << ";\n"
            << "\t\telsif (out_" << SignalFactory::getName(var, Style::UL, "_vld") << " = \'1\') then\n"
            << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << (isEnum ?
                                                 SignalFactory::vectorToEnum(var, "", "out_") :
@@ -196,7 +196,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     for (const auto& out : OtherUtils::getSubVars(signalFactory->getOutputs())) {
         if (hlsModule->hasOutputReg(out)) {
             ss << "\t\t\t" << SignalFactory::getName(out, Style::DOT) << " <= "
-               << VHDLPrintVisitorHLS::toString(out->getInitialValue()) << ";\n";
+               << getResetValue(out) << ";\n";
         }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
@@ -697,5 +697,27 @@ std::string PrintVHDLForHLS::printSensitivityList() {
         sensitivityListStream << ", " << vars->getFullName();
     }
     return sensitivityListStream.str();
+}
+
+std::string PrintVHDLForHLS::getResetValue(Variable* variable)
+{
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+        auto printResetValue = VHDLPrintResetValue(commitment, variable->getName());
+        if (printResetValue.toString()) {
+            return printResetValue.getString();
+        }
+    }
+    return VHDLPrintVisitorHLS::toString(variable->getInitialValue());
+}
+
+std::string PrintVHDLForHLS::getResetValue(DataSignal* dataSignal)
+{
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+        auto printResetValue = VHDLPrintResetValue(commitment, dataSignal->getFullName());
+        if (printResetValue.toString()) {
+            return printResetValue.getString();
+        }
+    }
+    return VHDLPrintVisitorHLS::toString(dataSignal->getInitialValue());
 }
 
