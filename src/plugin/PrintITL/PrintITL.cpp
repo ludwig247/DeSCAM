@@ -140,7 +140,14 @@ std::string PrintITL::printTemporalExpr(TemporalExpr* temporalExpr) {
         ss << ConditionVisitor::toString(temporalExpr->getTiming().at(1));
         ss << "]: ";
     }
-    ss << ConditionVisitor::toString(temporalExpr->getStatement());
+    if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
+        Assignment * a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
+        ss << ConditionVisitor::toString(a->getLhs());
+        ss << " = ";
+        ss << DatapathVisitor::toString(a->getRhs());
+    } else {
+        ss << ConditionVisitor::toString(temporalExpr->getStatement());
+    }
     ss << ";\n";
 
     return ss.str();
