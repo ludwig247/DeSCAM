@@ -1,0 +1,8 @@
+//
+// Created by lucas on 28.01.20.
+//
+
+#ifndef DESCAM_TIMEPOINTVISITOR_H
+#define DESCAM_TIMEPOINTVISITOR_H
+
+#endif //DESCAM_TIMEPOINTVISITOR_H
