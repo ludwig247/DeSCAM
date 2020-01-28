@@ -281,9 +281,7 @@ std::string PrintITL::propertySuite() {
     ss << "assume:\n";
     ss << "\t reset_sequence;\n";
     ss << "prove:\n";
-    //ss << "\t at t: " << ps->getResetProperty()->getNextState()->getName() << ";\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        //ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
         ss << printTemporalExpr(commitment);
     }
     ss << "end property;\n";
@@ -292,87 +290,6 @@ std::string PrintITL::propertySuite() {
     for (auto p : ps->getProperties()) {
         ss << printProperty(p);
     }
-/*
-    // Operation properties
-    for (auto op : ps->getOperationProperties()) {
-        ss << "property " << op->getName() << " is\n";
-
-        unsigned long constraintSize = op->getConstraints().size();
-        ss << "dependencies: ";
-        for (auto co : op->getConstraints()) {
-            ss << co->getName();
-            if (constraintSize > 1) {
-                ss << ",";
-            } else {
-                ss << ";\n";
-            }
-            constraintSize--;
-        }
-
-        //TODO: Make function independent of module
-        if (module->isSlave()) {
-            t_end = "t+1";
-        } else {
-            ss << "for timepoints:\n";
-            ss << "\tt_end = t+1;\n";
-            t_end = "t_end";
-        }
-
-        unsigned long freezeVarSize = op->getFreezeSignals().size();
-        if (freezeVarSize > 0) {
-            ss << "freeze:\n";
-            for (auto freeze : op->getFreezeSignals()) {
-                ss << "\t";
-                if (freeze.second->isArrayType()) {
-                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
-                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
-                }else if(freeze.second->isCompoundType()){
-                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "_at_t";
-                    ss << " = ";
-                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() <<"@t";
-                } else {
-                    ss << freeze.first << "_at_t = " << freeze.first << "@t";
-                }
-                if (freezeVarSize > 1) {
-                    ss << ",\n";
-                } else {
-                    ss << ";\n";
-                }
-                freezeVarSize--;
-            }
-        }
-        ss << "assume:\n";
-        ss << "\tat t: " << op->getState()->getName() << ";\n";
-        for (auto assumption : op->getAssumptionList()) {
-            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
-        }
-        ss << "prove:\n";
-        ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
-        for (auto commitment : op->getCommitmentList()) {
-            ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
-        }
-        for (auto notify : ps->getNotifySignals()) {
-            switch (op->getTiming(notify->getPort())) {
-                case TT_1:
-                    ss << "\tat t+1: " << notify->getName() << " = true;\n";
-                    break;
-                case FF_1:
-                    ss << "\tat t+1: " << notify->getName() << " = false;\n";
-                    break;
-                case FF_e:
-                    ss << "\tduring[t+1, t_end]: " << notify->getName() << " = false;\n";
-                    break;
-                case FT_e:
-                    ss << "\tduring[t+1, t_end-1]: " << notify->getName() << " = false;\n";
-                    ss << "\tat t_end: " << notify->getName() << " = true;\n";
-                    break;
-            }
-        }
-        ss << "end property;\n";
-        ss << "\n\n";
-    }*/
-
-
 
     return ss.str();
 }
