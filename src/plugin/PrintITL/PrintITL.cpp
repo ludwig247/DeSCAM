@@ -11,6 +11,7 @@
 #include "Config.h"
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
+#include "TimePointVisitor.h"
 
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
@@ -131,13 +132,13 @@ std::string PrintITL::printTemporalExpr(TemporalExpr* temporalExpr) {
     ss << "\t";
     if (temporalExpr->isAt()) {
         ss << "at ";
-        ss << ConditionVisitor::toString(temporalExpr->getTiming().at(0));
+        ss << TimePointVisitor::toString(temporalExpr->getTiming().at(0));
         ss << ": ";
     } else if (temporalExpr->isDuring()) {
         ss << "during[";
-        ss << ConditionVisitor::toString(temporalExpr->getTiming().at(0));
+        ss << TimePointVisitor::toString(temporalExpr->getTiming().at(0));
         ss << ", ";
-        ss << ConditionVisitor::toString(temporalExpr->getTiming().at(1));
+        ss << TimePointVisitor::toString(temporalExpr->getTiming().at(1));
         ss << "]: ";
     }
     if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
@@ -173,7 +174,7 @@ std::string PrintITL::printProperty(Property *property) {
     if (!property->getTimePoints().empty()) {
         ss << "for timepoints:\n";
         for (auto tp = property->getTimePoints().begin(); tp != property->getTimePoints().end(); tp++) {
-            ss << "\t" << tp->first->getName() << " = " << DatapathVisitor::toString(tp->second);
+            ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
             if (std::next(tp) != property->getTimePoints().end()) {
                 ss << ",\n";
             }
