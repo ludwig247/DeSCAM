@@ -12,6 +12,8 @@
 
 namespace SCAM {
 
+
+
     //TODO: Use Template (Port, Variable...) ?
     //TODO: Rename? SignalMacro?
     class PropertyMacro : public AbstractMacro {
@@ -75,6 +77,7 @@ namespace SCAM {
 
         std::string parentName = "";
     };
+    bool operator<(const PropertyMacro &c1, const PropertyMacro &c2);
 
 }
 

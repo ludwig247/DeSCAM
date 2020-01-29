@@ -185,6 +185,7 @@ std::string PrintITL::printProperty(Property *property) {
     //TODO: Overload < operator of PropertyMacro class for sorted output
     if (!property->getFreezeSignals().empty()) {
         ss << "freeze:\n";
+
         for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
             ss << "\t" << f->first->getFullName("_") << "_at_" << f->second->getName() << " = " << f->first->getFullName("_") << "@" << f->second->getName();
             if (std::next(f) != property->getFreezeSignals().end()) {

@@ -56,7 +56,7 @@ namespace SCAM {
         this->freezeSignals.insert(std::make_pair(freezeSignal, timePoint));
     }
 
-    const std::map<PropertyMacro *, TimeExpr *> &Property::getFreezeSignals() const {
+    const std::map<PropertyMacro *, TimeExpr *,pointer_comparator<PropertyMacro*>> &Property::getFreezeSignals() const {
         return freezeSignals;
     }
 
