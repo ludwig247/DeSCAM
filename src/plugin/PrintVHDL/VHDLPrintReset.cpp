@@ -77,3 +77,11 @@ void VHDLPrintResetValue::visit(VariableOperand& node)
         signalFound = true;
     }
 }
+
+void VHDLPrintResetValue::visit(BoolValue &node) {
+    if (node.getValue()) {
+        this->ss << "\'1\'";
+    } else {
+        this->ss << "\'0\'";
+    }
+}

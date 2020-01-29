@@ -6,6 +6,7 @@
 #define SCAM_VHDLPRINTRESETNOTIFY_H
 
 #include "VHDLPrintVisitor.h"
+#include "VHDLPrintVisitorHLS.h"
 #include <PrintStmt.h>
 
 namespace SCAM {
@@ -27,7 +28,7 @@ namespace SCAM {
         void visit(BoolValue &node) override ;
     };
 
-    class VHDLPrintResetValue : VHDLPrintVisitor {
+    class VHDLPrintResetValue : VHDLPrintVisitor{
 
     public:
         VHDLPrintResetValue(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
@@ -41,6 +42,7 @@ namespace SCAM {
         void visit(Assignment &node) override ;
         void visit(DataSignalOperand &node) override ;
         void visit(VariableOperand &node) override ;
+        void visit(BoolValue &node) override ;
 
     private:
         Stmt* stmt;

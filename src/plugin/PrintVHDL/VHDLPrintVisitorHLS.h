@@ -12,6 +12,8 @@ namespace SCAM {
 
     class VHDLPrintVisitorHLS : VHDLPrintVisitor {
     public:
+        VHDLPrintVisitorHLS() = default;
+
         explicit VHDLPrintVisitorHLS(SCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 

@@ -6,6 +6,7 @@
 #define DESCAM_SIGNALFACTORY_H
 
 #include <string>
+#include <set>
 #include <cmath>
 
 #include <PluginFactory.h>
