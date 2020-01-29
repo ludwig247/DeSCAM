@@ -52,17 +52,19 @@ const bool number4 = true;
     }
 };
 
-
-
 unsigned int compute(unsigned int param, int param2) {
     if(param > 10 && param2 > 10){
         return param +1 ;
     }else return param + static_cast<unsigned int>(param2);
 }
 
+int nested(unsigned int param2){
+    return static_cast<int>(param2)+3;
+}
+
 int compute2(int param, unsigned int param2){
-    //param = param + static_cast<int>(param);
-    return param+3;
+    param = param + static_cast<int>(param2);
+    return param+3+nested(param2);
 }
 
 bool compute3(bool param, unsigned int val){
@@ -77,7 +79,6 @@ SC_MODULE(TestGlobal2) {
     int foo;
     unsigned int bar;
     unsigned int list[5];
-
 
     SC_CTOR(TestGlobal2):
             test_in("test_in"),
@@ -94,10 +95,8 @@ SC_MODULE(TestGlobal2) {
             if(compute3(foo>5,bar)){
                 test_out->write(bar);
             }else test_out->write(bar+1);
-
         }
     }
 };
-
 
 #endif //DESCAM_MODULESGLOBAL_H

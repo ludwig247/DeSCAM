@@ -19,6 +19,7 @@
 #include "../parser/CommandLineParameter.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
+#include <z3.h>
 
 
 //Constructor
@@ -113,7 +114,7 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 //! Add structure ...
 void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     FindSCMain scmain(tu);
-        
+
     //The top instance is the sc_main. It doesn't contain any ports
     //Create empty dummy module for sc_main
     auto sc_main = new Module("main");
@@ -343,7 +344,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         }
         ErrorMsg::clear();
     }
-    if(cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
+    if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State2::state_cnt = 0;
@@ -372,7 +373,7 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
     //FindInitalValues findInitalValues(decl, findVariables.getVariableMap(), module);
 
     //Add members to module
-    for (auto&& variable: findVariables.getVariableTypeMap()) {
+    for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
         /*
          * Disinguish between local and global DataTypes.
@@ -498,7 +499,7 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
 
 
-        if (ErrorMsg::hasError() ) {
+        if (ErrorMsg::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
@@ -516,19 +517,23 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
 }
 
 void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
-
     //Find all global functions and variables
-    FindGlobal findGlobal(pDecl,_ci);
+    FindGlobal findGlobal(pDecl, _ci);
 
-    for(auto var: findGlobal.getVariableMap()){
+    for (auto var: findGlobal.getVariableMap()) {
         this->model->addGlobalVariable(var.second);
     }
 
-    for(auto func: findGlobal.getFunctionMap()){
+    //Add all global functions need in case of nested functions
+    for (auto func: findGlobal.getFunctionMap()) {
         //Add the definition to the function map
         this->model->addGlobalFunction(func.second);
-        std::string name = func.first;
+    }
+
+
+    for (auto func: findGlobal.getFunctionMap()) {
         try {
+            std::string name = func.first;
             //Create blockCFG for this process
             //Active searching only for functions
             //If fails ... function is not SystemC-PPA compliant
@@ -536,15 +541,13 @@ void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
             FindDataFlow::functionName = func.first;
             FindDataFlow::isFunction = true;
             auto module = Module("placeholder");
-            SCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci,  &module);
+            SCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci, &module);
             FindDataFlow::functionName = "";
             FindDataFlow::isFunction = false;
-
             //Transfor blockCFG back to code
             FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
             func.second->setStmtList(functionFactory.getStmtList());
-
-        }catch(std::runtime_error& e){
+        } catch (std::runtime_error &e) {
 //            std::cout << e.what() << std::endl;
 //            for(auto msg:  ErrorMsg::getErrorList()){
 //                std::cout << msg.msg << std::endl;
@@ -571,16 +574,34 @@ void SCAM::ModelFactory::removeUnused() {
     }
 
     auto globalFunMap = this->model->getGlobalFunctionMap();
+    //Nested calls
+    for (auto func  : globalFunMap) {
+        for (auto retValCond  : func.second->getReturnValueConditionList()) {
+            for (auto usedFunc: ExprVisitor::getUsedFunction(retValCond.first->getReturnValue())) {
+                if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
+                    removeGlobalFunctions.at(usedFunc) = false;
+                }
+            }
+            for(auto cond: retValCond.second){
+                for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
+                    if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
+                        removeGlobalFunctions.at(usedFunc) = false;
+                    }
+                }
+            }
+        }
+    }
 
-    for(auto module: model->getModules()){
+
+    for (auto module: model->getModules()) {
         for (auto state : module.second->getFSM()->getStateMap()) {
-            for(auto op: state.second->getOutgoingOperationsList()){
+            for (auto op: state.second->getOutgoingOperationsList()) {
                 for (auto ass: op->getAssumptionsList()) {
                     for (auto usedVar: ExprVisitor::getUsedVariables(ass)) {
-                        if(usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+                        if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
                     }
-                    for(auto usedFunc: ExprVisitor::getUsedFunction(ass)){
-                        if(globalFunMap.find(usedFunc->getName()) != globalFunMap.end()){
+                    for (auto usedFunc: ExprVisitor::getUsedFunction(ass)) {
+                        if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                             removeGlobalFunctions.at(usedFunc) = false;
                         }
                         //TODO: delete unused functions ... find CFG for remaining functions ... use global for functions?
@@ -592,10 +613,10 @@ void SCAM::ModelFactory::removeUnused() {
                         continue;
                     }
                     for (auto usedVar: ExprVisitor::getUsedVariables(comm->getRhs())) {
-                        if(usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+                        if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
                     }
-                    for(auto usedFunc: ExprVisitor::getUsedFunction(comm->getRhs())){
-                        if(globalFunMap.find(usedFunc->getName()) != globalFunMap.end()){
+                    for (auto usedFunc: ExprVisitor::getUsedFunction(comm->getRhs())) {
+                        if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                             removeGlobalFunctions.at(usedFunc) = false;
                         }
                     }
@@ -605,16 +626,16 @@ void SCAM::ModelFactory::removeUnused() {
     }
 
     //Remove global vars
-    for(auto var: removeGlobalVars){
-        if(var.second){
+    for (auto var: removeGlobalVars) {
+        if (var.second) {
             this->model->removeGlobalVariable(var.first);
         }
     }
 
     //Remove global functions
     std::map<Function *, bool> newGlobalFunc;
-    for(auto func: removeGlobalFunctions){
-        if(func.second){
+    for (auto func: removeGlobalFunctions) {
+        if (func.second) {
             this->model->removeGlobalFunction(func.first);
         }
     }

@@ -502,7 +502,7 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
 
     //Check for state values
-    if (clang::EnumConstantDecl *enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
+    if (auto enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
 
         //Regular enum-value
         std::string typeName = enumDecl->getType()->getAs<clang::EnumType>()->getDecl()->getName().str();
@@ -675,6 +675,7 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
         }
     }
     auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
+
     if (globalFunctionMap.find(functionName) != globalFunctionMap.end()) {
         auto function = globalFunctionMap.find((functionName))->second;
         std::map<std::string, SCAM::Expr *> paramExprMap;
@@ -775,7 +776,6 @@ bool SCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *static
 
 bool SCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
     FindDataFlow returnExpr(returnStmt->getRetValue(), module, false);
-
     if (returnExpr.getExpr() == nullptr) return exitVisitor(" return value is null");
     this->stmt = new SCAM::Return(returnExpr.getExpr());
     return false;
