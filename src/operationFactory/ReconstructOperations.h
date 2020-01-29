@@ -116,6 +116,8 @@ namespace SCAM {
 
         void visit(ArrayExpr &node) override;
 
+        void visit(SCAM::TimeExprOperand &node) override;
+
 
     private:
         std::map<std::string, SCAM::Expr *> variableAssignmentMap; //! Contains the current pointer to the value of a variable

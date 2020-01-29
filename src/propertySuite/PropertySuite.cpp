@@ -3,6 +3,8 @@
 //
 
 #include <Stmts/Assignment.h>
+
+#include <utility>
 #include "PropertySuite.h"
 
 
@@ -12,11 +14,11 @@ namespace SCAM {
     //                                Constructor
     // ------------------------------------------------------------------------------
 
-    PropertySuite::PropertySuite(const std::string &name) :
-            name(name){
+    PropertySuite::PropertySuite(std::string name) :
+            name(std::move(name)){
         this->resetSignal = new Variable("rst", DataTypes::getDataType("unsigned"));
         this->createConstraint(("no_reset"), new Assignment(new VariableOperand(resetSignal), new UnsignedValue(0)));
-        this->resetProperty = new ResetProperty("reset");
+        this->resetProperty = new Property("reset");
     }
 
     // ------------------------------------------------------------------------------
@@ -194,64 +196,30 @@ namespace SCAM {
     //                               ResetProperty
     // ------------------------------------------------------------------------------
 
-    ResetProperty *PropertySuite::getResetProperty() const {
+    Property *PropertySuite::getResetProperty() const {
         return resetProperty;
     }
 
-    void PropertySuite::setResetProperty(ResetProperty *resetProperty) {
-        PropertySuite::resetProperty = resetProperty;
+    void PropertySuite::setResetProperty(Property *newResetProperty) {
+        this->resetProperty = newResetProperty;
     }
 
     // ------------------------------------------------------------------------------
-    //                              OperationProperties
+    //                              Properties
     // ------------------------------------------------------------------------------
 
-    void PropertySuite::addOperationProperty(SCAM::OperationProperty *property) {
-
-        // Add states to the state map
-        successorStates[property->getState()].insert(property->getNextState());
-        predecessorStates[property->getNextState()].insert(property->getState());
-        successorProperties[property->getState()].insert(property);
-        predecessorProperties[property->getNextState()].insert(property);
-
-        this->operationProperties.push_back(property);
+    void PropertySuite::addProperty(Property *property) {
+        this->Properties.push_back(property);
     }
 
-    const std::vector<OperationProperty *> &PropertySuite::getOperationProperties() const {
-        return operationProperties;
-    }
-
-    void PropertySuite::setOperationProperties(const std::vector<SCAM::OperationProperty *> &operationProperties) {
-        PropertySuite::operationProperties = operationProperties;
-    }
-
-    // ------------------------------------------------------------------------------
-    //                               WaitProperties
-    // ------------------------------------------------------------------------------
-
-    void PropertySuite::addWaitProperty(WaitProperty *property) {
-
-        // Add states to the state map
-        successorStates[property->getState()].insert(property->getNextState());
-        predecessorStates[property->getNextState()].insert(property->getState());
-        successorProperties[property->getState()].insert(property);
-        predecessorProperties[property->getNextState()].insert(property);
-
-        this->waitProperties.push_back(property);
-    }
-
-    const std::vector<WaitProperty *> &PropertySuite::getWaitProperties() const {
-        return waitProperties;
-    }
-
-    void PropertySuite::setWaitProperties(const std::vector<WaitProperty *> &waitProperties) {
-        PropertySuite::waitProperties = waitProperties;
+    const std::vector<Property*> &PropertySuite::getProperties() const {
+        return Properties;
     }
 
     // ------------------------------------------------------------------------------
     //                                StateMap
     // ------------------------------------------------------------------------------
-
+/*
     std::set<PropertyMacro*> PropertySuite::getPredecessorStates(PropertyMacro* state) {
 
         if ( predecessorStates.find(state) == predecessorStates.end() ) {
@@ -288,7 +256,7 @@ namespace SCAM {
             return successorProperties[state];
         }
 
-    }
+    }*/
 }
 
 

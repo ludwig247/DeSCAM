@@ -71,6 +71,7 @@ namespace SCAM {
         virtual void visit(Peek &node) override;
         virtual void visit(class Notify &node) override;
         virtual void visit(class ArrayExpr &node);
+        void visit(struct TimeExprOperand &node) override;
 
     public:
         const std::string &getStateName() const;

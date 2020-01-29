@@ -47,8 +47,10 @@ namespace SCAM {
         virtual void visit(class ParamOperand &node);
 
         virtual void visit(class Notify &node);
-        virtual void visit(SCAM::ArrayExpr &node);
 
+        virtual void visit(class ArrayExpr &node);
+
+        virtual void visit(class TimeExpr &node);
 
         bool resize_flag = false;
     };

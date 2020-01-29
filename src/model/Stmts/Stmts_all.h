@@ -40,5 +40,6 @@
 #include "Wait.h"
 #include "Peek.h"
 #include "ArrayExpr.h"
+#include "TimeExprOperand.h"
 
 #endif //PROJECT_STMTS_ALL_H

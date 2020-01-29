@@ -58,15 +58,6 @@ namespace SCAM {
 
     }
 
-    PropertyMacro::PropertyMacro(const std::string &name, Variable * state) :
-            parentName(name),
-            AbstractMacro(name, DataTypes::getDataType("bool")){
-
-        this->variable = state;
-        this->macroType = stateType;
-
-    }
-
     PropertyMacro::PropertyMacro(const std::string &parentName, Variable * variable, const DataType * type, std::string subVarName) :
             parentName(parentName),
             AbstractMacro(subVarName, type){
@@ -123,7 +114,7 @@ namespace SCAM {
     }
 
     Variable *PropertyMacro::getVariable() const {
-        if (macroType != varType and macroType != stateType and macroType != arrayType){
+        if (macroType != varType and macroType != arrayType){
             throw std::runtime_error("Called Macro is not of type variable!");
         }
         return variable;
@@ -145,6 +136,24 @@ namespace SCAM {
 
     const std::string &PropertyMacro::getSubVarName() const {
         return subVarName;
+    }
+
+    Expr *PropertyMacro::getOperand() const {
+
+        if (macroType == portType) {
+            return portOperand;
+        } else if (macroType == notifyType) {
+            return reinterpret_cast<Expr *>(notifySignal);
+        } else if (macroType == syncType) {
+            return reinterpret_cast<Expr *>(syncSignal);
+        } else if (macroType == varType) {
+            return variableOperand;
+        } else if (macroType == arrayType) {
+            return variableOperand;
+        } else {
+            throw std::runtime_error("Unknown macroType when calling PropertyMacro::getOperand.");
+        }
+
     }
 
 
@@ -220,6 +229,12 @@ namespace SCAM {
     std::string PropertyMacro::getFullName() const {
         if(this->isCompoundType()){
             return this->parentName+"."+this->subVarName;
+        }else return this->parentName;
+    }
+
+    std::string PropertyMacro::getFullName(std::string delimiter) const {
+        if(this->isCompoundType()){
+            return this->parentName+delimiter+this->subVarName;
         }else return this->parentName;
     }
 }

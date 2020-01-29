@@ -88,6 +88,8 @@ namespace SCAM {
         void visit(SCAM::Wait &node) override;
 
         void visit(SCAM::Peek &node) override;
+
+        void visit(SCAM::TimeExprOperand &node) override;
     private:
         void extendRawOperation(const std::vector<SCAM::CfgNode *> &rawOperation);
         void addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation);

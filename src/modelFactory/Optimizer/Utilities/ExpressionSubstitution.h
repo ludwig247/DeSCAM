@@ -126,6 +126,8 @@ namespace SCAM {
 
         void visit(class Peek &node) override {};
 
+        void visit(class TimeExprOperand &node) override {};
+
     };
 
 }

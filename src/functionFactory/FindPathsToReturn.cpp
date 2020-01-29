@@ -58,6 +58,10 @@ void SCAM::FindPathsToReturn::visit(struct VariableOperand &node) {
     this->appendStmtToPaths(&node);
 }
 
+void SCAM::FindPathsToReturn::visit(struct TimeExprOperand &node) {
+    this->appendStmtToPaths(&node);
+}
+
 
 void SCAM::FindPathsToReturn::visit(struct PortOperand &node) {
     this->appendStmtToPaths(&node);

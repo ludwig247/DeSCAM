@@ -49,6 +49,8 @@ namespace SCAM {
         //visitors
         void visit(struct VariableOperand &node) override{};
 
+        void visit(struct TimeExprOperand &node) override{};
+
         void visit(struct IntegerValue &node) override{};
 
         void visit(struct UnsignedValue &node) override{};

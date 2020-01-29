@@ -41,11 +41,11 @@ private:
 
     std::string reset_sequence();
 
+    std::string temporalExpr(TemporalExpr* temporalExpr);
+
     std::string reset_operation();
 
     std::string operations();
-
-    std::string wait_operations();
 
     std::string convertDataType(const DataType * dataType) const;
 

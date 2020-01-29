@@ -211,8 +211,8 @@ namespace SCAM {
             //std::cout << state.second->getName() << std::endl;
 
             state.second->setName(state.second->getName());
-            Variable *stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
-            PropertyMacro *pm = new PropertyMacro(state.second->getName(), stateVar);
+            auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
+            auto pm = new PropertyMacro(state.second->getName(), stateVar, DataTypes::getDataType("bool"));
             pm->setExpression(new BoolValue(true));
             propertySuite->addState(pm);
         }
@@ -232,13 +232,18 @@ namespace SCAM {
             for (auto operation : state.second->getOutgoingOperationsList()) {
 
                 assert((operation->getState()->isInit()) && "Operation should be starting from init state");
-
+                auto t_var = new TimeExpr("t");
+                auto t = new TimeExprOperand(t_var);
                 PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-                propertySuite->getResetProperty()->setNextState(nextState);
+                auto nextStateExpr = new TemporalExpr(t, nextState->getOperand());
+
+                propertySuite->getResetProperty()->addCommitment(nextStateExpr);
+                //propertySuite->getResetProperty()->setNextState(nextState);
 
                 // Add commitments for ResetProperty
                 for (auto commitment: operation->getCommitmentsList()) {
-                    propertySuite->getResetProperty()->addCommitment(commitment);
+                    propertySuite->getResetProperty()->addCommitment(new TemporalExpr(t, commitment));
+                    //propertySuite->getResetProperty()->addCommitment(commitment);
                 }
 
                 //Notify&Sync Signals, no notification for shareds
@@ -262,9 +267,11 @@ namespace SCAM {
 
                     PropertyMacro *signalMacro = propertySuite->findSignal(port.first + "_notify");
                     if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                        propertySuite->getResetProperty()->addCommitment(new Assignment(signalMacro->getNotifySignal(), new BoolValue(true)));
+                        auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(true)));
+                        propertySuite->getResetProperty()->addCommitment(commitment);
                     } else {
-                        propertySuite->getResetProperty()->addCommitment(new Assignment(signalMacro->getNotifySignal(), new BoolValue(false)));
+                        auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(false)));
+                        propertySuite->getResetProperty()->addCommitment(commitment);
                     }
                 }
                 break;
@@ -279,9 +286,17 @@ namespace SCAM {
                 if (operation->IsWait()) continue;
 
                 std::string operationName = operation->getState()->getName() + "_" + std::to_string(operation->getId());
-                auto newOperationProperty = new OperationProperty(operationName);
+                auto newProperty = new Property(operationName);
 
-                newOperationProperty->addConstraint(propertySuite->getConstraint("no_reset"));
+                auto t_var = new TimeExpr("t");
+                auto t = new TimeExprOperand(t_var);
+
+                auto t_end_var = new TimeExpr("t_end");
+                auto t_end = new TimeExprOperand(t_end_var);
+
+                newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
+
+                newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
                 //FREEZE VARS
                 std::set<SCAM::SyncSignal *> syncSignals;
@@ -301,12 +316,12 @@ namespace SCAM {
                 // TODO: Does it make sense to check for sync signals (inputs)?
                 for (auto sync: syncSignals) {
                     PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
-                    newOperationProperty->addFreezeSignal(signalMacro);
+                    newProperty->addFreezeSignal(signalMacro, t_var);
                 }
                 for (auto var: variables) {
                         if(var->isConstant()) continue;
                         PropertyMacro *signalMacro = propertySuite->findSignal(var);
-                        newOperationProperty->addFreezeSignal(signalMacro);
+                        newProperty->addFreezeSignal(signalMacro, t_var);
                 }
                 for (auto dataSig: dataSignals) {
                     PropertyMacro *signalMacro;
@@ -325,16 +340,22 @@ namespace SCAM {
 //                    } catch (const std::runtime_error &e) {
 //                        signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() , dataSig->getName());
 //                    }
-                    newOperationProperty->addFreezeSignal(signalMacro);
+                    newProperty->addFreezeSignal(signalMacro, t_var);
                 }
 
                 PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
-                PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-                newOperationProperty->setState(startState);
-                newOperationProperty->setNextState(nextState);
-                newOperationProperty->setAssumptionList(operation->getAssumptionsList());
-                newOperationProperty->setCommitmentList(operation->getCommitmentsList());
+                PropertyMacro *nextState  = propertySuite->findSignal(operation->getNextState()->getName());
+                auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
+                auto nextStateExpr  = new TemporalExpr(t,  nextState->getVariableOperand());
+                newProperty->addAssumption(startStateExpr);
+                newProperty->addCommitment( nextStateExpr);
 
+                for (auto assumption : operation->getAssumptionsList()) {
+                    newProperty->addAssumption(new TemporalExpr(t, assumption));
+                }
+                for (auto commitment : operation->getCommitmentsList()) {
+                    newProperty->addCommitment(new TemporalExpr(t_end, commitment));
+                }
 
                 //Reset used ports:
                 std::set<Port *> usedPortsList;
@@ -358,6 +379,9 @@ namespace SCAM {
                     }
                 }
 
+                auto t_plus_1 = new Arithmetic(t, "+", new UnsignedValue(1));
+                auto t_end_minus_1 = new Arithmetic(t_end, "-", new UnsignedValue(1));
+
                 //Notify&Sync Signals, no notification for shareds, alwaysReady in ...
                 for (auto port: module->getPorts()) {
                     auto interface = port.second->getInterface();
@@ -368,21 +392,30 @@ namespace SCAM {
 
                     if (module->isSlave()) {
                         if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                            newOperationProperty->addTiming(port.second, TT_1);
+                            auto commitment = new Assignment(port.second->getNotify(), new BoolValue(true));
+                            newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
                         } else {
-                            newOperationProperty->addTiming(port.second, FF_1);
+                            auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
+                            newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
                         }
                     } else {
                         if (port.second == operation->getNextState()->getCommunicationPort()) { //if NextState is a wait state it will have null_ptr as CommunicationPort
-                            newOperationProperty->addTiming(port.second, FT_e);
+                            auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
+                            auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
+                            newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end_minus_1, commitment1));
+                            newProperty->addCommitment(new TemporalExpr(t_end, commitment2));
                         } else if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                            newOperationProperty->addTiming(port.second, FT_e);
+                            auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
+                            auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
+                            newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end_minus_1, commitment1));
+                            newProperty->addCommitment(new TemporalExpr(t_end, commitment2));
                         } else {
-                            newOperationProperty->addTiming(port.second, FF_e);
+                            auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
+                            newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end, commitment));
                         }
                     }
                 }
-                propertySuite->addOperationProperty(newOperationProperty);
+                propertySuite->addProperty(newProperty);
             }
         }
 
@@ -393,9 +426,14 @@ namespace SCAM {
             for (auto operation : state.second->getOutgoingOperationsList()) {
                 if (!operation->IsWait()) continue;
 
-                WaitProperty *newWaitProperty = new WaitProperty("wait_" + operation->getState()->getName());
+                auto *newProperty = new Property("wait_" + operation->getState()->getName());
 
-                newWaitProperty->addConstraint(propertySuite->getConstraint("no_reset"));
+                auto t_var = new TimeExpr("t");
+                auto t = new TimeExprOperand(t_var);
+
+                auto t_plus_1 = new Arithmetic(t, "+", new UnsignedValue(1));
+
+                newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
                 //FREEZE VARS
                 std::set<SCAM::SyncSignal *> syncSignals;
@@ -415,12 +453,12 @@ namespace SCAM {
 
                 for (auto sync: syncSignals) {
                     PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
-                    newWaitProperty->addFreezeSignal(signalMacro);
+                    newProperty->addFreezeSignal(signalMacro, t_var);
                 }
                 for (auto var: variables) {
                         if(var->isConstant()) continue;
                         PropertyMacro *signalMacro = propertySuite->findSignal(var);
-                        newWaitProperty->addFreezeSignal(signalMacro);
+                        newProperty->addFreezeSignal(signalMacro, t_var);
                 }
                 for (auto dataSig: dataSignals) {
                     //TODO: remove try/catch
@@ -434,15 +472,22 @@ namespace SCAM {
                     } catch (const std::runtime_error &e) {
                         signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
                     }
-                    newWaitProperty->addFreezeSignal(signalMacro);
+                    newProperty->addFreezeSignal(signalMacro, t_var);
                 }
 
                 PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
                 PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-                newWaitProperty->setState(startState);
-                newWaitProperty->setNextState(nextState);
-                newWaitProperty->setAssumptionList(operation->getAssumptionsList());
-                newWaitProperty->setCommitmentList(operation->getCommitmentsList());
+                auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
+                auto nextStateExpr  = new TemporalExpr(t,  nextState->getVariableOperand());
+                newProperty->addAssumption(startStateExpr);
+                newProperty->addCommitment( nextStateExpr);
+
+                for (auto assumption : operation->getAssumptionsList()) {
+                    newProperty->addAssumption(new TemporalExpr(t, assumption));
+                }
+                for (auto commitment : operation->getCommitmentsList()) {
+                    newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
+                }
 
                 //Notify&Sync Signals, no notification for shareds
                 for (auto port: module->getPorts()) {
@@ -452,12 +497,14 @@ namespace SCAM {
 
                     PropertyMacro * signalMacro = propertySuite->findSignal(port.first+"_notify");
                     if ((pI->isBlocking() || pI->isMasterOut()) && port.second != operation->getNextState()->getCommunicationPort()) { //if NextState is a wait state it will have null_ptr as CommunicationPort
-                        newWaitProperty->addCommitment(new Assignment(signalMacro->getNotifySignal(), new BoolValue(false)));
+                        auto commitment = new Assignment(signalMacro->getNotifySignal(), new BoolValue(false));
+                        newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
                     } else {
-                        newWaitProperty->addCommitment(new Assignment(signalMacro->getNotifySignal(), new BoolValue(true)));
+                        auto commitment = new Assignment(signalMacro->getNotifySignal(), new BoolValue(true));
+                        newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
                     }
                 }
-                propertySuite->addWaitProperty(newWaitProperty);
+                propertySuite->addProperty(newProperty);
             }
 
         }
@@ -480,10 +527,12 @@ namespace SCAM {
 
         ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
         for (auto sync: this->propertySuite->getSyncSignals()) {
-            ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := end macro;" << std::endl;
+            ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName())
+               << " := end macro;" << std::endl;
         }
         for (auto notify: this->propertySuite->getNotifySignals()) {
-            ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := end macro;" << std::endl;
+            ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName())
+               << " := end macro;" << std::endl;
         }
         ss << std::endl << std::endl;
 
@@ -502,7 +551,8 @@ namespace SCAM {
         ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
         for (auto co: this->propertySuite->getConstraints()) {
             if (co->getName() != "no_reset") {
-                ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression()) << "; end constraint;" << std::endl;
+                ss << "constraint " << co->getName() << " : " << co->getExpression()
+                   << "; end constraint;" << std::endl;
             }
         }
         ss << std::endl << std::endl;
@@ -522,7 +572,7 @@ namespace SCAM {
         ss << "-- STATES --" << std::endl;
         for (auto st: this->propertySuite->getStates()) {
             ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
-            ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
+            ss << " := " << st->getExpression() << " end macro;" << std::endl;
         }
         ss << std::endl << std::endl;
 
@@ -533,15 +583,26 @@ namespace SCAM {
         ss << "assume:\n";
         ss << "\t reset_sequence;\n";
         ss << "prove:\n";
-        ss << "\t at t: " << this->propertySuite->getResetProperty()->getNextState()->getName() << ";\n";
+        //ss << "\t at t: " << this->propertySuite->getResetProperty()->getNextState()->getName() << ";\n";
         for (auto commitment : this->propertySuite->getResetProperty()->getCommitmentList()) {
-            ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
+            if (commitment->isAt()) {
+                ss << "\t at ";
+                ss << commitment->getTiming().at(0);
+                ss << ": ";
+            } else if (commitment->isDuring()) {
+                ss << "\t during[";
+                ss << commitment->getTiming().at(0);
+                ss << ", ";
+                ss << commitment->getTiming().at(1);
+                ss << "]: ";
+            }
+            ss << commitment->getStatement();
         }
         ss << "end property;\n";
         ss << std::endl << std::endl;
 
         // Operation properties
-        for (auto op : this->propertySuite->getOperationProperties()) {
+        for (auto op : this->propertySuite->getProperties()) {
             ss << "property " << op->getName() << " is\n";
 
             unsigned long constraintSize = op->getConstraints().size();
@@ -556,13 +617,16 @@ namespace SCAM {
                 constraintSize--;
             }
 
-            //TODO: Make function independent of module
-            if (module->isSlave()) {
-                t_end = "t+1";
-            } else {
-                ss << "for timepoints:\n";
-                ss << "\tt_end = t+1;\n";
-                t_end = "t_end";
+            unsigned long timePointSize = op->getTimePoints().size();
+            ss << "for timepoints:\n";
+            for (auto tp : op->getTimePoints()) {
+                ss << "\t" << tp.first->getName() << " = " << tp.second;
+                if (timePointSize > 1) {
+                    ss << ",\n";
+                } else {
+                    ss << ";\n";
+                }
+                timePointSize--;
             }
 
             unsigned long freezeVarSize = op->getFreezeSignals().size();
@@ -571,11 +635,16 @@ namespace SCAM {
                 for (auto freeze : op->getFreezeSignals()) {
 
                     ss << "\t";
-                    if (freeze.second->isArrayType()) {
-                        ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
-                        ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
+                    if (freeze.first->isArrayType()) {
+                        ss << freeze.first->getParent()->getName() << "_" << freeze.first->getVariable()->getName()
+                           << "_at_" << freeze.second;
+                        ss << " = ";
+                        ss << freeze.first->getParent()->getName() << "(" << freeze.first->getVariable()->getName()
+                           << ")@t";
                     } else {
-                        ss << freeze.first << "_at_t = " << freeze.first << "@t";
+                        ss << freeze.first << "_at_" << freeze.second;
+                        ss << " = ";
+                        ss << freeze.first << "@" << freeze.second;
                     }
 
                     if (freezeVarSize > 1) {
@@ -587,90 +656,39 @@ namespace SCAM {
                 }
             }
             ss << "assume:\n";
-            ss << "\tat t: " << op->getState()->getName() << ";\n";
-            for (auto assumption : op->getAssumptionList()) {
-                ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
-            }
-            ss << "prove:\n";
-            ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
-            for (auto commitment : op->getCommitmentList()) {
-                ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
-            }
-            for (auto notify : this->propertySuite->getNotifySignals()) {
-                switch (op->getTiming(notify->getPort())) {
-                    case TT_1:
-                        ss << "\tat t+1: " << notify->getName() << " = true;\n";
-                        break;
-                    case FF_1:
-                        ss << "\tat t+1: " << notify->getName() << " = false;\n";
-                        break;
-                    case FF_e:
-                        ss << "\tduring[t+1, t_end]: " << notify->getName() << " = false;\n";
-                        break;
-                    case FT_e:
-                        ss << "\tduring[t+1, t_end-1]: " << notify->getName() << " = false;\n";
-                        ss << "\tat t_end: " << notify->getName() << " = true;\n";
-                        break;
+            for (auto assumption : this->propertySuite->getResetProperty()->getAssumptionList()) {
+                if (assumption->isAt()) {
+                    ss << "\t at ";
+                    ss << assumption->getTiming().at(0);
+                    ss << ": ";
+                } else if (assumption->isDuring()) {
+                    ss << "\t during[";
+                    ss << assumption->getTiming().at(0);
+                    ss << ", ";
+                    ss << assumption->getTiming().at(1);
+                    ss << "]: ";
                 }
+                ss << assumption->getStatement();
+            }
+
+
+            ss << "prove:\n";
+            for (auto commitment : this->propertySuite->getResetProperty()->getCommitmentList()) {
+                if (commitment->isAt()) {
+                    ss << "\t at ";
+                    ss << commitment->getTiming().at(0);
+                    ss << ": ";
+                } else if (commitment->isDuring()) {
+                    ss << "\t during[";
+                    ss << commitment->getTiming().at(0);
+                    ss << ", ";
+                    ss << commitment->getTiming().at(1);
+                    ss << "]: ";
+                }
+                ss << commitment->getStatement();
             }
             ss << "end property;\n";
             ss << "\n\n";
         }
-
-        // Wait properties
-        for (auto wp : this->propertySuite->getWaitProperties()) {
-            ss << "property " << wp->getName() << " is\n";
-
-            unsigned long constraintSize = wp->getConstraints().size();
-            ss << "dependencies: ";
-            for (auto co : wp->getConstraints()) {
-                ss << co->getName();
-                if (constraintSize > 1) {
-                    ss << ",";
-                } else {
-                    ss << ";\n";
-                }
-                constraintSize--;
-            }
-
-            unsigned long freezeVarSize = wp->getFreezeSignals().size();
-            if (freezeVarSize > 0) {
-                ss << "freeze:\n";
-                for (auto freeze : wp->getFreezeSignals()) {
-                    ss << "\t";
-                    if (freeze.second->isArrayType()) {
-                        ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
-                        ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
-                    } else {
-                        ss << freeze.first << "_at_t = " << freeze.first << "@t";
-                    }
-                    if (freezeVarSize > 1) {
-                        ss << ",\n";
-                    } else {
-                        ss << ";\n";
-                    }
-                    freezeVarSize--;
-                }
-            }
-            ss << "assume:\n";
-            ss << "\tat t: " << wp->getState()->getName() << ";\n";
-            for (auto assumption : wp->getAssumptionList()) {
-                ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
-            }
-            ss << "prove:\n";
-            ss << "\tat t+1: " << wp->getNextState()->getName() << ";\n";
-            for (auto commitment : wp->getCommitmentList()) {
-                ss << "\tat t+1: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
-            }
-            ss << "end property;\n";
-            ss << "\n\n";
-        }
-        std::cout << ss.str();
-
-    }
-
-
-    int OperationFactory::getOperationsCount() {
-        return static_cast<int>(this->operations.size());
     }
 }

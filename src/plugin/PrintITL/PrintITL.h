@@ -24,7 +24,7 @@ public:
     std::string print();
 
 private:
-    std::stringstream ss;
+    //std::stringstream ss;
 
     std::string functions();
 
@@ -32,11 +32,15 @@ private:
 
     std::string location(bool loc);
 
+    std::string printTemporalExpr(TemporalExpr* temporalExpr);
+
+    std::string printProperty(Property* property);
+
     std::string propertySuite();
 
-    std::string adjustmacros();
+    //std::string adjustmacros();
 
-    std::string pipelined();
+    //std::string pipelined();
 
 //        std::string hideConstants();
     SCAM::Module *module;

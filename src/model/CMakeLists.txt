@@ -12,7 +12,9 @@ set(AST_FILES
         DataType.cpp
         DataSignal.cpp
         Function.cpp
-        Parameter.cpp VariableTemplate.h VariableTemplate.cpp)
+        Parameter.cpp
+        VariableTemplate.cpp
+        TimeExpr.cpp)
 
 
 add_library(Model ${AST_FILES})

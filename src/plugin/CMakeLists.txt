@@ -17,16 +17,16 @@
 add_plugin(PrintITL; "Complete set of properties in ITL")
 add_plugin(PrintSVA; "Complete set of properties in SVA")
 
-add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
+#add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
 add_plugin(PrintSkeleton; "Structure and FSM in AML")
-add_plugin(PrintChisel; "Print a module in CHISEL")
+#add_plugin(PrintChisel; "Print a module in CHISEL")
 
-add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
-add_plugin(PrintDotFull; "statemachine + conditions + commitments as .dot" ; PrintDot)
-add_plugin(PrintDotStates; "statemachine as .dot" ; PrintDot)
+#add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
+#add_plugin(PrintDotFull; "statemachine + conditions + commitments as .dot" ; PrintDot)
+#add_plugin(PrintDotStates; "statemachine as .dot" ; PrintDot)
 
 add_plugin(PrintCFGDot; "Present Control Flow Graph of every module as .dot file" ; PrintDot)
-add_plugin(PrintCompleteness; "Completeness description in ITL")
+#add_plugin(PrintCompleteness; "Completeness description in ITL")
 
 add_plugin(PrintTemplate; "Example for a plugin")
 
@@ -45,8 +45,8 @@ add_plugin(PrintTemplate; "Example for a plugin")
 
 
 #Add new options by calling:
-add_plugin_option(PrintITL; adjustmacros; "Adjusts macros to automatically fit them to the generated RTL")
-add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal with pipelining more easily")
+#add_plugin_option(PrintITL; adjustmacros; "Adjusts macros to automatically fit them to the generated RTL")
+#add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal with pipelining more easily")
 
 add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 

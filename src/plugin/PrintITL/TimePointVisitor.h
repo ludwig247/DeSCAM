@@ -1,15 +1,15 @@
 //
-// Created by ludwig on 31.08.16.
+// Created by lucas on 28.01.20.
 //
 
-#ifndef SCAM_CONDITIONVISITOR2_H
-#define SCAM_CONDITIONVISITOR2_H
+#ifndef DESCAM_TIMEPOINTVISITOR_H
+#define DESCAM_TIMEPOINTVISITOR_H
 
 #include <PrintStmt.h>
 
 namespace SCAM {
 
-    class ConditionVisitor2 : public PrintStmt {
+    class TimePointVisitor : public PrintStmt {
     public:
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
@@ -30,6 +30,8 @@ namespace SCAM {
 
         virtual void visit(class UnsignedValue &node);
 
+        virtual void visit(class UnaryExpr & node);
+
         virtual void visit(class Cast &node);
 
         virtual void visit(class Return &node);
@@ -46,12 +48,13 @@ namespace SCAM {
 
         virtual void visit(class Notify &node);
 
-        virtual void visit(class TimeExprOperand &node);
+        virtual void visit(class ArrayExpr &node);
 
+        virtual void visit(class TimeExpr &node);
 
         bool resize_flag = false;
     };
 
 }
 
-#endif //SCAM_CONDITIONVISITOR_H
+#endif //DESCAM_TIMEPOINTVISITOR_H

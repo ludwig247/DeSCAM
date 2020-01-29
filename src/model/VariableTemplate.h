@@ -50,6 +50,9 @@ namespace SCAM {
 
     template
     class VariableTemplate<Parameter>;
+
+    template
+    class VariableTemplate<TimeExpr>;
 };
 
 
