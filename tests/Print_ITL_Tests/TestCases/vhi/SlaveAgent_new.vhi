@@ -55,7 +55,7 @@ prove:
 	 at t: agent_to_bus_sig_data = resize(0,32);
 	 at t: agent_to_bus_sig_err = false;
 	 at t: nextphase = IDLE;
-	 at t: slave_to_agent_resp_ack = ERR;
+	 at t: slave_to_agent_resp_ack = OK;
 	 at t: slave_to_agent_resp_data = resize(0,32);
 	 at t: agent_to_slave_notify = false;
 	 at t: slave_to_agent_notify = false;

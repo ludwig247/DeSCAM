@@ -21,7 +21,9 @@ TEST_P(FunctionOptimizer_Test, optimizing_functions) {
             ASSERT_FALSE(module.second->getCFG().empty()) << "CFG of module " << module.first << " is empty\n";
             SCAM::FindReadVariables findReadVariables(module.second->getCFG());
             SCAM::FunctionsOptimizer functionOptimizer(module.second->getCFG(),module.second,
+
                                                                               model,findReadVariables.getReadVariablesSet());
+
             ASSERT_FALSE(functionOptimizer.getCFG().empty())
                                         << "After optimizing functions, CFG of module "
                                         << module.second->getName()

@@ -77,7 +77,7 @@ prove:
 	 at t: data_o_sig = resize(0,32);
 	 at t: nextphase = IDLE;
 	 at t: nop = false;
-	 at t: opc_o_sig = BTR2_OPC;
+	 at t: opc_o_sig = NOP_OPC;
 	 at t: master_done_notify = false;
 	 at t: master_result_o_notify = false;
 	 at t: updateQ_o_notify = false;

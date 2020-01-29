@@ -51,7 +51,7 @@ assume:
 prove:
 	 at t: state_1;
 	 at t: agent_to_bus_req_trans_type = SINGLE_READ;
-	 at t: agent_to_bus_resp_ack = ERR;
+	 at t: agent_to_bus_resp_ack = OK;
 	 at t: agent_to_bus_resp_data = resize(0,32);
 	 at t: agent_to_bus_sig_addr = resize(0,32);
 	 at t: agent_to_bus_sig_cyc = false;
