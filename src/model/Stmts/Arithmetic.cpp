@@ -12,8 +12,9 @@ SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr 
         rhs(rhs),
         Expr(lhs->getDataType()) {
     if (lhs->getDataType() != rhs->getDataType()) {
-        std::cout << PrintStmt::toString(lhs) << operation << PrintStmt::toString(rhs) << std::endl;
-        throw std::runtime_error("Arithmetic: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype");
+        std::string errorMsg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs);
+        errorMsg += "Arithmetic: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype";
+        throw std::runtime_error(errorMsg);
     }
     if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw std::runtime_error("operands must be numeric");
     if (!(operation == "+" || operation == "-" || operation == "*" || operation == "/" || operation == "%")) {

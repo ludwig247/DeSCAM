@@ -78,7 +78,7 @@ struct Test_Module1 : public sc_module {
 
     //ports
     blocking_in<bool> b_in;
-    blocking_out<int> b_out;
+    blocking_out<unsigned> b_out;
 
     void fsm() {
         nextphase = SECTION_A;
@@ -90,7 +90,7 @@ struct Test_Module1 : public sc_module {
                 if(y){
                     b_out->write(x + glob4);
                 }else{
-                    b_out->write(-x - glob4);
+                    b_out->write(x - glob4);
                 }
                 nextphase = SECTION_B;
             }

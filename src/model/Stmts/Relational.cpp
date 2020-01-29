@@ -12,7 +12,7 @@ SCAM::Relational::Relational(Expr *lhs, std::string operation, Expr *rhs) :
         rhs(rhs),
         Expr(DataTypes::getDataType("bool")) {
     if (lhs->getDataType() != rhs->getDataType()) {
-        std::string message = PrintStmt::toString(lhs) + lhs->getDataType()->getName() + operation + PrintStmt::toString(rhs) + rhs->getDataType()->getName() + "\n";
+        std::string message = PrintStmt::toString(lhs) +":" + lhs->getDataType()->getName() + " " + operation + " " +  PrintStmt::toString(rhs) + ":" +  rhs->getDataType()->getName() + "\n";
         throw std::runtime_error(message + "Relational: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype");
     }
     if (operation == "==" || operation == "!=" || operation == ">" || operation == ">=" || operation == "<" || operation == "<=") {
