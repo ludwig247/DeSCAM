@@ -497,7 +497,6 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-
         if (ErrorMsg::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
