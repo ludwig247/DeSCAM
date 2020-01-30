@@ -282,8 +282,8 @@ std::string PrintITL::propertySuite() {
     ss << "assume:\n";
     ss << "\t reset_sequence;\n";
     ss << "prove:\n";
-    for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << printTemporalExpr(commitment);
+    for (auto c : ps->getResetProperty()->getCommitmentList()) {
+        ss << "\tat t: " << ConditionVisitor::toString(c->getStatement()) << ";\n";
     }
     ss << "end property;\n";
     ss << std::endl << std::endl;
