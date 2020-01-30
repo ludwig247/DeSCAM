@@ -33,11 +33,11 @@ TEST_P(GlobalVariablePropagation_Test, propagate_constant_global_variables) {
             std::string refFilePath =
                     SCAM_HOME"/tests/Optimizer_Test/src/GlobalVariablePropagation/ref_files/" + module.first +
                     "_out.txt";
-
+/*
             std::ofstream oFile(refFilePath);
             oFile << CFG_str;
             oFile.close();
-
+*/
             refFilePath =
                     SCAM_HOME"/tests/Optimizer_Test/src/GlobalVariablePropagation/ref_files/" + module.first +
                     ".txt";

@@ -7,6 +7,8 @@
 
 #include "systemc.h"
 #include "blocking_ifs.h"
+#include "ImportantState.h"
+
 
 template<typename T>
 class Blocking : public sc_prim_channel,

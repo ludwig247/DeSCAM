@@ -22,6 +22,7 @@ public:
 
 private:
     std::stringstream ss;
+    Model *model;
     SCAM::Module *module;
 
     ////////////////
@@ -30,6 +31,8 @@ private:
     std::string Text_body();
 
     std::string functions();
+
+    std::string globalFunctions();
 
     std::string dataTypes();
 
