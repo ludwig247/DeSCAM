@@ -345,8 +345,8 @@ namespace SCAM {
 
                 PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
                 PropertyMacro *nextState  = propertySuite->findSignal(operation->getNextState()->getName());
-                auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
-                auto nextStateExpr  = new TemporalExpr(t,  nextState->getVariableOperand());
+                auto startStateExpr = new TemporalExpr(t,    startState->getVariableOperand());
+                auto nextStateExpr  = new TemporalExpr(t_end,  nextState->getVariableOperand());
                 newProperty->addAssumption(startStateExpr);
                 newProperty->addCommitment( nextStateExpr);
 
@@ -477,8 +477,8 @@ namespace SCAM {
 
                 PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
                 PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-                auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
-                auto nextStateExpr  = new TemporalExpr(t,  nextState->getVariableOperand());
+                auto startStateExpr = new TemporalExpr(t,        startState->getVariableOperand());
+                auto nextStateExpr  = new TemporalExpr(t_plus_1,  nextState->getVariableOperand());
                 newProperty->addAssumption(startStateExpr);
                 newProperty->addCommitment( nextStateExpr);
 
