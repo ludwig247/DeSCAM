@@ -12,6 +12,12 @@
 #include "PropertyConstraint.h"
 
 namespace SCAM {
+    template< typename T >
+    class pointer_comparator : public std::binary_function< T, T, bool >
+    {
+    public :
+        bool operator()( T x, T y ) const { return *x < *y; }
+    };
 
     class Property {
 
@@ -33,7 +39,7 @@ namespace SCAM {
 
         // Freeze Signals
         void addFreezeSignal(PropertyMacro* freezeSignal, TimeExpr* timePoint);
-        const std::map<PropertyMacro *, TimeExpr *> &getFreezeSignals() const;
+        const std::map<PropertyMacro *, TimeExpr *,pointer_comparator<PropertyMacro*>> &getFreezeSignals() const;
 
         // Assumptions
         void addAssumption(TemporalExpr* assumption);
@@ -51,7 +57,7 @@ namespace SCAM {
 
         std::map<TimeExpr*, Expr*> timePoints;
 
-        std::map<PropertyMacro*, TimeExpr*> freezeSignals;
+        std::map<PropertyMacro*, TimeExpr*,pointer_comparator<PropertyMacro*>> freezeSignals;
 
         std::vector<TemporalExpr*> assumptionList;
 

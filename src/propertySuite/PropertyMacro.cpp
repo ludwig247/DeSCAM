@@ -237,6 +237,10 @@ namespace SCAM {
             return this->parentName+delimiter+this->subVarName;
         }else return this->parentName;
     }
+
+    bool operator<(const PropertyMacro &c1, const PropertyMacro &c2) {
+        return c1.getFullName() < c2.getFullName();
+    }
 }
 
 

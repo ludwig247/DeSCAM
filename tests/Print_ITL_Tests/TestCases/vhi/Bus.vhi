@@ -89,7 +89,7 @@ assume:
 prove:
 	 at t: state_1;
 	 at t: req_trans_type = SINGLE_READ;
-	 at t: resp_ack = ERR;
+	 at t: resp_ack = OK;
 	 at t: resp_data = resize(0,32);
 	 at t: master_in_notify = true;
 	 at t: master_out_notify = false;
