@@ -113,7 +113,7 @@ namespace SCAM {
             if (state.second->isInit()) continue;
 
             if ( state.second->getIncomingOperationsList().empty())
-                std::cout << "\t\033[1;33mWarning\033[0m: (" << state.first << ") is unreachable! consider removing it.\n";
+                std::cout << "\t\033[1;33mWarning\033[0m: (" << state.second->getName() << ") is unreachable! consider removing it.\n";
         }
     }
 
