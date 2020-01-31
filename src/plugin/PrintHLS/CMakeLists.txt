@@ -4,6 +4,7 @@ add_library(PrintHLS
             PrintFunctionParameters.cpp
             BitSlicingHLS.cpp
             PrintSynthesisScripts.cpp
-            InputRegisterVisitor.cpp
             OptimizeForHLS.cpp
-            Utilities.cpp PrintArrayStatements.cpp PrintArrayStatements.h)
+            Utilities.cpp
+            PrintArrayStatements.cpp
+            PrintResetValues.cpp)

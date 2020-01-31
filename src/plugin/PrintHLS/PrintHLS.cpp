@@ -6,6 +6,7 @@
 #include "PrintHLS.h"
 #include "PrintFunctionStatements.h"
 #include "Utilities.h"
+#include "PrintResetValues.h"
 
 PrintHLS::PrintHLS() :
     ss(""),
@@ -49,7 +50,8 @@ void PrintHLS::operations() {
     ss << "void operations(\n";
     interface();
     ss << "{\n";
-
+    register_variables();
+    ss << "\n";
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
@@ -66,12 +68,12 @@ void PrintHLS::operations() {
             switch (operationProperty->getTiming(notifySignal->getPort())) {
                 case TT_1:
                 case FT_e: {
-                    ss << "\t\t" << notifySignal->getName() << " = true;\n";
+                    ss << "\t\t" << notifySignal->getName() << "_reg" << " = true;\n";
                     break;
                 }
                 case FF_1:
                 case FF_e: {
-                    ss << "\t\t" << notifySignal->getName() << " = false;\n";
+                    ss << "\t\t" << notifySignal->getName() << "_reg" << " = false;\n";
                     break;
                 }
             }
@@ -85,18 +87,6 @@ void PrintHLS::operations() {
 void PrintHLS::interface() {
     // input and output signals
     for (const auto& input : Utilities::getParents(opt->getInputs())) {
-//        bool isArrayType = input->isArrayType();
-//        if (isArrayType) {
-//            ss << "\t"
-//               << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName());
-//        } else {
-//            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName());
-//        }
-//        ss << " " << input->getName();
-//        if (isArrayType) {
-//            ss << "[" <<input->getDataType()->getSubVarMap().size() << "]";
-//        }
-//        ss << ",\n";
         bool isArrayType = input->isArrayType();
         if (!isArrayType) {
             ss << "\t" << Utilities::convertDataType(input->getDataType()->getName())
@@ -123,20 +113,6 @@ void PrintHLS::interface() {
         }
         ss << ",\n";
     }
-    for (const auto reg : Utilities::getParents(opt->getInternalRegisterIn()))
-    {
-        bool isArrayType = reg->isArrayType();
-        if (isArrayType) {
-            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
-        } else {
-            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
-        }
-        ss << " in_" << reg->getFullName();
-        if (isArrayType) {
-            ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
-        }
-        ss << ",\n";
-    }
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut()))
     {
         bool isArrayType = reg->isArrayType();
@@ -155,6 +131,41 @@ void PrintHLS::interface() {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
     }
     ss << "\toperation active_operation\n)\n";
+}
+
+void PrintHLS::register_variables() {
+    for (const auto& output : Utilities::getParents(opt->getOutputs())) {
+        bool isArrayType = output->isArrayType();
+        if (isArrayType) {
+            ss << "\tstatic "
+               << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\tstatic " << Utilities::convertDataType(output->getDataType()->getName());
+        }
+        ss << " " << output->getName() << "_reg";
+        if (isArrayType) {
+            ss << "[" << output->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << " = " << getResetValue(output) << ";\n";
+    }
+    for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut()))
+    {
+        bool isArrayType = reg->isArrayType();
+        if (isArrayType) {
+            ss << "\tstatic " << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\tstatic " << Utilities::convertDataType(reg->getDataType()->getName());
+        }
+        ss << " " << reg->getFullName() << "_reg";
+        if (isArrayType) {
+            ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << " = " << getResetValue(reg) << ";\n";
+    }
+    for (auto notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
+           << getResetValue(notifySignal) << ";\n";
+    }
 }
 
 void PrintHLS::dataTypes(Model *model) {
@@ -320,4 +331,38 @@ void PrintHLS::visit(Function &node) {
         --numberOfBranches;
     }
     this->ss << "\n}\n\n";
+}
+
+std::string PrintHLS::getResetValue(Variable* variable)
+{
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+        auto printResetValue = PrintResetValues(commitment, variable->getName());
+        if (printResetValue.toString()) {
+            return printResetValue.getString();
+        }
+    }
+    return PrintFunctionStatements::toString(variable->getInitialValue());
+}
+
+std::string PrintHLS::getResetValue(DataSignal* dataSignal)
+{
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+        auto printResetValue = PrintResetValues(commitment, dataSignal->getFullName());
+        if (printResetValue.toString()) {
+            return printResetValue.getString();
+        }
+    }
+    return PrintFunctionStatements::toString(dataSignal->getInitialValue());
+}
+
+std::string PrintHLS::getResetValue(PropertyMacro* notifySignal)
+{
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+        auto printResetValue = PrintResetValues(commitment, notifySignal->getName());
+        if (printResetValue.toString()) {
+            return printResetValue.getString();
+        }
+    }
+    std::runtime_error("Notify Signal without reset value!");
+    return "";
 }

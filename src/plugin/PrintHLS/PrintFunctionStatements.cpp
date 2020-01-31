@@ -38,35 +38,29 @@ void PrintFunctionStatements::visit(Assignment &node) {
 }
 
 void PrintFunctionStatements::visit(VariableOperand &node) {
-    if (opt) {
-        if(side == Side::LHS) {
-            this->ss << "out_";
-        } else if (side == Side::RHS) {
-            this->ss << "in_";
-        }
-    }
     if (node.getVariable()->isSubVar()) {
-        this->ss << node.getVariable()->getParent()->getName();
+        this->ss << node.getVariable()->getParent()->getName() << "_reg";
         if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << "[" << node.getVariable()->getName() << "]";
         } else {
             this->ss << "." << node.getVariable()->getName();
         }
     } else {
-        this->ss << node.getVariable()->getName();
+        this->ss << node.getVariable()->getName() << "_reg";
     }
 }
 
 void PrintFunctionStatements::visit(DataSignalOperand &node) {
+    auto direction = node.getDataSignal()->getPort()->getInterface()->getDirection();
     if (node.getDataSignal()->isSubVar()) {
-        this->ss << node.getDataSignal()->getParent()->getName();
+        this->ss << node.getDataSignal()->getParent()->getName() << (direction == "in" ? "" : "_reg");
         if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << "[" << node.getDataSignal()->getName() << "]";
         } else {
             this->ss << "." << node.getDataSignal()->getName();
         }
     } else {
-        this->ss << node.getDataSignal()->getName();
+        this->ss << node.getDataSignal()->getName() << (direction == "in" ? "" : "_reg");
     }
 }
 

@@ -33,6 +33,11 @@ private:
     void functions();
     void operations();
     void interface();
+    void register_variables();
+
+    std::string getResetValue(Variable* variable);
+    std::string getResetValue(DataSignal* dataSignal);
+    std::string getResetValue(PropertyMacro* notifySignal);
 
     void visit(Model &node) override {};
     void visit(SCAM::Module &node) override {} ;
