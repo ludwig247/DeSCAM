@@ -5,6 +5,7 @@
 #include "Property.h"
 
 #include <utility>
+#include <Behavior/Operation2.h>
 
 namespace SCAM {
 
@@ -12,8 +13,11 @@ namespace SCAM {
     //                                Constructor
     // ------------------------------------------------------------------------------
 
-    Property::Property(std::string name) :
-            name(std::move(name)) {}
+    Property::Property(std::string name, const SCAM::Operation2 * operation) :
+            name(std::move(name)),
+            operation(operation){
+            assert(operation != nullptr && "Passing an operation that is null");
+    }
 
 
     // ------------------------------------------------------------------------------
@@ -82,6 +86,10 @@ namespace SCAM {
 
     const std::vector<SCAM::TemporalExpr*> &Property::getCommitmentList() const {
         return commitmentList;
+    }
+
+    const Operation2 *Property::getOperation() const {
+        return operation;
     }
 
 }

@@ -228,6 +228,7 @@ namespace SCAM {
         for (const auto& state: this->statesMap) {
             if (!state.second->isInit()) continue;
             assert((state.second->getOutgoingOperationsList().size() == 1) && "Only one operation allowed to start from init");
+            propertySuite->setResetProperty(new Property("reset", *state.second->getOutgoingOperationsList().begin()));
 
             for (auto operation : state.second->getOutgoingOperationsList()) {
 
@@ -286,7 +287,7 @@ namespace SCAM {
                 if (operation->IsWait()) continue;
 
                 std::string operationName = operation->getState()->getName() + "_" + std::to_string(operation->getId());
-                auto newProperty = new Property(operationName);
+                auto newProperty = new Property(operationName, operation);
 
                 auto t_var = new TimeExpr("t");
                 auto t = new TimeExprOperand(t_var);
@@ -426,7 +427,7 @@ namespace SCAM {
             for (auto operation : state.second->getOutgoingOperationsList()) {
                 if (!operation->IsWait()) continue;
 
-                auto *newProperty = new Property("wait_" + operation->getState()->getName());
+                auto *newProperty = new Property("wait_" + operation->getState()->getName(), operation);
 
                 auto t_var = new TimeExpr("t");
                 auto t = new TimeExprOperand(t_var);

@@ -18,7 +18,7 @@ namespace SCAM {
             name(std::move(name)){
         this->resetSignal = new Variable("rst", DataTypes::getDataType("unsigned"));
         this->createConstraint(("no_reset"), new Assignment(new VariableOperand(resetSignal), new UnsignedValue(0)));
-        this->resetProperty = new Property("reset");
+        //this->resetProperty = new Property("reset", nullptr);
     }
 
     // ------------------------------------------------------------------------------
