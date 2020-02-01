@@ -4,9 +4,7 @@
 
 #include "NodePeekVisitor.h"
 #include "PrintHLS.h"
-#include "PrintFunctionStatements.h"
 #include "Utilities.h"
-#include "PrintResetValues.h"
 
 PrintHLS::PrintHLS() :
     ss(""),
@@ -50,7 +48,7 @@ void PrintHLS::operations() {
     ss << "void operations(\n";
     interface();
     ss << "{\n";
-    register_variables();
+    registerVariables();
     ss << "\n";
     ss << "\tswitch (active_operation) {\n";
 
@@ -80,8 +78,9 @@ void PrintHLS::operations() {
         }
         ss << "\t\tbreak;\n";
     }
-    ss << "\t}\n"
-       << "}";
+    ss << "\t}\n\n";
+    writeToOutput();
+    ss << "}";
 }
 
 void PrintHLS::interface() {
@@ -133,7 +132,21 @@ void PrintHLS::interface() {
     ss << "\toperation active_operation\n)\n";
 }
 
-void PrintHLS::register_variables() {
+void PrintHLS::writeToOutput()
+{
+    for (const auto& output : Utilities::getParents(opt->getOutputs())) {
+        ss << "\t" << output->getName() << " = " << output->getName() << "_reg;\n";
+    }
+    for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut())) {
+        ss << "\tout_" << reg->getName() << " = " << reg->getName() << "_reg;\n";
+    }
+    for (auto notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t" << notifySignal->getName() << " = " << notifySignal->getName() << "_reg;\n";
+    }
+}
+
+
+void PrintHLS::registerVariables() {
     for (const auto& output : Utilities::getParents(opt->getOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
@@ -331,38 +344,4 @@ void PrintHLS::visit(Function &node) {
         --numberOfBranches;
     }
     this->ss << "\n}\n\n";
-}
-
-std::string PrintHLS::getResetValue(Variable* variable)
-{
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetValues(commitment, variable->getName());
-        if (printResetValue.toString()) {
-            return printResetValue.getString();
-        }
-    }
-    return PrintFunctionStatements::toString(variable->getInitialValue());
-}
-
-std::string PrintHLS::getResetValue(DataSignal* dataSignal)
-{
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetValues(commitment, dataSignal->getFullName());
-        if (printResetValue.toString()) {
-            return printResetValue.getString();
-        }
-    }
-    return PrintFunctionStatements::toString(dataSignal->getInitialValue());
-}
-
-std::string PrintHLS::getResetValue(PropertyMacro* notifySignal)
-{
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetValues(commitment, notifySignal->getName());
-        if (printResetValue.toString()) {
-            return printResetValue.getString();
-        }
-    }
-    std::runtime_error("Notify Signal without reset value!");
-    return "";
 }

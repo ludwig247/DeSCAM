@@ -12,6 +12,8 @@
 #include "Model.h"
 #include "PrintSynthesisScripts.h"
 #include "OptimizeForHLS.h"
+#include "PrintFunctionStatements.h"
+#include "PrintResetValues.h"
 
 class PrintHLS : public PluginFactory, public AbstractVisitor {
 public:
@@ -33,11 +35,11 @@ private:
     void functions();
     void operations();
     void interface();
-    void register_variables();
+    void registerVariables();
+    void writeToOutput();
 
-    std::string getResetValue(Variable* variable);
-    std::string getResetValue(DataSignal* dataSignal);
-    std::string getResetValue(PropertyMacro* notifySignal);
+    template <typename T>
+    std::string getResetValue(T* signal);
 
     void visit(Model &node) override {};
     void visit(SCAM::Module &node) override {} ;
@@ -52,5 +54,16 @@ private:
     void visit(Function &node) override ;
     void visit(Parameter &node) override {};
 };
+
+template <typename T>
+std::string PrintHLS::getResetValue(T* signal) {
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+        auto printResetValue = PrintResetValues(commitment, signal->getFullName());
+        if (printResetValue.toString()) {
+            return printResetValue.getString();
+        }
+    }
+    return PrintFunctionStatements::toString(signal->getDataType()->getDefaultVal());
+}
 
 #endif //SCAM_PRINTHLS_H
