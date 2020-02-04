@@ -855,6 +855,9 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) 
             auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
             syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
 
+            auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
+            dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
+
             auto lhsExpr = *ExprVisitor::getUsedVariables(assignment->getLhs()).begin();
             if (lhsExpr == nullptr || isRequired(lhsExpr, op, cycle)){
                 if( lhsExpr == nullptr || isRequired2(lhsExpr, op, cycle)) {
@@ -864,10 +867,6 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) 
                     }
                 }
             }
-
-
-            auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
-            dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
         }
         //Stream freeze variables to stringstream
 

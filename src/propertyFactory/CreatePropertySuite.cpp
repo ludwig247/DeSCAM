@@ -4,6 +4,7 @@
 
 #include <ExprVisitor.h>
 #include <PrintITL/PrintITL.h>
+#include <PrintTrueOperation/TrueOperation.h>
 #include "CreatePropertySuite.h"
 
 #include "BoolValue.h"
@@ -52,8 +53,8 @@ void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, SCAM:
     }
 }
 
-void SCAM::CreatePropertySuite::addVisibleRegisters(const std::map<std::string, Variable *> &varMap, SCAM::PropertySuite *propertySuite) {
-    for (const auto &var: varMap) {
+void SCAM::CreatePropertySuite::addVisibleRegisters(const Module * module, SCAM::PropertySuite *propertySuite) {
+    for (const auto &var: module->getVariableMap()) {
         // Check for Array-Types
         if (var.second->isSubVar() && var.second->getParent()->isArrayType()) {
             // Check if Macro for parent already exists
@@ -394,20 +395,63 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
 
 }
 
-void SCAM::CreatePropertySuite::addTrueOperations(const std::vector<std::vector<const Operation2 *> > &cyclesList, const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
     int cycle_cnt = 0;
+    //Find cylces
+    TrueOperation trueOperation(module);
     // Add a property for each cycle in the list
-    for (auto cycle: cyclesList) {
+
+
+    for (auto cycle: trueOperation.getCycleMap()) {
+
         auto newProperty = new Property("cycle_" + std::to_string(cycle_cnt), cycle);
+        //===============================
+        // Timepoints
+        //===============================
         //Add t_first timepoint:
         auto t_var = new TimeExpr("t_" + cycle.front()->getState()->getName());
-        auto t_prev = new TimeExprOperand(t_var);
+        auto t_prev = new TimeExprOperand(new TimeExpr("t" ));
         newProperty->addTimePoint(t_var, t_prev); // at t_state = t;
-        for (auto operation: cycle) {
-            auto t_next_var = new TimeExpr("t_" + operation->getNextState()->getName());
+        for (auto iterator = cycle.begin(); iterator != cycle.end(); ++iterator) {
+            auto operation = *iterator;
+            TimeExpr * t_next_var;
+            if(iterator == cycle.end()-1){
+                t_next_var = new TimeExpr("t_end");
+            }else{
+                t_next_var = new TimeExpr("t_" + operation->getNextState()->getName());
+            }
             newProperty->addTimePoint(t_next_var, new Arithmetic(t_prev, "+", new UnsignedValue(1)));
             t_prev = new TimeExprOperand(t_next_var);
+
         }
         propertySuite->addProperty(newProperty);
+
+        //===============================
+        // Freeze
+        //===============================
+        for (auto sync: trueOperation.getSyncSignals()) {
+            PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
+            newProperty->addFreezeSignal(signalMacro, t_var);
+        }
+        for (auto var: trueOperation.getVariables()) {
+            if (var->isConstant()) continue;
+            PropertyMacro *signalMacro = propertySuite->findSignal(var);
+            newProperty->addFreezeSignal(signalMacro, t_var);
+        }
+        for (auto dataSig: trueOperation.getDataSignals()) {
+            PropertyMacro *signalMacro;
+            //TODO remove try/catch
+            if (dataSig->isSubVar()) {
+                signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
+            } else {
+                signalMacro = propertySuite->findSignal(dataSig->getName());
+            }
+
+            newProperty->addFreezeSignal(signalMacro, t_var);
+        }
+
+        cycle_cnt++;
     }
+
+
 }

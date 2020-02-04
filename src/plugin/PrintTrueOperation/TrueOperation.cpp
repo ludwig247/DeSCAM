@@ -3,8 +3,9 @@
 //
 
 #include <CreatePropertySuite.h>
+#include <ExprVisitor.h>
 #include "TrueOperation.h"
-
+#include <algorithm>
 
 SCAM::TrueOperation::TrueOperation(SCAM::Module const *  module):
     //stateMap(module->getFSM()->getStateMap()),
@@ -12,17 +13,18 @@ SCAM::TrueOperation::TrueOperation(SCAM::Module const *  module):
     //Step 1: find all cycles starting from the start state
     auto start = this->getStartState(module->getFSM()->getStateMap());
     findCylces(start, start, {});
-    std::cout << printCycles() << std::endl;
-
+    //std::cout << printCycles() << std::endl;
+    findFreezeVars();
     //Step 2: create "composed" PropertySuite
-    //TODO: add "composed" operations to PropertySuite
-    //TODO: problem right now is to print the composed properties. Idea: make printing of properties a static function in PrintITL ?
-    createPropertySuite();
-
-
+    //TODO: next step add timepoints to freezevars
+    //createPropertySuite();
 
 
     //TODO: check output with hardware
+}
+
+const std::vector<std::vector<const SCAM::Operation2 *>> &SCAM::TrueOperation::getCycleMap() const {
+    return cycleMap;
 }
 
 
@@ -71,29 +73,107 @@ std::string SCAM::TrueOperation::printCycles() const {
     return ss.str();
 }
 
-void SCAM::TrueOperation::createPropertySuite() {
-
-    auto s2qed = new PropertySuite("TrueOperation");
-    // Generate PropertySuite
-    //Ports
-    //SCAM::CreatePropertySuite::addNotifySignals(this->module, s2qed);
-    //SCAM::CreatePropertySuite::addSyncSignals(this->module, s2qed);
-    //SCAM::CreatePropertySuite::addDataSignals(this->module, s2qed);
-
-    //Vars
-    //SCAM::CreatePropertySuite::addVisibleRegisters(this->varMap, s2qed);
-
-    //States
-    //SCAM::CreatePropertySuite::addStates(this->module, s2qed);
-
-    //Functions
-    //SCAM::CreatePropertySuite::addFunctions(this->module, s2qed);
-
-    SCAM::CreatePropertySuite::addTrueOperations(cycleMap,this->module, s2qed);
-
+const std::set<SCAM::SyncSignal *> &SCAM::TrueOperation::getSyncSignals() const {
+    return syncSignals;
 }
 
-std::string SCAM::TrueOperation::printProperty(SCAM::Property *property) {
-    return std::string();
+const std::set<SCAM::Variable *> &SCAM::TrueOperation::getVariables() const {
+    return variables;
 }
+
+const std::set<SCAM::DataSignal *> &SCAM::TrueOperation::getDataSignals() const {
+    return dataSignals;
+}
+
+void SCAM::TrueOperation::findFreezeVars() {
+    for(auto cycle: cycleMap){
+        for(auto op: cycle){
+            for (auto &&assignment : op->getCommitmentsList()) {
+                auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
+                syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
+
+                auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
+                dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
+
+                auto lhsExpr = *ExprVisitor::getUsedVariables(assignment->getLhs()).begin();
+                if (lhsExpr == nullptr || isRequired(lhsExpr, op, cycle)){
+                    if( lhsExpr == nullptr || isRequired2(lhsExpr, op, cycle)) {
+                        auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
+                        for (auto var: newVariables) {
+                            variables.insert(var);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+
+/***
+ * \brief Algorithm checks whether a visible register is needed for completness or not
+ *
+ * Algorithm starts at the current operation. If the variable is used in the current or any subsequent operatin, then
+ * it is needed for completion, otherwise not.
+ *
+ * @param var
+ * @param currentOperation
+ * @param cycle
+ * @return
+ */
+bool SCAM::TrueOperation::isRequired(Variable *var, const Operation2 * currentOperation,const std::vector<const Operation2 *> &cycle) {
+
+    //Start iterating from currentOperation
+    auto it = std::find(begin(cycle), end(cycle), currentOperation);
+
+    //Iterate through set and search for usages of the variable
+    for (auto iterator = it; iterator != cycle.end(); ++iterator) {
+        for (auto assignment: (*iterator)->getCommitmentsList()) {
+            if (PrintStmt::toString(assignment->getLhs()) == var->getFullName()) {
+                auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
+                const bool isInSet = newVariables.find(var) != newVariables.end();
+                const bool isEqual = *assignment->getRhs() == *assignment->getLhs();
+                if (!isInSet or !isEqual) return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation2 *op, std::vector<const Operation2 *> &cycle) {
+    //Start iterating from currentOperation
+
+    //Check operation: Is there already an assignment?
+    for (auto assignment: op->getCommitmentsList()) {
+        if (PrintStmt::toString(assignment->getLhs()) == var->getFullName()) {
+            auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
+            //const bool isInSet = newVariables.find(var) != newVariables.end();
+            const bool isEqual = *assignment->getRhs() == *assignment->getLhs();
+            if (!isEqual) {
+                return true;
+            }
+        }
+    }
+    auto it = std::find(begin(cycle), end(cycle), op)++;
+
+    //Iterate through set and search for usages of the variable
+    for (auto iterator = it; iterator != cycle.end(); ++iterator) {
+        for (auto assignment: (*iterator)->getCommitmentsList()) {
+            if (PrintStmt::toString(assignment->getLhs()) == var->getFullName()) {
+                auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
+                const bool isInSet = newVariables.find(var) != newVariables.end();
+                const bool isEqual = *assignment->getRhs() == *assignment->getLhs();
+
+                if (!isEqual) {
+                    if (!isInSet) return false;
+                    else return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
 

@@ -147,7 +147,7 @@ namespace SCAM {
         SCAM::CreatePropertySuite::addDataSignals(this->module, this->propertySuite);
 
         //Vars
-        SCAM::CreatePropertySuite::addVisibleRegisters(this->varMap, this->propertySuite);
+        SCAM::CreatePropertySuite::addVisibleRegisters(this->module, this->propertySuite);
 
         //States
         SCAM::CreatePropertySuite::addStates(this->module, this->propertySuite);
@@ -159,7 +159,8 @@ namespace SCAM {
         SCAM::CreatePropertySuite::addReset(this->module, this->propertySuite);
 
         //OPERATION PROPERTIES
-        SCAM::CreatePropertySuite::addOperations(this->module, this->propertySuite);
+        //SCAM::CreatePropertySuite::addOperations(this->module, this->propertySuite);
+        SCAM::CreatePropertySuite::addTrueOperations(this->module, this->propertySuite);
 
         // WAIT PROPERTIES
         SCAM::CreatePropertySuite::addWait(this->module, this->propertySuite);
