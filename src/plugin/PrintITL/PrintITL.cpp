@@ -1,18 +1,13 @@
 //
 // Created by ludwig on 27.10.16.
 //
-
-
 #include <fstream>
 #include <ExprVisitor.h>
-
-
 #include "PrintITL.h"
 #include "Config.h"
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
 #include "TimePointVisitor.h"
-
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 

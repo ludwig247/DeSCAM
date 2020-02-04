@@ -8,8 +8,7 @@
 
 namespace SCAM {
 
-    SCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<SCAM::Operation2 *> &opList, SCAM::Module *module) :
-    operationsList(opList) {
+    SCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<SCAM::Operation2 *> &operationsList, SCAM::Module *module){
         // mark all variables for removal initially
 
         //local vars
@@ -98,17 +97,13 @@ namespace SCAM {
                 }
             }
         }
-
-
     }
 
-    const std::map<std::string, Variable*> OptimizeOperations2::getNewVarMap() const {
+    const std::map<std::string, Variable*> SCAM::OptimizeOperations2::getNewVarMap() const {
         return this->varMap;
     }
 
-    const std::vector<SCAM::Operation2 *> SCAM::OptimizeOperations2::getOperationsList() const {
-        return this->operationsList;
-    }
+
 
 
 

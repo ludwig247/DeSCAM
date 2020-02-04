@@ -20,7 +20,7 @@ std::map<std::string, std::string> PrintTrueOperation::printModel(Model *node) {
 
         this->module = module.second;
 
-        TrueOperation(this->module);
+        TrueOperation trueOperation(this->module);
 
         pluginOutput.insert(std::make_pair(module.first + ".vhi", "nothing"));
 

@@ -225,6 +225,10 @@ namespace SCAM {
         this->functionMap.erase(functionName);
     }
 
+    void Module::setVariableMap(const std::map<std::string, Variable *> &variableMap) {
+        Module::variableMap = variableMap;
+    }
+
 //    void Module::setCFG_Original(std::map<int, SCAM::CfgNode *> blockCFG) {
 //        this->cfg_Original = std::move(blockCFG);
 //    }

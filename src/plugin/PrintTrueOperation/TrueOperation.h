@@ -20,15 +20,23 @@ namespace SCAM{
     public:
         TrueOperation() = delete;
         explicit  TrueOperation(const Module  *  module);
-
         ~TrueOperation() = default;
 
     private:
         const Module * module;
-        std::map<int,State2*> stateMap;
-        void setStartState();
+        //std::map<int,State2*> stateMap;
+        std::vector<std::vector<const Operation2 *>> cycleMap;
+        int loop_detection = 0;
+
+        void findCylces(State2 *current, State2 *start, const std::vector<const Operation2 *> &opList);
+        State2 * getStartState(const std::map<int,State2*>& stateMap) const;
         void setRightHook();
 
+        std::string printCycles() const;
+
+        std::string printProperty(Property *property);
+
+        void createPropertySuite();
     };
 
 }

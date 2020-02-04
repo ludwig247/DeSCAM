@@ -27,6 +27,7 @@ namespace SCAM {
         // Constructor
         Property() = delete;
         explicit Property(std::string name, const SCAM::Operation2 *operation);
+        explicit Property(std::string name, std::vector<const SCAM::Operation2 *> operationList);
 
         // Name
         const std::string &getName() const;
@@ -51,12 +52,13 @@ namespace SCAM {
         void addCommitment(TemporalExpr* commitment);
         const std::vector<TemporalExpr*> &getCommitmentList() const;
 
-        const Operation2 *getOperation() const;
+        const Operation2 * getOperation() const;
 
     private:
 
         const std::string name;
-        const SCAM::Operation2 * operation; //! Contains a reference to the abstract operation
+
+        std::vector<const SCAM::Operation2 *> operationList; //! Contains a reference to the abstract operations
 
         std::vector<PropertyConstraint*> constraints;
 
