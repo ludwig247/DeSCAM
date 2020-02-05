@@ -18,7 +18,7 @@ find_file(
 )
 message(STATUS ".h => ${TEST_FILE}")
 
-file(GLOB_RECURSE SOURCES
+file(GLOB SOURCES
         ../example/Bus/ESL/*.h
         )
 message(STATUS ".h => ${SOURCES}")
