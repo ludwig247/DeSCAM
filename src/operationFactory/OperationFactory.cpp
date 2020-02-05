@@ -163,7 +163,7 @@ namespace SCAM {
         SCAM::CreatePropertySuite::addTrueOperations(this->module, this->propertySuite);
 
         // WAIT PROPERTIES
-        SCAM::CreatePropertySuite::addWait(this->module, this->propertySuite);
+        //SCAM::CreatePropertySuite::addWait(this->module, this->propertySuite);
 
     }
 

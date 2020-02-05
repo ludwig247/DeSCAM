@@ -53,7 +53,7 @@ void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, SCAM:
     }
 }
 
-void SCAM::CreatePropertySuite::addVisibleRegisters(const Module * module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, SCAM::PropertySuite *propertySuite) {
     for (const auto &var: module->getVariableMap()) {
         // Check for Array-Types
         if (var.second->isSubVar() && var.second->getParent()->isArrayType()) {
@@ -410,15 +410,17 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         //Add t_first timepoint:
         auto t_var = new TimeExpr("t_" + cycle.front()->getState()->getName());
-        auto t_prev = new TimeExprOperand(new TimeExpr("t" ));
+        auto t_prev = new TimeExprOperand(new TimeExpr("t"));
         newProperty->addTimePoint(t_var, t_prev); // at t_state = t;
         for (auto iterator = cycle.begin(); iterator != cycle.end(); ++iterator) {
             auto operation = *iterator;
-            TimeExpr * t_next_var;
-            if(iterator == cycle.end()-1){
+            TimeExpr *t_next_var;
+            if (iterator == cycle.end() - 1) {
                 t_next_var = new TimeExpr("t_end");
-            }else{
+                std::cout << "Replacing " << operation->getNextState()->getName()  << " with t_end" <<  std::endl;
+            } else {
                 t_next_var = new TimeExpr("t_" + operation->getNextState()->getName());
+
             }
             newProperty->addTimePoint(t_next_var, new Arithmetic(t_prev, "+", new UnsignedValue(1)));
             t_prev = new TimeExprOperand(t_next_var);
@@ -429,29 +431,70 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         // Freeze
         //===============================
+        //Find all freeze variables for this cycle
+        trueOperation.findFreezeVars(cycle);
         for (auto sync: trueOperation.getSyncSignals()) {
             PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
-            newProperty->addFreezeSignal(signalMacro, t_var);
+            auto state = trueOperation.getSyncSignalTimepoints().at(sync);
+            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+            newProperty->addFreezeSignal(signalMacro, timepoint);
         }
         for (auto var: trueOperation.getVariables()) {
             if (var->isConstant()) continue;
             PropertyMacro *signalMacro = propertySuite->findSignal(var);
+            auto state = trueOperation.getVariablesTimepoints().at(var);
+            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
             newProperty->addFreezeSignal(signalMacro, t_var);
         }
         for (auto dataSig: trueOperation.getDataSignals()) {
             PropertyMacro *signalMacro;
-            //TODO remove try/catch
             if (dataSig->isSubVar()) {
                 signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
             } else {
                 signalMacro = propertySuite->findSignal(dataSig->getName());
             }
 
-            newProperty->addFreezeSignal(signalMacro, t_var);
+            auto state = trueOperation.getDataSignalsTimepoints().at(dataSig);
+            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+            newProperty->addFreezeSignal(signalMacro, timepoint);
         }
+
+
+        //===============================
+        // Assumptions
+        //===============================
+
+
+
+        for(auto operation: cycle){
+            PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
+            TimeExpr * timepoint = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getState()->getName());
+            auto timeExprOperand = new TimeExprOperand(timepoint);
+            auto test = new TemporalExpr(timeExprOperand,startState->getVariableOperand());
+            newProperty->addAssumption(test);
+
+            for (auto assumption : operation->getAssumptionsList()) {
+               newProperty->addAssumption(new TemporalExpr(timeExprOperand, assumption));
+            }
+        }
+
+        //===============================
+        // Commitments
+        //===============================
+//        PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
+//        auto nextStateExpr = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getNextState()->getName());
+//        newProperty->addCommitment(nextStateExpr);
+
 
         cycle_cnt++;
     }
 
 
+}
+
+TimeExpr *CreatePropertySuite::findTimeExpr(const std::map<TimeExpr *, Expr *> &map, std::string state_name) {
+    for(auto te: map){
+        if(te.first->getName() == state_name) return te.first;
+    }
+    throw std::runtime_error(" Timexpr " + state_name +" not found");
 }

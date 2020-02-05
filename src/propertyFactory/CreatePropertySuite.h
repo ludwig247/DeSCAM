@@ -28,6 +28,7 @@ namespace SCAM{
     private:
 
 
+        static TimeExpr *findTimeExpr(const std::map<TimeExpr *, Expr *> &map, std::basic_string<char, std::char_traits<char>, std::allocator<char>> basicString);
     };
 }
 

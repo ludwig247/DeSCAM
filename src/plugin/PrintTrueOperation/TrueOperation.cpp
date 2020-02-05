@@ -7,19 +7,17 @@
 #include "TrueOperation.h"
 #include <algorithm>
 
-SCAM::TrueOperation::TrueOperation(SCAM::Module const *  module):
-    //stateMap(module->getFSM()->getStateMap()),
-    module(module) {
+SCAM::TrueOperation::TrueOperation(SCAM::Module const *module) :
+//stateMap(module->getFSM()->getStateMap()),
+        module(module) {
     //Step 1: find all cycles starting from the start state
     auto start = this->getStartState(module->getFSM()->getStateMap());
     findCylces(start, start, {});
     //std::cout << printCycles() << std::endl;
-    findFreezeVars();
+
     //Step 2: create "composed" PropertySuite
     //TODO: next step add timepoints to freezevars
     //createPropertySuite();
-
-
     //TODO: check output with hardware
 }
 
@@ -34,9 +32,9 @@ void SCAM::TrueOperation::setRightHook() {
 
 void SCAM::TrueOperation::findCylces(State2 *current, State2 *start, const std::vector<const Operation2 *> &opList) {
     this->loop_detection++;
-    if(this->loop_detection == 0xFFFF-1) throw std::runtime_error(" loop "); //TODO: show trace of loop
+    if (this->loop_detection == 0xFFFF - 1) throw std::runtime_error(" loop "); //TODO: show trace of loop
     for (auto operation: current->getOutgoingOperationsList()) {
-        if(operation->IsWait()) continue;
+        if (operation->IsWait()) continue;
         auto newOpList = opList;
         newOpList.push_back(operation);
         if (operation->getNextState() == start) {
@@ -47,25 +45,25 @@ void SCAM::TrueOperation::findCylces(State2 *current, State2 *start, const std::
 }
 
 SCAM::State2 *SCAM::TrueOperation::getStartState(const std::map<int, State2 *> &stateMap) const {
-        //Init state should always be index 0
-        State2 *initState = stateMap.at(0);
-        assert(initState->getName() == "init_0" && "Wrong state");
-        return  initState->getOutgoingOperationsList().back()->getNextState();
+    //Init state should always be index 0
+    State2 *initState = stateMap.at(0);
+    assert(initState->getName() == "init_0" && "Wrong state");
+    return initState->getOutgoingOperationsList().back()->getNextState();
 }
 
 std::string SCAM::TrueOperation::printCycles() const {
 
     std::stringstream ss;
-    int i=0;
+    int i = 0;
     for (const auto &cycle : cycleMap) {
         ss << "Cycle #" << i++ << std::endl;
-        int j = cycle.size()-1;
-        for(auto op: cycle){
-            ss  << "op_"<< op->getId() <<"[" << op->getState()->getName() << ":" << op->getNextState()->getName() << "]";
-            if(j-- != 0){
+        int j = cycle.size() - 1;
+        for (auto op: cycle) {
+            ss << "op_" << op->getId() << "[" << op->getState()->getName() << ":" << op->getNextState()->getName() << "]";
+            if (j-- != 0) {
                 ss << "->";
-            }else{
-               ss  << std::endl;
+            } else {
+                ss << std::endl;
             }
 
         }
@@ -85,28 +83,41 @@ const std::set<SCAM::DataSignal *> &SCAM::TrueOperation::getDataSignals() const 
     return dataSignals;
 }
 
-void SCAM::TrueOperation::findFreezeVars() {
-    for(auto cycle: cycleMap){
-        for(auto op: cycle){
-            for (auto &&assignment : op->getCommitmentsList()) {
-                auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
-                syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
+void SCAM::TrueOperation::findFreezeVars(std::vector<const Operation2 *> cycle) {
+    //Reset everything from previos operations
+    this->variablesTimepoints.clear();
+    this->variables.clear();
+    this->dataSignalsTimepoints.clear();
+    this->dataSignals.clear();
+    this->syncSignalTimepoints.clear();
+    this->syncSignals.clear();
+    //Find all free vars for this cycle
+    for (auto op: cycle) {
+        for (auto &&assignment : op->getCommitmentsList()) {
+            //Sync signals
+            auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
+            syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
+            for (auto signal: newSyncSignals) {
+                syncSignalTimepoints.insert(std::make_pair(signal, op->getState()));
+            }
 
-                auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
-                dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
-
-                auto lhsExpr = *ExprVisitor::getUsedVariables(assignment->getLhs()).begin();
-                if (lhsExpr == nullptr || isRequired(lhsExpr, op, cycle)){
-                    if( lhsExpr == nullptr || isRequired2(lhsExpr, op, cycle)) {
-                        auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
-                        for (auto var: newVariables) {
-                            variables.insert(var);
-                        }
+            //Datasignals
+            auto newDataSignals = ExprVisitor::getUsedDataSignals(assignment->getRhs());
+            dataSignals.insert(newDataSignals.begin(), newDataSignals.end());
+            for (auto signal: newDataSignals) {
+                dataSignalsTimepoints.insert(std::make_pair(signal, op->getState()));
+            }
+            auto lhsExpr = *ExprVisitor::getUsedVariables(assignment->getLhs()).begin();
+            if (lhsExpr == nullptr || isRequired(lhsExpr, op, cycle)) {
+                if (lhsExpr == nullptr || isRequired2(lhsExpr, op, cycle)) {
+                    auto newVariables = ExprVisitor::getUsedVariables(assignment->getRhs());
+                    for (auto var: newVariables) {
+                        variables.insert(var);
+                        variablesTimepoints.insert(std::make_pair(var, op->getState()));
                     }
                 }
             }
         }
-
     }
 }
 
@@ -122,7 +133,7 @@ void SCAM::TrueOperation::findFreezeVars() {
  * @param cycle
  * @return
  */
-bool SCAM::TrueOperation::isRequired(Variable *var, const Operation2 * currentOperation,const std::vector<const Operation2 *> &cycle) {
+bool SCAM::TrueOperation::isRequired(Variable *var, const Operation2 *currentOperation, const std::vector<const Operation2 *> &cycle) {
 
     //Start iterating from currentOperation
     auto it = std::find(begin(cycle), end(cycle), currentOperation);
@@ -173,6 +184,18 @@ bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation2 *op
         }
     }
     return false;
+}
+
+const std::map<SCAM::SyncSignal *, SCAM::State2 *> &SCAM::TrueOperation::getSyncSignalTimepoints() const {
+    return syncSignalTimepoints;
+}
+
+const std::map<SCAM::Variable *, SCAM::State2 *> &SCAM::TrueOperation::getVariablesTimepoints() const {
+    return variablesTimepoints;
+}
+
+const std::map<SCAM::DataSignal *, SCAM::State2 *> &SCAM::TrueOperation::getDataSignalsTimepoints() const {
+    return dataSignalsTimepoints;
 }
 
 
