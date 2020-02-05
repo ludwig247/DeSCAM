@@ -10,12 +10,12 @@
 
 #include <PluginFactory.h>
 
-
+#include "OptimizeForHLS.h"
 
     class PrintSynthesisScripts : public PluginFactory {
 
     public:
-        PrintSynthesisScripts();
+        explicit PrintSynthesisScripts(OptimizeForHLS* opt);
         ~PrintSynthesisScripts() = default;
 
         std::map<std::string, std::string> printModel(Model *node) override ;
@@ -23,6 +23,7 @@
     private:
         PropertySuite *propertySuite;
         SCAM::Module* currentModule;
+        OptimizeForHLS* opt;
 
         std::string synthesisScript();
         std::string directivesScript();

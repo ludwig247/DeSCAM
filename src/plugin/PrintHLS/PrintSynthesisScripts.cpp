@@ -3,11 +3,12 @@
 //
 
 #include "PrintSynthesisScripts.h"
+#include "Utilities.h"
 
-
-PrintSynthesisScripts::PrintSynthesisScripts() :
+PrintSynthesisScripts::PrintSynthesisScripts(OptimizeForHLS* opt) :
     propertySuite(nullptr),
-    currentModule(nullptr)
+    currentModule(nullptr),
+    opt(opt)
 {
 }
 
@@ -55,40 +56,26 @@ std::string PrintSynthesisScripts::directivesScript() {
     ss << "config_rtl -reset all -reset_async -reset_level high\n";
     ss << "config_schedule -effort high -relax_ii_for_timing=0 -verbose=0\n";
     ss << "config_bind -effort high\n";
-//    ss << "set_directive_latency -min=1 operations\n";
-//    ss << setDirectivesReset();
+    ss << "set_directive_latency -max=1 operations\n";
     ss << setDirectiveInterface();
     ss << setDirectiveAllocation();
-//    ss << setDirectivePipeline();
 
-    return ss.str();
-}
-
-std::string PrintSynthesisScripts::setDirectivesReset() {
-    std::stringstream ss;
-    ss << "set_directive_interface -mode ap_ctrl_hs operations\n";
-    for (auto visibleRegisters : propertySuite->getVisibleRegisters()) {
-        ss << "set_directive_reset operations ";
-        if (visibleRegisters->isCompoundType()) {
-            ss << visibleRegisters->getVariable()->getParent()->getName() << "_"
-                << visibleRegisters->getVariable()->getName();
-        } else {
-            ss << visibleRegisters->getName();
-        }
-        ss << "\n";
-    }
     return ss.str();
 }
 
 std::string PrintSynthesisScripts::setDirectiveInterface() {
     std::stringstream ss;
+    ss << "set_directive_interface -mode ap_ctrl_none operations\n";
     for (auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
-            ss << "set_directive_interface -mode ap_vld operations " << port.second->getName() << "_sig\n";
+            ss << "set_directive_interface -mode ap_none operations " << port.second->getName() << "_sig\n";
         }
     }
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
-        ss << "set_directive_interface -mode ap_vld operations " << notifySignal->getName() << "\n";
+    for (auto &notifySignal : propertySuite->getNotifySignals()) {
+        ss << "set_directive_interface -mode ap_none operations " << notifySignal->getName() << "\n";
+    }
+    for (auto &internalRegisterOut : Utilities::getParents(opt->getInternalRegisterOut())) {
+        ss << "set_directive_interface -mode ap_none operations out_" << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
 }
@@ -97,14 +84,6 @@ std::string PrintSynthesisScripts::setDirectiveAllocation() {
     std::stringstream ss;
     for (auto &function : currentModule->getFunctionMap()) {
         ss << "set_directive_allocation -limit 1 -type function operations " << function.second->getName() << "\n";
-    }
-    return ss.str();
-}
-
-std::string PrintSynthesisScripts::setDirectivePipeline() {
-    std::stringstream ss;
-    for (auto &function : currentModule->getFunctionMap()) {
-        ss << "set_directive_pipeline " << function.second->getName() << "\n";
     }
     return ss.str();
 }

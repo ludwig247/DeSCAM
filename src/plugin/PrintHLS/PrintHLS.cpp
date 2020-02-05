@@ -33,7 +33,7 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
         pluginOutput.insert(std::make_pair(module.first + ".cpp", ss.str()));
     }
 
-    synthesisScript = std::make_unique<PrintSynthesisScripts>();
+    synthesisScript = std::make_unique<PrintSynthesisScripts>(opt.get());
     auto scripts = synthesisScript->printModel(model);
     pluginOutput.insert(scripts.begin(), scripts.end());
 
