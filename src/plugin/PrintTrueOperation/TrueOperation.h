@@ -34,7 +34,8 @@ namespace SCAM{
         const std::map<SCAM::Variable *, State2 *> &getVariablesTimepoints() const;
         const std::map<SCAM::DataSignal *, State2 *> &getDataSignalsTimepoints() const;
 
-
+        static bool isRequired2(Variable *const &var,const Operation2 * op, std::vector<const Operation2 *> &cycle);
+        static bool isRequired(Variable *var, const Operation2 * currentOperation, const std::vector<const Operation2 *> &cycle);
     private:
         const Module * module;
 
@@ -54,8 +55,7 @@ namespace SCAM{
         void findCylces(State2 *current, State2 *start, const std::vector<const Operation2 *> &opList);
         State2 * getStartState(const std::map<int,State2*>& stateMap) const;
         void setRightHook();
-        bool isRequired2(Variable *const &var,const Operation2 * op, std::vector<const Operation2 *> &cycle);
-        bool isRequired(Variable *var, const Operation2 * currentOperation, const std::vector<const Operation2 *> &cycle);
+
 
         std::string printCycles() const;
 

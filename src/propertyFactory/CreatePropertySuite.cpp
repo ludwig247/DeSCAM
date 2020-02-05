@@ -463,15 +463,11 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         // Assumptions
         //===============================
-
-
-
         for(auto operation: cycle){
             PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
             TimeExpr * timepoint = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getState()->getName());
             auto timeExprOperand = new TimeExprOperand(timepoint);
-            auto test = new TemporalExpr(timeExprOperand,startState->getVariableOperand());
-            newProperty->addAssumption(test);
+            newProperty->addAssumption(new TemporalExpr(timeExprOperand,startState->getVariableOperand()));
 
             for (auto assumption : operation->getAssumptionsList()) {
                newProperty->addAssumption(new TemporalExpr(timeExprOperand, assumption));
@@ -481,11 +477,36 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         // Commitments
         //===============================
-//        PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-//        auto nextStateExpr = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getNextState()->getName());
-//        newProperty->addCommitment(nextStateExpr);
+        for (auto it = cycle.begin(); it != cycle.end(); ++it) {
+            auto operation = *it;
+            TimeExpr * timepoint;
+            if(it != cycle.end()-1){
+                timepoint = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getNextState()->getName());
+            }else timepoint = findTimeExpr(newProperty->getTimePoints(),"t_end");
 
+            auto timeExprOperand = new TimeExprOperand(timepoint);
+            PropertyMacro * nextState = propertySuite->findSignal(operation->getNextState()->getName());
+            newProperty->addCommitment(new TemporalExpr(timeExprOperand,nextState->getVariableOperand()));
 
+            for (auto commitment : operation->getCommitmentsList()) {
+                std::cout <<*timeExprOperand  << ":" << *commitment << std::endl;
+                auto test = new TemporalExpr(timeExprOperand, commitment);
+                newProperty->addCommitment(test);
+            }
+
+            for (auto &&commitment : operation->getCommitmentsList()) {
+                //Only one variable in set
+                auto vars = ExprVisitor::getUsedVariables(commitment->getLhs());
+                assert(vars.size() < 2 && "Too many variables for LHS");
+
+                if (vars.empty() || TrueOperation::isRequired(*vars.begin(), operation, cycle)) {
+                    if (vars.empty() || TrueOperation::isRequired2(*vars.begin(), operation, cycle)) {
+                        auto test = new TemporalExpr(timeExprOperand, commitment);
+                        newProperty->addCommitment(test);
+                    }
+                }
+            }
+        }
         cycle_cnt++;
     }
 
