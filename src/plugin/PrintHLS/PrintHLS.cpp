@@ -50,6 +50,8 @@ void PrintHLS::operations() {
     ss << "{\n";
     registerVariables();
     ss << "\n";
+    writeToOutput();
+    ss << "\n";
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
@@ -78,8 +80,7 @@ void PrintHLS::operations() {
         }
         ss << "\t\tbreak;\n";
     }
-    ss << "\t}\n\n";
-    writeToOutput();
+    ss << "\t}\n";
     ss << "}";
 }
 

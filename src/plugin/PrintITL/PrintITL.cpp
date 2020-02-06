@@ -865,12 +865,9 @@ std::string PrintITL::hls() {
     ss << std::endl << std::endl;
 
     ss << "-- STATES --" << std::endl;
-    std::size_t stateNumber = 0;
     for (auto st: ps->getStates()){
-        ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
-        ss << " := " << "active_state = st_" << st->getName();
-        ss << " and (ready_sig = '1' or idle_sig = '1') end macro;" << std::endl;
-        stateNumber++;
+        ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName())
+           << " := " << "active_state = st_" << st->getName() << " and (ready_sig = '1' or idle_sig = '1') end macro;\n";
     }
     ss << std::endl << std::endl;
 

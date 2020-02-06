@@ -65,7 +65,7 @@ std::string PrintSynthesisScripts::directivesScript() {
 
 std::string PrintSynthesisScripts::setDirectiveInterface() {
     std::stringstream ss;
-    ss << "set_directive_interface -mode ap_ctrl_none operations\n";
+//    ss << "set_directive_interface -mode ap_ctrl_none operations\n";
     for (auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
             ss << "set_directive_interface -mode ap_none operations " << port.second->getName() << "_sig\n";

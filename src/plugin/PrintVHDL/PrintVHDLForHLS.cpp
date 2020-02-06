@@ -220,10 +220,15 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
        << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getNextState()->getName() << ";\n"
+       << "\t\t\tstart_sig <= '1';\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
-       << "\t\t\tactive_state <= next_state;\n";
-
-    ss << "\t\tend if;\n"
+       << "\t\t\tif ((idle_sig = '1' or ready_sig = '1') and wait_state = '0') then\n"
+       << "\t\t\t\tactive_state <= next_state;\n"
+       << "\t\t\t\tstart_sig <= '1';\n"
+       << "\t\t\telsif ((idle_sig = '1' or ready_sig = '1') and wait_state = '1') then\n"
+       << "\t\t\t\tstart_sig <= '0';\n"
+       << "\t\t\tend if;\n"
+       << "\t\tend if;\n"
        << "\tend process;\n\n"
        << "end " << propertySuite->getName() << "_arch;\n";
 
@@ -299,8 +304,12 @@ void PrintVHDLForHLS::signals(std::stringstream &ss) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
     }
 
+    ss << "\n\t-- Handshaking Protocol Signals (Communication between this wrapper and operations_inst)\n";
+    printSignal(signalFactory->getHandshakingProtocolSignals(), Style::DOT, "_sig", false);
+
     ss << "\n\t-- Monitor Signals\n";
     printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false);
+
 }
 
 void PrintVHDLForHLS::component(std::stringstream& ss) {
@@ -329,6 +338,7 @@ void PrintVHDLForHLS::component(std::stringstream& ss) {
     };
 
     printComponentSignal(signalFactory->getControlSignals(), "ap_");
+    printComponentSignal(signalFactory->getHandshakingProtocolSignals(), "ap_");
     printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "");
     printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "");
     printComponentVars(signalFactory->getInternalRegisterOut(), "out");
@@ -371,6 +381,7 @@ void PrintVHDLForHLS::componentInst(std::stringstream& ss) {
     };
 
     printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "");
+    printComponentInstSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", "_sig");
     printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
     printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
     printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");

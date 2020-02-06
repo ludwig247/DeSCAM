@@ -426,7 +426,12 @@ DataSignal* OptimizeForHLS::getCombinedDataSignal(const std::vector<DataSignal*>
         combinedName = name1.substr(end - result + 1, result);
     }
 
-    auto combinedDataSignal = new DataSignal(combinedName + "_sig", dataSignal.front()->getDataType());
+    auto combinedDataSignal = new DataSignal(
+            combinedName + "_sig",
+            dataSignal.front()->getDataType(),
+            dataSignal.front()->getInitialValue(),
+            nullptr,
+            dataSignal.front()->getPort());
     return combinedDataSignal;
 }
 
