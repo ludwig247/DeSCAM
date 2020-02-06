@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(wrapper CXX)
 
 
-add_subdirectory(pybind11)
+add_subdirectory(pybind)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 pybind11_add_module(wrapper MODULE wrappercode.cpp)
