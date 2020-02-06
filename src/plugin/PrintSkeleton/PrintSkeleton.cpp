@@ -63,6 +63,7 @@ std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(SCAM::Module 
     this->module = module;
     localPackageName = module->getName();
 
+
     return std::make_pair(localPackageName + "_types" + getFilenameExtention(), generateLocalTypes());
 }
 

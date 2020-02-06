@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 14) # C++14...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib)
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib)
+
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces)
 include_directories(${CMAKE_SOURCE_DIR}/src/plugin)
@@ -22,6 +25,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model/Stmts)#do include this directo
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG/new)#why include this directory?
+include_directories(${CMAKE_SOURCE_DIR}/src/parser)
 include_directories(${CMAKE_SOURCE_DIR}/tests/)
 
 add_subdirectory(src)
