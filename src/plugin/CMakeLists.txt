@@ -81,7 +81,7 @@ foreach (plugin_lib ${PLUGIN_NAMES})
 endforeach ()
 
 # First we add the executable that generates the table
-add_executable(MakeStyles MakeStyles.cpp /import/home/ludwig/DeSCAM/src/parser/CommandLineParametersConfig.cpp )
+add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp )
 set_target_properties(MakeStyles PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON
