@@ -15,7 +15,7 @@ set(AST_FILES
         Parameter.cpp VariableTemplate.h VariableTemplate.cpp)
 
 
-add_library(Model ${AST_FILES})
+add_library(Model SHARED ${AST_FILES})
 
 
 add_subdirectory(Stmts)

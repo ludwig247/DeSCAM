@@ -1,4 +1,4 @@
-add_library(functionFactory
+add_library(functionFactory SHARED
         Path.cpp
         FindPathsToReturn.cpp
         FunctionFactory.cpp)

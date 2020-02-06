@@ -9,7 +9,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(DESCAM, m)
+PYBIND11_MODULE(wrapper, m)
 {
     m.def("main", [](std::vector<std::string> args) {
         std::vector<const char *> cstrs;

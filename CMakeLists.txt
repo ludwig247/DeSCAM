@@ -22,6 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model/Stmts)#do include this directo
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG/new)#why include this directory?
+include_directories(${CMAKE_SOURCE_DIR}/src/parser)
 include_directories(${CMAKE_SOURCE_DIR}/tests/)
 
 add_subdirectory(src)

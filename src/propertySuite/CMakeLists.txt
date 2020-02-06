@@ -8,4 +8,4 @@ set(PROPERTY_SUITE_FILES
         PropertySuite.cpp
         ResetProperty.cpp
         WaitProperty.cpp)
-add_library(propertySuite ${PROPERTY_SUITE_FILES})
+add_library(propertySuite SHARED ${PROPERTY_SUITE_FILES})
