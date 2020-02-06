@@ -3,12 +3,10 @@
 //
 
 #include <iostream>
-#include "CommandLineParametersConfig.h"
-//#include "CommandLineParameter.cpp"
-#include "CommandLineParameter.h"
-#include "CommandLineProcess.cpp"
+
+#include "CommandLineProcess.h"
 #include "ManageOutput.h"
-#include "PluginFactory.cpp"
+#include "PluginFactory.h"
 #include "ModelGlobal.h"
 
 using namespace std;

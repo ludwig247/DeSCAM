@@ -8,7 +8,7 @@
 #include <PluginFactory.h>
 #include <sstream>
 #include "Model.h"
-//#include <PropertyFactory.h>
+#include "CommandLineParameter.h"
 
 class PrintITL : public PluginFactory {
 

@@ -3,7 +3,7 @@ project(DESCAM CXX)
 
 add_subdirectory(CLI)
 
-add_executable(DESCAM main.cpp CommandLineProcess.cpp CommandLineParameter.cpp CommandLineParametersConfig.cpp)
+add_executable(DESCAM main.cpp)
 
 target_compile_options(DESCAM PRIVATE -O2)
 

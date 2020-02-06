@@ -15,11 +15,11 @@
 #Add new plugins by calling:
 
 add_plugin(PrintITL; "Complete set of properties in ITL")
-add_plugin(PrintSVA; "Complete set of properties in SVA")
+#add_plugin(PrintSVA; "Complete set of properties in SVA")
 
 
 #add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
-add_plugin(PrintSkeleton; "Structure and FSM in AML")
+#add_plugin(PrintSkeleton; "Structure and FSM in AML")
 #add_plugin(PrintChisel; "Print a module in CHISEL")
 
 #add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
@@ -52,27 +52,26 @@ add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal 
 
 #add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 
-add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
-add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
-
-
-add_optimize_option(all; "Enable all optimizations")
-add_optimize_option(gvp; "Propagate the value of constant global variables")
-add_optimize_option(lvp; "Propagate locally constant values")
-add_optimize_option(gcp; "Propagate globally constant values")
-add_optimize_option(rda; "Remove dead assignments")
-add_optimize_option(are; "Analyze reachability of CFG paths")
-add_optimize_option(fun; "Optimize functions")
-add_optimize_option(sim; "Simplify expressions")
-add_optimize_option(ros; "Reduce operators strength")
-add_optimize_option(arb; "Analyze range and bitwidth")
-add_optimize_option(mrc; "Merge redundant conditions")
+#add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
+#add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
+#
+#
+#add_optimize_option(all; "Enable all optimizations")
+#add_optimize_option(gvp; "Propagate the value of constant global variables")
+#add_optimize_option(lvp; "Propagate locally constant values")
+#add_optimize_option(gcp; "Propagate globally constant values")
+#add_optimize_option(rda; "Remove dead assignments")
+#add_optimize_option(are; "Analyze reachability of CFG paths")
+#add_optimize_option(fun; "Optimize functions")
+#add_optimize_option(sim; "Simplify expressions")
+#add_optimize_option(ros; "Reduce operators strength")
+#add_optimize_option(arb; "Analyze range and bitwidth")
+#add_optimize_option(mrc; "Merge redundant conditions")
 
 
 #Please don't change the code below.
-add_library(PluginFactory
-        ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.cpp
-        ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.h)
+add_library(PluginFactory SHARED
+        ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.cpp)
 
 # get the list of all added plugins in order to link them to DESCAM
 get_directory_property(PLUGIN_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION PLUGIN_NAMES)

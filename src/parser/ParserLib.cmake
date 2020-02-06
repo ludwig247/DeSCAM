@@ -1,9 +1,9 @@
 
-add_library(parser SHARED)
+add_library(parser SHARED
+        CommandLineProcess.cpp CommandLineParameter.cpp CommandLineParametersConfig.cpp)
 SET_TARGET_PROPERTIES(parser PROPERTIES LINKER_LANGUAGE CXX)
 
 
-target_link_libraries(parser PluginFactory)
 target_link_libraries(parser tinyXML)
 target_link_libraries(parser modelFactory)
 target_link_libraries(parser operationFactory)
@@ -11,6 +11,7 @@ target_link_libraries(parser optimizer)
 target_link_libraries(parser global)
 target_link_libraries(parser Model)
 target_link_libraries(parser CLI)
+target_link_libraries(parser PluginFactory)
 target_link_libraries(parser pthread)
 
 #include LLVM,z3,SystemC CLANG
