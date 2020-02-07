@@ -50,7 +50,7 @@ namespace SCAM {
 
         virtual void visit(class ArrayExpr &node);
 
-        virtual void visit(class TimeExpr &node);
+        virtual void visit(class Timepoint &node);
 
         bool resize_flag = false;
     };

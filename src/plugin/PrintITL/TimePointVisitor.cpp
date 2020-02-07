@@ -211,6 +211,6 @@ void SCAM::TimePointVisitor::visit(SCAM::UnaryExpr &node) {
     this->ss << ")";
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::TimeExpr &node) {
+void SCAM::TimePointVisitor::visit(SCAM::Timepoint &node) {
     this->ss << node.getName();
 }

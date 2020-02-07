@@ -37,12 +37,14 @@ namespace SCAM {
         const std::vector<PropertyConstraint *> &getConstraints() const;
 
         // Time Points
-        void addTimePoint(TimeExpr* timePoint, Expr* expr);
-        const std::map<TimeExpr *, Expr *> &getTimePoints() const;
+        void addTimePoint(Timepoint* timePoint, Expr* expr);
+        const std::map<Timepoint *, Expr *> &getTimePoints() const;
+
+        const std::vector<std::pair<Timepoint *, Expr *>> &getTimePointsOrdered() const;
 
         // Freeze Signals
-        void addFreezeSignal(PropertyMacro* freezeSignal, TimeExpr* timePoint);
-        const std::map<PropertyMacro *, TimeExpr *,pointer_comparator<PropertyMacro*>> &getFreezeSignals() const;
+        void addFreezeSignal(PropertyMacro* freezeSignal, Timepoint* timePoint);
+        const std::map<PropertyMacro *, Timepoint *,pointer_comparator<PropertyMacro*>> &getFreezeSignals() const;
 
         // Assumptions
         void addAssumption(TemporalExpr* assumption);
@@ -62,9 +64,10 @@ namespace SCAM {
 
         std::vector<PropertyConstraint*> constraints;
 
-        std::map<TimeExpr*, Expr*> timePoints;
+        std::map<Timepoint*, Expr*> timePoints;
+        std::vector<std::pair<Timepoint*, Expr*>> timePointsOrdered;
 
-        std::map<PropertyMacro*, TimeExpr*,pointer_comparator<PropertyMacro*>> freezeSignals;
+        std::map<PropertyMacro*, Timepoint*,pointer_comparator<PropertyMacro*>> freezeSignals;
 
         std::vector<TemporalExpr*> assumptionList;
 

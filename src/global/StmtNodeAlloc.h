@@ -30,7 +30,7 @@ namespace SCAM {
 
         static VariableOperand *allocNode(VariableOperand &node, bool simplifyNode = false);
 
-        static TimeExprOperand *allocNode(TimeExprOperand &node, bool simplifyNode = false);
+        static TimePointOperand *allocNode(TimePointOperand &node, bool simplifyNode = false);
 
         static IntegerValue *allocNode(IntegerValue &node, bool simplifyNode = false);
 
@@ -96,7 +96,7 @@ namespace SCAM {
             return allocTableVariableOperand;
         }
 
-        static std::vector<TimeExprOperand *> &getAllocTableTimeExprOperand() {
+        static std::vector<TimePointOperand *> &getAllocTableTimeExprOperand() {
             return allocTableTimeExprOperand;
         }
 
@@ -213,7 +213,7 @@ namespace SCAM {
 
         // Expr node tables
         static std::vector<VariableOperand *> allocTableVariableOperand;
-        static std::vector<TimeExprOperand *> allocTableTimeExprOperand;
+        static std::vector<TimePointOperand *> allocTableTimeExprOperand;
         static std::vector<IntegerValue *> allocTableIntegerValue;
         static std::vector<UnsignedValue *> allocTableUnsignedValue;
         static std::vector<BoolValue *> allocTableBoolValue;
@@ -251,7 +251,7 @@ namespace SCAM {
     protected:
         virtual void visit(class VariableOperand &node);
 
-        virtual void visit(class TimeExprOperand &node);
+        virtual void visit(class TimePointOperand &node);
 
         virtual void visit(class IntegerValue &node);
 

@@ -274,7 +274,7 @@ namespace SCAM {
         throw std::runtime_error("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(SCAM::TimeExprOperand &node) {
+    void SCAM::CreateOperations::visit(SCAM::TimePointOperand &node) {
         throw std::runtime_error("CreateOperations: Not allowed ");
     }
 

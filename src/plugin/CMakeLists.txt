@@ -28,7 +28,7 @@ add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
 add_plugin(PrintCFGDot; "Present Control Flow Graph of every module as .dot file" ; PrintDot)
 #add_plugin(PrintCompleteness; "Completeness description in ITL")
 
-add_plugin(PrintTemplate; "Example for a plugin")
+#add_plugin(PrintTemplate; "Example for a plugin")
 
 #add_plugin(PrintMonitor; "fill out")
 

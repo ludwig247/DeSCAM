@@ -90,7 +90,7 @@ namespace SCAM {
 
         virtual void visit(ArrayExpr &node);
 
-        virtual void visit(TimeExprOperand &node);
+        virtual void visit(TimePointOperand &node);
 
     protected:
 

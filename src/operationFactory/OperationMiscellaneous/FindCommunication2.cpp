@@ -272,7 +272,7 @@ void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
     }
 }
 
-void SCAM::FindCommunication2::visit(struct TimeExprOperand &node) {
+void SCAM::FindCommunication2::visit(struct TimePointOperand &node) {
     waitComm = false;
     communication = false;
 }

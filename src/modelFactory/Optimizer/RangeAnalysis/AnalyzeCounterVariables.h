@@ -115,7 +115,7 @@ namespace SCAM {
 
         void visit(class Peek &node) override {};
 
-        void visit(struct TimeExprOperand &node) override {};
+        void visit(struct TimePointOperand &node) override {};
     };
 }
 

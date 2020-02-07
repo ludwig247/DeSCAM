@@ -139,7 +139,7 @@ namespace SCAM {
         this->newExpr = &node;
     }
 
-    void SCAM::FindStateBacktrack::visit(SCAM::TimeExprOperand &node) {
+    void SCAM::FindStateBacktrack::visit(SCAM::TimePointOperand &node) {
         this->newExpr = &node;
     }
 

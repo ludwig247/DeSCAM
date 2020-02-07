@@ -244,11 +244,11 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
 
     ss << "\t";
     if (temporalExpr->isAt()) {
-        ss << ConditionVisitorSVA::toString((temporalExpr->getTiming().at(0)));
+        ss << ConditionVisitorSVA::toString((temporalExpr->getTimepointList().at(0)));
         ss << " ##0 ";
     } else if (temporalExpr->isDuring()) {  //TODO: Think of a smoother way for during case
         ss << "during_o (";
-        for (auto t : temporalExpr->getTiming()) {
+        for (auto t : temporalExpr->getTimepointList()) {
             if (NodePeekVisitor::nodePeekArithmetic(t)) {
                 Arithmetic *a = NodePeekVisitor::nodePeekArithmetic(t);
                 ss << ConditionVisitorSVA::toString(a->getLhs()) << ", ";

@@ -31,8 +31,8 @@ protected:
     virtual void visit(class CompoundExpr &node);
     virtual void visit(class Notify &node);
     virtual void visit(class ParamOperand &node);
-    virtual void visit(class TimeExpr &node);
-    virtual void visit(class TimeExprOperand &node);
+    virtual void visit(class Timepoint &node);
+    virtual void visit(class TimePointOperand &node);
 
     bool resize_flag=false;
 };

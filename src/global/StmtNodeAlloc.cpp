@@ -10,7 +10,7 @@ namespace SCAM {
 
     // Expr node tables
     std::vector<VariableOperand *> StmtNodeAlloc::allocTableVariableOperand;
-    std::vector<TimeExprOperand *> StmtNodeAlloc::allocTableTimeExprOperand;
+    std::vector<TimePointOperand *> StmtNodeAlloc::allocTableTimeExprOperand;
     std::vector<IntegerValue *> StmtNodeAlloc::allocTableIntegerValue;
     std::vector<UnsignedValue *> StmtNodeAlloc::allocTableUnsignedValue;
     std::vector<BoolValue *> StmtNodeAlloc::allocTableBoolValue;
@@ -90,9 +90,9 @@ namespace SCAM {
         return (VariableOperand *) nodeAlloc.getAllocNode();
     }
 
-    TimeExprOperand *StmtNodeAlloc::allocNode(TimeExprOperand &node, bool simplifyNode) {
+    TimePointOperand *StmtNodeAlloc::allocNode(TimePointOperand &node, bool simplifyNode) {
         StmtNodeAlloc nodeAlloc(node, simplifyNode);
-        return (TimeExprOperand *) nodeAlloc.getAllocNode();
+        return (TimePointOperand *) nodeAlloc.getAllocNode();
     }
 
     IntegerValue *StmtNodeAlloc::allocNode(IntegerValue &node, bool simplifyNode) {
@@ -242,14 +242,14 @@ namespace SCAM {
         this->allocNodeAddress = tempPtr;
     }
 
-    void StmtNodeAlloc::visit(class TimeExprOperand &node) {
+    void StmtNodeAlloc::visit(class TimePointOperand &node) {
         for (auto lookup_it : allocTableTimeExprOperand) {
             if (*lookup_it == node) {
                 this->allocNodeAddress = lookup_it;
                 return;
             }
         }
-        auto tempPtr = new TimeExprOperand(node.getTimeExpr());
+        auto tempPtr = new TimePointOperand(node.getTimepoint());
         allocTableTimeExprOperand.push_back(tempPtr);
         this->allocNodeAddress = tempPtr;
     }

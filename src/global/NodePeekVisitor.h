@@ -82,7 +82,7 @@ namespace SCAM {
 
         ArrayExpr * nodePeekArrayExpr() const;
 
-        TimeExprOperand * nodePeekTimeExprOperand() const;
+        TimePointOperand * nodePeekTimePointOperand() const;
 
         static VariableOperand *nodePeekVariableOperand(Stmt *node);
 
@@ -148,7 +148,7 @@ namespace SCAM {
 
         static ArrayExpr * nodePeekArrayExpr(Stmt *node);
 
-        static TimeExprOperand * nodePeekTimeExprOperand(Stmt *node);
+        static TimePointOperand * nodePeekTimePointOperand(Stmt *node);
 
     private:
         bool isConstTypeNodeFlag = false;
@@ -184,7 +184,7 @@ namespace SCAM {
         Wait *nodePtrWait = nullptr;
         Peek *nodePtrPeek = nullptr;
         ArrayExpr * nodePtrArrayExpr = nullptr;
-        TimeExprOperand * nodePtrTimeExprOperand = nullptr;
+        TimePointOperand * nodePtrTimePointOperand= nullptr;
 
 
     public:
@@ -252,7 +252,7 @@ namespace SCAM {
 
         virtual void visit(struct ArrayExpr &node);
 
-        virtual void visit(struct TimeExprOperand &node);
+        virtual void visit(struct TimePointOperand &node);
 
     };
 }

@@ -8,6 +8,7 @@
 #include "TypeInterface.h"
 #include "ConstValue.h"
 
+
 namespace SCAM {
     template<class T>
     class VariableTemplate : public TypeInterface, public AbstractNode {
@@ -52,7 +53,7 @@ namespace SCAM {
     class VariableTemplate<Parameter>;
 
     template
-    class VariableTemplate<TimeExpr>;
+    class VariableTemplate<Timepoint>;
 };
 
 

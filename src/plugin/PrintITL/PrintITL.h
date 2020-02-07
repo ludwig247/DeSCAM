@@ -38,6 +38,9 @@ private:
 
     std::string propertySuite();
 
+    std::string macros();
+    std::string operations();
+
     //std::string adjustmacros();
 
     //std::string pipelined();

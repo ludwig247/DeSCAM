@@ -112,8 +112,8 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *pr
         for (auto operation : state.second->getOutgoingOperationsList()) {
 
             assert((operation->getState()->isInit()) && "Operation should be starting from init state");
-            auto t_var = new TimeExpr("t");
-            auto t = new TimeExprOperand(t_var);
+            auto t_var = new Timepoint("t");
+            auto t = new TimePointOperand(t_var);
             PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
             auto nextStateExpr = new TemporalExpr(t, nextState->getOperand());
 
@@ -170,11 +170,11 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
             std::string operationName = operation->getState()->getName() + "_" + std::to_string(operation->getId());
             auto newProperty = new Property(operationName, operation);
 
-            auto t_var = new TimeExpr("t");
-            auto t = new TimeExprOperand(t_var);
+            auto t_var = new Timepoint("t");
+            auto t = new TimePointOperand(t_var);
 
-            auto t_end_var = new TimeExpr("t_end");
-            auto t_end = new TimeExprOperand(t_end_var);
+            auto t_end_var = new Timepoint("t_end");
+            auto t_end = new TimePointOperand(t_end_var);
 
             newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
 
@@ -311,8 +311,8 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
 
             auto *newProperty = new Property("wait_" + operation->getState()->getName(), operation);
 
-            auto t_var = new TimeExpr("t");
-            auto t = new TimeExprOperand(t_var);
+            auto t_var = new Timepoint("t");
+            auto t = new TimePointOperand(t_var);
 
             auto t_plus_1 = new Arithmetic(t, "+", new UnsignedValue(1));
 
@@ -409,21 +409,20 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         // Timepoints
         //===============================
         //Add t_first timepoint:
-        auto t_var = new TimeExpr("t_" + cycle.front()->getState()->getName());
-        auto t_prev = new TimeExprOperand(new TimeExpr("t"));
+        auto t_var = new Timepoint("t_" + cycle.front()->getState()->getName());
+        auto t_prev = new TimePointOperand(new Timepoint("t"));
         newProperty->addTimePoint(t_var, t_prev); // at t_state = t;
         for (auto iterator = cycle.begin(); iterator != cycle.end(); ++iterator) {
             auto operation = *iterator;
-            TimeExpr *t_next_var;
+            Timepoint *t_next_var;
             if (iterator == cycle.end() - 1) {
-                t_next_var = new TimeExpr("t_end");
-                std::cout << "Replacing " << operation->getNextState()->getName()  << " with t_end" <<  std::endl;
+                t_next_var = new Timepoint("t_end");
             } else {
-                t_next_var = new TimeExpr("t_" + operation->getNextState()->getName());
+                t_next_var = new Timepoint("t_" + operation->getNextState()->getName());
 
             }
             newProperty->addTimePoint(t_next_var, new Arithmetic(t_prev, "+", new UnsignedValue(1)));
-            t_prev = new TimeExprOperand(t_next_var);
+            t_prev = new TimePointOperand(t_next_var);
 
         }
         propertySuite->addProperty(newProperty);
@@ -435,6 +434,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         trueOperation.findFreezeVars(cycle);
         for (auto sync: trueOperation.getSyncSignals()) {
             PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
+            signalMacro->setExpression(sync);
             auto state = trueOperation.getSyncSignalTimepoints().at(sync);
             auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
             newProperty->addFreezeSignal(signalMacro, timepoint);
@@ -442,9 +442,15 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         for (auto var: trueOperation.getVariables()) {
             if (var->isConstant()) continue;
             PropertyMacro *signalMacro = propertySuite->findSignal(var);
+            signalMacro->setExpression(new VariableOperand(var));
             auto state = trueOperation.getVariablesTimepoints().at(var);
             auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+
             newProperty->addFreezeSignal(signalMacro, t_var);
+
+            if(cycle_cnt == 0){
+                std::cout << signalMacro->getFullName("_") << ":" << var->getFullName() << std::endl;
+            }
         }
         for (auto dataSig: trueOperation.getDataSignals()) {
             PropertyMacro *signalMacro;
@@ -453,9 +459,10 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
             } else {
                 signalMacro = propertySuite->findSignal(dataSig->getName());
             }
-
+            signalMacro->setExpression(new DataSignalOperand(dataSig));
             auto state = trueOperation.getDataSignalsTimepoints().at(dataSig);
             auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+
             newProperty->addFreezeSignal(signalMacro, timepoint);
         }
 
@@ -465,8 +472,8 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         for(auto operation: cycle){
             PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
-            TimeExpr * timepoint = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getState()->getName());
-            auto timeExprOperand = new TimeExprOperand(timepoint);
+            Timepoint * timepoint = findTimeExpr(newProperty->getTimePoints(), "t_" + operation->getState()->getName());
+            auto timeExprOperand = new TimePointOperand(timepoint);
             newProperty->addAssumption(new TemporalExpr(timeExprOperand,startState->getVariableOperand()));
 
             for (auto assumption : operation->getAssumptionsList()) {
@@ -479,20 +486,20 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         for (auto it = cycle.begin(); it != cycle.end(); ++it) {
             auto operation = *it;
-            TimeExpr * timepoint;
+            Timepoint * timepoint;
             if(it != cycle.end()-1){
                 timepoint = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getNextState()->getName());
             }else timepoint = findTimeExpr(newProperty->getTimePoints(),"t_end");
 
-            auto timeExprOperand = new TimeExprOperand(timepoint);
+            auto timePointOperand = new TimePointOperand(timepoint);
             PropertyMacro * nextState = propertySuite->findSignal(operation->getNextState()->getName());
-            newProperty->addCommitment(new TemporalExpr(timeExprOperand,nextState->getVariableOperand()));
+            newProperty->addCommitment(new TemporalExpr(timePointOperand, nextState->getVariableOperand()));
 
-            for (auto commitment : operation->getCommitmentsList()) {
-                std::cout <<*timeExprOperand  << ":" << *commitment << std::endl;
-                auto test = new TemporalExpr(timeExprOperand, commitment);
-                newProperty->addCommitment(test);
-            }
+//            for (auto commitment : operation->getCommitmentsList()) {
+//                auto temporalExpr = new TemporalExpr(timePointOperand, commitment);
+//                temporalExpr->setFreezeAt("_"+timepoint->getName());
+//                newProperty->addCommitment(temporalExpr);
+//            }
 
             for (auto &&commitment : operation->getCommitmentsList()) {
                 //Only one variable in set
@@ -501,8 +508,9 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 
                 if (vars.empty() || TrueOperation::isRequired(*vars.begin(), operation, cycle)) {
                     if (vars.empty() || TrueOperation::isRequired2(*vars.begin(), operation, cycle)) {
-                        auto test = new TemporalExpr(timeExprOperand, commitment);
-                        newProperty->addCommitment(test);
+                        auto temporalExpr = new TemporalExpr(timePointOperand, commitment);
+                        temporalExpr->setFreezeAt("_at_t_"+operation->getState()->getName());
+                        newProperty->addCommitment(temporalExpr);
                     }
                 }
             }
@@ -513,7 +521,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 
 }
 
-TimeExpr *CreatePropertySuite::findTimeExpr(const std::map<TimeExpr *, Expr *> &map, std::string state_name) {
+Timepoint *CreatePropertySuite::findTimeExpr(const std::map<Timepoint *, Expr *> &map, std::string state_name) {
     for(auto te: map){
         if(te.first->getName() == state_name) return te.first;
     }

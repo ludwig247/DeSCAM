@@ -111,7 +111,7 @@ namespace SCAM {
 
         void visit(SCAM::Peek &node) override;
 
-        void visit(SCAM::TimeExprOperand &node) override;
+        void visit(SCAM::TimePointOperand &node) override;
     private:
         void addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation);
         void addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation);

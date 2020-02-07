@@ -39,4 +39,4 @@ add_library(Stmts
         Wait.cpp
         Peek.cpp
         ArrayExpr.cpp
-        TimeExprOperand.cpp)
+        TimePointOperand.cpp)

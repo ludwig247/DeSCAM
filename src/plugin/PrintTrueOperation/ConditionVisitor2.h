@@ -46,7 +46,7 @@ namespace SCAM {
 
         virtual void visit(class Notify &node);
 
-        virtual void visit(class TimeExprOperand &node);
+        virtual void visit(class TimePointOperand &node);
 
 
         bool resize_flag = false;

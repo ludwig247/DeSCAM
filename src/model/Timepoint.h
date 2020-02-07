@@ -2,8 +2,8 @@
 // Created by lucas on 16.01.20.
 //
 
-#ifndef DESCAM_TIMEEXPR_H
-#define DESCAM_TIMEEXPR_H
+#ifndef DESCAM_TIMEPOINT_H
+#define DESCAM_TIMEPOINT_H
 
 #include <string>
 
@@ -18,18 +18,16 @@ namespace SCAM {
      *  - TimeExpr(std::string name)
      *
      */
-    class TimeExpr : public VariableTemplate<TimeExpr> {
+    class Timepoint : public VariableTemplate<Timepoint> {
     public:
-        TimeExpr() = delete;
-        TimeExpr(TimeExpr&) = delete;
-
-        explicit TimeExpr(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, TimeExpr *parent = nullptr);
+        Timepoint() = delete;
+        Timepoint(Timepoint&) = delete;
+        explicit Timepoint(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, Timepoint *parent = nullptr);
 
         //Visitor
         virtual void accept(AbstractVisitor &visitor);
-
     };
 
 }
 
-#endif //DESCAM_TIMEEXPR_H
+#endif //DESCAM_TIMEPOINT_H

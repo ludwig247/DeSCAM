@@ -42,7 +42,7 @@ private:
 
     void visit(Interface &node) {};
 
-    void visit(TimeExpr &node) {};
+    void visit(Timepoint &node) {};
 
 };
 

@@ -359,6 +359,6 @@ void SCAM::PrintStmt::visit(SCAM::ArrayExpr &node) {
 }
 
 
-void SCAM::PrintStmt::visit(TimeExprOperand &node) {
-    this->ss << node.getTimeExpr()->getName();
+void SCAM::PrintStmt::visit(TimePointOperand &node) {
+    this->ss << node.getTimepoint()->getName();
 }

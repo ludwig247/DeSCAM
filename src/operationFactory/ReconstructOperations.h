@@ -116,7 +116,7 @@ namespace SCAM {
 
         void visit(ArrayExpr &node) override;
 
-        void visit(SCAM::TimeExprOperand &node) override;
+        void visit(SCAM::TimePointOperand &node) override;
 
 
     private:

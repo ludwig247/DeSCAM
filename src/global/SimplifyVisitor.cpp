@@ -382,7 +382,7 @@ namespace SCAM {
 
     }
 
-    void SimplifyVisitor::visit(class TimeExprOperand &node) {
+    void SimplifyVisitor::visit(class TimePointOperand &node) {
 
     }
 
@@ -524,9 +524,9 @@ namespace SCAM {
         return (VariableOperand *) simplifyVisitor.getSimplifiedNode();
     }
 
-    TimeExprOperand *SimplifyVisitor::simplifyNode(TimeExprOperand &node) {
+    TimePointOperand *SimplifyVisitor::simplifyNode(TimePointOperand &node) {
         SimplifyVisitor simplifyVisitor(&node);
-        return (TimeExprOperand *) simplifyVisitor.getSimplifiedNode();
+        return (TimePointOperand *) simplifyVisitor.getSimplifiedNode();
     }
 
     IntegerValue *SimplifyVisitor::simplifyNode(IntegerValue &node) {

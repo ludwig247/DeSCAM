@@ -257,7 +257,7 @@ void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
 
 }
 
-void SCAM::ExprVisitor::visit(struct TimeExprOperand &node) {
+void SCAM::ExprVisitor::visit(struct TimePointOperand &node) {
     this->usedOperands.insert(&node);
 
     this->constVal = false;

@@ -15,7 +15,8 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 
         this->module = module.second;
 
-        pluginOutput.insert(std::make_pair(module.first + ".vhi", propertySuite()));
+        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macros()));
+        pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
         std::string funString = functions();
         if (funString != "")
             pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
@@ -127,20 +128,21 @@ std::string PrintITL::printTemporalExpr(TemporalExpr* temporalExpr) {
     ss << "\t";
     if (temporalExpr->isAt()) {
         ss << "at ";
-        ss << TimePointVisitor::toString(temporalExpr->getTiming().at(0));
+        ss << TimePointVisitor::toString(temporalExpr->getTimepointList().front());
         ss << ": ";
     } else if (temporalExpr->isDuring()) {
         ss << "during[";
-        ss << TimePointVisitor::toString(temporalExpr->getTiming().at(0));
+        ss << TimePointVisitor::toString(temporalExpr->getTimepointList().front());
         ss << ", ";
-        ss << TimePointVisitor::toString(temporalExpr->getTiming().at(1));
+        ss << TimePointVisitor::toString(temporalExpr->getTimepointList().back());
         ss << "]: ";
     }
+
     if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
         Assignment * a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
         ss << ConditionVisitor::toString(a->getLhs());
         ss << " = ";
-        ss << DatapathVisitor::toString(a->getRhs());
+        ss << DatapathVisitor::toString(a->getRhs(),2,0,temporalExpr->getFreezeAt());
     } else {
         ss << ConditionVisitor::toString(temporalExpr->getStatement());
     }
@@ -168,21 +170,22 @@ std::string PrintITL::printProperty(Property *property) {
 
     if (!property->getTimePoints().empty()) {
         ss << "for timepoints:\n";
-        for (auto tp = property->getTimePoints().begin(); tp != property->getTimePoints().end(); tp++) {
+        for (auto tp = property->getTimePointsOrdered().begin(); tp != property->getTimePointsOrdered().end(); tp++) {
             ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
-            if (std::next(tp) != property->getTimePoints().end()) {
+            if (std::next(tp) != property->getTimePointsOrdered().end()) {
                 ss << ",\n";
             }
         }
         ss << ";\n";
     }
 
-    //TODO: Overload < operator of PropertyMacro class for sorted output
+    //TODO: create visitor for freeze variables ... does not work as it is :)
     if (!property->getFreezeSignals().empty()) {
         ss << "freeze:\n";
-
         for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
-            ss << "\t" << f->first->getFullName("_") << "_at_" << f->second->getName() << " = " << f->first->getFullName("_") << "@" << f->second->getName();
+            ss << "\t" << f->first->getFullName("_") + "_at_" + f->second->getName();
+            ss << " = ";
+            ss << f->first->getFullName("_") << "@" << f->second->getName();
             if (std::next(f) != property->getFreezeSignals().end()) {
                 ss << ",\n";
             }
@@ -269,6 +272,71 @@ std::string PrintITL::propertySuite() {
         ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
+
+
+}
+
+std::string PrintITL::macros() {
+    PropertySuite *ps = this->module->getPropertySuite();
+
+    std::stringstream ss;
+
+
+    ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
+    for (auto sync: ps->getSyncSignals()) {
+        ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := end macro;" << std::endl;
+    }
+    for (auto notify: ps->getNotifySignals()) {
+        ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- DP SIGNALS --" << std::endl;
+    for (auto dp: ps->getDpSignals()) {
+        ss << "macro " << dp->getParentName();
+        if (dp->isCompoundType()) {
+            ss << "_" + dp->getSubVarName();
+        }
+        ss << " : " << convertDataType(dp->getDataType()->getName()) << " := end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- CONSTRAINTS --" << std::endl;
+    // Reset constraint is print out extra because of the quotation marks ('0')
+    ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
+    for (auto co: ps->getConstraints()) {
+        if (co->getName() != "no_reset") {
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression()) << "; end constraint;" << std::endl;
+        }
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- VISIBLE REGISTERS --" << std::endl;
+    for (auto vr: ps->getVisibleRegisters()) {
+        if (!vr->isArrayType()) {
+            ss << "macro " << vr->getParentName();
+            if (vr->isCompoundType()) {
+                ss << "_" + vr->getSubVarName();
+            }
+            ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
+        }
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- STATES --" << std::endl;
+    for (auto st: ps->getStates()) {
+        ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
+        ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+    return ss.str();
+}
+
+std::string PrintITL::operations() {
+
+    PropertySuite *ps = this->module->getPropertySuite();
+
+    std::stringstream ss;
 
     ss << "-- OPERATIONS --" << std::endl;
 

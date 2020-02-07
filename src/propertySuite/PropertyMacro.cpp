@@ -14,14 +14,14 @@ namespace SCAM {
         port(port),
         parentName(name),
         portOperand(new PortOperand(port)),
-        macroType(portType),
+        macroType(MacroType::portType),
         AbstractMacro(name, type){
     }
 
     PropertyMacro::PropertyMacro(const std::string &parentName, Port * port, const DataType * type, const std::string subVarName) :
         port(port),
         portOperand(new PortOperand(port)),
-        macroType(portType),
+        macroType(MacroType::portType),
         subVarName(subVarName),
         parentName(parentName),
         AbstractMacro(subVarName, type){
@@ -34,7 +34,7 @@ namespace SCAM {
 
         this->port = port;
         this->notifySignal = notifySignal;
-        this->macroType = notifyType;
+        this->macroType = MacroType::notifyType;
 
     }
 
@@ -44,7 +44,7 @@ namespace SCAM {
 
         this->port = port;
         this->syncSignal = syncSignal;
-        this->macroType = syncType;
+        this->macroType = MacroType::syncType;
 
     }
 
@@ -54,7 +54,7 @@ namespace SCAM {
 
         this->variable = variable;
         this->variableOperand = new VariableOperand(variable);
-        this->macroType = varType;
+        this->macroType = MacroType::varType;
 
     }
 
@@ -64,7 +64,7 @@ namespace SCAM {
 
         this->variable = variable;
         this->variableOperand = new VariableOperand(variable);
-        this->macroType = varType;
+        this->macroType = MacroType::varType;
         this->subVarName = subVarName;
 
     }
@@ -75,7 +75,7 @@ namespace SCAM {
 
         this->variable = variable;
         this->variableOperand = new VariableOperand(variable);
-        this->macroType = arrayType;
+        this->macroType = MacroType::arrayType;
         this->parent = parent;
 
     }
@@ -86,49 +86,49 @@ namespace SCAM {
     // ------------------------------------------------------------------------------
 
     Port *PropertyMacro::getPort() const {
-        if (macroType != portType and macroType != notifyType and macroType != syncType){
+        if (macroType != MacroType::portType and macroType != MacroType::notifyType and macroType != MacroType::syncType){
             throw std::runtime_error("Called Macro is not of type port, notifySignal or syncSignal!");
         }
         return port;
     }
 
     PortOperand *PropertyMacro::getPortOperand() const {
-        if (macroType != portType){
+        if (macroType != MacroType::portType){
             throw std::runtime_error("Called Macro is not of type port!");
         }
         return portOperand;
     }
 
     Notify *PropertyMacro::getNotifySignal() const {
-        if (macroType != notifyType){
+        if (macroType != MacroType::notifyType){
             throw std::runtime_error("Called Macro is not of type notifySignal!");
         }
         return notifySignal;
     }
 
     SyncSignal *PropertyMacro::getSyncSignal() const {
-        if (macroType != syncType){
+        if (macroType != MacroType::syncType){
             throw std::runtime_error("Called Macro is not of type syncSignal!");
         }
         return syncSignal;
     }
 
     Variable *PropertyMacro::getVariable() const {
-        if (macroType != varType and macroType != arrayType){
+        if (macroType != MacroType::varType and macroType != MacroType::arrayType){
             throw std::runtime_error("Called Macro is not of type variable!");
         }
         return variable;
     }
 
     VariableOperand *PropertyMacro::getVariableOperand() const {
-        if (macroType != varType and macroType != arrayType){
+        if (macroType != MacroType::varType and macroType != MacroType::arrayType){
             throw std::runtime_error("Called Macro is not of type variable!");
         }
         return variableOperand;
     }
 
     PropertyMacro *PropertyMacro::getParent() const {
-        if (macroType != arrayType){
+        if (macroType != MacroType::arrayType){
             throw std::runtime_error("Called Macro is not of type array!");
         }
         return parent;
@@ -140,15 +140,15 @@ namespace SCAM {
 
     Expr *PropertyMacro::getOperand() const {
 
-        if (macroType == portType) {
+        if (macroType == MacroType::portType) {
             return portOperand;
-        } else if (macroType == notifyType) {
+        } else if (macroType == MacroType::notifyType) {
             return reinterpret_cast<Expr *>(notifySignal);
-        } else if (macroType == syncType) {
+        } else if (macroType == MacroType::syncType) {
             return reinterpret_cast<Expr *>(syncSignal);
-        } else if (macroType == varType) {
+        } else if (macroType == MacroType::varType) {
             return variableOperand;
-        } else if (macroType == arrayType) {
+        } else if (macroType == MacroType::arrayType) {
             return variableOperand;
         } else {
             throw std::runtime_error("Unknown macroType when calling PropertyMacro::getOperand.");
@@ -162,49 +162,49 @@ namespace SCAM {
     // ------------------------------------------------------------------------------
 
     void PropertyMacro::setPort(Port *port) {
-        if (macroType != portType){
+        if (macroType != MacroType::portType){
             throw std::runtime_error("Called Macro is not of type port!");
         }
         PropertyMacro::port = port;
     }
 
     void PropertyMacro::setPortOperand(PortOperand *portOperand) {
-        if (macroType != portType){
+        if (macroType != MacroType::portType){
             throw std::runtime_error("Called Macro is not of type port!");
         }
         PropertyMacro::portOperand = portOperand;
     }
 
     void PropertyMacro::setNotifySignal(Notify *notifySignal) {
-        if (macroType != notifyType){
+        if (macroType != MacroType::notifyType){
             throw std::runtime_error("Called Macro is not of type notifySignal!");
         }
         PropertyMacro::notifySignal = notifySignal;
     }
 
     void PropertyMacro::setSyncSignal(SyncSignal *syncSignal) {
-        if (macroType != portType){
+        if (macroType != MacroType::portType){
             throw std::runtime_error("Called Macro is not of type syncSignal!");
         }
         PropertyMacro::syncSignal = syncSignal;
     }
 
     void PropertyMacro::setVariable(Variable *variable) {
-        if (macroType != varType and macroType != arrayType){
+        if (macroType != MacroType::varType and macroType != MacroType::arrayType){
             throw std::runtime_error("Called Macro is not of type variable!");
         }
         PropertyMacro::variable = variable;
     }
 
     void PropertyMacro::setVariableOperand(VariableOperand *variableOperand) {
-        if (macroType != varType and macroType != arrayType){
+        if (macroType != MacroType::varType and macroType != MacroType::arrayType){
             throw std::runtime_error("Called Macro is not of type variable!");
         }
         PropertyMacro::variableOperand = variableOperand;
     }
 
     void PropertyMacro::setParent(SCAM::PropertyMacro *parent) {
-        if (macroType != arrayType){
+        if (macroType != MacroType::arrayType){
             throw std::runtime_error("Called Macro is not of type array!");
         }
         PropertyMacro::parent = parent;
@@ -218,8 +218,8 @@ namespace SCAM {
         return !subVarName.empty();
     }
 
-    bool PropertyMacro::isArrayType() {
-        return macroType == arrayType;
+    bool PropertyMacro::isArrayType() const {
+        return macroType == MacroType::arrayType;
     }
 
     const std::string &PropertyMacro::getParentName() const {
@@ -232,7 +232,13 @@ namespace SCAM {
         }else return this->parentName;
     }
 
-    std::string PropertyMacro::getFullName(std::string delimiter) const {
+    std::string PropertyMacro::getFullName(const std::string& delimiter) const {
+        if(this->macroType == MacroType::arrayType){
+            if(this->variable->isSubVar() && this->variable->getParent()->isArrayType()){
+                return this->variable->getParent()->getName()+"("+this->variable->getName()+")";
+            }
+        }
+
         if(this->isCompoundType()){
             return this->parentName+delimiter+this->subVarName;
         }else return this->parentName;

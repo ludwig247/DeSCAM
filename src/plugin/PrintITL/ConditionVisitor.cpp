@@ -217,7 +217,7 @@ void SCAM::ConditionVisitor::visit(SCAM::UnaryExpr &node) {
     this->ss << ")";
 }
 
-void SCAM::ConditionVisitor::visit(SCAM::TimeExpr &node) {
+void SCAM::ConditionVisitor::visit(SCAM::Timepoint &node) {
     this->ss << node.getName();
 }
 

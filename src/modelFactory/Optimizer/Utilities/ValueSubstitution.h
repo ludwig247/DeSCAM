@@ -122,7 +122,7 @@ namespace SCAM {
 
         void visit(class Peek &node) override {};
 
-        void visit(class TimeExprOperand &node) override {};
+        void visit(class TimePointOperand &node) override {};
     };
 }
 #endif //SCAM_VALUESUBSTITUTION_H

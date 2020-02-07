@@ -14,7 +14,7 @@ set(AST_FILES
         Function.cpp
         Parameter.cpp
         VariableTemplate.cpp
-        TimeExpr.cpp)
+        Timepoint.cpp)
 
 
 add_library(Model ${AST_FILES})

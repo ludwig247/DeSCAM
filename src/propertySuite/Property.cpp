@@ -50,11 +50,12 @@ namespace SCAM {
     //                          Time Point-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addTimePoint(TimeExpr* timePoint, Expr* expr) {
+    void Property::addTimePoint(Timepoint* timePoint, Expr* expr) {
         this->timePoints.insert(std::make_pair(timePoint, expr));
+        this->timePointsOrdered.emplace_back(std::make_pair(timePoint, expr));
     }
 
-    const std::map<TimeExpr *, Expr *> &Property::getTimePoints() const {
+    const std::map<Timepoint *, Expr *> &Property::getTimePoints() const {
         return timePoints;
     }
 
@@ -62,11 +63,11 @@ namespace SCAM {
     //                            Freeze-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addFreezeSignal(SCAM::PropertyMacro *freezeSignal, TimeExpr* timePoint) {
+    void Property::addFreezeSignal(SCAM::PropertyMacro *freezeSignal, Timepoint* timePoint) {
         this->freezeSignals.insert(std::make_pair(freezeSignal, timePoint));
     }
 
-    const std::map<PropertyMacro *, TimeExpr *,pointer_comparator<PropertyMacro*>> &Property::getFreezeSignals() const {
+    const std::map<PropertyMacro *, Timepoint *,pointer_comparator<PropertyMacro*>> &Property::getFreezeSignals() const {
         return freezeSignals;
     }
 
@@ -99,6 +100,10 @@ namespace SCAM {
             throw std::runtime_error("Property is build from more then 1 operation. Please use getOperations()");
         }
         return operationList.front();
+    }
+
+    const std::vector<std::pair<Timepoint *, Expr *>> &Property::getTimePointsOrdered() const {
+        return timePointsOrdered;
     }
 
 }
