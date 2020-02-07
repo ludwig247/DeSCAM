@@ -27,8 +27,6 @@ std::map<std::string, std::string> PrintSynthesisScripts::printModel(Model *node
 
 std::string PrintSynthesisScripts::synthesisScript() {
     std::stringstream ss;
-
-    //ss << "cd " << functionName << "\n\n";
     ss << "# Create project\n";
     ss << "open_project -reset synthesis\n\n";
     ss << "# Add design files\n";
@@ -65,7 +63,7 @@ std::string PrintSynthesisScripts::directivesScript() {
 
 std::string PrintSynthesisScripts::setDirectiveInterface() {
     std::stringstream ss;
-//    ss << "set_directive_interface -mode ap_ctrl_none operations\n";
+    ss << "set_directive_interface -mode ap_ctrl_none operations\n";
     for (auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
             ss << "set_directive_interface -mode ap_none operations " << port.second->getName() << "_sig\n";

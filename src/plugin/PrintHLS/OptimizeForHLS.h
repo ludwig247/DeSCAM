@@ -23,6 +23,9 @@ public:
     std::set<Variable *> getInternalRegisterIn();
     std::set<Variable *> getInternalRegisterOut();
 
+    bool hasOutputReg(DataSignal* dataSignal) ;
+    Variable* getCorrespondingRegister(DataSignal* dataSignal) ;
+
     inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
 
 private:
@@ -32,6 +35,7 @@ private:
 
     std::set<DataSignal *> moduleOutputs;
     std::map<Variable *, DataSignal *> registerToOutputMap;
+    std::map<DataSignal *, Variable *> outputToRegisterMap;
     std::map<DataSignal *, std::vector<DataSignal *>> moduleToTopSignalMap;
     std::map<Port *, std::list<Expr *>> arrayPorts;
 

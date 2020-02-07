@@ -79,7 +79,6 @@ void SignalFactory::setMonitorSignals() {
     monitorSignals.insert(new Variable("active_state", stateType));
     monitorSignals.insert(new Variable("next_state", stateType));
     monitorSignals.insert(new Variable("active_operation", operationType));
-    monitorSignals.insert(new Variable("wait_state", new DataType("bool")));
 }
 
 void SignalFactory::setInputs() {

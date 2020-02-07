@@ -6,6 +6,7 @@
 #define SCAM_PRINTHLS_H
 
 #include <memory>
+#include <boost/optional.hpp>
 
 #include <PluginFactory.h>
 
@@ -38,8 +39,12 @@ private:
     void registerVariables();
     void writeToOutput();
 
+    std::string getVariableReset(Variable* variable);
+    std::string getDataSignalReset(DataSignal* dataSignal);
+    std::string getValue(Variable* variable);
+
     template <typename T>
-    std::string getResetValue(T* signal);
+    boost::optional<std::string> getResetValue(T* signal);
 
     void visit(Model &node) override {};
     void visit(SCAM::Module &node) override {} ;
@@ -56,14 +61,14 @@ private:
 };
 
 template <typename T>
-std::string PrintHLS::getResetValue(T* signal) {
+boost::optional<std::string> PrintHLS::getResetValue(T* signal) {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
         auto printResetValue = PrintResetValues(commitment, signal->getFullName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
         }
     }
-    return PrintFunctionStatements::toString(signal->getDataType()->getDefaultVal());
+    return boost::none;
 }
 
 #endif //SCAM_PRINTHLS_H

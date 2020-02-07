@@ -44,20 +44,21 @@ std::string PrintVHDLForHLS::printTypes(Model *model) {
     // Operation enumeration
     typeStream << "\t-- Operations\n"
                << "\ttype " << propertySuite->getName() << "_operation_t is (";
-    for (auto op = propertySuite->getOperationProperties().begin(); op != propertySuite->getOperationProperties().end(); ++op) {
-        typeStream << "op_" << (*op)->getName();
-        if (std::next(op) != propertySuite->getOperationProperties().end())
-            typeStream << ", ";
+    auto operations = propertySuite->getOperationProperties();
+    for (auto op : operations) {
+        typeStream << "op_" << op->getName() << ", ";
     }
-    typeStream << ");\n\n";
+    typeStream << "op_state_wait);\n\n";
 
     // State enumeration
     typeStream << "\t -- States\n"
                << "\ttype " + propertySuite->getName() << "_state_t is (";
-    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
+    auto states = propertySuite->getStates();
+    for (auto state = states.begin(); state != states.end(); ++state) {
         typeStream << "st_" << (*state)->getName();
-        if (std::next(state) != propertySuite->getStates().end())
+        if (std::next(state) != states.end()) {
             typeStream << ", ";
+        }
     }
     typeStream << ");\n\n";
 
@@ -207,7 +208,7 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     for (const auto &arrayPort : hlsModule->getArrayPorts()) {
         uint32_t exprNumber = 0;
         for (const auto &expr : arrayPort.second) {
-            ss << "\t\t\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
+            ss << "\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
                << VHDLPrintVisitorHLS::toString(expr) << ")));\n";
             exprNumber++;
@@ -215,19 +216,13 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     }
 
     // Print Control Process
-    ss << "\t-- Control process\n"
+    ss << "\n\t-- Control process\n"
        << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
        << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getNextState()->getName() << ";\n"
-       << "\t\t\tstart_sig <= '1';\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
-       << "\t\t\tif ((idle_sig = '1' or ready_sig = '1') and wait_state = '0') then\n"
-       << "\t\t\t\tactive_state <= next_state;\n"
-       << "\t\t\t\tstart_sig <= '1';\n"
-       << "\t\t\telsif ((idle_sig = '1' or ready_sig = '1') and wait_state = '1') then\n"
-       << "\t\t\t\tstart_sig <= '0';\n"
-       << "\t\t\tend if;\n"
+       << "\t\t\tactive_state <= next_state;\n"
        << "\t\tend if;\n"
        << "\tend process;\n\n"
        << "end " << propertySuite->getName() << "_arch;\n";
@@ -304,9 +299,6 @@ void PrintVHDLForHLS::signals(std::stringstream &ss) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
     }
 
-    ss << "\n\t-- Handshaking Protocol Signals (Communication between this wrapper and operations_inst)\n";
-    printSignal(signalFactory->getHandshakingProtocolSignals(), Style::DOT, "_sig", false);
-
     ss << "\n\t-- Monitor Signals\n";
     printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false);
 
@@ -338,7 +330,6 @@ void PrintVHDLForHLS::component(std::stringstream& ss) {
     };
 
     printComponentSignal(signalFactory->getControlSignals(), "ap_");
-    printComponentSignal(signalFactory->getHandshakingProtocolSignals(), "ap_");
     printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "");
     printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "");
     printComponentVars(signalFactory->getInternalRegisterOut(), "out");
@@ -381,7 +372,6 @@ void PrintVHDLForHLS::componentInst(std::stringstream& ss) {
     };
 
     printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "");
-    printComponentInstSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", "_sig");
     printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
     printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
     printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");
@@ -443,10 +433,10 @@ void PrintVHDLForHLS::monitor(std::stringstream &ss) {
             }
             if (waitStateNames.find((*property)->getName()) == waitStateNames.end()) {
                 ss << "\t\t\t\tactive_operation <= op_" << (*property)->getName() << ";\n"
-                   << "\t\t\t\tnext_state <= st_" << (*property)->getNextState()->getName() << ";\n"
-                   << "\t\t\t\twait_state <= '0';\n";
+                   << "\t\t\t\tnext_state <= st_" << (*property)->getNextState()->getName() << ";\n";
             } else {
-                ss << "\t\t\t\twait_state <= '1';\n";
+                ss << "\t\t\t\tactive_operation <= op_state_wait;\n";
+                ss << "\t\t\t\tnext_state <= active_state;\n";
             }
         }
         if (!noEndIf) {

@@ -80,6 +80,8 @@ void PrintHLS::operations() {
         }
         ss << "\t\tbreak;\n";
     }
+    ss << "\tcase state_wait:\n";
+    ss << "\t\tbreak;\n";
     ss << "\t}\n";
     ss << "}";
 }
@@ -160,7 +162,8 @@ void PrintHLS::registerVariables() {
         if (isArrayType) {
             ss << "[" << output->getDataType()->getSubVarMap().size() << "]";
         }
-        ss << " = " << getResetValue(output) << ";\n";
+        ss << " = " << getDataSignalReset(output);
+        ss << ";\n";
     }
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut()))
     {
@@ -174,11 +177,12 @@ void PrintHLS::registerVariables() {
         if (isArrayType) {
             ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
         }
-        ss << " = " << getResetValue(reg) << ";\n";
+        ss << " = " << getVariableReset(reg) << ";\n";
     }
     for (auto notifySignal : propertySuite->getNotifySignals()) {
+        auto resetValue = getResetValue(notifySignal);
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
-           << getResetValue(notifySignal) << ";\n";
+           << (resetValue ? resetValue.get() : "'0'") << ";\n";
     }
 }
 
@@ -201,14 +205,10 @@ void PrintHLS::dataTypes(Model *model) {
     // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    auto operationVector = propertySuite->getOperationProperties();
-    for (auto operationProperty = operationVector.begin(); operationProperty != operationVector.end(); ++operationProperty) {
-        ss << (*operationProperty)->getName();
-        if (std::next(operationProperty) != operationVector.end()) {
-            ss << ", ";
-        }
+    for (const auto operationProperty : propertySuite->getOperationProperties()) {
+        ss << operationProperty->getName() << ", ";
     }
-    ss << "};\n\n";
+    ss << "state_wait};\n\n";
 
     std::set<DataType *> enumTypes;
     std::set<DataType *> compoundTypes;
@@ -345,4 +345,62 @@ void PrintHLS::visit(Function &node) {
         --numberOfBranches;
     }
     this->ss << "\n}\n\n";
+}
+
+std::string PrintHLS::getDataSignalReset(DataSignal *dataSignal) {
+    auto getDataSignalValue = [this](DataSignal* dataSignal) {
+        auto resetValue = getResetValue(dataSignal);
+        if (resetValue) {
+            return resetValue.get();
+        } else {
+            if (opt->hasOutputReg(dataSignal)) {
+                return getValue(opt->getCorrespondingRegister(dataSignal));
+            } else {
+                return dataSignal->getInitialValue()->getValueAsString();
+            }
+        }
+    };
+
+    if (dataSignal->isCompoundType()) {
+        std::stringstream resetValueStream;
+        resetValueStream << "{";
+        auto subVarList = dataSignal->getSubVarList();
+        for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
+            resetValueStream << getDataSignalValue(*subVar);
+            if (std::next(subVar) != subVarList.end()) {
+                resetValueStream << ", ";
+            }
+        }
+        resetValueStream << "}";
+        return resetValueStream.str();
+    } else {
+        return getDataSignalValue(dataSignal);
+    }
+}
+
+std::string PrintHLS::getValue(Variable* variable) {
+    auto resetValue = getResetValue(variable);
+    if (resetValue) {
+        return resetValue.get();
+    } else {
+        return variable->getInitialValue()->getValueAsString();
+    }
+}
+
+std::string PrintHLS::getVariableReset(Variable *variable) {
+    if (variable->isCompoundType()) {
+        std::stringstream resetValueStream;
+        resetValueStream << "{";
+        auto subVarList = variable->getSubVarList();
+        for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
+            resetValueStream << getValue(*subVar);
+            if (std::next(subVar) != subVarList.end()) {
+                resetValueStream << ", ";
+            }
+        }
+        resetValueStream << "}";
+        return resetValueStream.str();
+    } else {
+        return getValue(variable);
+    }
 }

@@ -44,7 +44,6 @@ void SCAM::PrintStmt::visit(BoolValue &node) {
 void SCAM::PrintStmt::visit(EnumValue &node) {
     useParenthesesFlag = true;
     this->ss << node.getEnumValue();
-
 }
 
 void SCAM::PrintStmt::visit(SCAM::CompoundValue &node) {

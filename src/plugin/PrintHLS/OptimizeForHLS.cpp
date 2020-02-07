@@ -13,7 +13,8 @@
 OptimizeForHLS::OptimizeForHLS(PropertySuite *propertySuite, Module* module) :
     propertySuite(propertySuite),
     module(module),
-    registerToOutputMap()
+    registerToOutputMap(),
+    outputToRegisterMap()
 {
     // Save original commitment list
     for (const auto& operationProperty : propertySuite->getOperationProperties()) {
@@ -31,6 +32,21 @@ OptimizeForHLS::~OptimizeForHLS() {
     for (const auto& operationProperty : propertySuite->getOperationProperties()) {
         operationProperty->setCommitmentList(originalCommitmentLists.front());
         originalCommitmentLists.pop();
+    }
+}
+
+bool OptimizeForHLS::hasOutputReg(DataSignal* dataSignal) {
+    const auto& subVarMap = getSubVarMap(outputToRegisterMap);
+    return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
+            subVarMap.find(dataSignal) != subVarMap.end());
+}
+
+Variable* OptimizeForHLS::getCorrespondingRegister(DataSignal* dataSignal) {
+    const auto& subVarMap = getSubVarMap(outputToRegisterMap);
+    if (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end()) {
+        return outputToRegisterMap.at(dataSignal);
+    } else {
+        return subVarMap.at(dataSignal);
     }
 }
 
@@ -166,6 +182,7 @@ void OptimizeForHLS::mapOutputRegistersToOutput() {
             } while (it != parentMap.cend() && reg == it->first);
             const auto& combinedDataSignal = getCombinedDataSignal(outputs);
             registerToOutputMap.insert({reg, combinedDataSignal});
+            outputToRegisterMap.insert({combinedDataSignal, reg});
             moduleOutputs.insert(combinedDataSignal);
             for (const auto& out : outputs) {
                 oldToNewDataSignalMap.insert({out, combinedDataSignal});
@@ -173,6 +190,7 @@ void OptimizeForHLS::mapOutputRegistersToOutput() {
             }
         } else {
             registerToOutputMap.insert({it->first, it->second});
+            outputToRegisterMap.insert({it->second, it->first});
             moduleOutputs.insert(it->second);
             ++it;
         }
