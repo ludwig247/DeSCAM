@@ -867,7 +867,7 @@ std::string PrintITL::hls() {
     ss << "-- STATES --" << std::endl;
     for (auto st: ps->getStates()){
         ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName())
-           << " := " << "active_state = st_" << st->getName() << " and (ready_sig = '1' or idle_sig = '1') end macro;\n";
+           << " := " << "active_state = st_" << st->getName() << " end macro;\n";
     }
     ss << std::endl << std::endl;
 
@@ -901,13 +901,13 @@ std::string PrintITL::hls() {
             constraintSize--;
         }
 
-//        if (module->isSlave()) {
-//            t_end = "t+1";
-//        } else {
+        if (module->isSlave()) {
+            t_end = "t+1";
+        } else {
             ss << "for timepoints:\n";
-            ss << "\tt_end = t+1..5 waits_for done_sig = '1';\n";
+            ss << "\tt_end = t+1;\n";
             t_end = "t_end";
-//        }
+        }
 
         unsigned long freezeVarSize = op->getFreezeSignals().size();
         if (freezeVarSize > 0) {

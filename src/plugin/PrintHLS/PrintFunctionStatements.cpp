@@ -38,15 +38,16 @@ void PrintFunctionStatements::visit(Assignment &node) {
 }
 
 void PrintFunctionStatements::visit(VariableOperand &node) {
+    bool isConstant = opt->isConstant(node.getVariable());
     if (node.getVariable()->isSubVar()) {
-        this->ss << node.getVariable()->getParent()->getName() << "_reg";
+        this->ss << node.getVariable()->getParent()->getName() << (isConstant ? "" : "_reg");
         if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << "[" << node.getVariable()->getName() << "]";
         } else {
             this->ss << "." << node.getVariable()->getName();
         }
     } else {
-        this->ss << node.getVariable()->getName() << "_reg";
+        this->ss << node.getVariable()->getName() << (isConstant ? "" : "_reg");
     }
 }
 

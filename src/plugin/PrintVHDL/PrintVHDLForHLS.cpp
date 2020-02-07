@@ -115,6 +115,15 @@ std::string PrintVHDLForHLS::printTypes(Model *model) {
     }
 
     typeStream << "\n"
+               << "\t-- Constants\n";
+    for (const auto& var : hlsModule->getVariables()) {
+        if (hlsModule->isConstant(var)) {
+            typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
+                       << " := " << getResetValue(var) << ";\n";
+        }
+    }
+
+    typeStream << "\n"
                << "end package " + model->getName() << "_types;";
     return typeStream.str();
 }
@@ -146,7 +155,14 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
     // Print Output_Vld Processes
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool isEnum = dataSignal->isEnumType();
-        ss << "\t" << SignalFactory::getName(dataSignal, Style::DOT) << " <= "
+        bool hasOutputReg = hlsModule->hasOutputReg(dataSignal);
+        std::string name;
+        if (hasOutputReg) {
+            name = SignalFactory::getName(hlsModule->getCorrespondingRegister(dataSignal), Style::DOT);
+        } else {
+            name = SignalFactory::getName(dataSignal, Style::DOT);
+        }
+        ss << "\t" << name << " <= "
            << (
                    isEnum ?
                    SignalFactory::vectorToEnum(dataSignal, "_out") :
@@ -158,6 +174,20 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
         printOutputProcess(out);
     }
 
+    ss << "\n\t-- Output Register to Output Mapping\n";
+    for (const auto& out : signalFactory->getOperationModuleOutputs()) {
+        if (hlsModule->hasOutputReg(out)) {
+            if (hlsModule->isModuleSignal(out)) {
+                for (const auto& sig : hlsModule->getCorrespondingTopSignals(out)) {
+                    ss << "\t" << sig->getFullName() << " <= " << hlsModule->getCorrespondingRegister(out)->getFullName() << ";\n";
+                }
+            } else {
+                ss << "\t" << out->getFullName() << " <= " << hlsModule->getCorrespondingRegister(out)->getFullName() << ";\n";
+            }
+        }
+    }
+
+    ss << "\n\t-- Internal Register\n";
     auto printOutputProcessRegs = [&](Variable* var) {
         bool isEnum = var->isEnumType();
         ss << "\t" << SignalFactory::getName(var, Style::DOT) << " <= "
@@ -167,7 +197,6 @@ std::string PrintVHDLForHLS::printModule(Model *model) {
                    "out_" + SignalFactory::getName(var, Style::UL, ""))
            << ";\n";
     };
-    ss << "\n\t-- Internal Register\n";
     for (const auto& internalRegs : signalFactory->getInternalRegisterOut()) {
         printOutputProcessRegs(internalRegs);
     }
@@ -284,8 +313,9 @@ void PrintVHDLForHLS::signals(std::stringstream &ss) {
     };
 
     ss << "\n\t-- Internal Registers\n";
-    printVars(signalFactory->getInternalRegisterOut(),Style::UL, "", "", false);
+    printVars(OtherUtils::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
     printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
+    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false);
 
     ss << "\n\t-- Operation Module Inputs\n";
     printSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()),
@@ -535,6 +565,7 @@ std::string PrintVHDLForHLS::printDataTypes(const DataType *dataType) {
                        << " downto 0) of " << SignalFactory::convertDataType(dataType->getSubVarMap().begin()->second->getName())
                        << ";\n";
     }
+
     return dataTypeStream.str();
 }
 
@@ -555,7 +586,11 @@ std::string PrintVHDLForHLS::printSensitivityList() {
             sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
 
             const auto& vars = ExprVisitor::getUsedVariables(assumption);
-            sensListVars.insert(vars.begin(), vars.end());
+            for (const auto& var : vars) {
+                if (!hlsModule->isConstant(var)) {
+                    sensListVars.insert(var);
+                }
+            }
         }
     }
 
@@ -569,7 +604,11 @@ std::string PrintVHDLForHLS::printSensitivityList() {
             sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
 
             const auto& vars = ExprVisitor::getUsedVariables(assumption);
-            sensListVars.insert(vars.begin(), vars.end());
+            for (const auto& var : vars) {
+                if (!hlsModule->isConstant(var)) {
+                    sensListVars.insert(var);
+                }
+            }
         }
     }
 

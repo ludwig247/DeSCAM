@@ -287,6 +287,11 @@ std::set<DataSignal *> HLSmodule::getInputs() {
     return inputSet;
 }
 
+bool HLSmodule::isConstant(Variable *variable) {
+    auto internalRegister = getInternalRegisterOut();
+    return !(internalRegister.find(variable) != internalRegister.end());
+}
+
 std::set<Variable *> HLSmodule::getVariables() {
     std::set<Variable* > variableSet;
     for (const auto &var : module->getVariableMap()) {

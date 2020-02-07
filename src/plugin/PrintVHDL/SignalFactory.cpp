@@ -39,6 +39,7 @@ void SignalFactory::setOperationSelector() {
     for (const auto& property : propertySuite->getOperationProperties()) {
         operationSelectorType->addEnumValue(property->getName());
     }
+    operationSelectorType->addEnumValue("state_wait");
     activeOperation = new Variable("active_operation", operationSelectorType);
 }
 

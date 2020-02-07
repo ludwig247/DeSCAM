@@ -22,6 +22,7 @@ public:
     std::set<Variable *> getVariables();
     std::set<Variable *> getInternalRegisterIn();
     std::set<Variable *> getInternalRegisterOut();
+    bool isConstant(Variable* variable);
 
     bool hasOutputReg(DataSignal* dataSignal) ;
     Variable* getCorrespondingRegister(DataSignal* dataSignal) ;

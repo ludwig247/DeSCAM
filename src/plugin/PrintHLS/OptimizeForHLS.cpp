@@ -483,6 +483,11 @@ std::set<Variable*> OptimizeForHLS::getInternalRegisterOut()
     return vars;
 }
 
+bool OptimizeForHLS::isConstant(Variable *variable) {
+    auto internalRegister = getInternalRegisterOut();
+    return !(internalRegister.find(variable) != internalRegister.end());
+}
+
 std::set<Port *> OptimizeForHLS::setArrayPorts()
 {
     std::set<Port *> ports;

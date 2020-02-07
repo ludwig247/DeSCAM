@@ -21,6 +21,8 @@ public:
     std::set<Variable *> getOutputRegister();
     std::set<DataSignal *> getOutputs();
     std::set<DataSignal *> getInputs();
+    std::set<Variable *> getVariables();
+    bool isConstant(Variable* variable);
 
     inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
 
@@ -45,7 +47,6 @@ private:
     void mapInputRegistersToInputs();
     void arraySlicing();
     std::set<Port *> setArrayPorts();
-    std::set<Variable *> getVariables();
     DataSignal* getCombinedDataSignal(const std::vector<DataSignal*> &dataSignals);
     std::multimap<Variable *, DataSignal *> getParentMap(const std::multimap<Variable *, DataSignal *> &multimap);
 };

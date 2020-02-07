@@ -252,6 +252,14 @@ void PrintHLS::dataTypes(Model *model) {
         type->accept(*this);
     }
 
+    ss << "\n// Constants\n";
+    for (const auto& var : opt->getVariables()) {
+        if (opt->isConstant(var)) {
+            ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
+               << " " << var->getName() << " = " << getVariableReset(var) << ";\n";
+        }
+    }
+
     ss << "\n#endif //DATA_TYPES_H";
 }
 
