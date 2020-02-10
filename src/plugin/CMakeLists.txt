@@ -77,7 +77,7 @@ add_library(PluginFactory
         ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.h)
 
 # First we add the executable that generates the table
-add_executable(MakeStyles MakeStyles.cpp)
+add_executable(MakeStyles MakeStyles.cpp PrintHLS/PrintHLS.cpp PrintHLS/PrintHLS.h)
 set_target_properties(MakeStyles PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON

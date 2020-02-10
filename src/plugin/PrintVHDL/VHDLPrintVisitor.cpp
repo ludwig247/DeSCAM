@@ -3,7 +3,6 @@
 //
 
 #include <iomanip>
-#include <PrintHLS/BitSlicingHLS.h>
 #include "VHDLPrintVisitor.h"
 #include "NodePeekVisitor.h"
 #include "OtherUtils.h"

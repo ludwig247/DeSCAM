@@ -1,10 +1,8 @@
-add_library(PrintHLS
-            PrintHLS.cpp
-            PrintFunctionStatements.cpp
-            PrintFunctionParameters.cpp
-            BitSlicingHLS.cpp
-            PrintSynthesisScripts.cpp
-            OptimizeForHLS.cpp
-            Utilities.cpp
-            PrintArrayStatements.cpp
-            PrintResetValues.cpp)
+file(GLOB SOURCES
+        "*.cpp"
+        )
+file(GLOB SOURCES_HLS
+        "HLS/*.cpp"
+        )
+
+add_library(printHLS ${SOURCES} ${SOURCES_HLS})

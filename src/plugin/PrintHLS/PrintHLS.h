@@ -1,74 +1,27 @@
 //
-// Created by johannes on 28.07.19.
+// Created by schauss on 10.02.20.
 //
 
-#ifndef SCAM_PRINTHLS_H
-#define SCAM_PRINTHLS_H
+#ifndef DESCAM_PRINTHLS_H
+#define DESCAM_PRINTHLS_H
 
+#include <map>
 #include <memory>
-#include <boost/optional.hpp>
 
-#include <PluginFactory.h>
+#include "PluginFactory.h"
+#include "PrintHLS/HLS/MainHLS.h"
 
-#include "Model.h"
-#include "PrintSynthesisScripts.h"
-#include "OptimizeForHLS.h"
-#include "PrintFunctionStatements.h"
-#include "PrintResetValues.h"
-
-class PrintHLS : public PluginFactory, public AbstractVisitor {
+class PrintHLS : public PluginFactory {
 public:
     PrintHLS();
-    ~PrintHLS() override = default;
 
-    std::map<std::string, std::string> printModel(Model *model) override ;
+    ~PrintHLS() = default;
+
+    std::map<std::string, std::string> printModel(Model *model) override;
 
 private:
-    std::stringstream ss;
-
-    PropertySuite *propertySuite;
-    SCAM::Module *currentModule;
-
-    std::unique_ptr<PrintSynthesisScripts> synthesisScript;
-    std::unique_ptr<OptimizeForHLS> opt;
-
-    void dataTypes(Model *model);
-    void functions();
-    void operations();
-    void interface();
-    void registerVariables();
-    void writeToOutput();
-
-    std::string getVariableReset(Variable* variable);
-    std::string getDataSignalReset(DataSignal* dataSignal);
-    std::string getValue(Variable* variable);
-
-    template <typename T>
-    boost::optional<std::string> getResetValue(T* signal);
-
-    void visit(Model &node) override {};
-    void visit(SCAM::Module &node) override {} ;
-    void visit(ModuleInstance &node) override {};
-    void visit(Port &node) override  {};
-    void visit(DataSignal &node) override {};
-    void visit(Channel &node)  override {};
-    void visit(Interface &node)  override {}
-    void visit(Variable &node) override {};
-    void visit(FSM &node) override {};
-    void visit(DataType &node) override ;
-    void visit(Function &node) override ;
-    void visit(Parameter &node) override {};
+    std::unique_ptr<MainHLS> hls;
 };
 
-template <typename T>
-boost::optional<std::string> PrintHLS::getResetValue(T* signal) {
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetValues(commitment, signal->getFullName());
-        if (printResetValue.toString()) {
-            return printResetValue.getString();
-        }
-    }
-    return boost::none;
-}
 
-#endif //SCAM_PRINTHLS_H
+#endif //DESCAM_PRINTHLS_H
