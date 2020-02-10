@@ -38,16 +38,20 @@ void PrintFunctionStatements::visit(Assignment &node) {
 }
 
 void PrintFunctionStatements::visit(VariableOperand &node) {
+    std::string suffix;
     bool isConstant = opt->isConstant(node.getVariable());
+    if (!isConstant) {
+         suffix = (side == Side::LHS ? "_reg" : "_tmp");
+    }
     if (node.getVariable()->isSubVar()) {
-        this->ss << node.getVariable()->getParent()->getName() << (isConstant ? "" : "_reg");
+        this->ss << node.getVariable()->getParent()->getName() << suffix;
         if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << "[" << node.getVariable()->getName() << "]";
         } else {
             this->ss << "." << node.getVariable()->getName();
         }
     } else {
-        this->ss << node.getVariable()->getName() << (isConstant ? "" : "_reg");
+        this->ss << node.getVariable()->getName() << suffix;
     }
 }
 
@@ -102,7 +106,6 @@ void PrintFunctionStatements::visit(CompoundExpr &node) {
 }
 
 void PrintFunctionStatements::visit(Cast &node) {
-//    this->ss << "static_cast<" << node.getDataType()->getName() << ">(";
     this->ss << Utilities::convertDataType(node.getDataType()->getName()) << "(";
     node.getSubExpr()->accept(*this);
     this->ss << ")";

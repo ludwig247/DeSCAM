@@ -68,12 +68,12 @@ void PrintHLS::operations() {
             switch (operationProperty->getTiming(notifySignal->getPort())) {
                 case TT_1:
                 case FT_e: {
-                    ss << "\t\t" << notifySignal->getName() << "_reg" << " = true;\n";
+                    ss << "\t\t" << notifySignal->getName() << "_reg = true;\n";
                     break;
                 }
                 case FF_1:
                 case FF_e: {
-                    ss << "\t\t" << notifySignal->getName() << "_reg" << " = false;\n";
+                    ss << "\t\t" << notifySignal->getName() << "_reg = false;\n";
                     break;
                 }
             }
@@ -81,6 +81,11 @@ void PrintHLS::operations() {
         ss << "\t\tbreak;\n";
     }
     ss << "\tcase state_wait:\n";
+    for (const auto& port : currentModule->getPorts()) {
+        if (port.second->getInterface()->isMasterOut()) {
+            ss << "\t\t" << port.second->getName() << "_notify_reg = false;\n";
+        }
+    }
     ss << "\t\tbreak;\n";
     ss << "\t}\n";
     ss << "}";
@@ -183,6 +188,21 @@ void PrintHLS::registerVariables() {
         auto resetValue = getResetValue(notifySignal);
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue ? resetValue.get() : "'0'") << ";\n";
+    }
+    ss << "\n";
+    for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut()))
+    {
+        bool isArrayType = reg->isArrayType();
+        if (isArrayType) {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
+        } else {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
+        }
+        ss << " " << reg->getFullName() << "_tmp";
+        if (isArrayType) {
+            ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << " = " << reg->getName() << "_reg" << ";\n";
     }
 }
 
