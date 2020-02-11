@@ -35,7 +35,6 @@ namespace SCAM {
     private:
 
         const std::string name;
-        const DataType * dataType;
         Stmt* expression;
         bool active;
 

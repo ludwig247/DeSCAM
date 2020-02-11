@@ -30,14 +30,15 @@ namespace SCAM {
             port(syncSignal->getPort()),
             syncSignal(syncSignal),
             macroType(MacroType::syncType),
-            AbstractMacro(syncSignal->getPort()->getName() + "sync", syncSignal->getDataType()) {
+            AbstractMacro(syncSignal->getPort()->getName() + "_sync", syncSignal->getDataType()) {
     }
 
-    PropertyMacro::PropertyMacro(Variable *variable) :
+    PropertyMacro::PropertyMacro(Variable * variable) :
             variable(variable),
             variableOperand(new VariableOperand(variable)),
             macroType(MacroType::varType),
             AbstractMacro(variable->getName(), variable->getDataType()) {
+        std::cout << variable->getDataType()->getName() << std::endl;
     }
 
     PropertyMacro::PropertyMacro(Variable *variable, PropertyMacro *parent) :
@@ -95,17 +96,7 @@ namespace SCAM {
         return parent;
     }
 
-    const std::string &PropertyMacro::getSubVarName() const {
-        if (this->variable != nullptr) {
-            if (this->variable->isSubVar()) {
-                return this->variable->getName();
-            }
-        } else if (this->dataSignal->isSubVar()) {
-            return this->variable->getName();
-        } else {
-            throw std::runtime_error(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
-        }
-    }
+
 
     Expr *PropertyMacro::getOperand() const {
 
@@ -134,15 +125,31 @@ namespace SCAM {
     //                      CompoundType/ArrayType-Functions
     // ------------------------------------------------------------------------------
 
-    const std::string &PropertyMacro::getParentName() const {
+    std::string PropertyMacro::getParentName() const {
         if (this->variable != nullptr) {
             if (this->variable->isSubVar()) {
                 return this->variable->getParent()->getName();
             }
-        } else if (this->dataSignal->isSubVar()) {
-            return this->dataSignal->getName();
+        } else if (this->dataSignal != nullptr) {
+            if (this->dataSignal->isSubVar()) {
+                return this->dataSignal->getParent()->getName();
+            }
         } else {
             throw std::runtime_error(" Macro is not a subvarible. Check first with ->isSubVar() ");
+        }
+    }
+
+    std::string PropertyMacro::getSubVarName() const {
+        if (this->variable != nullptr) {
+            if (this->variable->isSubVar()) {
+                return this->variable->getName();
+            }
+        } else if (this->dataSignal != nullptr) {
+            if (this->dataSignal->isSubVar()) {
+                return this->dataSignal->getName();
+            }
+        } else {
+            throw std::runtime_error(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
         }
     }
 
@@ -153,9 +160,17 @@ namespace SCAM {
             }
         }
 
-        if (this->isCompoundType()) {
+        if (this->isSubVar()) {
             return this->getParentName() + delimiter + this->getSubVarName();
         } else return this->getName();
+    }
+
+    bool PropertyMacro::isSubVar() const {
+        if (this->variable != nullptr) {
+            return this->variable->isSubVar();
+        } else if (this->dataSignal != nullptr) {
+            return this->dataSignal->isSubVar();
+        } else return false;
     }
 
 //    std::string PropertyMacro::getName() const {

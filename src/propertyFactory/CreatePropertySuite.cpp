@@ -4,7 +4,7 @@
 
 #include <ExprVisitor.h>
 #include <PrintITL/PrintITL.h>
-#include <PrintTrueOperation/TrueOperation.h>
+#include <TrueOperation.h>
 #include "CreatePropertySuite.h"
 
 #include "BoolValue.h"

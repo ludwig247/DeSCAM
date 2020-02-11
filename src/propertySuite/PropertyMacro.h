@@ -40,9 +40,10 @@ namespace SCAM {
         PropertyMacro *getParent() const;
         Expr *getOperand() const;
 
-        std::string getFullName(const std::string& delimiter = ".") const;
-        const std::string &getParentName() const;
-        const std::string &getSubVarName() const;
+        std::string getFullName(const std::string& delimiter = ".") const;  //! Return the full name if compound ... return parent + subvar name
+        std::string getParentName() const; //! Returns the parent name, only call if subvar
+        std::string getSubVarName() const; //! Returns the subvar name, only call if subvar
+        bool isSubVar() const;
 
     private:
         Port * port = nullptr;

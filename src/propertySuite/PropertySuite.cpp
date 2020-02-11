@@ -100,7 +100,7 @@ namespace SCAM {
 
         for (auto visibleRegister : visibleRegisters) {
 
-            if(visibleRegister->getSubVarName() != ""){
+            if(visibleRegister->isSubVar()){
                 std::string name = visibleRegister->getName() + "." + visibleRegister->getSubVarName();
                 if(name == signalName) return visibleRegister;
             }
@@ -120,19 +120,15 @@ namespace SCAM {
 
     PropertyMacro * PropertySuite::findSignal(const std::string &parentName, const std::string &subVarName) const {
         for (auto dpSignal : dpSignals) {
-            if (dpSignal->isCompoundType()) {
-                auto name = parentName + "." + subVarName;
-                std::string test = dpSignal->getFullName();
-                if (dpSignal->getFullName() == name) {
+            if (dpSignal->isSubVar()) {
+                if ((dpSignal->getParentName() == parentName) && (dpSignal->getSubVarName() == subVarName)) {
                     return dpSignal;
                 }
             }
-
         }
-
         for (auto visibleRegister : visibleRegisters) {
-            if (visibleRegister->isCompoundType()) {
-                if ((visibleRegister->getName() == parentName) && (visibleRegister->getSubVarName() == subVarName)) {
+            if (visibleRegister->isSubVar()) {
+                if ((visibleRegister->getParentName() == parentName) && (visibleRegister->getSubVarName() == subVarName)) {
                     return visibleRegister;
                 }
             }

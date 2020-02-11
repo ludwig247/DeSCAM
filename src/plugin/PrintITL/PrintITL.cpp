@@ -224,7 +224,9 @@ std::string PrintITL::propertySuite() {
         return adjustmacros();
     } else if (getOptionMap()["pipelined"]) {
         return pipelined();
-    }*/
+    }*
+*/
+
 
     PropertySuite *ps = this->module->getPropertySuite();
 
@@ -242,10 +244,7 @@ std::string PrintITL::propertySuite() {
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()) {
-        ss << "macro " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
+        ss << "macro " << dp->getFullName("_");
         ss << " : " << convertDataType(dp->getDataType()->getName()) << " := end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
@@ -263,10 +262,7 @@ std::string PrintITL::propertySuite() {
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
         if (!vr->isArrayType()) {
-            ss << "macro " << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
+            ss << "macro " << vr->getFullName("_");
             ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
         }
     }
@@ -279,7 +275,7 @@ std::string PrintITL::propertySuite() {
     }
     ss << std::endl << std::endl;
 
-
+    return ss.str();
 }
 
 std::string PrintITL::macros() {
@@ -299,10 +295,12 @@ std::string PrintITL::macros() {
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()) {
-        ss << "macro " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
+        ss << "macro " ;
+        ss << dp->getFullName("_");
+//        if(dp->isSubVar()){
+//            ss << dp->getParentName() << "_";
+//        }
+//        ss << dp->getName();
         ss << " : " << convertDataType(dp->getDataType()->getName()) << " := end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
@@ -319,12 +317,9 @@ std::string PrintITL::macros() {
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
-        if (!vr->isArrayType()) {
-            ss << "macro " << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
+        if (!vr->isArrayType()) {  //TODO: necessary?
+            ss << "macro " << vr->getFullName("_");
+           ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
         }
     }
     ss << std::endl << std::endl;
