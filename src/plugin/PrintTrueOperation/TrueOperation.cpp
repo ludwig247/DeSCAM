@@ -65,7 +65,6 @@ std::string SCAM::TrueOperation::printCycles() const {
             } else {
                 ss << std::endl;
             }
-
         }
     }
     return ss.str();

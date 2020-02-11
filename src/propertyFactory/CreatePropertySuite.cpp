@@ -14,7 +14,7 @@ void SCAM::CreatePropertySuite::addNotifySignals(const SCAM::Module *module, SCA
         auto interface = port.second->getInterface();
         if (interface->isShared()) continue;
         if (interface->isMasterOut() || interface->isBlocking()) {
-            auto pm = new PropertyMacro(port.first + "_notify", port.second, port.second->getNotify(), DataTypes::getDataType("bool"));
+            auto pm = new PropertyMacro(port.second->getNotify());
             propertySuite->addNotifySignal(pm);
         }
     }
@@ -26,7 +26,7 @@ void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, SCAM:
         auto interface = port.second->getInterface();
         if (interface->isShared()) continue;
         if (!interface->isMaster() && !interface->isSlaveOut()) {
-            PropertyMacro *pm = new PropertyMacro(port.first + "_sync", port.second, port.second->getSynchSignal(), DataTypes::getDataType("bool"));
+            PropertyMacro *pm = new PropertyMacro(port.second->getSynchSignal());
             propertySuite->addSyncSignal(pm);
         }
     }
@@ -36,19 +36,16 @@ void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, SCAM:
     // DP SIGNALS
     for (const auto &port: module->getPorts()) {
         if (port.second->getDataType()->isVoid()) continue;
+        //Add port as datapath signal
+        auto pm = new PropertyMacro(port.second->getDataSignal());
+        propertySuite->addDpSignal(pm);
 
         if (port.second->getDataType()->isCompoundType() || port.second->getDataType()->isArrayType()) {
-            //Add compound type signal
-            auto pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
-            propertySuite->addDpSignal(pm);
             //Add all subignals of the compound type
             for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
-                auto pm = new PropertyMacro(port.first + "_sig", port.second, subVar.second, subVar.first);
-                propertySuite->addDpSignal(pm);
+                auto sub_macro = new PropertyMacro(port.second->getDataSignal()->getSubVar(subVar.first));
+                propertySuite->addDpSignal(sub_macro);
             }
-        } else {
-            auto pm = new PropertyMacro(port.first + "_sig", port.second, port.second->getDataType());
-            propertySuite->addDpSignal(pm);
         }
     }
 }
@@ -65,17 +62,17 @@ void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, SCAM::
                 parentMacro = propertySuite->findSignal(parent);
             } catch (const std::runtime_error &e) {
                 // If not, add macro for parent
-                parentMacro = new PropertyMacro(parent->getName(), parent, parent->getDataType());
+                parentMacro = new PropertyMacro(parent);
                 propertySuite->addVisibleRegister(parentMacro);
             }
-            auto pm = new PropertyMacro(var.first, var.second, parentMacro, var.second->getDataType());
+            auto pm = new PropertyMacro(var.second, parentMacro);
             propertySuite->addVisibleRegister(pm);
 
         } else if (var.second->isSubVar()) {
-            auto pm = new PropertyMacro(var.second->getParent()->getName(), var.second, var.second->getDataType(), var.second->getName());
+            auto pm = new PropertyMacro(var.second);
             propertySuite->addVisibleRegister(pm);
         } else {
-            auto pm = new PropertyMacro(var.first, var.second, var.second->getDataType());
+            auto pm = new PropertyMacro(var.second);
             propertySuite->addVisibleRegister(pm);
         }
     }
@@ -88,7 +85,7 @@ void SCAM::CreatePropertySuite::addStates(const SCAM::Module *module, SCAM::Prop
         if (state.second->isInit()) continue;
         state.second->setName(state.second->getName());
         auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
-        auto pm = new PropertyMacro(state.second->getName(), stateVar, DataTypes::getDataType("bool"));
+        auto pm = new PropertyMacro(stateVar);
         pm->setExpression(new SCAM::BoolValue(true));
         propertySuite->addState(pm);
     }
@@ -436,7 +433,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
             PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
             signalMacro->setExpression(sync);
             auto state = trueOperation.getSyncSignalTimepoints().at(sync);
-            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(), "t_" + state->getName());
             newProperty->addFreezeSignal(signalMacro, timepoint);
         }
         for (auto var: trueOperation.getVariables()) {
@@ -444,13 +441,10 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
             PropertyMacro *signalMacro = propertySuite->findSignal(var);
             signalMacro->setExpression(new VariableOperand(var));
             auto state = trueOperation.getVariablesTimepoints().at(var);
-            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(), "t_" + state->getName());
 
             newProperty->addFreezeSignal(signalMacro, t_var);
 
-            if(cycle_cnt == 0){
-                std::cout << signalMacro->getFullName("_") << ":" << var->getFullName() << std::endl;
-            }
         }
         for (auto dataSig: trueOperation.getDataSignals()) {
             PropertyMacro *signalMacro;
@@ -461,7 +455,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
             }
             signalMacro->setExpression(new DataSignalOperand(dataSig));
             auto state = trueOperation.getDataSignalsTimepoints().at(dataSig);
-            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(),"t_"+state->getName());
+            auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(), "t_" + state->getName());
 
             newProperty->addFreezeSignal(signalMacro, timepoint);
         }
@@ -470,14 +464,14 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         // Assumptions
         //===============================
-        for(auto operation: cycle){
+        for (auto operation: cycle) {
             PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
-            Timepoint * timepoint = findTimeExpr(newProperty->getTimePoints(), "t_" + operation->getState()->getName());
+            Timepoint *timepoint = findTimeExpr(newProperty->getTimePoints(), "t_" + operation->getState()->getName());
             auto timeExprOperand = new TimePointOperand(timepoint);
-            newProperty->addAssumption(new TemporalExpr(timeExprOperand,startState->getVariableOperand()));
+            newProperty->addAssumption(new TemporalExpr(timeExprOperand, startState->getVariableOperand()));
 
             for (auto assumption : operation->getAssumptionsList()) {
-               newProperty->addAssumption(new TemporalExpr(timeExprOperand, assumption));
+                newProperty->addAssumption(new TemporalExpr(timeExprOperand, assumption));
             }
         }
 
@@ -486,20 +480,15 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //===============================
         for (auto it = cycle.begin(); it != cycle.end(); ++it) {
             auto operation = *it;
-            Timepoint * timepoint;
-            if(it != cycle.end()-1){
-                timepoint = findTimeExpr(newProperty->getTimePoints(),"t_"+operation->getNextState()->getName());
-            }else timepoint = findTimeExpr(newProperty->getTimePoints(),"t_end");
+            Timepoint *timepoint;
+            if (it != cycle.end() - 1) {
+                timepoint = findTimeExpr(newProperty->getTimePoints(), "t_" + operation->getNextState()->getName());
+            } else timepoint = findTimeExpr(newProperty->getTimePoints(), "t_end");
 
             auto timePointOperand = new TimePointOperand(timepoint);
-            PropertyMacro * nextState = propertySuite->findSignal(operation->getNextState()->getName());
+            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
             newProperty->addCommitment(new TemporalExpr(timePointOperand, nextState->getVariableOperand()));
 
-//            for (auto commitment : operation->getCommitmentsList()) {
-//                auto temporalExpr = new TemporalExpr(timePointOperand, commitment);
-//                temporalExpr->setFreezeAt("_"+timepoint->getName());
-//                newProperty->addCommitment(temporalExpr);
-//            }
 
             for (auto &&commitment : operation->getCommitmentsList()) {
                 //Only one variable in set
@@ -509,7 +498,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
                 if (vars.empty() || TrueOperation::isRequired(*vars.begin(), operation, cycle)) {
                     if (vars.empty() || TrueOperation::isRequired2(*vars.begin(), operation, cycle)) {
                         auto temporalExpr = new TemporalExpr(timePointOperand, commitment);
-                        temporalExpr->setFreezeAt("_at_t_"+operation->getState()->getName());
+                        temporalExpr->setFreezeAt("_at_t_" + operation->getState()->getName());
                         newProperty->addCommitment(temporalExpr);
                     }
                 }
@@ -522,8 +511,8 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 }
 
 Timepoint *CreatePropertySuite::findTimeExpr(const std::map<Timepoint *, Expr *> &map, std::string state_name) {
-    for(auto te: map){
-        if(te.first->getName() == state_name) return te.first;
+    for (auto te: map) {
+        if (te.first->getName() == state_name) return te.first;
     }
-    throw std::runtime_error(" Timexpr " + state_name +" not found");
+    throw std::runtime_error(" Timexpr " + state_name + " not found");
 }

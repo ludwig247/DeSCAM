@@ -31,6 +31,8 @@ struct Bus_new : public sc_module {
     bus_req_t req;
     bus_resp_t resp;
 
+    int foo;
+
     //Constructor
     SC_HAS_PROCESS(Bus_new);
 
@@ -71,6 +73,7 @@ struct Bus_new : public sc_module {
                 slave_out0->write(req);
                 slave_in0->read(resp);
             }
+
             else if (req.addr >= 8 && req.addr < 16) {
                 req.addr = req.addr - 8;
                 slave_out1->write(req);

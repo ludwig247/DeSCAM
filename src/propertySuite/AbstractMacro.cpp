@@ -13,6 +13,7 @@ namespace SCAM {
     AbstractMacro::AbstractMacro(const std::string &name, const DataType *type) :
             name(name),
             dataType(type),
+            TypeInterface(type),
             active(true) {}
 
 

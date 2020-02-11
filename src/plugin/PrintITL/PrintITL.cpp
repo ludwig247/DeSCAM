@@ -183,7 +183,13 @@ std::string PrintITL::printProperty(Property *property) {
     if (!property->getFreezeSignals().empty()) {
         ss << "freeze:\n";
         for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
-            ss << "\t" << f->first->getFullName("_") + "_at_" + f->second->getName();
+            if(f->first->isCompoundType() || f->first->isArrayType()){
+                ss << "\t"  << f->first->getParentName() << "_" << f->first->getSubVarName();
+            }else{
+               ss <<  "\t" <<  f->first->getFullName("_");
+            }
+            ss << "_at_" + f->second->getName();
+            //ss << "\t" << f->first->getFullName("_") + "_at_" + f->second->getName();
             ss << " = ";
             ss << f->first->getFullName("_") << "@" << f->second->getName();
             if (std::next(f) != property->getFreezeSignals().end()) {
