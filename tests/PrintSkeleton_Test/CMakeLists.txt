@@ -4,37 +4,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ${LLVM_CXX_FLAGS} ")
 
 
 #DIRECTORIES
-
-include_directories(${CMAKE_SOURCE_DIR}/example)
+#include_directories(${CMAKE_SOURCE_DIR}/example)
 
 set(SOURCE_FILES tests.cpp)
 
 set(GLOBAL_FILES
-        ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParameter.cpp
-        ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParameter.h
-        ${CMAKE_SOURCE_DIR}/src/global/ErrorMsg.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/DataTypes.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/ModelGlobal.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/ExprTranslator.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/PrintStmt.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/ExprVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
         ${CMAKE_SOURCE_DIR}/src/plugin/PrintITL/DatapathVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/plugin/PrintITL/ConditionVisitor.cpp
-        PrintSkeleton_Test.h TestCases/ModuleFunctions.h TestCases/ModuleArrays.h TestCases/Tests.h)
+        ${CMAKE_SOURCE_DIR}/src/plugin/PrintITL/ConditionVisitor.cpp)
 
 add_executable(PrintSkeleton_Test_Run ${SOURCE_FILES} ${GLOBAL_FILES})
-
-
-target_link_libraries(PrintSkeleton_Test_Run PrintSkeleton)
-target_link_libraries(PrintSkeleton_Test_Run modelFactory)
-target_link_libraries(PrintSkeleton_Test_Run optimizer)
-target_link_libraries(PrintSkeleton_Test_Run operationFactory)
-target_link_libraries(PrintSkeleton_Test_Run Model)
-target_link_libraries(PrintSkeleton_Test_Run Stmts)
+target_link_libraries(PrintSkeleton_Test_Run parser)
 target_link_libraries(PrintSkeleton_Test_Run ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
 
 set(LLVM_LIBS

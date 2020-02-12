@@ -1,9 +1,8 @@
-#include <utility>
 
 //
 // Created by tobias on 13.02.17.
 //
-
+#include <utility>
 #include <PrintStmt.h>
 #include <math.h>
 #include <ModelGlobal.h>

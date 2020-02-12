@@ -52,8 +52,8 @@ add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal 
 
 #add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 
-#add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
-#add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
+add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
+add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
 #
 #
 #add_optimize_option(all; "Enable all optimizations")
