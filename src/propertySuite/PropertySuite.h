@@ -86,7 +86,7 @@ namespace SCAM {
         std::vector<PropertyConstraint*> constraints;
 
         Property* resetProperty;
-        std::vector<Property*> Properties;
+        std::vector<Property*> propertyList;
 
         //std::map<PropertyMacro*, std::set<PropertyMacro*>> predecessorStates;
         //std::map<PropertyMacro*, std::set<PropertyMacro*>> successorStates;

@@ -38,15 +38,6 @@ namespace SCAM {
             variableOperand(new VariableOperand(variable)),
             macroType(MacroType::varType),
             AbstractMacro(variable->getName(), variable->getDataType()) {
-        std::cout << variable->getDataType()->getName() << std::endl;
-    }
-
-    PropertyMacro::PropertyMacro(Variable *variable, PropertyMacro *parent) :
-            variable(variable),
-            variableOperand(new VariableOperand(variable)),
-            macroType(MacroType::varType),
-            parent(parent),
-            AbstractMacro(variable->getName(), variable->getDataType()) {
     }
 
 
@@ -88,14 +79,6 @@ namespace SCAM {
         }
         return variableOperand;
     }
-
-    PropertyMacro *PropertyMacro::getParent() const {
-        if (macroType != MacroType::arrayType) {
-            throw std::runtime_error("Called Macro is not of type array!");
-        }
-        return parent;
-    }
-
 
 
     Expr *PropertyMacro::getOperand() const {
@@ -154,14 +137,11 @@ namespace SCAM {
     }
 
     std::string PropertyMacro::getFullName(const std::string &delimiter) const {
-        if (this->macroType == MacroType::arrayType) {
-            if (this->variable->isSubVar() && this->variable->getParent()->isArrayType()) {
-                return this->variable->getParent()->getName() + "(" + this->variable->getName() + ")";
-            }
-        }
 
         if (this->isSubVar()) {
-            return this->getParentName() + delimiter + this->getSubVarName();
+            if(this->getParentDataType()->isArrayType() && delimiter == "."){
+                return this->getParentName() + "(" + this->getSubVarName() + ")";
+            }else  return this->getParentName() + delimiter + this->getSubVarName();
         } else return this->getName();
     }
 
@@ -171,6 +151,20 @@ namespace SCAM {
         } else if (this->dataSignal != nullptr) {
             return this->dataSignal->isSubVar();
         } else return false;
+    }
+
+    const DataType * PropertyMacro::getParentDataType() const {
+        if (this->variable != nullptr) {
+            if (this->variable->isSubVar()) {
+                return this->variable->getParent()->getDataType();
+            }
+        } else if (this->dataSignal != nullptr) {
+            if (this->dataSignal->isSubVar()) {
+                return this->dataSignal->getParent()->getDataType();
+            }
+        } else {
+            throw std::runtime_error(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
+        }
     }
 
 //    std::string PropertyMacro::getName() const {

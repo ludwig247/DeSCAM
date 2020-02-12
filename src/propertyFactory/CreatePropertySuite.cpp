@@ -65,7 +65,7 @@ void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, SCAM::
                 parentMacro = new PropertyMacro(parent);
                 propertySuite->addVisibleRegister(parentMacro);
             }
-            auto pm = new PropertyMacro(var.second, parentMacro);
+            auto pm = new PropertyMacro(var.second);
             propertySuite->addVisibleRegister(pm);
 
         } else if (var.second->isSubVar()) {

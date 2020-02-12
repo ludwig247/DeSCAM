@@ -5,6 +5,7 @@
 #include <Stmts/Assignment.h>
 
 #include <utility>
+#include <algorithm>
 #include "PropertySuite.h"
 
 
@@ -205,11 +206,12 @@ namespace SCAM {
     // ------------------------------------------------------------------------------
 
     void PropertySuite::addProperty(Property *property) {
-        this->Properties.push_back(property);
+        this->propertyList.push_back(property);
+        std::sort(propertyList.begin(), propertyList.end(), [](Property* a, Property* b){return a->getName() < b->getName();});
     }
 
     const std::vector<Property*> &PropertySuite::getProperties() const {
-        return Properties;
+        return propertyList;
     }
 
     // ------------------------------------------------------------------------------
