@@ -24,12 +24,16 @@ set(GLOBAL_FILES
 add_executable(PrintITL_Test_Run ${SOURCE_FILES} ${GLOBAL_FILES})
 
 target_link_libraries(PrintITL_Test_Run PrintITL)
-target_link_libraries(PrintITL_Test_Run modelFactory)
-target_link_libraries(PrintITL_Test_Run operationFactory)
-target_link_libraries(PrintITL_Test_Run optimizer)
-target_link_libraries(PrintITL_Test_Run Model)
-target_link_libraries(PrintITL_Test_Run Stmts)
+target_link_libraries(PrintITL_Test_Run parser)
 target_link_libraries(PrintITL_Test_Run ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
+
+#target_link_libraries(PrintITL_Test_Run PrintITL)
+#target_link_libraries(PrintITL_Test_Run modelFactory)
+#target_link_libraries(PrintITL_Test_Run operationFactory)
+#target_link_libraries(PrintITL_Test_Run optimizer)
+#target_link_libraries(PrintITL_Test_Run Model)
+#target_link_libraries(PrintITL_Test_Run Stmts)
+#target_link_libraries(PrintITL_Test_Run ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
 
 
 set(LLVM_LIBS

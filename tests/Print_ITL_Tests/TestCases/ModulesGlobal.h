@@ -13,6 +13,10 @@ const unsigned int number2 = 0x111;
 const int number3 = 20;
 const bool number4 = true;
 const int intern = 3;
+const int intern2 = 3;
+
+
+
 
  SC_MODULE(TestGlobal1)
 {
@@ -60,7 +64,7 @@ unsigned int compute(unsigned int param, int param2) {
 }
 
 int nested(unsigned int param2){
-    return static_cast<int>(param2)+3+intern;
+    return static_cast<int>(param2)+3;
 }
 
 int compute2(int param, unsigned int param2){
@@ -70,6 +74,12 @@ int compute2(int param, unsigned int param2){
 
 bool compute3(bool param, unsigned int val){
     if(param) return val+2;
+    else return val;
+}
+
+
+bool global_intern(bool param, unsigned int val){
+    if(param) return val+intern;
     else return val;
 }
 
@@ -100,4 +110,46 @@ SC_MODULE(TestGlobal2) {
     }
 };
 
+
+//
+//SC_MODULE(TestGlobal3)
+//{
+//    blocking_in <int> test_in;
+//    blocking_out<unsigned int> test_out;
+//
+//    int foo;
+//    unsigned int bar;
+//
+//    unsigned int test_var(unsigned int val) const {
+//        return val+3+number;
+//    }
+//
+//    bool test_fun(int param) const {
+//        if(param > intern2+5){
+//            return true;
+//        }else return false;
+//    }
+//
+//    SC_CTOR(TestGlobal3):
+//            test_in("test_in"),
+//            test_out("test_out")
+//    {
+//        SC_THREAD(fsm);
+//    }
+//    void fsm()
+//    {
+//        while(true)
+//        {
+//            test_in->read(foo);
+//            if(test_fun(foo)){
+//                bar = static_cast<unsigned int>(intern) + 2;
+//            }else bar = static_cast<unsigned int>(foo);
+//            test_out->write(bar);
+//
+//        }
+//    }
+//};
+
+
 #endif //DESCAM_MODULESGLOBAL_H
+

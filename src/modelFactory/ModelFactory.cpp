@@ -625,6 +625,29 @@ void SCAM::ModelFactory::removeUnused() {
                     }
                 }
             }
+            //Check functions:
+            for(auto func: module.second->getFunctionMap()){
+                for (auto retValCond  : func.second->getReturnValueConditionList()) {
+                    for (auto usedFunc: ExprVisitor::getUsedFunction(retValCond.first->getReturnValue())) {
+                        if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
+                            removeGlobalFunctions.at(usedFunc) = false;
+                        }
+                    }
+                    for (auto usedVar: ExprVisitor::getUsedVariables(retValCond.first->getReturnValue())) {
+                        if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+                    }
+                    for(auto cond: retValCond.second){
+                        for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
+                            if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
+                                removeGlobalFunctions.at(usedFunc) = false;
+                            }
+                        }
+                        for (auto usedVar: ExprVisitor::getUsedVariables(cond)) {
+                            if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+                        }
+                    }
+                }
+            }
         }
     }
 
