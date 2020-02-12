@@ -159,8 +159,8 @@ namespace SCAM {
         SCAM::CreatePropertySuite::addReset(this->module, this->propertySuite);
 
         //OPERATION PROPERTIES
-        //SCAM::CreatePropertySuite::addOperations(this->module, this->propertySuite);
-        SCAM::CreatePropertySuite::addTrueOperations(this->module, this->propertySuite);
+        SCAM::CreatePropertySuite::addOperations(this->module, this->propertySuite);
+        //SCAM::CreatePropertySuite::addTrueOperations(this->module, this->propertySuite);
 
         // WAIT PROPERTIES
         SCAM::CreatePropertySuite::addWait(this->module, this->propertySuite);
