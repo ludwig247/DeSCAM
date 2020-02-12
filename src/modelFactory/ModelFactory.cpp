@@ -422,7 +422,6 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
                     initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
                 } else throw std::runtime_error("No initialValue for type " + type->getName());
             }
-
             module->addVariable(new Variable(variable.first, type, initialValue));
         }
     }
@@ -580,11 +579,17 @@ void SCAM::ModelFactory::removeUnused() {
                     removeGlobalFunctions.at(usedFunc) = false;
                 }
             }
+            for (auto usedVar: ExprVisitor::getUsedVariables(retValCond.first->getReturnValue())) {
+                if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
+            }
             for(auto cond: retValCond.second){
                 for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
                     if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                         removeGlobalFunctions.at(usedFunc) = false;
                     }
+                }
+                for (auto usedVar: ExprVisitor::getUsedVariables(cond)) {
+                    if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
                 }
             }
         }
