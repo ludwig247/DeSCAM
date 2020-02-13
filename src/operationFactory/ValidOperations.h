@@ -7,25 +7,25 @@
 
 #include <Stmt.h>
 #include <Behavior/CfgNode.h>
-#include "Behavior/Operation2.h"
-#include "Behavior/State2.h"
+#include "Behavior/Operation.h"
+#include "Behavior/State.h"
 
 namespace SCAM {
 
     class ValidOperations {
     public:
-        explicit ValidOperations(const std::vector<SCAM::Operation2*> &operationsList, SCAM::Module * module);
+        explicit ValidOperations(const std::vector<SCAM::Operation*> &operationsList, SCAM::Module * module);
         ~ValidOperations() = default;
 
-        static const bool isOperationReachable(SCAM::Operation2* op);
+        static const bool isOperationReachable(SCAM::Operation* op);
         static const bool isPathReachable(std::vector<SCAM::CfgNode* > operationPath, SCAM::Module * module);
         static const bool isPathReachable(std::vector<SCAM::Stmt* > assumedStatements, std::vector<SCAM::CfgNode* > operationPath, SCAM::Module * module);
 
         //Getter
-        const std::vector<SCAM::Operation2*> getOperationsList() const;
+        const std::vector<SCAM::Operation*> getOperationsList() const;
 
     private:
-        std::vector<SCAM::Operation2*> operationsList;
+        std::vector<SCAM::Operation*> operationsList;
         SCAM::Module * module;
     };
 }

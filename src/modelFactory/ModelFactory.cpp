@@ -19,6 +19,7 @@
 #include "../parser/CommandLineParameter.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
+#include <PropertyFactory.h>
 
 
 //Constructor
@@ -34,10 +35,6 @@ SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
     this->unimportantModules.push_back("Testbench");//! Not important for the abstract model:
 }
 
-//Destructor
-SCAM::ModelFactory::~ModelFactory() {
-}
-
 bool SCAM::ModelFactory::preFire() {
     if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
         std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
@@ -51,12 +48,11 @@ bool SCAM::ModelFactory::fire() {
     //Translation Unit?
     TranslationUnitDecl *tu = _context.getTranslationUnitDecl();
 
-    //Delte content of previous models
     //SCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
     //Modules
-    this->addModules(tu, SCAM::Module());
+    this->addModules(tu);
 
     //Optimize model
     this->optimizeModel();
@@ -66,26 +62,21 @@ bool SCAM::ModelFactory::fire() {
     return true;
 }
 
-
-//Modules
-void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl, SCAM::Module module) {
-    FindModules modules(decl);
-
-
-    //Fill the model with modules(structural describtion)
-    for (auto &scparModule: modules.getModuleMap()) {
-
-//        //Module Name
-        std::string name = scparModule.first;
-
-//        /*
-//         * Create Module
+//        /*!
+//         * \brief Adds a module for each sc_module in the source-tree
 //
 //         * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
 //         * is executed by the module constructor method addModule using the reference to the
 //         * module declaration of the ast
 //        */
-//        //Module is on the unimportant module list -> skip
+void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
+    FindModules modules(decl);
+    //Fill the model with modules(structural describtion)
+    for (auto &sc_module: modules.getModuleMap()) {
+
+        //Module Name
+        std::string name = sc_module.first;
+        //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
             this->unimportantModules.end()) {
             //Skip this module
@@ -94,26 +85,22 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl, SCAM::Modu
         std::cout << "############################" << std::endl;
         std::cout << "Module: " << name << std::endl;
         std::cout << "############################" << std::endl;
-        //DataTypes::reset();//FIXME:
-        Module *module = new Module(scparModule.first);
-        //INFO: this is the most important step ! Otherwise the PluginAction Object is deleted and with it the model
-
-
+        auto module = new Module(name);
         model->addModule(module);
 
         //Global variables
-        this->addGlobalVariables(decl,module);
+        this->addGlobalVariables(module, decl);
 
         //Members
-        this->addVariables(module, scparModule.second);
+        this->addVariables(module, sc_module.second);
         //Ports
-        this->addPorts(module, scparModule.second);
+        this->addPorts(module, sc_module.second);
         //Combinational Functions
-        this->addFunctions(module, scparModule.second);
+        this->addFunctions(module, sc_module.second);
         //States
-        this->addSections(module, scparModule.second);
+        this->addSections(module, sc_module.second);
         //Processe
-        this->addBehavior(module, scparModule.second);
+        this->addBehavior(module, sc_module.second);
 
         //this->addCommunicationFSM(module);
     }
@@ -298,27 +285,27 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
  * Adds a FSM to the Module
  */
 void SCAM::ModelFactory::addSections(Module *module, clang::CXXRecordDecl *decl) {
-    //Find states
-    FindSections findSections(decl);
-    this->moduleHasSections = findSections.hasSections();
-    this->moduleHasSections = false;
-    //Create Section-Datatype for this module
-    //DataType *sections = new DataType(module->getName() + "_SECTIONS");
-    //DataTypes::addLocalDataType(module->getName(), sections);
-    //Check whether the module defines a FSM
-    if (moduleHasSections) {
-        //Create FSM with states
-        for (auto state: findSections.getSectionList()) {
-            //sections->addEnumValue(state);
-        }
-        //module->getFSM()->setSections(sections, findSections.getInitialState());
-
-    } else {
-        //TODO: remove
-        //Create default FSM without any sections
-        //sections->addEnumValue("run");
-        //module->getFSM()->setSections(sections, "run");
-    }
+//    //Find states
+//    FindSections findSections(decl);
+//    this->moduleHasSections = findSections.hasSections();
+//    this->moduleHasSections = false;
+//    //Create Section-Datatype for this module
+//    //DataType *sections = new DataType(module->getName() + "_SECTIONS");
+//    //DataTypes::addLocalDataType(module->getName(), sections);
+//    //Check whether the module defines a FSM
+//    if (moduleHasSections) {
+//        //Create FSM with states
+//        for (auto state: findSections.getSectionList()) {
+//            //sections->addEnumValue(state);
+//        }
+//        //module->getFSM()->setSections(sections, findSections.getInitialState());
+//
+//    } else {
+//        //TODO: remove
+//        //Create default FSM without any sections
+//        //sections->addEnumValue("run");
+//        //module->getFSM()->setSections(sections, "run");
+//    }
 }
 
 //! Adds processes to the model
@@ -355,20 +342,22 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     if(cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
-    SCAM::State2::state_cnt = 0;
-    SCAM::Operation2::operations_cnt = 0;
+    SCAM::State::state_cnt = 0;
+    SCAM::Operation::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
     if (!optOptionsSet.empty()) {
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model->getGlobalVariableMap(), optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
         SCAM::OperationFactory operationFactory(opt.getCFG(), module);
-        module->setPropertySuite(operationFactory.getPropertySuite());
+        PropertyFactory propertyFactory(module);
+        module->setPropertySuite(propertyFactory.getPropertySuite());
     } else {
         SCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
         module->setCFG(test.getCFG());
         SCAM::OperationFactory operationFactory(test.getCFG(), module);
-        module->setPropertySuite(operationFactory.getPropertySuite());
+        PropertyFactory propertyFactory(module);
+        module->setPropertySuite(propertyFactory.getPropertySuite());
     }
 }
 
@@ -435,11 +424,6 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
         }
     }
 
-//    //All findVariables initialized?
-//    if (module->getVariableMap().size() != findInitalValues.getVariableInitialMap().size()) {
-//        std::cout << "-I-  Not all variables initialized" << std::endl;
-//    }
-
 }
 
 bool SCAM::ModelFactory::postFire() {
@@ -449,16 +433,14 @@ bool SCAM::ModelFactory::postFire() {
 
 void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 // Pass 1: Find the necessary information.
-    bool pre = false;
-    pre = preFire();
+    bool pre = preFire();
     if (!pre) {
         std::cout << "#################################" << std::endl;
         std::cout << "######## Syntax Errors ##########" << std::endl;
         std::cout << "#################################" << std::endl;
         return;
     } else {
-        bool f = false;
-        f = fire();
+        bool f = fire();
         if (!f) {
             std::cout << "----------Fire(fail)" << std::endl;
             return;
@@ -528,11 +510,10 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *pDecl
         }
 
     }
-    //throw std::runtime_error(" Throw ");
 }
 
-void SCAM::ModelFactory::addGlobalVariables(TranslationUnitDecl *pDecl, SCAM::Module *pModule) {
-    //FindGlobal findGlobal(pDecl, pModule);
+void SCAM::ModelFactory::addGlobalVariables(SCAM::Module *module, TranslationUnitDecl *pDecl) {
+    //FindGlobal findGlobal(pDecl, module);
 
 }
 
@@ -572,8 +553,6 @@ void SCAM::ModelFactory::optimizeModel() {
             this->model->removeGlobalVariable(var.first);
         }
     }
-
-
 }
 
 

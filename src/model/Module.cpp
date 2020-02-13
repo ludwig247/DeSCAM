@@ -9,30 +9,15 @@
 
 namespace SCAM {
 
-    Module::Module() :
-            slave(false),
-            fsm(new FSM(this)),
-            propertySuite(nullptr) {
-    }
-
     Module::Module(std::string name) :
-            slave(false),
             fsm(new FSM(this)),
             propertySuite(nullptr),
             AbstractNode(name) {
 
     }
 
-    Module::~Module() {
-        delete this->fsm;
-        delete this->propertySuite;
-
-    }
-
     void Module::addPort(Port *port) {
         this->ports.insert(std::make_pair(port->getName(), port));
-        if (port->getInterface()->isSlave())
-            this->slave = true;
     }
 
     const std::map<std::string, Port *> &Module::getPorts() const {
@@ -146,11 +131,10 @@ namespace SCAM {
     }
 
     bool Module::isSlave() const {
-//        for (auto port: this->ports) {
-//            if (port.second->getInterface()->isSlaveIn() || port.second->getInterface()->isSlaveOut()) return true;
-//        }
-//        return false;
-        return this->slave;
+        for (auto port: this->ports) {
+            if (port.second->getInterface()->isSlaveIn() || port.second->getInterface()->isSlaveOut()) return true;
+        }
+        return false;
     }
 
     void Module::removeVariable(Variable *variable) {

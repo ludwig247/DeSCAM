@@ -5,7 +5,7 @@
 #include "Property.h"
 
 #include <utility>
-#include <Behavior/Operation2.h>
+#include <Behavior/Operation.h>
 
 namespace SCAM {
 
@@ -13,14 +13,14 @@ namespace SCAM {
     //                                Constructor
     // ------------------------------------------------------------------------------
 
-    Property::Property(std::string name, const SCAM::Operation2 * operation) :
+    Property::Property(std::string name, const SCAM::Operation * operation) :
             name(name){
             this->operationList.push_back(operation);
             assert(operation != nullptr && "Passing an operation that is null");
     }
 
 
-    Property::Property(std::string name, std::vector<const SCAM::Operation2 *> operationList):
+    Property::Property(std::string name, std::vector<const SCAM::Operation *> operationList):
         name(name),
         operationList(operationList){
         assert(!operationList.empty() && "Passing an empty list of operations");
@@ -95,7 +95,7 @@ namespace SCAM {
         return commitmentList;
     }
 
-    const Operation2 *Property::getOperation() const {
+    const Operation *Property::getOperation() const {
         if(operationList.size() > 1){
             throw std::runtime_error("Property is build from more then 1 operation. Please use getOperations()");
         }

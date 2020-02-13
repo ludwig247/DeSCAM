@@ -53,14 +53,14 @@ namespace SCAM {
         std::cout << "Optimization:" << std::endl;
         this->optimizeOperations();
         std::cout << "Generating PropertySuite:" << std::endl;
-        std::map<int, State2 *> stateMap;
+        std::map<int, State *> stateMap;
         for (auto state: this->statesMap) {
             state.second->setName(state.second->getName() + "_" + std::to_string(state.second->getStateId()));
             stateMap.insert(std::make_pair(state.second->getStateId(), state.second));
         }
         this->module->getFSM()->setStateMap(stateMap);
         this->module->setVariableMap(this->varMap);
-        this->generatePropertySuite();
+        //this->generatePropertySuite();
     }
 
     PropertySuite *OperationFactory::getPropertySuite() const {
@@ -93,7 +93,7 @@ namespace SCAM {
     }
 
     void OperationFactory::findValidOperations() {
-        std::vector<SCAM::Operation2 *> validOperations;
+        std::vector<SCAM::Operation *> validOperations;
         for (auto op : this->operations) {
             if (SCAM::ValidOperations::isOperationReachable(op)) {
                 validOperations.push_back(op);
@@ -137,33 +137,4 @@ namespace SCAM {
         this->varMap = oOperations.getNewVarMap();
     }
 
-    void OperationFactory::generatePropertySuite() {
-        // Generate PropertySuite
-        this->propertySuite = new PropertySuite(module->getName());
-
-        //Ports
-        SCAM::CreatePropertySuite::addNotifySignals(this->module, this->propertySuite);
-        SCAM::CreatePropertySuite::addSyncSignals(this->module, this->propertySuite);
-        SCAM::CreatePropertySuite::addDataSignals(this->module, this->propertySuite);
-
-        //Vars
-        SCAM::CreatePropertySuite::addVisibleRegisters(this->module, this->propertySuite);
-
-        //States
-        SCAM::CreatePropertySuite::addStates(this->module, this->propertySuite);
-
-        //Functions
-        SCAM::CreatePropertySuite::addFunctions(this->module, this->propertySuite);
-
-        // RESET PROPERTY
-        SCAM::CreatePropertySuite::addReset(this->module, this->propertySuite);
-
-        //OPERATION PROPERTIES
-        SCAM::CreatePropertySuite::addOperations(this->module, this->propertySuite);
-        //SCAM::CreatePropertySuite::addTrueOperations(this->module, this->propertySuite);
-
-        // WAIT PROPERTIES
-        SCAM::CreatePropertySuite::addWait(this->module, this->propertySuite);
-
-    }
 }

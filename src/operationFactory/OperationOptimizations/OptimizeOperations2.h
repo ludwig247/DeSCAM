@@ -7,14 +7,14 @@
 
 #include <Model.h>
 #include <Stmt.h>
-#include "Behavior/Operation2.h"
+#include "Behavior/Operation.h"
 
 namespace SCAM {
 
 class OptimizeOperations2 {
 public:
     OptimizeOperations2() = delete;
-    OptimizeOperations2(const std::vector<SCAM::Operation2*> &opList, SCAM::Module *module);
+    OptimizeOperations2(const std::vector<SCAM::Operation*> &opList, SCAM::Module *module);
     ~OptimizeOperations2() = default;
 
     //Getter

@@ -22,7 +22,9 @@ add_library(Model ${AST_FILES})
 
 add_subdirectory(Stmts)
 add_subdirectory(Behavior)
+add_subdirectory(propertySuite)
 
 target_link_libraries(Model Behavior)
 target_link_libraries(Model Stmts)
+target_link_libraries(Model propertySuite)
 #add_subdirectory(operationGraph)

@@ -23,7 +23,7 @@ SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> sta
     }
 }
 
-SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::State2 *> statesMap, SCAM::Module *module) :
+SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module) :
         isStateVar(false),
         newExpr(nullptr),
         module(module),
@@ -54,7 +54,7 @@ SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::S
     }
 }
 
-void SCAM::ReconstructOperations::sortOperation(SCAM::Operation2 *operation) {
+void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
     this->assumptionsList.clear();
     this->commitmentsList.clear();
     this->variableAssignmentMap.clear();

@@ -9,8 +9,8 @@
 #include <StmtAbstractVisitor.h>
 #include <Stmt.h>
 #include "Behavior/CfgNode.h"
-#include "Behavior/Operation2.h"
-#include "Behavior/State2.h"
+#include "Behavior/Operation.h"
+#include "Behavior/State.h"
 
 namespace SCAM {
 /**
@@ -44,9 +44,9 @@ namespace SCAM {
     class ReconstructOperations : public SCAM::StmtAbstractVisitor {
     public:
         ReconstructOperations() = default;
-        ReconstructOperations(std::map<std::string, SCAM::State2 *> statesMap, SCAM::Module *module);
+        ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module);
         ReconstructOperations(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
-        void sortOperation(SCAM::Operation2 *operation);
+        void sortOperation(SCAM::Operation *operation);
 
         static std::vector<SCAM::Expr *> extractConditions(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
         static Return * getReturnValue(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
@@ -131,7 +131,7 @@ namespace SCAM {
         std::vector<Expr *> assumptionsList;
         std::vector<Assignment *> commitmentsList;
 
-        std::map<std::string, SCAM::State2 *> statesMap;
+        std::map<std::string, SCAM::State *> statesMap;
         std::vector<std::string> dpSignalsList;
         SCAM::Module *module;
         Return *returnValue = nullptr;

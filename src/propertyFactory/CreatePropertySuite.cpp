@@ -166,6 +166,7 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
 
             std::string operationName = operation->getState()->getName() + "_" + std::to_string(operation->getId());
             auto newProperty = new Property(operationName, operation);
+            newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
             auto t_var = new Timepoint("t");
             auto t = new TimePointOperand(t_var);
@@ -175,7 +176,6 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
 
             newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
 
-            newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
             //FREEZE VARS
             std::set<SCAM::SyncSignal *> syncSignals;
@@ -388,6 +388,10 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 
         auto newProperty = new Property("cycle_" + std::to_string(cycle_cnt), cycle);
         //===============================
+        // Constraints
+        //===============================
+        newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
+        //===============================
         // Timepoints
         //===============================
         //Add t_first timepoint:
@@ -422,13 +426,15 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
             newProperty->addFreezeSignal(signalMacro, timepoint);
         }
         for (auto var: trueOperation.getVariables()) {
+//            if(cycle_cnt == 0){
+//                std::cout << "yes" << std::endl;
+//            }
             if (var->isConstant()) continue;
             PropertyMacro *signalMacro = propertySuite->findSignal(var);
             signalMacro->setExpression(new VariableOperand(var));
             auto state = trueOperation.getVariablesTimepoints().at(var);
             auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(), "t_" + state->getName());
-
-            newProperty->addFreezeSignal(signalMacro, t_var);
+            newProperty->addFreezeSignal(signalMacro, timepoint);
 
         }
         for (auto dataSig: trueOperation.getDataSignals()) {

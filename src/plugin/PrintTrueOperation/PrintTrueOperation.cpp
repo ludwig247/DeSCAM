@@ -816,7 +816,7 @@ std::string PrintTrueOperation::pipelined() {
 }
 
 
-void PrintTrueOperation::findCylces(State2 *current, State2 *start, const std::vector<Operation2 *> &opList) {
+void PrintTrueOperation::findCylces(State *current, State *start, const std::vector<Operation *> &opList) {
     save++;
     if(save == 0xFFFF-1) throw std::runtime_error(" loop ");
     for (auto operation: current->getOutgoingOperationsList()) {
@@ -830,7 +830,7 @@ void PrintTrueOperation::findCylces(State2 *current, State2 *start, const std::v
     return;
 }
 
-std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) {
+std::string PrintTrueOperation::generatTrueOp(std::vector<Operation *> &cycle) {
     this->cycle_cnt++;
     std::stringstream ss;
     ss << "property " << "cycle" << this->cycle_cnt << " is\n";
@@ -999,7 +999,7 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation2 *> &cycle) 
  * @param cycle
  * @return
  */
-bool PrintTrueOperation::isRequired(Variable *var, Operation2 *&currentOperation, std::vector<Operation2 *> &cycle) {
+bool PrintTrueOperation::isRequired(Variable *var, Operation *&currentOperation, std::vector<Operation *> &cycle) {
 
     //Start iterating from currentOperation
     auto it = std::find(begin(cycle), end(cycle), currentOperation);
@@ -1018,7 +1018,7 @@ bool PrintTrueOperation::isRequired(Variable *var, Operation2 *&currentOperation
     return false;
 }
 
-bool PrintTrueOperation::isRequired2(Variable *const &var, Operation2 *op, std::vector<Operation2 *> &cycle) {
+bool PrintTrueOperation::isRequired2(Variable *const &var, Operation *op, std::vector<Operation *> &cycle) {
     //Start iterating from currentOperation
 
     //Check operation: Is there already an assignment?

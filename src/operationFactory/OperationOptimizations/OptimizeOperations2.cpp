@@ -8,7 +8,7 @@
 
 namespace SCAM {
 
-    SCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<SCAM::Operation2 *> &operationsList, SCAM::Module *module){
+    SCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<SCAM::Operation *> &operationsList, SCAM::Module *module){
         // mark all variables for removal initially
 
         //local vars

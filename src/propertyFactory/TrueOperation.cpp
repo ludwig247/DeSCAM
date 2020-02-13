@@ -21,7 +21,7 @@ SCAM::TrueOperation::TrueOperation(SCAM::Module const *module) :
     //TODO: check output with hardware
 }
 
-const std::vector<std::vector<const SCAM::Operation2 *>> &SCAM::TrueOperation::getCycleMap() const {
+const std::vector<std::vector<const SCAM::Operation *>> &SCAM::TrueOperation::getCycleMap() const {
     return cycleMap;
 }
 
@@ -30,7 +30,7 @@ void SCAM::TrueOperation::setRightHook() {
 
 }
 
-void SCAM::TrueOperation::findCylces(State2 *current, State2 *start, const std::vector<const Operation2 *> &opList) {
+void SCAM::TrueOperation::findCylces(State *current, State *start, const std::vector<const Operation *> &opList) {
     this->loop_detection++;
     if (this->loop_detection == 0xFFFF - 1) throw std::runtime_error(" loop "); //TODO: show trace of loop
     for (auto operation: current->getOutgoingOperationsList()) {
@@ -44,9 +44,9 @@ void SCAM::TrueOperation::findCylces(State2 *current, State2 *start, const std::
     return;
 }
 
-SCAM::State2 *SCAM::TrueOperation::getStartState(const std::map<int, State2 *> &stateMap) const {
+SCAM::State *SCAM::TrueOperation::getStartState(const std::map<int, State *> &stateMap) const {
     //Init state should always be index 0
-    State2 *initState = stateMap.at(0);
+    State *initState = stateMap.at(0);
     assert(initState->getName() == "init_0" && "Wrong state");
     return initState->getOutgoingOperationsList().back()->getNextState();
 }
@@ -82,7 +82,7 @@ const std::set<SCAM::DataSignal *> &SCAM::TrueOperation::getDataSignals() const 
     return dataSignals;
 }
 
-void SCAM::TrueOperation::findFreezeVars(std::vector<const Operation2 *> cycle) {
+void SCAM::TrueOperation::findFreezeVars(std::vector<const Operation *> cycle) {
     //Reset everything from previos operations
     this->variablesTimepoints.clear();
     this->variables.clear();
@@ -132,7 +132,7 @@ void SCAM::TrueOperation::findFreezeVars(std::vector<const Operation2 *> cycle) 
  * @param cycle
  * @return
  */
-bool SCAM::TrueOperation::isRequired(Variable *var, const Operation2 *currentOperation, const std::vector<const Operation2 *> &cycle) {
+bool SCAM::TrueOperation::isRequired(Variable *var, const Operation *currentOperation, const std::vector<const Operation *> &cycle) {
 
     //Start iterating from currentOperation
     auto it = std::find(begin(cycle), end(cycle), currentOperation);
@@ -151,7 +151,7 @@ bool SCAM::TrueOperation::isRequired(Variable *var, const Operation2 *currentOpe
     return false;
 }
 
-bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation2 *op, std::vector<const Operation2 *> &cycle) {
+bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation *op, std::vector<const Operation *> &cycle) {
     //Start iterating from currentOperation
 
     //Check operation: Is there already an assignment?
@@ -185,15 +185,15 @@ bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation2 *op
     return false;
 }
 
-const std::map<SCAM::SyncSignal *, SCAM::State2 *> &SCAM::TrueOperation::getSyncSignalTimepoints() const {
+const std::map<SCAM::SyncSignal *, SCAM::State *> &SCAM::TrueOperation::getSyncSignalTimepoints() const {
     return syncSignalTimepoints;
 }
 
-const std::map<SCAM::Variable *, SCAM::State2 *> &SCAM::TrueOperation::getVariablesTimepoints() const {
+const std::map<SCAM::Variable *, SCAM::State *> &SCAM::TrueOperation::getVariablesTimepoints() const {
     return variablesTimepoints;
 }
 
-const std::map<SCAM::DataSignal *, SCAM::State2 *> &SCAM::TrueOperation::getDataSignalsTimepoints() const {
+const std::map<SCAM::DataSignal *, SCAM::State *> &SCAM::TrueOperation::getDataSignalsTimepoints() const {
     return dataSignalsTimepoints;
 }
 

@@ -29,11 +29,11 @@ const std::map<std::string, std::vector<SCAM::Stmt *>> &SCAM::FSM::getSectionMap
     return this->sectionMap;
 }
 
-const std::map<int, SCAM::State2 *> &SCAM::FSM::getStateMap() const {
+const std::map<int, SCAM::State *> &SCAM::FSM::getStateMap() const {
     return stateMap;
 }
 
-void SCAM::FSM::setStateMap(const std::map<int, SCAM::State2 *> &stateMap) {
+void SCAM::FSM::setStateMap(const std::map<int, SCAM::State *> &stateMap) {
     FSM::stateMap.clear();
     FSM::stateMap = stateMap;
 }
@@ -88,10 +88,10 @@ SCAM::FSM::FSM() {
 
 }
 
-const std::map<SCAM::Operation2 *, SCAM::Path *> &SCAM::FSM::getOperationPathMap() const {
+const std::map<SCAM::Operation *, SCAM::Path *> &SCAM::FSM::getOperationPathMap() const {
     return operationPathMap;
 }
 
-void SCAM::FSM::setOperationPathMap(const std::map<SCAM::Operation2 *, SCAM::Path *> &operationPathMap) {
+void SCAM::FSM::setOperationPathMap(const std::map<SCAM::Operation *, SCAM::Path *> &operationPathMap) {
     FSM::operationPathMap = operationPathMap;
 }

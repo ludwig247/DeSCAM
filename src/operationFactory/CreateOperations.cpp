@@ -13,7 +13,7 @@
 
 namespace SCAM {
 
-    CreateOperations::CreateOperations(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State2 *> statesMap, SCAM::Module *module) :
+    CreateOperations::CreateOperations(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module) :
             firstStatement(false),
             lastStatement(false),
             condition(false),
@@ -26,7 +26,7 @@ namespace SCAM {
         /// create Explicit Operations
         this->operationsList.reserve(rawOperations.size());
         for (const auto& op : rawOperations) {
-            auto *operation = new Operation2();
+            auto *operation = new Operation();
             /// save operation in the final list
             this->operationsList.push_back(operation);
             this->addStates(op, operation);
@@ -43,7 +43,7 @@ namespace SCAM {
             if (findComm.isBlockingInterface()) {
                 bool isNewWaitOperation = (std::find(this->nodeWaitList.begin(), this->nodeWaitList.end(), (*node)) == this->nodeWaitList.end());
                 if (!findComm.isNonBlockingAccess() && isNewWaitOperation) {
-                    Operation2 *wait_operation = new Operation2();
+                    Operation *wait_operation = new Operation();
                     /// save operation in the final list
                     this->operationsList.push_back(wait_operation);
                     wait_operation->setWait(true);
@@ -60,7 +60,7 @@ namespace SCAM {
                     this->nodeWaitList.push_back((*node));
 
                 } else if (findComm.isNonBlockingAccess()) {
-                    auto *notSynced_operation = new Operation2();
+                    auto *notSynced_operation = new Operation();
                     /// save operation in the final list
                     this->operationsList.push_back(notSynced_operation);
                     this->notSyncOp = true;
@@ -87,15 +87,15 @@ namespace SCAM {
 #endif
     }
 
-    const std::vector<SCAM::Operation2*> &CreateOperations::getOperationsList() const{
+    const std::vector<SCAM::Operation*> &CreateOperations::getOperationsList() const{
         return this->operationsList;
     }
 
-    const std::map<std::string, SCAM::State2 *> &CreateOperations::getStatesMap() const {
+    const std::map<std::string, SCAM::State *> &CreateOperations::getStatesMap() const {
         return this->statesMap;
     }
 
-    void CreateOperations::addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation) {
+    void CreateOperations::addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation) {
         /// Process starting state
         auto node = rawOperation.begin();
         if ((*node)->getStmt() == nullptr) {
@@ -130,7 +130,7 @@ namespace SCAM {
         }
     }
 
-    void CreateOperations::addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation) {
+    void CreateOperations::addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation) {
         this->statementsList.clear();
 
         auto node = rawOperation.begin();

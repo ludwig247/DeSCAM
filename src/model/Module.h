@@ -18,11 +18,9 @@
 namespace SCAM {
     class Module : public AbstractNode {
     public:
-        Module();
-
-        Module(std::string name);
-
-        virtual ~Module();
+        Module() = delete;
+        explicit  Module(std::string name);
+        ~Module() = default;
 
         //Ports
         void addPort(Port *port);
@@ -67,10 +65,8 @@ namespace SCAM {
 
     private:
 
-        bool slave;
         std::map<std::string, Port *> ports; //! sc_in, sc_port<Interface>, ...
         std::map<std::string, Variable *> variableMap; //! <memberName,ptrToMember>
-        std::map<std::string, Variable *> optimized_variable_map; //! <memberName,ptrToMember>
         std::map<std::string, Function *> functionMap;
 
         FSM *fsm;
@@ -78,8 +74,6 @@ namespace SCAM {
         std::map<int, SCAM::CfgNode *> cfg;
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
 
-        //    std::map<int, SCAM::CfgNode *> cfg_Original;
-//    std::map<int, SCAM::CfgNode *> cfg_Explicit;
         PropertySuite *propertySuite;
     };
 }

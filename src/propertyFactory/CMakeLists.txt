@@ -1,3 +1,4 @@
 add_library(propertyFactory
         CreatePropertySuite.cpp
-        TrueOperation.cpp)
+        TrueOperation.cpp
+        PropertyFactory.cpp )

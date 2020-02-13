@@ -10,7 +10,7 @@
 #include "TemporalExpr.h"
 #include "PropertyMacro.h"
 #include "PropertyConstraint.h"
-#include "Behavior/Operation2.h"
+#include "Behavior/Operation.h"
 
 namespace SCAM {
     template< typename T >
@@ -26,8 +26,8 @@ namespace SCAM {
 
         // Constructor
         Property() = delete;
-        explicit Property(std::string name, const SCAM::Operation2 *operation);
-        explicit Property(std::string name, std::vector<const SCAM::Operation2 *> operationList);
+        explicit Property(std::string name, const SCAM::Operation *operation);
+        explicit Property(std::string name, std::vector<const SCAM::Operation *> operationList);
 
         // Name
         const std::string &getName() const;
@@ -54,7 +54,7 @@ namespace SCAM {
         void addCommitment(TemporalExpr* commitment);
         const std::vector<TemporalExpr*> &getCommitmentList() const;
 
-        const Operation2 * getOperation() const;
+        const Operation * getOperation() const;
 
 
 
@@ -62,7 +62,7 @@ namespace SCAM {
 
         const std::string name;
 
-        std::vector<const SCAM::Operation2 *> operationList; //! Contains a reference to the abstract operations
+        std::vector<const SCAM::Operation *> operationList; //! Contains a reference to the abstract operations
 
         std::vector<PropertyConstraint*> constraints;
 

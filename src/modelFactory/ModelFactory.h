@@ -56,9 +56,9 @@ namespace SCAM {
     class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {
 
     public:
-        ModelFactory(CompilerInstance &ci);
-
-        virtual ~ModelFactory();
+        ModelFactory() = delete;
+        explicit ModelFactory(CompilerInstance &ci);
+        ~ModelFactory() = default;
 
         virtual bool preFire();
         virtual bool fire();
@@ -68,30 +68,24 @@ namespace SCAM {
     private:
         Model* model;
         CompilerInstance &_ci;
-        virtual void HandleTranslationUnit(ASTContext & context);
+        void HandleTranslationUnit(ASTContext & context) override;
         ASTContext & _context;
         SourceManager & _sm;
         llvm::raw_ostream & _os;
-
         std::vector<std::string> unimportantModules; //! List containing unimportant modules
 
-
         //Methods
-
-        void addModules(clang::TranslationUnitDecl *decl, SCAM::Module module);
-
-
+        void addModules(clang::TranslationUnitDecl *decl);
         void addPorts(Module* module,clang::CXXRecordDecl* decl);
         void addFunctions(Module *module, CXXRecordDecl *pDecl);
-
         void addBehavior(Module *module, clang::CXXRecordDecl *decl);
         void addSections(Module *module, clang::CXXRecordDecl *decl);
         void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
         void addInstances(TranslationUnitDecl * tu );
 
-        bool moduleHasSections; //! True if the module that is currently processed has explicte state rep. need for section dection
+        bool moduleHasSections = false; //! True if the module that is currently processed has explicte state rep. need for section dection
 
-        void addGlobalVariables(TranslationUnitDecl *pDecl, Module *pModule);
+        void addGlobalVariables(SCAM::Module *module, TranslationUnitDecl *pDecl);
 
         void optimizeModel();
     };

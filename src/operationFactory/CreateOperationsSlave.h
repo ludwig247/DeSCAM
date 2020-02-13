@@ -9,21 +9,21 @@
 #include <StmtAbstractVisitor.h>
 #include <Stmt.h>
 #include "Behavior/CfgNode.h"
-#include "Behavior/Operation2.h"
-#include "Behavior/State2.h"
+#include "Behavior/Operation.h"
+#include "Behavior/State.h"
 
 namespace SCAM {
 
     class CreateOperationsSlave : public SCAM::StmtAbstractVisitor {
     public:
 
-        CreateOperationsSlave(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State2 *> statesMap, SCAM::Module *module);
+        CreateOperationsSlave(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module);
 
         virtual ~CreateOperationsSlave() = default;
 
-        const std::vector<SCAM::Operation2 *> &getOperationsList() const;
+        const std::vector<SCAM::Operation *> &getOperationsList() const;
 
-        const std::map<std::string, SCAM::State2 *> &getStatesMap() const;
+        const std::map<std::string, SCAM::State *> &getStatesMap() const;
 
         void visit(SCAM::VariableOperand &node) override;
 
@@ -92,8 +92,8 @@ namespace SCAM {
         void visit(SCAM::TimePointOperand &node) override;
     private:
         void extendRawOperation(const std::vector<SCAM::CfgNode *> &rawOperation);
-        void addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation);
-        void addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation);
+        void addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation);
+        void addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation);
         std::vector<std::vector<SCAM::CfgNode *>> rawOperationsExtended;
         std::vector<SCAM::Stmt *> statementsList;
         SCAM::Expr *newExpr;
@@ -101,8 +101,8 @@ namespace SCAM {
         bool lastStatement;
         bool condition;
 
-        std::vector<SCAM::Operation2 *> operationsList;
-        std::map<std::string, SCAM::State2 *> statesMap;
+        std::vector<SCAM::Operation *> operationsList;
+        std::map<std::string, SCAM::State *> statesMap;
         SCAM::Module *module;
     };
 }
