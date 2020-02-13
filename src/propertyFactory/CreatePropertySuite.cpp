@@ -4,7 +4,7 @@
 
 #include <ExprVisitor.h>
 #include <PrintITL/PrintITL.h>
-#include <PrintTrueOperation/TrueOperation.h>
+#include <TrueOperation.h>
 #include "CreatePropertySuite.h"
 
 #include "BoolValue.h"
@@ -65,7 +65,7 @@ void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, SCAM::
                 parentMacro = new PropertyMacro(parent);
                 propertySuite->addVisibleRegister(parentMacro);
             }
-            auto pm = new PropertyMacro(var.second, parentMacro);
+            auto pm = new PropertyMacro(var.second);
             propertySuite->addVisibleRegister(pm);
 
         } else if (var.second->isSubVar()) {
@@ -204,21 +204,11 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
             }
             for (auto dataSig: dataSignals) {
                 PropertyMacro *signalMacro;
-                //TODO remove try/catch
                 if (dataSig->isSubVar()) {
                     signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
                 } else {
                     signalMacro = propertySuite->findSignal(dataSig->getName());
                 }
-
-//                    try {
-//                        if(dataSig->isSubVar() && dataSig->getParent()->isArrayType())
-//                            signalMacro = propertySuite->findSignal(dataSig->getParent()->getName());
-//                        else
-//                            signalMacro = propertySuite->findSignal(dataSig->getName());
-//                    } catch (const std::runtime_error &e) {
-//                        signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() , dataSig->getName());
-//                    }
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
 
@@ -341,16 +331,11 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
             for (auto dataSig: dataSignals) {
-                //TODO: remove try/catch
                 PropertyMacro *signalMacro;
-
-                try {
-                    if (dataSig->isSubVar() && dataSig->getParent()->isArrayType())
-                        signalMacro = propertySuite->findSignal(dataSig->getParent()->getName());
-                    else
-                        signalMacro = propertySuite->findSignal(dataSig->getName());
-                } catch (const std::runtime_error &e) {
+                if (dataSig->isSubVar()) {
                     signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
+                } else {
+                    signalMacro = propertySuite->findSignal(dataSig->getName());
                 }
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }

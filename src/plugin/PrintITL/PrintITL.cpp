@@ -28,14 +28,14 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
 
     this->module = node;
 
-    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", propertySuite()));
+    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macros() + operations()));
     pluginOutput.insert(std::make_pair(node->getName() + "_functions.vhi", functions()));
 
     return pluginOutput;
 }
 
 std::string PrintITL::print() {
-    return (propertySuite() + functions());
+    return (macros() + operations()  + functions());
 }
 
 std::string PrintITL::functions() {
@@ -179,19 +179,16 @@ std::string PrintITL::printProperty(Property *property) {
         ss << ";\n";
     }
 
-    //TODO: create visitor for freeze variables ... does not work as it is :)
     if (!property->getFreezeSignals().empty()) {
         ss << "freeze:\n";
         for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
-            if(f->first->isCompoundType() || f->first->isArrayType()){
-                ss << "\t"  << f->first->getParentName() << "_" << f->first->getSubVarName();
-            }else{
-               ss <<  "\t" <<  f->first->getFullName("_");
-            }
+            ss <<  "\t" <<  f->first->getFullName("_");
             ss << "_at_" + f->second->getName();
-            //ss << "\t" << f->first->getFullName("_") + "_at_" + f->second->getName();
             ss << " = ";
-            ss << f->first->getFullName("_") << "@" << f->second->getName();
+            if(f->first->isSubVar() && f->first->getParentDataType()->isArrayType()){
+                ss << f->first->getFullName();
+            }else ss << f->first->getFullName("_");
+            ss << "@" << f->second->getName();
             if (std::next(f) != property->getFreezeSignals().end()) {
                 ss << ",\n";
             }
@@ -218,70 +215,6 @@ std::string PrintITL::printProperty(Property *property) {
     return ss.str();
 }
 
-std::string PrintITL::propertySuite() {
-
-/*    if (getOptionMap()["adjustmacros"]) {
-        return adjustmacros();
-    } else if (getOptionMap()["pipelined"]) {
-        return pipelined();
-    }*/
-
-    PropertySuite *ps = this->module->getPropertySuite();
-
-    std::stringstream ss;
-    std::string t_end;
-
-    ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
-    for (auto sync: ps->getSyncSignals()) {
-        ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := end macro;" << std::endl;
-    }
-    for (auto notify: ps->getNotifySignals()) {
-        ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := end macro;" << std::endl;
-    }
-    ss << std::endl << std::endl;
-
-    ss << "-- DP SIGNALS --" << std::endl;
-    for (auto dp: ps->getDpSignals()) {
-        ss << "macro " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
-        ss << " : " << convertDataType(dp->getDataType()->getName()) << " := end macro;" << std::endl;
-    }
-    ss << std::endl << std::endl;
-
-    ss << "-- CONSTRAINTS --" << std::endl;
-    // Reset constraint is print out extra because of the quotation marks ('0')
-    ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
-    for (auto co: ps->getConstraints()) {
-        if (co->getName() != "no_reset") {
-            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression()) << "; end constraint;" << std::endl;
-        }
-    }
-    ss << std::endl << std::endl;
-
-    ss << "-- VISIBLE REGISTERS --" << std::endl;
-    for (auto vr: ps->getVisibleRegisters()) {
-        if (!vr->isArrayType()) {
-            ss << "macro " << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
-        }
-    }
-    ss << std::endl << std::endl;
-
-    ss << "-- STATES --" << std::endl;
-    for (auto st: ps->getStates()) {
-        ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
-        ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
-    }
-    ss << std::endl << std::endl;
-
-
-}
-
 std::string PrintITL::macros() {
     PropertySuite *ps = this->module->getPropertySuite();
 
@@ -299,10 +232,8 @@ std::string PrintITL::macros() {
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()) {
-        ss << "macro " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
+        ss << "macro " ;
+        ss << dp->getFullName("_");
         ss << " : " << convertDataType(dp->getDataType()->getName()) << " := end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
@@ -319,12 +250,10 @@ std::string PrintITL::macros() {
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
-        if (!vr->isArrayType()) {
-            ss << "macro " << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
+        bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        if (!skip) {  //Dont print all the sub vars for an array
+            ss << "macro " << vr->getFullName("_");
+           ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
         }
     }
     ss << std::endl << std::endl;
@@ -352,7 +281,7 @@ std::string PrintITL::operations() {
     ss << "\t reset_sequence;\n";
     ss << "prove:\n";
     for (auto c : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\tat t: " << ConditionVisitor::toString(c->getStatement()) << ";\n";
+        ss << "\t at t: " << ConditionVisitor::toString(c->getStatement()) << ";\n";
     }
     ss << "end property;\n";
     ss << std::endl << std::endl;

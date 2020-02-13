@@ -10,7 +10,7 @@
 namespace SCAM {
 
     template<class T>
-    VariableTemplate<T>::VariableTemplate(std::string name, DataType *dataType, ConstValue *initialValue, VariableTemplate *parent) :
+    VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent) :
             subVar(parent != nullptr),
             parent(parent),
             initialValue(initialValue),

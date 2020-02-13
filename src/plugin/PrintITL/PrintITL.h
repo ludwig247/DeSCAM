@@ -36,8 +36,6 @@ private:
 
     std::string printProperty(Property* property);
 
-    std::string propertySuite();
-
     std::string macros();
     std::string operations();
 

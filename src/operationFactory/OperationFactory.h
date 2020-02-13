@@ -69,7 +69,6 @@ namespace SCAM {
         void optimizeAssignments();
         void optimizeOperations();
         void generatePropertySuite();
-        void printPropertySuite();
 
         int getOperationsCount();
     };
