@@ -19,7 +19,7 @@ add_executable(RISCV_elf_test sc_main_test.cpp)
 
 # link libraries
 target_link_libraries(RISCV_elf_test systemc)
-target_link_libraries(RISCV_elf_test scv)
+#target_link_libraries(RISCV_elf_test scv)
 target_link_libraries(RISCV_elf_test ${Boost_LIBRARIES} pthread)
 
 # add macros

@@ -20,9 +20,8 @@ namespace SCAM{
         static void addFunctions(const Module * module,PropertySuite * propertySuite);
         static void addReset(const Module *module, PropertySuite *propertySuite);
         static void addWait(const Module *module, PropertySuite *propertySuite);
-
-
         static void addOperations(const Module *module, PropertySuite *propertySuite);
+
         static void addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite);
 
     private:

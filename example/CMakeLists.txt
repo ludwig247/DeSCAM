@@ -10,6 +10,8 @@ add_subdirectory(Comm_Test_newInterfaces)
 add_subdirectory(Uart_aashild_v3)
 add_subdirectory(Interfaces)
 
+add_subdirectory(RISCV_Test_ELF)
+
 
 
 

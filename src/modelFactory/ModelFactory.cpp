@@ -355,13 +355,17 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
+        SCAM::OperationFactory operationFactory(opt.getCFG(), module);
+        PropertyFactory propertyFactory(module);
+        module->setPropertySuite(propertyFactory.getPropertySuite());
     } else {
         SCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
         module->setCFG(test.getCFG());
-
+        SCAM::OperationFactory operationFactory(test.getCFG(), module);
+        PropertyFactory propertyFactory(module);
+        module->setPropertySuite(propertyFactory.getPropertySuite());
     }
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
+
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module
