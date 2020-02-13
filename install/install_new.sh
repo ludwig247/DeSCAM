@@ -1,7 +1,7 @@
 #!/bin/bash
 #BINARY LOCATIONS
-SCAM_HOME="/import/lab/users/hesselberg/Simon_repo/DeSCAM/" #NO SLASH AT THE END
-CMAKE_BIN="cmake" #NO SLASH AT THE END
+SCAM_HOME="/import/lab/users/hesselberg/Simon_repo/DeSCAM" #NO SLASH AT THE END
+CMAKE_BIN="cmake3" #NO SLASH AT THE END
 PYTHON3="python3.6" #NO SLASH AT THE END
 
 #UNZIPPING FILES

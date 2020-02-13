@@ -21,6 +21,7 @@ get_directory_property(OPTION_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DE
 get_directory_property(OPTION_DESCRIPTIONS DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION OPTION_DESCRIPTIONS)
 get_directory_property(OPTIMIZE_OPTIONS DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION OPTIMIZE_OPTIONS)
 get_directory_property(OPTIMIZE_OPTIONS_DESCRIPTIONS DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION OPTIMIZE_OPTIONS_DESCRIPTIONS)
+
 # configure a header file to pass plugins and options of the CMake settings to the source code
 configure_file (
         "${PROJECT_SOURCE_DIR}/src/parser/CommandLineParametersConfig.h.in"

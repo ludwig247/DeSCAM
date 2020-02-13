@@ -1,0 +1,33 @@
+
+#ifndef PROJECT_EXAMPLEHEADERS_H
+#define PROJECT_EXAMPLEHEADERS_H
+
+
+#include <vector>
+#include <fstream>
+#include <sstream>
+
+//
+//for (tests_dir ${TEST_DIRECTORIES})
+//
+//
+//endforeach ()
+#include"@EXAMPLE_NAMES@"
+#define EXAMPLE_DESCRIPTIONS "@EXAMPLE_DESCRIPTIONS@"
+#define EXAMPLE_DIRECTORIES "@EXAMPLE_DIRECTORIES@"
+#define OPTION_NAMES "@OPTION_NAMES@"
+#define OPTION_DESCRIPTIONS "@OPTION_DESCRIPTIONS@"
+#define OPTIMIZE_OPTIONS "@OPTIMIZE_OPTIONS@"
+#define OPTIMIZE_OPTIONS_DESCRIPTIONS "@OPTIMIZE_OPTIONS_DESCRIPTIONS@"
+
+std::vector<std::string> split(const std::string &s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+#endif //PROJECT_EXAMPLEHEADERS_H
