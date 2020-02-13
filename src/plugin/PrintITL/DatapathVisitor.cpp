@@ -10,9 +10,6 @@ SCAM::DatapathVisitor::DatapathVisitor(std::string tp):
 
 }
 
-
-
-
 void SCAM::DatapathVisitor::visit(SCAM::SyncSignal &node) {
     PrintStmt::toString(&node);
     this->ss << node.getPort()->getName() << "_sync" << tp;

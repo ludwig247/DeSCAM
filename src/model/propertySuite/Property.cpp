@@ -89,6 +89,7 @@ namespace SCAM {
 
     void Property::addCommitment(TemporalExpr* commitment) {
         this->commitmentList.push_back(commitment);
+
     }
 
     const std::vector<SCAM::TemporalExpr*> &Property::getCommitmentList() const {

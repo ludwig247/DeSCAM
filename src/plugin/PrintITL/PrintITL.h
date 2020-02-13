@@ -29,7 +29,7 @@ public:
 private:
     //std::stringstream ss;
 
-    Model *model;
+    //Model *model;
 
     std::string functions();
 
