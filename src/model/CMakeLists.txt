@@ -20,11 +20,11 @@ set(AST_FILES
 add_library(Model SHARED ${AST_FILES})
 
 
-add_subdirectory(Stmts)
-add_subdirectory(Behavior)
 add_subdirectory(propertySuite)
+add_subdirectory(Behavior)
+add_subdirectory(Stmts)
 
-target_link_libraries(Model Behavior)
-target_link_libraries(Model Stmts)
-target_link_libraries(Model propertySuite)
+target_link_libraries(Model  propertySuite)
+target_link_libraries(Model  Behavior)
+target_link_libraries(Model  Stmts)
 #add_subdirectory(operationGraph)

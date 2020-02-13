@@ -9,6 +9,9 @@
 #include <sstream>
 #include "Model.h"
 #include "CommandLineParameter.h"
+#include "ConditionVisitor.h"
+#include "DatapathVisitor.h"
+#include "TimePointVisitor.h"
 
 class PrintITL : public PluginFactory {
 

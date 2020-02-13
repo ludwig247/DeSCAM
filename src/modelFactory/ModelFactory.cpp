@@ -20,6 +20,7 @@
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
 #include <z3.h>
+#include <PropertyFactory.h>
 
 
 //Constructor
@@ -347,21 +348,20 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
-    SCAM::State2::state_cnt = 0;
-    SCAM::Operation2::operations_cnt = 0;
+    SCAM::State::state_cnt = 0;
+    SCAM::Operation::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
     if (!optOptionsSet.empty()) {
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
-        SCAM::OperationFactory operationFactory(opt.getCFG(), module);
-        module->setPropertySuite(operationFactory.getPropertySuite());
     } else {
         SCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
         module->setCFG(test.getCFG());
-        SCAM::OperationFactory operationFactory(test.getCFG(), module);
-        module->setPropertySuite(operationFactory.getPropertySuite());
+
     }
+    PropertyFactory propertyFactory(module);
+    module->setPropertySuite(propertyFactory.getPropertySuite());
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module

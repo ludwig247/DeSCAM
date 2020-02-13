@@ -21,5 +21,6 @@ add_library (modelFactory SHARED
         FindFunctions.cpp
         FindGlobal.cpp FindGlobal.h FindStateName.cpp FindStateName.h)
 
+target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)
 target_link_libraries(modelFactory functionFactory)
