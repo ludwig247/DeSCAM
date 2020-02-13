@@ -2,17 +2,20 @@
 // Created by johannes on 13.08.19.
 //
 
-#include "PrintSynthesisScripts.h"
-#include "Utilities.h"
+#include <Optimizer/Optimizer.h>
+#include "SynthesisScripts.h"
+#include "../HLS/Utilities.h"
 
-PrintSynthesisScripts::PrintSynthesisScripts(OptimizeForHLS* opt) :
+using namespace SCAM::HLSPlugin::Script;
+
+SynthesisScripts::SynthesisScripts(std::shared_ptr<HLS::Optimizer> optimizer) :
     propertySuite(nullptr),
     currentModule(nullptr),
-    opt(opt)
+    optimizer(std::move(optimizer))
 {
 }
 
-std::map<std::string, std::string> PrintSynthesisScripts::printModel(Model *node) {
+std::map<std::string, std::string> SynthesisScripts::printModel(Model *node) {
     for (auto &module: node->getModules()) {
         this->currentModule = module.second;
         this->propertySuite = module.second->getPropertySuite();
@@ -25,7 +28,7 @@ std::map<std::string, std::string> PrintSynthesisScripts::printModel(Model *node
 }
 
 
-std::string PrintSynthesisScripts::synthesisScript() {
+std::string SynthesisScripts::synthesisScript() {
     std::stringstream ss;
     ss << "# Create project\n";
     ss << "open_project -reset synthesis\n\n";
@@ -48,7 +51,7 @@ std::string PrintSynthesisScripts::synthesisScript() {
     return ss.str();
 }
 
-std::string PrintSynthesisScripts::directivesScript() {
+std::string SynthesisScripts::directivesScript() {
     std::stringstream ss;
 
     ss << "config_rtl -reset all -reset_async -reset_level high\n";
@@ -61,7 +64,7 @@ std::string PrintSynthesisScripts::directivesScript() {
     return ss.str();
 }
 
-std::string PrintSynthesisScripts::setDirectiveInterface() {
+std::string SynthesisScripts::setDirectiveInterface() {
     std::stringstream ss;
     ss << "set_directive_interface -mode ap_ctrl_none operations\n";
     for (auto &port : currentModule->getPorts()) {
@@ -72,13 +75,13 @@ std::string PrintSynthesisScripts::setDirectiveInterface() {
     for (auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "set_directive_interface -mode ap_none operations " << notifySignal->getName() << "\n";
     }
-    for (auto &internalRegisterOut : Utilities::getParents(opt->getInternalRegisterOut())) {
+    for (auto &internalRegisterOut : HLS::Utilities::getParents(optimizer->getInternalRegisterOut())) {
         ss << "set_directive_interface -mode ap_none operations out_" << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
 }
 
-std::string PrintSynthesisScripts::setDirectiveAllocation() {
+std::string SynthesisScripts::setDirectiveAllocation() {
     std::stringstream ss;
     for (auto &function : currentModule->getFunctionMap()) {
         ss << "set_directive_allocation -limit 1 -type function operations " << function.second->getName() << "\n";

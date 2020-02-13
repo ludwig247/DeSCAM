@@ -5,16 +5,15 @@
 #ifndef SCAM_VHDLPRINTRESETNOTIFY_H
 #define SCAM_VHDLPRINTRESETNOTIFY_H
 
-#include "VHDLPrintVisitor.h"
-#include "VHDLPrintVisitorHLS.h"
+#include "PrintStatement.h"
 #include <PrintStmt.h>
 
-namespace SCAM {
+namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-    class VHDLPrintResetNotify : VHDLPrintVisitor {
+    class PrintResetNotify : PrintStatement {
 
     public:
-        explicit VHDLPrintResetNotify(SCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintResetNotify(SCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
@@ -28,10 +27,10 @@ namespace SCAM {
         void visit(BoolValue &node) override ;
     };
 
-    class VHDLPrintResetValue : VHDLPrintVisitor{
+    class PrintResetSignal : PrintStatement{
 
     public:
-        VHDLPrintResetValue(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        PrintResetSignal(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         bool toString();
 
@@ -51,6 +50,6 @@ namespace SCAM {
         std::string resetSignal;
         bool signalFound;
     };
-}
+}}}
 
 #endif //SCAM_VHDLPRINTRESETNOTIFY_H

@@ -2,8 +2,8 @@
 // Created by pmorku on 7/29/18.
 //
 
-#ifndef PROJECT_OTHERUTILS_H
-#define PROJECT_OTHERUTILS_H
+#ifndef PROJECT_Utilities_H
+#define PROJECT_Utilities_H
 
 #include <set>
 #include <string>
@@ -11,7 +11,7 @@
 #include "DataSignal.h"
 #include "DataType.h"
 
-namespace HLSPlugin { namespace VHDLWrapper{
+namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper{
 
     enum class Side {
         UNKNOWN,
@@ -28,7 +28,7 @@ namespace HLSPlugin { namespace VHDLWrapper{
         UNKNOWN, BITWISE_AND, BITWISE_OR, BITWISE_XOR, LEFT_SHIFT, RIGHT_SHIFT
     };
 
-    class OtherUtils {
+    class Utilities {
     public:
         static bool isPowerOfTwo(long int n);
 
@@ -49,7 +49,7 @@ namespace HLSPlugin { namespace VHDLWrapper{
     };
 
         template<typename Key, typename Value>
-        std::map<Key *, Value *> OtherUtils::getSubVarMap(const std::map<Key *, Value *> map) {
+        std::map<Key *, Value *> Utilities::getSubVarMap(const std::map<Key *, Value *> map) {
             std::vector<Key* > keys;
             for (const auto& var : map) {
                 if (var.first->isCompoundType()) {
@@ -78,7 +78,7 @@ namespace HLSPlugin { namespace VHDLWrapper{
         }
 
         template<typename T>
-        std::set<T *> OtherUtils::getSubVars(const std::set<T *> &vars) {
+        std::set<T *> Utilities::getSubVars(const std::set<T *> &vars) {
             std::set<T *> subVarSet;
             for (const auto& var : vars) {
                 if (var->isCompoundType()) {
@@ -93,7 +93,7 @@ namespace HLSPlugin { namespace VHDLWrapper{
         }
 
         template <typename T>
-        std::set<T *> OtherUtils::getParents(const std::set<T *> &subVars) {
+        std::set<T *> Utilities::getParents(const std::set<T *> &subVars) {
             std::set<T *> parents;
             for (const auto& var : subVars) {
                 if (var->isSubVar()) {
@@ -109,6 +109,6 @@ namespace HLSPlugin { namespace VHDLWrapper{
             return parents;
         }
 
-} }
+} } }
 
-#endif //PROJECT_OTHERUTILS_H
+#endif //PROJECT_Utilities_H

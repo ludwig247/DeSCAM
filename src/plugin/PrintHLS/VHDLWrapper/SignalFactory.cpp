@@ -6,6 +6,8 @@
 
 #include "SignalFactory.h"
 
+using namespace SCAM::HLSPlugin::VHDLWrapper;
+
 const std::set<std::tuple<std::string, std::string, std::string>> HANDSHAKING_PROTOCOL_SIGNALS = {
         {"start", "bool", "in"},
         {"done", "bool", "out"},
@@ -18,7 +20,7 @@ const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNAL
         {"rst", "bool", "in"}
 };
 
-SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, HLSmodule* hlsModule) :
+SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, OperationModuleInterface* hlsModule) :
     propertySuite(propertySuite),
     module(module),
     hlsModule(hlsModule)

@@ -6,14 +6,13 @@
 #include "HLS.h"
 #include "Utilities.h"
 
-using namespace HLSPlugin::HLSModel;
+using namespace SCAM::HLSPlugin::HLS;
 
 HLS::HLS()
         :
         ss(""),
         propertySuite(nullptr),
         currentModule(nullptr),
-        synthesisScript(nullptr),
         opt(nullptr)
 {
 }
@@ -23,7 +22,7 @@ std::map<std::string, std::string> HLS::printModel(Model* model)
     for (auto& module: model->getModules()) {
         this->currentModule = module.second;
         this->propertySuite = module.second->getPropertySuite();
-        opt = std::make_unique<OptimizeForHLS>(propertySuite, currentModule);
+        opt = std::make_unique<Optimizer>(propertySuite, currentModule);
 
         dataTypes(model);
         pluginOutput.insert(std::make_pair("Data_Types.h", ss.str()));
@@ -36,11 +35,6 @@ std::map<std::string, std::string> HLS::printModel(Model* model)
         operations();
         pluginOutput.insert(std::make_pair(module.first+".cpp", ss.str()));
     }
-
-    synthesisScript = std::make_unique<PrintSynthesisScripts>(opt.get());
-    auto scripts = synthesisScript->printModel(model);
-    pluginOutput.insert(scripts.begin(), scripts.end());
-
     return pluginOutput;
 }
 
@@ -67,7 +61,7 @@ void HLS::operations()
             if (*(commitment->getRhs())==*(commitment->getLhs())) {
                 continue;
             }
-            ss << PrintFunctionStatements::toString(commitment, opt.get(), 2, 2);
+            ss << PrintStatement::toString(commitment, opt.get(), 2, 2);
         }
         for (auto notifySignal : propertySuite->getNotifySignals()) {
             switch (operationProperty->getTiming(notifySignal->getPort())) {
@@ -379,7 +373,7 @@ void HLS::visit(Function& node)
                 for (auto condition = returnValue.second.begin();
                      condition!=returnValue.second.end();
                      ++condition) {
-                    ss << PrintFunctionStatements::toString(*condition);
+                    ss << PrintStatement::toString(*condition);
                     if (std::next(condition)!=returnValue.second.end()) {
                         ss << ") && (";
                     }
@@ -390,7 +384,7 @@ void HLS::visit(Function& node)
         if (node.getReturnValueConditionList().size()>1 && numberOfBranches==1) {
             ss << "else {\n";
         }
-        ss << PrintFunctionStatements::toString(returnValue.first, 2, 2) << ";";
+        ss << PrintStatement::toString(returnValue.first, 2, 2) << ";";
         if (node.getReturnValueConditionList().size()>1) {
             ss << "\n\t} ";
         }

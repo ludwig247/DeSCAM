@@ -6,12 +6,10 @@
 #include "VHDLPrintVisitor.h"
 #include "NodePeekVisitor.h"
 #include "OtherUtils.h"
-#include "BitSlicingVHDL.h"
 
 #define USE_ADDER_FOR_2xVAR 1
 
 using namespace SCAM;
-using namespace SCAM::VHDL;
 
 VHDLPrintVisitor::VHDLPrintVisitor(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->createString(stmt, indentSize, indentOffset);
@@ -154,46 +152,41 @@ void VHDLPrintVisitor::visit(Bitwise &node) {
     bool tempUseParentheses = useParenthesesFlag;
     useParenthesesFlag = true;
 
-    auto bitSlicing = std::make_unique<BitSlicingVHDL>(&node);
-    if (bitSlicing->isSlicingOp()) {
-        this->ss << bitSlicing->getOpAsString();
-    } else {
-        if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
-            if (node.getOperation() == "<<")
-                this->ss << "shift_left(";
-            else if (node.getOperation() == ">>")
-                this->ss << "shift_right(";
-            useParenthesesFlag = false;
-            node.getLhs()->accept(*this);
-            NodePeekVisitor nodePeek(node.getRhs());
-            this->ss << ", ";
-            if (nodePeek.nodePeekIntegerValue()) {
-                this->ss << nodePeek.nodePeekIntegerValue()->getValue();
-            } else if (nodePeek.nodePeekUnsignedValue()) {
-                this->ss << nodePeek.nodePeekUnsignedValue()->getValue();
-            } else {
-                useParenthesesFlag = false;
-                bool tempUseHexFlag = useHexFlag;
-                useHexFlag = false;
-                this->ss << "to_integer(";
-                node.getRhs()->accept(*this);
-                this->ss << ")";
-                useHexFlag = tempUseHexFlag;
-            }
-            this->ss << ")";
+    if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
+        if (node.getOperation() == "<<")
+            this->ss << "shift_left(";
+        else if (node.getOperation() == ">>")
+            this->ss << "shift_right(";
+        useParenthesesFlag = false;
+        node.getLhs()->accept(*this);
+        NodePeekVisitor nodePeek(node.getRhs());
+        this->ss << ", ";
+        if (nodePeek.nodePeekIntegerValue()) {
+            this->ss << nodePeek.nodePeekIntegerValue()->getValue();
+        } else if (nodePeek.nodePeekUnsignedValue()) {
+            this->ss << nodePeek.nodePeekUnsignedValue()->getValue();
         } else {
-            if (tempUseParentheses) this->ss << "(";
-            node.getLhs()->accept(*this);
-            if (node.getOperation() == "&") {
-                this->ss << " and ";
-            } else if (node.getOperation() == "|") {
-                this->ss << " or ";
-            } else if (node.getOperation() == "^") {
-                this->ss << " xor ";
-            } else throw std::runtime_error("Should not get here");
+            useParenthesesFlag = false;
+            bool tempUseHexFlag = useHexFlag;
+            useHexFlag = false;
+            this->ss << "to_integer(";
             node.getRhs()->accept(*this);
-            if (tempUseParentheses) this->ss << ")";
+            this->ss << ")";
+            useHexFlag = tempUseHexFlag;
         }
+        this->ss << ")";
+    } else {
+        if (tempUseParentheses) this->ss << "(";
+        node.getLhs()->accept(*this);
+        if (node.getOperation() == "&") {
+            this->ss << " and ";
+        } else if (node.getOperation() == "|") {
+            this->ss << " or ";
+        } else if (node.getOperation() == "^") {
+            this->ss << " xor ";
+        } else throw std::runtime_error("Should not get here");
+        node.getRhs()->accept(*this);
+        if (tempUseParentheses) this->ss << ")";
     }
 }
 

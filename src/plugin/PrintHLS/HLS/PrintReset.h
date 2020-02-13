@@ -2,19 +2,18 @@
 // Created by johannes on 31.01.20.
 //
 
-#ifndef DESCAM_PRINTRESETVALUES_H
-#define DESCAM_PRINTRESETVALUES_H
+#ifndef DESCAM_PRINTRESET_H
+#define DESCAM_PRINTRESET_H
 
-#include <PrintStmt.h>
+#include "PrintStatement.h"
+#include "PrintStmt.h"
 
-#include "PrintFunctionStatements.h"
+namespace SCAM { namespace HLSPlugin { namespace HLS {
 
-namespace SCAM {
-
-    class PrintResetValues : PrintStmt {
+    class PrintReset : PrintStmt {
 
     public:
-        PrintResetValues(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        PrintReset(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         bool toString();
 
@@ -33,6 +32,7 @@ namespace SCAM {
         std::string resetSignal;
         bool signalFound;
     };
-}
 
-#endif //DESCAM_PRINTRESETVALUES_H
+}}}
+
+#endif //DESCAM_PRINTRESET_H

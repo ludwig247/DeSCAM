@@ -1,9 +1,8 @@
 add_library(HLS
-        HLS.cpp
-            BitSlicingHLS.cpp
-            OptimizeForHLS.cpp
+            HLS.cpp
+            PrintBitOperations.cpp
+            Optimizer.cpp
             PrintArrayStatements.cpp
-            PrintFunctionStatements.cpp
-            PrintResetValues.cpp
-            PrintSynthesisScripts.cpp
+        PrintStatement.cpp
+            PrintReset.cpp
             Utilities.cpp)

@@ -2,23 +2,23 @@
 // Created by johannes on 28.07.19.
 //
 
-#ifndef SCAM_PRINTTESTVISITORS_H
-#define SCAM_PRINTTESTVISITORS_H
+#ifndef SCAM_PRINTCOMMITMENTSHLS_H
+#define SCAM_PRINTCOMMITMENTSHLS_H
 
 #include "PrintStmt.h"
 #include "Utilities.h"
-#include "OptimizeForHLS.h"
-#include "BitSlicingHLS.h"
+#include "Optimizer.h"
+#include "PrintBitOperations.h"
 
-namespace SCAM {
+namespace SCAM { namespace HLSPlugin { namespace HLS {
 
-    class PrintFunctionStatements : public PrintStmt {
+    class PrintStatement : public PrintStmt {
 
     public:
-        explicit PrintFunctionStatements(SCAM::Stmt *stmt, OptimizeForHLS *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintStatement(SCAM::Stmt *stmt, Optimizer *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
-        static std::string toString(Stmt *stmt, OptimizeForHLS *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        static std::string toString(Stmt *stmt, Optimizer *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         std::string getString();
 
@@ -39,12 +39,12 @@ namespace SCAM {
         void visit(ArrayOperand &node) override;
 
     private:
-        OptimizeForHLS *opt;
+        Optimizer *opt;
         Side side;
 
         void printIndent();
     };
 
-}
+}}}
 
-#endif //SCAM_PRINTTESTVISITORS_H
+#endif //SCAM_PRINTCOMMITMENTSHLS_H

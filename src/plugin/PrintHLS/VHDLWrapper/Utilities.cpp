@@ -1,18 +1,24 @@
-//
-// Created by johannes on 29.11.19.
-//
-
 #include "Utilities.h"
+#include <assert.h>
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-std::string Utilities::convertDataType(const std::string& type) {
-    if (type == "int") {
-        return "ap_int<32>";
-    } else if (type == "unsigned") {
-        return "ap_uint<32>";
-    } else {
-        return type;
+bool Utilities::isPowerOfTwo(long int n) {
+    if ((n < 1) || (n & n - 1))
+        return false;
+    return true;
+}
+
+int Utilities::bitPosition(long int n) {
+    assert(isPowerOfTwo(n) == true);
+    int count = 0;
+    while (n > 0) {
+        if (n & 1)
+            return count;
+        else {
+            count++;
+            n >>= 1;
+        }
     }
 }
 

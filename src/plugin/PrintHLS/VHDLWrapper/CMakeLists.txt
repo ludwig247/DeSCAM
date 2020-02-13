@@ -1,9 +1,9 @@
 add_library(VHDLWrapper
             VHDLWrapper.cpp
-            OtherUtils.cpp
-            VHDLPrintVisitor.cpp
-            VHDLPrintReset.cpp
-            BitSlicingVHDL.cpp
-            HLSmodule.cpp
+            Utilities.cpp
+        PrintStatement.cpp
+            PrintReset.cpp
+            PrintBitOperations.cpp
+            OperationModuleInterface.cpp
             SignalFactory.cpp)
 

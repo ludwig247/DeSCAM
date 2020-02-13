@@ -2,29 +2,29 @@
 // Created by johannes on 12.08.19.
 //
 
-#include "BitSlicingHLS.h"
+#include "PrintBitOperations.h"
 
 #include <set>
 
 #include "NodePeekVisitor.h"
 
-using namespace SCAM;
+using namespace SCAM::HLSPlugin::HLS;
 
-BitSlicingHLS::BitSlicingHLS(Stmt *stmt)
+PrintBitOperations::PrintBitOperations(Stmt *stmt)
 {
     actualNode = std::make_shared<Node>();
     stmt->accept(*this);
 }
 
-bool BitSlicingHLS::isSlicingOp() {
+bool PrintBitOperations::isSlicingOp() {
     return slicing(actualNode.get());
 }
 
-std::string BitSlicingHLS::getOpAsString() {
+std::string PrintBitOperations::getOpAsString() {
     return getString(actualNode.get());
 }
 
-void BitSlicingHLS::visit(Arithmetic &node) {
+void PrintBitOperations::visit(Arithmetic &node) {
     actualNode->type = StmtType::ARITHMETIC;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -36,7 +36,7 @@ void BitSlicingHLS::visit(Arithmetic &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(Relational &node) {
+void PrintBitOperations::visit(Relational &node) {
     actualNode->type = StmtType::RELATIONAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -48,7 +48,7 @@ void BitSlicingHLS::visit(Relational &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(UnaryExpr &node) {
+void PrintBitOperations::visit(UnaryExpr &node) {
     actualNode->type = StmtType::UNARY_EXPR;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -57,12 +57,12 @@ void BitSlicingHLS::visit(UnaryExpr &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(Assignment &node) {
+void PrintBitOperations::visit(Assignment &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void BitSlicingHLS::visit(Bitwise &node) {
+void PrintBitOperations::visit(Bitwise &node) {
     actualNode->type = StmtType::BITWISE;
     actualNode->subType = Utilities::getSubTypeBitwise(node.getOperation());
     auto tmpNode = actualNode;
@@ -79,7 +79,7 @@ void BitSlicingHLS::visit(Bitwise &node) {
 //    }
 }
 
-void BitSlicingHLS::visit(ArrayOperand &node) {
+void PrintBitOperations::visit(ArrayOperand &node) {
     actualNode->type = StmtType::ARRAY_OPERAND;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -88,12 +88,12 @@ void BitSlicingHLS::visit(ArrayOperand &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(ParamOperand &node) {
+void PrintBitOperations::visit(ParamOperand &node) {
     actualNode->type = StmtType::PARAM_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-void BitSlicingHLS::visit(Logical &node) {
+void PrintBitOperations::visit(Logical &node) {
     actualNode->type = StmtType::LOGICAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -105,17 +105,17 @@ void BitSlicingHLS::visit(Logical &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingHLS::visit(UnsignedValue &node) {
+void PrintBitOperations::visit(UnsignedValue &node) {
     actualNode->type = StmtType::UNSIGNED_VALUE;
     actualNode->value = node.getValue();
 }
 
-void BitSlicingHLS::visit(IntegerValue &node) {
+void PrintBitOperations::visit(IntegerValue &node) {
     actualNode->type = StmtType::INTEGER_VALUE;
     actualNode->value = node.getValue();
 }
 
-void BitSlicingHLS::visit(DataSignalOperand &node) {
+void PrintBitOperations::visit(DataSignalOperand &node) {
     actualNode->type = StmtType::DATA_SIGNAL_OPERAND;
     std::string name = node.getDataSignal()->getPort()->getName() + "_sig";
     if (node.getDataSignal()->isSubVar()) {
@@ -128,20 +128,20 @@ void BitSlicingHLS::visit(DataSignalOperand &node) {
     actualNode->name = name;
 }
 
-void BitSlicingHLS::visit(VariableOperand &node) {
+void PrintBitOperations::visit(VariableOperand &node) {
     actualNode->type = StmtType::VARIABLE_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-bool BitSlicingHLS::slicing(Node *node) {
+bool PrintBitOperations::slicing(Node *node) {
     return sliceWithShift(node) || sliceWithoutShift(node) || shiftWithConstant(node);
 }
 
-uint32_t BitSlicingHLS::getRangeAsValue() {
+uint32_t PrintBitOperations::getRangeAsValue() {
     return rangeValue;
 }
 
-bool BitSlicingHLS::sliceWithShift(Node *node) {
+bool PrintBitOperations::sliceWithShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {
@@ -176,7 +176,7 @@ bool BitSlicingHLS::sliceWithShift(Node *node) {
     return true;
 }
 
-bool BitSlicingHLS::sliceWithoutShift(Node *node) {
+bool PrintBitOperations::sliceWithoutShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         std::set<StmtType > types;
         for (auto &child : node->child) {
@@ -208,7 +208,7 @@ bool BitSlicingHLS::sliceWithoutShift(Node *node) {
     return true;
 }
 
-bool BitSlicingHLS::shiftWithConstant(Node *node) {
+bool PrintBitOperations::shiftWithConstant(Node *node) {
     if (node->type == StmtType::BITWISE) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
             std::set<StmtType > types;
@@ -240,7 +240,7 @@ bool BitSlicingHLS::shiftWithConstant(Node *node) {
     return true;
 }
 
-std::string BitSlicingHLS::getString(Node *node) {
+std::string PrintBitOperations::getString(Node *node) {
     std::stringstream ss;
 
     int offset = 0;
@@ -298,7 +298,7 @@ std::string BitSlicingHLS::getString(Node *node) {
     return ss.str();
 }
 
-bool BitSlicingHLS::getRange(uint32_t number, uint32_t &firstBit, uint32_t &lastBit) {
+bool PrintBitOperations::getRange(uint32_t number, uint32_t &firstBit, uint32_t &lastBit) {
     firstBit = -1;
     lastBit = -1;
     bool firstBitSet = false;
@@ -350,7 +350,7 @@ bool BitConcatenation::evaluateOps(Bitwise* node) {
 
     bool bitConcatenation = true;
     if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
-        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node->getRhs());
+        auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs());
         if (!bitSlicingRHS->isSlicingOp()) {
             bitConcatenation = evaluateOps(dynamic_cast<Bitwise* >(node->getRhs()));
         }
@@ -358,7 +358,7 @@ bool BitConcatenation::evaluateOps(Bitwise* node) {
         return false;
     }
     if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
-        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node->getLhs());
+        auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs());
         if (!bitSlicingLHS->isSlicingOp()) {
             bitConcatenation &= evaluateOps(dynamic_cast<Bitwise* >(node->getLhs()));
         }
@@ -385,7 +385,7 @@ bool BitConcatenation::isConstValue(Expr *node) {
 
 void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
     if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
-        auto bitSlicingRHS = std::make_unique<BitSlicingHLS>(node->getRhs());
+        auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs());
         if (!bitSlicingRHS->isSlicingOp()) {
             getBitConcatenationOp(dynamic_cast<Bitwise * >(node->getRhs()));
         } else {
@@ -395,7 +395,7 @@ void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
         constValue = constValue | getConstValue(node->getRhs());
     }
     if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
-        auto bitSlicingLHS = std::make_unique<BitSlicingHLS>(node->getLhs());
+        auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs());
         if (!bitSlicingLHS->isSlicingOp()) {
             getBitConcatenationOp(dynamic_cast<Bitwise* >(node->getLhs()));
         } else {
@@ -423,8 +423,8 @@ void BitConcatenation::setOpAsString() {
     uint32_t i = 32;
     uint32_t value = 0;
     uint32_t bitCounter = 0;
-    BitSlicingHLS* slicingOp = nullptr;
-    BitSlicingHLS* lastSlicingOp = nullptr;
+    PrintBitOperations* slicingOp = nullptr;
+    PrintBitOperations* lastSlicingOp = nullptr;
     do {
         i--;
         slicingOp = nullptr;

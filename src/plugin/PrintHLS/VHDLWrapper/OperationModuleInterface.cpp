@@ -4,13 +4,14 @@
 
 #include <algorithm>
 
-#include <ExprVisitor.h>
-
+#include "ExprVisitor.h"
+#include "OperationModuleInterface.h"
 #include "NodePeekVisitor.h"
-#include "HLSmodule.h"
-#include "OtherUtils.h"
+#include "Utilities.h"
 
-HLSmodule::HLSmodule(PropertySuite *propertySuite, Module* module) :
+using namespace SCAM::HLSPlugin::VHDLWrapper;
+
+OperationModuleInterface::OperationModuleInterface(PropertySuite *propertySuite, Module* module) :
         propertySuite(propertySuite),
         module(module),
         registerToOutputMap()
@@ -21,14 +22,14 @@ HLSmodule::HLSmodule(PropertySuite *propertySuite, Module* module) :
     arraySlicing();
 }
 
-bool HLSmodule::hasOutputReg(DataSignal* dataSignal) const {
-    const auto& subVarMap = VHDL::OtherUtils::getSubVarMap(outputToRegisterMap);
+bool OperationModuleInterface::hasOutputReg(DataSignal* dataSignal) const {
+    const auto& subVarMap = Utilities::getSubVarMap(outputToRegisterMap);
     return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
             subVarMap.find(dataSignal) != subVarMap.end());
 }
 
-Variable* HLSmodule::getCorrespondingRegister(DataSignal* dataSignal) const {
-    const auto& subVarMap = VHDL::OtherUtils::getSubVarMap(outputToRegisterMap);
+Variable* OperationModuleInterface::getCorrespondingRegister(DataSignal* dataSignal) const {
+    const auto& subVarMap = Utilities::getSubVarMap(outputToRegisterMap);
     if (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end()) {
         return outputToRegisterMap.at(dataSignal);
     } else {
@@ -36,15 +37,15 @@ Variable* HLSmodule::getCorrespondingRegister(DataSignal* dataSignal) const {
     }
 }
 
-bool HLSmodule::isModuleSignal(DataSignal *dataSignal) const {
+bool OperationModuleInterface::isModuleSignal(DataSignal *dataSignal) const {
     return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
 }
 
-std::vector<DataSignal *> HLSmodule::getCorrespondingTopSignals(DataSignal *dataSignal) const {
+std::vector<DataSignal *> OperationModuleInterface::getCorrespondingTopSignals(DataSignal *dataSignal) const {
     return moduleToTopSignalMap.at(dataSignal);
 }
 
-bool HLSmodule::isArrayPort(DataSignal *dataSignal) const {
+bool OperationModuleInterface::isArrayPort(DataSignal *dataSignal) const {
     for (const auto& arrayPort : arrayPorts) {
         if (dataSignal->getName() == arrayPort.first->getDataSignal()->getName()) {
             return true;
@@ -53,7 +54,7 @@ bool HLSmodule::isArrayPort(DataSignal *dataSignal) const {
     return false;
 }
 
-void HLSmodule::removeRedundantConditions()
+void OperationModuleInterface::removeRedundantConditions()
 {
     for (auto &function : module->getFunctionMap()) {
 //        std::cout << "------ FUNCTION " << function.second->getName() << " --------" << std::endl;
@@ -116,7 +117,7 @@ void HLSmodule::removeRedundantConditions()
     }
 }
 
-void HLSmodule::mapOutputRegistersToOutput() {
+void OperationModuleInterface::mapOutputRegistersToOutput() {
 
     auto getAllOutputs = [this]() -> std::set<DataSignal *> {
         std::set<DataSignal*> outputSet;
@@ -216,7 +217,7 @@ void HLSmodule::mapOutputRegistersToOutput() {
     }
 }
 
-std::multimap<Variable*, DataSignal*> HLSmodule::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
+std::multimap<Variable*, DataSignal*> OperationModuleInterface::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
     std::multimap<Variable*, DataSignal*> parentMap;
     std::set<std::pair<Variable*, DataSignal*>> uniquePairs;
     for (const auto& var : multimap) {
@@ -235,7 +236,7 @@ std::multimap<Variable*, DataSignal*> HLSmodule::getParentMap(const std::multima
     return parentMap;
 }
 
-std::set<DataSignal *> HLSmodule::getOutputs() {
+std::set<DataSignal *> OperationModuleInterface::getOutputs() {
     std::set<DataSignal *> outputSet;
     for (const auto& property : propertySuite->getOperationProperties()) {
         for (const auto& commitment : property->getCommitmentList()) {
@@ -246,7 +247,7 @@ std::set<DataSignal *> HLSmodule::getOutputs() {
             outputSet.insert(outputs.begin(), outputs.end());
         }
     }
-    outputSet = VHDL::OtherUtils::getParents(outputSet);
+    outputSet = Utilities::getParents(outputSet);
     for (const auto& moduleSignal : moduleToTopSignalMap) {
         outputSet.insert(moduleSignal.first);
         for (const auto& topSignal : moduleSignal.second) {
@@ -259,7 +260,7 @@ std::set<DataSignal *> HLSmodule::getOutputs() {
     return outputSet;
 }
 
-std::set<DataSignal *> HLSmodule::getInputs() {
+std::set<DataSignal *> OperationModuleInterface::getInputs() {
     std::set<DataSignal *> inputSet;
     for (const auto& property : propertySuite->getOperationProperties()) {
         for (const auto& commitment : property->getCommitmentList()) {
@@ -287,12 +288,12 @@ std::set<DataSignal *> HLSmodule::getInputs() {
     return inputSet;
 }
 
-bool HLSmodule::isConstant(Variable *variable) {
+bool OperationModuleInterface::isConstant(Variable *variable) {
     auto internalRegister = getInternalRegisterOut();
     return !(internalRegister.find(variable) != internalRegister.end());
 }
 
-std::set<Variable *> HLSmodule::getVariables() {
+std::set<Variable *> OperationModuleInterface::getVariables() {
     std::set<Variable* > variableSet;
     for (const auto &var : module->getVariableMap()) {
         if (var.second->isCompoundType()) {
@@ -330,7 +331,7 @@ std::set<Variable *> HLSmodule::getVariables() {
     return variableSet;
 }
 
-DataSignal* HLSmodule::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
+DataSignal* OperationModuleInterface::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
 
     std::string combinedName = dataSignal.front()->getFullName();
     for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
@@ -373,7 +374,7 @@ DataSignal* HLSmodule::getCombinedDataSignal(const std::vector<DataSignal*> &dat
     return combinedDataSignal;
 }
 
-void HLSmodule::mapInputRegistersToInputs() {
+void OperationModuleInterface::mapInputRegistersToInputs() {
     std::set<DataSignal* > inputs;
     for (const auto& property : propertySuite->getOperationProperties()) {
         std::cout << "Property " << property->getName() << ": " << std::endl;
@@ -462,7 +463,7 @@ void HLSmodule::mapInputRegistersToInputs() {
     }
 }
 
-std::set<Variable *> HLSmodule::getInternalRegisterIn() {
+std::set<Variable *> OperationModuleInterface::getInternalRegisterIn() {
     std::set<Variable *> vars;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
@@ -477,7 +478,7 @@ std::set<Variable *> HLSmodule::getInternalRegisterIn() {
     for (const auto& outputRegister : registerToOutputMap) {
         outputRegisters.insert(outputRegister.first);
     }
-    for (const auto& outputRegister : VHDL::OtherUtils::getSubVars(outputRegisters)) {
+    for (const auto& outputRegister : Utilities::getSubVars(outputRegisters)) {
         const auto it = vars.find(outputRegister);
         if (it != vars.end()) {
             vars.erase(it);
@@ -486,7 +487,7 @@ std::set<Variable *> HLSmodule::getInternalRegisterIn() {
     return vars;
 }
 
-std::set<Variable *> HLSmodule::getInternalRegisterOut() {
+std::set<Variable *> OperationModuleInterface::getInternalRegisterOut() {
     std::set<Variable *> vars;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
@@ -501,7 +502,7 @@ std::set<Variable *> HLSmodule::getInternalRegisterOut() {
     for (const auto& outputRegister : registerToOutputMap) {
         outputRegisters.insert(outputRegister.first);
     }
-    for (const auto& outputRegister : VHDL::OtherUtils::getSubVars(outputRegisters)) {
+    for (const auto& outputRegister : Utilities::getSubVars(outputRegisters)) {
         const auto it = vars.find(outputRegister);
         if (it != vars.end()) {
             vars.erase(it);
@@ -510,15 +511,15 @@ std::set<Variable *> HLSmodule::getInternalRegisterOut() {
     return vars;
 }
 
-std::set<Variable*> HLSmodule::getOutputRegister() {
+std::set<Variable*> OperationModuleInterface::getOutputRegister() {
     std::set<Variable *> outputRegister;
     for (const auto& reg : registerToOutputMap) {
         outputRegister.insert(reg.first);
     }
-    return VHDL::OtherUtils::getParents(outputRegister);
+    return Utilities::getParents(outputRegister);
 }
 
-std::set<Port *> HLSmodule::setArrayPorts() {
+std::set<Port *> OperationModuleInterface::setArrayPorts() {
     std::set<Port *> ports;
     for (const auto &port : module->getPorts()) {
         if (port.second->isArrayType()) {
@@ -528,7 +529,7 @@ std::set<Port *> HLSmodule::setArrayPorts() {
     return ports;
 }
 
-void HLSmodule::arraySlicing() {
+void OperationModuleInterface::arraySlicing() {
     const auto ports = setArrayPorts();
 
     for (const auto &port : ports) {

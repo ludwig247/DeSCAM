@@ -1,34 +1,49 @@
 //
-// Created by johannes on 28.11.19.
+// Created by johannes on 27.10.19.
 //
 
 #include <algorithm>
 
-#include <ExprVisitor.h>
-
+#include "ExprVisitor.h"
 #include "NodePeekVisitor.h"
-#include "HLSmodule.h"
-#include "OtherUtils.h"
+#include "Optimizer.h"
+#include "PrintArrayStatements.h"
 
-HLSmodule::HLSmodule(PropertySuite *propertySuite, Module* module) :
-        propertySuite(propertySuite),
-        module(module),
-        registerToOutputMap()
+using namespace SCAM::HLSPlugin::HLS;
+
+Optimizer::Optimizer(PropertySuite *propertySuite, Module* module) :
+    propertySuite(propertySuite),
+    module(module),
+    registerToOutputMap(),
+    outputToRegisterMap()
 {
+    // Save original commitment list
+    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
+        originalCommitmentLists.push(operationProperty->getCommitmentList());
+    }
+
     removeRedundantConditions();
     mapOutputRegistersToOutput();
-    mapInputRegistersToInputs();
+    replaceVariables();
     arraySlicing();
 }
 
-bool HLSmodule::hasOutputReg(DataSignal* dataSignal) const {
-    const auto& subVarMap = VHDL::OtherUtils::getSubVarMap(outputToRegisterMap);
+Optimizer::~Optimizer() {
+    // Load original commitment list
+    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
+        operationProperty->setCommitmentList(originalCommitmentLists.front());
+        originalCommitmentLists.pop();
+    }
+}
+
+bool Optimizer::hasOutputReg(DataSignal* dataSignal) {
+    const auto& subVarMap = getSubVarMap(outputToRegisterMap);
     return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
             subVarMap.find(dataSignal) != subVarMap.end());
 }
 
-Variable* HLSmodule::getCorrespondingRegister(DataSignal* dataSignal) const {
-    const auto& subVarMap = VHDL::OtherUtils::getSubVarMap(outputToRegisterMap);
+Variable* Optimizer::getCorrespondingRegister(DataSignal* dataSignal) {
+    const auto& subVarMap = getSubVarMap(outputToRegisterMap);
     if (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end()) {
         return outputToRegisterMap.at(dataSignal);
     } else {
@@ -36,24 +51,7 @@ Variable* HLSmodule::getCorrespondingRegister(DataSignal* dataSignal) const {
     }
 }
 
-bool HLSmodule::isModuleSignal(DataSignal *dataSignal) const {
-    return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
-}
-
-std::vector<DataSignal *> HLSmodule::getCorrespondingTopSignals(DataSignal *dataSignal) const {
-    return moduleToTopSignalMap.at(dataSignal);
-}
-
-bool HLSmodule::isArrayPort(DataSignal *dataSignal) const {
-    for (const auto& arrayPort : arrayPorts) {
-        if (dataSignal->getName() == arrayPort.first->getDataSignal()->getName()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void HLSmodule::removeRedundantConditions()
+void Optimizer::removeRedundantConditions()
 {
     for (auto &function : module->getFunctionMap()) {
 //        std::cout << "------ FUNCTION " << function.second->getName() << " --------" << std::endl;
@@ -116,25 +114,8 @@ void HLSmodule::removeRedundantConditions()
     }
 }
 
-void HLSmodule::mapOutputRegistersToOutput() {
-
-    auto getAllOutputs = [this]() -> std::set<DataSignal *> {
-        std::set<DataSignal*> outputSet;
-        for (const auto &port : module->getPorts()) {
-            if (port.second->getInterface()->isOutput()) {
-                if (port.second->isCompoundType()) {
-                    for (const auto &subType : port.second->getDataSignal()->getSubVarList()) {
-                        outputSet.insert(subType);
-                    }
-                } else {
-                    outputSet.insert(port.second->getDataSignal());
-                }
-            }
-        }
-        return outputSet;
-    };
-
-    const auto& outputSet = getAllOutputs();
+void Optimizer::mapOutputRegistersToOutput() {
+    const auto& outputSet = getOutputs();
     auto candidates = getVariables();
 
     // If for every operation assignment of Variable equals assignment of DataSignal
@@ -172,7 +153,7 @@ void HLSmodule::mapOutputRegistersToOutput() {
         return candidates;
     };
 
-    std::multimap<Variable *, DataSignal *> registerToOutput;
+    std::multimap<Variable*, DataSignal*> registerToOutput;
     for (const auto& output : outputSet) {
         const auto& outputReg = compareAssignments(output);
         if (outputReg.size() == 1) {
@@ -185,13 +166,13 @@ void HLSmodule::mapOutputRegistersToOutput() {
     const auto& parentMap = getParentMap(registerToOutput);
     registerToOutput.clear();
 
-    std::cout << "Map Output Registers to Outputs:" << std::endl;
     for (const auto& parent : parentMap) {
-        std::cout << "\t" << parent.first->getFullName() << " -> " << parent.second->getFullName() << std::endl;
+        std::cout << parent.first->getFullName() << " -> " << parent.second->getFullName() << std::endl;
     }
 
     // If we can map multiple DataSignals to one Variable, we can replace these DataSignal by a new DataSignal
     // representing all these DataSignals
+    std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
     for (auto it = parentMap.cbegin(); it != parentMap.cend();) {
         Variable* reg = it->first;
         if (parentMap.count(reg) > 1) {
@@ -202,21 +183,133 @@ void HLSmodule::mapOutputRegistersToOutput() {
             } while (it != parentMap.cend() && reg == it->first);
             const auto& combinedDataSignal = getCombinedDataSignal(outputs);
             registerToOutputMap.insert({reg, combinedDataSignal});
-            moduleOutputs.insert(combinedDataSignal);
             outputToRegisterMap.insert({combinedDataSignal, reg});
+            moduleOutputs.insert(combinedDataSignal);
             for (const auto& out : outputs) {
+                oldToNewDataSignalMap.insert({out, combinedDataSignal});
                 moduleToTopSignalMap.insert({combinedDataSignal, outputs});
             }
         } else {
             registerToOutputMap.insert({it->first, it->second});
-            moduleOutputs.insert(it->second);
             outputToRegisterMap.insert({it->second, it->first});
+            moduleOutputs.insert(it->second);
             ++it;
+        }
+    }
+    replaceDataSignals(oldToNewDataSignalMap);
+}
+
+void Optimizer::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap) {
+    const auto& subVarMap = getSubVarMap(dataSignalMap);
+
+    std::cout << "Replace DataSignal by new DataSignal" << std::endl;
+    for (const auto& subVar : subVarMap) {
+        std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
+
+        for (const auto& property : propertySuite->getOperationProperties()) {
+            std::vector<Assignment* > assignments;
+            for (const auto& commitment : property->getCommitmentList()) {
+                if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
+                    auto dataSignal = dynamic_cast<DataSignalOperand*>(commitment->getLhs())->getDataSignal();
+                    if (dataSignal == subVar.first) {
+                        assignments.emplace_back(
+                                new SCAM::Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                        continue;
+                    }
+                }
+                assignments.emplace_back(commitment);
+            }
+            property->setCommitmentList(assignments);
         }
     }
 }
 
-std::multimap<Variable*, DataSignal*> HLSmodule::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
+void Optimizer::replaceVariables() {
+    const auto& subVarMap = getSubVarMap(registerToOutputMap);
+
+    std::cout << "Replace OutputRegister by DataSignal" << std::endl;
+    for (const auto& subVar : subVarMap) {
+        std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
+
+        for (const auto& property : propertySuite->getOperationProperties()) {
+            std::vector<Assignment* > assignments;
+            for (const auto& commitment : property->getCommitmentList()) {
+                // Remove if LHS == RHS
+                if (*(commitment->getLhs()) == *(commitment->getRhs())) {
+                    continue;
+                }
+                // Replace OutputRegister by DataSignal
+                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
+                    auto dataSignal = dynamic_cast<VariableOperand*>(commitment->getLhs())->getVariable();
+                    if (dataSignal == subVar.first) {
+                        assignments.emplace_back(
+                                new SCAM::Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                        continue;
+                    }
+                }
+                // Remove assignments with OutputRegister at RHS
+                const auto& varSet = ExprVisitor::getUsedVariables(commitment->getRhs());
+                if (varSet.find(subVar.first) != varSet.end()) {
+                    continue;
+                }
+                assignments.emplace_back(commitment);
+            }
+            property->setCommitmentList(assignments);
+        }
+    }
+
+    // Remove duplicate assignments
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        std::vector<Assignment* > assignments;
+
+        auto equalAssignments = [&assignments](Assignment* commitment) -> bool {
+            for (const auto& assignment : assignments) {
+                if (*assignment == *commitment) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        for (const auto& commitment : property->getCommitmentList()) {
+            if(!equalAssignments(commitment)) {
+                assignments.push_back(commitment);
+            }
+        }
+        property->setCommitmentList(assignments);
+    }
+}
+
+template<typename Key, typename Value>
+std::map<Key *, Value *> Optimizer::getSubVarMap(const std::map<Key *, Value *> map) {
+    std::vector<Key* > keys;
+    for (const auto& var : map) {
+        if (var.first->isCompoundType()) {
+            for (const auto& subVar : var.first->getSubVarList()) {
+                keys.push_back(subVar);
+            }
+        } else {
+            keys.push_back(var.first);
+        }
+    }
+    std::vector<Value* > values;
+    for (const auto& var : map) {
+        if (var.second->isCompoundType()) {
+            for (const auto& subVar : var.second->getSubVarList()) {
+                values.push_back(subVar);
+            }
+        } else {
+            values.push_back(var.second);
+        }
+    }
+    std::map<Key *, Value *> subVarMap;
+    for (std::size_t it = 0; it < keys.size(); ++it) {
+        subVarMap.insert({keys.at(it), values.at(it)});
+    }
+    return subVarMap;
+}
+
+std::multimap<Variable*, DataSignal*> Optimizer::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
     std::multimap<Variable*, DataSignal*> parentMap;
     std::set<std::pair<Variable*, DataSignal*>> uniquePairs;
     for (const auto& var : multimap) {
@@ -235,7 +328,7 @@ std::multimap<Variable*, DataSignal*> HLSmodule::getParentMap(const std::multima
     return parentMap;
 }
 
-std::set<DataSignal *> HLSmodule::getOutputs() {
+std::set<DataSignal *> Optimizer::getOutputs() {
     std::set<DataSignal *> outputSet;
     for (const auto& property : propertySuite->getOperationProperties()) {
         for (const auto& commitment : property->getCommitmentList()) {
@@ -246,7 +339,6 @@ std::set<DataSignal *> HLSmodule::getOutputs() {
             outputSet.insert(outputs.begin(), outputs.end());
         }
     }
-    outputSet = VHDL::OtherUtils::getParents(outputSet);
     for (const auto& moduleSignal : moduleToTopSignalMap) {
         outputSet.insert(moduleSignal.first);
         for (const auto& topSignal : moduleSignal.second) {
@@ -259,7 +351,7 @@ std::set<DataSignal *> HLSmodule::getOutputs() {
     return outputSet;
 }
 
-std::set<DataSignal *> HLSmodule::getInputs() {
+std::set<DataSignal *> Optimizer::getInputs() {
     std::set<DataSignal *> inputSet;
     for (const auto& property : propertySuite->getOperationProperties()) {
         for (const auto& commitment : property->getCommitmentList()) {
@@ -267,32 +359,21 @@ std::set<DataSignal *> HLSmodule::getInputs() {
                 continue;
             }
             const auto& inputs = ExprVisitor::getUsedDataSignals(commitment->getRhs());
-            for (const auto &input : inputs) {
-                if (!input->isArrayType()) {
-                    inputSet.insert(input);
-                }
-            }
+            inputSet.insert(inputs.begin(), inputs.end());
         }
     }
-    for (const auto &arrayPort : arrayPorts) {
-        for (uint64_t i = 0; i < arrayPort.second.size(); ++i)
-        inputSet.insert(new DataSignal(
-                arrayPort.first->getDataSignal()->getName() + "_" + std::to_string(i),
-                arrayPort.first->getDataType()->getSubVarMap().begin()->second,
-                nullptr,
-                nullptr,
-                arrayPort.first
-                ));
-    }
+//    for (const auto &arrayPort : arrayPorts) {
+//        for (unsigned int i = 0; i < arrayPort.second.size(); ++i) {
+//            auto dataSignalCopy = new DataSignal(
+//                    arrayPort.first->getName() + "_" + std::to_string(i),
+//                    arrayPort.first->getDataType());
+//            inputSet.insert(dataSignalCopy);
+//        }
+//    }
     return inputSet;
 }
 
-bool HLSmodule::isConstant(Variable *variable) {
-    auto internalRegister = getInternalRegisterOut();
-    return !(internalRegister.find(variable) != internalRegister.end());
-}
-
-std::set<Variable *> HLSmodule::getVariables() {
+std::set<Variable *> Optimizer::getVariables() {
     std::set<Variable* > variableSet;
     for (const auto &var : module->getVariableMap()) {
         if (var.second->isCompoundType()) {
@@ -330,7 +411,7 @@ std::set<Variable *> HLSmodule::getVariables() {
     return variableSet;
 }
 
-DataSignal* HLSmodule::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
+DataSignal* Optimizer::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
 
     std::string combinedName = dataSignal.front()->getFullName();
     for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
@@ -367,102 +448,14 @@ DataSignal* HLSmodule::getCombinedDataSignal(const std::vector<DataSignal*> &dat
     auto combinedDataSignal = new DataSignal(
             combinedName + "_sig",
             dataSignal.front()->getDataType(),
-            nullptr,
+            dataSignal.front()->getInitialValue(),
             nullptr,
             dataSignal.front()->getPort());
     return combinedDataSignal;
 }
 
-void HLSmodule::mapInputRegistersToInputs() {
-    std::set<DataSignal* > inputs;
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        std::cout << "Property " << property->getName() << ": " << std::endl;
-        std::set<DataSignal *> dataSignals;
-        for (const auto& commitment : property->getCommitmentList()) {
-            if (*commitment->getLhs() == *commitment->getRhs()) {
-                continue;
-            }
-            const auto& signals = ExprVisitor::getUsedDataSignals(commitment->getRhs());
-            for (const auto& signal : signals) {
-                dataSignals.insert(signal->isSubVar() ? signal->getParent() : signal);
-            }
-        }
-        for (const auto& dataSignal : dataSignals) {
-            std::cout << dataSignal->getFullName() << std::endl;
-        }
-        std::cout << std::endl;
-        inputs.insert(dataSignals.begin(), dataSignals.end());
-    }
-
-    std::cout << "getAllInputs: " << std::endl;
-    for (const auto& input : inputs) {
-        std::cout << input->getFullName() << std::endl;
-    }
-    std::cout << std::endl;
-
-    std::map<DataType *, std::vector<DataSignal *> > typeToDataSignalMap;
-    for (const auto& input : inputs) {
-        if (typeToDataSignalMap.find(input->getDataType()) != typeToDataSignalMap.end()) {
-            typeToDataSignalMap.at(input->getDataType()).push_back(input);
-        } else {
-            typeToDataSignalMap.insert({input->getDataType(), {input}});
-        }
-    }
-    for (const auto& type : typeToDataSignalMap) {
-        std::cout << type.first->getName() << ": " << std::endl;
-        for (const auto& signal : type.second) {
-            std::cout << signal->getFullName() << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
-    auto isInAssignment = [](Expr *expr, DataSignal* dataSignal) -> bool {
-        const auto& signals = ExprVisitor::getUsedDataSignals(expr);
-        for (const auto sig : signals) {
-            const std::string& name = sig->isSubVar() ? sig->getParent()->getFullName() : sig->getFullName();
-            if (dataSignal->getFullName() == name) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    auto isInProperty = [this, &isInAssignment](DataSignal* dataSignal, OperationProperty* property) -> bool {
-        for (const auto& commitment : property->getCommitmentList()) {
-            if (isInAssignment(commitment->getRhs(), dataSignal)) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    for (const auto& type : typeToDataSignalMap) {
-        std::vector<DataSignal *> candidates = type.second;
-        for (const auto& candidate : candidates) {
-            std::set<DataSignal *> partnerSet = {candidates.begin(), candidates.end()};
-            for (const auto& property : propertySuite->getOperationProperties()) {
-                bool isIn = isInProperty(candidate, property);
-//                std::cout << candidate->getFullName() << (isIn ? " is in " : " is not in ") << property->getName() << std::endl;
-                if (isIn) {
-                    auto it = partnerSet.begin() ;
-                    while (it != partnerSet.end()) {
-                        if (isInProperty(*it, property)) {
-                            partnerSet.erase(it++);
-                        } else {
-                            ++it;
-                        }
-                    }
-                }
-            }
-            std::cout << "Partner for " << candidate->getFullName() << ": " << std::endl;
-            for (const auto& partner : partnerSet) {
-                std::cout << partner->getFullName() << std::endl;
-            }
-        }
-    }
-}
-
-std::set<Variable *> HLSmodule::getInternalRegisterIn() {
+std::set<Variable*> Optimizer::getInternalRegisterIn()
+{
     std::set<Variable *> vars;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
@@ -473,20 +466,11 @@ std::set<Variable *> HLSmodule::getInternalRegisterIn() {
             vars.insert(foundVars.begin(), foundVars.end());
         }
     }
-    std::set<Variable *> outputRegisters;
-    for (const auto& outputRegister : registerToOutputMap) {
-        outputRegisters.insert(outputRegister.first);
-    }
-    for (const auto& outputRegister : VHDL::OtherUtils::getSubVars(outputRegisters)) {
-        const auto it = vars.find(outputRegister);
-        if (it != vars.end()) {
-            vars.erase(it);
-        }
-    }
     return vars;
 }
 
-std::set<Variable *> HLSmodule::getInternalRegisterOut() {
+std::set<Variable*> Optimizer::getInternalRegisterOut()
+{
     std::set<Variable *> vars;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
@@ -497,28 +481,16 @@ std::set<Variable *> HLSmodule::getInternalRegisterOut() {
             vars.insert(foundVars.begin(), foundVars.end());
         }
     }
-    std::set<Variable *> outputRegisters;
-    for (const auto& outputRegister : registerToOutputMap) {
-        outputRegisters.insert(outputRegister.first);
-    }
-    for (const auto& outputRegister : VHDL::OtherUtils::getSubVars(outputRegisters)) {
-        const auto it = vars.find(outputRegister);
-        if (it != vars.end()) {
-            vars.erase(it);
-        }
-    }
     return vars;
 }
 
-std::set<Variable*> HLSmodule::getOutputRegister() {
-    std::set<Variable *> outputRegister;
-    for (const auto& reg : registerToOutputMap) {
-        outputRegister.insert(reg.first);
-    }
-    return VHDL::OtherUtils::getParents(outputRegister);
+bool Optimizer::isConstant(Variable *variable) {
+    auto internalRegister = getInternalRegisterOut();
+    return !(internalRegister.find(variable) != internalRegister.end());
 }
 
-std::set<Port *> HLSmodule::setArrayPorts() {
+std::set<Port *> Optimizer::setArrayPorts()
+{
     std::set<Port *> ports;
     for (const auto &port : module->getPorts()) {
         if (port.second->isArrayType()) {
@@ -528,36 +500,90 @@ std::set<Port *> HLSmodule::setArrayPorts() {
     return ports;
 }
 
-void HLSmodule::arraySlicing() {
+void Optimizer::arraySlicing() {
     const auto ports = setArrayPorts();
 
     for (const auto &port : ports) {
         std::list<Expr *> expressions;
         for (const auto &operationProperty: propertySuite->getOperationProperties()) {
             for (const auto &commitment :  operationProperty->getCommitmentList()) {
-                const auto arrayOperands = ExprVisitor::getUsedArrayOperands(commitment->getRhs());
-                for (const auto &arrayOperand : arrayOperands) {
+                const auto foundExpressions = PrintArrayStatements::getArrayExprs(commitment->getRhs(), port);
+                for (const auto &foundExpression : foundExpressions) {
                     bool alreadyFound = false;
-                    if (arrayOperand->getArrayOperand()->getOperandName() != port->getDataSignal()->getName()) {
-                        continue;
-                    }
                     for (const auto &expression : expressions) {
-                        if (*arrayOperand->getIdx() == *expression) {
+                        if (*foundExpression == *expression) {
                             alreadyFound = true;
                         }
                     }
                     if (!alreadyFound) {
-                        expressions.push_back(arrayOperand->getIdx());
+                        expressions.push_back(foundExpression);
                     }
                 }
             }
         }
-        arrayPorts.insert({port, expressions});
-
-        std::cout << port->getName() << ": " << std::endl;
         for (const auto &expression : expressions) {
             std::cout << *expression << std::endl;
         }
+        arrayPorts.insert({port, expressions});
     }
 }
 
+//    for (const auto& state : propertySuite->getStates()) {
+//        auto successorProperties = propertySuite->getSuccessorProperties(state);
+//        std::sort(successorProperties.begin(), successorProperties.end(), [](const AbstractProperty* prop1, const AbstractProperty* prop2) {
+//            return (prop1->getAssumptionList().size() < prop2->getAssumptionList().size());
+//        });
+//        for (auto property = successorProperties.begin(); property != successorProperties.end(); ++property) {
+//            auto assumptionList = (*property)->getAssumptionList();
+//            for (auto assumption : assumptionList) {
+//                std::cout << "Find Conditions: " << *assumption << std::endl;
+//            }
+//            std::cout << std::endl;
+//            for (auto otherProperty = std::next(property); otherProperty != successorProperties.end(); ++otherProperty) {
+//                auto otherAssumptionList = (*otherProperty)->getAssumptionList();
+//                for (auto &assumption : otherAssumptionList) {
+//                    if (NodePeekVisitor::nodePeekUnaryExpr(assumption) != nullptr) {
+//                        assumption = (dynamic_cast<UnaryExpr * >(assumption))->getExpr();
+//                    }
+//                }
+//                for (auto assumption : otherAssumptionList) {
+//                    std::cout << *assumption << std::endl;
+//                }
+//                bool allFound = true;
+//                for (auto assumption : assumptionList) {
+//                    bool found = false;
+//                    for (auto otherAssumption : otherAssumptionList) {
+//                        if (*assumption == *otherAssumption) {
+//                            found = true;
+//                        }
+//                    }
+//                    if (!found) {
+//                        allFound = false;
+//                    }
+//                }
+//                if (allFound) {
+//                    std::cout << "All found!" << std::endl;
+//                    for (const auto &assumption : assumptionList) {
+//                        (otherAssumptionList).erase(std::remove_if(
+//                                otherAssumptionList.begin(),
+//                                otherAssumptionList.end(),
+//                                [&assumption](Expr *expr) {
+//                                    if (NodePeekVisitor::nodePeekUnaryExpr(expr) != nullptr) {
+//                                        return (*assumption == *((dynamic_cast<UnaryExpr * >(expr))->getExpr()));
+//                                    }
+//                                    return false;
+//                                }), otherAssumptionList.end()
+//                        );
+//                    }
+//                    std::cout << std::endl << "New List" << std::endl;
+//                    for (auto assumption : otherAssumptionList) {
+//                        std::cout << *assumption << std::endl;
+//                    }
+//                } else {
+//                    std::cout << "Not all found!" << std::endl;
+//                }
+//                std::cout << std::endl << std::endl;
+//            }
+//            std::cout << std::endl << std::endl;
+//        }
+//    }

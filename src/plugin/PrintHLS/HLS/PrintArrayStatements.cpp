@@ -4,7 +4,7 @@
 
 #include "PrintArrayStatements.h"
 
-using namespace SCAM;
+using namespace SCAM::HLSPlugin::HLS;
 
 PrintArrayStatements::PrintArrayStatements(Expr *expr, Port* port) :
     port(port)
@@ -12,7 +12,7 @@ PrintArrayStatements::PrintArrayStatements(Expr *expr, Port* port) :
     expr->accept(*this);
 }
 
-std::list<Expr *> PrintArrayStatements::getArrayExprs(SCAM::Expr *expr, Port* port) {
+std::list<SCAM::Expr *> PrintArrayStatements::getArrayExprs(SCAM::Expr *expr, Port* port) {
     PrintArrayStatements printArrayStatements(expr, port);
     return printArrayStatements.arrayExprs;
 }

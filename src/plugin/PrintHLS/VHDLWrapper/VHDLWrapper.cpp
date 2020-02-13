@@ -4,12 +4,11 @@
 
 #include "ExprVisitor.h"
 #include "VHDLWrapper.h"
-#include "VHDLPrintVisitor.h"
-#include "VHDLPrintReset.h"
-#include "VHDLPrintVisitorHLS.h"
-#include "OtherUtils.h"
+#include "PrintReset.h"
+#include "PrintStatement.h"
+#include "Utilities.h"
 
-using namespace HLSPlugin::VHDLWrapper;
+using namespace SCAM::HLSPlugin::VHDLWrapper;
 
 VHDLWrapper::VHDLWrapper() :
     propertySuite(nullptr),
@@ -22,7 +21,7 @@ std::map<std::string, std::string> VHDLWrapper::printModel(Model *model) {
     for (auto &module : model->getModules()) {
         this->propertySuite = module.second->getPropertySuite();
         this->currentModule = module.second;
-        hlsModule = std::make_unique<HLSmodule>(propertySuite, currentModule);
+        hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
         signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get());
 
         pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
@@ -170,7 +169,7 @@ std::string VHDLWrapper::printModule(Model *model) {
            << ";\n";
     };
     ss << "\n\t-- Operation Module Outputs\n";
-    for (const auto& out : OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs())) {
+    for (const auto& out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
         printOutputProcess(out);
     }
 
@@ -232,14 +231,14 @@ std::string VHDLWrapper::printModule(Model *model) {
 
     ss << "\n\t-- Operation Module Inputs\n";
     printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
-    printModuleInputSignals(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()));
+    printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
 
     for (const auto &arrayPort : hlsModule->getArrayPorts()) {
         uint32_t exprNumber = 0;
         for (const auto &expr : arrayPort.second) {
             ss << "\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
-               << VHDLPrintVisitorHLS::toString(expr) << ")));\n";
+               << PrintStatement::toString(expr, false) << ")));\n";
             exprNumber++;
         }
     }
@@ -313,17 +312,17 @@ void VHDLWrapper::signals(std::stringstream &ss) {
     };
 
     ss << "\n\t-- Internal Registers\n";
-    printVars(OtherUtils::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
+    printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
     printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
     printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false);
 
     ss << "\n\t-- Operation Module Inputs\n";
-    printSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()),
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
             Style::UL, "_in", true);
     printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", true);
 
     ss << "\n\t-- Module Outputs\n";
-    printSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()),
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
             Style::UL, "_out", true);
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
@@ -360,8 +359,8 @@ void VHDLWrapper::component(std::stringstream& ss) {
     };
 
     printComponentSignal(signalFactory->getControlSignals(), "ap_");
-    printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "");
-    printComponentSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "");
+    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "");
+    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "");
     printComponentVars(signalFactory->getInternalRegisterOut(), "out");
 
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
@@ -402,8 +401,8 @@ void VHDLWrapper::componentInst(std::stringstream& ss) {
     };
 
     printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "");
-    printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
-    printComponentInstSignal(OtherUtils::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
+    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
+    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
     printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");
 
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
@@ -432,7 +431,7 @@ void VHDLWrapper::monitor(std::stringstream &ss) {
             ss << "true";
         }
         for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {
-            ss << VHDLPrintVisitorHLS::toString(*expr);
+            ss << PrintStatement::toString(*expr, true);
             if (std::next(expr) != exprList.end()) {
                 ss << " and ";
             }
@@ -532,12 +531,12 @@ void VHDLWrapper::functions(std::stringstream &ss) {
                     ss << "elsif ";
                 }
                 for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
-                    ss << VHDLPrintVisitorHLS::toString(*cond);
+                    ss << PrintStatement::toString(*cond, true);
                     if (cond != --retValData->second.end()) ss << " and ";
                 }
                 ss << " then ";
             }
-            ss << VHDLPrintVisitorHLS::toString(retValData->first) << ";\n";
+            ss << PrintStatement::toString(retValData->first, false) << ";\n";
         }
         if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
         ss << "\tend " + func->getName() + ";\n\n";
@@ -614,7 +613,7 @@ std::string VHDLWrapper::printSensitivityList() {
 
     sensitivityListStream << "active_state";
     for (const auto& syncSignals : sensListSyncSignals) {
-        sensitivityListStream << ", " << VHDLPrintVisitor::toString(syncSignals);
+        sensitivityListStream << ", " << PrintStatement::toString(syncSignals, false);
     }
 
     for (const auto& dataSignals : sensListDataSignals) {
@@ -630,22 +629,22 @@ std::string VHDLWrapper::printSensitivityList() {
 std::string VHDLWrapper::getResetValue(Variable* variable)
 {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = VHDLPrintResetValue(commitment, variable->getName());
+        auto printResetValue = PrintResetSignal(commitment, variable->getName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
         }
     }
-    return VHDLPrintVisitorHLS::toString(variable->getInitialValue());
+    return PrintStatement::toString(variable->getInitialValue(), false);
 }
 
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = VHDLPrintResetValue(commitment, dataSignal->getFullName());
+        auto printResetValue = PrintResetSignal(commitment, dataSignal->getFullName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
         }
     }
-    return VHDLPrintVisitorHLS::toString(dataSignal->getInitialValue());
+    return PrintStatement::toString(dataSignal->getInitialValue(), false);
 }
 

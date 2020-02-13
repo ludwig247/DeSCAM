@@ -7,15 +7,10 @@
 #include "PrintVHDL.h"
 #include "VHDLPrintVisitor.h"
 #include "ExprVisitor.h"
-#include "PrintVHDLForHLS.h"
 
 using namespace SCAM;
 
 std::map<std::string, std::string> PrintVHDL::printModel(Model *model) {
-    if (getOptionMap().at("hls")) {
-        std::unique_ptr<PrintVHDLForHLS> VHDLForHLS = std::make_unique<PrintVHDLForHLS>();
-        return VHDLForHLS->printModel(model);
-    }
     // Print types that have to be seen from outside of the provided modules
     for (auto &module : model->getModules()) {
         this->propertySuite = module.second->getPropertySuite();

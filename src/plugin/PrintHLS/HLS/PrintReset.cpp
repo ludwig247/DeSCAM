@@ -2,9 +2,11 @@
 // Created by johannes on 31.01.20.
 //
 
-#include "PrintResetValues.h"
+#include "PrintReset.h"
 
-PrintResetValues::PrintResetValues(SCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
+using namespace SCAM::HLSPlugin::HLS;
+
+PrintReset::PrintReset(SCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
     stmt(stmt),
     indentSize(indentSize),
     indentOffset(indentOffset),
@@ -13,18 +15,18 @@ PrintResetValues::PrintResetValues(SCAM::Stmt* stmt, const std::string& signalNa
 {
 }
 
-bool PrintResetValues::toString()
+bool PrintReset::toString()
 {
     this->createString(stmt, indentSize, indentOffset);
     return signalFound;
 }
 
-std::string PrintResetValues::getString()
+std::string PrintReset::getString()
 {
     return this->ss.str();
 }
 
-void PrintResetValues::visit(Assignment& node)
+void PrintReset::visit(Assignment& node)
 {
     node.getLhs()->accept(*this);
     if (signalFound) {
@@ -32,21 +34,21 @@ void PrintResetValues::visit(Assignment& node)
     }
 }
 
-void PrintResetValues::visit(DataSignalOperand& node)
+void PrintReset::visit(DataSignalOperand& node)
 {
     if (node.getDataSignal()->getFullName() == resetSignal) {
         signalFound = true;
     }
 }
 
-void PrintResetValues::visit(Notify& node)
+void PrintReset::visit(Notify& node)
 {
     if ((node.getPort()->getName() + "_notify") == resetSignal) {
         signalFound = true;
     }
 }
 
-void PrintResetValues::visit(VariableOperand& node)
+void PrintReset::visit(VariableOperand& node)
 {
     if (node.getVariable()->getFullName() == resetSignal) {
         signalFound = true;

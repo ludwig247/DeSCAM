@@ -4,26 +4,25 @@
 
 #include <set>
 
-#include "BitSlicingVHDL.h"
+#include "PrintBitOperations.h"
 
-using namespace SCAM;
-using namespace SCAM::VHDL;
+using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-BitSlicingVHDL::BitSlicingVHDL(Stmt *stmt)
+PrintBitOperations::PrintBitOperations(Stmt *stmt)
 {
     actualNode = std::make_shared<Node>();
     stmt->accept(*this);
 }
 
-bool BitSlicingVHDL::isSlicingOp() {
+bool PrintBitOperations::isSlicingOp() {
     return slicing(actualNode.get());
 }
 
-std::string BitSlicingVHDL::getOpAsString() {
+std::string PrintBitOperations::getOpAsString() {
     return getString(actualNode.get());
 }
 
-void BitSlicingVHDL::visit(Arithmetic &node) {
+void PrintBitOperations::visit(Arithmetic &node) {
     actualNode->type = StmtType::ARITHMETIC;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -35,7 +34,7 @@ void BitSlicingVHDL::visit(Arithmetic &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingVHDL::visit(Relational &node) {
+void PrintBitOperations::visit(Relational &node) {
     actualNode->type = StmtType::RELATIONAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -47,7 +46,7 @@ void BitSlicingVHDL::visit(Relational &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingVHDL::visit(UnaryExpr &node) {
+void PrintBitOperations::visit(UnaryExpr &node) {
     actualNode->type = StmtType::UNARY_EXPR;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -56,14 +55,14 @@ void BitSlicingVHDL::visit(UnaryExpr &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingVHDL::visit(Assignment &node) {
+void PrintBitOperations::visit(Assignment &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void BitSlicingVHDL::visit(Bitwise &node) {
+void PrintBitOperations::visit(Bitwise &node) {
     actualNode->type = StmtType::BITWISE;
-    actualNode->subType = OtherUtils::getSubTypeBitwise(node.getOperation());
+    actualNode->subType = Utilities::getSubTypeBitwise(node.getOperation());
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
     tmpNode->child.push_back(actualNode);
@@ -78,7 +77,7 @@ void BitSlicingVHDL::visit(Bitwise &node) {
 //    }
 }
 
-void BitSlicingVHDL::visit(ArrayOperand &node) {
+void PrintBitOperations::visit(ArrayOperand &node) {
     actualNode->type = StmtType::ARRAY_OPERAND;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -87,12 +86,12 @@ void BitSlicingVHDL::visit(ArrayOperand &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingVHDL::visit(ParamOperand &node) {
+void PrintBitOperations::visit(ParamOperand &node) {
     actualNode->type = StmtType::PARAM_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-void BitSlicingVHDL::visit(Logical &node) {
+void PrintBitOperations::visit(Logical &node) {
     actualNode->type = StmtType::LOGICAL;
     auto tmpNode = actualNode;
     actualNode = std::make_shared<Node>();
@@ -104,17 +103,17 @@ void BitSlicingVHDL::visit(Logical &node) {
     actualNode = tmpNode;
 }
 
-void BitSlicingVHDL::visit(UnsignedValue &node) {
+void PrintBitOperations::visit(UnsignedValue &node) {
     actualNode->type = StmtType::UNSIGNED_VALUE;
     actualNode->value = node.getValue();
 }
 
-void BitSlicingVHDL::visit(IntegerValue &node) {
+void PrintBitOperations::visit(IntegerValue &node) {
     actualNode->type = StmtType::INTEGER_VALUE;
     actualNode->value = node.getValue();
 }
 
-void BitSlicingVHDL::visit(DataSignalOperand &node) {
+void PrintBitOperations::visit(DataSignalOperand &node) {
     actualNode->type = StmtType::DATA_SIGNAL_OPERAND;
     std::string name = node.getDataSignal()->getPort()->getName() + "_sig";
     if (node.getDataSignal()->isSubVar()) {
@@ -127,16 +126,16 @@ void BitSlicingVHDL::visit(DataSignalOperand &node) {
     actualNode->name = name;
 }
 
-void BitSlicingVHDL::visit(VariableOperand &node) {
+void PrintBitOperations::visit(VariableOperand &node) {
     actualNode->type = StmtType::VARIABLE_OPERAND;
     actualNode->name = node.getOperandName();
 }
 
-bool BitSlicingVHDL::slicing(Node *node) {
+bool PrintBitOperations::slicing(Node *node) {
     return sliceWithShift(node) || sliceWithoutShift(node) || shiftWithConstant(node);
 }
 
-bool BitSlicingVHDL::sliceWithShift(Node *node) {
+bool PrintBitOperations::sliceWithShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {
@@ -170,7 +169,7 @@ bool BitSlicingVHDL::sliceWithShift(Node *node) {
     return true;
 }
 
-bool BitSlicingVHDL::sliceWithoutShift(Node *node) {
+bool PrintBitOperations::sliceWithoutShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         std::set<StmtType > types;
         for (auto &child : node->child) {
@@ -201,7 +200,7 @@ bool BitSlicingVHDL::sliceWithoutShift(Node *node) {
     return true;
 }
 
-bool BitSlicingVHDL::shiftWithConstant(Node *node) {
+bool PrintBitOperations::shiftWithConstant(Node *node) {
     if (node->type == StmtType::BITWISE) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
             std::set<StmtType > types;
@@ -226,7 +225,7 @@ bool BitSlicingVHDL::shiftWithConstant(Node *node) {
     return true;
 }
 
-std::string BitSlicingVHDL::getString(Node *node) {
+std::string PrintBitOperations::getString(Node *node) {
     std::stringstream ss;
 
     int offset = 0;
@@ -284,7 +283,7 @@ std::string BitSlicingVHDL::getString(Node *node) {
     return ss.str();
 }
 
-bool BitSlicingVHDL::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
+bool PrintBitOperations::getRange(unsigned int number, unsigned int &firstBit, unsigned int &lastBit) {
     firstBit = -1;
     lastBit = -1;
     bool firstBitSet = false;
@@ -313,10 +312,10 @@ bool BitSlicingVHDL::getRange(unsigned int number, unsigned int &firstBit, unsig
     return !((firstBit == -1) || (lastBit == -1));
 }
 
-unsigned int BitSlicingVHDL::getFirstBit() const {
+unsigned int PrintBitOperations::getFirstBit() const {
     return actualNode->firstBit;
 }
 
-unsigned int BitSlicingVHDL::getLastBit() const {
+unsigned int PrintBitOperations::getLastBit() const {
     return actualNode->lastBit;
 }

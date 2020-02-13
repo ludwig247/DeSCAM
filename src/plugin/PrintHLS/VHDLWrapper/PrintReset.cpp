@@ -2,24 +2,24 @@
 // Created by schauss on 07.10.19.
 //
 
-#include "VHDLPrintReset.h"
+#include "PrintReset.h"
 
-using namespace SCAM;
+using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-std::string SCAM::VHDLPrintResetNotify::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    VHDLPrintResetNotify printer(stmt, indentSize, indentOffset);
+std::string PrintResetNotify::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+    PrintResetNotify printer(stmt, indentSize, indentOffset);
     return printer.getString();
 }
 
-SCAM::VHDLPrintResetNotify::VHDLPrintResetNotify(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+PrintResetNotify::PrintResetNotify(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->createString(stmt, indentSize, indentOffset);
 }
 
-std::string VHDLPrintResetNotify::getString() {
+std::string PrintResetNotify::getString() {
     return this->ss.str();
 }
 
-void VHDLPrintResetNotify::visit(Assignment &node) {
+void PrintResetNotify::visit(Assignment &node) {
     node.getLhs()->accept(*this);
     if (!this->ss.str().empty()) {
         this->ss << " <= ";
@@ -28,7 +28,7 @@ void VHDLPrintResetNotify::visit(Assignment &node) {
     }
 }
 
-void VHDLPrintResetNotify::visit(BoolValue &node) {
+void PrintResetNotify::visit(BoolValue &node) {
     if (node.getValue()) {
         this->ss << "'1'";
     } else {
@@ -36,7 +36,7 @@ void VHDLPrintResetNotify::visit(BoolValue &node) {
     }
 }
 
-VHDLPrintResetValue::VHDLPrintResetValue(SCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
+PrintResetSignal::PrintResetSignal(SCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
     stmt(stmt),
     indentSize(indentSize),
     indentOffset(indentOffset),
@@ -45,18 +45,18 @@ VHDLPrintResetValue::VHDLPrintResetValue(SCAM::Stmt* stmt, const std::string& si
 {
 }
 
-bool VHDLPrintResetValue::toString()
+bool PrintResetSignal::toString()
 {
     this->createString(stmt, indentSize, indentOffset);
     return signalFound;
 }
 
-std::string VHDLPrintResetValue::getString()
+std::string PrintResetSignal::getString()
 {
     return this->ss.str();
 }
 
-void VHDLPrintResetValue::visit(Assignment& node)
+void PrintResetSignal::visit(Assignment& node)
 {
     node.getLhs()->accept(*this);
     if (signalFound) {
@@ -64,21 +64,21 @@ void VHDLPrintResetValue::visit(Assignment& node)
     }
 }
 
-void VHDLPrintResetValue::visit(DataSignalOperand& node)
+void PrintResetSignal::visit(DataSignalOperand& node)
 {
     if (node.getDataSignal()->getFullName() == resetSignal) {
         signalFound = true;
     }
 }
 
-void VHDLPrintResetValue::visit(VariableOperand& node)
+void PrintResetSignal::visit(VariableOperand& node)
 {
     if (node.getVariable()->getFullName() == resetSignal) {
         signalFound = true;
     }
 }
 
-void VHDLPrintResetValue::visit(BoolValue &node) {
+void PrintResetSignal::visit(BoolValue &node) {
     if (node.getValue()) {
         this->ss << "\'1\'";
     } else {
