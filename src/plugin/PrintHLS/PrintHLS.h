@@ -9,7 +9,10 @@
 #include <memory>
 
 #include "PluginFactory.h"
-#include "PrintHLS/HLS/MainHLS.h"
+
+#include "HLS/HLS.h"
+#include "VHDLWrapper/VHDLWrapper.h"
+
 
 class PrintHLS : public PluginFactory {
 public:
@@ -17,10 +20,11 @@ public:
 
     ~PrintHLS() = default;
 
-    std::map<std::string, std::string> printModel(Model *model) override;
+    std::map<std::string, std::string> printModel(Model* model) override;
 
 private:
-    std::unique_ptr<MainHLS> hls;
+    std::unique_ptr<HLSPlugin::HLSModel::HLS> hls;
+    std::unique_ptr<VHDLWrapper> vhdlWrapper;
 };
 
 

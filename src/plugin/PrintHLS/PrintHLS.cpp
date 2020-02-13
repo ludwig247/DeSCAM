@@ -10,9 +10,13 @@ PrintHLS::PrintHLS() :
 }
 
 std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
-//    hls = std::make_unique<MainHLS>();
-    auto scripts = hls->printModel(model);
-    pluginOutput.insert(scripts.begin(), scripts.end());
+    hls = std::make_unique<HLSPlugin::HLSModel::HLS>();
+    auto hlsModel = hls->printModel(model);
+    pluginOutput.insert(hlsModel.begin(), hlsModel.end());
+
+    vhdlWrapper = std::make_unique<VHDLWrapper>();
+    auto vhdlWrapperModel = vhdlWrapper->printModel(model);
+    pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
 
     return pluginOutput;
 }
