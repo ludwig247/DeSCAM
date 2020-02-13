@@ -26,7 +26,6 @@ struct Bus_new : public sc_module {
     blocking_out<bus_req_t> slave_out2;
     blocking_out<bus_req_t> slave_out3;
 
-
     //Variables
     bus_req_t req;
     bus_resp_t resp;
