@@ -96,6 +96,7 @@ struct Bus_new : public sc_module {
                 resp.data = 0;
             }
             master_out->write(resp);
+
             //wait(SC_ZERO_TIME);
         }
     }

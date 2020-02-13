@@ -8,7 +8,6 @@
 
 SCAM::Variable::Variable(std::string name, const DataType *type, SCAM::ConstValue *initialValue, SCAM::Variable *parent) :
         VariableTemplate(name, type, initialValue, parent) {
-
 }
 
 void SCAM::Variable::accept(SCAM::AbstractVisitor &visitor) {

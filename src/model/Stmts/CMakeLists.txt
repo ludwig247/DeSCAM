@@ -1,4 +1,4 @@
-add_library(Stmts
+add_library(Stmts SHARED
         Assignment.cpp
         Stmt.h
         Operand.h

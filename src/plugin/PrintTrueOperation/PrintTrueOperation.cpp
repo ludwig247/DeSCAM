@@ -928,7 +928,6 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation *> &cycle) {
         }
     }
 
-
     ss << "prove:\n";
     //Last operation goes back to beginning no need to prove:
     ss << "\tat t_"<<cycle.at(1)->getState()->getName() <<": state_constraint;\n";

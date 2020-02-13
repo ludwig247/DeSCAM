@@ -48,7 +48,6 @@ namespace SCAM {
         void addFunction(Function* function);
         const std::vector<Function*> &getFunctions() const;
 
-
         // Constraints
         PropertyConstraint * createConstraint(const std::string &name);
         PropertyConstraint * createConstraint(const std::string &name, Stmt *expr);

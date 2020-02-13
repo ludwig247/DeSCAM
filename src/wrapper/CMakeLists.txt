@@ -12,3 +12,6 @@ target_link_libraries(wrapper PRIVATE parser)
 configure_file(wrapper.py ${CMAKE_SOURCE_DIR}/bin/wrapper/wrapper.py COPYONLY)
 file(COPY ${CMAKE_SOURCE_DIR}/bin/lib/ DESTINATION ${CMAKE_SOURCE_DIR}/bin/wrapper/)
 
+
+
+

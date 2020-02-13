@@ -10,12 +10,17 @@
 #include "DatapathVisitorSVA.h"
 
 std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
+    this->model = node;
     pluginOutput.insert(std::make_pair("ipc.sva", Text_ipc()));
 
     for (auto &module: node->getModules()) {
         this->module = module.second;
         pluginOutput.insert(std::make_pair(module.first + ".sva", Text_body()));
         pluginOutput.insert(std::make_pair(module.first + "_functions.sva", functions()));
+    }
+
+    if(!node->getGlobalFunctionMap().empty()){
+        pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.sva", globalFunctions()));
     }
     return pluginOutput;
 }
@@ -373,4 +378,55 @@ std::string PrintSVA::tolower(std::string str) {
     for (char i : str)
         ret << std::tolower(i, loc);
     return ret.str();
+}
+
+std::string PrintSVA::globalFunctions() {
+    std::stringstream globss;
+    globss << "\n\n// GLOBAL FUNCTIONS //\n";
+    for (auto function: model->getGlobalFunctionMap()) {
+        globss << "function " + convertDataType(function.second->getReturnType()) + " " + function.first << " (";
+        auto paramMap = function.second->getParamMap();
+        for (auto param = paramMap.begin(); param != paramMap.end(); ++param) {
+            if (param->second->getDataType()->isCompoundType()) {
+                for (auto iterator = param->second->getDataType()->getSubVarMap().begin();
+                     iterator != param->second->getDataType()->getSubVarMap().end(); ++iterator) {
+                    globss << convertDataType(iterator->second) << " " << param->first << "_" << iterator->first;
+                    if (iterator != --param->second->getDataType()->getSubVarMap().end()) globss << ", ";
+                }
+            } else {
+                globss << convertDataType(param->second->getDataType()) << " " << param->first;
+            }
+            if (param != --paramMap.end()) globss << ", ";
+        }
+        globss << ");\n";
+
+        if (function.second->getReturnValueConditionList().empty())
+            throw std::runtime_error(" No return value for function " + function.first + "()");
+        auto j = function.second->getReturnValueConditionList().size();
+        for (auto returnValue: function.second->getReturnValueConditionList()) {
+            globss << "\t";
+            //Any conditions?
+            if (!returnValue.second.empty()) {
+
+                if (j == function.second->getReturnValueConditionList().size()) {
+                    globss << "if (";
+                } else globss << "else if (";
+
+                auto i = returnValue.second.size();
+                for (auto cond: returnValue.second) {
+                    globss << ConditionVisitorSVA::toString(cond);
+                    if (i > 1) globss << " && ";
+                    --i;
+                }
+                globss << ") begin return ";
+                //TODO: The following lines print statements like "regfile.reg_file_01", which should be changed to "regfile_reg_file_01"
+                globss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
+            } else {
+                globss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
+            }
+            --j;
+        }
+        globss << "endfunction\n\n";
+    }
+    return globss.str();
 }

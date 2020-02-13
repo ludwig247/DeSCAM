@@ -30,7 +30,6 @@ namespace SCAM {
         std::string getFullName() const;
 
         bool isConstant() const;
-
         void setConstant(bool isConstant);
 
     private:

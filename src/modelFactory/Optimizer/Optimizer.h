@@ -62,7 +62,7 @@ namespace SCAM {
         Optimizer() = delete;
 
         Optimizer(std::map<int, SCAM::CfgBlock *> CFG,
-                  SCAM::Module *module, const std::map<std::string, Variable *> &globalVariableMap , const std::set<std::string>& optimizeOptionsSet);
+                  SCAM::Module *module, SCAM::Model *model , const std::set<std::string>& optimizeOptionsSet);
 
         ~Optimizer() = default;
 

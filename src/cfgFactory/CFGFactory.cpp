@@ -16,22 +16,31 @@ namespace SCAM {
             methodDecl(decl),
             ci(ci),
             module(module) {
-
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
         clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(), b);
-        if (clangCFG == NULL) {
+        if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
         }
-
-
         this->translateToScamCFG();
-
-
     }
 
-    CFGFactory::~CFGFactory() {
+    CFGFactory::CFGFactory(const clang::FunctionDecl * functionDecl, clang::CompilerInstance &ci, Module *module, bool sourceModule):
+            sourceModule(sourceModule),
+            methodDecl(nullptr),
+            ci(ci),
+            module(module) {
+
+        //TODO: remove ci and methodDecl from class
+        //Create Control flow graph(blockCFG)
+        clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(), &functionDecl->getASTContext(), b);
+        if (clangCFG == nullptr) {
+            llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
+            return;
+        }
+        this->translateToScamCFG();
     }
 
 /*
@@ -53,7 +62,7 @@ namespace SCAM {
 
         if (sourceModule) {
             //Init Block
-            SCAM::CfgBlock *initBlock = new SCAM::CfgBlock();
+            auto initBlock = new SCAM::CfgBlock();
             initBlock->setBlockID(this->controlFlowMap.size());
             std::vector<SCAM::Stmt *> initList = SCAM::CreateInitSection2::createInitSection2(module);
             for (auto stmt:initList) {
@@ -89,7 +98,7 @@ namespace SCAM {
         std::vector<clang::Stmt *> statementList = this->getCleanStmtList(block);
 
         //Create empty cfgNode
-        CfgBlock *cfgNode = new CfgBlock(-1, block->getBlockID());
+        auto cfgNode = new CfgBlock(-1, block->getBlockID());
         //Translate CLANG::Stms to SCAM:Stmts and add to node
         for (auto clangStmt: statementList) {
             SCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
@@ -114,15 +123,19 @@ namespace SCAM {
                 } else {
                     clang::LangOptions LO;
                     LO.CPlusPlus = true;
-                    block->dump(clangCFG, LO, false);
-                    block->getTerminator().getStmt()->dump();
-                    throw std::runtime_error("Can't translate terminator");
+                    //block->dump(clangCFG, LO, false);
+                    //block->getTerminator().getStmt()->dump();
+                    //std::string location = ci.getSourceManager().getFilename(block->getTerminator()->getLocStart());
+                    std::string location = block->getTerminator()->getLocStart().printToString(ci.getSourceManager());
+                    std::string errorMsg = "Error: " + location + "\n";
+                    errorMsg += "\tProblem with an terminator (if,while, else if) statement.\n";
+                    errorMsg += "\tMake sure only SystemC-PPA valid statements are used.\n";
+                    throw std::runtime_error(errorMsg);
                 }
             }
         }
 
         //Assign unique ID for each node
-
         int blockID = this->controlFlowMap.size();
         cfgNode->setBlockID(blockID);
         //
@@ -290,7 +303,6 @@ namespace SCAM {
     //! Methods that translates a Clang::Stmt into a SCAM::Stmt
     SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
         SCAM::FindDataFlow dataFlow(clangStmt, module, false);
-
         //Is stmt properly initialized?
         if (dataFlow.getStmt() == nullptr) {
             //Get the source code as string
@@ -328,7 +340,7 @@ namespace SCAM {
                 if (currentBlock->getSuccessorList().at(0) != currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[0];
                 }
-                    //OR
+                //OR
                 else if (currentBlock->getSuccessorList().at(0) == currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[1];
                 } else {
@@ -414,5 +426,7 @@ namespace SCAM {
         return false;
 
     }
+
+
 
 }

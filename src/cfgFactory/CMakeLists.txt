@@ -1,4 +1,4 @@
-add_library(cfgFactory
+add_library(cfgFactory SHARED
         CfgBlock.cpp
         CFGFactory.cpp
         FlattenIf.cpp

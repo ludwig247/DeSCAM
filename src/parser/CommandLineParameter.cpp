@@ -7,8 +7,8 @@
 
 #include <vector>
 #include <sstream>
+
 #include "CommandLineParameter.h"
-#include "CommandLineParametersConfig.h"
 
 CommandLineParameter::CommandLineParameter() {
     std::vector<std::string> parameters;

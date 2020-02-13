@@ -25,7 +25,6 @@ public:
 private:
     T shared_data;
     bool available_data;
-
     sc_port_base *reader, *writer;
 };
 

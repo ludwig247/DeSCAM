@@ -1,9 +1,8 @@
-#include <utility>
 
 //
 // Created by tobias on 13.02.17.
 //
-
+#include <utility>
 #include <PrintStmt.h>
 #include <math.h>
 #include <ModelGlobal.h>
@@ -62,6 +61,7 @@ std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(SCAM::Module 
     globalPackageName = ModelGlobal::getModel()->getName();
     this->module = module;
     localPackageName = module->getName();
+
 
     return std::make_pair(localPackageName + "_types" + getFilenameExtention(), generateLocalTypes());
 }

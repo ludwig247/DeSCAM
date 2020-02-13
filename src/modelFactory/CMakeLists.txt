@@ -3,7 +3,7 @@ add_compile_options(-D__STDC_LIMIT_MACROS)
 
 add_subdirectory(Optimizer)
 
-add_library (modelFactory
+add_library (modelFactory SHARED
         ModelFactory.cpp
         PluginAction.h
         FindModules.cpp

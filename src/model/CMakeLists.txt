@@ -17,7 +17,7 @@ set(AST_FILES
         Timepoint.cpp)
 
 
-add_library(Model ${AST_FILES})
+add_library(Model SHARED ${AST_FILES})
 
 
 add_subdirectory(Stmts)
