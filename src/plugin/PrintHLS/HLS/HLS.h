@@ -14,12 +14,13 @@
 #include "Optimizer.h"
 #include "PrintStatement.h"
 #include "PrintReset.h"
+#include "Utilities.h"
 
 namespace SCAM { namespace HLSPlugin { namespace  HLS {
 
         class HLS : public PluginFactory, public AbstractVisitor {
         public:
-            HLS();
+            explicit HLS(HLSOption hlsOption);
             ~HLS() override = default;
 
             std::map<std::string, std::string> printModel(Model* model) override;
@@ -33,6 +34,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             SCAM::Module* currentModule;
 
             std::shared_ptr<Optimizer> opt;
+            HLSOption hlsOption;
 
             void dataTypes(Model* model);
             void functions();
@@ -40,6 +42,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             void interface();
             void registerVariables();
             void writeToOutput();
+            void waitOperation();
 
             std::string getVariableReset(Variable* variable);
             std::string getDataSignalReset(DataSignal* dataSignal);
@@ -62,6 +65,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             void visit(Parameter& node) override { };
         };
 
+        // Template Function
         template<typename T>
         boost::optional<std::string> HLS::getResetValue(T* signal)
         {
@@ -74,6 +78,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             return boost::none;
         }
 
+        // Inline Function
         std::shared_ptr<Optimizer> HLS::getOptimizer() {
             return opt;
         }

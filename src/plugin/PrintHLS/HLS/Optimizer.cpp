@@ -456,17 +456,29 @@ DataSignal* Optimizer::getCombinedDataSignal(const std::vector<DataSignal*> &dat
 
 std::set<Variable*> Optimizer::getInternalRegisterIn()
 {
-    std::set<Variable *> vars;
+    std::set<Variable *> varsIn;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
             auto foundVars = ExprVisitor::getUsedVariables(commitment->getRhs());
-            vars.insert(foundVars.begin(), foundVars.end());
+            varsIn.insert(foundVars.begin(), foundVars.end());
         }
     }
-    return vars;
+
+    auto varsOut = getInternalRegisterOut();
+
+    auto it = varsIn.begin();
+    while(it != varsIn.end()) {
+        if (varsOut.find(*it) == varsOut.end()) {
+            varsIn.erase(it++);
+        } else {
+            ++it;
+        }
+    }
+
+    return varsIn;
 }
 
 std::set<Variable*> Optimizer::getInternalRegisterOut()

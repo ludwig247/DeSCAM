@@ -3,21 +3,21 @@
 //
 
 #include "ExprVisitor.h"
-#include "VHDLWrapper.h"
+#include "VHDLWrapperOneClkCycle.h"
 #include "PrintReset.h"
 #include "PrintStatement.h"
 #include "Utilities.h"
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-VHDLWrapper::VHDLWrapper() :
+VHDLWrapperOneClkCycle::VHDLWrapperOneClkCycle() :
     propertySuite(nullptr),
     currentModule(nullptr),
     hlsModule(nullptr)
 {
 }
 
-std::map<std::string, std::string> VHDLWrapper::printModel(Model *model) {
+std::map<std::string, std::string> VHDLWrapperOneClkCycle::printModel(Model *model) {
     for (auto &module : model->getModules()) {
         this->propertySuite = module.second->getPropertySuite();
         this->currentModule = module.second;
@@ -30,7 +30,7 @@ std::map<std::string, std::string> VHDLWrapper::printModel(Model *model) {
     return pluginOutput;
 }
 
-std::string VHDLWrapper::printTypes(Model *model) {
+std::string VHDLWrapperOneClkCycle::printTypes(Model *model) {
     std::stringstream typeStream;
     typeStream << "-- External data type definition package\n";
     typeStream << "library ieee;\n";
@@ -127,7 +127,32 @@ std::string VHDLWrapper::printTypes(Model *model) {
     return typeStream.str();
 }
 
-std::string VHDLWrapper::printModule(Model *model) {
+std::string VHDLWrapperOneClkCycle::printDataTypes(const DataType *dataType) {
+    std::stringstream dataTypeStream;
+
+    if (dataType->isEnumType()) {
+        dataTypeStream << "\ttype " << SignalFactory::convertDataType(dataType->getName()) << " is (";
+        for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
+            dataTypeStream << enumVal->first;
+            if (enumVal != --dataType->getEnumValueMap().end()) dataTypeStream << ", ";
+        }
+        dataTypeStream << ");\n";
+    } else if (dataType->isCompoundType()) {
+        dataTypeStream << "\ttype " + SignalFactory::convertDataType(dataType->getName()) << " is record\n";
+        for (auto &subVar: dataType->getSubVarMap()) {
+            dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataType(subVar.second->getName()) << ";\n";
+        }
+        dataTypeStream << "\tend record;\n";
+    } else if (dataType->isArrayType()) {
+        dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
+                       << " downto 0) of " << SignalFactory::convertDataType(dataType->getSubVarMap().begin()->second->getName())
+                       << ";\n";
+    }
+
+    return dataTypeStream.str();
+}
+
+std::string VHDLWrapperOneClkCycle::printModule(Model *model) {
     std::stringstream ss;
 
     // Print Include
@@ -150,8 +175,298 @@ std::string VHDLWrapper::printModule(Model *model) {
 
     componentInst(ss);
     monitor(ss);
+    controlProcess(ss);
 
-    // Print Output_Vld Processes
+    return ss.str();
+}
+
+void VHDLWrapperOneClkCycle::entity(std::stringstream &ss) {
+    // Print Entity
+    ss << "entity " + propertySuite->getName() + "_module is\n";
+    ss << "port(\n";
+
+    auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
+        for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); ++dataSignal) {
+            ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
+               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
+            if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
+                ss << ";\n";
+            }
+        }
+    };
+    printPortSignals(signalFactory->getInputs(), false);
+    printPortSignals(signalFactory->getOutputs(), false);
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
+    }
+    for (const auto syncSignal : propertySuite->getSyncSignals()) {
+        ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
+    }
+    printPortSignals(signalFactory->getControlSignals(), true);
+
+    ss << "\n);\n";
+    ss << "end " + propertySuite->getName() << "_module;\n\n";
+}
+
+// Print Signals
+void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
+    auto printVars = [&ss](
+            std::set<Variable *> const& vars,
+            Style const& style,
+            std::string const& prefix,
+            std::string const& suffix,
+            bool const& asVector) {
+        for (const auto& var : vars) {
+            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix)
+               << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
+        }
+    };
+
+    auto printSignal = [&ss](
+            std::set<DataSignal *> const& signals,
+            Style const& style,
+            std::string const& suffix,
+            bool const& asVector) {
+        for (const auto& signal : signals) {
+            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix)
+               << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
+        }
+    };
+
+    ss << "\n\t-- Internal Registers\n";
+    printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
+    printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
+    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false);
+
+    ss << "\n\t-- Operation Module Inputs\n";
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
+            Style::UL, "_in", true);
+    printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", true);
+
+    ss << "\n\t-- Module Outputs\n";
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
+            Style::UL, "_out", true);
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
+    }
+
+    ss << "\n\t-- Monitor Signals\n";
+    printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false);
+
+}
+
+void VHDLWrapperOneClkCycle::functions(std::stringstream &ss) {
+    std::set<Function* > usedFunctions;
+    for (const auto& state : propertySuite->getStates()) {
+        for (const auto& property : propertySuite->getSuccessorProperties(state)) {
+            for (const auto& assumption : property->getAssumptionList()) {
+                const auto& funcSet = ExprVisitor::getUsedFunctions(assumption);
+                usedFunctions.insert(funcSet.begin(), funcSet.end());
+            }
+        }
+    }
+
+    if (propertySuite->getFunctions().empty()) return;
+
+    ss << "\n\t-- Functions\n";
+    for (const auto& func : usedFunctions) {
+        ss << "\tfunction " + func->getName() << "(";
+
+        const auto& paramMap = func->getParamMap();
+        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
+            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
+            if (std::next(param) != paramMap.end())
+                ss << "; ";
+        }
+        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << ";\n";
+    }
+    ss << "\n";
+
+    for (const auto& func : usedFunctions) {
+        ss << "\tfunction " + func->getName() << "(";
+
+        auto paramMap = func->getParamMap();
+        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
+            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
+            if (std::next(param) != paramMap.end())
+                ss << "; ";
+        }
+        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << " is\n";
+        ss << "\tbegin\n";
+
+        if (func->getReturnValueConditionList().empty())
+            throw std::runtime_error("No return value for function " + func->getName() + "()");
+
+        auto returnValueConditionList = func->getReturnValueConditionList();
+        for (auto retValData = returnValueConditionList.begin(); retValData != returnValueConditionList.end(); retValData++) {
+            ss << "\t\t";
+            if (retValData == --returnValueConditionList.end()) {
+                if (returnValueConditionList.size() != 1)
+                    ss << "else ";
+            } else {
+                if (retValData == returnValueConditionList.begin()) {
+                    ss << "if ";
+                } else {
+                    ss << "elsif ";
+                }
+                for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
+                    ss << PrintStatement::toString(*cond, true);
+                    if (cond != --retValData->second.end()) ss << " and ";
+                }
+                ss << " then ";
+            }
+            ss << PrintStatement::toString(retValData->first, false) << ";\n";
+        }
+        if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
+        ss << "\tend " + func->getName() + ";\n\n";
+    }
+}
+
+void VHDLWrapperOneClkCycle::component(std::stringstream& ss) {
+    // Print Component
+    ss << "\n\tcomponent operations is\n";
+    ss << "\tport(\n";
+
+    auto printComponentSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix) {
+        for (const auto& signal : signals) {
+            bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
+            std::string suffix = (vectorType ? "_V" : "");
+            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix) << ": "
+               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::getDataTypeName(signal, true)
+               << ";\n";
+        }
+    };
+
+    auto printComponentVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix) {
+        for (const auto& var : vars) {
+            std::string type = var->getDataType()->getName();
+            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
+            ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix) << ": "
+               << prefix << " " << SignalFactory::getDataTypeName(var, true)
+               << ";\n";
+        }
+    };
+
+    printComponentSignal(signalFactory->getControlSignals(), "ap_");
+    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "");
+    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "");
+    printComponentVars(signalFactory->getInternalRegisterOut(), "out");
+
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
+    }
+
+    const auto& activeOp = signalFactory->getActiveOperation();
+    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactory::getDataTypeName(activeOp, true) << "\n";
+
+    ss << "\t);\n"
+       << "\tend component;\n";
+}
+
+// Print Component Instantiation
+void VHDLWrapperOneClkCycle::componentInst(std::stringstream& ss) {
+    ss << "\toperations_inst: operations\n"
+       << "\tport map(\n";
+
+    auto printComponentInstSignal = [&ss](
+            std::set<DataSignal *> const& signals,
+            std::string const& prefix,
+            std::string const& suffix) {
+        for (const auto& signal : signals) {
+            std::string type = signal->getDataType()->getName();
+            std::string moduleSuffix = (type == "int" || type == "unsigned" ? "_V" : "");
+            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix) << " => "
+               << SignalFactory::getName(signal, Style::UL, suffix) << ",\n";
+        }
+    };
+
+    auto printComponentInstVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix) {
+        for (const auto& var : vars) {
+            std::string type = var->getDataType()->getName();
+            std::string suffix = (type == "int" || type == "unsigned" ? "_V" : "");
+            ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix) << " => "
+               << prefix << SignalFactory::getName(var, Style::UL, "") << ",\n";
+        }
+    };
+
+    printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "");
+    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
+    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
+    printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");
+
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
+    }
+
+    const auto& activeOp = signalFactory->getActiveOperation();
+    ss << "\t\t" << activeOp->getFullName() << " => " << SignalFactory::getName(activeOp, Style::UL, "_in") << "\n"
+       << "\t);\n\n";
+}
+
+// Print Monitor
+void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
+    ss << "\t-- Monitor\n"
+       << "\tprocess (" << sensitivityList() << ")\n"
+       << "\tbegin\n"
+       << "\t\tcase active_state is\n";
+
+    std::set<std::string> waitStateNames;
+    for (auto waitState : propertySuite->getWaitProperties()) {
+        waitStateNames.insert(waitState->getName());
+    }
+
+    auto printAssumptions = [&ss](std::vector<Expr* > exprList) {
+        if (exprList.empty()) {
+            ss << "true";
+        }
+        for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {
+            ss << PrintStatement::toString(*expr, true);
+            if (std::next(expr) != exprList.end()) {
+                ss << " and ";
+            }
+        }
+    };
+
+    for (const auto& state : propertySuite->getStates()) {
+        bool noEndIf = false;
+        bool skipAssumptions = false;
+        ss << "\t\twhen st_" << state->getName() << " =>\n";
+        auto properties = propertySuite->getSuccessorProperties(state);
+        for (auto property = properties.begin(); property != properties.end(); ++property) {
+            if (property == properties.begin()) {
+                if (properties.size() == 1) {
+                    noEndIf = true;
+                } else {
+                    ss << "\t\t\tif (";
+                }
+            } else if (std::next(property) == properties.end()) {
+                ss << "\t\t\telse\n";
+                skipAssumptions = true;
+            } else {
+                ss << "\t\t\telsif (";
+            }
+            if (!skipAssumptions) {
+                printAssumptions((*property)->getAssumptionList());
+                ss << ") then \n";
+            }
+            if (waitStateNames.find((*property)->getName()) == waitStateNames.end()) {
+                ss << "\t\t\t\tactive_operation <= op_" << (*property)->getName() << ";\n"
+                   << "\t\t\t\tnext_state <= st_" << (*property)->getNextState()->getName() << ";\n";
+            } else {
+                ss << "\t\t\t\tactive_operation <= op_state_wait;\n";
+                ss << "\t\t\t\tnext_state <= active_state;\n";
+            }
+        }
+        if (!noEndIf) {
+            ss << "\t\t\tend if;\n";
+        }
+    }
+    ss << "\t\tend case;\n"
+       << "\tend process;\n\n";
+}
+
+void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
+{
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool isEnum = dataSignal->isEnumType();
         bool hasOutputReg = hlsModule->hasOutputReg(dataSignal);
@@ -242,7 +557,9 @@ std::string VHDLWrapper::printModule(Model *model) {
             exprNumber++;
         }
     }
+}
 
+void VHDLWrapperOneClkCycle::controlProcess(std::stringstream &ss) {
     // Print Control Process
     ss << "\n\t-- Control process\n"
        << "\tprocess (clk, rst)\n"
@@ -254,321 +571,9 @@ std::string VHDLWrapper::printModule(Model *model) {
        << "\t\tend if;\n"
        << "\tend process;\n\n"
        << "end " << propertySuite->getName() << "_arch;\n";
-
-    return ss.str();
 }
 
-void VHDLWrapper::entity(std::stringstream &ss) {
-    // Print Entity
-    ss << "entity " + propertySuite->getName() + "_module is\n";
-    ss << "port(\n";
-
-    auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
-        for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); ++dataSignal) {
-            ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
-               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
-            if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
-                ss << ";\n";
-            }
-        }
-    };
-    printPortSignals(signalFactory->getInputs(), false);
-    printPortSignals(signalFactory->getOutputs(), false);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
-    }
-    for (const auto syncSignal : propertySuite->getSyncSignals()) {
-        ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
-    }
-    printPortSignals(signalFactory->getControlSignals(), true);
-
-    ss << "\n);\n";
-    ss << "end " + propertySuite->getName() << "_module;\n\n";
-}
-
-// Print Signals
-void VHDLWrapper::signals(std::stringstream &ss) {
-    auto printVars = [&ss](
-            std::set<Variable *> const& vars,
-            Style const& style,
-            std::string const& prefix,
-            std::string const& suffix,
-            bool const& asVector) {
-        for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix)
-               << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
-        }
-    };
-
-    auto printSignal = [&ss](
-            std::set<DataSignal *> const& signals,
-            Style const& style,
-            std::string const& suffix,
-            bool const& asVector) {
-        for (const auto& signal : signals) {
-            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix)
-               << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
-        }
-    };
-
-    ss << "\n\t-- Internal Registers\n";
-    printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
-    printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
-    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false);
-
-    ss << "\n\t-- Operation Module Inputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
-            Style::UL, "_in", true);
-    printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", true);
-
-    ss << "\n\t-- Module Outputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
-            Style::UL, "_out", true);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
-    }
-
-    ss << "\n\t-- Monitor Signals\n";
-    printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false);
-
-}
-
-void VHDLWrapper::component(std::stringstream& ss) {
-    // Print Component
-    ss << "\n\tcomponent operations is\n";
-    ss << "\tport(\n";
-
-    auto printComponentSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix) {
-        for (const auto& signal : signals) {
-            bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
-            std::string suffix = (vectorType ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix) << ": "
-               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::getDataTypeName(signal, true)
-               << ";\n";
-        }
-    };
-
-    auto printComponentVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix) {
-        for (const auto& var : vars) {
-            std::string type = var->getDataType()->getName();
-            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix) << ": "
-               << prefix << " " << SignalFactory::getDataTypeName(var, true)
-               << ";\n";
-        }
-    };
-
-    printComponentSignal(signalFactory->getControlSignals(), "ap_");
-    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "");
-    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "");
-    printComponentVars(signalFactory->getInternalRegisterOut(), "out");
-
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
-    }
-
-    const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactory::getDataTypeName(activeOp, true) << "\n";
-
-    ss << "\t);\n"
-       << "\tend component;\n";
-}
-
-// Print Component Instantiation
-void VHDLWrapper::componentInst(std::stringstream& ss) {
-    ss << "\toperations_inst: operations\n"
-       << "\tport map(\n";
-
-    auto printComponentInstSignal = [&ss](
-            std::set<DataSignal *> const& signals,
-            std::string const& prefix,
-            std::string const& suffix) {
-        for (const auto& signal : signals) {
-            std::string type = signal->getDataType()->getName();
-            std::string moduleSuffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix) << " => "
-               << SignalFactory::getName(signal, Style::UL, suffix) << ",\n";
-        }
-    };
-
-    auto printComponentInstVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix) {
-        for (const auto& var : vars) {
-            std::string type = var->getDataType()->getName();
-            std::string suffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix) << " => "
-               << prefix << SignalFactory::getName(var, Style::UL, "") << ",\n";
-        }
-    };
-
-    printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "");
-    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
-    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
-    printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");
-
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
-    }
-
-    const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << " => " << SignalFactory::getName(activeOp, Style::UL, "_in") << "\n"
-       << "\t);\n\n";
-}
-
-// Print Monitor
-void VHDLWrapper::monitor(std::stringstream &ss) {
-    ss << "\t-- Monitor\n"
-       << "\tprocess (" << printSensitivityList() << ")\n"
-       << "\tbegin\n"
-       << "\t\tcase active_state is\n";
-
-    std::set<std::string> waitStateNames;
-    for (auto waitState : propertySuite->getWaitProperties()) {
-        waitStateNames.insert(waitState->getName());
-    }
-
-    auto printAssumptions = [&ss](std::vector<Expr* > exprList) {
-        if (exprList.empty()) {
-            ss << "true";
-        }
-        for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {
-            ss << PrintStatement::toString(*expr, true);
-            if (std::next(expr) != exprList.end()) {
-                ss << " and ";
-            }
-        }
-    };
-
-    for (const auto& state : propertySuite->getStates()) {
-        bool noEndIf = false;
-        bool skipAssumptions = false;
-        ss << "\t\twhen st_" << state->getName() << " =>\n";
-        auto properties = propertySuite->getSuccessorProperties(state);
-        for (auto property = properties.begin(); property != properties.end(); ++property) {
-            if (property == properties.begin()) {
-                if (properties.size() == 1) {
-                    noEndIf = true;
-                } else {
-                    ss << "\t\t\tif (";
-                }
-            } else if (std::next(property) == properties.end()) {
-                ss << "\t\t\telse\n";
-                skipAssumptions = true;
-            } else {
-                ss << "\t\t\telsif (";
-            }
-            if (!skipAssumptions) {
-                printAssumptions((*property)->getAssumptionList());
-                ss << ") then \n";
-            }
-            if (waitStateNames.find((*property)->getName()) == waitStateNames.end()) {
-                ss << "\t\t\t\tactive_operation <= op_" << (*property)->getName() << ";\n"
-                   << "\t\t\t\tnext_state <= st_" << (*property)->getNextState()->getName() << ";\n";
-            } else {
-                ss << "\t\t\t\tactive_operation <= op_state_wait;\n";
-                ss << "\t\t\t\tnext_state <= active_state;\n";
-            }
-        }
-        if (!noEndIf) {
-            ss << "\t\t\tend if;\n";
-        }
-    }
-    ss << "\t\tend case;\n"
-       << "\tend process;\n\n";
-}
-
-void VHDLWrapper::functions(std::stringstream &ss) {
-    std::set<Function* > usedFunctions;
-    for (const auto& state : propertySuite->getStates()) {
-        for (const auto& property : propertySuite->getSuccessorProperties(state)) {
-            for (const auto& assumption : property->getAssumptionList()) {
-                const auto& funcSet = ExprVisitor::getUsedFunctions(assumption);
-                usedFunctions.insert(funcSet.begin(), funcSet.end());
-            }
-        }
-    }
-
-    if (propertySuite->getFunctions().empty()) return;
-
-    ss << "\n\t-- Functions\n";
-    for (const auto& func : usedFunctions) {
-        ss << "\tfunction " + func->getName() << "(";
-
-        const auto& paramMap = func->getParamMap();
-        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
-            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
-            if (std::next(param) != paramMap.end())
-                ss << "; ";
-        }
-        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << ";\n";
-    }
-    ss << "\n";
-
-    for (const auto& func : usedFunctions) {
-        ss << "\tfunction " + func->getName() << "(";
-
-        auto paramMap = func->getParamMap();
-        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
-            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
-            if (std::next(param) != paramMap.end())
-                ss << "; ";
-        }
-        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << " is\n";
-        ss << "\tbegin\n";
-
-        if (func->getReturnValueConditionList().empty())
-            throw std::runtime_error("No return value for function " + func->getName() + "()");
-
-        auto returnValueConditionList = func->getReturnValueConditionList();
-        for (auto retValData = returnValueConditionList.begin(); retValData != returnValueConditionList.end(); retValData++) {
-            ss << "\t\t";
-            if (retValData == --returnValueConditionList.end()) {
-                if (returnValueConditionList.size() != 1)
-                    ss << "else ";
-            } else {
-                if (retValData == returnValueConditionList.begin()) {
-                    ss << "if ";
-                } else {
-                    ss << "elsif ";
-                }
-                for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
-                    ss << PrintStatement::toString(*cond, true);
-                    if (cond != --retValData->second.end()) ss << " and ";
-                }
-                ss << " then ";
-            }
-            ss << PrintStatement::toString(retValData->first, false) << ";\n";
-        }
-        if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
-        ss << "\tend " + func->getName() + ";\n\n";
-    }
-}
-
-std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
-    std::stringstream dataTypeStream;
-
-    if (dataType->isEnumType()) {
-        dataTypeStream << "\ttype " << SignalFactory::convertDataType(dataType->getName()) << " is (";
-        for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
-            dataTypeStream << enumVal->first;
-            if (enumVal != --dataType->getEnumValueMap().end()) dataTypeStream << ", ";
-        }
-        dataTypeStream << ");\n";
-    } else if (dataType->isCompoundType()) {
-        dataTypeStream << "\ttype " + SignalFactory::convertDataType(dataType->getName()) << " is record\n";
-        for (auto &subVar: dataType->getSubVarMap()) {
-            dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataType(subVar.second->getName()) << ";\n";
-        }
-        dataTypeStream << "\tend record;\n";
-    } else if (dataType->isArrayType()) {
-        dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
-                       << " downto 0) of " << SignalFactory::convertDataType(dataType->getSubVarMap().begin()->second->getName())
-                       << ";\n";
-    }
-
-    return dataTypeStream.str();
-}
-
-std::string VHDLWrapper::printSensitivityList() {
+std::string VHDLWrapperOneClkCycle::sensitivityList() {
     std::stringstream sensitivityListStream;
 
     std::set<SyncSignal* > sensListSyncSignals;
@@ -626,7 +631,7 @@ std::string VHDLWrapper::printSensitivityList() {
     return sensitivityListStream.str();
 }
 
-std::string VHDLWrapper::getResetValue(Variable* variable)
+std::string VHDLWrapperOneClkCycle::getResetValue(Variable* variable)
 {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
         auto printResetValue = PrintResetSignal(commitment, variable->getName());
@@ -637,7 +642,7 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
     return PrintStatement::toString(variable->getInitialValue(), false);
 }
 
-std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
+std::string VHDLWrapperOneClkCycle::getResetValue(DataSignal* dataSignal)
 {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
         auto printResetValue = PrintResetSignal(commitment, dataSignal->getFullName());
@@ -647,4 +652,3 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
     }
     return PrintStatement::toString(dataSignal->getInitialValue(), false);
 }
-

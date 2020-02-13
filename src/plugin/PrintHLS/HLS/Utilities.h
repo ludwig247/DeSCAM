@@ -10,6 +10,11 @@
 
 namespace SCAM { namespace HLSPlugin { namespace HLS {
 
+    enum class HLSOption {
+        OCCO,   // One Clock Cycle Operations
+        MCCO    // Multi Clock Cycle Operations
+    };
+
     enum class Side {
         UNKNOWN,
         LHS,

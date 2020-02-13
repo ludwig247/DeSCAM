@@ -14,11 +14,11 @@
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-        class VHDLWrapper : public PluginFactory {
+        class VHDLWrapperOneClkCycle : public PluginFactory {
 
         public:
-            VHDLWrapper();
-            ~VHDLWrapper() = default;
+            VHDLWrapperOneClkCycle();
+            ~VHDLWrapperOneClkCycle() = default;
 
             std::map<std::string, std::string> printModel(Model* model) override;
 
@@ -33,15 +33,17 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
             void entity(std::stringstream& ss);
             void signals(std::stringstream& ss);
+            void functions(std::stringstream& ss);
             void component(std::stringstream& ss);
             void componentInst(std::stringstream& ss);
             void monitor(std::stringstream& ss);
-            void functions(std::stringstream& ss);
+            void moduleOutputHandling(std::stringstream& ss);
+            void controlProcess(std::stringstream& ss);
 
             std::string getResetValue(Variable* variable);
             std::string getResetValue(DataSignal* dataSignal);
             std::string printDataTypes(const DataType* dataType);
-            std::string printSensitivityList();
+            std::string sensitivityList();
         };
 
 }}}

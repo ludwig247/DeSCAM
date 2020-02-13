@@ -7,19 +7,26 @@
 
 using namespace SCAM::HLSPlugin::HLS;
 
-PrintStatement::PrintStatement(Stmt *stmt, Optimizer *opt, unsigned int indentSize, unsigned int indentOffset) {
-    side = Side::UNKNOWN;
+PrintStatement::PrintStatement(
+        Stmt *stmt,
+        Optimizer *opt,
+        HLSOption hlsOption,
+        unsigned int indentSize,
+        unsigned int indentOffset
+) {
+    this->side = Side::UNKNOWN;
     this->opt = opt;
+    this->hlsOption = hlsOption;
     this->createString(stmt, indentSize, indentOffset);
 }
 
 std::string PrintStatement::toString(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    PrintStatement printer(stmt, nullptr, indentSize, indentOffset);
+    PrintStatement printer(stmt, nullptr, HLSOption::MCCO, indentSize, indentOffset);
     return printer.getString();
 }
 
-std::string PrintStatement::toString(Stmt *stmt, Optimizer *opt, unsigned int indentSize, unsigned int indentOffset) {
-    PrintStatement printer(stmt, opt, indentSize, indentOffset);
+std::string PrintStatement::toString(Stmt *stmt, Optimizer *opt, HLSOption hlsOption, unsigned int indentSize, unsigned int indentOffset) {
+    PrintStatement printer(stmt, opt, hlsOption, indentSize, indentOffset);
     return printer.getString();
 }
 
@@ -38,11 +45,23 @@ void PrintStatement::visit(Assignment &node) {
 }
 
 void PrintStatement::visit(VariableOperand &node) {
-    std::string suffix;
     bool isConstant = opt->isConstant(node.getVariable());
-    if (!isConstant) {
+
+    std::string suffix;
+    if (!isConstant && hlsOption == HLSOption::OCCO) {
          suffix = (side == Side::LHS ? "_reg" : "_tmp");
     }
+
+    if (!isConstant && hlsOption == HLSOption::MCCO) {
+        if (opt) {
+            if(side == Side::LHS) {
+                this->ss << "out_";
+            } else if (side == Side::RHS) {
+                this->ss << "in_";
+            }
+        }
+    }
+
     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << suffix;
         if (node.getVariable()->getParent()->isArrayType()) {
@@ -56,16 +75,22 @@ void PrintStatement::visit(VariableOperand &node) {
 }
 
 void PrintStatement::visit(DataSignalOperand &node) {
-    auto direction = node.getDataSignal()->getPort()->getInterface()->getDirection();
+    std::string suffix;
+    if (hlsOption == HLSOption::OCCO) {
+        if (node.getDataSignal()->getPort()->getInterface()->getDirection() == "in") {
+            suffix = "_reg";
+        }
+    }
+
     if (node.getDataSignal()->isSubVar()) {
-        this->ss << node.getDataSignal()->getParent()->getName() << (direction == "in" ? "" : "_reg");
+        this->ss << node.getDataSignal()->getParent()->getName() << suffix;
         if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << "[" << node.getDataSignal()->getName() << "]";
         } else {
             this->ss << "." << node.getDataSignal()->getName();
         }
     } else {
-        this->ss << node.getDataSignal()->getName() << (direction == "in" ? "" : "_reg");
+        this->ss << node.getDataSignal()->getName() << suffix;
     }
 }
 
@@ -123,11 +148,8 @@ void PrintStatement::visit(ITE &node) {
         for (std::size_t i = 0; i < indent; ++i) {
             this->ss << " ";    //add indent
         }
-        std::string statementString = PrintStatement::toString(stmt, indentSize, indent);
-        this->ss << statementString;
-        if (statementString.find('\n') == std::string::npos)
-            this->ss << ";";
-        this->ss << std::endl;
+        stmt->accept(*this);
+        this->ss << ";\n";
     }
     indent -= indentSize;
     for (std::size_t i = 0; i < indent; ++i) {
@@ -143,11 +165,8 @@ void PrintStatement::visit(ITE &node) {
             }
             if (NodePeekVisitor::nodePeekITE(stmt) != nullptr)
                 indent -= indentSize;
-            std::string statementString = PrintStatement::toString(stmt, indentSize, indent);
-            this->ss << statementString;
-            if (statementString.find('\n') == std::string::npos)
-                this->ss << ";";
-            this->ss << std::endl;
+            stmt->accept(*this);
+            this->ss << ";\n";
         }
         indent -= indentSize;
         for (std::size_t i = 0; i < indent; ++i) {

@@ -5,20 +5,37 @@
 #ifndef SCAM_PRINTCOMMITMENTSHLS_H
 #define SCAM_PRINTCOMMITMENTSHLS_H
 
-#include "PrintStmt.h"
-#include "Utilities.h"
 #include "Optimizer.h"
 #include "PrintBitOperations.h"
+#include "PrintStmt.h"
+#include "Utilities.h"
 
 namespace SCAM { namespace HLSPlugin { namespace HLS {
 
     class PrintStatement : public PrintStmt {
 
     public:
-        explicit PrintStatement(SCAM::Stmt *stmt, Optimizer *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintStatement(
+                SCAM::Stmt *stmt,
+                Optimizer *opt,
+                HLSOption hlsOption,
+                unsigned int indentSize = 2,
+                unsigned int indentOffset = 0
+        );
 
-        static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
-        static std::string toString(Stmt *stmt, Optimizer *opt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        static std::string toString(
+                Stmt *stmt,
+                unsigned int indentSize = 2,
+                unsigned int indentOffset = 0
+        );
+
+        static std::string toString(
+                Stmt *stmt,
+                Optimizer *opt,
+                HLSOption hlsOption,
+                unsigned int indentSize = 2,
+                unsigned int indentOffset = 0
+        );
 
         std::string getString();
 
@@ -41,6 +58,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
     private:
         Optimizer *opt;
         Side side;
+        HLSOption hlsOption;
 
         void printIndent();
     };

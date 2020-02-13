@@ -4,16 +4,15 @@
 
 #include "NodePeekVisitor.h"
 #include "HLS.h"
-#include "Utilities.h"
 
 using namespace SCAM::HLSPlugin::HLS;
 
-HLS::HLS()
-        :
-        ss(""),
-        propertySuite(nullptr),
-        currentModule(nullptr),
-        opt(nullptr)
+HLS::HLS(HLSOption hlsOption) :
+    ss(""),
+    propertySuite(nullptr),
+    currentModule(nullptr),
+    opt(nullptr),
+    hlsOption(hlsOption)
 {
 }
 
@@ -47,10 +46,14 @@ void HLS::operations()
     ss << "void operations(\n";
     interface();
     ss << "{\n";
-    registerVariables();
-    ss << "\n";
-    writeToOutput();
-    ss << "\n";
+
+    if (hlsOption == HLSOption::OCCO) {
+        registerVariables();
+        ss << "\n";
+        writeToOutput();
+        ss << "\n";
+    }
+
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
@@ -61,7 +64,7 @@ void HLS::operations()
             if (*(commitment->getRhs())==*(commitment->getLhs())) {
                 continue;
             }
-            ss << PrintStatement::toString(commitment, opt.get(), 2, 2);
+            ss << PrintStatement::toString(commitment, opt.get(), hlsOption, 2, 2);
         }
         for (auto notifySignal : propertySuite->getNotifySignals()) {
             switch (operationProperty->getTiming(notifySignal->getPort())) {
@@ -79,20 +82,16 @@ void HLS::operations()
         }
         ss << "\t\tbreak;\n";
     }
-    ss << "\tcase state_wait:\n";
-    for (const auto& port : currentModule->getPorts()) {
-        if (port.second->getInterface()->isMasterOut()) {
-            ss << "\t\t" << port.second->getName() << "_notify_reg = false;\n";
-        }
+    if (hlsOption == HLSOption::OCCO) {
+        waitOperation();
     }
-    ss << "\t\tbreak;\n";
     ss << "\t}\n";
     ss << "}";
 }
 
 void HLS::interface()
 {
-    // input and output signals
+    // Input
     for (const auto& input : Utilities::getParents(opt->getInputs())) {
         bool isArrayType = input->isArrayType();
         if (!isArrayType) {
@@ -100,13 +99,8 @@ void HLS::interface()
                << " " << input->getName() << ",\n";
         }
     }
-    for (const auto& arrayPort : opt->getArrayPorts()) {
-        for (unsigned long i = 0; i<arrayPort.second.size(); ++i) {
-            ss << "\t" << Utilities::convertDataType(
-                    arrayPort.first->getDataType()->getSubVarMap().begin()->second->getName())
-               << " " << arrayPort.first->getDataSignal()->getName() << "_" << i << ",\n";
-        }
-    }
+
+    // Output
     for (const auto& output : Utilities::getParents(opt->getOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
@@ -122,6 +116,35 @@ void HLS::interface()
         }
         ss << ",\n";
     }
+
+    // Optimized Array Inputs
+    for (const auto& arrayPort : opt->getArrayPorts()) {
+        for (unsigned long i = 0; i<arrayPort.second.size(); ++i) {
+            ss << "\t" << Utilities::convertDataType(
+                    arrayPort.first->getDataType()->getSubVarMap().begin()->second->getName())
+               << " " << arrayPort.first->getDataSignal()->getName() << "_" << i << ",\n";
+        }
+    }
+
+    if (hlsOption == HLSOption::MCCO) {
+        // Internal Registers Input
+        for (const auto reg : Utilities::getParents(opt->getInternalRegisterIn())) {
+            bool isArrayType = reg->isArrayType();
+            if (isArrayType) {
+                ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
+            }
+            else {
+                ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
+            }
+            ss << " in_" << reg->getFullName();
+            if (isArrayType) {
+                ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
+            }
+            ss << ",\n";
+        }
+    }
+
+    // Internal Register Output
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut())) {
         bool isArrayType = reg->isArrayType();
         if (isArrayType) {
@@ -136,9 +159,12 @@ void HLS::interface()
         }
         ss << ",\n";
     }
+
+    // Notify Signals
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
     }
+
     ss << "\toperation active_operation\n)\n";
 }
 
@@ -173,6 +199,7 @@ void HLS::registerVariables()
         ss << " = " << getDataSignalReset(output);
         ss << ";\n";
     }
+
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut())) {
         bool isArrayType = reg->isArrayType();
         if (isArrayType) {
@@ -188,12 +215,15 @@ void HLS::registerVariables()
         }
         ss << " = " << getVariableReset(reg) << ";\n";
     }
+
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         auto resetValue = getResetValue(notifySignal);
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue ? resetValue.get() : "'0'") << ";\n";
     }
+
     ss << "\n";
+
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut())) {
         bool isArrayType = reg->isArrayType();
         if (isArrayType) {
@@ -230,10 +260,15 @@ void HLS::dataTypes(Model* model)
     // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    for (const auto operationProperty : propertySuite->getOperationProperties()) {
-        ss << operationProperty->getName() << ", ";
+    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
+        ss << (*state)->getName();
+        if (std::next(state) != propertySuite->getStates().end()) {
+            ss << ", ";
+        }
     }
-    ss << "state_wait};\n\n";
+    if (hlsOption == HLSOption::OCCO) {
+        ss << ", state_wait};\n\n";
+    }
 
     std::set<DataType*> enumTypes;
     std::set<DataType*> compoundTypes;
@@ -304,8 +339,8 @@ void HLS::visit(DataType& node)
                 ss << ", ";
         }
         ss << "};\n\n";
-        // Structs
     }
+    // Structs
     else if (node.isCompoundType()) {
         ss << "struct " << node.getName() << " {\n";
         for (auto& subVar : node.getSubVarMap()) {
@@ -457,4 +492,15 @@ std::string HLS::getVariableReset(Variable* variable)
     else {
         return getValue(variable);
     }
+}
+
+void HLS::waitOperation()
+{
+    ss << "\tcase state_wait:\n";
+    for (const auto& port : currentModule->getPorts()) {
+        if (port.second->getInterface()->isMasterOut()) {
+            ss << "\t\t" << port.second->getName() << "_notify_reg = false;\n";
+        }
+    }
+    ss << "\t\tbreak;\n";
 }
