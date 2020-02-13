@@ -464,27 +464,29 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
 }
 
 std::set<Variable *> OperationModuleInterface::getInternalRegisterIn() {
-    std::set<Variable *> vars;
+    std::set<Variable *> varsIn;
     for (const auto &operationProperties : propertySuite->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getCommitmentList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
             auto foundVars = ExprVisitor::getUsedVariables(commitment->getRhs());
-            vars.insert(foundVars.begin(), foundVars.end());
+            varsIn.insert(foundVars.begin(), foundVars.end());
         }
     }
-    std::set<Variable *> outputRegisters;
-    for (const auto& outputRegister : registerToOutputMap) {
-        outputRegisters.insert(outputRegister.first);
-    }
-    for (const auto& outputRegister : Utilities::getSubVars(outputRegisters)) {
-        const auto it = vars.find(outputRegister);
-        if (it != vars.end()) {
-            vars.erase(it);
+
+    auto varsOut = getInternalRegisterOut();
+
+    auto it = varsIn.begin();
+    while(it != varsIn.end()) {
+        if (varsOut.find(*it) == varsOut.end()) {
+            varsIn.erase(it++);
+        } else {
+            ++it;
         }
     }
-    return vars;
+
+    return varsIn;
 }
 
 std::set<Variable *> OperationModuleInterface::getInternalRegisterOut() {

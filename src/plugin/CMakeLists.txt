@@ -56,8 +56,8 @@ add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by sho
 add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
 
-add_plugin_option(PrintHLS; one_clk_cycle_op; "Generates HLS file which try to force Vivado HLS generating onc clock cylce designs")
-add_plugin_option(PrintHLS; multi_clk_cycle_op; "Generates HLS file allowing Vivado HLS scheduling the operation over multiple cycles")
+add_plugin_option(PrintHLS; one_clk_cycle_op; "Generates HLS file while trying to force Vivado HLS generating onc clock cylce designs")
+add_plugin_option(PrintHLS; multi_clk_cycle_op; "Generates HLS file while allowing Vivado HLS scheduling the operation over multiple cycles")
 
 add_optimize_option(all; "Enable all optimizations")
 add_optimize_option(gvp; "Propagate the value of constant global variables")

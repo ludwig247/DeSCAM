@@ -6,14 +6,9 @@
 #define DESCAM_PRINTHLS_H
 
 #include <map>
-#include <memory>
 
+#include "HLS/Utilities.h"
 #include "PluginFactory.h"
-
-#include "HLS/HLS.h"
-#include "PrintHLS/VHDLWrapper/VHDLWrapperOneClkCycle.h"
-#include "SynthesisScript/SynthesisScripts.h"
-
 
 class PrintHLS : public PluginFactory {
 public:

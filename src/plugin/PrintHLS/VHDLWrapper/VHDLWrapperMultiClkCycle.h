@@ -2,8 +2,8 @@
 // Created by johannes on 02.11.19.
 //
 
-#ifndef SCAM_PRINTVHDLFORHLS_H
-#define SCAM_PRINTVHDLFORHLS_H
+#ifndef SCAM_VHDLWrapperMultiClkCycle_H
+#define SCAM_VHDLWrapperMultiClkCycle_H
 
 #include <memory>
 #include <string>
@@ -15,11 +15,11 @@
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-        class VHDLWrapperOneClkCycle : public VHDLWrapper {
+        class VHDLWrapperMultiClkCycle : public VHDLWrapper {
 
         public:
-            VHDLWrapperOneClkCycle() = default;
-            ~VHDLWrapperOneClkCycle() = default;
+            VHDLWrapperMultiClkCycle() = default;
+            ~VHDLWrapperMultiClkCycle() = default;
 
         private:
             void entity(std::stringstream& ss) override ;
@@ -33,4 +33,4 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
 }}}
 
-#endif //SCAM_PRINTVHDLFORHLS_H
+#endif //SCAM_VHDLWrapperMultiClkCycle_H
