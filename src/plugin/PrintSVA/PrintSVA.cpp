@@ -277,7 +277,6 @@ std::string PrintSVA::reset_operation() {
        << "\treset_sequence |=>\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
         ss << temporalExpr(commitment);
-        //ss << "\tt ##0 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << ConditionVisitorSVA::toString(commitment->getRhs());
         if (commitment != ps->getResetProperty()->getCommitmentList().back())
             ss << " and\n";
 
@@ -325,18 +324,6 @@ std::string PrintSVA::operations() {
             }
         }
         ss << ";\n";
-        /*
-        for (auto notify : ps->getNotifySignals()){
-            ss << " and\n";
-            switch(op->getTiming(notify->getPort())){
-                case TT_1: ss << "\tt ##1 " << notify->getName() << "() == 1"; break;
-                case FF_1: ss << "\tt ##1 " << notify->getName() << "() == 0"; break;
-                case FF_e: ss << "\tduring (next(t,1), t_end(o), " << notify->getName() << "() == 0)"; break;
-                case FT_e: ss << "\tduring_o (t, 1, t_end(o), -1, " << notify->getName() << "() == 0) and\n";
-                           ss << "\tt_end(o) ##0 " << notify->getName() << "() == 1"; break;
-            }
-        }*/
-
         ss << "endproperty;\n";
         ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p(1)); //ASSIGN t_end offset here\n\n";
         ss << "\n\n";
