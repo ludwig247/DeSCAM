@@ -267,7 +267,6 @@ std::string PrintITL::macros() {
 
 std::string PrintITL::operations() {
 
-
     PropertySuite *ps = this->module->getPropertySuite();
 
     std::stringstream ss;
