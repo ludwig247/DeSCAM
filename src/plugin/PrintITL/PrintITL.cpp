@@ -14,8 +14,10 @@ PrintITL::PrintITL() {
         usedITLOption = ITLOption::ADJUSTMACROS;
     } else if (getOptionMap().at("pipelined")) {
         usedITLOption = ITLOption::PIPELINED;
-    } else if (getOptionMap().at("hls")) {
-        usedITLOption = ITLOption::HLS;
+    } else if (getOptionMap().at("hls-occo")) {
+        usedITLOption = ITLOption::HLS_OCCO;
+    } else if (getOptionMap().at("hls-mcco")){
+        usedITLOption = ITLOption::HLS_MCCO;
     } else {
         usedITLOption = ITLOption::DEFAULT;
     }
@@ -37,7 +39,10 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
             case ITLOption::PIPELINED:
                 pluginOutput.insert(std::make_pair(module.first + ".vhi", pipelined()));
                 break;
-            case ITLOption::HLS:
+            case ITLOption::HLS_MCCO:
+                pluginOutput.insert(std::make_pair(module.first + ".vhi", hls()));
+                break;
+            case ITLOption::HLS_OCCO:
                 pluginOutput.insert(std::make_pair(module.first + ".vhi", hls()));
                 break;
         }
@@ -61,7 +66,10 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
         case ITLOption::PIPELINED:
             pluginOutput.insert(std::make_pair(node->getName() + ".vhi", pipelined()));
             break;
-        case ITLOption::HLS:
+        case ITLOption::HLS_OCCO:
+            pluginOutput.insert(std::make_pair(node->getName() + ".vhi", hls()));
+            break;
+        case ITLOption::HLS_MCCO:
             pluginOutput.insert(std::make_pair(node->getName() + ".vhi", hls()));
             break;
     }
@@ -867,7 +875,11 @@ std::string PrintITL::hls() {
     ss << "-- STATES --" << std::endl;
     for (auto st: ps->getStates()){
         ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName())
-           << " := " << "active_state = st_" << st->getName() << " end macro;\n";
+           << " := " << "active_state = st_" << st->getName();
+        if (usedITLOption == ITLOption::HLS_MCCO) {
+            ss << " and (ready_sig = '1' or idle_sig = '1')";
+        }
+        ss << " end macro;\n";
     }
     ss << std::endl << std::endl;
 
@@ -901,11 +913,17 @@ std::string PrintITL::hls() {
             constraintSize--;
         }
 
-        if (module->isSlave()) {
-            t_end = "t+1";
+        if (usedITLOption == ITLOption::HLS_OCCO) {
+            if (module->isSlave()) {
+                t_end = "t+1";
+            } else {
+                ss << "for timepoints:\n";
+                ss << "\tt_end = t+1;\n";
+                t_end = "t_end";
+            }
         } else {
-            ss << "for timepoints:\n";
-            ss << "\tt_end = t+1;\n";
+            ss << "for timepoints:\n"
+               << "\tt_end = t+1..5 waits_for done_sig = '1';\n";
             t_end = "t_end";
         }
 

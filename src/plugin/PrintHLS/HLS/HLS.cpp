@@ -67,15 +67,16 @@ void HLS::operations()
             ss << PrintStatement::toString(commitment, opt.get(), hlsOption, 2, 2);
         }
         for (auto notifySignal : propertySuite->getNotifySignals()) {
+            std::string suffix = (hlsOption == HLSOption::OCCO ? "_reg" : "");
             switch (operationProperty->getTiming(notifySignal->getPort())) {
             case TT_1:
             case FT_e: {
-                ss << "\t\t" << notifySignal->getName() << "_reg = true;\n";
+                ss << "\t\t" << notifySignal->getName() << suffix << " = true;\n";
                 break;
             }
             case FF_1:
             case FF_e: {
-                ss << "\t\t" << notifySignal->getName() << "_reg = false;\n";
+                ss << "\t\t" << notifySignal->getName() << suffix << " = false;\n";
                 break;
             }
             }
@@ -260,15 +261,17 @@ void HLS::dataTypes(Model* model)
     // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
-        ss << (*state)->getName();
-        if (std::next(state) != propertySuite->getStates().end()) {
+    auto operations = propertySuite->getOperationProperties();
+    for (auto operation = operations.begin(); operation != operations.end(); ++operation) {
+        ss << (*operation)->getName();
+        if (std::next(operation) != operations.end()) {
             ss << ", ";
         }
     }
     if (hlsOption == HLSOption::OCCO) {
-        ss << ", state_wait};\n\n";
+        ss << ", state_wait";
     }
+    ss << "};\n\n";
 
     std::set<DataType*> enumTypes;
     std::set<DataType*> compoundTypes;

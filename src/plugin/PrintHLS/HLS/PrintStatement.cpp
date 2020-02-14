@@ -77,7 +77,7 @@ void PrintStatement::visit(VariableOperand &node) {
 void PrintStatement::visit(DataSignalOperand &node) {
     std::string suffix;
     if (hlsOption == HLSOption::OCCO) {
-        if (node.getDataSignal()->getPort()->getInterface()->getDirection() == "in") {
+        if (node.getDataSignal()->getPort()->getInterface()->getDirection() == "out") {
             suffix = "_reg";
         }
     }

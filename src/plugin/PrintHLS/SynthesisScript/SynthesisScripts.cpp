@@ -8,10 +8,11 @@
 
 using namespace SCAM::HLSPlugin::Script;
 
-SynthesisScripts::SynthesisScripts(std::shared_ptr<HLS::Optimizer> optimizer) :
+SynthesisScripts::SynthesisScripts(std::shared_ptr<HLS::Optimizer> optimizer, HLS::HLSOption hlsOption) :
     propertySuite(nullptr),
     currentModule(nullptr),
-    optimizer(std::move(optimizer))
+    optimizer(std::move(optimizer)),
+    hlsOption(hlsOption)
 {
 }
 
@@ -57,14 +58,20 @@ std::string SynthesisScripts::directivesScript() {
     ss << "config_rtl -reset all -reset_async -reset_level high\n";
     ss << "config_schedule -effort high -relax_ii_for_timing=0 -verbose=0\n";
     ss << "config_bind -effort high\n";
-    ss << "set_directive_latency -max=0 operations\n";
-    ss << setDirectiveInterface();
+
+    if (hlsOption == HLS::HLSOption::OCCO) {
+        ss << "set_directive_latency -max=0 operations\n";
+        ss << setDirectiveInterfaceNone();
+    } else {
+        ss << setDirectiveInterfaceHS();
+    }
+
     ss << setDirectiveAllocation();
 
     return ss.str();
 }
 
-std::string SynthesisScripts::setDirectiveInterface() {
+std::string SynthesisScripts::setDirectiveInterfaceNone() {
     std::stringstream ss;
     ss << "set_directive_interface -mode ap_ctrl_none operations\n";
     for (auto &port : currentModule->getPorts()) {
@@ -77,6 +84,23 @@ std::string SynthesisScripts::setDirectiveInterface() {
     }
     for (auto &internalRegisterOut : HLS::Utilities::getParents(optimizer->getInternalRegisterOut())) {
         ss << "set_directive_interface -mode ap_none operations out_" << internalRegisterOut->getName() << "\n";
+    }
+    return ss.str();
+}
+
+std::string SynthesisScripts::setDirectiveInterfaceHS() {
+    std::stringstream ss;
+    ss << "set_directive_interface -mode ap_ctrl_hs operations\n";
+    for (auto &port : currentModule->getPorts()) {
+        if (port.second->getInterface()->isOutput()) {
+            ss << "set_directive_interface -mode ap_vld operations " << port.second->getName() << "_sig\n";
+        }
+    }
+    for (auto &notifySignal : propertySuite->getNotifySignals()) {
+        ss << "set_directive_interface -mode ap_vld operations " << notifySignal->getName() << "\n";
+    }
+    for (auto &internalRegisterOut : HLS::Utilities::getParents(optimizer->getInternalRegisterOut())) {
+        ss << "set_directive_interface -mode ap_vld operations out_" << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
 }

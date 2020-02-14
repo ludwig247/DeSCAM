@@ -40,20 +40,20 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         std::string getString();
 
     protected:
-        void visit(VariableOperand &node) override ;
-        void visit(DataSignalOperand &node) override ;
-        void visit(SyncSignal &node) override ;
-        void visit(UnaryExpr &node) override ;
-        void visit(CompoundExpr &node) override ;
-        void visit(Cast &node) override ;
-        void visit(ITE &node) override ;
-        void visit(Return &node) override ;
-        void visit(ParamOperand &node) override ;
-        void visit(Logical &node) override ;
-        void visit(FunctionOperand &node) override ;
+        void visit(ArrayOperand &node) override;
         void visit(Assignment &node) override ;
         void visit(Bitwise &node) override ;
-        void visit(ArrayOperand &node) override;
+        void visit(Cast &node) override ;
+        void visit(CompoundExpr &node) override ;
+        void visit(DataSignalOperand &node) override ;
+        void visit(FunctionOperand &node) override ;
+        void visit(ITE &node) override ;
+        void visit(Logical &node) override ;
+        void visit(ParamOperand &node) override ;
+        void visit(Return &node) override ;
+        void visit(SyncSignal &node) override ;
+        void visit(UnaryExpr &node) override ;
+        void visit(VariableOperand &node) override ;
 
     private:
         Optimizer *opt;

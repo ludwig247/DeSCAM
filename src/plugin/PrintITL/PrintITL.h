@@ -13,7 +13,8 @@ enum class ITLOption {
     DEFAULT,
     ADJUSTMACROS,
     PIPELINED,
-    HLS
+    HLS_OCCO,
+    HLS_MCCO
 };
 
 class PrintITL : public PluginFactory {
