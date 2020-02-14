@@ -25,8 +25,12 @@ jobs:
       run: sh install/github/install_move.sh
     - name: descam
       run: sh install/github/install_descam.sh
-    - name: run_tests
-      run: sh install/github/install_run_tests.sh
+    - name: run_tests_ITL
+      run: sh install/github/install_run_tests_ITL.sh
+    - name: run_tests_Skeleton
+      run: sh install/github/install_run_tests_Skeleton.sh
+    - name: run_tests_Optimizer
+      run: sh install/github/install_run_tests_Optimizer.sh
     - name: cleanup
       run: sh install/github/install_cleanup.sh
 
