@@ -191,15 +191,10 @@ std::string PrintSVA::signals() {
 
     ss << "\n// DP SIGNALS //\n";
     for (auto dp: ps->getDpSignals()) {
-        ss << "function " << convertDataType(dp->getDataType()) << " " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
-        ss << ";\n\t" << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
-        ss << " = " << ";\nendfunction\n";
+
+        ss << "function " << convertDataType(dp->getDataType()) << " ";
+        ss << dp->getFullName("_") << ";\n";
+        ss << "\t" << dp->getFullName("_") << " = ;\nendfunction\n";
     }
     return ss.str();
 }
@@ -209,16 +204,11 @@ std::string PrintSVA::registers() {
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
-        if (!vr->isArrayType()) {
-            ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << ";\n\t" << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << " = ;\nendfunction\n";
+        bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        if (!skip) {
+             ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getFullName("_") << ";\n";
+             ss << "\t" << vr->getFullName("_");
+             ss << " = ;\nendfunction\n";
         }
     }
     //TODO: add array types

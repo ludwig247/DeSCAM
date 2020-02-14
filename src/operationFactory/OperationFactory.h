@@ -49,8 +49,6 @@ namespace SCAM {
         OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module * module);
         ~OperationFactory() = default;
 
-        PropertySuite * getPropertySuite() const;
-
     private:
         SCAM::Module * module;
         std::map<int, SCAM::CfgNode *> cfg;
@@ -58,7 +56,6 @@ namespace SCAM {
         std::map<std::string, SCAM::State *> statesMap;
         std::vector<SCAM::Operation*> operations;
         std::map<std::string, Variable*> varMap;
-        PropertySuite * propertySuite;
 
         void findOperations();
         void createOperations();
@@ -68,7 +65,6 @@ namespace SCAM {
         void optimizeConditions();
         void optimizeAssignments();
         void optimizeOperations();
-
     };
 
 }

@@ -9,7 +9,6 @@ SCAM::TemporalExpr::TemporalExpr(Expr *timepoint, Stmt *statement) :
     statement(statement) {
     type = Type::AT;
     timepointList.push_back(timepoint);
-    std::cout << *statement << std::endl;
 
 }
 
@@ -18,7 +17,6 @@ SCAM::TemporalExpr::TemporalExpr(Expr *t_start, Expr *t_end, Stmt *statement) :
     type = Type::DURING;
     timepointList.push_back(t_start);
     timepointList.push_back(t_end);
-    std::cout << *statement << std::endl;
 
 }
 

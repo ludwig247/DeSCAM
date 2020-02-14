@@ -22,7 +22,6 @@
 
 namespace SCAM {
     OperationFactory::OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module *module) :
-            propertySuite(nullptr),
             module(module),
             cfg(std::move(controlFlowMap)) {
         std::cout << "======================" << std::endl;
@@ -60,11 +59,6 @@ namespace SCAM {
         }
         this->module->getFSM()->setStateMap(stateMap);
         this->module->setVariableMap(this->varMap);
-        //this->generatePropertySuite();
-    }
-
-    PropertySuite *OperationFactory::getPropertySuite() const {
-        return this->propertySuite;
     }
 
     void OperationFactory::findOperations() {

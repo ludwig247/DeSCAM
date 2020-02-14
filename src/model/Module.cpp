@@ -139,7 +139,6 @@ namespace SCAM {
 
     void Module::removeVariable(Variable *variable) {
         assert(false && "not allowed");
-        std::cout << "MODULE REMOVING: " << variable->getName() << std::endl;
         assert(variable != nullptr);
         assert(!variable->isSubVar()); //Is not correctly implemented
         if (variable->isSubVar()) {
