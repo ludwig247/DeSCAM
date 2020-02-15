@@ -6,3 +6,4 @@ file(GLOB optimizer_lib_src
         )
 
 add_library(optimizer SHARED ${optimizer_main_src} ${optimizer_lib_src} ValuePropagation/GlobalConstantVariablePropagation.h ValuePropagation/GlobalConstantVariablePropagation.cpp)
+target_link_libraries(optimizer Model)
