@@ -9,6 +9,19 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
+std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModel(Model *model) {
+    for (auto &module : model->getModules()) {
+        this->propertySuite = module.second->getPropertySuite();
+        this->currentModule = module.second;
+        hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
+        signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get(), false);
+
+        pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
+        pluginOutput.insert(std::make_pair(propertySuite->getName() + ".vhd", printModule(model)));
+    }
+    return pluginOutput;
+}
+
 void VHDLWrapperMultiClkCycle::entity(std::stringstream &ss) {
     // Print Entity
     ss << "entity " << propertySuite->getName() << "_module is\n";
@@ -99,7 +112,6 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
     printSignal(signalFactory->getHandshakingProtocolSignals(), Style::DOT, "_sig", false, false);
     ss << "\n\t-- Monitor Signals\n";
     printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false, false);
-    ss << "\tsignal wait_state: std_logic;\n";
 }
 
 void VHDLWrapperMultiClkCycle::component(std::stringstream& ss) {
@@ -427,4 +439,21 @@ void VHDLWrapperMultiClkCycle::controlProcess(std::stringstream& ss)
        << "\t\tend if;\n"
        << "\tend process;\n\n"
        << "end " << propertySuite->getName() << "_arch;\n";
+}
+
+std::string VHDLWrapperMultiClkCycle::operationEnum()
+{
+    std::stringstream ss;
+    ss << "\t-- Operations\n"
+               << "\ttype " << propertySuite->getName() << "_operation_t is (";
+    auto operations = propertySuite->getOperationProperties();
+    for (auto operation = operations.begin(); operation != operations.end(); ++ operation) {
+        ss << "op_" << (*operation)->getName();
+        if (std::next(operation) != operations.end()) {
+            ss << ", ";
+        }
+    }
+    ss << ");\n\n";
+
+    return ss.str();
 }

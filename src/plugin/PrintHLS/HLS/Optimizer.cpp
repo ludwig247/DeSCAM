@@ -484,8 +484,8 @@ std::set<Variable*> Optimizer::getInternalRegisterIn()
 std::set<Variable*> Optimizer::getInternalRegisterOut()
 {
     std::set<Variable *> vars;
-    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-        for (const auto &commitment : operationProperties->getCommitmentList()) {
+    for (const auto operationProperties : propertySuite->getOperationProperties()) {
+        for (const auto commitment : operationProperties->getCommitmentList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }

@@ -45,7 +45,10 @@ void PrintStatement::visit(Assignment &node) {
 }
 
 void PrintStatement::visit(VariableOperand &node) {
-    bool isConstant = opt->isConstant(node.getVariable());
+    bool isConstant = false;
+    if (opt) {
+        isConstant = opt->isConstant(node.getVariable());
+    }
 
     std::string suffix;
     if (!isConstant && hlsOption == HLSOption::OCCO) {

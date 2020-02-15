@@ -20,10 +20,11 @@ const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNAL
         {"rst", "bool", "in"}
 };
 
-SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, OperationModuleInterface* hlsModule) :
+SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, OperationModuleInterface* hlsModule, bool useWaitState) :
     propertySuite(propertySuite),
     module(module),
-    hlsModule(hlsModule)
+    hlsModule(hlsModule),
+    useWaitOp(useWaitOp)
 {
     setOperationSelector();
     setControlSignals();
@@ -41,7 +42,9 @@ void SignalFactory::setOperationSelector() {
     for (const auto& property : propertySuite->getOperationProperties()) {
         operationSelectorType->addEnumValue(property->getName());
     }
-    operationSelectorType->addEnumValue("state_wait");
+    if (useWaitOp) {
+        operationSelectorType->addEnumValue("state_wait");
+    }
     activeOperation = new Variable("active_operation", operationSelectorType);
 }
 
@@ -82,6 +85,9 @@ void SignalFactory::setMonitorSignals() {
     monitorSignals.insert(new Variable("active_state", stateType));
     monitorSignals.insert(new Variable("next_state", stateType));
     monitorSignals.insert(new Variable("active_operation", operationType));
+    if (!useWaitOp) {
+        monitorSignals.insert(new Variable("wait_state", new DataType("bool")));
+    }
 }
 
 void SignalFactory::setInputs() {

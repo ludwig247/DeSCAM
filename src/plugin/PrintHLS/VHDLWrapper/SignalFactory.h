@@ -24,7 +24,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
             class SignalFactory {
 
             public:
-                SignalFactory(PropertySuite *propertySuite, Module *module, OperationModuleInterface *hlsModule);
+                SignalFactory(PropertySuite *propertySuite, Module *module, OperationModuleInterface *hlsModule, bool useWaitOp);
                 ~SignalFactory() = default;
 
                 template<typename T>
@@ -63,6 +63,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 PropertySuite *propertySuite;
                 Module *module;
                 OperationModuleInterface *hlsModule;
+                bool useWaitOp;
 
                 Variable *activeOperation;
                 std::set<Variable *> monitorSignals;

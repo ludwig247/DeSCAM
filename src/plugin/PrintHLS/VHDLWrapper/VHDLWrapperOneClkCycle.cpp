@@ -8,6 +8,19 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
+std::map<std::string, std::string> VHDLWrapperOneClkCycle::printModel(Model *model) {
+    for (auto &module : model->getModules()) {
+        this->propertySuite = module.second->getPropertySuite();
+        this->currentModule = module.second;
+        hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
+        signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get(), true);
+
+        pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
+        pluginOutput.insert(std::make_pair(propertySuite->getName() + ".vhd", printModule(model)));
+    }
+    return pluginOutput;
+}
+
 void VHDLWrapperOneClkCycle::entity(std::stringstream &ss) {
     // Print Entity
     ss << "entity " + propertySuite->getName() + "_module is\n";
@@ -332,4 +345,18 @@ void VHDLWrapperOneClkCycle::controlProcess(std::stringstream &ss) {
        << "\t\tend if;\n"
        << "\tend process;\n\n"
        << "end " << propertySuite->getName() << "_arch;\n";
+}
+
+std::string VHDLWrapperOneClkCycle::operationEnum()
+{
+    std::stringstream ss;
+    ss << "\t-- Operations\n"
+       << "\ttype " << propertySuite->getName() << "_operation_t is (";
+    auto operations = propertySuite->getOperationProperties();
+    for (auto op : operations) {
+        ss << "op_" << op->getName() << ", ";
+    }
+    ss << "op_state_wait);\n\n";
+
+    return ss.str();
 }

@@ -18,19 +18,6 @@ VHDLWrapper::VHDLWrapper() :
 {
 }
 
-std::map<std::string, std::string> VHDLWrapper::printModel(Model *model) {
-    for (auto &module : model->getModules()) {
-        this->propertySuite = module.second->getPropertySuite();
-        this->currentModule = module.second;
-        hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
-        signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get());
-
-        pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
-        pluginOutput.insert(std::make_pair(propertySuite->getName() + ".vhd", printModule(model)));
-    }
-    return pluginOutput;
-}
-
 std::string VHDLWrapper::printTypes(Model *model) {
     std::stringstream typeStream;
     typeStream << "-- External data type definition package\n";
@@ -40,15 +27,6 @@ std::string VHDLWrapper::printTypes(Model *model) {
     typeStream << "\n";
 
     typeStream << "package " + model->getName() << "_types is\n\n";
-
-    // Operation enumeration
-    typeStream << "\t-- Operations\n"
-               << "\ttype " << propertySuite->getName() << "_operation_t is (";
-    auto operations = propertySuite->getOperationProperties();
-    for (auto op : operations) {
-        typeStream << "op_" << op->getName() << ", ";
-    }
-    typeStream << "op_state_wait);\n\n";
 
     // State enumeration
     typeStream << "\t -- States\n"
@@ -61,6 +39,8 @@ std::string VHDLWrapper::printTypes(Model *model) {
         }
     }
     typeStream << ");\n\n";
+
+    operationEnum();
 
     std::set<const DataType *> enumTypes;
     std::set<const DataType *> compoundTypes;
