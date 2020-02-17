@@ -18,21 +18,16 @@
 namespace SCAM {
     class Module : public AbstractNode {
     public:
-        Module();
-
-        Module(std::string name);
-
-        virtual ~Module();
+        Module() = delete;
+        explicit  Module(std::string name);
+        ~Module() = default;
 
         //Ports
         void addPort(Port *port);
 
         const std::map<std::string, Port *> &getPorts() const;
-
-        Port *getPort(const std::string &n) const;
-
+        Port * getPort(const std::string &n) const;
         bool isPort(const std::string &n) const;
-
         bool isSlave() const;
 
         //FSM
@@ -40,24 +35,17 @@ namespace SCAM {
 
         //Variables
         void addVariable(Variable *variable);
-
         const std::map<std::string, Variable *> &getVariableMap() const;
-
         Variable *getVariable(const std::string &n) const;
-
         bool isVariable(const std::string &n) const;
-
         void removeVariable(Variable *variable);
-
         void removeFunction(std::string functionName);
+        void setVariableMap(const std::map<std::string, Variable *> &variableMap);
 
         //Functions
         const std::map<std::string, Function *> &getFunctionMap() const;
-
         void addFunction(Function *function);
-
         bool isFunction(std::string name) const;
-
         Function *getFunction(std::string name);
 
         //Accept
@@ -71,18 +59,12 @@ namespace SCAM {
         std::map<int, SCAM::CfgNode *> getCFG() const;
 
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> getcommGroups() const; //TODO: delete
-
-//    std::map<int, SCAM::CfgNode *> getCFG_Original() const;
-//    std::map<int, SCAM::CfgNode *> getCFG_Implicit() const;
         void setCFG(std::map<int, SCAM::CfgNode *> cfg);
-
         void setCFG(std::map<int, SCAM::CfgNode *> cfg, std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups);
-//    void setCFG_Original(std::map<int, SCAM::CfgNode *> blockCFG);
-//    void setCFG_Explicit(std::map<int, SCAM::CfgNode *> blockCFG);
+
 
     private:
 
-        bool slave;
         std::map<std::string, Port *> ports; //! sc_in, sc_port<Interface>, ...
         std::map<std::string, Variable *> variableMap; //! <memberName,ptrToMember>
         std::map<std::string, Function *> functionMap;
@@ -92,8 +74,6 @@ namespace SCAM {
         std::map<int, SCAM::CfgNode *> cfg;
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
 
-        //    std::map<int, SCAM::CfgNode *> cfg_Original;
-//    std::map<int, SCAM::CfgNode *> cfg_Explicit;
         PropertySuite *propertySuite;
     };
 }

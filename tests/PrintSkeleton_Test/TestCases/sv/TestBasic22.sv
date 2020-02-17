@@ -8,7 +8,6 @@ module TestBasic22 (
 	output logic m_out_notify
 	);
 
-	Sections nextsection_signal;
 	Sections section_signal;
 	test_compound test_signal;
 	bit[31:0] test2_signal;
@@ -16,7 +15,6 @@ module TestBasic22 (
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
 			test_signal.x <= 0;
 			test_signal.y <= 0;

@@ -77,12 +77,10 @@ namespace SCAM {
         void addPorts(Module* module,clang::CXXRecordDecl* decl);
         void addFunctions(Module *module, CXXRecordDecl * decl);
         void addBehavior(Module *module, clang::CXXRecordDecl *decl);
-        void addSections(Module *module, clang::CXXRecordDecl *decl);
         void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
         void addInstances(TranslationUnitDecl * tu );
         void removeUnused();
 
-        bool moduleHasSections; //! True if the module that is currently processed has explicte state rep. need for section dection
     };
 
 

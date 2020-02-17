@@ -38,6 +38,8 @@ end property;
 
 property state_1_1 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data1_at_t = data1@t,
 	data2_at_t = data2@t,
@@ -45,13 +47,13 @@ freeze:
 assume:
 	at t: state_1;
 prove:
-	at t+1: state_1;
-	at t+1: data1 = data1_at_t;
-	at t+1: data2 = data2_at_t;
-	at t+1: data3 = data3_at_t;
-	at t+1: s_out_1_sig = data1_at_t;
-	at t+1: s_out_2_sig = data2_at_t;
-	at t+1: s_out_3_sig = data3_at_t;
+	at t_end: state_1;
+	at t_end: data1 = data1_at_t;
+	at t_end: data2 = data2_at_t;
+	at t_end: data3 = data3_at_t;
+	at t_end: s_out_1_sig = data1_at_t;
+	at t_end: s_out_2_sig = data2_at_t;
+	at t_end: s_out_3_sig = data3_at_t;
 end property;
 
 

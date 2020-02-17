@@ -8,11 +8,12 @@
 #include "TypeInterface.h"
 #include "ConstValue.h"
 
+
 namespace SCAM {
     template<class T>
     class VariableTemplate : public TypeInterface, public AbstractNode {
     public:
-        explicit VariableTemplate(std::string name, DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr);
+        explicit VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr);
 
         virtual T *getParent() const final;
 
@@ -30,6 +31,7 @@ namespace SCAM {
 
         bool isConstant() const;
         void setConstant(bool isConstant);
+        bool isArrayElement() const;
 
     private:
 
@@ -49,6 +51,9 @@ namespace SCAM {
 
     template
     class VariableTemplate<Parameter>;
+
+    template
+    class VariableTemplate<Timepoint>;
 };
 
 

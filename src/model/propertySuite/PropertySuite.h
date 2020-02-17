@@ -8,14 +8,12 @@
 #include <set>
 
 #include "FunctionMacro.h"
-#include "OperationProperty.h"
+#include "Property.h"
 #include "PropertyConstraint.h"
 #include "PropertyMacro.h"
-#include "ResetProperty.h"
 #include "UnsignedValue.h"
 #include "Variable.h"
 #include "VariableOperand.h"
-#include "WaitProperty.h"
 
 
 namespace SCAM {
@@ -25,7 +23,7 @@ namespace SCAM {
     public:
 
         // Constructor
-        explicit PropertySuite(const std::string &name);
+        explicit PropertySuite(std::string name);
 
         // Name
         const std::string &getName() const;
@@ -57,24 +55,18 @@ namespace SCAM {
         const std::vector<PropertyConstraint *> &getConstraints() const;
 
         // ResetProperty
-        ResetProperty * getResetProperty() const;
-        void setResetProperty(ResetProperty *resetProperty);
+        Property* getResetProperty() const;
+        void setResetProperty(Property* resetProperty);
 
         // OperationProperties
-        void addOperationProperty(OperationProperty* property);
-        const std::vector<OperationProperty *> &getOperationProperties() const;
-        void setOperationProperties(const std::vector<OperationProperty *> &operationProperties);
-
-        // WaitProperties
-        void addWaitProperty(WaitProperty* property);
-        const std::vector<WaitProperty *> &getWaitProperties() const;
-        void setWaitProperties(const std::vector<WaitProperty *> &waitProperties);
+        void addProperty(Property* property);
+        const std::vector<Property*> &getProperties() const;
 
         // StateMap
-        std::set<PropertyMacro*> getPredecessorStates(PropertyMacro* state);
-        std::set<PropertyMacro*> getSuccessorStates(PropertyMacro* state);
-        std::set<AbstractProperty*> getPredecessorProperties(PropertyMacro* state);
-        std::set<AbstractProperty*> getSuccessorProperties(PropertyMacro* state);
+        //std::set<PropertyMacro*> getPredecessorStates(PropertyMacro* state);
+        //std::set<PropertyMacro*> getSuccessorStates(PropertyMacro* state);
+        //std::set<AbstractProperty*> getPredecessorProperties(PropertyMacro* state);
+        //std::set<AbstractProperty*> getSuccessorProperties(PropertyMacro* state);
 
     private:
 
@@ -92,14 +84,13 @@ namespace SCAM {
 
         std::vector<PropertyConstraint*> constraints;
 
-        ResetProperty* resetProperty;
-        std::vector<OperationProperty*> operationProperties;
-        std::vector<WaitProperty*> waitProperties;
+        Property* resetProperty;
+        std::vector<Property*> propertyList;
 
-        std::map<PropertyMacro*, std::set<PropertyMacro*>> predecessorStates;
-        std::map<PropertyMacro*, std::set<PropertyMacro*>> successorStates;
-        std::map<PropertyMacro*, std::set<AbstractProperty*>> predecessorProperties;
-        std::map<PropertyMacro*, std::set<AbstractProperty*>> successorProperties;
+        //std::map<PropertyMacro*, std::set<PropertyMacro*>> predecessorStates;
+        //std::map<PropertyMacro*, std::set<PropertyMacro*>> successorStates;
+        //std::map<PropertyMacro*, std::set<AbstractProperty*>> predecessorProperties;
+        //std::map<PropertyMacro*, std::set<AbstractProperty*>> successorProperties;
 
     };
 

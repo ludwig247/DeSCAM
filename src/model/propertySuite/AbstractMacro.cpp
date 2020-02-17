@@ -12,7 +12,7 @@ namespace SCAM {
 
     AbstractMacro::AbstractMacro(const std::string &name, const DataType *type) :
             name(name),
-            dataType(type),
+            TypeInterface(type),
             active(true) {}
 
 
@@ -24,9 +24,6 @@ namespace SCAM {
         return name;
     }
 
-    const DataType *AbstractMacro::getDataType() const {
-        return dataType;
-    }
 
     Stmt *AbstractMacro::getExpression() {
         return expression;

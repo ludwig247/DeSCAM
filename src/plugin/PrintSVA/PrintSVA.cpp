@@ -95,7 +95,7 @@ std::string PrintSVA::Text_body() {
             << "//////////// Operations ////////////\n"
             << "////////////////////////////////////\n"
             << "\n"
-            << reset_sequence() << reset_operation() << operations() << wait_operations()
+            << reset_sequence() << reset_operation() << operations()
             << "endmodule\n\n"
             << "//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT\n"
             << "bind " << this->module->getName() << " " << this->module->getName()
@@ -191,15 +191,10 @@ std::string PrintSVA::signals() {
 
     ss << "\n// DP SIGNALS //\n";
     for (auto dp: ps->getDpSignals()) {
-        ss << "function " << convertDataType(dp->getDataType()) << " " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
-        ss << ";\n\t" << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" + dp->getSubVarName();
-        }
-        ss << " = " << ";\nendfunction\n";
+
+        ss << "function " << convertDataType(dp->getDataType()) << " ";
+        ss << dp->getFullName("_") << ";\n";
+        ss << "\t" << dp->getFullName("_") << " = ;\nendfunction\n";
     }
     return ss.str();
 }
@@ -209,16 +204,11 @@ std::string PrintSVA::registers() {
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
-        if (!vr->isArrayType()) {
-            ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << ";\n\t" << vr->getParentName();
-            if (vr->isCompoundType()) {
-                ss << "_" + vr->getSubVarName();
-            }
-            ss << " = ;\nendfunction\n";
+        bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        if (!skip) {
+             ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getFullName("_") << ";\n";
+             ss << "\t" << vr->getFullName("_");
+             ss << " = ;\nendfunction\n";
         }
     }
     //TODO: add array types
@@ -243,13 +233,50 @@ std::string PrintSVA::reset_sequence() {
     return ss.str();
 }
 
+std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
+
+    std::stringstream ss;
+
+    ss << "\t";
+    if (temporalExpr->isAt()) {
+        ss << ConditionVisitorSVA::toString((temporalExpr->getTimepointList().at(0)));
+        ss << " ##0 ";
+    } else if (temporalExpr->isDuring()) {  //TODO: Think of a smoother way for during case
+        ss << "during_o (";
+        for (auto t : temporalExpr->getTimepointList()) {
+            if (NodePeekVisitor::nodePeekArithmetic(t)) {
+                Arithmetic *a = NodePeekVisitor::nodePeekArithmetic(t);
+                ss << ConditionVisitorSVA::toString(a->getLhs()) << ", ";
+                if (a->getOperation() == "-"){
+                    ss << "-";
+                }
+                ss << ConditionVisitorSVA::toString(a->getRhs()) << ", ";
+            } else {
+                ss << ConditionVisitorSVA::toString(t) << ", 0, ";
+            }
+        }
+        ss << ConditionVisitorSVA::toString(temporalExpr->getStatement()) << ")";
+        return ss.str();
+    }
+    if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
+        Assignment * a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
+        ss << ConditionVisitorSVA::toString(a->getLhs());
+        ss << " == ";
+        ss << DatapathVisitorSVA::toString(a->getRhs());
+    } else {
+        ss << ConditionVisitorSVA::toString(temporalExpr->getStatement());
+    }
+
+    return ss.str();
+}
+
 std::string PrintSVA::reset_operation() {
     PropertySuite *ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
        << "\treset_sequence |=>\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-        ss << "\tt ##0 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << ConditionVisitorSVA::toString(commitment->getRhs());
+        ss << temporalExpr(commitment);
         if (commitment != ps->getResetProperty()->getCommitmentList().back())
             ss << " and\n";
 
@@ -262,97 +289,43 @@ std::string PrintSVA::reset_operation() {
 }
 
 std::string PrintSVA::operations() {
+
     PropertySuite *ps = this->module->getPropertySuite();
+
     std::stringstream ss;
 
-    // Operation properties
-    for (auto op : ps->getOperationProperties()) {
+    // Operations
+    for (auto op : ps->getProperties()) {
         ss << "property " << op->getName() << "_p(o);\n";
 
         if (!op->getFreezeSignals().empty()) {
-            for (auto freeze : op->getFreezeSignals()) {
-                ss << " " << convertDataType(freeze.second->getDataType()) << " " << freeze.first << "_0;\n";
+            for (auto f : op->getFreezeSignals()) {
+                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
             }
-            for (auto freeze : op->getFreezeSignals()) {
-                ss << "\tt ##0 hold(";
-                if (freeze.second->isArrayType()) {
-                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_0,";
-                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << "()) and\n";
-                } else {
-                    ss << freeze.first << "_0," << freeze.first << "()) and\n";
-                }
+            for (auto f : op->getFreezeSignals()) {
+                ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName() << "()) and\n";
             }
         }
-        ss << "\tt ##0 " << op->getState()->getName() << "()";
-        for (auto assumption : op->getAssumptionList()){
-            ss << " and\n";
-            ss << "\tt ##0 " << ConditionVisitorSVA::toString(assumption);
+
+        for (auto a = op->getAssumptionList().begin(); a != op->getAssumptionList().end(); a++){
+            ss << temporalExpr(*a);
+            if (std::next(a) != op->getAssumptionList().end()) {
+                ss << " and\n";
+            }
         }
         ss << "\n";
 
         ss << "implies\n";
-        ss << "\tt_end(o) ##0 " << op->getNextState()->getName() << "()";
-        for (auto commitment : op->getCommitmentList()) {
-            ss << " and\n";
-            ss << "\tt_end(o) ##0 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << DatapathVisitorSVA::toString(commitment->getRhs());
-        }
-        for (auto notify : ps->getNotifySignals()){
-            ss << " and\n";
-            switch(op->getTiming(notify->getPort())){
-                case TT_1: ss << "\tt ##1 " << notify->getName() << "() == 1"; break;
-                case FF_1: ss << "\tt ##1 " << notify->getName() << "() == 0"; break;
-                case FF_e: ss << "\tduring (next(t,1), t_end(o), " << notify->getName() << "() == 0)"; break;
-                case FT_e: ss << "\tduring_o (t, 1, t_end(o), -1, " << notify->getName() << "() == 0) and\n";
-                           ss << "\tt_end(o) ##0 " << notify->getName() << "() == 1"; break;
+
+        for (auto c = op->getCommitmentList().begin(); c != op->getCommitmentList().end(); c++){
+            ss << temporalExpr(*c);
+            if (std::next(c) != op->getCommitmentList().end()) {
+                ss << " and\n";
             }
         }
         ss << ";\n";
         ss << "endproperty;\n";
         ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p(1)); //ASSIGN t_end offset here\n\n";
-        ss << "\n\n";
-    }
-    return ss.str();
-}
-
-std::string PrintSVA::wait_operations() {
-    PropertySuite *ps = this->module->getPropertySuite();
-    std::stringstream ss;
-
-    // Operation properties
-    for (auto op : ps->getWaitProperties()){
-        ss << "property " << op->getName() << "_p;\n";
-
-        if (!op->getFreezeSignals().empty()) {
-            for (auto freeze : op->getFreezeSignals()) {
-                ss << " " << convertDataType(freeze.second->getDataType()) << " " << freeze.first << "_0;\n";
-            }
-            for (auto freeze : op->getFreezeSignals()) {
-                ss << "\tt ##0 hold(";
-                if (freeze.second->isArrayType()) {
-                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_0,";
-                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << "()) and\n";
-                } else {
-                    ss << freeze.first << "_0," << freeze.first << "()) and\n";
-                }
-            }
-        }
-
-        ss << "\tt ##0 " << op->getState()->getName() << "()";
-        for (auto assumption : op->getAssumptionList()){
-            ss << " and\n";
-            ss << "\tt ##0 " << ConditionVisitorSVA::toString(assumption);
-        }
-        ss << "\n";
-
-        ss << "implies\n";
-        ss << "\tt ##1 " << op->getNextState()->getName() << "()";
-        for (auto commitment : op->getCommitmentList()) {
-            ss << " and\n";
-            ss << "\tt ##1 " << ConditionVisitorSVA::toString(commitment->getLhs()) << " == " << DatapathVisitorSVA::toString(commitment->getRhs());
-        }
-        ss << ";\n";
-        ss << "endproperty;\n";
-        ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p);\n\n";
         ss << "\n\n";
     }
     return ss.str();

@@ -169,7 +169,6 @@ void SCAM::ConditionVisitor::visit(SCAM::ITE &node) {
 
 void SCAM::ConditionVisitor::visit(SCAM::Assignment &node) {
     PrintStmt::visit(node);
-    this->ss << ";\n";
 }
 
 void SCAM::ConditionVisitor::visit(SCAM::ArrayOperand &node) {
@@ -216,6 +215,10 @@ void SCAM::ConditionVisitor::visit(SCAM::UnaryExpr &node) {
     }else this->ss << node.getOperation() << "(";
     node.getExpr()->accept(*this);
     this->ss << ")";
+}
+
+void SCAM::ConditionVisitor::visit(SCAM::Timepoint &node) {
+    this->ss << node.getName();
 }
 
 

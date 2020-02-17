@@ -23,8 +23,8 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- STATES --
-macro state_2 : boolean := true end macro;
 macro state_1 : boolean := true end macro;
+macro state_2 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -35,6 +35,24 @@ prove:
 	 at t: state_1;
 	 at t: b_in_notify = true;
 	 at t: b_out_notify = false;
+end property;
+
+
+property state_1_1 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	b_in_sig_0_at_t = b_in_sig(0)@t;
+assume:
+	at t: state_1;
+	at t: b_in_sync;
+prove:
+	at t_end: state_2;
+	at t_end: b_out_sig = (2 + b_in_sig_at_t(0))(31 downto 0);
+	during[t+1, t_end]: b_in_notify = false;
+	during[t+1, t_end-1]: b_out_notify = false;
+	at t_end: b_out_notify = true;
 end property;
 
 
@@ -53,21 +71,15 @@ prove:
 end property;
 
 
-property state_1_1 is
+property wait_state_1 is
 dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	b_in_sig_0_at_t = b_in_sig_0@t;
 assume:
 	at t: state_1;
-	at t: b_in_sync;
+	at t: not(b_in_sync);
 prove:
-	at t_end: state_2;
-	at t_end: b_out_sig = (2 + b_in_sig_at_t(0))(31 downto 0);
-	during[t+1, t_end]: b_in_notify = false;
-	during[t+1, t_end-1]: b_out_notify = false;
-	at t_end: b_out_notify = true;
+	at t+1: state_1;
+	at t+1: b_in_notify = true;
+	at t+1: b_out_notify = false;
 end property;
 
 
@@ -83,18 +95,6 @@ prove:
 	at t+1: b_out_sig = b_out_sig_at_t;
 	at t+1: b_in_notify = false;
 	at t+1: b_out_notify = true;
-end property;
-
-
-property wait_state_1 is
-dependencies: no_reset;
-assume:
-	at t: state_1;
-	at t: not(b_in_sync);
-prove:
-	at t+1: state_1;
-	at t+1: b_in_notify = true;
-	at t+1: b_out_notify = false;
 end property;
 
 

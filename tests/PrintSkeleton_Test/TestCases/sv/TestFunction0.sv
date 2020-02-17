@@ -12,14 +12,10 @@ module TestFunction0 (
 	output logic b_out_notify
 	);
 
-	integer x_signal;
-	bit[31:0] y_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			x_signal <= 0;
-			y_signal <= 0;
 			b_in_notify <= 1'b1;
 			b_out_notify <= 1'b0;
 		end else begin

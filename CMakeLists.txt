@@ -15,14 +15,14 @@ include_directories(${CMAKE_SOURCE_DIR}/src/plugin)
 include_directories(${CMAKE_SOURCE_DIR}/src/ParseAML)
 include_directories(${CMAKE_SOURCE_DIR}/src/global/)
 include_directories(${CMAKE_SOURCE_DIR}/src/operationFactory/)
+include_directories(${CMAKE_SOURCE_DIR}/src/propertyFactory/)
 include_directories(${CMAKE_SOURCE_DIR}/src/cfgFactory/)
 include_directories(${CMAKE_SOURCE_DIR}/src/functionFactory/)
-include_directories(${CMAKE_SOURCE_DIR}/src/propertyFactory/)
 include_directories(${CMAKE_SOURCE_DIR}/src/propertyFactory/operationGraph)#do include this directory? its files already included in propertyFactory library
-include_directories(${CMAKE_SOURCE_DIR}/src/propertySuite/)
 include_directories(${CMAKE_SOURCE_DIR}/src/model/)
 include_directories(${CMAKE_SOURCE_DIR}/src/model/Stmts)#do include this directory? its files already included in model library
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
+include_directories(${CMAKE_SOURCE_DIR}/src/model/propertySuite)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG/new)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/src/parser)

@@ -3,16 +3,16 @@
 //
 
 #include <algorithm>
-#include "State2.h"
+#include "State.h"
 
 namespace SCAM {
 
-    int State2::state_cnt = 0;
+    int State::state_cnt = 0;
 
 
 
-    State2::State2(std::string name) :
-            stateId(State2::state_cnt++),
+    State::State(std::string name) :
+            stateId(State::state_cnt++),
             name(name),
             commStmt(nullptr),
             wait(false),
@@ -21,23 +21,23 @@ namespace SCAM {
 
 
     //GETTERS
-    int State2::getStateId() const {
+    int State::getStateId() const {
         return this->stateId;
     }
 
-    std::string State2::getName() const {
+    std::string State::getName() const {
         return this->name;
     }
 
-    const std::vector<Operation2 *> &State2::getOutgoingOperationsList() const {
+    const std::vector<Operation *> &State::getOutgoingOperationsList() const {
         return this->outgoingOperationsList;
     }
 
-    const std::vector<Operation2 *> &State2::getIncomingOperationsList() const {
+    const std::vector<Operation *> &State::getIncomingOperationsList() const {
         return this->incomingOperationsList;
     }
 
-    SCAM::Port *State2::getCommunicationPort() const {
+    SCAM::Port *State::getCommunicationPort() const {
         if (this->commStmt != nullptr)
             return this->commStmt->getPort();
         return nullptr;
@@ -45,49 +45,49 @@ namespace SCAM {
 
 
     //SETTERS
-    void State2::setName(std::string name_arg) {
+    void State::setName(std::string name_arg) {
         this->name = std::move(name_arg);
     }
 
-    void State2::setInit() {
+    void State::setInit() {
         this->init = true;
     }
 
-    void State2::setWait() {
+    void State::setWait() {
         this->wait = true;
     }
 
-    void State2::setCommunicationStmt(SCAM::Communication *commStmt_arg) {
+    void State::setCommunicationStmt(SCAM::Communication *commStmt_arg) {
         this->commStmt = commStmt_arg;
     }
 
     //ADDERS
-    void State2::addIncomingOperation(SCAM::Operation2 *incomingOperation) {
+    void State::addIncomingOperation(SCAM::Operation *incomingOperation) {
         this->incomingOperationsList.push_back(incomingOperation);
     }
 
-    void State2::addOutgoingOperation(SCAM::Operation2 *outgoingOperation) {
+    void State::addOutgoingOperation(SCAM::Operation *outgoingOperation) {
         this->outgoingOperationsList.push_back(outgoingOperation);
     }
 
-    void State2::removeIncomingOperation(SCAM::Operation2 *incomingOperation) {
+    void State::removeIncomingOperation(SCAM::Operation *incomingOperation) {
         this->incomingOperationsList.erase(std::find(this->incomingOperationsList.begin(), this->incomingOperationsList.end(), incomingOperation));
     }
 
-    void State2::removeOutgoingOperation(SCAM::Operation2 *outgoingOperation) {
+    void State::removeOutgoingOperation(SCAM::Operation *outgoingOperation) {
         this->outgoingOperationsList.erase(std::find(this->outgoingOperationsList.begin(), this->outgoingOperationsList.end(), outgoingOperation));
     }
 
-    bool State2::isInit() const {
+    bool State::isInit() const {
         return this->init;
     }
 
-    bool State2::isWait() const {
+    bool State::isWait() const {
         return this->wait;
     }
 
     //Print
-    std::string State2::print() const {
+    std::string State::print() const {
         return this->name;
     }
 

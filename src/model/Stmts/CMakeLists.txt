@@ -38,4 +38,5 @@ add_library(Stmts SHARED
         Notify.cpp
         Wait.cpp
         Peek.cpp
-        ArrayExpr.cpp)
+        ArrayExpr.cpp
+        TimePointOperand.cpp)

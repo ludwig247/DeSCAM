@@ -11,14 +11,14 @@
 
 namespace SCAM {
 
-    class Operation2;
+    class Operation;
 
-    class State2 {
+    class State {
     public:
-        State2() = delete;
-        explicit State2(std::string name);
+        State() = delete;
+        explicit State(std::string name);
 
-        ~State2() = default;
+        ~State() = default;
 
         //GETTERS
         int getStateId() const;
@@ -31,9 +31,9 @@ namespace SCAM {
 
         SCAM::Port *getCommunicationPort() const;
 
-        const std::vector<SCAM::Operation2 *> &getOutgoingOperationsList() const;
+        const std::vector<SCAM::Operation *> &getOutgoingOperationsList() const;
 
-        const std::vector<SCAM::Operation2 *> &getIncomingOperationsList() const;
+        const std::vector<SCAM::Operation *> &getIncomingOperationsList() const;
 
 
         //SETTERS
@@ -46,14 +46,14 @@ namespace SCAM {
         void setCommunicationStmt(SCAM::Communication *commStmt);
 
         //ADDERS
-        void addIncomingOperation(SCAM::Operation2 *incomingOperation);
+        void addIncomingOperation(SCAM::Operation *incomingOperation);
 
-        void addOutgoingOperation(SCAM::Operation2 *outgoingOperation);
+        void addOutgoingOperation(SCAM::Operation *outgoingOperation);
 
         //REMOVE
-        void removeIncomingOperation(SCAM::Operation2 *incomingOperation);
+        void removeIncomingOperation(SCAM::Operation *incomingOperation);
 
-        void removeOutgoingOperation(SCAM::Operation2 *outgoingOperation);
+        void removeOutgoingOperation(SCAM::Operation *outgoingOperation);
 
         //WAIT STATE
 
@@ -67,8 +67,8 @@ namespace SCAM {
         bool init;
         bool wait;
         SCAM::Communication *commStmt;    //! Stmt that is communication in this state
-        std::vector<SCAM::Operation2 *> incomingOperationsList;
-        std::vector<SCAM::Operation2 *> outgoingOperationsList;
+        std::vector<SCAM::Operation *> incomingOperationsList;
+        std::vector<SCAM::Operation *> outgoingOperationsList;
         std::vector<std::vector<SCAM::Stmt *> > incomingFreezeSignals;
         std::vector<std::vector<SCAM::Stmt *> > outgoingAssignSignals;
     };

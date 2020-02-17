@@ -28,7 +28,6 @@ namespace SCAM {
     public:
         CFGFactory(clang::CXXMethodDecl *, clang::CompilerInstance &ci, Module *module, bool sourceModule = false);
         CFGFactory(const clang::FunctionDecl  * , clang::CompilerInstance &ci, Module *module, bool sourceModule = false);
-
         ~CFGFactory() = default;
 
         const std::map<int, CfgBlock *> &getControlFlowMap() const;

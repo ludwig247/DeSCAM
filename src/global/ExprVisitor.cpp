@@ -264,6 +264,14 @@ void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
 
 }
 
+void SCAM::ExprVisitor::visit(struct TimePointOperand &node) {
+    this->usedOperands.insert(&node);
+
+    this->constVal = false;
+    this->var = (this->usedOperands.size() == 1) && (this->usedVar.size() == 1);
+
+}
+
 
 
 

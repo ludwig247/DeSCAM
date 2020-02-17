@@ -12,15 +12,19 @@ set(AST_FILES
         DataType.cpp
         DataSignal.cpp
         Function.cpp
-        Parameter.cpp VariableTemplate.h VariableTemplate.cpp)
+        Parameter.cpp
+        VariableTemplate.cpp
+        Timepoint.cpp)
 
 
 add_library(Model SHARED ${AST_FILES})
 
 
-add_subdirectory(Stmts)
+add_subdirectory(propertySuite)
 add_subdirectory(Behavior)
+add_subdirectory(Stmts)
 
-target_link_libraries(Model Behavior)
-target_link_libraries(Model Stmts)
+target_link_libraries(Model  propertySuite)
+target_link_libraries(Model  Behavior)
+target_link_libraries(Model  Stmts)
 #add_subdirectory(operationGraph)

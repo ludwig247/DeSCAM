@@ -18,19 +18,12 @@ port(
 end TestFunction2;
 
 architecture TestFunction2_arch of TestFunction2 is
-	signal record_var_signal: record_t;
-	signal x_signal: int;
-	signal y_signal: unsigned (31 downto 0);
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			record_var_signal.x <= to_signed(0, 32);
-			record_var_signal.y <= to_unsigned(0, 32);
-			x_signal <= to_signed(0, 32);
-			y_signal <= to_unsigned(0, 32);
 			b_in_notify <= true;
 			b_out_notify <= false;
 		else

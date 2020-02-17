@@ -59,6 +59,8 @@ end property;
 
 property state_1_1 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data1_data_at_t = data1_data@t,
 	data1_trans_type_at_t = data1_trans_type@t,
@@ -69,22 +71,22 @@ freeze:
 assume:
 	at t: state_1;
 prove:
-	at t+1: state_1;
-	at t+1: data1_data = data1_data_at_t;
-	at t+1: data1_trans_type = data1_trans_type_at_t;
-	at t+1: data2_data = data2_data_at_t;
-	at t+1: data2_trans_type = data2_trans_type_at_t;
-	at t+1: data3_data = data3_data_at_t;
-	at t+1: data3_trans_type = data3_trans_type_at_t;
-	at t+1: s_out_1_sig_addr = 1;
-	at t+1: s_out_1_sig_data = data1_data_at_t;
-	at t+1: s_out_1_sig_trans_type = data1_trans_type_at_t;
-	at t+1: s_out_2_sig_addr = 2;
-	at t+1: s_out_2_sig_data = data2_data_at_t;
-	at t+1: s_out_2_sig_trans_type = data2_trans_type_at_t;
-	at t+1: s_out_3_sig_addr = 3;
-	at t+1: s_out_3_sig_data = data3_data_at_t;
-	at t+1: s_out_3_sig_trans_type = data3_trans_type_at_t;
+	at t_end: state_1;
+	at t_end: data1_data = data1_data_at_t;
+	at t_end: data1_trans_type = data1_trans_type_at_t;
+	at t_end: data2_data = data2_data_at_t;
+	at t_end: data2_trans_type = data2_trans_type_at_t;
+	at t_end: data3_data = data3_data_at_t;
+	at t_end: data3_trans_type = data3_trans_type_at_t;
+	at t_end: s_out_1_sig_addr = 1;
+	at t_end: s_out_1_sig_data = data1_data_at_t;
+	at t_end: s_out_1_sig_trans_type = data1_trans_type_at_t;
+	at t_end: s_out_2_sig_addr = 2;
+	at t_end: s_out_2_sig_data = data2_data_at_t;
+	at t_end: s_out_2_sig_trans_type = data2_trans_type_at_t;
+	at t_end: s_out_3_sig_addr = 3;
+	at t_end: s_out_3_sig_data = data3_data_at_t;
+	at t_end: s_out_3_sig_trans_type = data3_trans_type_at_t;
 end property;
 
 

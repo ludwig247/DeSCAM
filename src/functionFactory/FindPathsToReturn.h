@@ -79,6 +79,7 @@ namespace SCAM {
         SCAM::Stmt* find_or_add_false(Expr *conditionStmt); //! Either looks up the if-stmt for the condition or creates a new one
 
         virtual void visit(struct VariableOperand &node) override;
+        virtual void visit(struct TimePointOperand &node) override;
         virtual void visit(struct IntegerValue &node) override;
         virtual void visit(struct UnsignedValue &node) override;
         virtual void visit(struct BoolValue &node) override;

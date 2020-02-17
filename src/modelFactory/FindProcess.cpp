@@ -123,6 +123,18 @@ const std::map<std::string, std::pair<clang::CXXMethodDecl *, SCAM::PROCESS_TYPE
     return this->processMap;
 }
 
-std::vector<clang::CXXMethodDecl *> SCAM::FindProcess::getOtherFunctions() {
-    return this->otherFunctions;
+bool SCAM::FindProcess::isValidProcess() const {
+    if(this->processMap.size() == 1){
+        auto process = (*this->processMap.begin());
+        if(process.second.second == SCAM::PROCESS_TYPE::THREAD){
+            return true;
+        }else throw std::runtime_error("Process: "+process.first+ " is not an SC_THREAD");
+    }else throw std::runtime_error(" Multiple proccess defined. Only one allowed");
+}
+
+
+clang::CXXMethodDecl* SCAM::FindProcess::getProcess() const {
+    if(this->processMap.size() == 1){
+        return this->processMap.begin()->second.first;
+    }else throw std::runtime_error(" Zero or >2 proccesses defined. Exactly one process is required");
 }
