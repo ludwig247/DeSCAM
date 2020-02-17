@@ -16,8 +16,6 @@ add_library(CLI SHARED
         TypeTools.hpp
         Validators.hpp
         Version.hpp
-        #../CommandLineParameter.cpp
-        #../CommandLineProcess.cpp
         )
 
 

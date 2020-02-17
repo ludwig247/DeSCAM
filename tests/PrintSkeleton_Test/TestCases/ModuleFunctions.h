@@ -52,7 +52,7 @@ struct TestFunction0: public sc_module {
     }
 };
 
-struct record_t{int x; unsigned int y;};
+
 
 SC_MODULE(TestFunction1) {
 

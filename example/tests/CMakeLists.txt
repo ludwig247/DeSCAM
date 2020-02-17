@@ -10,5 +10,5 @@ link_directories(/usr/local/systemc/lib-linux64)
 
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
-add_executable(Testing ${R_SRC} SlaveDaveBave.h BugTest.h main.cpp foobar.h)
+add_executable(Testing ${R_SRC} SlaveDaveBave.h BugTest.h main.cpp foobar.h ahb_bus.h)
 target_link_libraries(Testing systemc)

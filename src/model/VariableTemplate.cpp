@@ -4,12 +4,13 @@
 #include "VariableTemplate.h"
 #include "Variable.h"
 #include "DataSignal.h"
+#include "Timepoint.h"
 #include "Parameter.h"
 
 namespace SCAM {
 
     template<class T>
-    VariableTemplate<T>::VariableTemplate(std::string name, DataType *dataType, ConstValue *initialValue, VariableTemplate *parent) :
+    VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent) :
             subVar(parent != nullptr),
             parent(parent),
             initialValue(initialValue),
@@ -103,5 +104,10 @@ namespace SCAM {
     template<class T>
     void VariableTemplate<T>::setConstant(bool isConstant) {
         VariableTemplate::constant = isConstant;
+    }
+
+    template<class T>
+    bool VariableTemplate<T>::isArrayElement() const {
+        return this->isSubVar() && this->parent->isArrayType();
     }
 }

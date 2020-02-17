@@ -7,9 +7,7 @@
 
 
 #include <gtest/gtest.h>
-#include <Model.h>
-#include <ModelFactory.h>
-#include <PluginAction.h>
+
 #include <ModelGlobal.h>
 #include <fstream>
 

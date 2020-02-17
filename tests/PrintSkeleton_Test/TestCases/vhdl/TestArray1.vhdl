@@ -18,16 +18,12 @@ port(
 end TestArray1;
 
 architecture TestArray1_arch of TestArray1 is
-	signal regfile_signal: int_2;
-	signal rs1_signal: int;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			regfile_signal <= (others => to_signed(0, 32));
-			rs1_signal <= to_signed(0, 32);
 			m_in_notify <= true;
 			m_out_notify <= false;
 		else

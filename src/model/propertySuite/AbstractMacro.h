@@ -5,13 +5,14 @@
 #ifndef PROJECT_ABSTRACTMACRO_H
 #define PROJECT_ABSTRACTMACRO_H
 
+#include <TypeInterface.h>
 #include "DataType.h"
 #include "Stmt.h"
 
 
 namespace SCAM {
 
-    class AbstractMacro {
+    class AbstractMacro: public TypeInterface {
 
     public:
 
@@ -21,7 +22,6 @@ namespace SCAM {
 
         // Getter
         const std::string &getName() const;
-        const DataType * getDataType() const;
         Stmt * getExpression();
 
         // Setter
@@ -35,7 +35,6 @@ namespace SCAM {
     private:
 
         const std::string name;
-        const DataType * dataType;
         Stmt* expression;
         bool active;
 

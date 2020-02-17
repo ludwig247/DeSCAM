@@ -19,8 +19,8 @@ macro bar : unsigned := end macro;
 
 
 -- STATES --
-macro state_2 : boolean := true end macro;
 macro state_1 : boolean := true end macro;
+macro state_2 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -32,24 +32,6 @@ prove:
 	 at t: bar = resize(24,32);
 	 at t: test_in_notify = true;
 	 at t: test_out_notify = false;
-end property;
-
-
-property state_2_3 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	bar_at_t = bar@t;
-assume:
-	at t: state_2;
-	at t: test_out_sync;
-prove:
-	at t_end: state_1;
-	at t_end: bar = bar_at_t;
-	during[t+1, t_end-1]: test_in_notify = false;
-	at t_end: test_in_notify = true;
-	during[t+1, t_end]: test_out_notify = false;
 end property;
 
 
@@ -95,20 +77,21 @@ prove:
 end property;
 
 
-property wait_state_2 is
+property state_2_3 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
-	bar_at_t = bar@t,
-	test_out_sig_at_t = test_out_sig@t;
+	bar_at_t = bar@t;
 assume:
 	at t: state_2;
-	at t: not(test_out_sync);
+	at t: test_out_sync;
 prove:
-	at t+1: state_2;
-	at t+1: bar = bar_at_t;
-	at t+1: test_out_sig = test_out_sig_at_t;
-	at t+1: test_in_notify = false;
-	at t+1: test_out_notify = true;
+	at t_end: state_1;
+	at t_end: bar = bar_at_t;
+	during[t+1, t_end-1]: test_in_notify = false;
+	at t_end: test_in_notify = true;
+	during[t+1, t_end]: test_out_notify = false;
 end property;
 
 
@@ -124,6 +107,23 @@ prove:
 	at t+1: bar = bar_at_t;
 	at t+1: test_in_notify = true;
 	at t+1: test_out_notify = false;
+end property;
+
+
+property wait_state_2 is
+dependencies: no_reset;
+freeze:
+	bar_at_t = bar@t,
+	test_out_sig_at_t = test_out_sig@t;
+assume:
+	at t: state_2;
+	at t: not(test_out_sync);
+prove:
+	at t+1: state_2;
+	at t+1: bar = bar_at_t;
+	at t+1: test_out_sig = test_out_sig_at_t;
+	at t+1: test_in_notify = false;
+	at t+1: test_out_notify = true;
 end property;
 
 

@@ -23,8 +23,8 @@ macro data3 : signed := end macro;
 
 
 -- STATES --
-macro state_2 : boolean := true end macro;
 macro state_1 : boolean := true end macro;
+macro state_2 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -38,25 +38,6 @@ prove:
 	 at t: m_out_1_notify = false;
 	 at t: m_out_2_notify = false;
 	 at t: m_out_3_notify = false;
-end property;
-
-
-property state_2_2 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	m_in_2_sig_at_t = m_in_2_sig@t,
-	m_in_3_sig_at_t = m_in_3_sig@t;
-assume:
-	at t: state_2;
-prove:
-	at t_end: state_1;
-	at t_end: data2 = m_in_2_sig_at_t;
-	at t_end: data3 = m_in_3_sig_at_t;
-	during[t+1, t_end]: m_out_1_notify = false;
-	during[t+1, t_end]: m_out_2_notify = false;
-	during[t+1, t_end]: m_out_3_notify = false;
 end property;
 
 
@@ -83,6 +64,25 @@ prove:
 	at t_end: m_out_2_notify = true;
 	during[t+1, t_end-1]: m_out_3_notify = false;
 	at t_end: m_out_3_notify = true;
+end property;
+
+
+property state_2_2 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	m_in_2_sig_at_t = m_in_2_sig@t,
+	m_in_3_sig_at_t = m_in_3_sig@t;
+assume:
+	at t: state_2;
+prove:
+	at t_end: state_1;
+	at t_end: data2 = m_in_2_sig_at_t;
+	at t_end: data3 = m_in_3_sig_at_t;
+	during[t+1, t_end]: m_out_1_notify = false;
+	during[t+1, t_end]: m_out_2_notify = false;
+	during[t+1, t_end]: m_out_3_notify = false;
 end property;
 
 

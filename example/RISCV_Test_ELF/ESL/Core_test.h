@@ -11,7 +11,7 @@
 #include "assert.h"
 #include "systemc.h"
 //#include "Interfaces.h"
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "Core_include.h"
 #include "Memory_Interfaces.h"
 

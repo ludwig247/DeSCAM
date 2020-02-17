@@ -11,14 +11,12 @@ module TestMasterSlave5 (
 	output integer s_out
 	);
 
-	Sections nextsection_signal;
 	Sections section_signal;
 	integer val_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
 			val_signal <= 1337;
 		end else begin

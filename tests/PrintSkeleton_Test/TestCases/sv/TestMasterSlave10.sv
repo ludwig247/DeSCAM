@@ -14,7 +14,6 @@ module TestMasterSlave10 (
 
 	Sections nextsection_signal;
 	Sections section_signal;
-	integer shared_signal;
 	bit succ_signal;
 	integer val_signal;
 
@@ -23,7 +22,6 @@ module TestMasterSlave10 (
 		if (rst) begin
 			nextsection_signal <= section_a;
 			section_signal <= section_a;
-			shared_signal <= 0;
 			succ_signal <= 1'b0;
 			val_signal <= 0;
 		end else begin

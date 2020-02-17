@@ -27,7 +27,9 @@ namespace SCAM {
      */
     class DatapathVisitor : public PrintStmt {
     public:
-        static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        DatapathVisitor() = default;
+        explicit DatapathVisitor(std::string tp);
+        static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0, std::string tp = "_at_t");
 
     protected:
         virtual void visit(class VariableOperand &node);
@@ -55,6 +57,7 @@ namespace SCAM {
         void visit(class UnaryExpr &node) override;
 
         bool resize_flag = false;
+        std::string tp = "_at_t";
     };
 
 

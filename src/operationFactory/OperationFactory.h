@@ -8,8 +8,8 @@
 #include <map>
 #include <Module.h>
 #include "Behavior/CfgNode.h"
-#include "Behavior/State2.h"
-#include "Behavior/Operation2.h"
+#include "Behavior/State.h"
+#include "Behavior/Operation.h"
 
 namespace SCAM {
 
@@ -49,16 +49,13 @@ namespace SCAM {
         OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module * module);
         ~OperationFactory() = default;
 
-        PropertySuite * getPropertySuite() const;
-
     private:
         SCAM::Module * module;
         std::map<int, SCAM::CfgNode *> cfg;
         std::vector<std::vector<SCAM::CfgNode *> > rawOperations;
-        std::map<std::string, SCAM::State2 *> statesMap;
-        std::vector<SCAM::Operation2*> operations;
+        std::map<std::string, SCAM::State *> statesMap;
+        std::vector<SCAM::Operation*> operations;
         std::map<std::string, Variable*> varMap;
-        PropertySuite * propertySuite;
 
         void findOperations();
         void createOperations();
@@ -68,10 +65,6 @@ namespace SCAM {
         void optimizeConditions();
         void optimizeAssignments();
         void optimizeOperations();
-        void generatePropertySuite();
-        void printPropertySuite();
-
-        int getOperationsCount();
     };
 
 }

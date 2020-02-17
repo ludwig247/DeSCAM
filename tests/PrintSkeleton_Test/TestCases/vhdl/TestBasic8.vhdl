@@ -17,16 +17,12 @@ port(
 end TestBasic8;
 
 architecture TestBasic8_arch of TestBasic8 is
-	signal nb_result_signal: bool;
-	signal var_signal: int;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nb_result_signal <= false;
-			var_signal <= to_signed(1337, 32);
 			b_in_notify <= true;
 			m_out_notify <= false;
 		else

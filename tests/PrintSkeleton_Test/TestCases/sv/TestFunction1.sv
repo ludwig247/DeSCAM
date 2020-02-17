@@ -19,7 +19,6 @@ module TestFunction1 (
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			record_var_signal.x <= 0;
 			record_var_signal.y <= 0;
 			x_signal <= 0;
 			y_signal <= 0;

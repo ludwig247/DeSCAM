@@ -72,7 +72,7 @@ add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
 #Please don't change the code below.
 add_library(PluginFactory SHARED
         ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.cpp)
-
+target_link_libraries(PluginFactory Model)
 # get the list of all added plugins in order to link them to DESCAM
 get_directory_property(PLUGIN_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION PLUGIN_NAMES)
 foreach (plugin_lib ${PLUGIN_NAMES})

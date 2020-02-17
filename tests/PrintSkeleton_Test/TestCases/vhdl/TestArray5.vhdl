@@ -19,7 +19,6 @@ end TestArray5;
 
 architecture TestArray5_arch of TestArray5 is
 	signal myArray_signal: int_2;
-	signal succ_signal: bool;
 	signal test_signal: int;
 
 begin
@@ -27,8 +26,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			myArray_signal <= (others => to_signed(0, 32));
-			succ_signal <= false;
 			test_signal <= to_signed(0, 32);
 			b_in_notify <= true;
 			b_out_notify <= false;

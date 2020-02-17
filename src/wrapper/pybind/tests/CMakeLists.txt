@@ -132,7 +132,8 @@ if(PYBIND11_TEST_FILES_EIGEN_I GREATER -1)
 endif()
 
 # Optional dependency for some tests (boost::variant is only supported with version >= 1.56)
-find_package(Boost 1.56)
+find_package(Boost)
+
 
 # Compile with compiler warnings turned on
 function(pybind11_enable_warnings target_name)

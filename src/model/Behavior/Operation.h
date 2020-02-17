@@ -10,16 +10,16 @@
 #include <string>
 #include <sstream>
 #include "Expr.h"
-#include "State2.h"
+#include "State.h"
 #include <map>
 
 namespace SCAM {
 
-    class Operation2 {
+    class Operation {
     public:
-        Operation2();
+        Operation();
 
-        ~Operation2();
+        ~Operation();
 
         // Getter
         bool IsReset();
@@ -32,9 +32,9 @@ namespace SCAM {
 
         const std::vector<Assignment *> &getCommitmentsList() const;
 
-        SCAM::State2 *getState() const;
+        SCAM::State *getState() const;
 
-        SCAM::State2 *getNextState() const;
+        SCAM::State *getNextState() const;
 
         // Setter
         void setStatementsList(std::vector<SCAM::Stmt *> statementsList_arg);
@@ -43,9 +43,9 @@ namespace SCAM {
 
         void setCommitmentsList(std::vector<Assignment *> commitmentsList);
 
-        void setState(SCAM::State2 *state_arg);
+        void setState(SCAM::State *state_arg);
 
-        void setNextState(SCAM::State2 *nextState);
+        void setNextState(SCAM::State *nextState);
 
         void setReset(bool reset);
 
@@ -56,9 +56,6 @@ namespace SCAM {
         void addAssumption(SCAM::Expr *assumption);
 
         void addCommitment(SCAM::Assignment *commitment);
-
-        //IDs
-        static int getOperations_cnt();
 
         int getId() const;
 
@@ -72,8 +69,8 @@ namespace SCAM {
         std::vector<SCAM::Expr *> assumptionList;
         std::vector<SCAM::Assignment *> commitmentList;
 
-        SCAM::State2 *state;
-        SCAM::State2 *nextState;
+        SCAM::State *state;
+        SCAM::State *nextState;
         bool resetOperation;
         bool waitOperation;
     };

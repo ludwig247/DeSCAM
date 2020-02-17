@@ -15,14 +15,12 @@ port(
 end TestBasic3;
 
 architecture TestBasic3_arch of TestBasic3 is
-	signal nb_result_signal: bool;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nb_result_signal <= false;
 			b_out_notify <= true;
 		else
 			 -- FILL OUT HERE;
