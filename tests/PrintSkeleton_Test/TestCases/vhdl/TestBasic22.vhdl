@@ -24,8 +24,8 @@ begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
 			section_signal <= SECTION_A;
-			test.x_signal <= to_signed(0, 32);
-			test.y_signal <= to_unsigned(0, 32);
+			test_signal.x <= to_signed(0, 32);
+			test_signal.y <= to_unsigned(0, 32);
 			test2_signal <= to_unsigned(30, 32);
 			m_out_notify <= true;
 		else

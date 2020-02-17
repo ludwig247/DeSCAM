@@ -340,13 +340,12 @@ void PrintSkeleton::registers(std::stringstream &ss) {
         //Don't print all sub-array elemtns ... only print parent once
         if (variable.second->isArrayElement()) {
             if (usedParents.insert(variable.second->getParent()).second) {
-                insertRegister(ss, variable.second->getParent()->getFullName() + "_signal", getDataTypeWrapper(variable.second->getParent()->getDataType()));
+                insertRegister(ss, variable.second->getParent()->getName() + "_signal", getDataTypeWrapper(variable.second->getParent()->getDataType()));
             }
         } else if (variable.second->isSubVar() && variable.second->getParent()->isCompoundType()) {
             //Only consider first element
             if (usedParents.insert(variable.second->getParent()).second) {
                 insertRegister(ss, variable.second->getParent()->getName() + "_signal", getDataTypeWrapper(variable.second->getParent()->getDataType()));
-
             }
 
         } else insertRegister(ss, variable.first + "_signal", getDataTypeWrapper(variable.second->getDataType()));
@@ -434,6 +433,9 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
         } else {
             std::string name = variable.first + "_signal";
+            if(variable.second->isSubVar() && !variable.second->isArrayElement()){
+                name = variable.second->getParent()->getName() +"_signal." + variable.second->getName();
+            }
             std::string resetValue;
             if (language == SV) {
                 if (variable.second->getDataType()->getName() == "bool") {

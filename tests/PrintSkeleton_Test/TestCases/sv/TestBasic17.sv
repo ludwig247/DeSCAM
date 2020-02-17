@@ -10,17 +10,11 @@ module TestBasic17 (
 	input CompoundType m_in
 	);
 
-	CompoundType compoundType_signal;
-	Sections nextsection_signal;
 	Sections section_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			compoundType_signal.mode <= read;
-			compoundType_signal.x <= 0;
-			compoundType_signal.y <= 1'b0;
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
 			b_out_notify <= 1'b1;
 		end else begin

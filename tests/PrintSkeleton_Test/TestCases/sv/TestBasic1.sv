@@ -9,16 +9,12 @@ module TestBasic1 (
 	output logic b_in_notify
 	);
 
-	Sections nextsection_signal;
 	Sections section_signal;
-	integer x_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
-			x_signal <= 0;
 			b_in_notify <= 1'b1;
 		end else begin
 				// FILL OUT HERE

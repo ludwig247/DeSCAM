@@ -27,7 +27,7 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			compoundType.x_signal <= to_signed(0, 32);
+			compoundType_signal.x <= to_signed(0, 32);
 			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
 			b_in_notify <= true;

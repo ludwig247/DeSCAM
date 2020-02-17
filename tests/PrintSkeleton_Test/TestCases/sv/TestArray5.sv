@@ -13,14 +13,11 @@ module TestArray5 (
 	);
 
 	int_2 myArray_signal;
-	bit succ_signal;
 	integer test_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			myArray_signal <= '{default:0};
-			succ_signal <= 1'b0;
 			test_signal <= 0;
 			b_in_notify <= 1'b1;
 			b_out_notify <= 1'b0;

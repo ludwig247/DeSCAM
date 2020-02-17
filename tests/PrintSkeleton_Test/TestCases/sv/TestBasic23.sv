@@ -12,7 +12,6 @@ module TestBasic23 (
 	output logic b_out2_notify
 	);
 
-	Sections nextsection_signal;
 	Sections section_signal;
 	integer val_signed_signal;
 	bit[31:0] val_unsigned_signal;
@@ -20,7 +19,6 @@ module TestBasic23 (
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
 			val_signed_signal <= -7;
 			val_unsigned_signal <= 13;
