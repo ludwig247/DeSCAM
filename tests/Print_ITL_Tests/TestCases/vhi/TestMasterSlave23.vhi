@@ -19,8 +19,8 @@ macro data3 : signed := end macro;
 
 
 -- STATES --
-macro state_2 : boolean := true end macro;
 macro state_1 : boolean := true end macro;
+macro state_2 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -33,128 +33,10 @@ prove:
 end property;
 
 
-property state_2_17 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_2;
-	at t: s_in_1_sync;
-	at t: s_in_2_sync;
-	at t: s_in_3_sync;
-prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_2_18 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_2;
-	at t: s_in_1_sync;
-	at t: s_in_2_sync;
-	at t: not(s_in_3_sync);
-prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_2_19 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_2;
-	at t: s_in_1_sync;
-	at t: not(s_in_2_sync);
-	at t: s_in_3_sync;
-prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_2_20 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_2;
-	at t: s_in_1_sync;
-	at t: not(s_in_2_sync);
-	at t: not(s_in_3_sync);
-prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_2_21 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_2;
-	at t: not(s_in_1_sync);
-	at t: s_in_2_sync;
-	at t: s_in_3_sync;
-prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_2_22 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_2;
-	at t: not(s_in_1_sync);
-	at t: s_in_2_sync;
-	at t: not(s_in_3_sync);
-prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_2_23 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_2;
-	at t: not(s_in_1_sync);
-	at t: not(s_in_2_sync);
-	at t: s_in_3_sync;
-prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_2_24 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_2;
-	at t: not(s_in_1_sync);
-	at t: not(s_in_2_sync);
-	at t: not(s_in_3_sync);
-prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
 property state_1_1 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_3_sig_at_t = s_in_3_sig@t;
 assume:
@@ -164,141 +46,15 @@ assume:
 	at t: s_in_3_sync;
 	at t: (s_in_3_sig >= resize(6,32));
 prove:
-	at t+1: state_2;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_1_2 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_1;
-	at t: s_in_1_sync;
-	at t: s_in_2_sync;
-	at t: not(s_in_3_sync);
-	at t: (data3 >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_1_3 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_1;
-	at t: s_in_1_sync;
-	at t: not(s_in_2_sync);
-	at t: s_in_3_sync;
-	at t: (s_in_3_sig >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_1_4 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_1;
-	at t: s_in_1_sync;
-	at t: not(s_in_2_sync);
-	at t: not(s_in_3_sync);
-	at t: (data3 >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_1_5 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_1;
-	at t: not(s_in_1_sync);
-	at t: s_in_2_sync;
-	at t: s_in_3_sync;
-	at t: (s_in_3_sig >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_1_6 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_1;
-	at t: not(s_in_1_sync);
-	at t: s_in_2_sync;
-	at t: not(s_in_3_sync);
-	at t: (data3 >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_1_7 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_1;
-	at t: not(s_in_1_sync);
-	at t: not(s_in_2_sync);
-	at t: s_in_3_sync;
-	at t: (s_in_3_sig >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = s_in_3_sig_at_t;
-end property;
-
-
-property state_1_8 is
-dependencies: no_reset;
-freeze:
-	data3_at_t = data3@t;
-assume:
-	at t: state_1;
-	at t: not(s_in_1_sync);
-	at t: not(s_in_2_sync);
-	at t: not(s_in_3_sync);
-	at t: (data3 >= resize(6,32));
-prove:
-	at t+1: state_2;
-	at t+1: data3 = data3_at_t;
-end property;
-
-
-property state_1_9 is
-dependencies: no_reset;
-freeze:
-	s_in_3_sig_at_t = s_in_3_sig@t;
-assume:
-	at t: state_1;
-	at t: s_in_1_sync;
-	at t: s_in_2_sync;
-	at t: s_in_3_sync;
-	at t: (s_in_3_sig <= resize(5,32));
-prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
+	at t_end: state_2;
+	at t_end: data3 = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_10 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data3_at_t = data3@t;
 assume:
@@ -308,13 +64,15 @@ assume:
 	at t: not(s_in_3_sync);
 	at t: (data3 <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
 end property;
 
 
 property state_1_11 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_3_sig_at_t = s_in_3_sig@t;
 assume:
@@ -324,13 +82,15 @@ assume:
 	at t: s_in_3_sync;
 	at t: (s_in_3_sig <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_12 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data3_at_t = data3@t;
 assume:
@@ -340,13 +100,15 @@ assume:
 	at t: not(s_in_3_sync);
 	at t: (data3 <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
 end property;
 
 
 property state_1_13 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_3_sig_at_t = s_in_3_sig@t;
 assume:
@@ -356,13 +118,15 @@ assume:
 	at t: s_in_3_sync;
 	at t: (s_in_3_sig <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_14 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data3_at_t = data3@t;
 assume:
@@ -372,13 +136,15 @@ assume:
 	at t: not(s_in_3_sync);
 	at t: (data3 <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
 end property;
 
 
 property state_1_15 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_3_sig_at_t = s_in_3_sig@t;
 assume:
@@ -388,13 +154,15 @@ assume:
 	at t: s_in_3_sync;
 	at t: (s_in_3_sig <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_16 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data3_at_t = data3@t;
 assume:
@@ -404,8 +172,288 @@ assume:
 	at t: not(s_in_3_sync);
 	at t: (data3 <= resize(5,32));
 prove:
-	at t+1: state_1;
-	at t+1: data3 = data3_at_t;
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_1_2 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_1;
+	at t: s_in_1_sync;
+	at t: s_in_2_sync;
+	at t: not(s_in_3_sync);
+	at t: (data3 >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_1_3 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_1;
+	at t: s_in_1_sync;
+	at t: not(s_in_2_sync);
+	at t: s_in_3_sync;
+	at t: (s_in_3_sig >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_1_4 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_1;
+	at t: s_in_1_sync;
+	at t: not(s_in_2_sync);
+	at t: not(s_in_3_sync);
+	at t: (data3 >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_1_5 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_1;
+	at t: not(s_in_1_sync);
+	at t: s_in_2_sync;
+	at t: s_in_3_sync;
+	at t: (s_in_3_sig >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_1_6 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_1;
+	at t: not(s_in_1_sync);
+	at t: s_in_2_sync;
+	at t: not(s_in_3_sync);
+	at t: (data3 >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_1_7 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_1;
+	at t: not(s_in_1_sync);
+	at t: not(s_in_2_sync);
+	at t: s_in_3_sync;
+	at t: (s_in_3_sig >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_1_8 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_1;
+	at t: not(s_in_1_sync);
+	at t: not(s_in_2_sync);
+	at t: not(s_in_3_sync);
+	at t: (data3 >= resize(6,32));
+prove:
+	at t_end: state_2;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_1_9 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_1;
+	at t: s_in_1_sync;
+	at t: s_in_2_sync;
+	at t: s_in_3_sync;
+	at t: (s_in_3_sig <= resize(5,32));
+prove:
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_2_17 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_2;
+	at t: s_in_1_sync;
+	at t: s_in_2_sync;
+	at t: s_in_3_sync;
+prove:
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_2_18 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_2;
+	at t: s_in_1_sync;
+	at t: s_in_2_sync;
+	at t: not(s_in_3_sync);
+prove:
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_2_19 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_2;
+	at t: s_in_1_sync;
+	at t: not(s_in_2_sync);
+	at t: s_in_3_sync;
+prove:
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_2_20 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_2;
+	at t: s_in_1_sync;
+	at t: not(s_in_2_sync);
+	at t: not(s_in_3_sync);
+prove:
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_2_21 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_2;
+	at t: not(s_in_1_sync);
+	at t: s_in_2_sync;
+	at t: s_in_3_sync;
+prove:
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_2_22 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_2;
+	at t: not(s_in_1_sync);
+	at t: s_in_2_sync;
+	at t: not(s_in_3_sync);
+prove:
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
+end property;
+
+
+property state_2_23 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in_3_sig_at_t = s_in_3_sig@t;
+assume:
+	at t: state_2;
+	at t: not(s_in_1_sync);
+	at t: not(s_in_2_sync);
+	at t: s_in_3_sync;
+prove:
+	at t_end: state_1;
+	at t_end: data3 = s_in_3_sig_at_t;
+end property;
+
+
+property state_2_24 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data3_at_t = data3@t;
+assume:
+	at t: state_2;
+	at t: not(s_in_1_sync);
+	at t: not(s_in_2_sync);
+	at t: not(s_in_3_sync);
+prove:
+	at t_end: state_1;
+	at t_end: data3 = data3_at_t;
 end property;
 
 

@@ -41,6 +41,8 @@ end property;
 
 property state_1_1 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in2_sig_at_t = s_in2_sig@t,
 	succ_at_t = succ@t;
@@ -51,17 +53,19 @@ assume:
 	at t: succ;
 	at t: not((phase = SECTION_B));
 prove:
-	at t+1: state_2;
-	at t+1: nextphase = SECTION_B;
-	at t+1: phase = SECTION_B;
-	at t+1: sh_out_sig = s_in2_sig_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = s_in2_sig_at_t;
+	at t_end: state_2;
+	at t_end: nextphase = SECTION_B;
+	at t_end: phase = SECTION_B;
+	at t_end: sh_out_sig = s_in2_sig_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = s_in2_sig_at_t;
 end property;
 
 
 property state_1_2 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_sig_at_t = s_in_sig@t,
 	succ_at_t = succ@t;
@@ -72,17 +76,19 @@ assume:
 	at t: succ;
 	at t: not((phase = SECTION_B));
 prove:
-	at t+1: state_2;
-	at t+1: nextphase = SECTION_B;
-	at t+1: phase = SECTION_B;
-	at t+1: sh_out_sig = s_in_sig_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = s_in_sig_at_t;
+	at t_end: state_2;
+	at t_end: nextphase = SECTION_B;
+	at t_end: phase = SECTION_B;
+	at t_end: sh_out_sig = s_in_sig_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = s_in_sig_at_t;
 end property;
 
 
 property state_1_3 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in2_sig_at_t = s_in2_sig@t,
 	succ_at_t = succ@t;
@@ -93,17 +99,19 @@ assume:
 	at t: succ;
 	at t: not((phase = SECTION_B));
 prove:
-	at t+1: state_2;
-	at t+1: nextphase = SECTION_B;
-	at t+1: phase = SECTION_B;
-	at t+1: sh_out_sig = s_in2_sig_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = s_in2_sig_at_t;
+	at t_end: state_2;
+	at t_end: nextphase = SECTION_B;
+	at t_end: phase = SECTION_B;
+	at t_end: sh_out_sig = s_in2_sig_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = s_in2_sig_at_t;
 end property;
 
 
 property state_1_4 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	succ_at_t = succ@t,
 	val_at_t = val@t;
@@ -114,17 +122,19 @@ assume:
 	at t: succ;
 	at t: not((phase = SECTION_B));
 prove:
-	at t+1: state_2;
-	at t+1: nextphase = SECTION_B;
-	at t+1: phase = SECTION_B;
-	at t+1: sh_out_sig = val_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = val_at_t;
+	at t_end: state_2;
+	at t_end: nextphase = SECTION_B;
+	at t_end: phase = SECTION_B;
+	at t_end: sh_out_sig = val_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = val_at_t;
 end property;
 
 
 property state_1_5 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	nextphase_at_t = nextphase@t,
 	s_in2_sig_at_t = s_in2_sig@t,
@@ -137,17 +147,19 @@ assume:
 	at t: not((phase = SECTION_B));
 	at t: (nextphase = SECTION_A);
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = nextphase_at_t;
-	at t+1: phase = nextphase_at_t;
-	at t+1: sh_out_sig = s_in2_sig_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = s_in2_sig_at_t;
+	at t_end: state_1;
+	at t_end: nextphase = nextphase_at_t;
+	at t_end: phase = nextphase_at_t;
+	at t_end: sh_out_sig = s_in2_sig_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = s_in2_sig_at_t;
 end property;
 
 
 property state_1_6 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	nextphase_at_t = nextphase@t,
 	s_in_sig_at_t = s_in_sig@t,
@@ -160,17 +172,19 @@ assume:
 	at t: not((phase = SECTION_B));
 	at t: (nextphase = SECTION_A);
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = nextphase_at_t;
-	at t+1: phase = nextphase_at_t;
-	at t+1: sh_out_sig = s_in_sig_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = s_in_sig_at_t;
+	at t_end: state_1;
+	at t_end: nextphase = nextphase_at_t;
+	at t_end: phase = nextphase_at_t;
+	at t_end: sh_out_sig = s_in_sig_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = s_in_sig_at_t;
 end property;
 
 
 property state_1_7 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	nextphase_at_t = nextphase@t,
 	s_in2_sig_at_t = s_in2_sig@t,
@@ -183,17 +197,19 @@ assume:
 	at t: not((phase = SECTION_B));
 	at t: (nextphase = SECTION_A);
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = nextphase_at_t;
-	at t+1: phase = nextphase_at_t;
-	at t+1: sh_out_sig = s_in2_sig_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = s_in2_sig_at_t;
+	at t_end: state_1;
+	at t_end: nextphase = nextphase_at_t;
+	at t_end: phase = nextphase_at_t;
+	at t_end: sh_out_sig = s_in2_sig_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = s_in2_sig_at_t;
 end property;
 
 
 property state_1_8 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	nextphase_at_t = nextphase@t,
 	succ_at_t = succ@t,
@@ -206,36 +222,19 @@ assume:
 	at t: not((phase = SECTION_B));
 	at t: (nextphase = SECTION_A);
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = nextphase_at_t;
-	at t+1: phase = nextphase_at_t;
-	at t+1: sh_out_sig = val_at_t;
-	at t+1: succ = succ_at_t;
-	at t+1: val = val_at_t;
-end property;
-
-
-property state_2_9 is
-dependencies: no_reset;
-freeze:
-	s_in2_sig_at_t = s_in2_sig@t,
-	succ_at_t = succ@t;
-assume:
-	at t: state_2;
-	at t: s_in_sync;
-	at t: s_in2_sync;
-prove:
-	at t+1: state_1;
-	at t+1: nextphase = SECTION_A;
-	at t+1: phase = SECTION_A;
-	at t+1: sh_out_sig = (4 * s_in2_sig_at_t)(31 downto 0);
-	at t+1: succ = succ_at_t;
-	at t+1: val = (2 * s_in2_sig_at_t)(31 downto 0);
+	at t_end: state_1;
+	at t_end: nextphase = nextphase_at_t;
+	at t_end: phase = nextphase_at_t;
+	at t_end: sh_out_sig = val_at_t;
+	at t_end: succ = succ_at_t;
+	at t_end: val = val_at_t;
 end property;
 
 
 property state_2_10 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_sig_at_t = s_in_sig@t,
 	succ_at_t = succ@t;
@@ -244,17 +243,19 @@ assume:
 	at t: s_in_sync;
 	at t: not(s_in2_sync);
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = SECTION_A;
-	at t+1: phase = SECTION_A;
-	at t+1: sh_out_sig = (4 * s_in_sig_at_t)(31 downto 0);
-	at t+1: succ = succ_at_t;
-	at t+1: val = (2 * s_in_sig_at_t)(31 downto 0);
+	at t_end: state_1;
+	at t_end: nextphase = SECTION_A;
+	at t_end: phase = SECTION_A;
+	at t_end: sh_out_sig = (4 * s_in_sig_at_t)(31 downto 0);
+	at t_end: succ = succ_at_t;
+	at t_end: val = (2 * s_in_sig_at_t)(31 downto 0);
 end property;
 
 
 property state_2_11 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in2_sig_at_t = s_in2_sig@t,
 	succ_at_t = succ@t;
@@ -263,17 +264,19 @@ assume:
 	at t: not(s_in_sync);
 	at t: s_in2_sync;
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = SECTION_A;
-	at t+1: phase = SECTION_A;
-	at t+1: sh_out_sig = (4 * s_in2_sig_at_t)(31 downto 0);
-	at t+1: succ = succ_at_t;
-	at t+1: val = (2 * s_in2_sig_at_t)(31 downto 0);
+	at t_end: state_1;
+	at t_end: nextphase = SECTION_A;
+	at t_end: phase = SECTION_A;
+	at t_end: sh_out_sig = (4 * s_in2_sig_at_t)(31 downto 0);
+	at t_end: succ = succ_at_t;
+	at t_end: val = (2 * s_in2_sig_at_t)(31 downto 0);
 end property;
 
 
 property state_2_12 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	succ_at_t = succ@t,
 	val_at_t = val@t;
@@ -282,12 +285,33 @@ assume:
 	at t: not(s_in_sync);
 	at t: not(s_in2_sync);
 prove:
-	at t+1: state_1;
-	at t+1: nextphase = SECTION_A;
-	at t+1: phase = SECTION_A;
-	at t+1: sh_out_sig = (4 * val_at_t)(31 downto 0);
-	at t+1: succ = succ_at_t;
-	at t+1: val = (2 * val_at_t)(31 downto 0);
+	at t_end: state_1;
+	at t_end: nextphase = SECTION_A;
+	at t_end: phase = SECTION_A;
+	at t_end: sh_out_sig = (4 * val_at_t)(31 downto 0);
+	at t_end: succ = succ_at_t;
+	at t_end: val = (2 * val_at_t)(31 downto 0);
+end property;
+
+
+property state_2_9 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	s_in2_sig_at_t = s_in2_sig@t,
+	succ_at_t = succ@t;
+assume:
+	at t: state_2;
+	at t: s_in_sync;
+	at t: s_in2_sync;
+prove:
+	at t_end: state_1;
+	at t_end: nextphase = SECTION_A;
+	at t_end: phase = SECTION_A;
+	at t_end: sh_out_sig = (4 * s_in2_sig_at_t)(31 downto 0);
+	at t_end: succ = succ_at_t;
+	at t_end: val = (2 * s_in2_sig_at_t)(31 downto 0);
 end property;
 
 

@@ -31,6 +31,7 @@ namespace SCAM {
 
         bool isConstant() const;
         void setConstant(bool isConstant);
+        bool isArrayElement() const;
 
     private:
 

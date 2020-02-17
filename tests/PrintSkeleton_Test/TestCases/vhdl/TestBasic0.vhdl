@@ -15,7 +15,6 @@ port(
 end TestBasic0;
 
 architecture TestBasic0_arch of TestBasic0 is
-	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
 
 begin
@@ -23,7 +22,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
 			b_out_notify <= true;
 		else

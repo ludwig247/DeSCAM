@@ -105,4 +105,9 @@ namespace SCAM {
     void VariableTemplate<T>::setConstant(bool isConstant) {
         VariableTemplate::constant = isConstant;
     }
+
+    template<class T>
+    bool VariableTemplate<T>::isArrayElement() const {
+        return this->isSubVar() && this->parent->isArrayType();
+    }
 }
