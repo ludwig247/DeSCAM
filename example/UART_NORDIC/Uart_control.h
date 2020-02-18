@@ -134,8 +134,6 @@ SC_MODULE(Uart_control) {
             is_bus_write = is_bus_write_transaction(bus_request.trans_type, bus_in_valid); //FIXME: can it be true at the same time?
             bus_response.valid  = is_bus_read_transaction(bus_request.trans_type, bus_in_valid); //FIXME: can it be true at the same time?
 
-
-
 //            if (is_bus_write) {//is_bus_write_transaction(bus_request.trans_type, bus_in_valid)) {
             //FIXME: is this better?
             if (bus_in_valid && bus_request.trans_type == WRITE) {//is_bus_write_transaction(bus_request.trans_type, bus_in_valid)) {
@@ -182,8 +180,6 @@ SC_MODULE(Uart_control) {
                     config = CONFIG_BIT(bus_request.data);
                 }*/
 
-
-
             } 
             else if (bus_in_valid && bus_request.trans_type == READ) // BUS READ
                 //FIXME: old
@@ -195,7 +191,6 @@ SC_MODULE(Uart_control) {
                 bus_response.data = ite_unsigned(bus_response.data,error_src,bus_request.addr == ADDR_ERROR_SRC);
                 bus_response.data = ite_unsigned(bus_response.data,enable,bus_request.addr ==  ADDR_ENABLE);
                 bus_response.data = ite_unsigned(bus_response.data,config,bus_request.addr == ADDR_CONFIG);
-
 
                 /*FIXME: old
                 if (bus_request.addr == ADDR_ERROR_SRC)
@@ -236,7 +231,7 @@ SC_MODULE(Uart_control) {
             //                             tasks_in_valid,
             //                             is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_STOP_RX),
             //                             is_bus_write_transaction(bus_request.trans_type, bus_in_valid));
-            // if (tasks_in_valid)
+            // if (tasks_in_valid) //FIXME: add ite for this
             // {
             //     tasks_internal.start_rx = tasks_internal.start_rx || tasks.start_rx;
             //     tasks_internal.stop_rx  = tasks_internal.stop_rx  || tasks.stop_rx;
@@ -268,7 +263,7 @@ SC_MODULE(Uart_control) {
 
             // Update ERROR_SRC register in case of errors.
             // New errors have priority over clearance
-            //if (rx_control_in_valid)
+            //if (rx_control_in_valid) //ITE here
             //{
                 // error_src = error_src | ((static_cast<unsigned int> (rx_control_resp.error_overrun)) << 0) |
                 //                         ((static_cast<unsigned int> (rx_control_resp.error_parity)) << 1) |
@@ -281,7 +276,7 @@ SC_MODULE(Uart_control) {
                 //error_src = error_src | rx_control_resp.error_src;
                 //std::cout << "Control: register ERROR_SRC after update: " << error_src << std::endl;
             //}
-            // if (rx_control_in_valid)
+            // if (rx_control_in_valid) // FIXME: merge with previous if ... use "ite trick"
             // {
             //     error_overrun = error_overrun || rx_control_resp.error_overrun;
             //     error_parity = error_parity || rx_control_resp.error_parity;
@@ -296,7 +291,7 @@ SC_MODULE(Uart_control) {
             // if (hwfc_enabled(registers.config))
             // {
 
-            //     if (rx_control_req.active && rts == RTS_DEACTIVATED)
+            //     if (rx_control_req.active && rts == RTS_DEACTIVATED) //FIXME: does the write happen in any case? possible ite trick ...
             //     {
             //         rts = RTS_ACTIVATED;
             //         rts_out->master_write(rts);

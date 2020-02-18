@@ -10,7 +10,7 @@
 #include "ModulesBasic_new.h"
 #include "ModuleFunctions_new.h"
 #include "ModulesMasterSlave_new.h"
-//#include "ModuleArrays_new.h"
+#include "ModuleArrays_new.h"
 //#include "ModulesGlobal.h"
 //#include "Bus_new.h"
 //#include "Paper_new.h"
