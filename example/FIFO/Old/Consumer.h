@@ -1,19 +1,24 @@
-#include "Interfaces.h"
-#include "FIFO_Channel.h"
+#include "../Interfaces_new/Interfaces.h"
+
 #include "systemc.h"
 
 SC_MODULE(Consumer){
-  sc_port<FIFO_in_if<int>> inp;
+  blocking_in<int> inp;
 
   int value = 0;
+  bool start = true;
 
   void check_inp(){
 
       while(true) {
-          //Consumes values from the Output of the FIFO
+          if(start){
+              start = false;
+              wait(3.001, SC_NS);
+          }
+          //Read Output of FIFO
           inp->read(value);
           std::cout << "At " << sc_time_stamp() << " Consumer received: " << value << endl;
-          wait(2*WAIT_TIME,SC_NS);
+          wait(1,SC_NS);
       }
   }
 

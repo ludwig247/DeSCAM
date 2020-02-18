@@ -4,21 +4,14 @@
 #include "FIFO.h"
 
 int sc_main(int argc, char *argv[]){
-  Blocking<int> prod_out("Producer_out");
-  Blocking<int> cons_in("Consumer_in");
-
   Producer P1("Producer");
-  FIFO F1("FIFO");
+  FIFO<int> channel("FIFO_Shared", 3);
   Consumer C1("Consumer");
 
-  P1.out(prod_out);
+  P1.out.bind(channel);
+  C1.inp.bind(channel);
 
-  F1.producer(prod_out);
-  F1.consumer(cons_in);
-
-  C1.inp(cons_in);
-
-  sc_start(20, SC_NS);
+  sc_start(200, SC_PS);
 
   return 0;
 

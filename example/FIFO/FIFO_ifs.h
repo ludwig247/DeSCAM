@@ -1,9 +1,9 @@
 //
-// Created by wezel on 10/24/19.
+// Created by wezel on 2/18/20.
 //
 
-#ifndef SCAM_FIFO_CHANNEL_IFS_H
-#define SCAM_FIFO_CHANNEL_IFS_H
+#ifndef SCAM_FIFO_IFS_H
+#define SCAM_FIFO_IFS_H
 
 template<typename T>
 class FIFO_in_if : virtual public sc_interface
@@ -19,4 +19,4 @@ class FIFO_out_if : virtual public sc_interface
 public:
     virtual void write(const T & val) = 0; //regular blocking write
 };
-#endif //SCAM_FIFO_CHANNEL_IFS_H
+#endif //SCAM_FIFO_IFS_H

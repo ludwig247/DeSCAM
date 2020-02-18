@@ -1,18 +1,25 @@
-#include "../Interfaces_new/Interfaces.h"
-
+#include "Interfaces.h"
+#include "FIFO.h"
 #include "systemc.h"
 
 SC_MODULE(Producer){
-  blocking_out<int> out;
+    sc_port<FIFO_out_if<int>> out;
 
   int cnt = 1;
+  float random;
+  float limit = 0.5;
 
   void drive_out(){
       while(true) {
+          random = ((float) rand()) / (float) RAND_MAX;
+          while (random < limit) {
+              insert_state();
+              random = ((float) rand()) / (float) RAND_MAX;
+          }
           //Produce Values and write them to the Input of the FIFO
           out->write(cnt++);
           std::cout << "At " << sc_time_stamp() << " Producer sent: " << cnt-1 << endl;
-          wait(1, SC_NS);
+          insert_state();
       }
   }
 
