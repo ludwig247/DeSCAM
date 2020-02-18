@@ -11,6 +11,9 @@ add_subdirectory(Uart_aashild_v3)
 add_subdirectory(Interfaces)
 
 
+add_subdirectory(UART_NORDIC)
+
+
 
 
 
