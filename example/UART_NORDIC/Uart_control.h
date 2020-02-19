@@ -139,19 +139,19 @@ SC_MODULE(Uart_control) {
             // Task suspend is not included in PS for nRF53 UART
             //tasks_internal.suspend  = is_task_bus(bus_in_msg.addr, bus_in_msg.data, ADDR_tasks_SUSPEND);
             //if (bus_in_msg.addr == ADDR_TASKS_START_RX)        tasks_internal.start_rx = TASK_MASK(bus_in_msg.data) != 0;
-            tasks_internal.start_rx = (bus_in_msg.addr == ADDR_TASKS_START_RX && is_bus_write) ? TASK_MASK(bus_in_msg.data) != 0 : tasks_internal.start_rx;
+            tasks_internal.start_rx = (bus_in_msg.addr == ADDR_TASKS_START_RX ) ? true : tasks_internal.start_rx;
 //                else if (bus_in_msg.addr == ADDR_TASKS_STOP_RX)    tasks_internal.stop_rx = TASK_MASK(bus_in_msg.data) != 0;
-            tasks_internal.stop_rx = (bus_in_msg.addr == ADDR_TASKS_STOP_RX && is_bus_write) ? TASK_MASK(bus_in_msg.data) != 0 : tasks_internal.stop_rx;
+            tasks_internal.stop_rx = (bus_in_msg.addr == ADDR_TASKS_STOP_RX && is_bus_write) ? bus_in_msg.data != 0 : tasks_internal.stop_rx;
             //else if (bus_in_msg.addr == ADDR_TASKS_START_TX)   tasks_internal.start_tx = TASK_MASK(bus_in_msg.data) != 0;
-            tasks_internal.start_tx = (bus_in_msg.addr == ADDR_TASKS_START_TX && is_bus_write) ? TASK_MASK(bus_in_msg.data) != 0 : tasks_internal.start_tx;
+            tasks_internal.start_tx = (bus_in_msg.addr == ADDR_TASKS_START_TX && is_bus_write) ? bus_in_msg.data != 0 : tasks_internal.start_tx;
             //else if (bus_in_msg.addr == ADDR_TASKS_STOP_TX)    tasks_internal.stop_tx = TASK_MASK(bus_in_msg.data) != 0;
-            tasks_internal.stop_tx = (bus_in_msg.addr == ADDR_TASKS_STOP_TX && is_bus_write) ? TASK_MASK(bus_in_msg.data) != 0 : tasks_internal.start_tx;
+            tasks_internal.stop_tx = (bus_in_msg.addr == ADDR_TASKS_STOP_TX && is_bus_write) ? bus_in_msg.data!= 0 : tasks_internal.start_tx;
             //else if (bus_in_msg.addr == ADDR_ERROR_SRC)        error_src = ERROR_MASK(~bus_in_msg.data & error_src); // clear on 1
-            error_src = (bus_in_msg.addr == ADDR_ERROR_SRC && is_bus_write) ? ERROR_MASK(~bus_in_msg.data & error_src) : error_src;
+            error_src = (bus_in_msg.addr == ADDR_ERROR_SRC && is_bus_write) ? bus_in_msg.data : error_src;
             //else if (bus_in_msg.addr == ADDR_ENABLE)           enable = ENABLE_MASK(bus_in_msg.data);
-            enable = (bus_in_msg.addr == ADDR_ENABLE && is_bus_write) ?  ENABLE_MASK(bus_in_msg.data) : enable;
-//                else if (bus_in_msg.addr == ADDR_CONFIG)           config = CONFIG_MASK(bus_in_msg.data);
-            config = (bus_in_msg.addr == ADDR_CONFIG && is_bus_write) ? CONFIG_MASK(bus_in_msg.data) : config;
+            enable = (bus_in_msg.addr == ADDR_ENABLE && is_bus_write) ?  bus_in_msg.data : enable;
+//                else if (bus_CONFIG_MASK(bus_in_msg.data)in_msg.addr == ADDR_CONFIG)           config = CONFIG_MASK(bus_in_msg.data);
+            config = (bus_in_msg.addr == ADDR_CONFIG && is_bus_write) ? bus_in_msg.data : config;
 
 
 //            else if (bus_out_msg.valid) // BUS READ

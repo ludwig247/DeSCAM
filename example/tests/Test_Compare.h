@@ -28,6 +28,9 @@ bool compute3(bool param, unsigned int val){
     else return true;
 }
 
+
+struct complex{int x; int y;};
+
 SC_MODULE(TestGlobal2) {
     blocking_in<int> test_in;
     blocking_out<unsigned int> test_out;
@@ -35,19 +38,22 @@ SC_MODULE(TestGlobal2) {
     int foo;
     unsigned int bar;
 //    unsigned int list[5];
-//    bool test;
+    bool test;
 
     SC_CTOR(TestGlobal2):
             test_in("test_in"),
             test_out("test_out") {
         SC_THREAD(fsm);
     }
-
+    //complex type;
     void fsm() {
         while (true) {
             test_in->read(foo);
+            //test = (foo & 5) == 0;
             bar = (foo == 5) ? 0 : 1;
             test_out->write(bar);
+//            type.x = type.x + 5;
+//            type.y = type.x + 10;
         }
     }
 };
