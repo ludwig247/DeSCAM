@@ -128,3 +128,10 @@ void SCAM::DetectCounterVariable::visit(SCAM::ArrayExpr &node) {
 void SCAM::DetectCounterVariable::visit(struct ParamOperand &node) {
     if (node.getOperandName() == this->variableName) { this->isCounter = true; }
 }
+
+void SCAM::DetectCounterVariable::visit(SCAM::CompareOperator &node) {
+    node.getCondition()->accept(*this);
+    node.getTrueExpr()->accept(*this);
+    node.getFalseExpr()->accept(*this);
+
+}

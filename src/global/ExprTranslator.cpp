@@ -73,7 +73,10 @@ z3::expr &SCAM::ExprTranslator::translate(SCAM::Expr *scam_expr) {
 //    std::cout << "ExprTranslator::translate: " << PrintStmt::toString(scam_expr) << "   ------ " << ExprVisitor::isBitwise(scam_expr) << "\n";
     bitvector_flag = ExprVisitor::isBitwise(scam_expr) || bitvector_flag;
 
-    scam_expr->accept(*this);
+    if(!ExprVisitor::isCompareOperator(scam_expr)){
+        scam_expr->accept(*this);
+    }
+
 
     return z3_expr;
 }
@@ -89,6 +92,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate(z3::expr &z3_expr, const SCAM::Modul
     }
 
     this->module = module; //allowed to be nullptr !
+
 
     return this->translate_intern(z3_expr);
 }
@@ -702,5 +706,14 @@ void SCAM::ExprTranslator::visit(struct ArrayOperand &node) {
         this->arrayMap.insert(std::make_pair(name, &node));
         return;
     } else throw std::runtime_error("Unknown datatype");
+
+}
+
+
+void SCAM::ExprTranslator::visit(SCAM::CompareOperator &node) {
+
+    this->abort = true;
+    node.getCondition()->accept(*this);
+
 
 }

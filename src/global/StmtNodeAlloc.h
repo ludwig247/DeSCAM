@@ -92,6 +92,8 @@ namespace SCAM {
 
         static Return *allocNode(Return &node, bool simplifyNode = false);
 
+        static CompareOperator *allocNode(CompareOperator &node, bool simplifyNode = false);
+
         static std::vector<VariableOperand *> &getAllocTableVariableOperand() {
             return allocTableVariableOperand;
         }
@@ -314,6 +316,7 @@ namespace SCAM {
         virtual void visit(class Peek &node) override;
 
         virtual void visit(class ArrayExpr &node) override;
+        virtual void visit(class CompareOperator &node) override;
 
     };
 }

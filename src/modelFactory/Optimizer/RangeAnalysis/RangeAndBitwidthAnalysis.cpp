@@ -421,6 +421,11 @@ void SCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
     }
 }
 
+void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompareOperator &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+}
+
 
 
 

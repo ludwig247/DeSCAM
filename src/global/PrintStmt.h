@@ -92,6 +92,8 @@ namespace SCAM {
 
         virtual void visit(TimePointOperand &node);
 
+        virtual void visit(class CompareOperator &node);
+
     protected:
 
         std::string createString(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset);

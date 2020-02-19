@@ -41,5 +41,6 @@
 #include "Peek.h"
 #include "ArrayExpr.h"
 #include "TimePointOperand.h"
+#include "CompareOperator.h"
 
 #endif //PROJECT_STMTS_ALL_H

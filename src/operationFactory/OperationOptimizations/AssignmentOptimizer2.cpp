@@ -19,7 +19,7 @@ std::vector<SCAM::Assignment *> SCAM::AssignmentOptimizer2::getNewAssignmentsLis
 }
 
 SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *assignment) {
-
+    if(ExprVisitor::isCompareOperator(assignment->getRhs())) return assignment; //TODO: remove
     z3::params params(context);
     params.set("arith_lhs",false);
     params.set("eq2ineq",false);

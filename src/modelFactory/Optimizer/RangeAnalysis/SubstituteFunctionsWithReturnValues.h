@@ -112,6 +112,8 @@ namespace SCAM {
         void visit(class Wait &node) override{};
 
         void visit(class Peek &node) override{};
+
+        void visit(class CompareOperator &node) override;
     };
 }
 

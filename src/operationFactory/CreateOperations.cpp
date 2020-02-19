@@ -309,6 +309,10 @@ namespace SCAM {
         this->newExpr = &node;
     }
 
+    void SCAM::CreateOperations::visit(SCAM::CompareOperator &node) {
+        this->newExpr = &node;
+    }
+
     void SCAM::CreateOperations::visit(SCAM::Bitwise &node) {
         this->newExpr = &node;
     }

@@ -557,4 +557,9 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayExpr &node) {
     } else { this->newExpr = &node; }
 }
 
+void SCAM::OperatorStrengthReduction::visit(SCAM::CompareOperator &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+}
+
 

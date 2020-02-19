@@ -228,3 +228,7 @@ void SCAM::SimplifyExpressions::visit(SCAM::Bitwise &node) {
         this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
 }
 
+void SCAM::SimplifyExpressions::visit(SCAM::CompareOperator &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+}
+

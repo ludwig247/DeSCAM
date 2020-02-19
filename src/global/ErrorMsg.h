@@ -53,7 +53,7 @@ namespace SCAM {
         //SETTER
         static void addErrorLog(std::string msg);
 
-        static void addError(std::string msg, std::string astMsg);
+        static void addError(std::string msg, std::string astMsg, std::string file ="", std::string loc ="");
 
         static bool hasError();
 

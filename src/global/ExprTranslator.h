@@ -29,6 +29,8 @@ namespace SCAM {
 
         void reset();
 
+        void visit(class CompareOperator &node) override;
+
     private:
         ExprTranslator();
 
@@ -140,7 +142,9 @@ namespace SCAM {
         std::map<std::string, std::string> arithOperatorMap;
         std::map<std::string, std::string> bvArithOperatorMap;
         std::map<std::string, std::string> bvBitwiseOperatorMap;
+
         std::map<std::string, std::string> bvRelationalOperatorMap;
+
     };
 
 }

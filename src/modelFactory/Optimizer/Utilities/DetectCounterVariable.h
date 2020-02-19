@@ -117,6 +117,8 @@ namespace SCAM {
 
         void visit(class TimePointOperand &node) override {};
 
+        void visit(class CompareOperator &node) override;
+
     };
 }
 

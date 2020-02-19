@@ -68,6 +68,7 @@ namespace SCAM {
 
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
+            if(ExprVisitor::isCompareOperator(condition)) return true; //TODO: remove
             solver.add(translator.translate(condition));
             solver.check();
         }
@@ -101,6 +102,7 @@ namespace SCAM {
 
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
+            if(ExprVisitor::isCompareOperator(condition)) continue; //TODO: remove
             solver.add(translator.translate(condition));
         }
         // Check for SAT if unsat -> erase path

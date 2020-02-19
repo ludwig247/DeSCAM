@@ -362,3 +362,13 @@ void SCAM::PrintStmt::visit(SCAM::ArrayExpr &node) {
 void SCAM::PrintStmt::visit(TimePointOperand &node) {
     this->ss << node.getTimepoint()->getName();
 }
+
+void SCAM::PrintStmt::visit(SCAM::CompareOperator &node) {
+        this->ss << "(";
+        node.getCondition()->accept(*this);
+        this->ss << ")?";
+        node.getTrueExpr()->accept(*this);
+        this->ss << ":";
+        node.getFalseExpr()->accept(*this);
+
+}

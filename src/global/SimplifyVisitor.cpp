@@ -451,6 +451,10 @@ namespace SCAM {
 
     }
 
+    void SimplifyVisitor::visit(class CompareOperator &node) {
+
+    }
+
     void SimplifyVisitor::visit(class FunctionOperand &node) {
         std::map<std::string, Expr *> newParamValueMap;
         bool isSimplified = false;
@@ -669,6 +673,12 @@ namespace SCAM {
     If *SimplifyVisitor::simplifyNode(ArrayExpr &node) {
         throw std::runtime_error("Not implemented");
     }
+
+    CompareOperator *SimplifyVisitor::simplifyNode(CompareOperator &node) {
+        throw std::runtime_error("Not implemented");
+    }
+
+
 
 
 }

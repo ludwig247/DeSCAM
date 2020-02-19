@@ -582,4 +582,17 @@ namespace SCAM {
     }
 
 
+    void SCAM::ReconstructOperations::visit(SCAM::CompareOperator &node) {
+        node.getCondition()->accept(*this);
+        auto cond = this->newExpr;
+        node.getTrueExpr()->accept(*this);
+        auto trueExpr = this->newExpr;
+        node.getFalseExpr()->accept(*this);
+        auto falseExpr = this->newExpr;
+
+        //Create new stmt
+        this->newExpr = new SCAM::CompareOperator(cond, trueExpr, falseExpr);
+    }
+
+
 }

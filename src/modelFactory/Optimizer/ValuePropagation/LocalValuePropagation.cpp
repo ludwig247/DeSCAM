@@ -295,3 +295,7 @@ void SCAM::LocalValuePropagation::visit(SCAM::ArrayExpr &node) {
     this->newExpr = new ArrayExpr(valueMap, node.getDataType());
 }
 
+void SCAM::LocalValuePropagation::visit(SCAM::CompareOperator &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+}
+

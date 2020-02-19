@@ -258,6 +258,12 @@ bool SCAM::ExprVisitor::isParameter(SCAM::Expr *expr) {
     return exprVisitor.parameter;
 }
 
+bool SCAM::ExprVisitor::isCompareOperator(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.compare;
+}
+
+
 void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
     this->usedPorts.insert(node.getPort());
     this->constVal = false;
@@ -271,6 +277,15 @@ void SCAM::ExprVisitor::visit(struct TimePointOperand &node) {
     this->var = (this->usedOperands.size() == 1) && (this->usedVar.size() == 1);
 
 }
+
+void SCAM::ExprVisitor::visit(SCAM::CompareOperator &node) {
+    this->constVal = false;
+    this->compare = true;
+    node.getCondition()->accept(*this);
+    node.getTrueExpr()->accept(*this);
+    node.getFalseExpr()->accept(*this);
+}
+
 
 
 

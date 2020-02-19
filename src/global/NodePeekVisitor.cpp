@@ -122,6 +122,10 @@ namespace SCAM {
 
 
 
+    CompareOperator *NodePeekVisitor::nodePeekCompareOperator() const {
+        return nodePtrCompareOperator;
+    }
+
 
     ParamOperand *NodePeekVisitor::nodePeekParamOperand() const {
         return nodePtrParamOperand;
@@ -324,6 +328,12 @@ namespace SCAM {
     }
 
 
+    CompareOperator *NodePeekVisitor::nodePeekCompareOperator(Stmt *node) {
+        NodePeekVisitor peekVisitor(node);
+        return peekVisitor.nodePeekCompareOperator();
+    }
+
+
     void NodePeekVisitor::visit(VariableOperand &node) {
         nodePtrVariableOperand = &node;
     }
@@ -461,9 +471,17 @@ namespace SCAM {
         nodePtrArrayExpr = &node;
     }
 
+
+
     void NodePeekVisitor::visit(struct TimePointOperand &node) {
         nodePtrTimePointOperand = &node;
     }
+
+
+    void NodePeekVisitor::visit(struct CompareOperator &node) {
+        nodePtrCompareOperator = &node;
+    }
+
 
 
 }

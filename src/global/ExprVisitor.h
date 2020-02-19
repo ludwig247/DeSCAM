@@ -42,6 +42,8 @@ namespace SCAM {
 
         void visit(class ArrayExpr &node) override;
 
+        static bool isCompareOperator(Expr *expr);
+
     private:
         ExprVisitor(SCAM::Expr *expr);
 
@@ -49,7 +51,9 @@ namespace SCAM {
         bool constVal;
         bool var;
         bool parameter;
+        bool compare = false;
         SCAM::Expr *expr;
+
         std::set<Operand *> usedOperands;
         std::set<SyncSignal *> usedSynchSignal;
         std::set<DataSignal *> usedDataSignal;
@@ -123,6 +127,7 @@ namespace SCAM {
         virtual void visit(Peek &node);
 
         virtual void visit(struct TimePointOperand &node);
+        virtual void visit(struct CompareOperator &node);
 
     };
 }

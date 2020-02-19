@@ -249,6 +249,11 @@ void SCAM::SubstituteFunctionsWithReturnValues::visit(struct ArrayOperand &node)
     node.getIdx()->accept(*this);
 }
 
+void SCAM::SubstituteFunctionsWithReturnValues::visit(SCAM::CompareOperator &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+}
+
 
 
 

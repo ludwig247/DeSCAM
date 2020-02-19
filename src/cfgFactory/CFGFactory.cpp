@@ -313,7 +313,10 @@ namespace SCAM {
             llvm::raw_string_ostream ss(msgAST);
             clangStmt->dump(ss, ci.getSourceManager());
             //Add error to singleton
-            ErrorMsg::addError(msg, msgAST);
+            std::cout << msgAST << std::endl;
+            clangStmt->getSourceRange().getBegin().
+            std::string file =  clangStmt->getLocStart().printToString(ci.getSourceManager());
+            ErrorMsg::addError(msg, msgAST, file , std::string());
             //assert(false);
         }
         return dataFlow.getStmt();

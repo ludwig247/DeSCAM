@@ -3,6 +3,10 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
+#ifndef STOP_BIT
+    #define STOP_BIT 1
+#endif
+
 SC_MODULE(Uart_tx)
 {
     blocking_in<unsigned int> data_in;

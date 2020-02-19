@@ -123,6 +123,11 @@ void SCAM::FindUnusedFunctions::visit(struct Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
+void SCAM::FindUnusedFunctions::visit(SCAM::CompareOperator &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+}
+
 
 
 

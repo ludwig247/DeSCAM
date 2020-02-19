@@ -12,7 +12,7 @@ namespace SCAM {
     class NodePeekVisitor : public StmtAbstractVisitor {
 
     public:
-        NodePeekVisitor(Stmt *node);
+        explicit NodePeekVisitor(Stmt *node);
 
         bool isConstTypeNode() const;
 
@@ -84,6 +84,8 @@ namespace SCAM {
 
         TimePointOperand * nodePeekTimePointOperand() const;
 
+        CompareOperator * nodePeekCompareOperator() const;
+
         static VariableOperand *nodePeekVariableOperand(Stmt *node);
 
         static IntegerValue *nodePeekIntegerValue(Stmt *node);
@@ -150,6 +152,8 @@ namespace SCAM {
 
         static TimePointOperand * nodePeekTimePointOperand(Stmt *node);
 
+        static CompareOperator * nodePeekCompareOperator(Stmt *node);
+
     private:
         bool isConstTypeNodeFlag = false;
         VariableOperand *nodePtrVariableOperand = nullptr;
@@ -185,6 +189,7 @@ namespace SCAM {
         Peek *nodePtrPeek = nullptr;
         ArrayExpr * nodePtrArrayExpr = nullptr;
         TimePointOperand * nodePtrTimePointOperand= nullptr;
+        CompareOperator * nodePtrCompareOperator = nullptr;
 
 
     public:
@@ -253,6 +258,8 @@ namespace SCAM {
         virtual void visit(struct ArrayExpr &node);
 
         virtual void visit(struct TimePointOperand &node);
+
+        virtual void visit(struct CompareOperator &node);
 
     };
 }
