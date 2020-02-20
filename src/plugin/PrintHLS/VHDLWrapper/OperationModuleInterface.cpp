@@ -377,7 +377,6 @@ DataSignal* OperationModuleInterface::getCombinedDataSignal(const std::vector<Da
 void OperationModuleInterface::mapInputRegistersToInputs() {
     std::set<DataSignal* > inputs;
     for (const auto& property : propertySuite->getOperationProperties()) {
-        std::cout << "Property " << property->getName() << ": " << std::endl;
         std::set<DataSignal *> dataSignals;
         for (const auto& commitment : property->getCommitmentList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
@@ -388,18 +387,8 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
                 dataSignals.insert(signal->isSubVar() ? signal->getParent() : signal);
             }
         }
-        for (const auto& dataSignal : dataSignals) {
-            std::cout << dataSignal->getFullName() << std::endl;
-        }
-        std::cout << std::endl;
         inputs.insert(dataSignals.begin(), dataSignals.end());
     }
-
-    std::cout << "getAllInputs: " << std::endl;
-    for (const auto& input : inputs) {
-        std::cout << input->getFullName() << std::endl;
-    }
-    std::cout << std::endl;
 
     std::map<DataType *, std::vector<DataSignal *> > typeToDataSignalMap;
     for (const auto& input : inputs) {
@@ -408,13 +397,6 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
         } else {
             typeToDataSignalMap.insert({input->getDataType(), {input}});
         }
-    }
-    for (const auto& type : typeToDataSignalMap) {
-        std::cout << type.first->getName() << ": " << std::endl;
-        for (const auto& signal : type.second) {
-            std::cout << signal->getFullName() << std::endl;
-        }
-        std::cout << std::endl;
     }
 
     auto isInAssignment = [](Expr *expr, DataSignal* dataSignal) -> bool {

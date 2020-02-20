@@ -385,7 +385,6 @@ std::set<Variable *> Optimizer::getVariables() {
         }
     }
 
-    // TODO: Not needed, if variableMap contains no unused variables anymore
     auto eraseIfFunction = [this](Variable* var) {
         for (const auto &operationProperties : propertySuite->getOperationProperties()) {
             for (const auto &commitment : operationProperties->getCommitmentList()) {
@@ -498,7 +497,7 @@ std::set<Variable*> Optimizer::getInternalRegisterOut()
 
 bool Optimizer::isConstant(Variable *variable) {
     auto internalRegister = getInternalRegisterOut();
-    return !(internalRegister.find(variable) != internalRegister.end());
+    return internalRegister.find(variable) == internalRegister.end();
 }
 
 std::set<Port *> Optimizer::setArrayPorts()

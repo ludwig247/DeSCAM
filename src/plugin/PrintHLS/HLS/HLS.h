@@ -30,6 +30,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
         private:
             std::stringstream ss;
 
+            std::string moduleName;
             PropertySuite* propertySuite;
             SCAM::Module* currentModule;
 

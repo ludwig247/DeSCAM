@@ -9,6 +9,7 @@ using namespace SCAM::HLSPlugin::HLS;
 
 HLS::HLS(HLSOption hlsOption) :
     ss(""),
+    moduleName(""),
     propertySuite(nullptr),
     currentModule(nullptr),
     opt(nullptr),
@@ -24,15 +25,15 @@ std::map<std::string, std::string> HLS::printModel(Model* model)
         opt = std::make_unique<Optimizer>(propertySuite, currentModule);
 
         dataTypes(model);
-        pluginOutput.insert(std::make_pair("Data_Types.h", ss.str()));
+        pluginOutput.insert(std::make_pair(module.first + "_data_Types.h", ss.str()));
 
         ss.str("");
         functions();
-        pluginOutput.insert(std::make_pair("functions.h", ss.str()));
+        pluginOutput.insert(std::make_pair(module.first + "_functions.h", ss.str()));
 
         ss.str("");
         operations();
-        pluginOutput.insert(std::make_pair(module.first+".cpp", ss.str()));
+        pluginOutput.insert(std::make_pair(module.first + ".cpp", ss.str()));
     }
     return pluginOutput;
 }
@@ -43,7 +44,7 @@ void HLS::operations()
     ss << "#include \"functions.h\"\n";
     ss << "#include \"Data_Types.h\"\n\n";
 
-    ss << "void operations(\n";
+    ss << "void " << moduleName << "_operations(\n";
     interface();
     ss << "{\n";
 
