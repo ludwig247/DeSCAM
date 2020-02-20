@@ -22,5 +22,3 @@ add_subdirectory(Optimizer_Test)
 #        ../example/Bus/ESL/*.h
 #        )
 #message(STATUS ".h => ${SOURCES}")
-
-add_test(Bus; "Simple bus thing")

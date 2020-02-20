@@ -51,4 +51,4 @@ example/RISCV_synthesis/riscv_tailoring/formal_verification/work/
 example/RISCV_synthesis/riscv_tailoring/synthesis_flow/work/
 example/exampleheaders.h
 tests/testheaders.h
-/tests/Print_ITL_Tests/TestCases/exampleheaders.h
+/tests/Print_ITL_Tests/TestCases/tests.h
