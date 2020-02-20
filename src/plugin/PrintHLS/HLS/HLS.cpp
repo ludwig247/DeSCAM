@@ -17,32 +17,36 @@ HLS::HLS(HLSOption hlsOption) :
 {
 }
 
-std::map<std::string, std::string> HLS::printModel(Model* model)
+std::map<std::string, std::string> HLS::printModule(Module* module, const std::string &moduleName)
 {
-    for (auto& module: model->getModules()) {
-        this->currentModule = module.second;
-        this->propertySuite = module.second->getPropertySuite();
-        opt = std::make_unique<Optimizer>(propertySuite, currentModule);
+    std::map<std::string, std::string> pluginOutput;
 
-        dataTypes(model);
-        pluginOutput.insert(std::make_pair(module.first + "_data_Types.h", ss.str()));
+    this->moduleName = moduleName;
+    this->currentModule = module;
+    this->propertySuite = module->getPropertySuite();
 
-        ss.str("");
-        functions();
-        pluginOutput.insert(std::make_pair(module.first + "_functions.h", ss.str()));
+    opt = std::make_unique<Optimizer>(propertySuite, currentModule);
 
-        ss.str("");
-        operations();
-        pluginOutput.insert(std::make_pair(module.first + ".cpp", ss.str()));
-    }
+    ss.str("");
+    dataTypes();
+    pluginOutput.insert(std::make_pair(moduleName + "_data_Types.h", ss.str()));
+
+    ss.str("");
+    functions();
+    pluginOutput.insert(std::make_pair(moduleName + "_functions.h", ss.str()));
+
+    ss.str("");
+    operations();
+    pluginOutput.insert(std::make_pair(moduleName + ".cpp", ss.str()));
+
     return pluginOutput;
 }
 
 void HLS::operations()
 {
     ss << "#include \"ap_int.h\"\n";
-    ss << "#include \"functions.h\"\n";
-    ss << "#include \"Data_Types.h\"\n\n";
+    ss << "#include \"" << moduleName << "_functions.h\"\n";
+    ss << "#include \"" << moduleName << "_data_Types.h\"\n\n";
 
     ss << "void " << moduleName << "_operations(\n";
     interface();
@@ -242,7 +246,7 @@ void HLS::registerVariables()
     }
 }
 
-void HLS::dataTypes(Model* model)
+void HLS::dataTypes()
 {
     ss << "#ifndef DATA_TYPES_H\n";
     ss << "#define DATA_TYPES_H\n\n";
@@ -292,15 +296,13 @@ void HLS::dataTypes(Model* model)
     for (const auto& func : propertySuite->getFunctions()) {
         addDataType(func->getReturnType());
     }
-    for (const auto& module : model->getModules()) {
-        for (auto& port : module.second->getPorts()) {
-            if (port.second->isCompoundType()) {
-                for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
-                    addDataType(subVar->getDataType());
-                }
+    for (auto& port : currentModule->getPorts()) {
+        if (port.second->isCompoundType()) {
+            for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+                addDataType(subVar->getDataType());
             }
-            addDataType(port.second->getDataType());
         }
+        addDataType(port.second->getDataType());
     }
     for (const auto& var : currentModule->getVariableMap()) {
         addDataType(var.second->getDataType());
@@ -359,7 +361,7 @@ void HLS::functions()
     this->ss << "#ifndef FUNCTIONS_H\n";
     this->ss << "#define FUNCTIONS_H\n\n";
     this->ss << "#include \"ap_int.h\"\n";
-    this->ss << "#include \"Data_Types.h\"\n\n";
+    this->ss << "#include \"" << moduleName << "_data_Types.h\"\n\n";
 
     // Function Prototypes
     auto functionMap = currentModule->getFunctionMap();

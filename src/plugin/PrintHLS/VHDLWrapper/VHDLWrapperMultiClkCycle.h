@@ -21,7 +21,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
             VHDLWrapperMultiClkCycle() = default;
             ~VHDLWrapperMultiClkCycle() = default;
 
-            std::map<std::string, std::string> printModel(Model *model) override ;
+            std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName) override ;
 
         private:
             std::string operationEnum() override ;

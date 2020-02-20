@@ -9,16 +9,18 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModel(Model *model) {
-    for (auto &module : model->getModules()) {
-        this->propertySuite = module.second->getPropertySuite();
-        this->currentModule = module.second;
-        hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
-        signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get(), false);
+std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule(Module* module, const std::string &moduleName) {
+    std::map<std::string, std::string> pluginOutput;
 
-        pluginOutput.insert(std::make_pair(model->getName() + "_types.vhd", printTypes(model)));
-        pluginOutput.insert(std::make_pair(propertySuite->getName() + ".vhd", printModule(model)));
-    }
+    this->moduleName = moduleName;
+    this->propertySuite = module->getPropertySuite();
+    this->currentModule = module;
+    hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
+    signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get(), false);
+
+    pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
+    pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
+
     return pluginOutput;
 }
 
@@ -116,7 +118,7 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
 
 void VHDLWrapperMultiClkCycle::component(std::stringstream& ss) {
     // Print Component
-    ss << "\n\tcomponent operations is\n";
+    ss << "\n\tcomponent " << moduleName << "_operations is\n";
     ss << "\tport(\n";
 
     auto printComponentSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix, bool const& vld) {
@@ -168,7 +170,7 @@ void VHDLWrapperMultiClkCycle::component(std::stringstream& ss) {
 
 // Print Component Instantiation
 void VHDLWrapperMultiClkCycle::componentInst(std::stringstream& ss) {
-    ss << "\toperations_inst: operations\n"
+    ss << "\toperations_inst: " << moduleName << "_operations\n"
        << "\tport map(\n";
 
     auto printComponentInstSignal = [&ss](

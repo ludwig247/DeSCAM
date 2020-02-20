@@ -18,12 +18,12 @@
 
 namespace SCAM { namespace HLSPlugin { namespace  HLS {
 
-        class HLS : public PluginFactory, public AbstractVisitor {
+        class HLS : public AbstractVisitor {
         public:
             explicit HLS(HLSOption hlsOption);
             ~HLS() override = default;
 
-            std::map<std::string, std::string> printModel(Model* model) override;
+            std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName);
 
             inline std::shared_ptr<Optimizer> getOptimizer();
 
@@ -32,12 +32,12 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
 
             std::string moduleName;
             PropertySuite* propertySuite;
-            SCAM::Module* currentModule;
+            Module* currentModule;
 
             std::shared_ptr<Optimizer> opt;
             HLSOption hlsOption;
 
-            void dataTypes(Model* model);
+            void dataTypes();
             void functions();
             void operations();
             void interface();

@@ -18,7 +18,7 @@ VHDLWrapper::VHDLWrapper() :
 {
 }
 
-std::string VHDLWrapper::printTypes(Model *model) {
+std::string VHDLWrapper::printTypes() {
     std::stringstream typeStream;
     typeStream << "-- External data type definition package\n";
     typeStream << "library ieee;\n";
@@ -26,7 +26,7 @@ std::string VHDLWrapper::printTypes(Model *model) {
     typeStream << "use ieee.numeric_std.all;\n";
     typeStream << "\n";
 
-    typeStream << "package " + model->getName() << "_types is\n\n";
+    typeStream << "package " + moduleName << "_types is\n\n";
 
     // State enumeration
     typeStream << "\t -- States\n"
@@ -40,7 +40,7 @@ std::string VHDLWrapper::printTypes(Model *model) {
     }
     typeStream << ");\n\n";
 
-    operationEnum();
+    typeStream << operationEnum();
 
     std::set<const DataType *> enumTypes;
     std::set<const DataType *> compoundTypes;
@@ -63,15 +63,13 @@ std::string VHDLWrapper::printTypes(Model *model) {
     for (const auto& func : propertySuite->getFunctions()) {
         fillTypeSets(func->getReturnType());
     }
-    for (const auto& module : model->getModules()) {
-        for (auto &port : module.second->getPorts()) {
-            if (port.second->isCompoundType()) {
-                for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
-                    fillTypeSets(subVar->getDataType());
-                }
+    for (auto &port : currentModule->getPorts()) {
+        if (port.second->isCompoundType()) {
+            for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+                fillTypeSets(subVar->getDataType());
             }
-            fillTypeSets(port.second->getDataType());
         }
+        fillTypeSets(port.second->getDataType());
     }
     for (const auto& var : currentModule->getVariableMap()) {
         fillTypeSets(var.second->getDataType());
@@ -104,7 +102,7 @@ std::string VHDLWrapper::printTypes(Model *model) {
     }
 
     typeStream << "\n"
-               << "end package " + model->getName() << "_types;";
+               << "end package " + moduleName << "_types;";
     return typeStream.str();
 }
 
@@ -131,35 +129,6 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
     }
 
     return dataTypeStream.str();
-}
-
-std::string VHDLWrapper::printModule(Model *model) {
-    std::stringstream ss;
-
-    // Print Include
-    ss << "library ieee;\n";
-    ss << "use ieee.std_logic_1164.all;\n";
-    ss << "use ieee.numeric_std.all;\n";
-    ss << "use work.operations;\n";
-    ss << "use work." + model->getName() + "_types.all;\n\n";
-
-    entity(ss);
-
-    ss << "architecture " << propertySuite->getName() << "_arch of " << propertySuite->getName() << "_module is\n";
-
-    signals(ss);
-    functions(ss);
-    component(ss);
-
-    // begin of architecture implementation
-    ss << "\nbegin\n\n";
-
-    componentInst(ss);
-    monitor(ss);
-    moduleOutputHandling(ss);
-    controlProcess(ss);
-
-    return ss.str();
 }
 
 void VHDLWrapper::functions(std::stringstream &ss) {
@@ -227,6 +196,35 @@ void VHDLWrapper::functions(std::stringstream &ss) {
         if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
         ss << "\tend " + func->getName() + ";\n\n";
     }
+}
+
+std::string VHDLWrapper::printArchitecture() {
+    std::stringstream ss;
+
+    // Print Include
+    ss << "library ieee;\n";
+    ss << "use ieee.std_logic_1164.all;\n";
+    ss << "use ieee.numeric_std.all;\n";
+    ss << "use work.operations;\n";
+    ss << "use work." + moduleName + "_types.all;\n\n";
+
+    entity(ss);
+
+    ss << "architecture " << propertySuite->getName() << "_arch of " << propertySuite->getName() << "_module is\n";
+
+    signals(ss);
+    functions(ss);
+    component(ss);
+
+    // begin of architecture implementation
+    ss << "\nbegin\n\n";
+
+    componentInst(ss);
+    monitor(ss);
+    moduleOutputHandling(ss);
+    controlProcess(ss);
+
+    return ss.str();
 }
 
 std::string VHDLWrapper::sensitivityList() {

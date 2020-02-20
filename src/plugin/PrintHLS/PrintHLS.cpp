@@ -23,23 +23,34 @@ PrintHLS::PrintHLS()
 }
 
 std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
-    if (hlsOption == HLS::HLSOption::OCCO) {
-        auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperOneClkCycle>();
-        auto vhdlWrapperModel = vhdlWrapper->printModel(model);
-        pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
-    } else {
-        auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMultiClkCycle>();
-        auto vhdlWrapperModel = vhdlWrapper->printModel(model);
-        pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
+    std::stringstream moduleNames;
+
+    for (auto& module: model->getModules()) {
+        std::string moduleName = module.first;
+        auto currentModule = module.second;
+
+        moduleNames << moduleName << "\n";
+
+        if (hlsOption == HLS::HLSOption::OCCO) {
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperOneClkCycle>();
+            auto vhdlWrapperModel = vhdlWrapper->printModule(currentModule, moduleName);
+            pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
+        } else {
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMultiClkCycle>();
+            auto vhdlWrapperModel = vhdlWrapper->printModule(currentModule, moduleName);
+            pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
+        }
+
+        auto hls = std::make_unique<HLS::HLS>(hlsOption);
+        auto hlsModel = hls->printModule(currentModule, moduleName);
+        pluginOutput.insert(hlsModel.begin(), hlsModel.end());
+
+        auto synthesisScript = std::make_unique<Script::SynthesisScripts>(hls->getOptimizer(), hlsOption);
+        auto script = synthesisScript->printModule(currentModule, moduleName);
+        pluginOutput.insert(script.begin(), script.end());
     }
 
-    auto hls = std::make_unique<HLS::HLS>(hlsOption);
-    auto hlsModel = hls->printModel(model);
-    pluginOutput.insert(hlsModel.begin(), hlsModel.end());
-
-    auto synthesisScript = std::make_unique<Script::SynthesisScripts>(hls->getOptimizer(), hlsOption);
-    auto script = synthesisScript->printModel(model);
-    pluginOutput.insert(script.begin(), script.end());
+    pluginOutput.insert(std::make_pair(".module_names.txt", moduleNames.str()));
 
     return pluginOutput;
 }

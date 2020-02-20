@@ -14,23 +14,24 @@
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-            class VHDLWrapper : PluginFactory {
+            class VHDLWrapper {
             public:
                 VHDLWrapper();
                 ~VHDLWrapper() = default;
 
-                virtual std::map<std::string, std::string> printModel(Model* model) = 0;
+                virtual std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName) = 0;
 
             protected:
                 PropertySuite* propertySuite;
                 Module* currentModule;
+                std::string moduleName;
                 std::unique_ptr<OperationModuleInterface> hlsModule;
                 std::unique_ptr<SignalFactory> signalFactory;
                 std::map<std::string, std::string> pluginOutput;
 
-                virtual std::string printTypes(Model* model);
+                virtual std::string printTypes();
                 virtual std::string operationEnum() = 0;
-                virtual std::string printModule(Model* model);
+                virtual std::string printArchitecture();
 
                 virtual void entity(std::stringstream& ss) = 0;
                 virtual void signals(std::stringstream& ss) = 0;

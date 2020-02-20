@@ -14,18 +14,19 @@
 
 namespace SCAM { namespace HLSPlugin { namespace Script {
 
-            class SynthesisScripts : public PluginFactory {
+            class SynthesisScripts {
 
             public:
                 explicit SynthesisScripts(std::shared_ptr<HLS::Optimizer> opt, HLS::HLSOption hlsOption);
 
                 ~SynthesisScripts() = default;
 
-                std::map<std::string, std::string> printModel(Model *node) override;
+                std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName);
 
             private:
                 PropertySuite *propertySuite;
                 SCAM::Module *currentModule;
+                std::string moduleName;
                 std::shared_ptr<HLS::Optimizer> optimizer;
                 HLS::HLSOption hlsOption;
 
