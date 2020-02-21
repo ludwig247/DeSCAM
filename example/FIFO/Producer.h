@@ -16,6 +16,7 @@ SC_MODULE(Producer){
               insert_state();
               random = ((float) rand()) / (float) RAND_MAX;
           }
+          if (cnt > 10) break;
           //Produce Values and write them to the Input of the FIFO
           out->write(cnt++);
           std::cout << "At " << sc_time_stamp() << " Producer sent: " << cnt-1 << endl;

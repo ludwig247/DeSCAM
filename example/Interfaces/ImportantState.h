@@ -9,7 +9,7 @@
 
 //#define WAIT_TIME std::rand()%5
 #define WAIT_TIME std::rand()%5
-//#define WAIT_TIME 1
+//#define WAIT_TIME 0
 #define important_state  wait(WAIT_TIME, SC_PS);
 
 void inline insert_state(std::string stateName){

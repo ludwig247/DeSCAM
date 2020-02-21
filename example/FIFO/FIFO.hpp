@@ -42,6 +42,7 @@ void FIFO<T>::write(const T &val) {
         state = FULL;
     }
     writer_notify.notify();
+    return;
 
 }
 
