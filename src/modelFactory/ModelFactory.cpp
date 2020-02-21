@@ -47,7 +47,7 @@ bool SCAM::ModelFactory::preFire() {
 bool SCAM::ModelFactory::fire() {
     //Translation Unit
     TranslationUnitDecl *tu = _context.getTranslationUnitDecl();
-    tu->dumpColor();
+
     //SCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
