@@ -75,7 +75,7 @@ z3::expr &SCAM::ExprTranslator::translate(SCAM::Expr *scam_expr) {
 
     if(!ExprVisitor::isCompareOperator(scam_expr)){
         scam_expr->accept(*this);
-    }
+    }else scam_expr->accept(*this);
 
 
     return z3_expr;
@@ -98,30 +98,30 @@ SCAM::Expr *SCAM::ExprTranslator::translate(z3::expr &z3_expr, const SCAM::Modul
 }
 
 //is private, only enterered when the maps exists (and{throw std::runtime_error("ExprSCAMtoZ3 did not expect SyncSignal");} when at least "int" and "bool" is a datatype
-SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
+SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_intern) {
 
     //TERMINAL EXPRESSION
-    if (z3_expr.is_const()) {
-        std::string symbolname = z3_expr.decl().name().str();
+    if (z3_expr_intern.is_const()) {
+        std::string symbolname = z3_expr_intern.decl().name().str();
 
         //integer value
         if (symbolname == "Int") {
             if (this->unsigned_flag) {
-                unsigned int value = z3_expr.get_numeral_int64();
+                unsigned int value = z3_expr_intern.get_numeral_int64();
                 if (value > 4294967295) throw std::runtime_error("Result of unsigned computation is > 2^32-1");
                 return new SCAM::UnsignedValue(value);
-            } else return new SCAM::IntegerValue(z3_expr.get_numeral_int());
+            } else return new SCAM::IntegerValue(z3_expr_intern.get_numeral_int());
         };
 
         if (symbolname == "bv") {
             if (this->unsigned_flag) {
-                unsigned int value = z3_expr.get_numeral_int64();
+                unsigned int value = z3_expr_intern.get_numeral_int64();
                 if (value > 4294967295) throw std::runtime_error("Result of unsigned computation is > 2^32-1");
                 return new SCAM::UnsignedValue(value);
             } else {
                 //z3 doesn't translate a bitvector back into a signed integer, always interprets it unsigned
-                if (z3_expr.get_numeral_uint() > 2147483647) return new SCAM::IntegerValue(z3_expr.get_numeral_uint() - 4294967296);
-                else return new SCAM::IntegerValue(z3_expr.get_numeral_int());
+                if (z3_expr_intern.get_numeral_uint() > 2147483647) return new SCAM::IntegerValue(z3_expr_intern.get_numeral_uint() - 4294967296);
+                else return new SCAM::IntegerValue(z3_expr_intern.get_numeral_int());
             }
         }
         //boolean value
@@ -212,83 +212,83 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
 
         //NON-TERMINAL EXPRESSION
     else /*! z3_expr.is_const()*/ {
-        std::string oper = z3_expr.decl().name().str();
+        std::string oper = z3_expr_intern.decl().name().str();
         if (relationalOperatorMap.find(oper) != relationalOperatorMap.end()) {
-            if (z3_expr.num_args() == 2) {
-                z3::expr lhs = z3_expr.arg(0);
+            if (z3_expr_intern.num_args() == 2) {
+                z3::expr lhs = z3_expr_intern.arg(0);
                 this->unsigned_flag = translate_intern(lhs)->getDataType()->isUnsigned();
-                z3::expr rhs = z3_expr.arg(1);
+                z3::expr rhs = z3_expr_intern.arg(1);
                 return new SCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper), translate_intern(rhs));
             } else throw std::runtime_error("Expecte 2 arguments for " + oper);
         } else if (logicalOperatorMap.find(oper) != logicalOperatorMap.end()) {
-            if (z3_expr.num_args() < 2)
+            if (z3_expr_intern.num_args() < 2)
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 or more arguments");
 
-            z3::expr first = z3_expr.arg(0);
-            z3::expr second = z3_expr.arg(1);
+            z3::expr first = z3_expr_intern.arg(0);
+            z3::expr second = z3_expr_intern.arg(1);
             auto multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper), translate_intern(second));
 
-            for (unsigned int i = 2; i < z3_expr.num_args(); ++i) {
-                z3::expr next = z3_expr.arg(i);
+            for (unsigned int i = 2; i < z3_expr_intern.num_args(); ++i) {
+                z3::expr next = z3_expr_intern.arg(i);
                 multiple = new SCAM::Logical(multiple, logicalOperatorMap.at(oper), translate_intern(next));
             }
             return multiple;
         } else if (unaryOperatorMap.find(oper) != unaryOperatorMap.end()) {
             if (oper == "not") { // UNARY
-                if (z3_expr.num_args() != 1)
+                if (z3_expr_intern.num_args() != 1)
                     throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
-                z3::expr rhs = z3_expr.arg(0);
+                z3::expr rhs = z3_expr_intern.arg(0);
                 return new SCAM::UnaryExpr("not", translate_intern(rhs));
             } else if (oper == "bvnot") { // UNARY
-                if (z3_expr.num_args() != 1)
+                if (z3_expr_intern.num_args() != 1)
                     throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
-                z3::expr rhs = z3_expr.arg(0);
+                z3::expr rhs = z3_expr_intern.arg(0);
                 return new SCAM::UnaryExpr("~", translate_intern(rhs));
             } else if (oper == "-") { //NOTE: can be unary or binary, check num_arg
-                if (z3_expr.num_args() == 2) {
-                    z3::expr lhs = z3_expr.arg(0);
-                    z3::expr rhs = z3_expr.arg(1);
+                if (z3_expr_intern.num_args() == 2) {
+                    z3::expr lhs = z3_expr_intern.arg(0);
+                    z3::expr rhs = z3_expr_intern.arg(1);
                     return new SCAM::Arithmetic(translate_intern(lhs), "-", translate_intern(rhs));
-                } else if (z3_expr.num_args() == 1) {
-                    z3::expr rhs = z3_expr.arg(0);
+                } else if (z3_expr_intern.num_args() == 1) {
+                    z3::expr rhs = z3_expr_intern.arg(0);
                     return new SCAM::UnaryExpr("-", translate_intern(rhs));
                 } else throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator -, expected 1 or 2 arguments");
 
             } else throw std::runtime_error("ExprTranslator : unknown Unary: " + oper);
         } else if (arithOperatorMap.find(oper) != arithOperatorMap.end()) {
-            if (z3_expr.num_args() < 2)
+            if (z3_expr_intern.num_args() < 2)
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator +, expected 2 or more arguments");
-            z3::expr first = z3_expr.arg(0);
-            z3::expr second = z3_expr.arg(1);
+            z3::expr first = z3_expr_intern.arg(0);
+            z3::expr second = z3_expr_intern.arg(1);
 
             SCAM::Arithmetic *multiple = new SCAM::Arithmetic(translate_intern(first), arithOperatorMap.at(oper), translate_intern(second));
-            for (unsigned int i = 2; i < z3_expr.num_args(); ++i) {
-                z3::expr next = z3_expr.arg(i);
+            for (unsigned int i = 2; i < z3_expr_intern.num_args(); ++i) {
+                z3::expr next = z3_expr_intern.arg(i);
                 multiple = new SCAM::Arithmetic(multiple, arithOperatorMap.at(oper), translate_intern(next));
             }
             return multiple;
         } else if (bvArithOperatorMap.find(oper) != bvArithOperatorMap.end()) {
-            if (z3_expr.num_args() == 2) {
-                z3::expr lhs = z3_expr.arg(0);
-                z3::expr rhs = z3_expr.arg(1);
+            if (z3_expr_intern.num_args() == 2) {
+                z3::expr lhs = z3_expr_intern.arg(0);
+                z3::expr rhs = z3_expr_intern.arg(1);
                 return new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper), translate_intern(rhs));
             } else {
-                std::cout << z3_expr << std::endl;
+                std::cout << z3_expr_intern << std::endl;
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
         } else if (bvBitwiseOperatorMap.find(oper) != bvBitwiseOperatorMap.end()) {
-            if (z3_expr.num_args() == 2) {
-                z3::expr lhs = z3_expr.arg(0);
-                z3::expr rhs = z3_expr.arg(1);
+            if (z3_expr_intern.num_args() == 2) {
+                z3::expr lhs = z3_expr_intern.arg(0);
+                z3::expr rhs = z3_expr_intern.arg(1);
                 return new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper), translate_intern(rhs));
             } else {
-                std::cout << z3_expr << std::endl;
+                std::cout << z3_expr_intern << std::endl;
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
         } else if (bvRelationalOperatorMap.find(oper) != bvRelationalOperatorMap.end()) {
-            if (z3_expr.num_args() == 2) {
-                z3::expr lhs = z3_expr.arg(0);
-                z3::expr rhs = z3_expr.arg(1);
+            if (z3_expr_intern.num_args() == 2) {
+                z3::expr lhs = z3_expr_intern.arg(0);
+                z3::expr rhs = z3_expr_intern.arg(1);
                 if (oper == "bvule") this->unsigned_flag = true;
                 if (oper == "bvsle") this->unsigned_flag = false;
                 return new SCAM::Relational(translate_intern(lhs), bvRelationalOperatorMap.at(oper), translate_intern(rhs));
@@ -301,12 +301,22 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
         } else if (oper == "extract") {
 //            std::cout<<"EXprTranslator: extract " << z3_expr.is_algebraic() << "\n";
             abort = true;
-            z3::expr extract = z3_expr;
+            z3::expr extract = z3_expr_intern;
             assert(extract.decl().name().str() == "extract" && extract.num_args() == 1 && extract.arg(0).is_const() &&
                    "Unknown apps");
             //Return something to work with
-            z3::expr ret = z3_expr.arg(0);
+            z3::expr ret = z3_expr_intern.arg(0);
             return translate_intern(ret);
+        } else if (oper == "if") {
+            auto simplifiedITE = z3_expr_intern.simplify();
+            if(simplifiedITE.is_ite()){
+                auto cond = translate_intern(z3_expr_intern.arg(0));
+                auto trueExpr= translate_intern(z3_expr_intern.arg(1));
+                auto falseExpr= translate_intern(z3_expr_intern.arg(2));
+                return new CompareOperator(cond,trueExpr,falseExpr);
+            }else{
+                return translate_intern(simplifiedITE);
+            }
         } else throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, unknown operator: " + oper);
     }
 }
@@ -711,9 +721,11 @@ void SCAM::ExprTranslator::visit(struct ArrayOperand &node) {
 
 
 void SCAM::ExprTranslator::visit(SCAM::CompareOperator &node) {
-
     this->abort = true;
-    node.getCondition()->accept(*this);
+    auto condition = translate(node.getCondition());
+    auto trueExpr = translate(node.getTrueExpr());
+    auto falseExpr = translate(node.getFalseExpr());
 
+    z3_expr = z3::ite(condition,trueExpr,falseExpr);
 
 }

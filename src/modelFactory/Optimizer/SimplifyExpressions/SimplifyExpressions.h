@@ -111,7 +111,7 @@ namespace SCAM {
 
         void visit(class Notify &node) override {};
 
-        void visit(class Wait &node) override {};
+        void visit(class Wait &node) override {};;
 
         void visit(class Peek &node) override {};
 

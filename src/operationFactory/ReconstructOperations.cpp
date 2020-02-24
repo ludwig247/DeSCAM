@@ -589,10 +589,7 @@ namespace SCAM {
         auto trueExpr = this->newExpr;
         node.getFalseExpr()->accept(*this);
         auto falseExpr = this->newExpr;
-
         //Create new stmt
         this->newExpr = new SCAM::CompareOperator(cond, trueExpr, falseExpr);
     }
-
-
 }

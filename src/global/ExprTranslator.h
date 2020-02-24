@@ -128,7 +128,7 @@ namespace SCAM {
         const SCAM::Module *module;
 
         //recursive version of translate to SCAM
-        SCAM::Expr *translate_intern(z3::expr &z3_expr);
+        SCAM::Expr *translate_intern(const z3::expr &z3_expr_intern);
 
         z3::sort find_or_add_sort(const DataType *pType);
 

@@ -382,4 +382,57 @@ TEST_F(ExprTranslator_Test, array3) {
     ASSERT_EQ(newExpr->getDataType(), relational->getDataType()) << newExpr->getDataType()->getName() << " != " << relational->getDataType()->getName();
 }
 
+TEST_F(ExprTranslator_Test, CompareOperatorTerminal) {
+
+    auto valTrue =  new IntegerValue(2);
+    auto valFalse = new IntegerValue(3);
+
+    auto boolTrue = new BoolValue(true);
+    auto boolFalse = new BoolValue(false);
+
+    //Terminal true ? x : y -> return x
+    auto compare = new CompareOperator(boolTrue,valTrue, valFalse);
+    z3::expr expr = exprTranslator.translate(compare);
+    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    ASSERT_EQ((*valTrue), (*newExpr)) << PrintStmt::toString(valTrue)  << "!=" << PrintStmt::toString(newExpr);
+
+
+    //Terminal false ? x : y -> return y
+    auto compare2 = new CompareOperator(boolFalse,valTrue, valFalse);
+    expr = exprTranslator.translate(compare2);
+    newExpr = exprTranslator.translate(expr, &module);
+    ASSERT_EQ((*valFalse), (*newExpr))  <<  PrintStmt::toString(valFalse)  << " != " << PrintStmt::toString(newExpr);
+
+    //Terminal cond ? x : x -> return x
+    auto compare3 = new CompareOperator(new Relational(valTrue,">=", valFalse),valTrue,valTrue);
+    expr = exprTranslator.translate(compare3);
+    newExpr = exprTranslator.translate(expr, &module);
+    ASSERT_EQ((*valTrue), (*newExpr))  <<  PrintStmt::toString(valFalse)  << " != " << PrintStmt::toString(newExpr);
+
+    //Terminal true || false ? x : y -> return x
+    auto compare4 = new CompareOperator(new Logical(boolTrue,"or", boolFalse),valTrue,valFalse);
+    expr = exprTranslator.translate(compare4);
+    newExpr = exprTranslator.translate(expr, &module);
+    ASSERT_EQ((*valTrue), (*newExpr))  <<  PrintStmt::toString(valTrue)  << " != " << PrintStmt::toString(newExpr);
+
+}
+
+
+TEST_F(ExprTranslator_Test, CompareOperatorNonTerminal) {
+
+    auto valTrue =  new IntegerValue(2);
+    auto valFalse = new IntegerValue(3);
+    auto variableOperand =  new VariableOperand(module.getVariable("signed_var"));
+
+    auto compare3 = new CompareOperator(new Relational(variableOperand,">=", valFalse),valTrue,valFalse);
+    z3::expr expr = exprTranslator.translate(compare3);
+    auto newExpr = exprTranslator.translate(expr, &module);
+    bool test = (*compare3) ==  (*newExpr);
+    ASSERT_EQ((*compare3), (*newExpr))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
+
+}
+
+
+
+
 #endif //PROJECT_EXPRTRANSLATOR_TEST_H

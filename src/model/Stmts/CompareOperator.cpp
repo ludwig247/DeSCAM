@@ -27,8 +27,19 @@ void SCAM::CompareOperator::accept(SCAM::StmtAbstractVisitor &visitor) {
 }
 
 bool SCAM::CompareOperator::operator==(const SCAM::Stmt &other) const {
-    throw std::runtime_error("not implemented");
-    return false;
+    if (this == &other) return true;
+    if (NodePeekVisitor::nodePeekCompareOperator(const_cast<Stmt *>(&other)) == nullptr) return false;
+    auto thisPtr = (CompareOperator *) this;
+    auto otherPtr = (const CompareOperator *) &other;
+
+    auto is_equal = [] (Expr * a, Expr * b)-> bool {
+        return (*a) == (*b);
+    };
+
+   bool conditions =  is_equal(thisPtr->getCondition() ,otherPtr->getCondition()) ;
+   bool trueExprs = is_equal(thisPtr->getTrueExpr(),otherPtr->getTrueExpr());
+   bool falseExprs = is_equal(thisPtr->getFalseExpr(), otherPtr->getFalseExpr());
+   return conditions && trueExprs && falseExprs;
 }
 
 SCAM::Expr *SCAM::CompareOperator::getCondition() const {
