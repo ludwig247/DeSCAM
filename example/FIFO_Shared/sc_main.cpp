@@ -30,7 +30,7 @@ int sc_main(int argc, char *argv[]) {
     F1.producer_notify.bind(p_sync);
     F1.consumer_notify.bind(c_sync);
 
-    sc_start(100, SC_NS);
+    sc_start(100, SC_PS);
 
     return 0;
 }

@@ -28,6 +28,7 @@ void FIFO<T>::read(T &out) {
         state = EMPTY;
     }
     reader_notify.notify();
+    return;
 }
 
 template<typename T>

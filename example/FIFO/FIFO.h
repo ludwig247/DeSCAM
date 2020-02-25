@@ -7,7 +7,6 @@
 
 #include "systemc.h"
 #include "FIFO_ifs.h"
-#include "ImportantState.h"
 
 template<typename T>
 class FIFO : public sc_prim_channel,

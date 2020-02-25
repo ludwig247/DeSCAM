@@ -86,14 +86,12 @@ private:
                     producer_sig->get(p_data);
                     if (head == 0) {
                         buffer[0] = p_data;
-                        head = 1;
                     } else if (head == 1) {
                         buffer[1] = p_data;
-                        head = 2;
                     } else { // if (head == 2){
                         buffer[2] = p_data;
-                        head = 0;
                     }
+                    head = (head + 1) % N;
                     //Check if Buffer is full and set state accordingly
                     state = FILLED;
                     if (tail == head) {
@@ -111,14 +109,12 @@ private:
                     producer_sig->get(p_data);
                     if (head == 0) {
                         buffer[0] = p_data;
-                        head = 1;
                     } else if (head == 1) {
                         buffer[1] = p_data;
-                        head = 2;
                     } else { // if (head == 2){
                         buffer[2] = p_data;
-                        head = 0;
                     }
+                    head = (head + 1) % N;
                     //Check if Buffer is full and set state accordingly
                     state = FILLED;
                     if (tail == head) {
@@ -128,14 +124,12 @@ private:
                 } else if (!p_sync && c_sync) {
                     if (tail == 0) {
                         c_data = buffer[0];
-                        tail = 1;
                     } else if (tail == 1) {
                         c_data = buffer[1];
-                        tail = 2;
                     } else { // if (tail == 2){
                         c_data = buffer[2];
-                        tail = 0;
                     }
+                    tail = (tail + 1) % N;
                     consumer_sig->set(c_data);
                     state = FILLED;
                     if (tail == head) {
@@ -145,42 +139,37 @@ private:
                 } else if (p_sync and c_sync) {
                     if (tail == 0) {
                         c_data = buffer[0];
-                        tail = 1;
                     } else if (tail == 1) {
                         c_data = buffer[1];
-                        tail = 2;
                     } else { // if (tail == 2){
                         c_data = buffer[2];
-                        tail = 0;
                     }
+                    tail = (tail + 1) % N;
+
                     consumer_sig->set(c_data);
                     consumer_notify->set(true);
 
                     producer_sig->get(p_data);
                     if (head == 0) {
                         buffer[0] = p_data;
-                        head = 1;
                     } else if (head == 1) {
                         buffer[1] = p_data;
-                        head = 2;
                     } else { // if (head == 2){
                         buffer[2] = p_data;
-                        head = 0;
                     }
+                    head = (head + 1) % N;
                     producer_notify->set(true);
                 }
             } else if ((state == FULL) && (head < N) && (tail < N)) {
                 if (!p_sync && c_sync) {
                     if (tail == 0) {
                         c_data = buffer[0];
-                        tail = 1;
                     } else if (tail == 1) {
                         c_data = buffer[1];
-                        tail = 2;
                     } else { // if (tail == 2){
                         c_data = buffer[2];
-                        tail = 0;
                     }
+                    tail = (tail + 1) % N;
                     consumer_sig->set(c_data);
                     state = FILLED;
                     if (tail == head) {
@@ -190,28 +179,26 @@ private:
                 } else if (p_sync && c_sync) {
                     if (tail == 0) {
                         c_data = buffer[0];
-                        tail = 1;
                     } else if (tail == 1) {
                         c_data = buffer[1];
-                        tail = 2;
                     } else { // if (tail == 2){
                         c_data = buffer[2];
-                        tail = 0;
                     }
+                    tail = (tail + 1) % N;
+
                     consumer_sig->set(c_data);
                     consumer_notify->set(true);
 
                     producer_sig->get(p_data);
                     if (head == 0) {
                         buffer[0] = p_data;
-                        head = 1;
                     } else if (head == 1) {
                         buffer[1] = p_data;
-                        head = 2;
                     } else { // if (head == 2){
                         buffer[2] = p_data;
-                        head = 0;
                     }
+                    head = (head + 1) % N;
+
                     producer_notify->set(true);
                 }
             }

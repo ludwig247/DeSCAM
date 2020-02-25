@@ -73,6 +73,7 @@ namespace SCAM {
         void HandleTranslationUnit(ASTContext & context) override ;
 
         void addModules(clang::TranslationUnitDecl *decl);
+        void addChannels(clang::TranslationUnitDecl *decl);
         void addGlobalConstants(TranslationUnitDecl *pDecl);
         void addPorts(Module* module,clang::CXXRecordDecl* decl);
         void addFunctions(Module *module, CXXRecordDecl * decl);

@@ -11,6 +11,7 @@ namespace SCAM {
     }
 
     bool FindModules::VisitCXXRecordDecl(clang::CXXRecordDecl *cxxDecl) {
+
         //Checks wheter the module is just a declaration and not a implementation
         if (cxxDecl->hasDefinition() == false) {
             return true;

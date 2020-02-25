@@ -17,6 +17,8 @@
 #include "FindFunctions.h"
 #include "FindGlobal.h"
 #include "../parser/CommandLineParameter.h"
+#include "FindChannels.h"
+#include "FindChannelMethods.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
 #include <z3.h>
@@ -47,20 +49,23 @@ bool SCAM::ModelFactory::preFire() {
 bool SCAM::ModelFactory::fire() {
     //Translation Unit
     TranslationUnitDecl *tu = _context.getTranslationUnitDecl();
-
+    //tu->dumpColor();
     //SCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
+
+    //tu->dumpColor();
+    //Add Channels
+    this->addChannels(tu);
 
     //Global variables
     this->addGlobalConstants(tu);
 
     //Modules
     this->addModules(tu);
-
-
     //Remove unused things from the model
     this->removeUnused();
+
 
     //Instances
     this->addInstances(tu);
@@ -109,6 +114,28 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         this->addBehavior(module, scparModule.second);
 
         //this->addCommunicationFSM(module);
+    }
+}
+void SCAM::ModelFactory::addChannels(clang::TranslationUnitDecl *tu){
+    //Find CXXRecordDecls
+    FindChannels channels(tu);
+
+    //Fill the model with modules(structural describtion)
+    for (auto &scparModule: channels.getChannelMap()) {
+
+        //Channel Name
+        std::string name = scparModule.first;
+
+        if(name == "FIFO"){
+            FindChannelMethods methods(scparModule.second);
+        }
+        else{
+            continue;
+        };
+
+        std::cout << "############################" << std::endl;
+        std::cout << "Channel: " << name << std::endl;
+        std::cout << "############################" << std::endl;
     }
 }
 
