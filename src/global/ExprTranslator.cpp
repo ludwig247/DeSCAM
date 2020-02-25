@@ -308,13 +308,13 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             z3::expr ret = z3_expr_intern.arg(0);
             return translate_intern(ret);
         } else if (oper == "if") {
-            auto simplifiedITE = z3_expr_intern.simplify();
-            if(simplifiedITE.is_ite()){
+            z3::expr simplifiedITE = z3_expr_intern.simplify();
+            if(simplifiedITE.num_args()==3){
                 auto cond = translate_intern(z3_expr_intern.arg(0));
                 auto trueExpr= translate_intern(z3_expr_intern.arg(1));
                 auto falseExpr= translate_intern(z3_expr_intern.arg(2));
                 return new CompareOperator(cond,trueExpr,falseExpr);
-            }else{
+            }else if((simplifiedITE.num_args()==1)){
                 return translate_intern(simplifiedITE);
             }
         } else throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, unknown operator: " + oper);
