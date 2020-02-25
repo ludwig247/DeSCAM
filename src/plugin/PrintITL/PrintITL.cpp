@@ -8,7 +8,7 @@
 
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
-
+    this->model = node;
     for (auto &module: node->getModules()) {
 
         this->module = module.second;
@@ -19,6 +19,11 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
         if (funString != "")
             pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
     }
+
+    if(!node->getGlobalFunctionMap().empty()){
+        pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.vhi", globalFunctions()));
+    }
+
     return pluginOutput;
 }
 
@@ -288,6 +293,72 @@ std::string PrintITL::operations() {
         ss << printProperty(p);
     }
 
+    return ss.str();
+}
+
+std::string PrintITL::globalFunctions() {
+    std::stringstream ss;
+    if (model->getGlobalFunctionMap().empty()) return ss.str();
+    ss << "-- GLOBAL FUNCTIONS --\n";
+    for (auto function: model->getGlobalFunctionMap()) {
+        ss << "macro " + function.first << "(";
+        auto paramMap = function.second->getParamMap();
+        for (auto param = paramMap.begin(); param != paramMap.end(); ++param) {
+            if (param->second->getDataType()->isCompoundType()) {
+                for (auto iterator = param->second->getDataType()->getSubVarMap().begin();
+                     iterator != param->second->getDataType()->getSubVarMap().end(); ++iterator) {
+                    ss << param->first << "_" << iterator->first << ": " << convertDataType(iterator->second->getName());
+                    if (iterator != --param->second->getDataType()->getSubVarMap().end()) ss << ";";
+                }
+            } else {
+                ss << param->first << ": " << convertDataType(param->second->getDataType()->getName());
+            }
+            if (param != --paramMap.end()) ss << ";";
+        }
+        ss << ") : " << convertDataType(function.second->getReturnType()->getName()) << " :=\n";
+
+        if (function.second->getReturnValueConditionList().empty())
+            throw std::runtime_error(" No return value for function " + function.first + "()");
+        auto branchNum = function.second->getReturnValueConditionList().size();
+        for (auto returnValue: function.second->getReturnValueConditionList()) {
+            ss << "\t";
+            //Any conditions?
+            if (!returnValue.second.empty()) {
+                if (branchNum > 1) {
+                    if (branchNum == function.second->getReturnValueConditionList().size())
+                        ss << "if (";
+                    else
+                        ss << "elsif (";
+
+                    auto condNum = returnValue.second.size();
+                    for (auto cond_it: returnValue.second) {
+                        ss << ConditionVisitor::toString(cond_it);
+                        if (condNum > 1) ss << " and ";
+                        condNum--;
+                    }
+                    ss << ") then ";
+                }
+            }
+
+            // Handle optimized functions (last branch does not have any conditions)
+            if (1 != function.second->getReturnValueConditionList().size()) {
+                if (branchNum == 1) ss << "else ";
+            }
+
+            if (function.second->getReturnType()->getName() == "int" || function.second->getReturnType()->getName() == "unsigned") {
+                ss << convertDataType(function.second->getReturnType()->getName());
+            }
+            ss << "(" << ConditionVisitor::toString(returnValue.first->getReturnValue()) << ")";
+            if (!returnValue.second.empty()) {
+                ss << "\n";
+            } else {
+                ss << ";\n";
+            }
+            --branchNum;
+        }
+        if (function.second->getReturnValueConditionList().size() > 1) ss << "end if;\n";
+        ss << "end macro;\n\n";
+    }
     return ss.str();
 }
 

@@ -7,6 +7,8 @@
 
 #include "systemc.h"
 #include "../Interfaces/Interfaces.h"
+#include "Test_Module_GlobalFunctions2.h"
+
 
 #define num 8
 
