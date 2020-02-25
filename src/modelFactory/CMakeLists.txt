@@ -3,7 +3,7 @@ add_compile_options(-D__STDC_LIMIT_MACROS)
 
 add_subdirectory(Optimizer)
 
-add_library (modelFactory
+add_library (modelFactory SHARED
         ModelFactory.cpp
         PluginAction.h
         FindModules.cpp
@@ -21,5 +21,6 @@ add_library (modelFactory
         FindFunctions.cpp
         FindGlobal.cpp FindGlobal.h FindStateName.cpp FindStateName.h)
 
+target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)
 target_link_libraries(modelFactory functionFactory)

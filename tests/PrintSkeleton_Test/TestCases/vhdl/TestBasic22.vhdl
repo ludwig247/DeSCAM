@@ -14,7 +14,6 @@ port(
 end TestBasic22;
 
 architecture TestBasic22_arch of TestBasic22 is
-	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
 	signal test_signal: test_compound;
 	signal test2_signal: unsigned (31 downto 0);
@@ -24,7 +23,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
 			test_signal.x <= to_signed(0, 32);
 			test_signal.y <= to_unsigned(0, 32);

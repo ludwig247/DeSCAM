@@ -20,7 +20,6 @@ end TestMasterSlave10;
 architecture TestMasterSlave10_arch of TestMasterSlave10 is
 	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
-	signal shared_signal: int;
 	signal succ_signal: bool;
 	signal val_signal: int;
 
@@ -31,7 +30,6 @@ begin
 		if rst = '1' then
 			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
-			shared_signal <= to_signed(0, 32);
 			succ_signal <= false;
 			val_signal <= to_signed(0, 32);
 		else

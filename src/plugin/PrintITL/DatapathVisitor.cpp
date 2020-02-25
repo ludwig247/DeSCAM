@@ -5,22 +5,26 @@
 
 #include "DatapathVisitor.h"
 
+SCAM::DatapathVisitor::DatapathVisitor(std::string tp):
+    tp(tp){
+
+}
 
 void SCAM::DatapathVisitor::visit(SCAM::SyncSignal &node) {
     PrintStmt::toString(&node);
-    this->ss << node.getPort()->getName() << "_sync_at_t";
+    this->ss << node.getPort()->getName() << "_sync" << tp;
 }
 
 void SCAM::DatapathVisitor::visit(SCAM::DataSignalOperand &node) {
     PrintStmt::toString(&node);
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {
-            this->ss << node.getDataSignal()->getParent()->getName() << "_at_t" << "(" << node.getDataSignal()->getName() << ")";
+            this->ss << node.getDataSignal()->getParent()->getName() << tp << "(" << node.getDataSignal()->getName() << ")";
         } else {
-            this->ss << node.getDataSignal()->getParent()->getName() << "_" << node.getDataSignal()->getName() << "_at_t";
+            this->ss << node.getDataSignal()->getParent()->getName() << "_" << node.getDataSignal()->getName() << tp;
         }
     } else {
-        this->ss << node.getDataSignal()->getName() << "_at_t";
+        this->ss << node.getDataSignal()->getName() << tp;
     }
 }
 
@@ -29,13 +33,13 @@ void SCAM::DatapathVisitor::visit(class VariableOperand &node) {
     if(node.getVariable()->isConstant()) this->ss << node.getOperandName();
     else{
         if (node.getVariable()->isSubVar()) {
-            this->ss << node.getVariable()->getParent()->getName() + "_" + node.getVariable()->getName() + "_at_t";
-        } else this->ss << node.getOperandName() << "_at_t";
+            this->ss << node.getVariable()->getParent()->getName() + "_" + node.getVariable()->getName() + tp;
+        } else this->ss << node.getOperandName() << tp;
     }
 }
 
-std::string SCAM::DatapathVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    DatapathVisitor printer;
+std::string SCAM::DatapathVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset, std::string tp) {
+    DatapathVisitor printer(tp);
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
@@ -130,14 +134,17 @@ void SCAM::DatapathVisitor::visit(SCAM::CompoundExpr &node) {
 }
 
 void SCAM::DatapathVisitor::visit(SCAM::ArrayOperand &node) {
-    this->ss << node.getArrayOperand()->getOperandName();
+    this->ss << node.getArrayOperand()->getOperandName() << tp;
     this->ss << "(";
     node.getIdx()->accept(*this);
-    this->ss << ")";
+    this->ss << ")" ;
+
+//    this->ss << "(";
+//    node.getIdx()->accept(*this);
+//    this->ss << ")";
 }
 
 void SCAM::DatapathVisitor::visit(SCAM::UnaryExpr &node) {
-
         useParenthesesFlag = true;
         if(node.getOperation() == "~") {
             this->ss << "not(";

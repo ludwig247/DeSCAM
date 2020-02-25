@@ -10,14 +10,10 @@ module TestBasic9 (
 	input integer m_in
 	);
 
-	bit nb_result_signal;
-	integer var_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nb_result_signal <= 1'b0;
-			var_signal <= 1337;
 			b_in_notify <= 1'b1;
 		end else begin
 				// FILL OUT HERE

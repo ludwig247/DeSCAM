@@ -10,6 +10,8 @@
 #include <iostream>
 #include <set>
 
+#include "CommandLineParametersConfig.h"
+
 class CommandLineParameter {
 public:
     //GETTERS

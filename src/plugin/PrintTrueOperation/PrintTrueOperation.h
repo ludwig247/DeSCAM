@@ -26,7 +26,7 @@ public:
 
     std::string print();
 
-    void findCylces(State2 * current, State2 * start, const std::vector<Operation2*>& opList);
+    void findCylces(State * current, State * start, const std::vector<Operation*>& opList);
 
 private:
     std::stringstream ss;
@@ -45,17 +45,17 @@ private:
 
 //        std::string hideConstants();
     SCAM::Module *module;
-    std::vector<std::vector<Operation2 *>> cycleMap;
+    std::vector<std::vector<Operation *>> cycleMap;
 
-    std::string generatTrueOp(std::vector<Operation2 *> &cycle);
+    std::string generatTrueOp(std::vector<Operation *> &cycle);
 
     int cycle_cnt;
 
     unsigned save = 0;
 
-    bool isRequired(Variable *var, Operation2 *&currentOperation, std::vector<Operation2 *> &cycle);
+    bool isRequired(Variable *var, Operation *&currentOperation, std::vector<Operation *> &cycle);
 
-    bool isRequired2(Variable *const &var, Operation2 *op, std::vector<Operation2 *> &cycle);
+    bool isRequired2(Variable *const &var, Operation *op, std::vector<Operation *> &cycle);
 };
 
 

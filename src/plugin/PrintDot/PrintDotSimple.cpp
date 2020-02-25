@@ -27,15 +27,15 @@ std::string PrintDotSimple::printDotSimple(Module *module) {
         ss << "init" << "->";
         ss << "op_" << op->getName() << "[dir=none];\n";
         ss << "op_" << op->getName() << " ->";
-        ss << op->getNextState()->getName() << ";" << std::endl;
+        ss << op->getOperation()->getNextState()->getName() << ";" << std::endl;
         ss << "op_" << op->getName() << "[shape=record label =\"{" << op->getName() << "}";
         //Assumptions
         if (!op->getAssumptionList().empty()) { //should be empty
             ss << " | { Assumptions |";
-            for (auto iterator = op->getAssumptionList().begin();
-                 iterator != op->getAssumptionList().end(); ++iterator) {
+            for (auto iterator = op->getOperation()->getAssumptionsList().begin();
+                 iterator != op->getOperation()->getAssumptionsList().end(); ++iterator) {
                 ss << PrintStmtForDot::toString((*iterator));
-                if (iterator + 1 != op->getAssumptionList().end()) {
+                if (iterator + 1 != op->getOperation()->getAssumptionsList().end()) {
                     ss << "|";
                 }
             }
@@ -45,20 +45,20 @@ std::string PrintDotSimple::printDotSimple(Module *module) {
     }
 
 
-    for (auto op: ps->getOperationProperties()) {
+    for (auto op: ps->getProperties()) {
         // State -> Assumptions -> NextState
-        ss << op->getState()->getName() << "->";
+        ss << op->getOperation()->getState()->getName() << "->";
         ss << "op_" << op->getName() << "[dir=none];\n";
         ss << "op_" << op->getName() << " ->";
-        ss << op->getNextState()->getName() << ";" << std::endl;
+        ss << op->getOperation()->getNextState()->getName() << ";" << std::endl;
         ss << "op_" << op->getName() << "[shape=record label =\"{" << "op_"<<op->getName() << "}";
         //Assumptions
         if (!op->getAssumptionList().empty()) {
             ss << " | { Assumptions |";
-            for (auto iterator = op->getAssumptionList().begin();
-                 iterator != op->getAssumptionList().end(); ++iterator) {
+            for (auto iterator = op->getOperation()->getAssumptionsList().begin();
+                 iterator != op->getOperation()->getAssumptionsList().end(); ++iterator) {
                 ss << PrintStmtForDot::toString((*iterator));
-                if (iterator + 1 != op->getAssumptionList().end()) {
+                if (iterator + 1 != op->getOperation()->getAssumptionsList().end()) {
                     ss << "|";
                 }
             }
@@ -70,7 +70,6 @@ std::string PrintDotSimple::printDotSimple(Module *module) {
     ss << "init [ label =\"init\"];" << std::endl;
     for (auto state:ps->getStates())
         ss << state->getName() << "[ label =\"" << state->getName() << "\"];" << std::endl;
-
     ss << "}";
 
     return ss.str();

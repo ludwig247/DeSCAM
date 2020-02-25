@@ -7,5 +7,9 @@
 
 #include "Test_Module.h"
 
+#include "Test_Module_GlobalFunctions.h"
+
+
+
 
 #endif //PROJECT_TESTS_H

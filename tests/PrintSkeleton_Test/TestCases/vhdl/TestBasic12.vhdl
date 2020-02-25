@@ -17,8 +17,6 @@ port(
 end TestBasic12;
 
 architecture TestBasic12_arch of TestBasic12 is
-	signal compoundType_signal: CompoundType;
-	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
 
 begin
@@ -26,10 +24,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			compoundType_signal.mode <= READ;
-			compoundType_signal.x <= to_signed(0, 32);
-			compoundType_signal.y <= false;
-			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
 			b_in_notify <= true;
 			m_out_notify <= false;

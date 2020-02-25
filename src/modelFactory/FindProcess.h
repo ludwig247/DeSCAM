@@ -36,7 +36,9 @@ namespace SCAM{
 
         //Getter
         const std::map<std::string, std::pair<clang::CXXMethodDecl *, PROCESS_TYPE>>& getProcessMap();
-        std::vector<clang::CXXMethodDecl*> getOtherFunctions();
+        bool isValidProcess() const;
+        clang::CXXMethodDecl * getProcess() const;
+
 
     private:
         clang::CXXRecordDecl* recordDecl;

@@ -2,7 +2,7 @@
 file(GLOB OPERATIONMISCELLANEOUS "OperationMiscellaneous/*.cpp")
 file(GLOB OPERATIONOPTIMIZATIONS "OperationOptimizations/*.cpp")
 
-add_library(operationFactory
+add_library(operationFactory SHARED
         ${OPERATIONDATASTRUCTURE}
         ${OPERATIONMISCELLANEOUS}
         ${OPERATIONOPTIMIZATIONS}
@@ -12,5 +12,6 @@ add_library(operationFactory
         ReconstructOperations.cpp
         ValidOperations.cpp
         OperationFactory.cpp)
+
 
 target_link_libraries(operationFactory propertySuite)

@@ -12,7 +12,7 @@
 
 namespace SCAM {
 
-    SCAM::ValidOperations::ValidOperations(const std::vector<SCAM::Operation2 *> &operationsList, SCAM::Module * module) : module(module){
+    SCAM::ValidOperations::ValidOperations(const std::vector<SCAM::Operation *> &operationsList, SCAM::Module * module) : module(module){
 
         for (auto op : operationsList) {
             if (SCAM::ValidOperations::isOperationReachable(op)) {
@@ -29,7 +29,7 @@ namespace SCAM {
     }
 
 
-    const bool SCAM::ValidOperations::isOperationReachable(SCAM::Operation2* op) {
+    const bool SCAM::ValidOperations::isOperationReachable(SCAM::Operation* op) {
         z3::context  context;
         z3::solver solver(context);
         ExprTranslator translator(&context);
@@ -107,7 +107,7 @@ namespace SCAM {
         return !(solver.check() == z3::unsat);
     }
 
-    const std::vector<SCAM::Operation2*> SCAM::ValidOperations::getOperationsList() const {
+    const std::vector<SCAM::Operation*> SCAM::ValidOperations::getOperationsList() const {
         return this->operationsList;
     }
 }

@@ -1,4 +1,4 @@
-add_library(Stmts
+add_library(Stmts SHARED
         Assignment.cpp
         Stmt.h
         Operand.h
@@ -38,4 +38,5 @@ add_library(Stmts
         Notify.cpp
         Wait.cpp
         Peek.cpp
-        ArrayExpr.cpp)
+        ArrayExpr.cpp
+        TimePointOperand.cpp)

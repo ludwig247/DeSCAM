@@ -1,6 +1,7 @@
 //
 // Created by ludwig on 30.01.17.
 //
+
 #include "../../../example/Interfaces/Interfaces.h"
 #include "systemc.h"
 
@@ -18,14 +19,12 @@ struct Bus : public sc_module {
     blocking_in<bus_resp_t> slave_in2;
     blocking_in<bus_resp_t> slave_in3;
 
-
     //Out-por
     blocking_out<bus_resp_t> master_out;
     blocking_out<bus_req_t> slave_out0;
     blocking_out<bus_req_t> slave_out1;
     blocking_out<bus_req_t> slave_out2;
     blocking_out<bus_req_t> slave_out3;
-
 
     //Variables
     bus_req_t req;

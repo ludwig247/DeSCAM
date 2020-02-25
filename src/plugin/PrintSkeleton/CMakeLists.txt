@@ -1,4 +1,4 @@
 
-add_library(PrintSkeleton
+add_library(PrintSkeleton SHARED
         PrintSkeleton.cpp)
 

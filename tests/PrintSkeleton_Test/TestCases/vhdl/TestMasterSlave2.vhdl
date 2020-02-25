@@ -13,7 +13,6 @@ port(
 end TestMasterSlave2;
 
 architecture TestMasterSlave2_arch of TestMasterSlave2 is
-	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
 	signal val_signal: int;
 
@@ -22,7 +21,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
 			val_signal <= to_signed(1337, 32);
 		else

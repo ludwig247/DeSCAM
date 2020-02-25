@@ -8,7 +8,10 @@
 #include <PluginFactory.h>
 #include <sstream>
 #include "Model.h"
-//#include <PropertyFactory.h>
+#include "CommandLineParameter.h"
+#include "ConditionVisitor.h"
+#include "DatapathVisitor.h"
+#include "TimePointVisitor.h"
 
 class PrintITL : public PluginFactory {
 
@@ -24,23 +27,31 @@ public:
     std::string print();
 
 private:
-    std::stringstream ss;
+    //std::stringstream ss;
+
+    //Model *model;
 
     std::string functions();
+
+    std::string globalFunctions();
 
     std::string convertDataType(std::string dataTypeName);
 
     std::string location(bool loc);
 
-    std::string propertySuite();
+    std::string printTemporalExpr(TemporalExpr* temporalExpr);
 
-    std::string adjustmacros();
+    std::string printProperty(Property* property);
 
-    std::string pipelined();
+    std::string macros();
+    std::string operations();
+
+    //std::string adjustmacros();
+
+    //std::string pipelined();
 
 //        std::string hideConstants();
     SCAM::Module *module;
-
 };
 
 

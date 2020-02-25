@@ -14,9 +14,6 @@ namespace SCAM {
 
     }
 
-    AbstractNode::~AbstractNode() {
-
-    }
 
     std::string AbstractNode::getName() const {
         return this->name;

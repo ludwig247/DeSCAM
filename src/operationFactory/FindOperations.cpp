@@ -34,7 +34,7 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
     /// Create empty states starting from importantStatements: reset, wait(0), and Blocking communication
     for (auto node : this->importantStates) {
         if(node->getStmt() == nullptr) {
-            auto  *state = new SCAM::State2("init");
+            auto  *state = new SCAM::State("init");
             state->setInit();
             this->statesMap.insert(std::make_pair("init",state));
         } else {
@@ -46,7 +46,7 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
             if(findComm.hasStateName()) {
                 stateName = findComm.getStateName();
             }
-            auto *state = new SCAM::State2(stateName);
+            auto *state = new SCAM::State(stateName);
 
             if(findComm.isWaitComm()) {
                 state->setWait();
@@ -496,7 +496,7 @@ bool SCAM::FindOperations::checkSlavesOrder(const std::vector<SCAM::CfgNode *>& 
     return true;
 }
 
-const std::map<std::string, SCAM::State2 *> &SCAM::FindOperations::getStatesMap() const {
+const std::map<std::string, SCAM::State *> &SCAM::FindOperations::getStatesMap() const {
     return this->statesMap;
 }
 

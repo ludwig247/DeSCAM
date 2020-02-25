@@ -18,16 +18,12 @@ port(
 end TestBasic6;
 
 architecture TestBasic6_arch of TestBasic6 is
-	signal nb_result_signal: bool;
-	signal var_signal: int;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nb_result_signal <= false;
-			var_signal <= to_signed(4, 32);
 			b_in_notify <= true;
 			b_in2_notify <= false;
 		else

@@ -7,7 +7,7 @@
 
 #include <ExprTranslator.h>
 #include <vector>
-#include "Behavior/Operation2.h"
+#include "Behavior/Operation.h"
 
 namespace SCAM{
     /*!

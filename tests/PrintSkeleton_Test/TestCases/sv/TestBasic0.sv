@@ -9,13 +9,11 @@ module TestBasic0 (
 	output logic b_out_notify
 	);
 
-	Sections nextsection_signal;
 	Sections section_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
 			b_out_notify <= 1'b1;
 		end else begin

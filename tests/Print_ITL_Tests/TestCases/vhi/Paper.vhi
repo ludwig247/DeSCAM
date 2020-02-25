@@ -25,8 +25,8 @@ macro nextPhase : Phase := end macro;
 
 -- STATES --
 macro state_1 : boolean := true end macro;
-macro state_3 : boolean := true end macro;
 macro state_2 : boolean := true end macro;
+macro state_3 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -97,31 +97,7 @@ prove:
 end property;
 
 
-property state_3_6 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	msg_data_at_t = msg_data@t,
-	msg_status_at_t = msg_status@t,
-	s_out_sig_at_t = s_out_sig@t;
-assume:
-	at t: state_3;
-	at t: (cnt = resize(1,32));
-prove:
-	at t_end: state_2;
-	at t_end: cnt = 15;
-	at t_end: msg_data = msg_data_at_t;
-	at t_end: msg_status = msg_status_at_t;
-	at t_end: nextPhase = frame_data;
-	at t_end: s_out_sig = s_out_sig_at_t;
-	during[t+1, t_end-1]: b_in_notify = false;
-	at t_end: b_in_notify = true;
-	during[t+1, t_end]: m_out_notify = false;
-end property;
-
-
-property state_3_7 is
+property state_2_10 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
@@ -132,18 +108,20 @@ freeze:
 	nextPhase_at_t = nextPhase@t,
 	s_out_sig_at_t = s_out_sig@t;
 assume:
-	at t: state_3;
+	at t: state_2;
+	at t: not(b_in_sync);
 	at t: not((cnt = resize(1,32)));
-	at t: (nextPhase = frame_start);
+	at t: (nextPhase = frame_data);
 prove:
-	at t_end: state_3;
+	at t_end: state_2;
 	at t_end: cnt = (-1 + cnt_at_t)(31 downto 0);
-	at t_end: m_out_sig = (-1 + cnt_at_t)(31 downto 0);
+	at t_end: m_out_sig = msg_data_at_t;
 	at t_end: msg_data = msg_data_at_t;
 	at t_end: msg_status = msg_status_at_t;
 	at t_end: nextPhase = nextPhase_at_t;
 	at t_end: s_out_sig = s_out_sig_at_t;
-	during[t+1, t_end]: b_in_notify = false;
+	during[t+1, t_end-1]: b_in_notify = false;
+	at t_end: b_in_notify = true;
 	during[t+1, t_end-1]: m_out_notify = false;
 	at t_end: m_out_notify = true;
 end property;
@@ -203,7 +181,31 @@ prove:
 end property;
 
 
-property state_2_10 is
+property state_3_6 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	msg_data_at_t = msg_data@t,
+	msg_status_at_t = msg_status@t,
+	s_out_sig_at_t = s_out_sig@t;
+assume:
+	at t: state_3;
+	at t: (cnt = resize(1,32));
+prove:
+	at t_end: state_2;
+	at t_end: cnt = 15;
+	at t_end: msg_data = msg_data_at_t;
+	at t_end: msg_status = msg_status_at_t;
+	at t_end: nextPhase = frame_data;
+	at t_end: s_out_sig = s_out_sig_at_t;
+	during[t+1, t_end-1]: b_in_notify = false;
+	at t_end: b_in_notify = true;
+	during[t+1, t_end]: m_out_notify = false;
+end property;
+
+
+property state_3_7 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
@@ -214,20 +216,18 @@ freeze:
 	nextPhase_at_t = nextPhase@t,
 	s_out_sig_at_t = s_out_sig@t;
 assume:
-	at t: state_2;
-	at t: not(b_in_sync);
+	at t: state_3;
 	at t: not((cnt = resize(1,32)));
-	at t: (nextPhase = frame_data);
+	at t: (nextPhase = frame_start);
 prove:
-	at t_end: state_2;
+	at t_end: state_3;
 	at t_end: cnt = (-1 + cnt_at_t)(31 downto 0);
-	at t_end: m_out_sig = msg_data_at_t;
+	at t_end: m_out_sig = (-1 + cnt_at_t)(31 downto 0);
 	at t_end: msg_data = msg_data_at_t;
 	at t_end: msg_status = msg_status_at_t;
 	at t_end: nextPhase = nextPhase_at_t;
 	at t_end: s_out_sig = s_out_sig_at_t;
-	during[t+1, t_end-1]: b_in_notify = false;
-	at t_end: b_in_notify = true;
+	during[t+1, t_end]: b_in_notify = false;
 	during[t+1, t_end-1]: m_out_notify = false;
 	at t_end: m_out_notify = true;
 end property;

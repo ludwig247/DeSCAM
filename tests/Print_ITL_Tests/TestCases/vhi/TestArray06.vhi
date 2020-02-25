@@ -45,7 +45,7 @@ assume:
 	at t: b_out_sync;
 prove:
 	at t_end: state_1;
-	at t_end: b_out_sig = m_in_sig(foobar(0));
+	at t_end: b_out_sig = m_in_sig_at_t(foobar(0));
 	during[t+1, t_end-1]: b_out_notify = false;
 	at t_end: b_out_notify = true;
 end property;

@@ -6,10 +6,10 @@
 #include "Optimizer.h"
 
 SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module,
-                           const std::map<std::string, Variable *> &globalVariableMap,
+                           SCAM::Model *model,
                            const std::set <std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
                                                                                module(module),
-                                                                               globalVariableMap(globalVariableMap),
+                                                                               globalVariableMap(model->getGlobalVariableMap()),
                                                                                optimizeOptionsSet(optimizeOptionsSet) {
 
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
@@ -72,7 +72,7 @@ SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *mo
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("fun") != this->optimizeOptionsSet.end()) {
         module->setCFG(this->nodeCFG);
-        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, globalVariableMap, frv.getReadVariablesSet());
+        SCAM::FunctionsOptimizer fo(this->nodeCFG, module, model, frv.getReadVariablesSet());
         this->nodeCFG = fo.getCFG();
     }
     SCAM::RenumberCFG rcn(this->nodeCFG);
