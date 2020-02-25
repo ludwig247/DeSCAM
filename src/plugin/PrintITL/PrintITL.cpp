@@ -5,8 +5,6 @@
 
 #include "PrintITL.h"
 
-
-
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     this->model = node;
     for (auto &module: node->getModules()) {
