@@ -63,12 +63,12 @@ macro regfileWrite_dstData : unsigned := end macro;
 
 
 -- STATES --
-macro state_5 : boolean := true end macro;
-macro state_6 : boolean := true end macro;
 macro state_1 : boolean := true end macro;
 macro state_2 : boolean := true end macro;
 macro state_3 : boolean := true end macro;
 macro state_4 : boolean := true end macro;
+macro state_5 : boolean := true end macro;
+macro state_6 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -88,62 +88,6 @@ prove:
 	 at t: fromMemoryPort_notify = false;
 	 at t: toMemoryPort_notify = true;
 	 at t: toRegsPort_notify = false;
-end property;
-
-
-property state_5_13 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	pcReg_at_t = pcReg@t,
-	phase_at_t = phase@t,
-	regfileWrite_dst_at_t = regfileWrite_dst@t,
-	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
-assume:
-	at t: state_5;
-	at t: toMemoryPort_sync;
-prove:
-	at t_end: state_6;
-	at t_end: pcReg = pcReg_at_t;
-	at t_end: phase = phase_at_t;
-	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
-	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	during[t+1, t_end-1]: fromMemoryPort_notify = false;
-	at t_end: fromMemoryPort_notify = true;
-	during[t+1, t_end]: toMemoryPort_notify = false;
-	during[t+1, t_end]: toRegsPort_notify = false;
-end property;
-
-
-property state_6_14 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
-	pcReg_at_t = pcReg@t,
-	regfileWrite_dst_at_t = regfileWrite_dst@t;
-assume:
-	at t: state_6;
-	at t: fromMemoryPort_sync;
-prove:
-	at t_end: state_1;
-	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: phase = fetch_PH;
-	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
-	at t_end: regfileWrite_dstData = fromMemoryPort_sig_loadedData_at_t;
-	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
-	at t_end: toMemoryPort_sig_dataIn = 0;
-	at t_end: toMemoryPort_sig_mask = MT_W;
-	at t_end: toMemoryPort_sig_req = ME_RD;
-	at t_end: toRegsPort_sig_dst = regfileWrite_dst_at_t;
-	at t_end: toRegsPort_sig_dstData = fromMemoryPort_sig_loadedData_at_t;
-	during[t+1, t_end]: fromMemoryPort_notify = false;
-	during[t+1, t_end-1]: toMemoryPort_notify = false;
-	at t_end: toMemoryPort_notify = true;
-	during[t+1, t_end-1]: toRegsPort_notify = false;
-	at t_end: toRegsPort_notify = true;
 end property;
 
 
@@ -168,6 +112,43 @@ prove:
 	during[t+1, t_end-1]: fromMemoryPort_notify = false;
 	at t_end: fromMemoryPort_notify = true;
 	during[t+1, t_end]: toMemoryPort_notify = false;
+	during[t+1, t_end]: toRegsPort_notify = false;
+end property;
+
+
+property state_2_10 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
+assume:
+	at t: state_2;
+	at t: fromMemoryPort_sync;
+	at t: not((phase = execute_PH));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_J));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_L));
+	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_J));
+prove:
+	at t_end: state_1;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = pcReg_at_t;
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
 	during[t+1, t_end]: toRegsPort_notify = false;
 end property;
 
@@ -638,43 +619,6 @@ prove:
 end property;
 
 
-property state_2_10 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	pcReg_at_t = pcReg@t,
-	regfileWrite_dst_at_t = regfileWrite_dst@t,
-	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
-assume:
-	at t: state_2;
-	at t: fromMemoryPort_sync;
-	at t: not((phase = execute_PH));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_R));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_B));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_S));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_U));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_J));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_I));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_L));
-	at t: not((getEncType(fromMemoryPort_sig_loadedData) = ENC_I_J));
-prove:
-	at t_end: state_1;
-	at t_end: pcReg = pcReg_at_t;
-	at t_end: phase = fetch_PH;
-	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
-	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	at t_end: toMemoryPort_sig_addrIn = pcReg_at_t;
-	at t_end: toMemoryPort_sig_dataIn = 0;
-	at t_end: toMemoryPort_sig_mask = MT_W;
-	at t_end: toMemoryPort_sig_req = ME_RD;
-	during[t+1, t_end]: fromMemoryPort_notify = false;
-	during[t+1, t_end-1]: toMemoryPort_notify = false;
-	at t_end: toMemoryPort_notify = true;
-	during[t+1, t_end]: toRegsPort_notify = false;
-end property;
-
-
 property state_3_11 is
 dependencies: no_reset;
 for timepoints:
@@ -728,49 +672,59 @@ prove:
 end property;
 
 
-property wait_state_5 is
+property state_5_13 is
 dependencies: no_reset;
-freeze:
-	pcReg_at_t = pcReg@t,
-	phase_at_t = phase@t,
-	regfileWrite_dst_at_t = regfileWrite_dst@t,
-	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
-	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
-assume:
-	at t: state_5;
-	at t: not(toMemoryPort_sync);
-prove:
-	at t+1: state_5;
-	at t+1: pcReg = pcReg_at_t;
-	at t+1: phase = phase_at_t;
-	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
-	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
-	at t+1: fromMemoryPort_notify = false;
-	at t+1: toMemoryPort_notify = true;
-	at t+1: toRegsPort_notify = false;
-end property;
-
-
-property wait_state_6 is
-dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	pcReg_at_t = pcReg@t,
 	phase_at_t = phase@t,
 	regfileWrite_dst_at_t = regfileWrite_dst@t,
 	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
 assume:
-	at t: state_6;
-	at t: not(fromMemoryPort_sync);
+	at t: state_5;
+	at t: toMemoryPort_sync;
 prove:
-	at t+1: state_6;
-	at t+1: pcReg = pcReg_at_t;
-	at t+1: phase = phase_at_t;
-	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
-	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
-	at t+1: fromMemoryPort_notify = true;
-	at t+1: toMemoryPort_notify = false;
-	at t+1: toRegsPort_notify = false;
+	at t_end: state_6;
+	at t_end: pcReg = pcReg_at_t;
+	at t_end: phase = phase_at_t;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	during[t+1, t_end-1]: fromMemoryPort_notify = false;
+	at t_end: fromMemoryPort_notify = true;
+	during[t+1, t_end]: toMemoryPort_notify = false;
+	during[t+1, t_end]: toRegsPort_notify = false;
+end property;
+
+
+property state_6_14 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	fromMemoryPort_sig_loadedData_at_t = fromMemoryPort_sig_loadedData@t,
+	pcReg_at_t = pcReg@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t;
+assume:
+	at t: state_6;
+	at t: fromMemoryPort_sync;
+prove:
+	at t_end: state_1;
+	at t_end: pcReg = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: phase = fetch_PH;
+	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t_end: regfileWrite_dstData = fromMemoryPort_sig_loadedData_at_t;
+	at t_end: toMemoryPort_sig_addrIn = (4 + pcReg_at_t)(31 downto 0);
+	at t_end: toMemoryPort_sig_dataIn = 0;
+	at t_end: toMemoryPort_sig_mask = MT_W;
+	at t_end: toMemoryPort_sig_req = ME_RD;
+	at t_end: toRegsPort_sig_dst = regfileWrite_dst_at_t;
+	at t_end: toRegsPort_sig_dstData = fromMemoryPort_sig_loadedData_at_t;
+	during[t+1, t_end]: fromMemoryPort_notify = false;
+	during[t+1, t_end-1]: toMemoryPort_notify = false;
+	at t_end: toMemoryPort_notify = true;
+	during[t+1, t_end-1]: toRegsPort_notify = false;
+	at t_end: toRegsPort_notify = true;
 end property;
 
 
@@ -856,6 +810,52 @@ assume:
 	at t: not(fromMemoryPort_sync);
 prove:
 	at t+1: state_4;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: fromMemoryPort_notify = true;
+	at t+1: toMemoryPort_notify = false;
+	at t+1: toRegsPort_notify = false;
+end property;
+
+
+property wait_state_5 is
+dependencies: no_reset;
+freeze:
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t,
+	toMemoryPort_sig_at_t = toMemoryPort_sig@t;
+assume:
+	at t: state_5;
+	at t: not(toMemoryPort_sync);
+prove:
+	at t+1: state_5;
+	at t+1: pcReg = pcReg_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;
+	at t+1: regfileWrite_dstData = regfileWrite_dstData_at_t;
+	at t+1: toMemoryPort_sig = toMemoryPort_sig_at_t;
+	at t+1: fromMemoryPort_notify = false;
+	at t+1: toMemoryPort_notify = true;
+	at t+1: toRegsPort_notify = false;
+end property;
+
+
+property wait_state_6 is
+dependencies: no_reset;
+freeze:
+	pcReg_at_t = pcReg@t,
+	phase_at_t = phase@t,
+	regfileWrite_dst_at_t = regfileWrite_dst@t,
+	regfileWrite_dstData_at_t = regfileWrite_dstData@t;
+assume:
+	at t: state_6;
+	at t: not(fromMemoryPort_sync);
+prove:
+	at t+1: state_6;
 	at t+1: pcReg = pcReg_at_t;
 	at t+1: phase = phase_at_t;
 	at t+1: regfileWrite_dst = regfileWrite_dst_at_t;

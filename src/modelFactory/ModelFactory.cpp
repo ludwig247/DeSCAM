@@ -76,6 +76,7 @@ bool SCAM::ModelFactory::fire() {
 //         * module declaration of the ast
 //        */
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
+
     FindModules modules(decl);
 
     //Fill the model with modules(structural describtion)
@@ -103,8 +104,6 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         this->addPorts(module, scparModule.second);
         //Combinational Functions
         this->addFunctions(module, scparModule.second);
-        //States
-        this->addSections(module, scparModule.second);
         //Processe
         this->addBehavior(module, scparModule.second);
 
@@ -287,50 +286,18 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
 
 }
 
-/*!
- * Adds a FSM to the Module
- */
-void SCAM::ModelFactory::addSections(Module *module, clang::CXXRecordDecl *decl) {
-    //Find states
-    FindSections findSections(decl);
-    this->moduleHasSections = findSections.hasSections();
-    this->moduleHasSections = false;
-    //Create Section-Datatype for this module
-    //DataType *sections = new DataType(module->getName() + "_SECTIONS");
-    //DataTypes::addLocalDataType(module->getName(), sections);
-    //Check whether the module defines a FSM
-    if (moduleHasSections) {
-        //Create FSM with states
-        for (auto state: findSections.getSectionList()) {
-            //sections->addEnumValue(state);
-        }
-        //module->getFSM()->setSections(sections, findSections.getInitialState());
-
-    } else {
-        //TODO: remove
-        //Create default FSM without any sections
-        //sections->addEnumValue("run");
-        //module->getFSM()->setSections(sections, "run");
-    }
-}
-
 //! Adds processes to the model
 void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *decl) {
     //Find the process describing the behavior
     SCAM::FindProcess findProcess(decl);
-    if (findProcess.getProcessMap().size() != 1) throw std::runtime_error("Module need exactly 1 process!");
-    //Check Proces Type
-    auto process = findProcess.getProcessMap().begin();
-    //Process name
-    std::string processName = process->first;
-    if (process->second.second != SCAM::PROCESS_TYPE::THREAD) {
-        throw std::runtime_error(processName + ":Only THREAD allowed as process type");
+    clang::CXXMethodDecl *methodDecl;
+    if(findProcess.isValidProcess()){
+        methodDecl = findProcess.getProcess();
     }
 
-    //Process declarationinde
-    clang::CXXMethodDecl *methodDecl = process->second.first;
-    //Create blockCFG for this process
-    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
+    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
+
+
     //Print out error msgs
     if (ErrorMsg::hasError()) {
         std::cout << "" << std::endl;
@@ -611,7 +578,6 @@ void SCAM::ModelFactory::removeUnused() {
                         if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                             removeGlobalFunctions.at(usedFunc) = false;
                         }
-                        //TODO: delete unused functions ... find CFG for remaining functions ... use global for functions?
                     }
                 }
                 //Check commitment for usage
