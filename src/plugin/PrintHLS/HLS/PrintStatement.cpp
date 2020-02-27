@@ -88,7 +88,23 @@ void PrintStatement::visit(DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         this->ss << node.getDataSignal()->getParent()->getName() << suffix;
         if (node.getDataSignal()->getParent()->isArrayType()) {
-            this->ss << "[" << node.getDataSignal()->getName() << "]";
+            if (opt) {
+                const auto arrayPorts = opt->getArrayPorts();
+                for (const auto &arrayPort : arrayPorts) {
+                    if (arrayPort.first->getDataSignal()->getName() == node.getDataSignal()->getParent()->getName()) {
+                        uint32_t pos = 0;
+                        for (const auto &expr : arrayPort.second) {
+                            if (NodePeekVisitor::nodePeekDataSignalOperand(expr)) {
+                                if (dynamic_cast<DataSignalOperand* >(expr) == &node) {
+                                    this->ss << "_" << pos;
+                                    return;
+                                }
+                            }
+                            pos++;
+                        }
+                    }
+                }
+            }
         } else {
             this->ss << "." << node.getDataSignal()->getName();
         }
@@ -208,6 +224,7 @@ void PrintStatement::visit(Logical &node) {
 
 void PrintStatement::visit(FunctionOperand &node) {
     this->ss << node.getOperandName() << "(";
+    auto functionParameters = node.getFunction()->getParamMap();
     for (auto parameter = node.getParamValueMap().begin(); parameter != node.getParamValueMap().end(); ++parameter) {
         parameter->second->accept(*this);
         if (std::next(parameter) != node.getParamValueMap().end()) {
@@ -226,26 +243,26 @@ void PrintStatement::visit(ArrayOperand &node) {
                 for (const auto &expr : arrayPort.second) {
                     if (*expr == *node.getIdx()) {
                         this->ss << arrayPort.first->getDataSignal()->getName() << "_" << pos;
-                        break;
+                        return;
                     }
                     pos++;
                 }
             }
         }
-    } else {
-        this->ss << node.getArrayOperand()->getOperandName();
-        this->ss << "[";
-        node.getIdx()->accept(*this);
-        this->ss << "]";
     }
+
+    node.getArrayOperand()->accept(*this);
+    this->ss << "[";
+    node.getIdx()->accept(*this);
+    this->ss << "]";
 }
 
 void PrintStatement::visit(Bitwise &node) {
-    auto bitConcatenation = std::make_unique<BitConcatenation>(&node);
+    auto bitConcatenation = std::make_unique<BitConcatenation>(&node, hlsOption);
     if (bitConcatenation->isBitConcatenationOp()) {
         this->ss << bitConcatenation->getOpAsString();
     } else {
-        auto bitSlicing = std::make_unique<PrintBitOperations>(&node);
+        auto bitSlicing = std::make_unique<PrintBitOperations>(&node, hlsOption);
         if (bitSlicing->isSlicingOp()) {
             this->ss << bitSlicing->getOpAsString();
         } else {

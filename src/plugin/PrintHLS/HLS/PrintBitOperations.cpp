@@ -10,9 +10,10 @@
 
 using namespace SCAM::HLSPlugin::HLS;
 
-PrintBitOperations::PrintBitOperations(Stmt *stmt)
+PrintBitOperations::PrintBitOperations(Stmt *stmt, HLS::HLSOption hlsOption)
 {
-    actualNode = std::make_shared<Node>();
+    this->actualNode = std::make_shared<Node>();
+    this->hlsOption = hlsOption;
     stmt->accept(*this);
 }
 
@@ -129,8 +130,17 @@ void PrintBitOperations::visit(DataSignalOperand &node) {
 }
 
 void PrintBitOperations::visit(VariableOperand &node) {
+    std::string prefix;
+    std::string suffix;
+    if (hlsOption == HLSOption::OCCO) {
+        suffix = "_tmp";
+    }
+    if (hlsOption == HLSOption::MCCO) {
+        prefix = "out_";
+    }
+
     actualNode->type = StmtType::VARIABLE_OPERAND;
-    actualNode->name = node.getOperandName();
+    actualNode->name = prefix + node.getOperandName() + suffix;
 }
 
 bool PrintBitOperations::slicing(Node *node) {
@@ -327,9 +337,10 @@ bool PrintBitOperations::getRange(uint32_t number, uint32_t &firstBit, uint32_t 
     return !((firstBit == -1) || (lastBit == -1));
 }
 
-BitConcatenation::BitConcatenation(Bitwise* node) :
+BitConcatenation::BitConcatenation(Bitwise* node, HLS::HLSOption hlsOption) :
     bitwiseNode(node),
-    constValue(0)
+    constValue(0),
+    hlsOption(hlsOption)
 {
 }
 
@@ -350,7 +361,7 @@ bool BitConcatenation::evaluateOps(Bitwise* node) {
 
     bool bitConcatenation = true;
     if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
-        auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs());
+        auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs(), hlsOption);
         if (!bitSlicingRHS->isSlicingOp()) {
             bitConcatenation = evaluateOps(dynamic_cast<Bitwise* >(node->getRhs()));
         }
@@ -358,7 +369,7 @@ bool BitConcatenation::evaluateOps(Bitwise* node) {
         return false;
     }
     if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
-        auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs());
+        auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs(), hlsOption);
         if (!bitSlicingLHS->isSlicingOp()) {
             bitConcatenation &= evaluateOps(dynamic_cast<Bitwise* >(node->getLhs()));
         }
@@ -385,7 +396,7 @@ bool BitConcatenation::isConstValue(Expr *node) {
 
 void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
     if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
-        auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs());
+        auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs(), hlsOption);
         if (!bitSlicingRHS->isSlicingOp()) {
             getBitConcatenationOp(dynamic_cast<Bitwise * >(node->getRhs()));
         } else {
@@ -395,7 +406,7 @@ void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
         constValue = constValue | getConstValue(node->getRhs());
     }
     if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
-        auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs());
+        auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs(), hlsOption);
         if (!bitSlicingLHS->isSlicingOp()) {
             getBitConcatenationOp(dynamic_cast<Bitwise* >(node->getLhs()));
         } else {

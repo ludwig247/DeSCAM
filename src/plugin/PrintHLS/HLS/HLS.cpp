@@ -111,12 +111,12 @@ void HLS::interface()
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
             ss << "\t"
-               << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName());
+               << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
         }
         else {
-            ss << "\t" << Utilities::convertDataType(output->getDataType()->getName());
+            ss << "\t" << Utilities::convertDataType(output->getDataType()->getName()) << " &";
         }
-        ss << " &" << output->getName();
+        ss << output->getName();
         if (isArrayType) {
             ss << "[" << output->getDataType()->getSubVarMap().size() << "]";
         }
@@ -154,12 +154,12 @@ void HLS::interface()
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut())) {
         bool isArrayType = reg->isArrayType();
         if (isArrayType) {
-            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
         }
         else {
-            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName()) << " &";
         }
-        ss << " &out_" << reg->getFullName();
+        ss << "out_" << reg->getFullName();
         if (isArrayType) {
             ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
         }
@@ -242,7 +242,24 @@ void HLS::registerVariables()
         if (isArrayType) {
             ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
         }
-        ss << " = " << reg->getName() << "_reg" << ";\n";
+
+        auto initArray = [this](const std::string &name, const std::size_t &arraySize) {
+            ss << "{";
+            for (std::size_t i = 0; i < arraySize; ++i) {
+                ss << name << "_reg[" << i << "]";
+                if (i < arraySize - 1) {
+                    ss << ", ";
+                }
+            }
+            ss << "};\n";
+        };
+
+        ss << " = ";
+        if (isArrayType) {
+            initArray(reg->getName(), reg->getSubVarList().size());
+        } else {
+            ss << reg->getName() << "_reg" << ";\n";
+        }
     }
 }
 
@@ -320,10 +337,15 @@ void HLS::dataTypes()
     }
 
     ss << "\n// Constants\n";
+    std::set<std::string> uniqueNames;
     for (const auto& var : opt->getVariables()) {
         if (opt->isConstant(var)) {
+            if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
+                continue;
+            }
             ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
                << " " << var->getName() << " = " << getVariableReset(var) << ";\n";
+            uniqueNames.insert(var->getName());
         }
     }
 
@@ -369,10 +391,10 @@ void HLS::functions()
         this->ss << Utilities::convertDataType(function.second->getReturnType()->getName()) << " "
                  << function.second->getName() << "(";
         auto parameterMap = function.second->getParamMap();
-        for (auto parameter = parameterMap.begin(); parameter!=parameterMap.end(); ++parameter) {
+        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); ++parameter) {
             this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
                      << parameter->first;
-            if (std::next(parameter)!=parameterMap.end()) {
+            if (std::next(parameter) != parameterMap.end()) {
                 this->ss << ", ";
             }
         }
@@ -391,11 +413,12 @@ void HLS::visit(Function& node)
 {
     this->ss << Utilities::convertDataType(node.getReturnType()->getName()) << " " << node.getName() << "(";
     auto parameterMap = node.getParamMap();
-    for (auto parameter = parameterMap.begin(); parameter!=parameterMap.end(); parameter++) {
+    for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); ++parameter) {
         this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
                  << parameter->first;
-        if (parameter!=--parameterMap.end())
+        if (std::next(parameter) != parameterMap.end()) {
             this->ss << ", ";
+        }
     }
     this->ss << ") {\n";
     if (node.getReturnValueConditionList().empty()) {
@@ -404,29 +427,29 @@ void HLS::visit(Function& node)
     auto numberOfBranches = node.getReturnValueConditionList().size();
     for (auto& returnValue : node.getReturnValueConditionList()) {
         if (!returnValue.second.empty()) {
-            if (numberOfBranches>1) {
-                if (numberOfBranches==node.getReturnValueConditionList().size()) {
+            if (numberOfBranches > 1) {
+                if (numberOfBranches == node.getReturnValueConditionList().size()) {
                     ss << "\tif ((";
                 }
                 else {
                     ss << "else if((";
                 }
                 for (auto condition = returnValue.second.begin();
-                     condition!=returnValue.second.end();
+                     condition != returnValue.second.end();
                      ++condition) {
                     ss << PrintStatement::toString(*condition);
-                    if (std::next(condition)!=returnValue.second.end()) {
+                    if (std::next(condition) != returnValue.second.end()) {
                         ss << ") && (";
                     }
                 }
                 ss << ")) {\n";
             }
         }
-        if (node.getReturnValueConditionList().size()>1 && numberOfBranches==1) {
+        if (node.getReturnValueConditionList().size() > 1 && numberOfBranches==1) {
             ss << "else {\n";
         }
         ss << PrintStatement::toString(returnValue.first, 2, 2) << ";";
-        if (node.getReturnValueConditionList().size()>1) {
+        if (node.getReturnValueConditionList().size() > 1) {
             ss << "\n\t} ";
         }
         --numberOfBranches;
@@ -446,7 +469,8 @@ std::string HLS::getDataSignalReset(DataSignal* dataSignal)
                 return getValue(opt->getCorrespondingRegister(dataSignal));
             }
             else {
-                return dataSignal->getInitialValue()->getValueAsString();
+                std::string resetString = dataSignal->getInitialValue()->getValueAsString();
+                return resetString.empty() ? "{}" : resetString;
             }
         }
     };
@@ -457,7 +481,7 @@ std::string HLS::getDataSignalReset(DataSignal* dataSignal)
         auto subVarList = dataSignal->getSubVarList();
         for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
             resetValueStream << getDataSignalValue(*subVar);
-            if (std::next(subVar)!=subVarList.end()) {
+            if (std::next(subVar) != subVarList.end()) {
                 resetValueStream << ", ";
             }
         }
@@ -476,7 +500,8 @@ std::string HLS::getValue(Variable* variable)
         return resetValue.get();
     }
     else {
-        return variable->getInitialValue()->getValueAsString();
+        std::string resetString = variable->getInitialValue()->getValueAsString();
+        return resetString.empty() ? "{}" : resetString;
     }
 }
 

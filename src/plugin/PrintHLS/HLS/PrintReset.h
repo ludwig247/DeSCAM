@@ -15,12 +15,11 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
     public:
         PrintReset(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
-        bool toString();
+        bool hasReset();
 
         std::string getString();
 
     protected:
-        void visit(Assignment &node) override ;
         void visit(DataSignalOperand &node) override ;
         void visit(Notify &node) override ;
         void visit(VariableOperand &node) override ;

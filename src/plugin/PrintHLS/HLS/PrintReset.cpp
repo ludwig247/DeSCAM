@@ -15,7 +15,7 @@ PrintReset::PrintReset(SCAM::Stmt* stmt, const std::string& signalName, unsigned
 {
 }
 
-bool PrintReset::toString()
+bool PrintReset::hasReset()
 {
     this->createString(stmt, indentSize, indentOffset);
     return signalFound;
@@ -24,14 +24,6 @@ bool PrintReset::toString()
 std::string PrintReset::getString()
 {
     return this->ss.str();
-}
-
-void PrintReset::visit(Assignment& node)
-{
-    node.getLhs()->accept(*this);
-    if (signalFound) {
-        node.getRhs()->accept(*this);
-    }
 }
 
 void PrintReset::visit(DataSignalOperand& node)

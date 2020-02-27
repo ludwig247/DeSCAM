@@ -25,7 +25,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         class PrintBitOperations : public StmtAbstractVisitor {
 
         public:
-            explicit PrintBitOperations(Stmt *stmt);
+            PrintBitOperations(Stmt *stmt, HLS::HLSOption hlsOption);
 
             bool isSlicingOp();
             std::string getOpAsString();
@@ -34,6 +34,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         private:
             std::shared_ptr<Node> actualNode;
             uint32_t rangeValue;
+            HLS::HLSOption hlsOption;
 
             bool slicing(Node *node);
             bool sliceWithShift(Node *node);
@@ -80,7 +81,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         class BitConcatenation {
 
         public:
-            explicit BitConcatenation(Bitwise *node);
+            explicit BitConcatenation(Bitwise *node, HLS::HLSOption hlsOption);
 
             bool isBitConcatenationOp();
             std::string getOpAsString();
@@ -92,6 +93,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
             slicing_ops bitSlicingOps;
             uint32_t constValue;
             std::string opAsString;
+            HLS::HLSOption hlsOption;
 
             uint32_t getConstValue(Expr *node);
             bool evaluateOps(Bitwise *node);

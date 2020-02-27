@@ -71,9 +71,9 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
         boost::optional<std::string> HLS::getResetValue(T* signal)
         {
             for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-                auto printResetValue = PrintReset(commitment, signal->getFullName());
-                if (printResetValue.toString()) {
-                    return printResetValue.getString();
+                auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
+                if (printResetValue.hasReset()) {
+                    return PrintStatement::toString(commitment->getRhs());
                 }
             }
             return boost::none;

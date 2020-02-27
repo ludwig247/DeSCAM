@@ -57,5 +57,20 @@ void PrintArrayStatements::visit(ArrayOperand &node) {
     }
 }
 
+void PrintArrayStatements::visit(SCAM::Assignment& node)
+{
+    node.getLhs()->accept(*this);
+    node.getRhs()->accept(*this);
+}
+
+void PrintArrayStatements::visit(SCAM::DataSignalOperand& node)
+{
+    if (node.getDataSignal()->isSubVar()) {
+        if (node.getDataSignal()->getParent()->isArrayType()) {
+            arrayExprs.push_back(&node);
+        }
+    }
+}
+
 
 
