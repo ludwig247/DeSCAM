@@ -63,6 +63,7 @@ namespace SCAM {
             if (typeName == "_Bool") return "bool";
             else if (typeName == "int") return "int";
             else if (typeName == "unsigned int") return "unsigned";
+            else if (typeName == "void") return "void";
             else throw std::runtime_error("Built-in type: " + typeName + " is not allowed!");
         } else if (type->isEnumeralType()) {
             const clang::EnumType *enumType = type->getAs<clang::EnumType>();
@@ -74,7 +75,12 @@ namespace SCAM {
             std::string name = FindNewDatatype::getTypeName(constantArrayType->getElementType());
             std::string size = std::to_string(constantArrayType->getSize().getSExtValue());
             return name + "_" + size;
-        } else throw std::runtime_error("Can't analyze datatype");
+        } else if (type.getAsString() == "T *"){
+            return "T *";
+        } else if (type.getAsString() == "class sc_core::sc_event"){
+            return "class sc_core::sc_event";
+        }
+            else throw std::runtime_error("Can't analyze datatype");
     }
 
     bool FindNewDatatype::isGlobal(const clang::QualType &type) {

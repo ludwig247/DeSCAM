@@ -16,6 +16,7 @@
 #include "PrintStmt.h"
 
 #include "Module.h"
+#include "Protocol.h"
 
 
 namespace SCAM {
@@ -28,6 +29,7 @@ namespace SCAM {
     public:
         CFGFactory(clang::CXXMethodDecl *, clang::CompilerInstance &ci, Module *module, bool sourceModule = false);
         CFGFactory(const clang::FunctionDecl  * , clang::CompilerInstance &ci, Module *module, bool sourceModule = false);
+        CFGFactory(const clang::FunctionDecl  * , clang::CompilerInstance &ci, Module *module, Protocol * protocol, bool sourceModule = false);
 
         ~CFGFactory() = default;
 
@@ -52,6 +54,7 @@ namespace SCAM {
         clang::CompilerInstance &ci;
         SCAM::Module *module;
         bool sourceModule;
+        SCAM::Protocol * protocol;
 
         //Map
         std::map<int, int> entryMap; //! Contains an entry with <CFGBlockID,SusCFGBlockID>; If a block is split up it point to the first new block

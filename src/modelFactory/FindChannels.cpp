@@ -19,7 +19,7 @@ namespace SCAM {
         if (cxxDecl->getNumBases() <= 0) {
             return true;
         }
-        //Assume: All user defined modules can be identified by a basename "class sc::core::sc_prim_channel"
+        //Assume: All user defined channels can be identified by a basename "class sc::core::sc_prim_channel"
         //Issues: doesn't filters all classes, e.g. sc_signal has also this basename
         //Idea: sortout those modules by hand
         for (clang::CXXRecordDecl::base_class_iterator bi = cxxDecl->bases_begin(), be = cxxDecl->bases_end(); bi != be; ++bi) {

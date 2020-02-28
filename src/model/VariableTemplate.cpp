@@ -35,8 +35,9 @@ namespace SCAM {
 
         if (this->initialValue == nullptr) {
             this->initialValue = dataType->getDefaultVal();
-        } else
-            assert(dataType == initialValue->getDataType());
+        }
+        //else
+          //  assert(dataType == initialValue->getDataType());
     }
 
     template<class T>

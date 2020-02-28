@@ -5,30 +5,45 @@
 namespace SCAM {
 
 
-    FindChannelMethods::FindChannelMethods(clang::CXXRecordDecl *cxxDecl) {
-        assert(!(cxxDecl == NULL));
-        TraverseDecl(cxxDecl);
+    FindChannelMethods::FindChannelMethods(clang::CXXRecordDecl *recordDecl)
+            : FindFunctions(recordDecl) {
+        assert(!(recordDecl == NULL));
+        TraverseDecl(recordDecl);
     }
 
-    bool FindChannelMethods::VisitCXXMethodDecl(clang::CXXMethodDecl *cxxDecl) {
-        cxxDecl = cxxDecl->getMostRecentDecl();
-        if (cxxDecl->getNameAsString() == "FIFO<T>")
-        {
-            constructor = cxxDecl;
-            std::cout <<constructor->getNameAsString()<<std::endl;
-        }
-        else{
-            _ChannelMethodMap.insert(std::pair<std::string, clang::CXXMethodDecl *>(cxxDecl->getName().str(), cxxDecl));
-            for(auto it = FindChannelMethods::getChannelMethodMap().cbegin(); it != FindChannelMethods::getChannelMethodMap().cend(); ++it){
-                std::cout << it->first << "\t" << it->second << std::endl;
+    bool FindChannelMethods::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
+        methodDecl = methodDecl->getMostRecentDecl();
+        std::string name = methodDecl->getNameAsString();
+        if (name == "FIFO<T>") {
+            constructor = methodDecl;
+            //Param name and param type
+            std::vector<std::string> ConstructorparamNameList;
+            std::vector<std::string> ConstructorparamTypeList;
+            for (int i = 0; i < methodDecl->getNumParams(); i++) {
+                auto param = methodDecl->getParamDecl(i);
+                ConstructorparamNameList.push_back(param->getName().str());
+                ConstructorparamTypeList.push_back(this->clangToScamType(param->getType()));
             }
+            this->ConstructorParamNameMap.insert(std::make_pair(name, ConstructorparamNameList));
+            this->ConstructorParamTypeMap.insert(std::make_pair(name, ConstructorparamTypeList));
+        } else {
+            this->functionMap.insert(std::make_pair(name,methodDecl));
+
+            //Return type
+            this->functionReturnTypeMap.insert(std::make_pair(name, this->clangToScamType(methodDecl->getResultType())));
+
+            //Param name and param type
+            std::vector<std::string> paramNameList;
+            std::vector<std::string> paramTypeList;
+            for (int i = 0; i < methodDecl->getNumParams(); i++) {
+                auto param = methodDecl->getParamDecl(i);
+                paramNameList.push_back(param->getName().str());
+                paramTypeList.push_back(this->clangToScamType(param->getType()));
+            }
+            this->functionParamNameMap.insert(std::make_pair(name,paramNameList));
+            this->functionParamTypeMap.insert(std::make_pair(name,paramTypeList));
+
         }
         return true;
     }
-
-    const std::map<std::string, clang::CXXMethodDecl *> & FindChannelMethods::getChannelMethodMap() {
-        return _ChannelMethodMap;
-    }
-
-
 }

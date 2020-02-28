@@ -9,21 +9,23 @@
 #include <map>
 #include <string>
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "FindFunctions.h"
 
 namespace SCAM {
 
-    class FindChannelMethods : public clang::RecursiveASTVisitor<FindChannelMethods> {
+    class FindChannelMethods : public FindFunctions {
     public:
 
-        FindChannelMethods(clang::CXXRecordDecl*);
+        FindChannelMethods(clang::CXXRecordDecl *recordDecl);
 
         virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *);
 
-        const std::map<std::string, clang::CXXMethodDecl *> & getChannelMethodMap();
+
 
     private:
         clang::CXXMethodDecl * constructor;
-        std::map<std::string, clang::CXXMethodDecl *> _ChannelMethodMap;
+        std::map<std::string, std::vector<std::string>> ConstructorParamNameMap;
+        std::map<std::string, std::vector<std::string>> ConstructorParamTypeMap;
 
     };
 }

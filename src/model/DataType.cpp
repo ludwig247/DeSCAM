@@ -84,7 +84,18 @@ SCAM::ConstValue *SCAM::DataType::getDefaultVal() const {
             compoundValueList.push_back(this->arrayType->getDefaultVal());
         }
         initVal = new CompoundValue(compoundValueList, this);
-    } else throw std::runtime_error("Unsupported datatype: " + this->getName());
+    } else if (this->isT_andType()){
+        initVal = new IntegerValue(0);
+    } else if (this->isconst_T_andType()){
+        initVal = new IntegerValue(0);
+    } else if (this->isEventType()){
+        initVal = new IntegerValue(0);
+    } else if (this->isT_starType()){
+        initVal = new IntegerValue(0);
+    } else if (this->isVoid()){
+        initVal = new IntegerValue(0);
+    }
+    else throw std::runtime_error("Unsupported datatype: " + this->getName());
     assert(initVal != nullptr);
     return initVal;
 }
@@ -100,6 +111,23 @@ const bool SCAM::DataType::isInteger() const {
 const bool SCAM::DataType::isBoolean() const {
     return (this->getName() == "bool");
 }
+
+const bool SCAM::DataType::isT_andType() const{
+    return this->getName() == "T &";
+}
+
+const bool SCAM::DataType::isconst_T_andType() const{
+    return this->getName() == "const T &";
+}
+
+const bool SCAM::DataType::isEventType()const{
+    return this->getName() == "class sc_core::sc_event";
+}
+
+const bool SCAM::DataType::isT_starType() const{
+    return this->getName() == "T *";
+}
+
 
 void SCAM::DataType::addArray(DataType *arrayType, int arraySize) {
     assert(arrayType->isBuiltInType() && "Arraytype only allowed for built-in tpyes");

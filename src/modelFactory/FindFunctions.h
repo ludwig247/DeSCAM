@@ -28,14 +28,13 @@ namespace SCAM {
 
         const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const;
 
-    private:
 
+    protected:
         std::map<std::string,clang::CXXMethodDecl*> functionMap;
-        std::map<std::string,std::string> functionReturnTypeMap;
 
         std::string clangToScamType(clang::QualType qualType);
 
-
+        std::map<std::string,std::string> functionReturnTypeMap;
         std::map<std::string,std::vector<std::string>> functionParamNameMap;
         std::map<std::string,std::vector<std::string>> functionParamTypeMap;
     };
