@@ -3,6 +3,6 @@
 //
 #include "Operand.h"
 
-SCAM::Operand::Operand(DataType *type) : Expr(type) {
+SCAM::Operand::Operand(const DataType *type) : Expr(type) {
 
 }

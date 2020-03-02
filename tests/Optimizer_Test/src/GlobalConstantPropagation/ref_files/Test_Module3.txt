@@ -11,7 +11,7 @@
 		Pred:[ID1]
 		Succ:[ID3]
 [ID3]
-		x.ack = ERR
+		x.ack = OK
 		Pred:[ID2]
 		Succ:[ID4]
 [ID4]
@@ -19,7 +19,7 @@
 		Pred:[ID3]
 		Succ:[ID5]
 [ID5]
-		y.ack = ERR
+		y.ack = OK
 		Pred:[ID4]
 		Succ:[ID6]
 [ID6]

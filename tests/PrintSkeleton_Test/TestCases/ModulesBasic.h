@@ -287,16 +287,6 @@ struct TestBasic9 : public sc_module {
 //
 //
 
-enum Mode {
-    READ, WRITE
-};
-
-struct CompoundType {
-    int x;
-    bool y;
-    Mode mode;
-};
-
 
 struct TestBasic10 : public sc_module {
     //Sections

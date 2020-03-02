@@ -133,16 +133,18 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
 
 void VHDLWrapper::functions(std::stringstream &ss) {
     std::set<Function* > usedFunctions;
-    for (const auto& state : propertySuite->getStates()) {
-        for (const auto& property : propertySuite->getSuccessorProperties(state)) {
-            for (const auto& assumption : property->getAssumptionList()) {
-                const auto& funcSet = ExprVisitor::getUsedFunctions(assumption);
+    for (const auto& property : propertySuite->getProperties()) {
+        for (const auto& assumption : property->getAssumptionList()) {
+            if (assumption->isAt()) {
+                const auto& funcSet = ExprVisitor::getUsedFunction(assumption->getTimepointList().front());
                 usedFunctions.insert(funcSet.begin(), funcSet.end());
             }
         }
     }
 
-    if (propertySuite->getFunctions().empty()) return;
+    if (usedFunctions.empty()) {
+        return;
+    }
 
     ss << "\n\t-- Functions\n";
     for (const auto& func : usedFunctions) {
@@ -234,37 +236,21 @@ std::string VHDLWrapper::sensitivityList() {
     std::set<DataSignal* > sensListDataSignals;
     std::set<Variable* > sensListVars;
 
-    const auto& operationProperties = propertySuite->getOperationProperties();
+    const auto& operationProperties = propertySuite->getProperties();
     for (auto operationProperty : operationProperties) {
         for (const auto& assumption : operationProperty->getAssumptionList()) {
-            auto syncSignals = ExprVisitor::getUsedSynchSignals(assumption);
-            sensListSyncSignals.insert(syncSignals.begin(), syncSignals.end());
+            if(assumption->isAt()) {
+                auto syncSignals = ExprVisitor::getUsedSynchSignals(assumption->getTimepointList().front());
+                sensListSyncSignals.insert(syncSignals.begin(), syncSignals.end());
 
-            const auto& dataSignals = ExprVisitor::getUsedDataSignals(assumption);
-            sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
+                const auto& dataSignals = ExprVisitor::getUsedDataSignals(assumption->getTimepointList().front());
+                sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
 
-            const auto& vars = ExprVisitor::getUsedVariables(assumption);
-            for (const auto& var : vars) {
-                if (!hlsModule->isConstant(var)) {
-                    sensListVars.insert(var);
-                }
-            }
-        }
-    }
-
-    const auto& waitProperties = propertySuite->getWaitProperties();
-    for (const auto& waitProperty : waitProperties) {
-        for (const auto& assumption : waitProperty->getAssumptionList()) {
-            const auto& syncSignals = ExprVisitor::getUsedSynchSignals(assumption);
-            sensListSyncSignals.insert(syncSignals.begin(), syncSignals.end());
-
-            const auto& dataSignals = ExprVisitor::getUsedDataSignals(assumption);
-            sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
-
-            const auto& vars = ExprVisitor::getUsedVariables(assumption);
-            for (const auto& var : vars) {
-                if (!hlsModule->isConstant(var)) {
-                    sensListVars.insert(var);
+                const auto& vars = ExprVisitor::getUsedVariables(assumption->getTimepointList().front());
+                for (const auto& var : vars) {
+                    if (!hlsModule->isConstant(var)) {
+                        sensListVars.insert(var);
+                    }
                 }
             }
         }
@@ -288,7 +274,7 @@ std::string VHDLWrapper::sensitivityList() {
 std::string VHDLWrapper::getResetValue(Variable* variable)
 {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetSignal(commitment, variable->getName());
+        auto printResetValue = PrintResetSignal(commitment->getStatement(), variable->getName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
         }
@@ -299,7 +285,7 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 {
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetSignal(commitment, dataSignal->getFullName());
+        auto printResetValue = PrintResetSignal(commitment->getStatement(), dataSignal->getFullName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
         }

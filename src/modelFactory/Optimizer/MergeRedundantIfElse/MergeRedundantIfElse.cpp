@@ -82,14 +82,13 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                     auto cond1TrueBranchPtr = conditionTrueBranchPair.second.begin();
                     auto cond2TrueBranchPtr = (*pair).second.begin();
                     while (cond1TrueBranchPtr != conditionTrueBranchPair.second.end()) {
+#ifdef DEBUG_MERGE_REDUNDANT_IF_ELSE
                         auto stmt1 = SCAM::PrintStmt::toString((*cond1TrueBranchPtr));
                         auto stmt2 = SCAM::PrintStmt::toString((*cond2TrueBranchPtr));
-#ifdef DEBUG_MERGE_REDUNDANT_IF_ELSE
                         std::cout << "(*cond1TrueBranchPtr)= " << stmt1 << std::endl;
                         std::cout << "(*cond2TrueBranchPtr)= " << stmt2 << std::endl << std::endl;
 #endif
-                        //  if(!(**cond1TrueBranchPtr == **cond2TrueBranchPtr)){
-                        if (stmt1 != stmt2) {
+                          if(!(**cond1TrueBranchPtr == **cond2TrueBranchPtr)){
                             redundantLogic = false;
                             break;
                         }

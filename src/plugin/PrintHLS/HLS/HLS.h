@@ -44,6 +44,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             void registerVariables();
             void writeToOutput();
             void waitOperation();
+            void printDataType(const DataType *node);
 
             std::string getVariableReset(Variable* variable);
             std::string getDataSignalReset(DataSignal* dataSignal);
@@ -52,18 +53,19 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             template<typename T>
             boost::optional<std::string> getResetValue(T* signal);
 
-            void visit(Model& node) override { };
-            void visit(SCAM::Module& node) override { };
-            void visit(ModuleInstance& node) override { };
-            void visit(Port& node) override { };
-            void visit(DataSignal& node) override { };
-            void visit(Channel& node) override { };
-            void visit(Interface& node) override { }
-            void visit(Variable& node) override { };
-            void visit(FSM& node) override { };
-            void visit(DataType& node) override;
+            void visit(Model& node) override {};
+            void visit(Module& node) override {};
+            void visit(ModuleInstance& node) override {};
+            void visit(Port& node) override {};
+            void visit(DataSignal& node) override {};
+            void visit(Channel& node) override {};
+            void visit(Interface& node) override {}
+            void visit(Variable& node) override {};
+            void visit(FSM& node) override {};
+            void visit(DataType& node) override {};
             void visit(Function& node) override;
-            void visit(Parameter& node) override { };
+            void visit(Parameter& node) override {};
+            void visit(Timepoint& node) override {};
         };
 
         // Template Function
@@ -71,9 +73,12 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
         boost::optional<std::string> HLS::getResetValue(T* signal)
         {
             for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-                auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
-                if (printResetValue.hasReset()) {
-                    return PrintStatement::toString(commitment->getRhs());
+                if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
+                    Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
+                    auto printResetValue = PrintReset(assignment->getLhs(), signal->getFullName());
+                    if (printResetValue.hasReset()) {
+                        return PrintStatement::toString(assignment->getRhs());
+                    }
                 }
             }
             return boost::none;

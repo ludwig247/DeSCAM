@@ -171,8 +171,8 @@ void SCAM::ExprVisitor::visit(SCAM::FunctionOperand &node) {
         std::string test = PrintStmt::toString(param.second);
         param.second->accept(*this);
     }
-    this->usedFunctions.insert(node.getFunction());
     this->usedOperands.insert(&node);
+    this->usedFunction.insert(node.getFunction());
 }
 
 bool SCAM::ExprVisitor::isConstVal(SCAM::Expr *expr) {
@@ -215,6 +215,12 @@ std::set<SCAM::Variable *> SCAM::ExprVisitor::getUsedVariables(SCAM::Expr *expr)
     return exprVisitor.usedVar;
 }
 
+std::set<SCAM::Function *> SCAM::ExprVisitor::getUsedFunction(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedFunction;
+}
+
+
 std::set<SCAM::SyncSignal *> SCAM::ExprVisitor::getUsedSynchSignals(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
     return exprVisitor.usedSynchSignal;
@@ -223,11 +229,6 @@ std::set<SCAM::SyncSignal *> SCAM::ExprVisitor::getUsedSynchSignals(SCAM::Expr *
 std::set<SCAM::DataSignal *> SCAM::ExprVisitor::getUsedDataSignals(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
     return exprVisitor.usedDataSignal;
-}
-
-std::set<SCAM::Function *> SCAM::ExprVisitor::getUsedFunctions(SCAM::Expr *expr) {
-    SCAM::ExprVisitor exprVisitor(expr);
-    return exprVisitor.usedFunctions;
 }
 
 std::set<SCAM::ArrayOperand *> SCAM::ExprVisitor::getUsedArrayOperands(SCAM::Expr *expr) {
@@ -267,6 +268,15 @@ void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
     this->constVal = false;
 
 }
+
+void SCAM::ExprVisitor::visit(struct TimePointOperand &node) {
+    this->usedOperands.insert(&node);
+
+    this->constVal = false;
+    this->var = (this->usedOperands.size() == 1) && (this->usedVar.size() == 1);
+
+}
+
 
 
 

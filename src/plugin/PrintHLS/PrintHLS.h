@@ -12,13 +12,15 @@
 
 class PrintHLS : public PluginFactory {
 public:
-    PrintHLS();
+    PrintHLS() = default;
     ~PrintHLS() = default;
 
     std::map<std::string, std::string> printModel(Model* model) override;
 
 private:
-    SCAM::HLSPlugin::HLS::HLSOption hlsOption;
+    using hlsOptionEnum = SCAM::HLSPlugin::HLS::HLSOption;
+
+    SCAM::HLSPlugin::HLS::HLSOption hlsOption = hlsOptionEnum::MCCO;;
 };
 
 

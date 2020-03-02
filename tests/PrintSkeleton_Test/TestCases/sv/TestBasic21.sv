@@ -12,7 +12,6 @@ module TestBasic21 (
 	);
 
 	CompoundType compoundType_signal;
-	Sections nextsection_signal;
 	Sections section_signal;
 
 
@@ -21,7 +20,6 @@ module TestBasic21 (
 			compoundType_signal.mode <= read;
 			compoundType_signal.x <= 0;
 			compoundType_signal.y <= 1'b0;
-			nextsection_signal <= section_a;
 			section_signal <= section_a;
 			b_out_notify <= 1'b1;
 			m_out_notify <= 1'b0;

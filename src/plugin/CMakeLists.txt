@@ -17,20 +17,22 @@
 add_plugin(PrintITL; "Complete set of properties in ITL")
 add_plugin(PrintSVA; "Complete set of properties in SVA")
 
-add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
+
+#add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
 add_plugin(PrintSkeleton; "Structure and FSM in AML")
-add_plugin(PrintChisel; "Print a module in CHISEL")
+#add_plugin(PrintChisel; "Print a module in CHISEL")
 
-add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
-add_plugin(PrintDotFull; "statemachine + conditions + commitments as .dot" ; PrintDot)
-add_plugin(PrintDotStates; "statemachine as .dot" ; PrintDot)
+#add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
+#add_plugin(PrintDotFull; "statemachine + conditions + commitments as .dot" ; PrintDot)
+#add_plugin(PrintDotStates; "statemachine as .dot" ; PrintDot)
 
-add_plugin(PrintCFGDot; "Present Control Flow Graph of every module as .dot file" ; PrintDot)
-add_plugin(PrintCompleteness; "Completeness description in ITL")
+#add_plugin(PrintCFGDot; "Present Control Flow Graph of every module as .dot file" ; PrintDot)
+#add_plugin(PrintCompleteness; "Completeness description in ITL")
 
-add_plugin(PrintTemplate; "Example for a plugin")
+#add_plugin(PrintTemplate; "Example for a plugin")
 
-add_plugin(PrintVHDL; "Print VHDL template")
+
+#add_plugin(PrintVHDL; "Print VHDL template")
 add_plugin(PrintHLS; "Print C++ Files, VHDL Wrapper and scripts for Vivado High Level Synthesis")
 
 #add_plugin(PrintMonitor; "fill out")
@@ -52,11 +54,10 @@ add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal 
 add_plugin_option(PrintITL; hls-occo; "Adjusts macros to automatically fit them to HLS generated RTL with one clk cycle operations")
 add_plugin_option(PrintITL; hls-mcco; "Adjusts macros to automatically fit them to HLS generated RTL with multiple clk cycle operations")
 
-add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
+#add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 
 add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
-
 add_plugin_option(PrintHLS; occo; "[One Clock Cycle Operations] Generates HLS file while trying to force Vivado HLS generating onc clock cylce designs")
 add_plugin_option(PrintHLS; mcco; "[Multiple Clock Cycle Operations] Generates HLS file while allowing Vivado HLS scheduling the operation over multiple cycles")
 
@@ -74,12 +75,18 @@ add_optimize_option(mrc; "Merge redundant conditions")
 
 
 #Please don't change the code below.
-add_library(PluginFactory
-        ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.cpp
-        ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.h)
+add_library(PluginFactory SHARED
+        ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.cpp)
+target_link_libraries(PluginFactory Model)
+# get the list of all added plugins in order to link them to DESCAM
+get_directory_property(PLUGIN_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION PLUGIN_NAMES)
+foreach (plugin_lib ${PLUGIN_NAMES})
+    #			MESSAGE(STATUS "linking ${plugin_lib}")
+    target_link_libraries(PluginFactory ${plugin_lib})
+endforeach ()
 
 # First we add the executable that generates the table
-add_executable(MakeStyles MakeStyles.cpp)
+add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp )
 set_target_properties(MakeStyles PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON

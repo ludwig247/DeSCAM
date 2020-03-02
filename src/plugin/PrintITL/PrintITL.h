@@ -5,17 +5,15 @@
 #ifndef SCAM_SYNTHESIZE_H
 #define SCAM_SYNTHESIZE_H
 
-#include <PluginFactory.h>
 #include <sstream>
 #include "Model.h"
 
-enum class ITLOption {
-    DEFAULT,
-    ADJUSTMACROS,
-    PIPELINED,
-    HLS_OCCO,
-    HLS_MCCO
-};
+#include "CommandLineParameter.h"
+#include "ConditionVisitor.h"
+#include "DatapathVisitor.h"
+#include "PluginFactory.h"
+#include "TimePointVisitor.h"
+
 
 class PrintITL : public PluginFactory {
 
@@ -31,11 +29,14 @@ public:
     std::string print();
 
 private:
-    std::stringstream ss;
+    //std::stringstream ss;
+    //Model *model;
 
-    ITLOption usedITLOption;
+    SCAM::Module *module;
 
     std::string functions();
+
+    std::string globalFunctions();
 
     std::string convertDataType(std::string dataTypeName);
 
@@ -43,17 +44,20 @@ private:
 
     std::string location(bool loc);
 
-    std::string propertySuite();
+    std::string printTemporalExpr(TemporalExpr* temporalExpr);
 
-    std::string adjustmacros();
+    std::string printProperty(Property* property);
 
-    std::string pipelined();
+    std::string macros();
+    std::string operations();
 
-    std::string hls();
+    // std::string adjustmacros();
 
-    //        std::string hideConstants();
-    SCAM::Module *module;
+    // std::string pipelined();
 
+    std::string hls_macros();
+
+    // std::string hideConstants();
 };
 
 

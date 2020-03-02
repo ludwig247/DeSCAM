@@ -1,6 +1,6 @@
 #!/bin/bash
 export SYSTEMC_DISABLE_COPYRIGHT_MESSAGE=1
-export SCAM_DIR=$HOME/SCAM
+export SCAM_DIR=$HOME/DeSCAM
 
 echo -e "\e[30;48;5;82mCreate the elf files\e[0m";
 cd ${SCAM_DIR}/example/RISCV_Test_ELF/Instruction_Tests
@@ -16,13 +16,11 @@ make
 echo -e "\e[30;48;5;82mFinished creating the elf files\e[0m";
 
 #Running Instruction_Tests
-echo -e "\e[30;48;5;82mRunning tests for each instruction\e[0m";
-for f in ${SCAM_DIR}/example/RISCV_Test_ELF/Instruction_Tests/*.elf  ;
-do
-    "${SCAM_DIR}/bin/RISCV_elf_test" "$f"
-done
-
-
+#echo -e "\e[30;48;5;82mRunning tests for each instruction\e[0m";
+#for f in ${SCAM_DIR}/example/RISCV_Test_ELF/Instruction_Tests/*.elf  ;
+#do
+#    "${SCAM_DIR}/bin/RISCV_elf_test" "$f"
+#done
 
 #Running Programs Tests
 echo -e "\e[30;48;5;82mRunning Programs Tests\e[0m";

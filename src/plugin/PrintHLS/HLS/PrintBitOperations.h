@@ -76,6 +76,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
             void visit(Wait &node) override {};
             void visit(Peek &node) override {};
             void visit(ArrayExpr &node) override {};
+            void visit(TimePointOperand &node) override {};
         };
 
         class BitConcatenation {

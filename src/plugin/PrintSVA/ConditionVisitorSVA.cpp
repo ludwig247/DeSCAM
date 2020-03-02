@@ -213,3 +213,17 @@ void SCAM::ConditionVisitorSVA::visit(SCAM::ParamOperand &node) {
     useParenthesesFlag = true;
 }
 
+void SCAM::ConditionVisitorSVA::visit(SCAM::Timepoint &node) {
+    this->ss << node.getName();
+    if (node.getName() != "t") {
+        this->ss << "(o)";
+    }
+}
+
+void SCAM::ConditionVisitorSVA::visit(SCAM::TimePointOperand &node) {
+    this->ss << node.getOperandName();
+    if (node.getOperandName() != "t") {
+        this->ss << "(o)";
+    }
+}
+

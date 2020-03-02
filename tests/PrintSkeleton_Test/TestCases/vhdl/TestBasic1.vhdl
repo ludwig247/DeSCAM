@@ -15,18 +15,14 @@ port(
 end TestBasic1;
 
 architecture TestBasic1_arch of TestBasic1 is
-	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
-	signal x_signal: int;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
-			x_signal <= to_signed(0, 32);
 			b_in_notify <= true;
 		else
 			 -- FILL OUT HERE;

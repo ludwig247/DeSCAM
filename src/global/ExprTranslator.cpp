@@ -126,7 +126,6 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
 
         }
         if (symbolname == "false") {
-
             return new SCAM::BoolValue(false);
         }
 
@@ -213,6 +212,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
         if (relationalOperatorMap.find(oper) != relationalOperatorMap.end()) {
             if (z3_expr.num_args() == 2) {
                 z3::expr lhs = z3_expr.arg(0);
+                this->unsigned_flag = translate_intern(lhs)->getDataType()->isUnsigned();
                 z3::expr rhs = z3_expr.arg(1);
                 return new SCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper), translate_intern(rhs));
             } else throw std::runtime_error("Expecte 2 arguments for " + oper);
@@ -222,7 +222,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(z3::expr &z3_expr) {
 
             z3::expr first = z3_expr.arg(0);
             z3::expr second = z3_expr.arg(1);
-            SCAM::Logical *multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper), translate_intern(second));
+            auto multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper), translate_intern(second));
 
             for (unsigned int i = 2; i < z3_expr.num_args(); ++i) {
                 z3::expr next = z3_expr.arg(i);
@@ -561,8 +561,10 @@ void SCAM::ExprTranslator::visit(SCAM::Cast &node) {
 
 
 void SCAM::ExprTranslator::visit(SCAM::Relational &node) {
+
     z3::expr lhs = translate(node.getLhs());
     z3::expr rhs = translate(node.getRhs());
+
 
     if (node.getOperation() == "==") {
 

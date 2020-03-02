@@ -18,7 +18,6 @@ end TestBasic21;
 
 architecture TestBasic21_arch of TestBasic21 is
 	signal compoundType_signal: CompoundType;
-	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
 
 begin
@@ -29,7 +28,6 @@ begin
 			compoundType_signal.mode <= READ;
 			compoundType_signal.x <= to_signed(0, 32);
 			compoundType_signal.y <= false;
-			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
 			b_out_notify <= true;
 			m_out_notify <= false;

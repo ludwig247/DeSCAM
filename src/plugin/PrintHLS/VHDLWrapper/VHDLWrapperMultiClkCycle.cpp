@@ -360,7 +360,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        std::string assignment = PrintResetNotify::toString(commitment);
+        std::string assignment = PrintResetNotify::toString(commitment->getStatement());
         if (!assignment.empty()) {
             ss << "\t\t\t" << assignment;
         }

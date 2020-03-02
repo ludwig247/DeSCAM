@@ -44,6 +44,8 @@ end property;
 
 property state_1_1 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	s_in_1_sig_at_t = s_in_1_sig@t,
 	s_in_2_sig_at_t = s_in_2_sig@t,
@@ -54,18 +56,20 @@ assume:
 	at t: s_in_2_sync;
 	at t: s_in_3_sync;
 prove:
-	at t+1: state_1;
-	at t+1: data1 = s_in_1_sig_at_t;
-	at t+1: data2 = s_in_2_sig_at_t;
-	at t+1: data3 = s_in_3_sig_at_t;
-	at t+1: s_out_1_sig = s_in_1_sig_at_t;
-	at t+1: s_out_2_sig = s_in_2_sig_at_t;
-	at t+1: s_out_3_sig = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data1 = s_in_1_sig_at_t;
+	at t_end: data2 = s_in_2_sig_at_t;
+	at t_end: data3 = s_in_3_sig_at_t;
+	at t_end: s_out_1_sig = s_in_1_sig_at_t;
+	at t_end: s_out_2_sig = s_in_2_sig_at_t;
+	at t_end: s_out_3_sig = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_2 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data3_at_t = data3@t,
 	s_in_1_sig_at_t = s_in_1_sig@t,
@@ -76,18 +80,20 @@ assume:
 	at t: s_in_2_sync;
 	at t: not(s_in_3_sync);
 prove:
-	at t+1: state_1;
-	at t+1: data1 = s_in_1_sig_at_t;
-	at t+1: data2 = s_in_2_sig_at_t;
-	at t+1: data3 = data3_at_t;
-	at t+1: s_out_1_sig = s_in_1_sig_at_t;
-	at t+1: s_out_2_sig = s_in_2_sig_at_t;
-	at t+1: s_out_3_sig = data3_at_t;
+	at t_end: state_1;
+	at t_end: data1 = s_in_1_sig_at_t;
+	at t_end: data2 = s_in_2_sig_at_t;
+	at t_end: data3 = data3_at_t;
+	at t_end: s_out_1_sig = s_in_1_sig_at_t;
+	at t_end: s_out_2_sig = s_in_2_sig_at_t;
+	at t_end: s_out_3_sig = data3_at_t;
 end property;
 
 
 property state_1_3 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data2_at_t = data2@t,
 	s_in_1_sig_at_t = s_in_1_sig@t,
@@ -98,18 +104,20 @@ assume:
 	at t: not(s_in_2_sync);
 	at t: s_in_3_sync;
 prove:
-	at t+1: state_1;
-	at t+1: data1 = s_in_1_sig_at_t;
-	at t+1: data2 = data2_at_t;
-	at t+1: data3 = s_in_3_sig_at_t;
-	at t+1: s_out_1_sig = s_in_1_sig_at_t;
-	at t+1: s_out_2_sig = data2_at_t;
-	at t+1: s_out_3_sig = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data1 = s_in_1_sig_at_t;
+	at t_end: data2 = data2_at_t;
+	at t_end: data3 = s_in_3_sig_at_t;
+	at t_end: s_out_1_sig = s_in_1_sig_at_t;
+	at t_end: s_out_2_sig = data2_at_t;
+	at t_end: s_out_3_sig = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_4 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data2_at_t = data2@t,
 	data3_at_t = data3@t,
@@ -120,18 +128,20 @@ assume:
 	at t: not(s_in_2_sync);
 	at t: not(s_in_3_sync);
 prove:
-	at t+1: state_1;
-	at t+1: data1 = s_in_1_sig_at_t;
-	at t+1: data2 = data2_at_t;
-	at t+1: data3 = data3_at_t;
-	at t+1: s_out_1_sig = s_in_1_sig_at_t;
-	at t+1: s_out_2_sig = data2_at_t;
-	at t+1: s_out_3_sig = data3_at_t;
+	at t_end: state_1;
+	at t_end: data1 = s_in_1_sig_at_t;
+	at t_end: data2 = data2_at_t;
+	at t_end: data3 = data3_at_t;
+	at t_end: s_out_1_sig = s_in_1_sig_at_t;
+	at t_end: s_out_2_sig = data2_at_t;
+	at t_end: s_out_3_sig = data3_at_t;
 end property;
 
 
 property state_1_5 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data1_at_t = data1@t,
 	s_in_2_sig_at_t = s_in_2_sig@t,
@@ -142,18 +152,20 @@ assume:
 	at t: s_in_2_sync;
 	at t: s_in_3_sync;
 prove:
-	at t+1: state_1;
-	at t+1: data1 = data1_at_t;
-	at t+1: data2 = s_in_2_sig_at_t;
-	at t+1: data3 = s_in_3_sig_at_t;
-	at t+1: s_out_1_sig = data1_at_t;
-	at t+1: s_out_2_sig = s_in_2_sig_at_t;
-	at t+1: s_out_3_sig = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data1 = data1_at_t;
+	at t_end: data2 = s_in_2_sig_at_t;
+	at t_end: data3 = s_in_3_sig_at_t;
+	at t_end: s_out_1_sig = data1_at_t;
+	at t_end: s_out_2_sig = s_in_2_sig_at_t;
+	at t_end: s_out_3_sig = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_6 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data1_at_t = data1@t,
 	data3_at_t = data3@t,
@@ -164,18 +176,20 @@ assume:
 	at t: s_in_2_sync;
 	at t: not(s_in_3_sync);
 prove:
-	at t+1: state_1;
-	at t+1: data1 = data1_at_t;
-	at t+1: data2 = s_in_2_sig_at_t;
-	at t+1: data3 = data3_at_t;
-	at t+1: s_out_1_sig = data1_at_t;
-	at t+1: s_out_2_sig = s_in_2_sig_at_t;
-	at t+1: s_out_3_sig = data3_at_t;
+	at t_end: state_1;
+	at t_end: data1 = data1_at_t;
+	at t_end: data2 = s_in_2_sig_at_t;
+	at t_end: data3 = data3_at_t;
+	at t_end: s_out_1_sig = data1_at_t;
+	at t_end: s_out_2_sig = s_in_2_sig_at_t;
+	at t_end: s_out_3_sig = data3_at_t;
 end property;
 
 
 property state_1_7 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data1_at_t = data1@t,
 	data2_at_t = data2@t,
@@ -186,18 +200,20 @@ assume:
 	at t: not(s_in_2_sync);
 	at t: s_in_3_sync;
 prove:
-	at t+1: state_1;
-	at t+1: data1 = data1_at_t;
-	at t+1: data2 = data2_at_t;
-	at t+1: data3 = s_in_3_sig_at_t;
-	at t+1: s_out_1_sig = data1_at_t;
-	at t+1: s_out_2_sig = data2_at_t;
-	at t+1: s_out_3_sig = s_in_3_sig_at_t;
+	at t_end: state_1;
+	at t_end: data1 = data1_at_t;
+	at t_end: data2 = data2_at_t;
+	at t_end: data3 = s_in_3_sig_at_t;
+	at t_end: s_out_1_sig = data1_at_t;
+	at t_end: s_out_2_sig = data2_at_t;
+	at t_end: s_out_3_sig = s_in_3_sig_at_t;
 end property;
 
 
 property state_1_8 is
 dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
 freeze:
 	data1_at_t = data1@t,
 	data2_at_t = data2@t,
@@ -208,13 +224,13 @@ assume:
 	at t: not(s_in_2_sync);
 	at t: not(s_in_3_sync);
 prove:
-	at t+1: state_1;
-	at t+1: data1 = data1_at_t;
-	at t+1: data2 = data2_at_t;
-	at t+1: data3 = data3_at_t;
-	at t+1: s_out_1_sig = data1_at_t;
-	at t+1: s_out_2_sig = data2_at_t;
-	at t+1: s_out_3_sig = data3_at_t;
+	at t_end: state_1;
+	at t_end: data1 = data1_at_t;
+	at t_end: data2 = data2_at_t;
+	at t_end: data3 = data3_at_t;
+	at t_end: s_out_1_sig = data1_at_t;
+	at t_end: s_out_2_sig = data2_at_t;
+	at t_end: s_out_3_sig = data3_at_t;
 end property;
 
 

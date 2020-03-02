@@ -35,9 +35,10 @@ namespace SCAM {
 
         static std::set<DataSignal *> getUsedDataSignals(SCAM::Expr *expr);
 
-        static std::set<Function *> getUsedFunctions(SCAM::Expr *expr);
-
         static std::set<ArrayOperand *> getUsedArrayOperands(SCAM::Expr *expr);
+
+        static std::set<SCAM::Function *> getUsedFunction(SCAM::Expr *expr);
+
 
         static Operand *getOperand(SCAM::Expr *expr);
 
@@ -56,8 +57,8 @@ namespace SCAM {
         std::set<DataSignal *> usedDataSignal;
         std::set<Variable *> usedVar;
         std::set<Port *> usedPorts;
-        std::set<Function *> usedFunctions;
         std::set<ArrayOperand *> usedArrayOperands;
+        std::set<Function *> usedFunction;
         CompoundValue *compoundValue;
 
         virtual void visit(struct VariableOperand &node);
@@ -123,6 +124,8 @@ namespace SCAM {
         virtual void visit(Wait &node);
 
         virtual void visit(Peek &node);
+
+        virtual void visit(struct TimePointOperand &node);
 
     };
 }

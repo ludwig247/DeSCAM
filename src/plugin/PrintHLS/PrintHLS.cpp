@@ -10,8 +10,9 @@
 
 using namespace SCAM::HLSPlugin;
 
-PrintHLS::PrintHLS()
-{
+std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
+    std::stringstream moduleNames;
+
     if (getOptionMap().at("occo")) {
         hlsOption = HLS::HLSOption::OCCO;
     } else if (getOptionMap().at("mcco")) {
@@ -20,10 +21,6 @@ PrintHLS::PrintHLS()
         std::cout << "\x1B[31mNo HLS Option selected. Default Option is \"Multi Clock Cycle Operation!\"\033[0m\t\t" << std::endl;
         hlsOption = HLS::HLSOption::MCCO;
     }
-}
-
-std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
-    std::stringstream moduleNames;
 
     for (auto& module: model->getModules()) {
         std::string moduleName = module.first;

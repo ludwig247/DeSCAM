@@ -3,11 +3,9 @@
 //
 
 #include <iostream>
-#include "CommandLineParametersConfig.h"
-#include "CommandLineParameter.cpp"
-#include "CommandLineProcess.cpp"
+#include "CommandLineProcess.h"
 #include "ManageOutput.h"
-#include "PluginFactory.cpp"
+#include "PluginFactory.h"
 #include <ModelGlobal.h>
 
 int main(int argc, const char **argv) {

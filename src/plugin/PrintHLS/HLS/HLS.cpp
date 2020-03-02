@@ -62,29 +62,11 @@ void HLS::operations()
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
-    for (auto operationProperty : propertySuite->getOperationProperties()) {
+    for (auto operationProperty : propertySuite->getProperties()) {
         const std::string& operationName = operationProperty->getName();
         ss << "\tcase " << operationName << ":\n";
         for (auto commitment : operationProperty->getCommitmentList()) {
-            if (*(commitment->getRhs())==*(commitment->getLhs())) {
-                continue;
-            }
-            ss << PrintStatement::toString(commitment, opt.get(), hlsOption, 2, 2);
-        }
-        for (auto notifySignal : propertySuite->getNotifySignals()) {
-            std::string suffix = (hlsOption == HLSOption::OCCO ? "_reg" : "");
-            switch (operationProperty->getTiming(notifySignal->getPort())) {
-            case TT_1:
-            case FT_e: {
-                ss << "\t\t" << notifySignal->getName() << suffix << " = true;\n";
-                break;
-            }
-            case FF_1:
-            case FF_e: {
-                ss << "\t\t" << notifySignal->getName() << suffix << " = false;\n";
-                break;
-            }
-            }
+            ss << PrintStatement::toString(commitment->getStatement(), opt.get(), hlsOption, 2, 2);
         }
         ss << "\t\tbreak;\n";
     }
@@ -283,10 +265,15 @@ void HLS::dataTypes()
     // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    auto operations = propertySuite->getOperationProperties();
-    for (auto operation = operations.begin(); operation != operations.end(); ++operation) {
-        ss << (*operation)->getName();
-        if (std::next(operation) != operations.end()) {
+    auto properties = propertySuite->getProperties();
+    properties.erase(std::remove_if(properties.begin(),
+            properties.end(),
+            [](Property* property) {return property->getName().find_first_of("wait") != std::string::npos;}),
+            properties.end());
+
+    for (auto property = properties.begin(); property != properties.end(); ++property) {
+        ss << (*property)->getName();
+        if (std::next(property) != properties.end()) {
             ss << ", ";
         }
     }
@@ -295,10 +282,10 @@ void HLS::dataTypes()
     }
     ss << "};\n\n";
 
-    std::set<DataType*> enumTypes;
-    std::set<DataType*> compoundTypes;
+    std::set<const DataType*> enumTypes;
+    std::set<const DataType*> compoundTypes;
 
-    auto addDataType = [&enumTypes, &compoundTypes](DataType* dataType) {
+    auto addDataType = [&enumTypes, &compoundTypes](const DataType* dataType) {
         if (dataType->isEnumType()) {
             enumTypes.insert(dataType);
         }
@@ -327,13 +314,13 @@ void HLS::dataTypes()
 
     ss << "// Enum Types\n";
     for (auto type : enumTypes) {
-        type->accept(*this);
+        printDataType(type);
     }
 
     ss << "\n"
        << "// Compound Types\n";
     for (auto type : compoundTypes) {
-        type->accept(*this);
+        printDataType(type);
     }
 
     ss << "\n// Constants\n";
@@ -352,26 +339,24 @@ void HLS::dataTypes()
     ss << "\n#endif //DATA_TYPES_H";
 }
 
-void HLS::visit(DataType& node)
+void HLS::printDataType(const DataType *node)
 {
     // Enums
-    if (node.isEnumType()) {
-        if (node.getName().find("_SECTIONS")<node.getName().size())
+    if (node->isEnumType()) {
+        if (node->getName().find("_SECTIONS") < node->getName().size())
             return;
-        ss << "enum " << node.getName() << " {";
-        for (auto enumValue = node.getEnumValueMap().begin();
-             enumValue!=node.getEnumValueMap().end();
-             enumValue++) {
+        ss << "enum " << node->getName() << " {";
+        for (auto enumValue = node->getEnumValueMap().begin(); enumValue != node->getEnumValueMap().end(); ++enumValue) {
             ss << enumValue->first;
-            if (std::next(enumValue)!=node.getEnumValueMap().end())
+            if (std::next(enumValue) != node->getEnumValueMap().end())
                 ss << ", ";
         }
         ss << "};\n\n";
     }
     // Structs
-    else if (node.isCompoundType()) {
-        ss << "struct " << node.getName() << " {\n";
-        for (auto& subVar : node.getSubVarMap()) {
+    else if (node->isCompoundType()) {
+        ss << "struct " << node->getName() << " {\n";
+        for (auto& subVar : node->getSubVarMap()) {
             ss << "\t" << Utilities::convertDataType(subVar.second->getName()) << " " << subVar.first << ";\n";
         }
         ss << "};\n\n";
