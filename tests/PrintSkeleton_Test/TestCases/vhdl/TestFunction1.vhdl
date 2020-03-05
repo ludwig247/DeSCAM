@@ -27,7 +27,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			record_var_signal.x <= to_signed(0, 32);
 			record_var_signal.y <= to_unsigned(0, 32);
 			x_signal <= to_signed(0, 32);
 			y_signal <= to_unsigned(0, 32);

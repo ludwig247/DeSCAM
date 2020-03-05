@@ -356,7 +356,9 @@ void SCAM::PrintStmt::visit(SCAM::ArrayExpr &node) {
         if (begin != --valueMap.end()) this->ss << ",";
     }
     this->ss << "]";
-
-
 }
 
+
+void SCAM::PrintStmt::visit(TimePointOperand &node) {
+    this->ss << node.getTimepoint()->getName();
+}

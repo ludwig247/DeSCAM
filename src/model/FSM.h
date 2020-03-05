@@ -8,7 +8,7 @@
 #include <Stmts/Stmt.h>
 #include "AbstractNode.h"
 #include "Variable.h"
-#include "Behavior/Operation2.h"
+#include "Behavior/Operation.h"
 
 
 namespace SCAM {
@@ -29,29 +29,21 @@ namespace SCAM {
         const std::map<std::string, std::vector<SCAM::Stmt *>> &getSectionMap();
 
         //Sections
-        Variable *getSectionVariable() const;
-
-        Variable *getNextSectionVariable() const;
-
-        void setSections(DataType *sectionType, std::string initialSection);
-
-        std::string getInitialSection();
-
-        std::vector<std::string> getSectionList();
-
+        Variable *getSectionVariable() const; //TODO delete
+        Variable *getNextSectionVariable() const; //TODO delte
+        void setSections(DataType *sectionType, std::string initialSection); //TODO: delete
+        std::string getInitialSection(); //TODO: delete
+        std::vector<std::string> getSectionList(); //TODO: delte
         //Module
-        Module *getModule() const;
-
+        Module *getModule() const; //TODO: delete
 
         //OperationPathMap
-        const std::map<Operation2 *, Path *> &getOperationPathMap() const;
-
-        void setOperationPathMap(const std::map<Operation2 *, Path *> &operationPathMap);
+        const std::map<Operation *, Path *> &getOperationPathMap() const; //TODO delete ?
+        void setOperationPathMap(const std::map<Operation *, Path *> &operationPathMap); //TODO delete?
 
         //StateMap
-        const std::map<int, State2 *> &getStateMap() const;
-
-        void setStateMap(const std::map<int, State2 *> &stateMap);
+        const std::map<int, State *> &getStateMap() const;
+        void setStateMap(const std::map<int, State *> &stateMap);
 
         //Accept
         virtual void accept(AbstractVisitor &visitor);
@@ -64,8 +56,8 @@ namespace SCAM {
         Variable *nextSectionVariable; //! Section that is executed next
 
         std::map<std::string, std::vector<SCAM::Stmt *>> sectionMap; //!Sections: a section exists for each state of the FSM with the stmts within the section
-        std::map<int, State2 *> stateMap; //! Stores a map of the abstract states and the connecting operations
-        std::map<Operation2 *, Path *> operationPathMap;
+        std::map<int, State *> stateMap; //! Stores a map of the abstract states and the connecting operations
+        std::map<Operation *, Path *> operationPathMap;
     };
 }
 

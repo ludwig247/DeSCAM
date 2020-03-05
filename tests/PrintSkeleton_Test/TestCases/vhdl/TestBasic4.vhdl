@@ -15,7 +15,6 @@ port(
 end TestBasic4;
 
 architecture TestBasic4_arch of TestBasic4 is
-	signal nb_result_signal: bool;
 	signal var_signal: int;
 
 begin
@@ -23,7 +22,6 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nb_result_signal <= false;
 			var_signal <= to_signed(4, 32);
 			b_out_notify <= true;
 		else

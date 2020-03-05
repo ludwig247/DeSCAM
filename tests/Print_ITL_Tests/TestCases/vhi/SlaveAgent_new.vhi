@@ -37,11 +37,11 @@ macro slave_to_agent_resp_data : signed := end macro;
 
 
 -- STATES --
-macro state_5 : boolean := true end macro;
 macro state_1 : boolean := true end macro;
 macro state_2 : boolean := true end macro;
 macro state_3 : boolean := true end macro;
 macro state_4 : boolean := true end macro;
+macro state_5 : boolean := true end macro;
 macro state_6 : boolean := true end macro;
 
 
@@ -55,105 +55,10 @@ prove:
 	 at t: agent_to_bus_sig_data = resize(0,32);
 	 at t: agent_to_bus_sig_err = false;
 	 at t: nextphase = IDLE;
-	 at t: slave_to_agent_resp_ack = ERR;
+	 at t: slave_to_agent_resp_ack = OK;
 	 at t: slave_to_agent_resp_data = resize(0,32);
 	 at t: agent_to_slave_notify = false;
 	 at t: slave_to_agent_notify = false;
-end property;
-
-
-property state_5_5 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
-	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
-	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	bus_to_agent_sig_addr_at_t = bus_to_agent_sig_addr@t,
-	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
-	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
-assume:
-	at t: state_5;
-	at t: bus_to_agent_sig_cyc;
-	at t: bus_to_agent_sig_stb;
-	at t: not(bus_to_agent_sig_we);
-prove:
-	at t_end: state_1;
-	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
-	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
-	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_sig_addr = bus_to_agent_sig_addr_at_t;
-	at t_end: agent_to_slave_sig_data = 0;
-	at t_end: agent_to_slave_sig_trans_type = SINGLE_READ;
-	at t_end: nextphase = READ;
-	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
-	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
-	during[t+1, t_end-1]: agent_to_slave_notify = false;
-	at t_end: agent_to_slave_notify = true;
-	during[t+1, t_end]: slave_to_agent_notify = false;
-end property;
-
-
-property state_5_6 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
-	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
-	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	bus_to_agent_sig_addr_at_t = bus_to_agent_sig_addr@t,
-	bus_to_agent_sig_data_at_t = bus_to_agent_sig_data@t,
-	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
-	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
-assume:
-	at t: state_5;
-	at t: bus_to_agent_sig_cyc;
-	at t: bus_to_agent_sig_stb;
-	at t: bus_to_agent_sig_we;
-prove:
-	at t_end: state_3;
-	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
-	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
-	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: agent_to_slave_sig_addr = bus_to_agent_sig_addr_at_t;
-	at t_end: agent_to_slave_sig_data = bus_to_agent_sig_data_at_t;
-	at t_end: agent_to_slave_sig_trans_type = SINGLE_WRITE;
-	at t_end: nextphase = WRITE;
-	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
-	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
-	during[t+1, t_end-1]: agent_to_slave_notify = false;
-	at t_end: agent_to_slave_notify = true;
-	during[t+1, t_end]: slave_to_agent_notify = false;
-end property;
-
-
-property state_5_7 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
-	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
-	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
-	nextphase_at_t = nextphase@t,
-	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
-	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
-assume:
-	at t: state_5;
-	at t: not((bus_to_agent_sig_cyc and bus_to_agent_sig_stb));
-	at t: (nextphase = IDLE);
-prove:
-	at t_end: state_5;
-	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
-	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
-	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
-	at t_end: nextphase = nextphase_at_t;
-	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
-	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
-	during[t+1, t_end]: agent_to_slave_notify = false;
-	during[t+1, t_end]: slave_to_agent_notify = false;
 end property;
 
 
@@ -264,6 +169,127 @@ prove:
 end property;
 
 
+property state_5_5 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
+	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
+	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
+	bus_to_agent_sig_addr_at_t = bus_to_agent_sig_addr@t,
+	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
+	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
+assume:
+	at t: state_5;
+	at t: bus_to_agent_sig_cyc;
+	at t: bus_to_agent_sig_stb;
+	at t: not(bus_to_agent_sig_we);
+prove:
+	at t_end: state_1;
+	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
+	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
+	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
+	at t_end: agent_to_slave_sig_addr = bus_to_agent_sig_addr_at_t;
+	at t_end: agent_to_slave_sig_data = 0;
+	at t_end: agent_to_slave_sig_trans_type = SINGLE_READ;
+	at t_end: nextphase = READ;
+	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
+	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
+	during[t+1, t_end-1]: agent_to_slave_notify = false;
+	at t_end: agent_to_slave_notify = true;
+	during[t+1, t_end]: slave_to_agent_notify = false;
+end property;
+
+
+property state_5_6 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
+	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
+	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
+	bus_to_agent_sig_addr_at_t = bus_to_agent_sig_addr@t,
+	bus_to_agent_sig_data_at_t = bus_to_agent_sig_data@t,
+	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
+	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
+assume:
+	at t: state_5;
+	at t: bus_to_agent_sig_cyc;
+	at t: bus_to_agent_sig_stb;
+	at t: bus_to_agent_sig_we;
+prove:
+	at t_end: state_3;
+	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
+	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
+	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
+	at t_end: agent_to_slave_sig_addr = bus_to_agent_sig_addr_at_t;
+	at t_end: agent_to_slave_sig_data = bus_to_agent_sig_data_at_t;
+	at t_end: agent_to_slave_sig_trans_type = SINGLE_WRITE;
+	at t_end: nextphase = WRITE;
+	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
+	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
+	during[t+1, t_end-1]: agent_to_slave_notify = false;
+	at t_end: agent_to_slave_notify = true;
+	during[t+1, t_end]: slave_to_agent_notify = false;
+end property;
+
+
+property state_5_7 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	agent_to_bus_sig_ack_at_t = agent_to_bus_sig_ack@t,
+	agent_to_bus_sig_data_at_t = agent_to_bus_sig_data@t,
+	agent_to_bus_sig_err_at_t = agent_to_bus_sig_err@t,
+	nextphase_at_t = nextphase@t,
+	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
+	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
+assume:
+	at t: state_5;
+	at t: not((bus_to_agent_sig_cyc and bus_to_agent_sig_stb));
+	at t: (nextphase = IDLE);
+prove:
+	at t_end: state_5;
+	at t_end: agent_to_bus_sig_ack = agent_to_bus_sig_ack_at_t;
+	at t_end: agent_to_bus_sig_data = agent_to_bus_sig_data_at_t;
+	at t_end: agent_to_bus_sig_err = agent_to_bus_sig_err_at_t;
+	at t_end: nextphase = nextphase_at_t;
+	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
+	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
+	during[t+1, t_end]: agent_to_slave_notify = false;
+	during[t+1, t_end]: slave_to_agent_notify = false;
+end property;
+
+
+property state_6_10 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	nextphase_at_t = nextphase@t,
+	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
+	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
+assume:
+	at t: state_6;
+	at t: not((not(bus_to_agent_sig_cyc) and not(bus_to_agent_sig_stb)));
+	at t: bus_to_agent_sig_we;
+	at t: (nextphase = DONE);
+prove:
+	at t_end: state_6;
+	at t_end: agent_to_bus_sig_ack = true;
+	at t_end: agent_to_bus_sig_data = 0;
+	at t_end: agent_to_bus_sig_err = not((slave_to_agent_resp_ack_at_t = OK));
+	at t_end: nextphase = nextphase_at_t;
+	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
+	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
+	during[t+1, t_end]: agent_to_slave_notify = false;
+	during[t+1, t_end]: slave_to_agent_notify = false;
+end property;
+
+
 property state_6_8 is
 dependencies: no_reset;
 for timepoints:
@@ -305,32 +331,6 @@ prove:
 	at t_end: state_6;
 	at t_end: agent_to_bus_sig_ack = true;
 	at t_end: agent_to_bus_sig_data = slave_to_agent_resp_data_at_t;
-	at t_end: agent_to_bus_sig_err = not((slave_to_agent_resp_ack_at_t = OK));
-	at t_end: nextphase = nextphase_at_t;
-	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;
-	at t_end: slave_to_agent_resp_data = slave_to_agent_resp_data_at_t;
-	during[t+1, t_end]: agent_to_slave_notify = false;
-	during[t+1, t_end]: slave_to_agent_notify = false;
-end property;
-
-
-property state_6_10 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	nextphase_at_t = nextphase@t,
-	slave_to_agent_resp_ack_at_t = slave_to_agent_resp_ack@t,
-	slave_to_agent_resp_data_at_t = slave_to_agent_resp_data@t;
-assume:
-	at t: state_6;
-	at t: not((not(bus_to_agent_sig_cyc) and not(bus_to_agent_sig_stb)));
-	at t: bus_to_agent_sig_we;
-	at t: (nextphase = DONE);
-prove:
-	at t_end: state_6;
-	at t_end: agent_to_bus_sig_ack = true;
-	at t_end: agent_to_bus_sig_data = 0;
 	at t_end: agent_to_bus_sig_err = not((slave_to_agent_resp_ack_at_t = OK));
 	at t_end: nextphase = nextphase_at_t;
 	at t_end: slave_to_agent_resp_ack = slave_to_agent_resp_ack_at_t;

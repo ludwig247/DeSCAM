@@ -271,3 +271,8 @@ void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
         return !this->stateName.empty();
     }
 }
+
+void SCAM::FindCommunication2::visit(struct TimePointOperand &node) {
+    waitComm = false;
+    communication = false;
+}

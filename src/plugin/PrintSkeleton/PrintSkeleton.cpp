@@ -1,9 +1,8 @@
-#include <utility>
 
 //
 // Created by tobias on 13.02.17.
 //
-
+#include <utility>
 #include <PrintStmt.h>
 #include <math.h>
 #include <ModelGlobal.h>
@@ -15,7 +14,7 @@ std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
     globalPackageName = node->getName();
 
     pluginOutput.insert(std::make_pair("globalTypes" + getFilenameExtention(), generateGlobalTypes()));
-    if(!node->getGlobalVariableMap().empty()){
+    if (!node->getGlobalVariableMap().empty()) {
         pluginOutput.insert(std::make_pair("globalDefines" + getFilenameExtention(), generateGlobalDefs()));
     }
 
@@ -62,6 +61,7 @@ std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(SCAM::Module 
     globalPackageName = ModelGlobal::getModel()->getName();
     this->module = module;
     localPackageName = module->getName();
+
 
     return std::make_pair(localPackageName + "_types" + getFilenameExtention(), generateLocalTypes());
 }
@@ -162,6 +162,9 @@ std::string PrintSkeleton::generateGlobalTypes() {
 
 std::string PrintSkeleton::generateHDLSkeleton() {
 
+    if (this->module->getName() == "TestBasic16") {
+        std::cout << "TestBasic16" << std::endl;
+    }
 
     std::stringstream skeletonStream;
 
@@ -243,11 +246,11 @@ void PrintSkeleton::printPackageHeader(std::stringstream &ss, const std::string 
     if (language == VHDL) {
         ss << "library ieee;\n";
         ss << "use IEEE.numeric_std.all;\n";
-        ss << "use work."<<globalPackageName <<"_types.all;\n\n";
+        ss << "use work." << globalPackageName << "_types.all;\n\n";
         ss << "package " + packageName << "_types is\n";
     } else if (language == SV) {
         ss << "package " + convertToLower(packageName) << "_types;\n\n";
-        ss << "\t import "<< convertToLower(globalPackageName) << "_types::*;\n";
+        ss << "\t import " << convertToLower(globalPackageName) << "_types::*;\n";
 
     }
 }
@@ -332,8 +335,20 @@ void PrintSkeleton::registers(std::stringstream &ss) {
     if (language == VHDL) {
         ss << "architecture " + module->getName() << "_arch of " + module->getName() + " is\n";
     }
+    std::set<Variable *> usedParents;
     for (auto variable: module->getVariableMap()) {
-        insertRegister(ss, variable.first + "_signal", getDataTypeWrapper(variable.second->getDataType()));
+        //Don't print all sub-array elemtns ... only print parent once
+        if (variable.second->isArrayElement()) {
+            if (usedParents.insert(variable.second->getParent()).second) {
+                insertRegister(ss, variable.second->getParent()->getName() + "_signal", getDataTypeWrapper(variable.second->getParent()->getDataType()));
+            }
+        } else if (variable.second->isSubVar() && variable.second->getParent()->isCompoundType()) {
+            //Only consider first element
+            if (usedParents.insert(variable.second->getParent()).second) {
+                insertRegister(ss, variable.second->getParent()->getName() + "_signal", getDataTypeWrapper(variable.second->getParent()->getDataType()));
+            }
+
+        } else insertRegister(ss, variable.first + "_signal", getDataTypeWrapper(variable.second->getDataType()));
     }
 }
 
@@ -354,6 +369,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
 
     for (auto variable: module->getVariableMap()) {
+        if (variable.second->isArrayElement() && variable.second->getName() != "0") continue; //Skip all other array elements
         if (variable.second->getDataType()->isCompoundType()) {
             for (auto subVar: variable.second->getSubVarList()) {
                 std::string resetValue;
@@ -385,6 +401,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
             }
 
         } else if (variable.second->isArrayType()) {
+
             if (variable.second->getDataType()->getArrayType()->isInteger()) {
                 std::string arrayDefaultValue;
                 if (language == VHDL) {
@@ -398,8 +415,27 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                             nonblockingIndentationLevel);
             } else throw std::runtime_error("not implemented");
 
+
+        } else if (variable.second->isArrayElement() && variable.second->getName() == "0") {
+
+            if (variable.second->getParent()->getDataType()->getArrayType()->isInteger()) {
+                std::string arrayDefaultValue;
+                if (language == VHDL) {
+                    arrayDefaultValue = "(others => to_signed(0, 32))";
+                } else if (language == SV) {
+                    arrayDefaultValue = "'{default:0}";
+                }
+                insertNonblockingAssignment(ss,
+                                            variable.second->getParent()->getFullName() + "_signal",
+                                            arrayDefaultValue,
+                                            nonblockingIndentationLevel);
+            } else throw std::runtime_error("not implemented");
+
         } else {
             std::string name = variable.first + "_signal";
+            if(variable.second->isSubVar() && !variable.second->isArrayElement()){
+                name = variable.second->getParent()->getName() +"_signal." + variable.second->getName();
+            }
             std::string resetValue;
             if (language == SV) {
                 if (variable.second->getDataType()->getName() == "bool") {
@@ -590,15 +626,15 @@ std::string PrintSkeleton::booleanWrapper(bool value) {
 
 std::string PrintSkeleton::generateGlobalDefs() {
     std::stringstream ss;
-    if(language == SV){
-        for(auto var :  ModelGlobal::getModel()->getGlobalVariableMap() ){
+    if (language == SV) {
+        for (auto var :  ModelGlobal::getModel()->getGlobalVariableMap()) {
             ss << "`ifndef " << var.first << std::endl;
-            ss << "\t`define " << var.first << " " <<  PrintStmt::toString(var.second->getInitialValue()) << std::endl;
+            ss << "\t`define " << var.first << " " << PrintStmt::toString(var.second->getInitialValue()) << std::endl;
             ss << "`endif" << std::endl;
             ss << std::endl;
         }
-    }else if(language == VHDL){
-        for(auto var :  ModelGlobal::getModel()->getGlobalVariableMap() ){
+    } else if (language == VHDL) {
+        for (auto var :  ModelGlobal::getModel()->getGlobalVariableMap()) {
             ss << "constant " << var.first << " ";
             ss << var.second->getDataType()->getName();
             ss << " := " << PrintStmt::toString(var.second->getInitialValue()) << ";\n";

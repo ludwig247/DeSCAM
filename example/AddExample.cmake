@@ -1,5 +1,7 @@
 #include( CMakeParseArguments )
+
 message(STATUS "${TESTS}")
+
 
 macro (add_example)
     set(macro_arg ${ARGN})
@@ -11,6 +13,7 @@ macro (add_example)
     if(${num_macro_arg} LESS 1 OR ${num_macro_arg} GREATER 3)
         MESSAGE(FATAL_ERROR "wrong use of \"add_example\"!!!! You need to give at least the name of your example.")
     elseif(${num_macro_arg} EQUAL 1)
+
         list(GET macro_arg 0 first_arg)
         MESSAGE(WARNING "You didn't give a description to your example ${first_arg}")
 #        list(APPEND EXAMPLE_NAMES ${first_arg})
@@ -34,10 +37,14 @@ macro (add_example)
                     "${PROJECT_SOURCE_DIR}/tests/${TEST_DIRS}/TestCases/tests.h"
             )
         endforeach()
-    elseif(${num_macro_arg} EQUAL 2)
+
+        MESSAGE(WARNING "You didn't specify which tests that need the example ${first_arg}")
         list(GET macro_arg 0 first_arg)
-        list(GET macro_arg 1 second_arg)
-#        message( STATUS "inside TESTS=${ADD_EXAMPLE_TESTS}" )
+#        list(APPEND EXAMPLE_NAMES ${first_arg})
+#        list(APPEND EXAMPLE_DESCRIPTIONS "")
+#        list(APPEND EXAMPLE_DIRECTORIES ${first_arg}) # default will be same as example name
+
+
             if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${first_arg}/ESL")
             file(GLOB EXAMPLE_H "${first_arg}/ESL/*.h")
             #        message(STATUS "${EXAMPLE_H}")
@@ -55,6 +62,7 @@ macro (add_example)
                     "${PROJECT_SOURCE_DIR}/tests/${TEST_DIRS}/TestCases/tests.h"
             )
         endforeach()
+
 #        message(STATUS "add_example ${first_arg} ${second_arg} ${EXAMPLE_NAMES}")
 #        list(APPEND EXAMPLE_NAMES ${first_arg})
 #        list(APPEND EXAMPLE_DESCRIPTIONS ${second_arg})
@@ -63,6 +71,7 @@ macro (add_example)
         list(GET macro_arg 0 first_arg)
         list(GET macro_arg 1 second_arg)
         list(GET macro_arg 2 third_arg)
+
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${third_arg}/ESL")
             file(GLOB EXAMPLE_H "${third_arg}/ESL/*.h")
             #        message(STATUS "${EXAMPLE_H}")
@@ -81,10 +90,12 @@ macro (add_example)
             )
         endforeach()
        message(STATUS "add_example ${third_arg}")
+
 #        list(APPEND EXAMPLE_NAMES ${first_arg})
 #        list(APPEND EXAMPLE_DESCRIPTIONS ${second_arg})
 #        list(APPEND EXAMPLE_DIRECTORIES ${third_arg}) # always append the directory even if it's repeated,
 #        # later before adding the subdirectories duplicates will be removed
 #        message(STATUS "${ARGN}")
     endif ()
+
 endmacro(add_example)

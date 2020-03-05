@@ -75,6 +75,7 @@ namespace SCAM {
             }
             if (argc >= 1) {
                 PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
+
             } else throw std::runtime_error("Wrong use of DeSCAM");
         };
 

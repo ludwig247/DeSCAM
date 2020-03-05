@@ -6,9 +6,8 @@
 #include <Stmts/UnsignedValue.h>
 #include "Variable.h"
 
-SCAM::Variable::Variable(std::string name, SCAM::DataType *type, SCAM::ConstValue *initialValue, SCAM::Variable *parent) :
+SCAM::Variable::Variable(std::string name, const DataType *type, SCAM::ConstValue *initialValue, SCAM::Variable *parent) :
         VariableTemplate(name, type, initialValue, parent) {
-
 }
 
 void SCAM::Variable::accept(SCAM::AbstractVisitor &visitor) {

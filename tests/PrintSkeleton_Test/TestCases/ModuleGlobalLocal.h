@@ -10,6 +10,20 @@
 #include "../Interfaces/Interfaces.h"
 
 
+enum Mode {
+    READ, WRITE
+};
+
+struct CompoundType {
+    int x;
+    bool y;
+    Mode mode;
+};
+
+
+
+struct record_t{int x; unsigned int y;};
+
 struct global_compound_type {
     unsigned w;
     bool b;

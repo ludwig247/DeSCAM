@@ -151,6 +151,10 @@ namespace SCAM {
         return nodePtrArrayExpr;
     }
 
+    TimePointOperand *NodePeekVisitor::nodePeekTimePointOperand() const {
+        return nodePtrTimePointOperand;
+    }
+
     VariableOperand *NodePeekVisitor::nodePeekVariableOperand(Stmt *node) {
         NodePeekVisitor peekVisitor(node);
         return peekVisitor.nodePeekVariableOperand();
@@ -309,13 +313,14 @@ namespace SCAM {
         return peekVisitor.nodePeekNotify();
     }
 
-
-
-
-
     ArrayExpr *NodePeekVisitor::nodePeekArrayExpr(Stmt *node) {
         NodePeekVisitor peekVisitor(node);
         return peekVisitor.nodePeekArrayExpr();
+    }
+
+    TimePointOperand *NodePeekVisitor::nodePeekTimePointOperand(Stmt *node) {
+        NodePeekVisitor peekVisitor(node);
+        return peekVisitor.nodePeekTimePointOperand();
     }
 
 
@@ -452,10 +457,12 @@ namespace SCAM {
         nodePtrPeek = &node;
     }
 
-
-
     void NodePeekVisitor::visit(struct ArrayExpr &node) {
         nodePtrArrayExpr = &node;
+    }
+
+    void NodePeekVisitor::visit(struct TimePointOperand &node) {
+        nodePtrTimePointOperand = &node;
     }
 
 

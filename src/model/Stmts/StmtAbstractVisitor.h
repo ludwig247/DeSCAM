@@ -72,6 +72,8 @@ namespace SCAM {
         virtual void visit(class Peek &node) = 0;
 
         virtual void visit(class ArrayExpr &node) = 0;
+
+        virtual void visit(class TimePointOperand &node) = 0;
     };
 }
 

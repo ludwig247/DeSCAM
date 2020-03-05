@@ -13,7 +13,7 @@
 
 namespace SCAM {
 
-    CreateOperationsSlave::CreateOperationsSlave(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State2 *> statesMap, SCAM::Module *module) :
+    CreateOperationsSlave::CreateOperationsSlave(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module) :
             firstStatement(false),
             lastStatement(false),
             condition(false),
@@ -41,7 +41,7 @@ namespace SCAM {
 
         /// create Explicit Operations
         for (const auto& op : rawOperationsExtended) {
-            auto *operation = new Operation2();
+            auto *operation = new Operation();
             /// save operation in the final list
             this->operationsList.push_back(operation);
             this->addStates(op, operation);
@@ -64,11 +64,11 @@ namespace SCAM {
 #endif
     }
 
-    const std::vector<SCAM::Operation2*> &CreateOperationsSlave::getOperationsList() const{
+    const std::vector<SCAM::Operation*> &CreateOperationsSlave::getOperationsList() const{
         return this->operationsList;
     }
 
-    const std::map<std::string, SCAM::State2 *> &CreateOperationsSlave::getStatesMap() const {
+    const std::map<std::string, SCAM::State *> &CreateOperationsSlave::getStatesMap() const {
         return this->statesMap;
     }
 
@@ -156,7 +156,7 @@ namespace SCAM {
         } while (!slaveInsStack.empty());
     }
 
-    void CreateOperationsSlave::addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation) {
+    void CreateOperationsSlave::addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation) {
         /// Process starting state
         auto node = rawOperation.begin();
         if ((*node)->getStmt() == nullptr) {
@@ -182,7 +182,7 @@ namespace SCAM {
         state->second->addIncomingOperation(operation);
     }
 
-    void CreateOperationsSlave::addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation2 *operation) {
+    void CreateOperationsSlave::addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation) {
         this->statementsList.clear();
 
         auto node = rawOperation.begin();
@@ -271,6 +271,10 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::PortOperand &node) {
+        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+    }
+
+    void SCAM::CreateOperationsSlave::visit(SCAM::TimePointOperand &node) {
         throw std::runtime_error("CreateOperationsSlave: Not allowed ");
     }
 

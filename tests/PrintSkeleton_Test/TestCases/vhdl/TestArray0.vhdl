@@ -19,15 +19,12 @@ end TestArray0;
 
 architecture TestArray0_arch of TestArray0 is
 	signal myArray_signal: int_2;
-	signal test_signal: int;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			myArray_signal <= (others => to_signed(0, 32));
-			test_signal <= to_signed(0, 32);
 			b_in_notify <= true;
 			b_out_notify <= false;
 		else

@@ -11,8 +11,7 @@
 #include <set>
 #include <sys/stat.h>//for managing directory commands
 #include "CLI/CLI.hpp"
-#include "CommandLineParameter.cpp"
-#include "CommandLineParametersConfig.h"
+#include "CommandLineParameter.h"
 
 namespace SCAM {
 //
@@ -40,35 +39,6 @@ namespace SCAM {
 
         const std::set<std::string> &getOptimizeOptions() const;
 
-//        static bool ProcessCommandLine(int argc, const char **argv, std::list<std::string> &styles, std::string &sourceFile, std::string &outputDirectory) {
-//            std::string tempArg;
-//            for (int i = 1; i < argc; i++) { // Skip first argument, the program name (SCAM).
-//                tempArg = argv[i];
-//                if(isSourceFile(tempArg))
-//                    sourceFile = tempArg;
-//                else if(tempArg == "-o") { // OutputDirectoy should be following this "-o" option
-//                    if(i == (argc - 1)){
-//                        outputDirectory = ""; // Undefined output directory !!!!!
-//                        return false;
-//                    }
-//                    else {
-//                        tempArg = argv[++i];
-//                        if (CreateOutputDirectory(tempArg))
-//                            outputDirectory = tempArg;
-//                        else
-//                            return false;
-//                    }
-//                }
-//                else if (tempArg != "-o" && !isDirectory(tempArg) && !isSourceFile(tempArg)) {
-//                    tempArg.erase(0, 1);//erase the '-' from the commandline argument
-//                    styles.emplace_back(tempArg);
-//                }
-//                else
-//                    return false;
-//            }
-//
-//            return true;
-//        }
 
     private:
         void commandLineInitialize();

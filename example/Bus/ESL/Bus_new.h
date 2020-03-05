@@ -26,10 +26,11 @@ struct Bus_new : public sc_module {
     blocking_out<bus_req_t> slave_out2;
     blocking_out<bus_req_t> slave_out3;
 
-
     //Variables
     bus_req_t req;
     bus_resp_t resp;
+
+    int foo;
 
     //Constructor
     SC_HAS_PROCESS(Bus_new);
@@ -71,6 +72,7 @@ struct Bus_new : public sc_module {
                 slave_out0->write(req);
                 slave_in0->read(resp);
             }
+
             else if (req.addr >= 8 && req.addr < 16) {
                 req.addr = req.addr - 8;
                 slave_out1->write(req);
@@ -94,6 +96,7 @@ struct Bus_new : public sc_module {
                 resp.data = 0;
             }
             master_out->write(resp);
+
             //wait(SC_ZERO_TIME);
         }
     }
