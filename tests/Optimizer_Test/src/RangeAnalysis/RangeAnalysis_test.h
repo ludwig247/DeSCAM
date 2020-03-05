@@ -25,7 +25,8 @@ TEST_P(RangeAnalysis_Test, inferring_bitwidths) {
                                                           << module.second->getName() << " is empty!.\n";
             SCAM::FindReadVariables findReadVariables(module.second->getCFG());
             SCAM::FunctionsOptimizer functionOptimizer(module.second->getCFG(),module.second,
-                                                       model->getGlobalVariableMap(),findReadVariables.getReadVariablesSet());
+                                                       model,findReadVariables.getReadVariablesSet());
+
             module.second->setCFG(functionOptimizer.getCFG());
             ASSERT_FALSE(module.second->getCFG().empty())
                                         << "After Optimizations, CFG of module "

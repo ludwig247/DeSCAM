@@ -129,16 +129,18 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
             case clang::BinaryOperator::Opcode::BO_Shl:
                 //Special case ... shiftings depends on LHS Datatype
                 if (binaryOperator->getType()->isUnsignedIntegerType()) {
-                    FindDataFlow findRHS(binaryOperator->getRHS(), this->module, true);
-                    this->rhsExpr = findRHS.getExpr();
+
+                    FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, true);
+
+                    this->rhsExpr = findRHS2.getExpr();
                 }
                 this->expr = new Bitwise(this->lhsExpr, "<<", this->rhsExpr);
                 break;
             case clang::BinaryOperator::Opcode::BO_Shr:
                 //Special case ... shiftings depends on LHS Datatype
                 if (binaryOperator->getType()->isUnsignedIntegerType()) {
-                    FindDataFlow findRHS(binaryOperator->getRHS(), this->module, true);
-                    this->rhsExpr = findRHS.getExpr();
+                    FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, true);
+                    this->rhsExpr = findRHS2.getExpr();
                 }
                 this->expr = new Bitwise(this->lhsExpr, ">>", this->rhsExpr);
                 break;
@@ -338,7 +340,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(0)))) {
                                 this->stmt = new Read(operand->getPort(), variableOp, true);
                             } else return exitVisitor("Could not dynamically cast argument as VariableOperand");
-                        } else if (methodString == "slave_read" && memberCallExpr->getNumArgs() >1 ) {
+                        } else if (methodString == "slave_read" && memberCallExpr->getNumArgs() > 1) {
                             //add variable as parameter
                             if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg(0)))) {
                                 if (hasValidArgument(memberCallExpr->getArg(1))) {
@@ -491,7 +493,6 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
     //Name
     std::string name = declRefExpr->getDecl()->getNameAsString();
-
     //Check for global variables
     auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
     if (!globalVars.empty() && globalVars.find(name) != globalVars.end()) {
@@ -501,7 +502,7 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
 
     //Check for state values
-    if (clang::EnumConstantDecl *enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
+    if (auto enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
 
         //Regular enum-value
         std::string typeName = enumDecl->getType()->getAs<clang::EnumType>()->getDecl()->getName().str();
@@ -515,14 +516,25 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
         }
 
     }
-    if (clang::ParmVarDecl *parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
+    if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
         if (FindDataFlow::isFunction) {
-            auto function = this->module->getFunctionMap().find(FindDataFlow::functionName)->second;
-            auto paramMap = function->getParamMap();
-            if (paramMap.find(name) != paramMap.end()) {
-                this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
-                return false;
-            } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
+            auto moduleFuncMap = this->module->getFunctionMap();
+            auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
+            if (moduleFuncMap.find(FindDataFlow::functionName) != moduleFuncMap.end()) {
+                auto function = moduleFuncMap.find(FindDataFlow::functionName)->second;
+                auto paramMap = function->getParamMap();
+                if (paramMap.find(name) != paramMap.end()) {
+                    this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
+                    return false;
+                } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
+            } else if (globalFunctionMap.find(FindDataFlow::functionName) != globalFunctionMap.end()) {
+                auto function = globalFunctionMap.find(FindDataFlow::functionName)->second;
+                auto paramMap = function->getParamMap();
+                if (paramMap.find(name) != paramMap.end()) {
+                    this->switchPassExpr(new ParamOperand(paramMap.find(name)->second));
+                    return false;
+                } else exitVisitor("Unknown parameter " + name + " for function " + function->getName());
+            } else exitVisitor("Function " + FindDataFlow::functionName + " is not defined");
         }
     }
     return true;
@@ -644,9 +656,11 @@ bool SCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *op
 
 
 bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
-    if (callExpr->getDirectCallee() == nullptr) return true;
-    else if (callExpr->getDirectCallee()->isCXXClassMember()) return true;
-    else if (callExpr->getDirectCallee()->getNameAsString() == "insert_state") {
+    auto callee = callExpr->getDirectCallee();
+    if (callee == nullptr || callee->isCXXClassMember()) return true;
+
+    std::string functionName = callee->getNameAsString();
+    if (functionName == "insert_state") {
         if (callExpr->getNumArgs() == 0) {
             this->stmt = new Wait();
             return false;
@@ -659,7 +673,22 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
         } else {
             return exitVisitor("Unallowed number of param for important_state()");
         }
+    }
+    auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
 
+    if (globalFunctionMap.find(functionName) != globalFunctionMap.end()) {
+        auto function = globalFunctionMap.find((functionName))->second;
+        std::map<std::string, SCAM::Expr *> paramExprMap;
+        for (int i = 0; i < callExpr->getNumArgs(); i++) {
+            std::string paramName = callee->getParamDecl(i)->getName();
+            SCAM::FindDataFlow findArgument(callExpr->getArg(i), this->module, false);
+            if (findArgument.getExpr() == nullptr)
+                return exitVisitor(functionName + "() has unsupported params");
+            SCAM::Expr *paramExpr = findArgument.getExpr();
+            paramExprMap.insert(std::make_pair(paramName, paramExpr));
+        }
+        this->expr = new FunctionOperand(function, paramExprMap);
+        this->stmt = this->expr;
     } else {
         std::string funcName = callExpr->getDirectCallee()->getNameAsString();
         return exitVisitor(funcName + "() is not a valid function");
@@ -731,26 +760,22 @@ bool SCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *static
     if (staticCastExpr->getType()->isUnsignedIntegerType() &&
         staticCastExpr->getType().getAsString() == "unsigned int") {
         FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, false);
-        if (ExprVisitor::isVar(subExpr.getExpr()) || true) {
+        if (subExpr.getExpr() != nullptr) {
             switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("unsigned")));
         } else return exitVisitor("static_cast: only variables are allowed as parameter");
         return false;
     } else if (staticCastExpr->getType()->isIntegerType() && staticCastExpr->getType().getAsString() == "int") {
         FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, false);
-        //FIXME: || true!
-        if (ExprVisitor::isVar(subExpr.getExpr()) || ExprVisitor::isParameter(subExpr.getExpr()) || true) {
+        if (subExpr.getExpr() != nullptr) {
             switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("int")));
         } else return exitVisitor("static_cast: only variables are allowed as parameter");
         return false;
     } else return exitVisitor("static_cast: unallowed static cast");
 
-
-    return true;
 }
 
 bool SCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
     FindDataFlow returnExpr(returnStmt->getRetValue(), module, false);
-
     if (returnExpr.getExpr() == nullptr) return exitVisitor(" return value is null");
     this->stmt = new SCAM::Return(returnExpr.getExpr());
     return false;

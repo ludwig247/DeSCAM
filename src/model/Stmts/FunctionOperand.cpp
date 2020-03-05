@@ -3,6 +3,7 @@
 //
 
 #include <NodePeekVisitor.h>
+#include <PrintStmt.h>
 #include "FunctionOperand.h"
 
 SCAM::FunctionOperand::FunctionOperand(SCAM::Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap) :
@@ -19,7 +20,10 @@ SCAM::FunctionOperand::FunctionOperand(SCAM::Function *function, const std::map<
             throw std::runtime_error("Param: " + param.first + " is not a parameter of function " + function->getName() + "()");
         } else {
             if (funcParams.find(param.first)->second->getDataType() != param.second->getDataType()) {
-                throw std::runtime_error("Parameter have different datatypes");
+                std::string error_message = "-E- Function: " + function->getName() +" Parameter have different datatypes:\n";
+                error_message += "Param names: " + param.first + " : " + PrintStmt::toString(param.second) + "\n";
+                error_message += "Param types: " + funcParams.find(param.first)->second->getDataType()->getName() + " : " + param.second->getDataType()->getName() + "\n";
+                throw std::runtime_error(error_message);
             }
         }
 

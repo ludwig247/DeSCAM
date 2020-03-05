@@ -9,30 +9,15 @@
 
 namespace SCAM {
 
-    Module::Module() :
-            slave(false),
-            fsm(new FSM(this)),
-            propertySuite(nullptr) {
-    }
-
     Module::Module(std::string name) :
-            slave(false),
             fsm(new FSM(this)),
             propertySuite(nullptr),
             AbstractNode(name) {
 
     }
 
-    Module::~Module() {
-        delete this->fsm;
-        delete this->propertySuite;
-
-    }
-
     void Module::addPort(Port *port) {
         this->ports.insert(std::make_pair(port->getName(), port));
-        if (port->getInterface()->isSlave())
-            this->slave = true;
     }
 
     const std::map<std::string, Port *> &Module::getPorts() const {
@@ -146,16 +131,14 @@ namespace SCAM {
     }
 
     bool Module::isSlave() const {
-//        for (auto port: this->ports) {
-//            if (port.second->getInterface()->isSlaveIn() || port.second->getInterface()->isSlaveOut()) return true;
-//        }
-//        return false;
-        return this->slave;
+        for (auto port: this->ports) {
+            if (port.second->getInterface()->isSlaveIn() || port.second->getInterface()->isSlaveOut()) return true;
+        }
+        return false;
     }
 
     void Module::removeVariable(Variable *variable) {
         assert(false && "not allowed");
-        std::cout << "MODULE REMOVING: " << variable->getName() << std::endl;
         assert(variable != nullptr);
         assert(!variable->isSubVar()); //Is not correctly implemented
         if (variable->isSubVar()) {
@@ -223,6 +206,10 @@ namespace SCAM {
 
     void Module::removeFunction(std::string functionName) {
         this->functionMap.erase(functionName);
+    }
+
+    void Module::setVariableMap(const std::map<std::string, Variable *> &variableMap) {
+        Module::variableMap = variableMap;
     }
 
 //    void Module::setCFG_Original(std::map<int, SCAM::CfgNode *> blockCFG) {

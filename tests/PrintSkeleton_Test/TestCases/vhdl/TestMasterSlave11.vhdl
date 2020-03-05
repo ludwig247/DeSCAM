@@ -18,7 +18,6 @@ end TestMasterSlave11;
 architecture TestMasterSlave11_arch of TestMasterSlave11 is
 	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
-	signal succ_signal: bool;
 	signal val_signal: int;
 
 begin
@@ -28,7 +27,6 @@ begin
 		if rst = '1' then
 			nextsection_signal <= SECTION_A;
 			section_signal <= SECTION_A;
-			succ_signal <= false;
 			val_signal <= to_signed(0, 32);
 		else
 			 -- FILL OUT HERE;

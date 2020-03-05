@@ -12,13 +12,13 @@ namespace SCAM {
     class TypeInterface {
     protected:
 
-        explicit TypeInterface(DataType *dataType) :
+        explicit TypeInterface(const DataType *dataType) :
                 dataType(dataType) {
             assert(dataType != nullptr && "Datatype is null");
         };
     public:
 
-        virtual DataType *getDataType() const final {
+        virtual const DataType *getDataType() const final {
             return dataType;
         }
 
@@ -57,7 +57,7 @@ namespace SCAM {
     private:
         TypeInterface() = default;
 
-        DataType *dataType;
+        const DataType *dataType;
 
     };
 }

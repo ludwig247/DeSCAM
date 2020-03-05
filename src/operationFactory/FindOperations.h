@@ -8,7 +8,7 @@
 #include <map>
 #include "Behavior/CfgNode.h"
 #include "Model.h"
-#include "Behavior/State2.h"
+#include "Behavior/State.h"
 #include "Behavior/CfgNode.h"
 #include "ValidOperations.h"
 #include <OperationMiscellaneous/FindStateBacktrack.h>
@@ -54,7 +54,7 @@ namespace SCAM{
 
         virtual ~FindOperations() = default;
 
-        const std::map<std::string, SCAM::State2 *> &getStatesMap() const;
+        const std::map<std::string, SCAM::State *> &getStatesMap() const;
         const std::vector<std::vector<SCAM::CfgNode *> >& getOperations() const;
 
     private:
@@ -62,7 +62,7 @@ namespace SCAM{
         SCAM::CfgNode * whileNode;
         std::vector<SCAM::CfgNode *> importantStates;
         std::vector<std::vector<SCAM::CfgNode *> > operations;
-        std::map<std::string, SCAM::State2 *> statesMap;
+        std::map<std::string, SCAM::State *> statesMap;
         SCAM::Module * module;
         std::map<SCAM::Port *, bool> slaveInOrder;
         std::map<SCAM::Port *, bool> slaveOutOrder;

@@ -90,6 +90,8 @@ namespace SCAM {
 
         virtual void visit(ArrayExpr &node);
 
+        virtual void visit(TimePointOperand &node);
+
     protected:
 
         std::string createString(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset);

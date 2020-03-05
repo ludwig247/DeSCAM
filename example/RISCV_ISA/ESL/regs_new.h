@@ -3,7 +3,7 @@
 
 #include "systemc.h"
 #include <iomanip>
-#include "../../Interfaces_new/Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "CPU_Interfaces.h"
 
 class Regs_new : public sc_module {

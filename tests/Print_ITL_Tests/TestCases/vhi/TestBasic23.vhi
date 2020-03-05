@@ -21,6 +21,7 @@ macro val_unsigned : unsigned := end macro;
 
 
 -- STATES --
+macro state_1 : boolean := true end macro;
 macro state_2 : boolean := true end macro;
 macro state_3 : boolean := true end macro;
 macro state_4 : boolean := true end macro;
@@ -28,7 +29,6 @@ macro state_5 : boolean := true end macro;
 macro state_6 : boolean := true end macro;
 macro state_7 : boolean := true end macro;
 macro state_8 : boolean := true end macro;
-macro state_1 : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -43,6 +43,29 @@ prove:
 	 at t: val_unsigned = resize(13,32);
 	 at t: b_out_notify = true;
 	 at t: b_out2_notify = false;
+end property;
+
+
+property state_1_1 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	phase_at_t = phase@t,
+	val_signed_at_t = val_signed@t,
+	val_unsigned_at_t = val_unsigned@t;
+assume:
+	at t: state_1;
+	at t: b_out_sync;
+prove:
+	at t_end: state_2;
+	at t_end: b_out_sig = (shift_left(val_unsigned_at_t,2));
+	at t_end: phase = phase_at_t;
+	at t_end: val_signed = val_signed_at_t;
+	at t_end: val_unsigned = val_unsigned_at_t;
+	during[t+1, t_end-1]: b_out_notify = false;
+	at t_end: b_out_notify = true;
+	during[t+1, t_end]: b_out2_notify = false;
 end property;
 
 
@@ -89,6 +112,96 @@ prove:
 	during[t+1, t_end-1]: b_out_notify = false;
 	at t_end: b_out_notify = true;
 	during[t+1, t_end]: b_out2_notify = false;
+end property;
+
+
+property state_4_10 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	val_signed_at_t = val_signed@t,
+	val_unsigned_at_t = val_unsigned@t;
+assume:
+	at t: state_4;
+	at t: b_out_sync;
+	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
+	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
+	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
+	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
+	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
+	at t: not((phase = SECTION_B));
+	at t: not((SECTION_B = SECTION_A));
+	at t: (SECTION_B = SECTION_B);
+prove:
+	at t_end: state_5;
+	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
+	at t_end: phase = SECTION_B;
+	at t_end: val_signed = val_signed_at_t;
+	at t_end: val_unsigned = val_unsigned_at_t;
+	during[t+1, t_end]: b_out_notify = false;
+	during[t+1, t_end-1]: b_out2_notify = false;
+	at t_end: b_out2_notify = true;
+end property;
+
+
+property state_4_11 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	val_signed_at_t = val_signed@t,
+	val_unsigned_at_t = val_unsigned@t;
+assume:
+	at t: state_4;
+	at t: b_out_sync;
+	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
+	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
+	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
+	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
+	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
+	at t: not((phase = SECTION_B));
+	at t: not((SECTION_B = SECTION_A));
+	at t: (SECTION_B = SECTION_B);
+prove:
+	at t_end: state_5;
+	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
+	at t_end: phase = SECTION_B;
+	at t_end: val_signed = val_signed_at_t;
+	at t_end: val_unsigned = val_unsigned_at_t;
+	during[t+1, t_end]: b_out_notify = false;
+	during[t+1, t_end-1]: b_out2_notify = false;
+	at t_end: b_out2_notify = true;
+end property;
+
+
+property state_4_12 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	val_signed_at_t = val_signed@t,
+	val_unsigned_at_t = val_unsigned@t;
+assume:
+	at t: state_4;
+	at t: b_out_sync;
+	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
+	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
+	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
+	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
+	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
+	at t: not((phase = SECTION_B));
+	at t: not((SECTION_B = SECTION_A));
+	at t: (SECTION_B = SECTION_B);
+prove:
+	at t_end: state_5;
+	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
+	at t_end: phase = SECTION_B;
+	at t_end: val_signed = val_signed_at_t;
+	at t_end: val_unsigned = val_unsigned_at_t;
+	during[t+1, t_end]: b_out_notify = false;
+	during[t+1, t_end-1]: b_out2_notify = false;
+	at t_end: b_out2_notify = true;
 end property;
 
 
@@ -256,96 +369,6 @@ assume:
 	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
 	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
-	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
-	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-prove:
-	at t_end: state_5;
-	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
-	at t_end: phase = SECTION_B;
-	at t_end: val_signed = val_signed_at_t;
-	at t_end: val_unsigned = val_unsigned_at_t;
-	during[t+1, t_end]: b_out_notify = false;
-	during[t+1, t_end-1]: b_out2_notify = false;
-	at t_end: b_out2_notify = true;
-end property;
-
-
-property state_4_10 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	val_signed_at_t = val_signed@t,
-	val_unsigned_at_t = val_unsigned@t;
-assume:
-	at t: state_4;
-	at t: b_out_sync;
-	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
-	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
-	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
-	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
-	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-prove:
-	at t_end: state_5;
-	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
-	at t_end: phase = SECTION_B;
-	at t_end: val_signed = val_signed_at_t;
-	at t_end: val_unsigned = val_unsigned_at_t;
-	during[t+1, t_end]: b_out_notify = false;
-	during[t+1, t_end-1]: b_out2_notify = false;
-	at t_end: b_out2_notify = true;
-end property;
-
-
-property state_4_11 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	val_signed_at_t = val_signed@t,
-	val_unsigned_at_t = val_unsigned@t;
-assume:
-	at t: state_4;
-	at t: b_out_sync;
-	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
-	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
-	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
-	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
-	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-prove:
-	at t_end: state_5;
-	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
-	at t_end: phase = SECTION_B;
-	at t_end: val_signed = val_signed_at_t;
-	at t_end: val_unsigned = val_unsigned_at_t;
-	during[t+1, t_end]: b_out_notify = false;
-	during[t+1, t_end-1]: b_out2_notify = false;
-	at t_end: b_out2_notify = true;
-end property;
-
-
-property state_4_12 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	val_signed_at_t = val_signed@t,
-	val_unsigned_at_t = val_unsigned@t;
-assume:
-	at t: state_4;
-	at t: b_out_sync;
-	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
-	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
-	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
 	at t: not((SECTION_B = SECTION_A));
@@ -683,26 +706,24 @@ prove:
 end property;
 
 
-property state_1_1 is
+property wait_state_1 is
 dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
 freeze:
+	b_out_sig_at_t = b_out_sig@t,
 	phase_at_t = phase@t,
 	val_signed_at_t = val_signed@t,
 	val_unsigned_at_t = val_unsigned@t;
 assume:
 	at t: state_1;
-	at t: b_out_sync;
+	at t: not(b_out_sync);
 prove:
-	at t_end: state_2;
-	at t_end: b_out_sig = (shift_left(val_unsigned_at_t,2));
-	at t_end: phase = phase_at_t;
-	at t_end: val_signed = val_signed_at_t;
-	at t_end: val_unsigned = val_unsigned_at_t;
-	during[t+1, t_end-1]: b_out_notify = false;
-	at t_end: b_out_notify = true;
-	during[t+1, t_end]: b_out2_notify = false;
+	at t+1: state_1;
+	at t+1: b_out_sig = b_out_sig_at_t;
+	at t+1: phase = phase_at_t;
+	at t+1: val_signed = val_signed_at_t;
+	at t+1: val_unsigned = val_unsigned_at_t;
+	at t+1: b_out_notify = true;
+	at t+1: b_out2_notify = false;
 end property;
 
 
@@ -850,27 +871,6 @@ prove:
 	at t+1: val_unsigned = val_unsigned_at_t;
 	at t+1: b_out_notify = false;
 	at t+1: b_out2_notify = true;
-end property;
-
-
-property wait_state_1 is
-dependencies: no_reset;
-freeze:
-	b_out_sig_at_t = b_out_sig@t,
-	phase_at_t = phase@t,
-	val_signed_at_t = val_signed@t,
-	val_unsigned_at_t = val_unsigned@t;
-assume:
-	at t: state_1;
-	at t: not(b_out_sync);
-prove:
-	at t+1: state_1;
-	at t+1: b_out_sig = b_out_sig_at_t;
-	at t+1: phase = phase_at_t;
-	at t+1: val_signed = val_signed_at_t;
-	at t+1: val_unsigned = val_unsigned_at_t;
-	at t+1: b_out_notify = true;
-	at t+1: b_out2_notify = false;
 end property;
 
 

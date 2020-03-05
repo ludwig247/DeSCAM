@@ -21,7 +21,7 @@ public:
 
     static PluginFactory *create(std::string type);
 
-    std::map<std::string, bool> getOptionMap() {
+    virtual std::map<std::string, bool> getOptionMap() {
         int status;
         char *pluginName = abi::__cxa_demangle(typeid(*this).name(), nullptr, nullptr, &status);
         return CommandLineParameter::getOptionMap(pluginName);

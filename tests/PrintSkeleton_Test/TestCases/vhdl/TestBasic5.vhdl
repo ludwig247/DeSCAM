@@ -18,16 +18,12 @@ port(
 end TestBasic5;
 
 architecture TestBasic5_arch of TestBasic5 is
-	signal nb_result_signal: bool;
-	signal var_signal: int;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nb_result_signal <= false;
-			var_signal <= to_signed(4, 32);
 			b_in_notify <= true;
 			b_out_notify <= false;
 		else

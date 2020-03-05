@@ -18,16 +18,12 @@ port(
 end TestFunction0;
 
 architecture TestFunction0_arch of TestFunction0 is
-	signal x_signal: int;
-	signal y_signal: unsigned (31 downto 0);
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			x_signal <= to_signed(0, 32);
-			y_signal <= to_unsigned(0, 32);
 			b_in_notify <= true;
 			b_out_notify <= false;
 		else

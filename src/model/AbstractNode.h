@@ -19,9 +19,9 @@ namespace SCAM {
     public:
         AbstractNode();
 
-        AbstractNode(std::string name);
+        explicit AbstractNode(std::string name);
 
-        virtual ~AbstractNode();
+        virtual ~AbstractNode() = default;
 
         //Accept for visitor
         virtual void accept(AbstractVisitor &visitor) = 0;

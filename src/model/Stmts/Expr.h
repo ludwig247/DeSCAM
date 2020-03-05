@@ -14,15 +14,15 @@ namespace SCAM {
 
     class Expr : public Stmt {
     public:
-        Expr(const DataType *dataType);
+        Expr() = delete;
+        explicit Expr(const DataType *dataType);
+        ~Expr() = default;
 
         const DataType *getDataType() const;
 
-        virtual std::ostream &print(std::ostream &ostream) const;
+        std::ostream &print(std::ostream &ostream) const override;
 
         bool isDataType(std::string n) const;
-
-
         virtual void accept(StmtAbstractVisitor &visitor) = 0;
 
     private:

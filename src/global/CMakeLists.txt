@@ -1,7 +1,7 @@
 
 add_subdirectory(tinyxml)
 
-add_library(global ErrorMsg.cpp
+add_library(global SHARED ErrorMsg.cpp
         DataTypes.cpp
         ModelGlobal.h
         ExprTranslator.cpp

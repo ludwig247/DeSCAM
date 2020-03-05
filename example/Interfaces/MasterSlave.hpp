@@ -8,7 +8,7 @@
 
 #include "MasterSlave.h"
 
-template<typename T>
+template<typename T> inline
 MasterSlave<T>::MasterSlave (const char *name) : sc_prim_channel(name) {
     reader = nullptr;
     writer = nullptr;
@@ -16,7 +16,7 @@ MasterSlave<T>::MasterSlave (const char *name) : sc_prim_channel(name) {
     available_data = false;
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::master_write(const T &val,std::string stateName) {
     /**
      * @breaf: Master write should definitely be read
@@ -57,7 +57,7 @@ void MasterSlave<T>::master_write(const T &val,std::string stateName) {
     assert(!available_data && "master_write: data hasn't been read yet!");
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::slave_read(T &out) {
     /**
      * @breaf: Slave read reads data IF AVAILABLE and return a boolean stating successful reading
@@ -99,7 +99,7 @@ void MasterSlave<T>::slave_read(T &out) {
 //    return false;
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::slave_read(T &out, bool &success) {
     /**
      * @breaf: Slave read reads data IF AVAILABLE and return a boolean stating successful reading
@@ -142,7 +142,7 @@ void MasterSlave<T>::slave_read(T &out, bool &success) {
     }
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::master_read(T & out,std::string stateName) {
     /**
      * @breaf: Master read should always have a value to read
@@ -182,13 +182,13 @@ void MasterSlave<T>::master_read(T & out,std::string stateName) {
 //    std::cout << "@" << this->name() << ": MasterSlave->master_read: done reading\n";
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::master_read(T &out) {
     this->master_read(out,"");
 
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::slave_write(const T &val) {
 //    std::cout << "@" << this->name() << ": MasterSlave->slave_write: writing something\n";
     shared_data = &val;
@@ -199,7 +199,7 @@ void MasterSlave<T>::slave_write(const T &val) {
 
 
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::register_port(sc_port_base &port, const char *if_typename) {
 
     std::string nm(if_typename);
@@ -269,7 +269,7 @@ void MasterSlave<T>::register_port(sc_port_base &port, const char *if_typename) 
     }
 }
 
-template<typename T>
+template<typename T> inline
 void MasterSlave<T>::master_write(const T &val) {
     this->master_write(val,"");
 }

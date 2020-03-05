@@ -107,6 +107,8 @@ namespace SCAM {
 
         void visit(class Peek &node) override { throw std::runtime_error("ExprSCAMtoZ3 did not expect Peek"); };
 
+        void visit(class TimePointOperand &node) override { throw std::runtime_error("ExprSCAMtoZ3 did not expect TimeExprOperand"); };
+
     private:
 
 

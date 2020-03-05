@@ -240,7 +240,6 @@ void ISA::run() {
                 /////////////////////////////////////////////////////////////////////////////
 
                 fromRegsPort->read(regfile); //Read register contents
-
                 //Set-up operands for alu by reading from regfile
                 aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
                 aluOp2 = getImmediate(encodedInstr);
