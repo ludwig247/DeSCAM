@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     commandLineArugmentsVector.push_back(bin.c_str());
 
     //SRC-File to be analyzed
-    std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
+    std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/tests.h");
     commandLineArugmentsVector.push_back(file_path.c_str());
 
     //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
