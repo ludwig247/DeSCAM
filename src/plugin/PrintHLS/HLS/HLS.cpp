@@ -8,24 +8,28 @@
 using namespace SCAM::HLSPlugin::HLS;
 
 HLS::HLS(HLSOption hlsOption) :
-    ss(""),
-    moduleName(""),
-    propertySuite(nullptr),
-    currentModule(nullptr),
-    opt(nullptr),
-    hlsOption(hlsOption)
+        ss(""),
+        moduleName(""),
+        propertySuiteHelper(nullptr),
+        currentModule(nullptr),
+        opt(nullptr),
+        hlsOption(hlsOption)
 {
 }
 
-std::map<std::string, std::string> HLS::printModule(Module* module, const std::string &moduleName)
+std::map<std::string, std::string> HLS::printModule(
+        Module* module,
+        const std::string &moduleName,
+        PropertySuiteHelper* propertySuiteHelper
+)
 {
     std::map<std::string, std::string> pluginOutput;
 
     this->moduleName = moduleName;
     this->currentModule = module;
-    this->propertySuite = module->getPropertySuite();
+    this->propertySuiteHelper = propertySuiteHelper;
 
-    opt = std::make_unique<Optimizer>(propertySuite, currentModule);
+    opt = std::make_unique<Optimizer>(propertySuiteHelper, currentModule);
 
     ss.str("");
     dataTypes();
@@ -62,11 +66,14 @@ void HLS::operations()
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
-    for (auto operationProperty : propertySuite->getProperties()) {
+    for (auto operationProperty : propertySuiteHelper->getOperationProperties()) {
         const std::string& operationName = operationProperty->getName();
         ss << "\tcase " << operationName << ":\n";
-        for (auto commitment : operationProperty->getCommitmentList()) {
-            ss << PrintStatement::toString(commitment->getStatement(), opt.get(), hlsOption, 2, 2);
+        for (auto commitment : operationProperty->getOperation()->getCommitmentsList()) {
+            ss << PrintStatement::toString(commitment, opt.get(), hlsOption, 2, 2);
+        }
+        for (const auto& notifyStmt : propertySuiteHelper->getNotifyStatements(operationProperty)) {
+            ss << PrintStatement::toString(notifyStmt, opt.get(), hlsOption, 2, 2);
         }
         ss << "\t\tbreak;\n";
     }
@@ -149,7 +156,7 @@ void HLS::interface()
     }
 
     // Notify Signals
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
+    for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
     }
 
@@ -164,7 +171,7 @@ void HLS::writeToOutput()
     for (const auto reg : Utilities::getParents(opt->getInternalRegisterOut())) {
         ss << "\tout_" << reg->getName() << " = " << reg->getName() << "_reg;\n";
     }
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
+    for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << " = " << notifySignal->getName() << "_reg;\n";
     }
 }
@@ -204,7 +211,7 @@ void HLS::registerVariables()
         ss << " = " << getVariableReset(reg) << ";\n";
     }
 
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
+    for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
         auto resetValue = getResetValue(notifySignal);
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue ? resetValue.get() : "'0'") << ";\n";
@@ -254,9 +261,9 @@ void HLS::dataTypes()
     // enum of states
     ss << "// States\n"
        << "enum state {";
-    for (auto state = propertySuite->getStates().begin(); state!=propertySuite->getStates().end(); ++state) {
+    for (auto state = propertySuiteHelper->getStates().begin(); state!=propertySuiteHelper->getStates().end(); ++state) {
         ss << (*state)->getName();
-        if (std::next(state)!=propertySuite->getStates().end()) {
+        if (std::next(state)!=propertySuiteHelper->getStates().end()) {
             ss << ", ";
         }
     }
@@ -265,15 +272,10 @@ void HLS::dataTypes()
     // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    auto properties = propertySuite->getProperties();
-    properties.erase(std::remove_if(properties.begin(),
-            properties.end(),
-            [](Property* property) {return property->getName().find_first_of("wait") != std::string::npos;}),
-            properties.end());
-
-    for (auto property = properties.begin(); property != properties.end(); ++property) {
+    const auto& operationProperties = propertySuiteHelper->getOperationProperties();
+    for (auto property = operationProperties.begin(); property != operationProperties.end(); ++property) {
         ss << (*property)->getName();
-        if (std::next(property) != properties.end()) {
+        if (std::next(property) != operationProperties.end()) {
             ss << ", ";
         }
     }
@@ -294,10 +296,10 @@ void HLS::dataTypes()
         }
     };
 
-    for (const auto& reg : propertySuite->getVisibleRegisters()) {
+    for (const auto& reg : propertySuiteHelper->getVisibleRegisters()) {
         addDataType((DataType*) (reg->getDataType()));
     }
-    for (const auto& func : propertySuite->getFunctions()) {
+    for (const auto& func : propertySuiteHelper->getFunctions()) {
         addDataType(func->getReturnType());
     }
     for (auto& port : currentModule->getPorts()) {

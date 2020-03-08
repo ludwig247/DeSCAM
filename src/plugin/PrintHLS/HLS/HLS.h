@@ -23,7 +23,11 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             explicit HLS(HLSOption hlsOption);
             ~HLS() override = default;
 
-            std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName);
+            std::map<std::string, std::string> printModule(
+                    Module* module,
+                    const std::string &moduleName,
+                    PropertySuiteHelper* propertySuiteHelper
+            );
 
             inline std::shared_ptr<Optimizer> getOptimizer();
 
@@ -31,7 +35,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             std::stringstream ss;
 
             std::string moduleName;
-            PropertySuite* propertySuite;
+            PropertySuiteHelper* propertySuiteHelper;
             Module* currentModule;
 
             std::shared_ptr<Optimizer> opt;
@@ -72,13 +76,10 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
         template<typename T>
         boost::optional<std::string> HLS::getResetValue(T* signal)
         {
-            for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-                if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
-                    Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-                    auto printResetValue = PrintReset(assignment->getLhs(), signal->getFullName());
-                    if (printResetValue.hasReset()) {
-                        return PrintStatement::toString(assignment->getRhs());
-                    }
+            for (const auto& commitment : propertySuiteHelper->getResetProperty()->getOperation()->getCommitmentsList()) {
+                auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
+                if (printResetValue.hasReset()) {
+                    return PrintStatement::toString(commitment->getRhs());
                 }
             }
             return boost::none;

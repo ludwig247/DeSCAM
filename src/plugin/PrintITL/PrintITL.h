@@ -18,7 +18,7 @@
 class PrintITL : public PluginFactory {
 
 public:
-    PrintITL();
+    PrintITL() = default;
 
     ~PrintITL() = default;
 

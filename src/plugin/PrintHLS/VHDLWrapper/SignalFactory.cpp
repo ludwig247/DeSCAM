@@ -20,11 +20,11 @@ const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNAL
         {"rst", "bool", "in"}
 };
 
-SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, OperationModuleInterface* hlsModule, bool useWaitState) :
-    propertySuite(propertySuite),
+SignalFactory::SignalFactory(PropertySuiteHelper* propertyHelper, Module* module, OperationModuleInterface* hlsModule, bool useWaitState) :
+    propertyHelper(propertyHelper),
     module(module),
     hlsModule(hlsModule),
-    useWaitOp(useWaitOp)
+    useWaitOp(useWaitState)
 {
     setOperationSelector();
     setControlSignals();
@@ -38,8 +38,8 @@ SignalFactory::SignalFactory(PropertySuite* propertySuite, Module* module, Opera
 }
 
 void SignalFactory::setOperationSelector() {
-    auto operationSelectorType = new DataType(propertySuite->getName() + "_operation_t");
-    for (const auto& property : propertySuite->getOperationProperties()) {
+    auto operationSelectorType = new DataType(propertyHelper->getName() + "_operation_t");
+    for (const auto& property : propertyHelper->getOperationProperties()) {
         operationSelectorType->addEnumValue(property->getName());
     }
     if (useWaitOp) {
@@ -74,12 +74,12 @@ void SignalFactory::setControlSignals() {
 }
 
 void SignalFactory::setMonitorSignals() {
-    auto stateType = new DataType(propertySuite->getName() + "_state_t");
-    for (const auto& state : propertySuite->getStates()) {
+    auto stateType = new DataType(propertyHelper->getName() + "_state_t");
+    for (const auto& state : propertyHelper->getStates()) {
         stateType->addEnumValue(state->getName());
     }
-    auto operationType = new DataType(propertySuite->getName() + "_operation_t");
-    for (const auto& operation : propertySuite->getOperationProperties()) {
+    auto operationType = new DataType(propertyHelper->getName() + "_operation_t");
+    for (const auto& operation : propertyHelper->getOperationProperties()) {
         operationType->addEnumValue(operation->getName());
     }
     monitorSignals.insert(new Variable("active_state", stateType));

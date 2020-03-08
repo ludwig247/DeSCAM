@@ -11,14 +11,15 @@
 
 #include "PluginFactory.h"
 #include "Utilities.h"
+#include "../Common/PropertySuiteHelper.h"
 
 namespace SCAM { namespace HLSPlugin { namespace HLS {
 
     class Optimizer {
 
     public:
-        explicit Optimizer(PropertySuite *propertySuite, Module* module);
-        ~Optimizer();
+        explicit Optimizer(PropertySuiteHelper *propertyHelper, Module* module);
+        ~Optimizer() = default;
 
         bool hasOutputReg(DataSignal* dataSignal) ;
         bool isConstant(Variable* variable) const;
@@ -32,7 +33,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
 
     private:
-        PropertySuite *propertySuite;
+        PropertySuiteHelper *propertyHelper;
         std::queue<std::vector<Assignment* >> originalCommitmentLists;
         Module* module;
 

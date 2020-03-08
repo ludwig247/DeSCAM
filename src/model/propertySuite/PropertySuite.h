@@ -24,6 +24,7 @@ namespace SCAM {
 
         // Constructor
         explicit PropertySuite(std::string name);
+        PropertySuite(PropertySuite const&) = default;
 
         // Name
         const std::string &getName() const;
@@ -61,9 +62,6 @@ namespace SCAM {
         // OperationProperties
         void addProperty(Property* property);
         const std::vector<Property*> &getProperties() const;
-
-        const std::vector<Property*> &getWaitProperties() const;
-        const std::vector<Property*> &getOperationProperties() const;
 
         // StateMap
         //std::set<PropertyMacro*> getPredecessorStates(PropertyMacro* state);

@@ -9,14 +9,19 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule(Module* module, const std::string &moduleName) {
+std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule(
+        Module* module,
+        const std::string &moduleName,
+        PropertySuiteHelper* propertySuiteHelper
+) {
     std::map<std::string, std::string> pluginOutput;
 
     this->moduleName = moduleName;
-    this->propertySuite = module->getPropertySuite();
+    this->propertySuiteHelper = propertySuiteHelper;
     this->currentModule = module;
-    hlsModule = std::make_unique<OperationModuleInterface>(propertySuite, currentModule);
-    signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, hlsModule.get(), false);
+
+    hlsModule = std::make_unique<OperationModuleInterface>(propertySuiteHelper, currentModule);
+    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, hlsModule.get(), false);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -26,7 +31,7 @@ std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule(Module*
 
 void VHDLWrapperMultiClkCycle::entity(std::stringstream &ss) {
     // Print Entity
-    ss << "entity " << propertySuite->getName() << "_module is\n";
+    ss << "entity " << propertySuiteHelper->getName() << "_module is\n";
     ss << "port(\n";
 
     auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
@@ -40,16 +45,16 @@ void VHDLWrapperMultiClkCycle::entity(std::stringstream &ss) {
     };
     printPortSignals(signalFactory->getInputs(), false);
     printPortSignals(signalFactory->getOutputs(), false);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
     }
-    for (const auto syncSignal : propertySuite->getSyncSignals()) {
+    for (const auto syncSignal : propertySuiteHelper->getSyncSignals()) {
         ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
     }
     printPortSignals(signalFactory->getControlSignals(), true);
 
     ss << "\n);\n";
-    ss << "end " + propertySuite->getName() << "_module;\n\n";
+    ss << "end " + propertySuiteHelper->getName() << "_module;\n\n";
 }
 
 // Print Signals
@@ -98,14 +103,14 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
 
     ss << "\n\t-- Output Register\n";
     printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false, false);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
     }
 
     ss << "\n\t-- Module Outputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
             Style::UL, "_out", true, true);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
     }
@@ -156,7 +161,7 @@ void VHDLWrapperMultiClkCycle::component(std::stringstream& ss) {
     printComponentVars(signalFactory->getInternalRegisterIn(), "in", false);
     printComponentVars(signalFactory->getInternalRegisterOut(), "out", true);
 
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
         ss << "\t\t" << notifySignal->getName() << "_ap_vld: out std_logic;\n";
     }
@@ -210,7 +215,7 @@ void VHDLWrapperMultiClkCycle::componentInst(std::stringstream& ss) {
     printComponentInstVars(signalFactory->getInternalRegisterIn(), "in_", false);
     printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_", true);
 
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
         ss << "\t\t" << notifySignal->getName() << "_ap_vld  => " << notifySignal->getName() << "_vld,\n";
     }
@@ -228,7 +233,7 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
        << "\t\tcase active_state is\n";
 
     std::set<std::string> waitStateNames;
-    for (auto waitState : propertySuite->getWaitProperties()) {
+    for (auto waitState : propertySuiteHelper->getWaitProperties()) {
         waitStateNames.insert(waitState->getName());
     }
 
@@ -244,31 +249,31 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
         }
     };
 
-    for (const auto& state : propertySuite->getStates()) {
+    for (const auto& state : propertySuiteHelper->getUniqueStates()) {
         bool noEndIf = false;
         bool skipAssumptions = false;
         ss << "\t\twhen st_" << state->getName() << " =>\n";
-        auto properties = propertySuite->getSuccessorProperties(state);
-        for (auto property = properties.begin(); property != properties.end(); ++property) {
-            if (property == properties.begin()) {
-                if (properties.size() == 1) {
+        auto operations = state->getOutgoingOperationsList();
+        for (auto operation = operations.begin(); operation != operations.end(); ++operation) {
+            if (operation == operations.begin()) {
+                if (operations.size() == 1) {
                     noEndIf = true;
                 } else {
                     ss << "\t\t\tif (";
                 }
-            } else if (std::next(property) == properties.end()) {
+            } else if (std::next(operation) == operations.end()) {
                 ss << "\t\t\telse\n";
                 skipAssumptions = true;
             } else {
                 ss << "\t\t\telsif (";
             }
             if (!skipAssumptions) {
-                printAssumptions((*property)->getAssumptionList());
+                printAssumptions((*operation)->getAssumptionsList());
                 ss << ") then \n";
             }
-            if (waitStateNames.find((*property)->getName()) == waitStateNames.end()) {
-                ss << "\t\t\t\tactive_operation <= op_" << (*property)->getName() << ";\n"
-                   << "\t\t\t\tnext_state <= st_" << (*property)->getNextState()->getName() << ";\n"
+            if (!(*operation)->IsWait()) {
+                ss << "\t\t\t\tactive_operation <= op_" << "blaa\n"//(*operation)->getName() << ";\n"
+                   << "\t\t\t\tnext_state <= st_" << (*operation)->getNextState()->getName() << ";\n"
                    << "\t\t\t\twait_state <= '0';\n";
             } else {
                 ss << "\t\t\t\twait_state <= '1';\n";
@@ -321,7 +326,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
         printOutputProcessRegs(internalRegs);
     }
 
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\tprocess(" << notifySignal->getName() << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (" << notifySignal->getName() << "_vld = '1') then\n"
@@ -359,7 +364,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
     ss << "\tprocess(rst, done_sig, idle_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+    for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
         std::string assignment = PrintResetNotify::toString(commitment->getStatement());
         if (!assignment.empty()) {
             ss << "\t\t\t" << assignment;
@@ -367,7 +372,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
     }
     ss << "\t\telse\n"
        << "\t\t\tif (done_sig = '1') then\n";
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_reg;\n";
     }
     ss << "\t\t\telsif (idle_sig = '1') then\n";
@@ -377,7 +382,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
         }
     }
     ss << "\t\t\telse\n";
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= '0';\n";
     }
     ss << "\t\t\tend if;\n"
@@ -415,7 +420,7 @@ void VHDLWrapperMultiClkCycle::controlProcess(std::stringstream& ss)
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
        << "\t\t\tstart_sig <= '0';\n"
-       << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getNextState()->getName() << ";\n"
+       << "\t\t\tactive_state <= st_" << propertySuiteHelper->getResetProperty()->getOperation()->getNextState()->getName() << ";\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
        << "\t\t\tif ((idle_sig = '1' or ready_sig = '1') and wait_state = '0') then\n"
        << "\t\t\t\tstart_sig <= '1';\n"
@@ -440,15 +445,15 @@ void VHDLWrapperMultiClkCycle::controlProcess(std::stringstream& ss)
        << "\t\t\tend if;\n"
        << "\t\tend if;\n"
        << "\tend process;\n\n"
-       << "end " << propertySuite->getName() << "_arch;\n";
+       << "end " << propertySuiteHelper->getName() << "_arch;\n";
 }
 
 std::string VHDLWrapperMultiClkCycle::operationEnum()
 {
     std::stringstream ss;
     ss << "\t-- Operations\n"
-               << "\ttype " << propertySuite->getName() << "_operation_t is (";
-    auto operations = propertySuite->getOperationProperties();
+       << "\ttype " << propertySuiteHelper->getName() << "_operation_t is (";
+    auto operations = propertySuiteHelper->getOperationProperties();
     for (auto operation = operations.begin(); operation != operations.end(); ++ operation) {
         ss << "op_" << (*operation)->getName();
         if (std::next(operation) != operations.end()) {

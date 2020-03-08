@@ -8,7 +8,7 @@
 
 using namespace SCAM::HLSPlugin::Script;
 
-SynthesisScripts::SynthesisScripts(std::shared_ptr<HLS::Optimizer> optimizer, HLS::HLSOption hlsOption) :
+SynthesisScripts::SynthesisScripts(std::shared_ptr<HLS::Optimizer> optimizer, HLSOption hlsOption) :
     propertySuite(nullptr),
     currentModule(nullptr),
     optimizer(std::move(optimizer)),
@@ -60,7 +60,7 @@ std::string SynthesisScripts::directivesScript() {
     ss << "config_schedule -effort high -relax_ii_for_timing=0 -verbose=0\n";
     ss << "config_bind -effort high\n";
 
-    if (hlsOption == HLS::HLSOption::OCCO) {
+    if (hlsOption == HLSOption::OCCO) {
         ss << "set_directive_latency -max=0 " << moduleName << "_operations\n";
         ss << setDirectiveInterfaceNone();
     } else {

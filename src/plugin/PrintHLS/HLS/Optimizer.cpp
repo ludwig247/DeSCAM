@@ -8,37 +8,26 @@
 #include "NodePeekVisitor.h"
 #include "Optimizer.h"
 #include "PrintArrayStatements.h"
+#include "../Common/PropertySuiteHelper.h"
+#include "../Common/PropertyHelper.h"
 
 using namespace SCAM::HLSPlugin::HLS;
 
-Optimizer::Optimizer(PropertySuite *propertySuite, Module* module) :
-    propertySuite(propertySuite),
+Optimizer::Optimizer(PropertySuiteHelper *propertyHelper, Module* module) :
+    propertyHelper(propertyHelper),
     module(module),
     registerToOutputMap(),
     outputToRegisterMap()
 {
-    // Save original commitment list
-    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
-        originalCommitmentLists.push(operationProperty->getCommitmentList());
-    }
-
     findVariables();
     findOutputs();
     findInputs();
-    findInternalRegisterIn();
     findInternalRegisterOut();
+    findInternalRegisterIn();
     removeRedundantConditions();
     mapOutputRegistersToOutput();
     replaceVariables();
     arraySlicing();
-}
-
-Optimizer::~Optimizer() {
-    // Load original commitment list
-    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
-        operationProperty->setCommitmentList(originalCommitmentLists.front());
-        originalCommitmentLists.pop();
-    }
 }
 
 bool Optimizer::hasOutputReg(DataSignal* dataSignal) {
@@ -125,16 +114,13 @@ void Optimizer::mapOutputRegistersToOutput() {
     auto compareAssignments = [this](DataSignal* output) -> std::set<Variable*> {
 
         auto getOutputReg = [this](Property* operationProperty, Expr* expr, std::set<Variable*> &vars) -> void {
-            for (const auto &commitment : operationProperty->getCommitmentList()) {
-                if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
-                    Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-                    if (NodePeekVisitor::nodePeekVariableOperand(assignment->getLhs())) {
-                        Variable* var = (dynamic_cast<VariableOperand*>(assignment->getLhs()))->getVariable();
-                        if (!(*expr==*assignment->getRhs())) {
-                            auto pos = vars.find(var);
-                            if (pos!=vars.end()) {
-                                vars.erase(pos);
-                            }
+            for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
+                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
+                    Variable* var = (dynamic_cast<VariableOperand*>(commitment->getLhs()))->getVariable();
+                    if (!(*expr == *commitment->getRhs())) {
+                        auto pos = vars.find(var);
+                        if (pos != vars.end()) {
+                            vars.erase(pos);
                         }
                     }
                 }
@@ -142,8 +128,8 @@ void Optimizer::mapOutputRegistersToOutput() {
         };
 
         auto candidates = variables;
-        for (const auto& operationProperty : propertySuite->getOperationProperties()) {
-            for (const auto &commitment : operationProperty->getCommitmentList()) {
+        for (const auto& operationProperty : propertyHelper->getOperationProperties()) {
+            for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (*(commitment->getLhs()) == *(commitment->getRhs())) {
                     continue;
                 }
@@ -221,9 +207,10 @@ void Optimizer::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &d
     for (const auto& subVar : subVarMap) {
         std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
 
-        for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& property : propertyHelper->getOperationProperties()) {
+            auto helper = (PropertyHelper *) property;
             std::vector<Assignment* > assignments;
-            for (const auto& commitment : property->getCommitmentList()) {
+            for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
                 // ignore self assignments
                 if (*commitment->getRhs() == *commitment->getLhs()) {
                     continue;
@@ -232,13 +219,13 @@ void Optimizer::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &d
                     auto dataSignal = dynamic_cast<DataSignalOperand*>(commitment->getLhs())->getDataSignal();
                     if (dataSignal == subVar.first) {
                         assignments.emplace_back(
-                                new SCAM::Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                                new Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
                         continue;
                     }
                 }
                 assignments.emplace_back(commitment);
             }
-            property->setCommitmentList(assignments);
+            helper->getOperationHelper()->setCommitmentsList(assignments);
         }
     }
 }
@@ -250,9 +237,10 @@ void Optimizer::replaceVariables() {
     for (const auto& subVar : subVarMap) {
         std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
 
-        for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& property : propertyHelper->getOperationProperties()) {
+            auto helper = (PropertyHelper *) property;
             std::vector<Assignment* > assignments;
-            for (const auto& commitment : property->getCommitmentList()) {
+            for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
                 // Remove if LHS == RHS
                 if (*(commitment->getLhs()) == *(commitment->getRhs())) {
                     continue;
@@ -262,7 +250,7 @@ void Optimizer::replaceVariables() {
                     auto dataSignal = dynamic_cast<VariableOperand*>(commitment->getLhs())->getVariable();
                     if (dataSignal == subVar.first) {
                         assignments.emplace_back(
-                                new SCAM::Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                                new Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
                         continue;
                     }
                 }
@@ -273,12 +261,13 @@ void Optimizer::replaceVariables() {
                 }
                 assignments.emplace_back(commitment);
             }
-            property->setCommitmentList(assignments);
+            helper->getOperationHelper()->setCommitmentsList(assignments);
         }
     }
 
     // Remove duplicate assignments
-    for (const auto& property : propertySuite->getOperationProperties()) {
+    for (const auto& property : propertyHelper->getOperationProperties()) {
+        auto helper = (PropertyHelper *) property;
         std::vector<Assignment* > assignments;
 
         auto equalAssignments = [&assignments](Assignment* commitment) -> bool {
@@ -290,15 +279,12 @@ void Optimizer::replaceVariables() {
             return false;
         };
 
-        for (const auto& commitment : property->getCommitmentList()) {
-            if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
-                Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-                if (!equalAssignments(assignment)) {
-                    assignments.push_back(assignment);
-                }
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
+            if (!equalAssignments(commitment)) {
+                assignments.push_back(commitment);
             }
         }
-        property->setCommitmentList(assignments);
+        helper->getOperationHelper()->setCommitmentsList(assignments);
     }
 }
 
@@ -351,31 +337,25 @@ std::multimap<Variable*, DataSignal*> Optimizer::getParentMap(const std::multima
 }
 
 void Optimizer::findOutputs() {
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        for (const auto& commitment : property->getCommitmentList()) {
-            if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
-                Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-                if (*assignment->getLhs()==*assignment->getRhs()) {
-                    continue;
-                }
-                const auto& out = ExprVisitor::getUsedDataSignals(assignment->getLhs());
-                outputs.insert(out.begin(), out.end());
+    for (const auto& property : propertyHelper->getOperationProperties()) {
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
             }
+            const auto& out = ExprVisitor::getUsedDataSignals(commitment->getLhs());
+            outputs.insert(out.begin(), out.end());
         }
     }
 }
 
 void Optimizer::findInputs() {
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        for (const auto& commitment : property->getCommitmentList()) {
-            if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
-                Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-                if (*assignment->getLhs()==*assignment->getRhs()) {
-                    continue;
-                }
-                const auto& in = ExprVisitor::getUsedDataSignals(assignment->getRhs());
-                inputs.insert(in.begin(), in.end());
+    for (const auto& property : propertyHelper->getOperationProperties()) {
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
+            if (*commitment->getLhs() == *commitment->getRhs()) {
+                continue;
             }
+            const auto& in = ExprVisitor::getUsedDataSignals(commitment->getRhs());
+            inputs.insert(in.begin(), in.end());
         }
     }
 }
@@ -392,15 +372,12 @@ void Optimizer::findVariables() {
     }
 
     auto eraseIfFunction = [this](Variable* var) {
-        for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-            for (const auto &commitment : operationProperties->getCommitmentList()) {
-                if (NodePeekVisitor::nodePeekAssignment(commitment->getStatement())) {
-                    Assignment* assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-                    if (NodePeekVisitor::nodePeekVariableOperand(assignment->getLhs())) {
-                        Variable* var2 = (dynamic_cast<VariableOperand*>(assignment->getLhs()))->getVariable();
-                        if (var->getFullName()==var2->getFullName()) {
-                            return false;
-                        }
+        for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+            for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
+                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
+                    Variable* var2 = (dynamic_cast<VariableOperand*>(commitment->getLhs()))->getVariable();
+                    if (var->getFullName()==var2->getFullName()) {
+                        return false;
                     }
                 }
             }
@@ -459,12 +436,10 @@ DataSignal* Optimizer::getCombinedDataSignal(const std::vector<DataSignal*> &dat
         combinedName = name1.substr(end - result + 1, result);
     }
 
-    auto copyDataType = *dataSignal.front()->getDataType();
-
     auto combinedDataSignal = new DataSignal(
             combinedName + "_sig",
-            &copyDataType,
-            dataSignal.front()->getInitialValue(),
+            dataSignal.front()->getDataType(),
+            nullptr,
             nullptr,
             dataSignal.front()->getPort());
     return combinedDataSignal;
@@ -472,8 +447,8 @@ DataSignal* Optimizer::getCombinedDataSignal(const std::vector<DataSignal*> &dat
 
 void Optimizer::findInternalRegisterIn()
 {
-    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-        for (const auto &commitment : operationProperties->getCommitmentList()) {
+    for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -495,8 +470,8 @@ void Optimizer::findInternalRegisterIn()
 
 void Optimizer::findInternalRegisterOut()
 {
-    for (const auto operationProperties : propertySuite->getOperationProperties()) {
-        for (const auto commitment : operationProperties->getCommitmentList()) {
+    for (const auto operationProperties : propertyHelper->getOperationProperties()) {
+        for (const auto commitment : operationProperties->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -516,8 +491,8 @@ void Optimizer::arraySlicing() {
 
     for (const auto &port : ports) {
         std::list<Expr *> expressions;
-        for (const auto &operationProperty: propertySuite->getOperationProperties()) {
-            for (const auto &commitment :  operationProperty->getCommitmentList()) {
+        for (const auto &operationProperty: propertyHelper->getOperationProperties()) {
+            for (const auto &commitment :  operationProperty->getOperation()->getCommitmentsList()) {
                 const auto foundExpressions = PrintArrayStatements::getArrayExprs(commitment->getRhs(), port);
                 for (const auto &foundExpression : foundExpressions) {
                     bool alreadyFound = false;

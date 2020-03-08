@@ -24,7 +24,7 @@ namespace SCAM {
         // Getter
         bool IsReset();
 
-        bool IsWait();
+        bool IsWait() const;
 
         const std::vector<SCAM::Stmt *> &getStatementsList() const;
 

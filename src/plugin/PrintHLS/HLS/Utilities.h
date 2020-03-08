@@ -8,27 +8,9 @@
 #include <set>
 #include <string>
 
+#include "Constants.h"
+
 namespace SCAM { namespace HLSPlugin { namespace HLS {
-
-    enum class HLSOption {
-        OCCO,   // One Clock Cycle Operations
-        MCCO    // Multi Clock Cycle Operations
-    };
-
-    enum class Side {
-        UNKNOWN,
-        LHS,
-        RHS
-    };
-
-    enum class StmtType {
-        UNKNOWN, ARITHMETIC, RELATIONAL, LOGICAL, BITWISE, VARIABLE_OPERAND, DATA_SIGNAL_OPERAND, ENUM_VALUE,
-        UNARY_EXPR, INTEGER_VALUE, UNSIGNED_VALUE, ARRAY_OPERAND, PARAM_OPERAND, ASSIGNMENT
-    };
-
-    enum class SubTypeBitwise {
-        UNKNOWN, BITWISE_AND, BITWISE_OR, BITWISE_XOR, LEFT_SHIFT, RIGHT_SHIFT
-    };
 
     class Utilities {
 

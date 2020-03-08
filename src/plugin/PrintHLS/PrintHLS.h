@@ -7,7 +7,7 @@
 
 #include <map>
 
-#include "HLS/Utilities.h"
+#include "Common/Constants.h"
 #include "PluginFactory.h"
 
 class PrintHLS : public PluginFactory {
@@ -18,9 +18,9 @@ public:
     std::map<std::string, std::string> printModel(Model* model) override;
 
 private:
-    using hlsOptionEnum = SCAM::HLSPlugin::HLS::HLSOption;
+    using hlsOptionEnum = SCAM::HLSPlugin::HLSOption;
 
-    SCAM::HLSPlugin::HLS::HLSOption hlsOption = hlsOptionEnum::MCCO;;
+    SCAM::HLSPlugin::HLSOption hlsOption = hlsOptionEnum::MCCO;;
 };
 
 

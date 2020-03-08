@@ -56,8 +56,6 @@ namespace SCAM {
 
         const Operation * getOperation() const;
 
-
-
     private:
 
         const std::string name;

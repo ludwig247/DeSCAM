@@ -8,13 +8,14 @@
 #include <list>
 #include <set>
 
-#include <PluginFactory.h>
+#include "../Common/PropertySuiteHelper.h"
+#include "PluginFactory.h"
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
         class OperationModuleInterface {
         public:
-            explicit OperationModuleInterface(PropertySuite *propertySuite, Module *module);
+            explicit OperationModuleInterface(PropertySuiteHelper *propertyHelper, Module *module);
 
             ~OperationModuleInterface() = default;
 
@@ -36,7 +37,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
             inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
 
         private:
-            PropertySuite *propertySuite;
+            PropertySuiteHelper *propertyHelper;
             Module *module;
 
             std::set<DataSignal *> moduleOutputs;

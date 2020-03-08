@@ -9,6 +9,7 @@
 #include <string>
 
 #include "OperationModuleInterface.h"
+#include "../Common/PropertySuiteHelper.h"
 #include "PluginFactory.h"
 #include "SignalFactory.h"
 
@@ -19,10 +20,14 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 VHDLWrapper();
                 ~VHDLWrapper() = default;
 
-                virtual std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName) = 0;
+                virtual std::map<std::string, std::string> printModule(
+                        Module* module,
+                        const std::string &moduleName,
+                        PropertySuiteHelper* property_suite_helper
+                ) = 0 ;
 
             protected:
-                PropertySuite* propertySuite;
+                PropertySuiteHelper* propertySuiteHelper;
                 Module* currentModule;
                 std::string moduleName;
                 std::unique_ptr<OperationModuleInterface> hlsModule;

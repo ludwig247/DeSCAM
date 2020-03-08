@@ -9,7 +9,7 @@
 #include <sstream>
 
 #include "../HLS/Optimizer.h"
-#include "../HLS/Utilities.h"
+#include "Constants.h"
 #include "PluginFactory.h"
 
 namespace SCAM { namespace HLSPlugin { namespace Script {
@@ -17,7 +17,7 @@ namespace SCAM { namespace HLSPlugin { namespace Script {
             class SynthesisScripts {
 
             public:
-                explicit SynthesisScripts(std::shared_ptr<HLS::Optimizer> opt, HLS::HLSOption hlsOption);
+                explicit SynthesisScripts(std::shared_ptr<HLS::Optimizer> opt, HLSOption hlsOption);
 
                 ~SynthesisScripts() = default;
 
@@ -28,7 +28,7 @@ namespace SCAM { namespace HLSPlugin { namespace Script {
                 SCAM::Module *currentModule;
                 std::string moduleName;
                 std::shared_ptr<HLS::Optimizer> optimizer;
-                HLS::HLSOption hlsOption;
+                HLSOption hlsOption;
 
                 std::string synthesisScript();
                 std::string directivesScript();

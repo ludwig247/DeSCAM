@@ -10,7 +10,7 @@
 
 using namespace SCAM::HLSPlugin::HLS;
 
-PrintBitOperations::PrintBitOperations(Stmt *stmt, HLS::HLSOption hlsOption)
+PrintBitOperations::PrintBitOperations(Stmt *stmt, HLSOption hlsOption)
 {
     this->actualNode = std::make_shared<Node>();
     this->hlsOption = hlsOption;
@@ -337,7 +337,7 @@ bool PrintBitOperations::getRange(uint32_t number, uint32_t &firstBit, uint32_t 
     return !((firstBit == -1) || (lastBit == -1));
 }
 
-BitConcatenation::BitConcatenation(Bitwise* node, HLS::HLSOption hlsOption) :
+BitConcatenation::BitConcatenation(Bitwise* node, HLSOption hlsOption) :
     bitwiseNode(node),
     constValue(0),
     hlsOption(hlsOption)

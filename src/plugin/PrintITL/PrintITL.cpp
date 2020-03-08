@@ -15,7 +15,7 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     std::function<std::string()> macro_function;
 
     if (getOptionMap().at("hls-occo") || getOptionMap().at("hls-mcco")) {
-        macro_function = std::bind(&PrintITL::hls_macros, this);
+        macro_function = std::bind(&PrintITL::macros, this);
     } else {
         macro_function = std::bind(&PrintITL::macros, this);
     }

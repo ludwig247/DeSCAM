@@ -3,6 +3,8 @@ add_library(HLS
             PrintBitOperations.cpp
             Optimizer.cpp
             PrintArrayStatements.cpp
-        PrintStatement.cpp
+            PrintStatement.cpp
             PrintReset.cpp
             Utilities.cpp)
+
+target_compile_options(HLS PRIVATE -fPIC -O2 )

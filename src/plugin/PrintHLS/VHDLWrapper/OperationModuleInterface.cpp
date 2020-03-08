@@ -11,8 +11,8 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-OperationModuleInterface::OperationModuleInterface(PropertySuite *propertySuite, Module* module) :
-        propertySuite(propertySuite),
+OperationModuleInterface::OperationModuleInterface(PropertySuiteHelper *propertyHelper, Module* module) :
+        propertyHelper(propertyHelper),
         module(module),
         registerToOutputMap()
 {
@@ -142,8 +142,8 @@ void OperationModuleInterface::mapOutputRegistersToOutput() {
     // we can map Variable -> DataSignal
     auto compareAssignments = [this](DataSignal* output) -> std::set<Variable*> {
 
-        auto getOutputReg = [this](OperationProperty* operationProperty, Expr* expr, std::set<Variable*> &vars) -> void {
-            for (const auto &commitment : operationProperty->getCommitmentList()) {
+        auto getOutputReg = [this](Property* operationProperty, Expr* expr, std::set<Variable*> &vars) -> void {
+            for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
                     Variable *var = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
                     if (!(*expr == *commitment->getRhs())) {
@@ -157,8 +157,8 @@ void OperationModuleInterface::mapOutputRegistersToOutput() {
         };
 
         auto candidates = getVariables();
-        for (const auto& operationProperty : propertySuite->getOperationProperties()) {
-            for (const auto &commitment : operationProperty->getCommitmentList()) {
+        for (const auto& operationProperty : propertyHelper->getOperationProperties()) {
+            for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (*(commitment->getLhs()) == *(commitment->getRhs())) {
                     continue;
                 }
@@ -184,7 +184,6 @@ void OperationModuleInterface::mapOutputRegistersToOutput() {
     }
 
     const auto& parentMap = getParentMap(registerToOutput);
-    registerToOutput.clear();
 
     std::cout << "Map Output Registers to Outputs:" << std::endl;
     for (const auto& parent : parentMap) {
@@ -238,8 +237,8 @@ std::multimap<Variable*, DataSignal*> OperationModuleInterface::getParentMap(con
 
 std::set<DataSignal *> OperationModuleInterface::getOutputs() {
     std::set<DataSignal *> outputSet;
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        for (const auto& commitment : property->getCommitmentList()) {
+    for (const auto& property : propertyHelper->getOperationProperties()) {
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -262,8 +261,8 @@ std::set<DataSignal *> OperationModuleInterface::getOutputs() {
 
 std::set<DataSignal *> OperationModuleInterface::getInputs() {
     std::set<DataSignal *> inputSet;
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        for (const auto& commitment : property->getCommitmentList()) {
+    for (const auto& property : propertyHelper->getOperationProperties()) {
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -307,8 +306,8 @@ std::set<Variable *> OperationModuleInterface::getVariables() {
 
     // TODO: Not needed, if variableMap contains no unused variables anymore
     auto eraseIfFunction = [this](Variable* var) {
-        for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-            for (const auto &commitment : operationProperties->getCommitmentList()) {
+        for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+            for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
                     Variable* var2 = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
                     if (var->getFullName() == var2->getFullName()) {
@@ -376,9 +375,9 @@ DataSignal* OperationModuleInterface::getCombinedDataSignal(const std::vector<Da
 
 void OperationModuleInterface::mapInputRegistersToInputs() {
     std::set<DataSignal* > inputs;
-    for (const auto& property : propertySuite->getOperationProperties()) {
+    for (const auto& property : propertyHelper->getOperationProperties()) {
         std::set<DataSignal *> dataSignals;
-        for (const auto& commitment : property->getCommitmentList()) {
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -390,7 +389,7 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
         inputs.insert(dataSignals.begin(), dataSignals.end());
     }
 
-    std::map<DataType *, std::vector<DataSignal *> > typeToDataSignalMap;
+    std::map<const DataType *, std::vector<DataSignal *> > typeToDataSignalMap;
     for (const auto& input : inputs) {
         if (typeToDataSignalMap.find(input->getDataType()) != typeToDataSignalMap.end()) {
             typeToDataSignalMap.at(input->getDataType()).push_back(input);
@@ -410,8 +409,8 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
         return false;
     };
 
-    auto isInProperty = [this, &isInAssignment](DataSignal* dataSignal, OperationProperty* property) -> bool {
-        for (const auto& commitment : property->getCommitmentList()) {
+    auto isInProperty = [this, &isInAssignment](DataSignal* dataSignal, Property* property) -> bool {
+        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
             if (isInAssignment(commitment->getRhs(), dataSignal)) {
                 return true;
             }
@@ -423,7 +422,7 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
         std::vector<DataSignal *> candidates = type.second;
         for (const auto& candidate : candidates) {
             std::set<DataSignal *> partnerSet = {candidates.begin(), candidates.end()};
-            for (const auto& property : propertySuite->getOperationProperties()) {
+            for (const auto& property : propertyHelper->getOperationProperties()) {
                 bool isIn = isInProperty(candidate, property);
 //                std::cout << candidate->getFullName() << (isIn ? " is in " : " is not in ") << property->getName() << std::endl;
                 if (isIn) {
@@ -447,8 +446,8 @@ void OperationModuleInterface::mapInputRegistersToInputs() {
 
 std::set<Variable *> OperationModuleInterface::getInternalRegisterIn() {
     std::set<Variable *> varsIn;
-    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-        for (const auto &commitment : operationProperties->getCommitmentList()) {
+    for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -473,8 +472,8 @@ std::set<Variable *> OperationModuleInterface::getInternalRegisterIn() {
 
 std::set<Variable *> OperationModuleInterface::getInternalRegisterOut() {
     std::set<Variable *> vars;
-    for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-        for (const auto &commitment : operationProperties->getCommitmentList()) {
+    for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+        for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
             }
@@ -518,8 +517,8 @@ void OperationModuleInterface::arraySlicing() {
 
     for (const auto &port : ports) {
         std::list<Expr *> expressions;
-        for (const auto &operationProperty: propertySuite->getOperationProperties()) {
-            for (const auto &commitment :  operationProperty->getCommitmentList()) {
+        for (const auto &operationProperty: propertyHelper->getOperationProperties()) {
+            for (const auto &commitment :  operationProperty->getOperation()->getCommitmentsList()) {
                 const auto arrayOperands = ExprVisitor::getUsedArrayOperands(commitment->getRhs());
                 for (const auto &arrayOperand : arrayOperands) {
                     bool alreadyFound = false;

@@ -11,7 +11,7 @@
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
 VHDLWrapper::VHDLWrapper() :
-        propertySuite(nullptr),
+        propertySuiteHelper(nullptr),
         currentModule(nullptr),
         hlsModule(nullptr),
         signalFactory(nullptr)
@@ -30,8 +30,8 @@ std::string VHDLWrapper::printTypes() {
 
     // State enumeration
     typeStream << "\t -- States\n"
-               << "\ttype " + propertySuite->getName() << "_state_t is (";
-    auto states = propertySuite->getStates();
+               << "\ttype " + propertySuiteHelper->getName() << "_state_t is (";
+    auto states = propertySuiteHelper->getStates();
     for (auto state = states.begin(); state != states.end(); ++state) {
         typeStream << "st_" << (*state)->getName();
         if (std::next(state) != states.end()) {
@@ -57,10 +57,10 @@ std::string VHDLWrapper::printTypes() {
         }
     };
 
-    for (const auto& reg : propertySuite->getVisibleRegisters()) {
+    for (const auto& reg : propertySuiteHelper->getVisibleRegisters()) {
         fillTypeSets(reg->getDataType());
     }
-    for (const auto& func : propertySuite->getFunctions()) {
+    for (const auto& func : propertySuiteHelper->getFunctions()) {
         fillTypeSets(func->getReturnType());
     }
     for (auto &port : currentModule->getPorts()) {
@@ -133,7 +133,7 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
 
 void VHDLWrapper::functions(std::stringstream &ss) {
     std::set<Function* > usedFunctions;
-    for (const auto& property : propertySuite->getProperties()) {
+    for (const auto& property : propertySuiteHelper->getProperties()) {
         for (const auto& assumption : property->getAssumptionList()) {
             if (assumption->isAt()) {
                 const auto& funcSet = ExprVisitor::getUsedFunction(assumption->getTimepointList().front());
@@ -212,7 +212,7 @@ std::string VHDLWrapper::printArchitecture() {
 
     entity(ss);
 
-    ss << "architecture " << propertySuite->getName() << "_arch of " << propertySuite->getName() << "_module is\n";
+    ss << "architecture " << propertySuiteHelper->getName() << "_arch of " << propertySuiteHelper->getName() << "_module is\n";
 
     signals(ss);
     functions(ss);
@@ -236,7 +236,7 @@ std::string VHDLWrapper::sensitivityList() {
     std::set<DataSignal* > sensListDataSignals;
     std::set<Variable* > sensListVars;
 
-    const auto& operationProperties = propertySuite->getProperties();
+    const auto& operationProperties = propertySuiteHelper->getProperties();
     for (auto operationProperty : operationProperties) {
         for (const auto& assumption : operationProperty->getAssumptionList()) {
             if(assumption->isAt()) {
@@ -273,7 +273,7 @@ std::string VHDLWrapper::sensitivityList() {
 
 std::string VHDLWrapper::getResetValue(Variable* variable)
 {
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+    for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
         auto printResetValue = PrintResetSignal(commitment->getStatement(), variable->getName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
@@ -284,7 +284,7 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
 
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 {
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+    for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
         auto printResetValue = PrintResetSignal(commitment->getStatement(), dataSignal->getFullName());
         if (printResetValue.toString()) {
             return printResetValue.getString();
