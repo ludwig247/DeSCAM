@@ -5,7 +5,7 @@ project(wrapper CXX)
 add_subdirectory(pybind)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-pybind11_add_module(wrapper MODULE wrappercode.cpp)
+pybind11_add_module(wrapper MODULE descamCheck.cpp)
 target_compile_options(wrapper PRIVATE -fPIC -O2 )
 target_link_libraries(wrapper PRIVATE parser)
 

@@ -1,33 +1,19 @@
-import argparse, wrapper as m
-
-MyClass = m.main
+import argparse, wrapper as pyModule
 
 parser = argparse.ArgumentParser(prog="RUN DESCAM", description='Link input files to DESCAM.')
-parser.add_argument("exec", nargs='?', help='address to exec')
-parser.add_argument("-f", "--file", nargs='+', help='source file')
-parser.add_argument("-PrintITL", help="Complete set of properties in ITL", action="store_true")
+parser.add_argument("FILE", nargs='+', help='SystemC-PPA file dir')
 
 args = parser.parse_args()
+parserList = list()
 
-if args.exec:
-    parserList = list(args.exec)
-else:
-    parserList = None
-
-if args.file:
+if args.FILE:
     parserList.append("--file")
-    for x in args.file:
-        parserList.append(x)
-    if args.PrintITL:
-        parserList.append("-PrintITL")
+    for x in args.FILE:
+        parserList.append(str(x))
 
-if parserList == None:
-    val = list(input("Parse Arguments: ").split())
-    m.main(val)
+if parserList is None:
+    print("{'No file was given, please give at least one file dir as an argument!'}")
 
 else:
-    m.main(parserList)
-
-# print(MyClass.getSourceFile)
-# MyClass.getSourceFile()
+    pyModule.descamCheck(parserList)
 
