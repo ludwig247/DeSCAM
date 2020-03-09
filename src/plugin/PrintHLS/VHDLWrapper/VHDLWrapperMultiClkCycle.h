@@ -8,7 +8,6 @@
 #include <memory>
 #include <string>
 
-#include "OperationModuleInterface.h"
 #include "PluginFactory.h"
 #include "SignalFactory.h"
 #include "VHDLWrapper.h"
@@ -18,14 +17,9 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
         class VHDLWrapperMultiClkCycle : public VHDLWrapper {
 
         public:
-            VHDLWrapperMultiClkCycle() = default;
             ~VHDLWrapperMultiClkCycle() = default;
 
-            std::map<std::string, std::string> printModule(
-                    Module* module,
-                    const std::string &moduleName,
-                    PropertySuiteHelper* property_suite_helper
-            ) override ;
+            std::map<std::string, std::string> printModule() override ;
 
         private:
             std::string operationEnum() override ;

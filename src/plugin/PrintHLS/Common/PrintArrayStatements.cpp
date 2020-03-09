@@ -4,7 +4,7 @@
 
 #include "PrintArrayStatements.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace SCAM::HLSPlugin;
 
 PrintArrayStatements::PrintArrayStatements(Expr *expr, Port* port) :
     port(port)

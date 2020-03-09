@@ -9,24 +9,25 @@ using namespace SCAM::HLSPlugin::HLS;
 
 PrintStatement::PrintStatement(
         Stmt *stmt,
-        Optimizer *opt,
+        std::shared_ptr<OptimizerHLS>& opt,
         HLSOption hlsOption,
         unsigned int indentSize,
         unsigned int indentOffset
 ) {
     this->side = Side::UNKNOWN;
-    this->opt = opt;
+    this->optimizer = opt;
     this->hlsOption = hlsOption;
     this->createString(stmt, indentSize, indentOffset);
 }
 
 std::string PrintStatement::toString(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    PrintStatement printer(stmt, nullptr, HLSOption::MCCO, indentSize, indentOffset);
+    std::shared_ptr<OptimizerHLS> optimizerNullPtr;
+    PrintStatement printer(stmt, optimizerNullPtr, HLSOption::MCCO, indentSize, indentOffset);
     return printer.getString();
 }
 
-std::string PrintStatement::toString(Stmt *stmt, Optimizer *opt, HLSOption hlsOption, unsigned int indentSize, unsigned int indentOffset) {
-    PrintStatement printer(stmt, opt, hlsOption, indentSize, indentOffset);
+std::string PrintStatement::toString(Stmt *stmt, std::shared_ptr<OptimizerHLS>& optimizer, HLSOption hlsOption, unsigned int indentSize, unsigned int indentOffset) {
+    PrintStatement printer(stmt, optimizer, hlsOption, indentSize, indentOffset);
     return printer.getString();
 }
 
@@ -49,8 +50,8 @@ void PrintStatement::visit(Assignment &node) {
 
 void PrintStatement::visit(VariableOperand &node) {
     bool isConstant = false;
-    if (opt) {
-        isConstant = opt->isConstant(node.getVariable());
+    if (optimizer) {
+        isConstant = optimizer->isConstant(node.getVariable());
     }
 
     std::string suffix;
@@ -59,7 +60,7 @@ void PrintStatement::visit(VariableOperand &node) {
     }
 
     if (!isConstant && hlsOption == HLSOption::MCCO) {
-        if (opt) {
+        if (optimizer) {
             if(side == Side::LHS) {
                 this->ss << "out_";
             } else if (side == Side::RHS) {
@@ -91,8 +92,8 @@ void PrintStatement::visit(DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         this->ss << node.getDataSignal()->getParent()->getName() << suffix;
         if (node.getDataSignal()->getParent()->isArrayType()) {
-            if (opt) {
-                const auto arrayPorts = opt->getArrayPorts();
+            if (optimizer) {
+                const auto arrayPorts = optimizer->getArrayPorts();
                 for (const auto &arrayPort : arrayPorts) {
                     if (arrayPort.first->getDataSignal()->getName() == node.getDataSignal()->getParent()->getName()) {
                         uint32_t pos = 0;
@@ -238,8 +239,8 @@ void PrintStatement::visit(FunctionOperand &node) {
 }
 
 void PrintStatement::visit(ArrayOperand &node) {
-    if (opt) {
-        const auto arrayPorts = opt->getArrayPorts();
+    if (optimizer) {
+        const auto arrayPorts = optimizer->getArrayPorts();
         for (const auto &arrayPort : arrayPorts) {
             if (arrayPort.first->getDataSignal()->getName() == node.getArrayOperand()->getOperandName()) {
                 uint32_t pos = 0;
@@ -261,11 +262,11 @@ void PrintStatement::visit(ArrayOperand &node) {
 }
 
 void PrintStatement::visit(Bitwise &node) {
-    auto bitConcatenation = std::make_unique<BitConcatenation>(&node, hlsOption);
+    auto bitConcatenation = std::make_unique<BitConcatenation>(&node, hlsOption, optimizer);
     if (bitConcatenation->isBitConcatenationOp()) {
         this->ss << bitConcatenation->getOpAsString();
     } else {
-        auto bitSlicing = std::make_unique<PrintBitOperations>(&node, hlsOption);
+        auto bitSlicing = std::make_unique<PrintBitOperations>(&node, hlsOption, optimizer);
         if (bitSlicing->isSlicingOp()) {
             this->ss << bitSlicing->getOpAsString();
         } else {

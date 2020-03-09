@@ -3,6 +3,7 @@
 //
 
 #include "PrintHLS.h"
+#include "OptimizerHLS.h"
 #include "HLS/HLS.h"
 #include "SynthesisScript/SynthesisScripts.h"
 #include "VHDLWrapper/VHDLWrapperOneClkCycle.h"
@@ -29,22 +30,23 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
         moduleNames << moduleName << "\n";
 
         auto propertySuiteHelper = std::make_shared<PropertySuiteHelper>(*module.second->getPropertySuite());
+        auto optimizer = std::make_shared<OptimizerHLS>(propertySuiteHelper, module.second);
 
         if (hlsOption == HLSOption::OCCO) {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperOneClkCycle>();
-            auto vhdlWrapperModel = vhdlWrapper->printModule(currentModule, moduleName, propertySuiteHelper.get());
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperOneClkCycle>(currentModule, moduleName, propertySuiteHelper, optimizer);
+            auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         } else {
             auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMultiClkCycle>();
-            auto vhdlWrapperModel = vhdlWrapper->printModule(currentModule, moduleName, propertySuiteHelper.get());
+            auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         }
 
-        auto hls = std::make_unique<HLS::HLS>(hlsOption);
-        auto hlsModel = hls->printModule(currentModule, moduleName, propertySuiteHelper.get());
+        auto hls = std::make_unique<HLS::HLS>(hlsOption, currentModule, moduleName, propertySuiteHelper, optimizer);
+        auto hlsModel = hls->printModule();
         pluginOutput.insert(hlsModel.begin(), hlsModel.end());
 
-        auto synthesisScript = std::make_unique<Script::SynthesisScripts>(hls->getOptimizer(), hlsOption);
+        auto synthesisScript = std::make_unique<Script::SynthesisScripts>(optimizer, hlsOption);
         auto script = synthesisScript->printModule(currentModule, moduleName);
         pluginOutput.insert(script.begin(), script.end());
     }

@@ -11,7 +11,6 @@ using namespace SCAM::HLSPlugin;
 PropertySuiteHelper::PropertySuiteHelper(PropertySuite const& propertySuite) :
     PropertySuite(propertySuite)
 {
-    addUniqueState();
     addOperationProperties();
     addWaitProperties();
 }
@@ -24,11 +23,6 @@ std::vector<SCAM::Property*> PropertySuiteHelper::getWaitProperties() const
 std::vector<SCAM::Property*> PropertySuiteHelper::getOperationProperties() const
 {
     return operationProperties;
-}
-
-std::set<SCAM::State *> PropertySuiteHelper::getUniqueStates() const
-{
-    return uniqueStates;
 }
 
 void PropertySuiteHelper::addOperationProperties() {
@@ -44,12 +38,6 @@ void PropertySuiteHelper::addWaitProperties() {
         if (property->getOperation()->IsWait()) {
             waitProperties.push_back(property);
         }
-    }
-}
-
-void PropertySuiteHelper::addUniqueState() {
-    for (const auto &property : getProperties()) {
-        uniqueStates.insert(property->getOperation()->getState());
     }
 }
 

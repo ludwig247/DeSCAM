@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "Constants.h"
+#include "OptimizerHLS.h"
 #include "PrintStmt.h"
 #include "Utilities.h"
 
@@ -26,7 +27,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         class PrintBitOperations : public StmtAbstractVisitor {
 
         public:
-            PrintBitOperations(Stmt *stmt, HLSOption hlsOption);
+            PrintBitOperations(Stmt *stmt, HLSOption hlsOption, std::shared_ptr<OptimizerHLS>& optimizer);
 
             bool isSlicingOp();
             std::string getOpAsString();
@@ -36,6 +37,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
             std::shared_ptr<Node> actualNode;
             uint32_t rangeValue;
             HLSOption hlsOption;
+            std::shared_ptr<OptimizerHLS> optimizer;
 
             bool slicing(Node *node);
             bool sliceWithShift(Node *node);
@@ -83,7 +85,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         class BitConcatenation {
 
         public:
-            explicit BitConcatenation(Bitwise *node, HLSOption hlsOption);
+            explicit BitConcatenation(Bitwise *node, HLSOption hlsOption, std::shared_ptr<OptimizerHLS>& optimizer);
 
             bool isBitConcatenationOp();
             std::string getOpAsString();
@@ -96,6 +98,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
             uint32_t constValue;
             std::string opAsString;
             HLSOption hlsOption;
+            std::shared_ptr<OptimizerHLS> optimizer;
 
             uint32_t getConstValue(Expr *node);
             bool evaluateOps(Bitwise *node);

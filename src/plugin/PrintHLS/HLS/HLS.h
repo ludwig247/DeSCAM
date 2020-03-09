@@ -11,7 +11,7 @@
 #include <PluginFactory.h>
 
 #include "Model.h"
-#include "Optimizer.h"
+#include "OptimizerHLS.h"
 #include "PrintStatement.h"
 #include "PrintReset.h"
 #include "Utilities.h"
@@ -20,26 +20,25 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
 
         class HLS : public AbstractVisitor {
         public:
-            explicit HLS(HLSOption hlsOption);
-            ~HLS() override = default;
-
-            std::map<std::string, std::string> printModule(
+            HLS(
+                    HLSOption hlsOption,
                     Module* module,
                     const std::string &moduleName,
-                    PropertySuiteHelper* propertySuiteHelper
+                    std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+                    std::shared_ptr<OptimizerHLS>& optimizer
             );
+            ~HLS() override = default;
 
-            inline std::shared_ptr<Optimizer> getOptimizer();
+            std::map<std::string, std::string> printModule();
 
         private:
             std::stringstream ss;
 
-            std::string moduleName;
-            PropertySuiteHelper* propertySuiteHelper;
-            Module* currentModule;
-
-            std::shared_ptr<Optimizer> opt;
             HLSOption hlsOption;
+            std::string moduleName;
+            Module* currentModule;
+            std::shared_ptr<OptimizerHLS> optimizer;
+            std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
 
             void dataTypes();
             void functions();
@@ -72,7 +71,6 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             void visit(Timepoint& node) override {};
         };
 
-        // Template Function
         template<typename T>
         boost::optional<std::string> HLS::getResetValue(T* signal)
         {
@@ -84,12 +82,6 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             }
             return boost::none;
         }
-
-        // Inline Function
-        std::shared_ptr<Optimizer> HLS::getOptimizer() {
-            return opt;
-        }
-
 }}}
 
 #endif //SCAM_MAIN_HLS_H

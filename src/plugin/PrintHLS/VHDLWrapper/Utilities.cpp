@@ -72,7 +72,7 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
     }
 }
 
-SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
+SCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
     if (name == "&") {
         return SubTypeBitwise::BITWISE_AND;
     } else if (name == "|") {

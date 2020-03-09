@@ -6,7 +6,7 @@ add_library(VHDLWrapper
             PrintStatement.cpp
             PrintReset.cpp
             PrintBitOperations.cpp
-            OperationModuleInterface.cpp
+            #OperationModuleInterface.cpp
             SignalFactory.cpp
 )
 

@@ -11,7 +11,7 @@
 #include "Stmts_all.h"
 #include "StmtAbstractVisitor.h"
 
-namespace SCAM { namespace HLSPlugin { namespace HLS {
+namespace SCAM { namespace HLSPlugin {
 
     class PrintArrayStatements : public StmtAbstractVisitor {
     public:
@@ -58,6 +58,6 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         void visit(TimePointOperand &node) override {}
     };
 
-}}}
+}}
 
 #endif //DESCAM_PRINTARRAYSTATEMENTS_H

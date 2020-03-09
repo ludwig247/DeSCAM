@@ -5,7 +5,9 @@
 #ifndef SCAM_PRINTCOMMITMENTSHLS_H
 #define SCAM_PRINTCOMMITMENTSHLS_H
 
-#include "Optimizer.h"
+#include <memory>
+
+#include "OptimizerHLS.h"
 #include "PrintBitOperations.h"
 #include "PrintStmt.h"
 #include "Utilities.h"
@@ -17,7 +19,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
     public:
         explicit PrintStatement(
                 SCAM::Stmt *stmt,
-                Optimizer *opt,
+                std::shared_ptr<OptimizerHLS>& optimizer,
                 HLSOption hlsOption,
                 unsigned int indentSize = 2,
                 unsigned int indentOffset = 0
@@ -31,7 +33,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
 
         static std::string toString(
                 Stmt *stmt,
-                Optimizer *opt,
+                std::shared_ptr<OptimizerHLS>& opt,
                 HLSOption hlsOption,
                 unsigned int indentSize = 2,
                 unsigned int indentOffset = 0
@@ -56,7 +58,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         void visit(VariableOperand &node) override ;
 
     private:
-        Optimizer *opt;
+        std::shared_ptr<OptimizerHLS> optimizer;
         Side side;
         HLSOption hlsOption;
 

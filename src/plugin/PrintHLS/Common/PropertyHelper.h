@@ -6,14 +6,13 @@
 #define DESCAM_PROPERTYHELPER_H
 
 #include "Property.h"
-#include "OperationHelper.h"
 
 namespace SCAM { namespace HLSPlugin {
 
 class PropertyHelper : public Property {
 
 public:
-    OperationHelper* getOperationHelper() const;
+    void modifyCommitmentsList(std::vector<Assignment* >&& assignments);
 
 private:
 

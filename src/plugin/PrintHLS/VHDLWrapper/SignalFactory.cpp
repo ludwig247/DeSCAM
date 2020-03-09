@@ -20,11 +20,16 @@ const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNAL
         {"rst", "bool", "in"}
 };
 
-SignalFactory::SignalFactory(PropertySuiteHelper* propertyHelper, Module* module, OperationModuleInterface* hlsModule, bool useWaitState) :
-    propertyHelper(propertyHelper),
-    module(module),
-    hlsModule(hlsModule),
-    useWaitOp(useWaitState)
+SignalFactory::SignalFactory(
+        std::shared_ptr<PropertySuiteHelper>& propertyHelper,
+        Module* module,
+        std::shared_ptr<OptimizerHLS>& optimizer,
+        bool useWaitState
+) :
+        propertySuiteHelper(propertyHelper),
+        module(module),
+        optimizer(optimizer),
+        useWaitOp(useWaitState)
 {
     setOperationSelector();
     setControlSignals();
@@ -38,8 +43,8 @@ SignalFactory::SignalFactory(PropertySuiteHelper* propertyHelper, Module* module
 }
 
 void SignalFactory::setOperationSelector() {
-    auto operationSelectorType = new DataType(propertyHelper->getName() + "_operation_t");
-    for (const auto& property : propertyHelper->getOperationProperties()) {
+    auto operationSelectorType = new DataType(propertySuiteHelper->getName() + "_operation_t");
+    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         operationSelectorType->addEnumValue(property->getName());
     }
     if (useWaitOp) {
@@ -74,12 +79,12 @@ void SignalFactory::setControlSignals() {
 }
 
 void SignalFactory::setMonitorSignals() {
-    auto stateType = new DataType(propertyHelper->getName() + "_state_t");
-    for (const auto& state : propertyHelper->getStates()) {
+    auto stateType = new DataType(propertySuiteHelper->getName() + "_state_t");
+    for (const auto& state : propertySuiteHelper->getStates()) {
         stateType->addEnumValue(state->getName());
     }
-    auto operationType = new DataType(propertyHelper->getName() + "_operation_t");
-    for (const auto& operation : propertyHelper->getOperationProperties()) {
+    auto operationType = new DataType(propertySuiteHelper->getName() + "_operation_t");
+    for (const auto& operation : propertySuiteHelper->getOperationProperties()) {
         operationType->addEnumValue(operation->getName());
     }
     monitorSignals.insert(new Variable("active_state", stateType));
@@ -107,20 +112,20 @@ void SignalFactory::setOutputs() {
 }
 
 void SignalFactory::setInternalRegister() {
-    internalRegisterIn = hlsModule->getInternalRegisterIn();
-    internalRegisterOut = hlsModule->getInternalRegisterOut();
+    internalRegisterIn = optimizer->getInternalRegisterIn();
+    internalRegisterOut = optimizer->getInternalRegisterOut();
 }
 
 void SignalFactory::setOutputRegister() {
-    outputRegister = hlsModule->getOutputRegister();
+    outputRegister = optimizer->getInternalRegisterOut(); // TODO: check outputregister
 }
 
 void SignalFactory::setOperationModuleInputs() {
-    operationModuleInputs = hlsModule->getInputs();
+    operationModuleInputs = optimizer->getInputs();
 }
 
 void SignalFactory::setOperationModuleOutputs() {
-    operationModuleOutputs = hlsModule->getOutputs();
+    operationModuleOutputs = optimizer->getOutputs();
 }
 
 std::set<Variable *> SignalFactory::getInternalRegister() const {
@@ -143,7 +148,7 @@ std::string SignalFactory::convertDataType(const std::string& dataType)
 
 std::string SignalFactory::convertReturnType(const std::string &returnType) {
     if (returnType == "bool") {
-        return "boolean";
+        return "std_logic";
     } else if (returnType == "int" || returnType == "unsigned") {
         return "std_logic_vector";
     } else {

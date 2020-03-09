@@ -9,19 +9,9 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule(
-        Module* module,
-        const std::string &moduleName,
-        PropertySuiteHelper* propertySuiteHelper
-) {
+std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule() {
     std::map<std::string, std::string> pluginOutput;
-
-    this->moduleName = moduleName;
-    this->propertySuiteHelper = propertySuiteHelper;
-    this->currentModule = module;
-
-    hlsModule = std::make_unique<OperationModuleInterface>(propertySuiteHelper, currentModule);
-    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, hlsModule.get(), false);
+    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, false);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -232,11 +222,6 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
        << "\tbegin\n"
        << "\t\tcase active_state is\n";
 
-    std::set<std::string> waitStateNames;
-    for (auto waitState : propertySuiteHelper->getWaitProperties()) {
-        waitStateNames.insert(waitState->getName());
-    }
-
     auto printAssumptions = [&ss](std::vector<Expr* > exprList) {
         if (exprList.empty()) {
             ss << "true";
@@ -249,11 +234,11 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
         }
     };
 
-    for (const auto& state : propertySuiteHelper->getUniqueStates()) {
+    for (const auto& state : currentModule->getFSM()->getStateMap()) {
         bool noEndIf = false;
         bool skipAssumptions = false;
-        ss << "\t\twhen st_" << state->getName() << " =>\n";
-        auto operations = state->getOutgoingOperationsList();
+        ss << "\t\twhen st_" << state.second->getName() << " =>\n";
+        auto operations = state.second->getOutgoingOperationsList();
         for (auto operation = operations.begin(); operation != operations.end(); ++operation) {
             if (operation == operations.begin()) {
                 if (operations.size() == 1) {
@@ -272,8 +257,12 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
                 ss << ") then \n";
             }
             if (!(*operation)->IsWait()) {
-                ss << "\t\t\t\tactive_operation <= op_" << "blaa\n"//(*operation)->getName() << ";\n"
-                   << "\t\t\t\tnext_state <= st_" << (*operation)->getNextState()->getName() << ";\n"
+                const std::string& stateName = (*operation)->getState()->getName();
+                const std::string& nextStateName = (*operation)->getNextState()->getName();
+                const std::string operationName = stateName + "_" + std::to_string((*operation)->getId());
+
+                ss << "\t\t\t\tactive_operation <= op_" << operationName << ";\n"
+                   << "\t\t\t\tnext_state <= st_" << nextStateName << ";\n"
                    << "\t\t\t\twait_state <= '0';\n";
             } else {
                 ss << "\t\t\t\twait_state <= '1';\n";
@@ -291,15 +280,15 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
 {
     // Print Output_Vld Processes
     auto printOutputProcess = [&](DataSignal* dataSignal) {
-        bool hasOutputReg = hlsModule->hasOutputReg(dataSignal);
+        bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
         bool isEnum = dataSignal->isEnumType();
         ss << "\tprocess (rst, " << SignalFactory::getName(dataSignal, Style::UL, "_vld") << ")\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
+           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
            << " <= " << getResetValue(dataSignal) << ";\n"
            << "\t\telsif (" << SignalFactory::getName(dataSignal, Style::UL, "_vld") << " = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? hlsModule->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
+           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
            << " <= " << (isEnum ? SignalFactory::vectorToEnum(dataSignal, "_out") : SignalFactory::getName(dataSignal, Style::UL, "_out")) << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
@@ -341,20 +330,20 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
     for (const auto& out : Utilities::getSubVars(signalFactory->getOutputs())) {
-        if (hlsModule->hasOutputReg(out)) {
+        if (optimizer->hasOutputReg(out)) {
             ss << "\t\t\t" << SignalFactory::getName(out, Style::DOT) << " <= "
                << getResetValue(out) << ";\n";
         }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
     for (const auto& out : signalFactory->getOperationModuleOutputs()) {
-        if (hlsModule->hasOutputReg(out)) {
-            if (hlsModule->isModuleSignal(out)) {
-                for (const auto& sig : hlsModule->getCorrespondingTopSignals(out)) {
-                    ss << "\t\t\t" << sig->getFullName() << " <= " << hlsModule->getCorrespondingRegister(out)->getFullName() << ";\n";
+        if (optimizer->hasOutputReg(out)) {
+            if (optimizer->isModuleSignal(out)) {
+                for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {
+                    ss << "\t\t\t" << sig->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
                 }
             } else {
-                ss << "\t\t\t" << out->getFullName() << " <= " << hlsModule->getCorrespondingRegister(out)->getFullName() << ";\n";
+                ss << "\t\t\t" << out->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
             }
         }
     }
@@ -430,7 +419,7 @@ void VHDLWrapperMultiClkCycle::controlProcess(std::stringstream& ss)
     printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
     printModuleInputVars(signalFactory->getInternalRegisterIn(), "in_", "");
 
-    for (const auto &arrayPort : hlsModule->getArrayPorts()) {
+    for (const auto &arrayPort : optimizer->getArrayPorts()) {
         uint32_t exprNumber = 0;
         for (const auto &expr : arrayPort.second) {
             ss << "\t\t\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"

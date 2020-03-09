@@ -8,10 +8,10 @@
 
 using namespace SCAM::HLSPlugin::Script;
 
-SynthesisScripts::SynthesisScripts(std::shared_ptr<HLS::Optimizer> optimizer, HLSOption hlsOption) :
+SynthesisScripts::SynthesisScripts(std::shared_ptr<OptimizerHLS>& optimizer, HLSOption hlsOption) :
     propertySuite(nullptr),
     currentModule(nullptr),
-    optimizer(std::move(optimizer)),
+    optimizer(optimizer),
     hlsOption(hlsOption)
 {
 }

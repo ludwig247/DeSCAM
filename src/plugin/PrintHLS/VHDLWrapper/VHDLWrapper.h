@@ -8,8 +8,8 @@
 #include <memory>
 #include <string>
 
-#include "OperationModuleInterface.h"
-#include "../Common/PropertySuiteHelper.h"
+#include "PropertySuiteHelper.h"
+#include "OptimizerHLS.h"
 #include "PluginFactory.h"
 #include "SignalFactory.h"
 
@@ -17,22 +17,17 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
             class VHDLWrapper {
             public:
-                VHDLWrapper();
+                VHDLWrapper() = default;
                 ~VHDLWrapper() = default;
 
-                virtual std::map<std::string, std::string> printModule(
-                        Module* module,
-                        const std::string &moduleName,
-                        PropertySuiteHelper* property_suite_helper
-                ) = 0 ;
+                virtual std::map<std::string, std::string> printModule() = 0 ;
 
             protected:
-                PropertySuiteHelper* propertySuiteHelper;
+                std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
                 Module* currentModule;
                 std::string moduleName;
-                std::unique_ptr<OperationModuleInterface> hlsModule;
+                std::shared_ptr<OptimizerHLS> optimizer;
                 std::unique_ptr<SignalFactory> signalFactory;
-                std::map<std::string, std::string> pluginOutput;
 
                 virtual std::string printTypes();
                 virtual std::string operationEnum() = 0;

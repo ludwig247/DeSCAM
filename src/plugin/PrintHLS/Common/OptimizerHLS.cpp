@@ -6,18 +6,18 @@
 
 #include "ExprVisitor.h"
 #include "NodePeekVisitor.h"
-#include "Optimizer.h"
+#include "OptimizerHLS.h"
 #include "PrintArrayStatements.h"
-#include "../Common/PropertySuiteHelper.h"
-#include "../Common/PropertyHelper.h"
+#include "PropertySuiteHelper.h"
+#include "PropertyHelper.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace SCAM::HLSPlugin;
 
-Optimizer::Optimizer(PropertySuiteHelper *propertyHelper, Module* module) :
-    propertyHelper(propertyHelper),
-    module(module),
-    registerToOutputMap(),
-    outputToRegisterMap()
+OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper, Module* module) :
+        propertySuiteHelper(propertyHelper),
+        module(module),
+        registerToOutputMap(),
+        outputToRegisterMap()
 {
     findVariables();
     findOutputs();
@@ -30,13 +30,17 @@ Optimizer::Optimizer(PropertySuiteHelper *propertyHelper, Module* module) :
     arraySlicing();
 }
 
-bool Optimizer::hasOutputReg(DataSignal* dataSignal) {
+bool OptimizerHLS::hasOutputReg(DataSignal* dataSignal) {
     const auto& subVarMap = getSubVarMap(outputToRegisterMap);
     return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
             subVarMap.find(dataSignal) != subVarMap.end());
 }
 
-Variable* Optimizer::getCorrespondingRegister(DataSignal* dataSignal) {
+bool OptimizerHLS::isModuleSignal(DataSignal *dataSignal) const {
+    return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
+}
+
+Variable* OptimizerHLS::getCorrespondingRegister(DataSignal* dataSignal) {
     const auto& subVarMap = getSubVarMap(outputToRegisterMap);
     if (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end()) {
         return outputToRegisterMap.at(dataSignal);
@@ -45,18 +49,13 @@ Variable* Optimizer::getCorrespondingRegister(DataSignal* dataSignal) {
     }
 }
 
-void Optimizer::removeRedundantConditions()
+void OptimizerHLS::removeRedundantConditions()
 {
     for (auto &function : module->getFunctionMap()) {
-//        std::cout << "------ FUNCTION " << function.second->getName() << " --------" << std::endl;
-
         auto branches = function.second->getReturnValueConditionList();
         for (auto branch = branches.begin(); std::next(branch) != branches.end(); ++branch) {
             auto conditionList = branch->second;
-//            for (auto cond : conditionList) {
-//                std::cout << "Find Conditions: " << *cond << std::endl;
-//            }
-//            std::cout << std::endl;
+
             for (auto otherBranches = std::next(branch); otherBranches != branches.end(); ++otherBranches) {
                 auto otherConditionList = otherBranches->second;
                 for (auto &cond : otherConditionList) {
@@ -64,9 +63,7 @@ void Optimizer::removeRedundantConditions()
                         cond = (dynamic_cast<UnaryExpr * >(cond))->getExpr();
                     }
                 }
-//                for (auto cond : otherConditionList) {
-//                    std::cout << *cond << std::endl;
-//                }
+
                 bool allFound = true;
                 for (auto cond : conditionList) {
                     bool found = false;
@@ -80,7 +77,6 @@ void Optimizer::removeRedundantConditions()
                     }
                 }
                 if (allFound) {
-//                    std::cout << "All found!" << std::endl;
                     for (const auto &cond : conditionList) {
                         (otherBranches->second).erase(std::remove_if(
                                 (otherBranches->second).begin(),
@@ -93,22 +89,14 @@ void Optimizer::removeRedundantConditions()
                                 }), (otherBranches->second).end()
                         );
                     }
-//                    std::cout << std::endl << "New List" << std::endl;
-//                    for (auto cond : otherBranches->second) {
-//                        std::cout << *cond << std::endl;
-//                    }
-//                } else {
-//                    std::cout << "Not all found!" << std::endl;
                 }
-//                std::cout << std::endl << std::endl;
             }
-//            std::cout << std::endl << std::endl;
         }
         function.second->setReturnValueConditionList(branches);
     }
 }
 
-void Optimizer::mapOutputRegistersToOutput() {
+void OptimizerHLS::mapOutputRegistersToOutput() {
     // If for every operation assignment of Variable equals assignment of DataSignal
     // we can map Variable -> DataSignal
     auto compareAssignments = [this](DataSignal* output) -> std::set<Variable*> {
@@ -128,7 +116,7 @@ void Optimizer::mapOutputRegistersToOutput() {
         };
 
         auto candidates = variables;
-        for (const auto& operationProperty : propertyHelper->getOperationProperties()) {
+        for (const auto& operationProperty : propertySuiteHelper->getOperationProperties()) {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (*(commitment->getLhs()) == *(commitment->getRhs())) {
                     continue;
@@ -200,14 +188,14 @@ void Optimizer::mapOutputRegistersToOutput() {
     }
 }
 
-void Optimizer::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap) {
+void OptimizerHLS::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap) {
     const auto& subVarMap = getSubVarMap(dataSignalMap);
 
     std::cout << "Replace DataSignal by new DataSignal" << std::endl;
     for (const auto& subVar : subVarMap) {
         std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
 
-        for (const auto& property : propertyHelper->getOperationProperties()) {
+        for (const auto& property : propertySuiteHelper->getOperationProperties()) {
             auto helper = (PropertyHelper *) property;
             std::vector<Assignment* > assignments;
             for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
@@ -218,26 +206,25 @@ void Optimizer::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &d
                 if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
                     auto dataSignal = dynamic_cast<DataSignalOperand*>(commitment->getLhs())->getDataSignal();
                     if (dataSignal == subVar.first) {
-                        assignments.emplace_back(
-                                new Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
+                        assignments.emplace_back(new Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
                         continue;
                     }
                 }
                 assignments.emplace_back(commitment);
             }
-            helper->getOperationHelper()->setCommitmentsList(assignments);
+            helper->modifyCommitmentsList(std::move(assignments));
         }
     }
 }
 
-void Optimizer::replaceVariables() {
+void OptimizerHLS::replaceVariables() {
     const auto& subVarMap = getSubVarMap(registerToOutputMap);
 
     std::cout << "Replace OutputRegister by DataSignal" << std::endl;
     for (const auto& subVar : subVarMap) {
         std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
 
-        for (const auto& property : propertyHelper->getOperationProperties()) {
+        for (const auto& property : propertySuiteHelper->getOperationProperties()) {
             auto helper = (PropertyHelper *) property;
             std::vector<Assignment* > assignments;
             for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
@@ -261,12 +248,12 @@ void Optimizer::replaceVariables() {
                 }
                 assignments.emplace_back(commitment);
             }
-            helper->getOperationHelper()->setCommitmentsList(assignments);
+            helper->modifyCommitmentsList(std::move(assignments));
         }
     }
 
     // Remove duplicate assignments
-    for (const auto& property : propertyHelper->getOperationProperties()) {
+    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         auto helper = (PropertyHelper *) property;
         std::vector<Assignment* > assignments;
 
@@ -284,12 +271,12 @@ void Optimizer::replaceVariables() {
                 assignments.push_back(commitment);
             }
         }
-        helper->getOperationHelper()->setCommitmentsList(assignments);
+        helper->modifyCommitmentsList(std::move(assignments));
     }
 }
 
 template<typename Key, typename Value>
-std::map<Key *, Value *> Optimizer::getSubVarMap(const std::map<Key *, Value *> map) {
+std::map<Key *, Value *> OptimizerHLS::getSubVarMap(const std::map<Key *, Value *> map) {
     std::vector<Key* > keys;
     for (const auto& var : map) {
         if (var.first->isCompoundType()) {
@@ -317,7 +304,7 @@ std::map<Key *, Value *> Optimizer::getSubVarMap(const std::map<Key *, Value *> 
     return subVarMap;
 }
 
-std::multimap<Variable*, DataSignal*> Optimizer::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
+std::multimap<Variable*, DataSignal*> OptimizerHLS::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
     std::multimap<Variable*, DataSignal*> parentMap;
     std::set<std::pair<Variable*, DataSignal*>> uniquePairs;
     for (const auto& var : multimap) {
@@ -336,8 +323,8 @@ std::multimap<Variable*, DataSignal*> Optimizer::getParentMap(const std::multima
     return parentMap;
 }
 
-void Optimizer::findOutputs() {
-    for (const auto& property : propertyHelper->getOperationProperties()) {
+void OptimizerHLS::findOutputs() {
+    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
@@ -348,8 +335,8 @@ void Optimizer::findOutputs() {
     }
 }
 
-void Optimizer::findInputs() {
-    for (const auto& property : propertyHelper->getOperationProperties()) {
+void OptimizerHLS::findInputs() {
+    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
@@ -360,7 +347,7 @@ void Optimizer::findInputs() {
     }
 }
 
-void Optimizer::findVariables() {
+void OptimizerHLS::findVariables() {
     for (const auto &var : module->getVariableMap()) {
         if (var.second->isCompoundType()) {
             for (const auto &subVar : var.second->getSubVarList()) {
@@ -372,11 +359,11 @@ void Optimizer::findVariables() {
     }
 
     auto eraseIfFunction = [this](Variable* var) {
-        for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+        for (const auto &operationProperties : propertySuiteHelper->getOperationProperties()) {
             for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
                     Variable* var2 = (dynamic_cast<VariableOperand*>(commitment->getLhs()))->getVariable();
-                    if (var->getFullName()==var2->getFullName()) {
+                    if (var->getFullName() == var2->getFullName()) {
                         return false;
                     }
                 }
@@ -394,15 +381,15 @@ void Optimizer::findVariables() {
     }
 }
 
-bool Optimizer::isConstant(Variable *variable) const {
-    auto internalRegisterOutParents = Utilities::getParents(internalRegisterOut);
+bool OptimizerHLS::isConstant(Variable *variable) const {
+    auto internalRegisterOutParents = getParents(internalRegisterOut);
     if (variable->isSubVar()) {
         return internalRegisterOutParents.find(variable->getParent()) == internalRegisterOutParents.end();
     }
     return internalRegisterOutParents.find(variable) == internalRegisterOutParents.end();
 }
 
-DataSignal* Optimizer::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
+DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
 
     std::string combinedName = dataSignal.front()->getFullName();
     for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
@@ -445,9 +432,9 @@ DataSignal* Optimizer::getCombinedDataSignal(const std::vector<DataSignal*> &dat
     return combinedDataSignal;
 }
 
-void Optimizer::findInternalRegisterIn()
+void OptimizerHLS::findInternalRegisterIn()
 {
-    for (const auto &operationProperties : propertyHelper->getOperationProperties()) {
+    for (const auto &operationProperties : propertySuiteHelper->getOperationProperties()) {
         for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
@@ -461,6 +448,7 @@ void Optimizer::findInternalRegisterIn()
     auto it = internalRegisterIn.begin();
     while(it != internalRegisterIn.end()) {
         if (internalRegisterOut.find(*it) == internalRegisterOut.end()) {
+            constantVariables.insert(*it);
             internalRegisterIn.erase(it++);
         } else {
             ++it;
@@ -468,9 +456,9 @@ void Optimizer::findInternalRegisterIn()
     }
 }
 
-void Optimizer::findInternalRegisterOut()
+void OptimizerHLS::findInternalRegisterOut()
 {
-    for (const auto operationProperties : propertyHelper->getOperationProperties()) {
+    for (const auto operationProperties : propertySuiteHelper->getOperationProperties()) {
         for (const auto commitment : operationProperties->getOperation()->getCommitmentsList()) {
             if (*commitment->getLhs() == *commitment->getRhs()) {
                 continue;
@@ -481,7 +469,7 @@ void Optimizer::findInternalRegisterOut()
     }
 }
 
-void Optimizer::arraySlicing() {
+void OptimizerHLS::arraySlicing() {
     std::set<Port *> ports;
     for (const auto &port : module->getPorts()) {
         if (port.second->isArrayType()) {
@@ -491,7 +479,7 @@ void Optimizer::arraySlicing() {
 
     for (const auto &port : ports) {
         std::list<Expr *> expressions;
-        for (const auto &operationProperty: propertyHelper->getOperationProperties()) {
+        for (const auto &operationProperty: propertySuiteHelper->getOperationProperties()) {
             for (const auto &commitment :  operationProperty->getOperation()->getCommitmentsList()) {
                 const auto foundExpressions = PrintArrayStatements::getArrayExprs(commitment->getRhs(), port);
                 for (const auto &foundExpression : foundExpressions) {

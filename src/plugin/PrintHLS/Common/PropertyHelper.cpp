@@ -6,6 +6,10 @@
 
 using namespace SCAM::HLSPlugin;
 
-OperationHelper * PropertyHelper::getOperationHelper() const {
-    return (OperationHelper* ) getOperation();
+void PropertyHelper::modifyCommitmentsList(std::vector<Assignment* >&& assignments) {
+    if(operationList.size() > 1){
+        throw std::runtime_error("Property is build from more then 1 operation. Please use getOperations()");
+    }
+    Operation operation = *operationList.front();
+    operation.setCommitmentsList(assignments);
 }

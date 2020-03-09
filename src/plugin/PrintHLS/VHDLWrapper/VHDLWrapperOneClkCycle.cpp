@@ -8,19 +8,23 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-std::map<std::string, std::string> VHDLWrapperOneClkCycle::printModule(
+VHDLWrapperOneClkCycle::VHDLWrapperOneClkCycle(
         Module* module,
         const std::string &moduleName,
-        PropertySuiteHelper* propertySuiteHelper
-) {
-    std::map<std::string, std::string> pluginOutput;
-
-    this->moduleName = moduleName;
+        std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+        std::shared_ptr<OptimizerHLS>& optimizer
+)
+{
     this->propertySuiteHelper = propertySuiteHelper;
     this->currentModule = module;
+    this->moduleName = moduleName;
+    this->optimizer = optimizer;
+    this->signalFactory = nullptr;
+}
 
-    hlsModule = std::make_unique<OperationModuleInterface>(propertySuiteHelper, currentModule);
-    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, hlsModule.get(), true);
+std::map<std::string, std::string> VHDLWrapperOneClkCycle::printModule() {
+    std::map<std::string, std::string> pluginOutput;
+    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, true);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -191,11 +195,6 @@ void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
        << "\tbegin\n"
        << "\t\tcase active_state is\n";
 
-    std::set<std::string> waitStateNames;
-    for (auto waitState : propertySuiteHelper->getWaitProperties()) {
-        waitStateNames.insert(waitState->getName());
-    }
-
     auto printAssumptions = [&ss](std::vector<Expr* > exprList) {
         if (exprList.empty()) {
             ss << "true";
@@ -208,11 +207,11 @@ void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
         }
     };
 
-    for (const auto& state : propertySuiteHelper->getUniqueStates()) {
+    for (const auto& state : currentModule->getFSM()->getStateMap()) {
         bool noEndIf = false;
         bool skipAssumptions = false;
-        ss << "\t\twhen st_" << state->getName() << " =>\n";
-        auto operations = state->getOutgoingOperationsList();
+        ss << "\t\twhen st_" << state.second->getName() << " =>\n";
+        auto operations = state.second->getOutgoingOperationsList();
         for (auto operation = operations.begin(); operation != operations.end(); ++operation) {
             if (operation == operations.begin()) {
                 if (operations.size() == 1) {
@@ -231,7 +230,11 @@ void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
                 ss << ") then \n";
             }
             if (!(*operation)->IsWait()) {
-                ss << "\t\t\t\tactive_operation <= op_" << "blla\n"//(*operation)->getName() << ";\n"
+                const std::string& stateName = (*operation)->getState()->getName();
+                const std::string& nextStateName = (*operation)->getNextState()->getName();
+                const std::string operationName = stateName + "_" + std::to_string((*operation)->getId());
+
+                ss << "\t\t\t\tactive_operation <= op_" << operationName << ";\n"
                    << "\t\t\t\tnext_state <= st_" << (*operation)->getNextState()->getName() << ";\n";
             } else {
                 ss << "\t\t\t\tactive_operation <= op_state_wait;\n";
@@ -250,10 +253,10 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
 {
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool isEnum = dataSignal->isEnumType();
-        bool hasOutputReg = hlsModule->hasOutputReg(dataSignal);
+        bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
         std::string name;
         if (hasOutputReg) {
-            name = SignalFactory::getName(hlsModule->getCorrespondingRegister(dataSignal), Style::DOT);
+            name = SignalFactory::getName(optimizer->getCorrespondingRegister(dataSignal), Style::DOT);
         } else {
             name = SignalFactory::getName(dataSignal, Style::DOT);
         }
@@ -271,13 +274,13 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
 
     ss << "\n\t-- Output Register to Output Mapping\n";
     for (const auto& out : signalFactory->getOperationModuleOutputs()) {
-        if (hlsModule->hasOutputReg(out)) {
-            if (hlsModule->isModuleSignal(out)) {
-                for (const auto& sig : hlsModule->getCorrespondingTopSignals(out)) {
-                    ss << "\t" << sig->getFullName() << " <= " << hlsModule->getCorrespondingRegister(out)->getFullName() << ";\n";
+        if (optimizer->hasOutputReg(out)) {
+            if (optimizer->isModuleSignal(out)) {
+                for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {
+                    ss << "\t" << sig->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
                 }
             } else {
-                ss << "\t" << out->getFullName() << " <= " << hlsModule->getCorrespondingRegister(out)->getFullName() << ";\n";
+                ss << "\t" << out->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
             }
         }
     }
@@ -329,7 +332,7 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
     printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
     printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
 
-    for (const auto &arrayPort : hlsModule->getArrayPorts()) {
+    for (const auto &arrayPort : optimizer->getArrayPorts()) {
         uint32_t exprNumber = 0;
         for (const auto &expr : arrayPort.second) {
             ss << "\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"

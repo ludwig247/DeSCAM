@@ -10,14 +10,6 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-VHDLWrapper::VHDLWrapper() :
-        propertySuiteHelper(nullptr),
-        currentModule(nullptr),
-        hlsModule(nullptr),
-        signalFactory(nullptr)
-{
-}
-
 std::string VHDLWrapper::printTypes() {
     std::stringstream typeStream;
     typeStream << "-- External data type definition package\n";
@@ -94,8 +86,8 @@ std::string VHDLWrapper::printTypes() {
 
     typeStream << "\n"
                << "\t-- Constants\n";
-    for (const auto& var : hlsModule->getVariables()) {
-        if (hlsModule->isConstant(var)) {
+    for (const auto& var : optimizer->getVariables()) {
+        if (optimizer->isConstant(var)) {
             typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
                        << " := " << getResetValue(var) << ";\n";
         }
@@ -248,7 +240,7 @@ std::string VHDLWrapper::sensitivityList() {
 
                 const auto& vars = ExprVisitor::getUsedVariables(assumption->getTimepointList().front());
                 for (const auto& var : vars) {
-                    if (!hlsModule->isConstant(var)) {
+                    if (!optimizer->isConstant(var)) {
                         sensListVars.insert(var);
                     }
                 }
