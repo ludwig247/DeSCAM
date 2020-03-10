@@ -25,7 +25,7 @@ architecture Example_arch of Example is
 	signal active_state: Example_state_t;
 	signal active_assignment: Example_assign_t;
 	signal cnt: signed(31 downto 0);
-	signal statement: msg_t;
+	signal msg: msg_t;
 
 	-- Declare state signals that are used by ITL properties for OneSpin
 	signal frame_data_0: boolean;
@@ -76,7 +76,7 @@ begin
 	begin
 		if (rst = '1') then
 			s_out_sig <= false;
-			statement.data <= x"00000000";
+			msg.data <= x"00000000";
 			m_out_notify <= false;
 			b_in_notify <= true;
 			cnt <= x"00000000";
@@ -87,17 +87,17 @@ begin
 				m_out_notify <= false;
 				b_in_notify <= true;
 				active_state <= st_frame_data_0;
-				statement.data <= b_in_sig.data;
+				msg.data <= b_in_sig.data;
 			when assign_1 =>
 				cnt <= x"ffffffff" + cnt;
 				m_out_notify <= true;
-				m_out_sig <= statement.data;
+				m_out_sig <= msg.data;
 				b_in_notify <= true;
 				active_state <= st_frame_data_0;
 			when assign_2 =>
 				cnt <= x"ffffffff" + cnt;
 				m_out_notify <= true;
-				m_out_sig <= statement.data;
+				m_out_sig <= msg.data;
 				s_out_sig <= false;
 				b_in_notify <= true;
 				active_state <= st_idle_3;
@@ -116,7 +116,7 @@ begin
 				m_out_notify <= true;
 				b_in_notify <= false;
 				active_state <= st_frame_start_2;
-				statement.data <= b_in_sig.data;
+				msg.data <= b_in_sig.data;
 				cnt <= x"00000003";
 				s_out_sig <= true;
 				m_out_sig <= x"00000003";
@@ -128,7 +128,7 @@ begin
 				s_out_sig <= false;
 				m_out_notify <= false;
 				b_in_notify <= true;
-				statement.data <= b_in_sig.data;
+				msg.data <= b_in_sig.data;
 				active_state <= st_idle_3;
 			end case;
 		end if;

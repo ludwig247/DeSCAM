@@ -53,7 +53,7 @@ SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *ass
             //Only interested in the simplification of RHS
             // In case varName == true or varName == false is passed
             if (result.operator[](0).as_expr().num_args() <= 1) {
-                //TODO: Warning statement for this case
+                //TODO: Warning msg for this case
                 return assignment;
             }
             //Sanity check: in case some weired assignment is passed

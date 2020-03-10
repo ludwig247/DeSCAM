@@ -611,7 +611,7 @@ xleftmargin=5.0ex]
                 if(start_of_frame) nextsection = reading;
             }
             else if(section == reading) {
-                msg_port->read(statement);
+                msg_port->read(msg);
                 ++cnt;
                 if(cnt > 4){
                     nextsection = idle;
