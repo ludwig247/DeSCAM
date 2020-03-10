@@ -21,25 +21,17 @@ namespace SCAM {
         };
 
         struct Error {
-            Error(const std::string msg, const std::string astMsg, const std::string file, const std::string loc, const std::vector<std::string> &errorLog) :
+            Error(const std::string msg, const std::string astMsg ="", const std::string file="", const std::string loc="", const std::vector<std::string> &errorLog={}) :
                     msg(msg),
                     astMsg(astMsg),
                     file(file),
                     loc(loc),
-                    errorLog(errorLog) {};
-
-            Error(const std::string msg) :
-                    msg(msg),
-                    astMsg(""),
-                    file(""),
-                    loc("") {};
-
+                    errorLog(errorLog){};
             const std::string msg;
             const std::string astMsg;
             const std::string file;
             const std::string loc;
             const std::vector<std::string> errorLog;
-
         };
 
         //
@@ -53,7 +45,7 @@ namespace SCAM {
         //SETTER
         static void addErrorLog(std::string msg);
 
-        static void addError(std::string msg, std::string astMsg);
+        static void addError(std::string msg, std::string astMsg, std::string file = "", std::string loc="");
 
         static bool hasError();
 
