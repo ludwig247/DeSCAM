@@ -125,12 +125,10 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
 
 void VHDLWrapper::functions(std::stringstream &ss) {
     std::set<Function* > usedFunctions;
-    for (const auto& property : propertySuiteHelper->getProperties()) {
-        for (const auto& assumption : property->getAssumptionList()) {
-            if (assumption->isAt()) {
-                const auto& funcSet = ExprVisitor::getUsedFunction(assumption->getTimepointList().front());
-                usedFunctions.insert(funcSet.begin(), funcSet.end());
-            }
+    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
+        for (const auto& assumption : property->getOperation()->getAssumptionsList()) {
+            const auto& funcSet = ExprVisitor::getUsedFunction(assumption);
+            usedFunctions.insert(funcSet.begin(), funcSet.end());
         }
     }
 

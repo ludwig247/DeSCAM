@@ -6,25 +6,24 @@
 
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
-#include "ExprVisitor.h"
 #include "PrintITL.h"
 
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 
-    std::function<std::string()> macro_function;
+    std::function<std::string()> macroFunction;
 
     if (getOptionMap().at("hls-occo") || getOptionMap().at("hls-mcco")) {
-        macro_function = std::bind(&PrintITL::macros, this);
+        macroFunction = std::bind(&PrintITL::hlsMacros, this);
     } else {
-        macro_function = std::bind(&PrintITL::macros, this);
+        macroFunction = std::bind(&PrintITL::macros, this);
     }
 
     for (auto &module: node->getModules()) {
 
         this->module = module.second;
 
-        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macro_function()));
+        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macroFunction()));
         pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
         std::string funString = functions();
         if (!funString.empty())
@@ -36,17 +35,17 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 
 std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
 
-    std::function<std::string()> macro_function;
+    std::function<std::string()> macroFunction;
 
     if (getOptionMap().at("hls-occo") || getOptionMap().at("hls-mcco")) {
-        macro_function = std::bind(&PrintITL::hls_macros, this);
+        macroFunction = std::bind(&PrintITL::hlsMacros, this);
     } else {
-        macro_function = std::bind(&PrintITL::macros, this);
+        macroFunction = std::bind(&PrintITL::macros, this);
     }
 
     this->module = node;
 
-    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macro_function() + operations()));
+    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macroFunction() + operations()));
     pluginOutput.insert(std::make_pair(node->getName() + "_functions.vhi", functions()));
 
     return pluginOutput;
@@ -322,44 +321,36 @@ std::string PrintITL::operations() {
     return ss.str();
 }
 
-std::string PrintITL::hls_macros() {
-
+std::string PrintITL::hlsMacros() {
     PropertySuite * ps = this->module->getPropertySuite();
-
     std::stringstream ss;
-    std::string t_end;
 
     ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
     for (auto sync: ps->getSyncSignals()){
-        ss << "--macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := end macro;" << std::endl;
+        ss << "-- macro " << sync->getName() << " : " << convertDataTypeForHLS(sync->getDataType()->getName()) << " := end macro;" << std::endl;
     }
     for (auto notify: ps->getNotifySignals()){
-        ss << "--macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := end macro;" << std::endl;
+        ss << "-- macro " << notify->getName() << " : " << convertDataTypeForHLS(notify->getDataType()->getName()) << " := end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()){
-        if (!dp->isCompoundType()){
-            ss << "--";
+        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType())){
+            ss << "-- ";
         }
-        ss << "macro " << dp->getParentName();
-        if (dp->isCompoundType()) {
-            ss << "_" << dp->getSubVarName();
-        }
-        std::string dataType = convertDataType(dp->getDataType()->getName());
+        ss << "macro " ;
+        ss << dp->getFullName("_");
         ss << " : " << convertDataTypeForHLS(dp->getDataType()->getName()) << " := ";
-        if (dp->isCompoundType()){
-            ss << dp->getParentName() << "." << dp->getSubVarName() << " ";
-        }
-        ss << "end macro;" << std::endl;
+        ss << dp->getFullName(".");
+        ss << " end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
     ss << "-- CONSTRAINTS --" << std::endl;
     // Reset constraint is print out extra because of the quotation marks ('0')
     ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
-    for (auto co: ps->getConstraints()){
+    for (auto co: ps->getConstraints()) {
         if (co->getName() != "no_reset") {
             ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression()) << "; end constraint;" << std::endl;
         }
@@ -367,19 +358,20 @@ std::string PrintITL::hls_macros() {
     ss << std::endl << std::endl;
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
-    for (auto vr: ps->getVisibleRegisters()){
-        if (vr->isCompoundType()) {
-            ss << "macro " << vr->getParentName() << "_" << vr->getSubVarName();
-            ss << " : " << convertDataTypeForHLS(vr->getDataType()->getName()) << " := ";
-            ss << vr->getParentName() << "." << vr->getSubVarName();
-            ss << " end macro;" << std::endl;
+    for (auto vr: ps->getVisibleRegisters()) {
+        if (vr->isSubVar() && vr->getParentDataType()->isArrayType()) {
+            continue;
         }
+        ss << "macro " << vr->getFullName("_");
+        ss << " : " << convertDataTypeForHLS(vr->getDataType()->getName()) << " := ";
+        ss << vr->getFullName(".");
+        ss << " end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
     ss << "-- STATES --" << std::endl;
     for (auto st: ps->getStates()){
-        ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName())
+        ss << "macro " << st->getName() << " : " << convertDataTypeForHLS(st->getDataType()->getName())
            << " := " << "active_state = st_" << st->getName();
         if (getOptionMap().at("hls-mcco")) {
             ss << " and (ready_sig = '1' or idle_sig = '1')";
@@ -387,157 +379,6 @@ std::string PrintITL::hls_macros() {
         ss << " end macro;\n";
     }
     ss << std::endl << std::endl;
-
-//    ss << "-- OPERATIONS --" << std::endl;
-//
-//    // Reset property
-//    ss << "property " << ps->getResetProperty()->getName() << " is\n";
-//    ss << "assume:\n";
-//    ss << "\t reset_sequence;\n";
-//    ss << "prove:\n";
-//    ss << "\t at t: " << ps->getResetProperty()->getNextState()->getName() << ";\n";
-//    for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
-//        ss << "\t at t: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << ConditionVisitor::toString(commitment->getRhs()) << ";\n";
-//    }
-//    ss << "end property;\n";
-//    ss << std::endl << std::endl;
-//
-//    // Operation properties
-//    for (auto op : ps->getOperationProperties()){
-//        ss << "property " << op->getName() << " is\n";
-//
-//        unsigned long constraintSize = op->getConstraints().size();
-//        ss << "dependencies: ";
-//        for (auto co : op->getConstraints()) {
-//            ss << co->getName();
-//            if (constraintSize > 1) {
-//                ss << ",";
-//            } else {
-//                ss << ";\n";
-//            }
-//            constraintSize--;
-//        }
-//
-//        if (usedITLOption == ITLOption::HLS_OCCO) {
-//            if (module->isSlave()) {
-//                t_end = "t+1";
-//            } else {
-//                ss << "for timepoints:\n";
-//                ss << "\tt_end = t+1;\n";
-//                t_end = "t_end";
-//            }
-//        } else {
-//            ss << "for timepoints:\n"
-//               << "\tt_end = t+1..5 waits_for done_sig = '1';\n";
-//            t_end = "t_end";
-//        }
-//
-//        unsigned long freezeVarSize = op->getFreezeSignals().size();
-//        if (freezeVarSize > 0) {
-//            ss << "freeze:\n";
-//            for (auto freeze : op->getFreezeSignals()) {
-//                ss << "\t";
-//                if (freeze.second->isArrayType()) {
-//                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
-//                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
-//                }else if(freeze.second->isCompoundType()){
-//                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "_at_t";
-//                    ss << " = ";
-//                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() <<"@t";
-//                } else {
-//                    ss << freeze.first << "_at_t = " << freeze.first << "@t";
-//                }
-//                if (freezeVarSize > 1) {
-//                    ss << ",\n";
-//                } else {
-//                    ss << ";\n";
-//                }
-//                freezeVarSize--;
-//            }
-//        }
-//        ss << "assume:\n";
-//        ss << "\tat t: " << op->getState()->getName() << ";\n";
-//        for (auto assumption : op->getAssumptionList()) {
-//            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
-//        }
-//        ss << "prove:\n";
-//        ss << "\tat " << t_end << ": " << op->getNextState()->getName() << ";\n";
-//        for (auto commitment : op->getCommitmentList()) {
-//            ss << "\tat " << t_end << ": " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
-//        }
-//        for (auto notify : ps->getNotifySignals()) {
-//            switch (op->getTiming(notify->getPort())) {
-//                case TT_1:
-//                    ss << "\tat t+1: " << notify->getName() << " = true;\n";
-//                    break;
-//                case FF_1:
-//                    ss << "\tat t+1: " << notify->getName() << " = false;\n";
-//                    break;
-//                case FF_e:
-//                    ss << "\tduring[t+1, t_end]: " << notify->getName() << " = false;\n";
-//                    break;
-//                case FT_e:
-//                    ss << "\tduring[t+1, t_end-1]: " << notify->getName() << " = false;\n";
-//                    ss << "\tat t_end: " << notify->getName() << " = true;\n";
-//                    break;
-//            }
-//        }
-//        ss << "end property;\n";
-//        ss << "\n\n";
-//    }
-//
-//    // Wait properties
-//    for (auto wp : ps->getWaitProperties()) {
-//        ss << "property " << wp->getName() << " is\n";
-//
-//        unsigned long constraintSize = wp->getConstraints().size();
-//        ss << "dependencies: ";
-//        for (auto co : wp->getConstraints()) {
-//            ss << co->getName();
-//            if (constraintSize > 1) {
-//                ss << ",";
-//            } else {
-//                ss << ";\n";
-//            }
-//            constraintSize--;
-//        }
-//
-//        unsigned long freezeVarSize = wp->getFreezeSignals().size();
-//        if (freezeVarSize > 0) {
-//            ss << "freeze:\n";
-//            for (auto freeze : wp->getFreezeSignals()) {
-//                ss << "\t";
-//                if (freeze.second->isArrayType()) {
-//                    ss << freeze.second->getParent()->getName() << "_" << freeze.second->getVariable()->getName() << "_at_t = ";
-//                    ss << freeze.second->getParent()->getName() << "(" << freeze.second->getVariable()->getName() << ")@t";
-//                }else if(freeze.second->isCompoundType()){
-//                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "_at_t";
-//                    ss << " = ";
-//                    ss << freeze.second->getParentName() << "_" << freeze.second->getSubVarName() << "@t" ;
-//                } else {
-//                    ss << freeze.first << "_at_t = " << freeze.first << "@t";
-//                }
-//                if (freezeVarSize > 1) {
-//                    ss << ",\n";
-//                } else {
-//                    ss << ";\n";
-//                }
-//                freezeVarSize--;
-//            }
-//        }
-//        ss << "assume:\n";
-//        ss << "\tat t: " << wp->getState()->getName() << ";\n";
-//        for (auto assumption : wp->getAssumptionList()) {
-//            ss << "\tat t: " << ConditionVisitor::toString(assumption) << ";\n";
-//        }
-//        ss << "prove:\n";
-//        ss << "\tat t+1: " << wp->getNextState()->getName() << ";\n";
-//        for (auto commitment : wp->getCommitmentList()) {
-//            ss << "\tat t+1: " << ConditionVisitor::toString(commitment->getLhs()) << " = " << DatapathVisitor::toString(commitment->getRhs()) << ";\n";
-//        }
-//        ss << "end property;\n";
-//        ss << "\n\n";
-//    }
-//    return ss.str();
+    return ss.str();
 }
 

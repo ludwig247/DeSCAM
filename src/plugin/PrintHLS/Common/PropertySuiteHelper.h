@@ -6,6 +6,7 @@
 #define DESCAM_PROPERTYSUITEHELPER_H
 
 #include "PropertySuite.h"
+#include "PropertyHelper.h"
 
 namespace SCAM { namespace HLSPlugin {
 
@@ -14,16 +15,16 @@ class PropertySuiteHelper : public PropertySuite {
 public:
     explicit PropertySuiteHelper(PropertySuite const& propertySuite);
 
-    std::vector<Property*> getWaitProperties() const;
-    std::vector<Property*> getOperationProperties() const;
-    std::vector<Assignment *> getNotifyStatements(Property* property) const;
+    std::vector<PropertyHelper *> getWaitProperties() const;
+    std::vector<PropertyHelper *> getOperationProperties() const;
+    std::vector<Assignment *> getNotifyStatements(Property *property) const;
 
 private:
     void addWaitProperties();
     void addOperationProperties();
 
-    std::vector<Property *> waitProperties = {};
-    std::vector<Property* > operationProperties = {};
+    std::vector<PropertyHelper *> waitProperties = {};
+    std::vector<PropertyHelper *> operationProperties = {};
 };
 
 }}

@@ -26,8 +26,8 @@ OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper,
     findInternalRegisterIn();
     removeRedundantConditions();
     mapOutputRegistersToOutput();
-    replaceVariables();
     arraySlicing();
+    modifyCommitmentLists();
 }
 
 bool OptimizerHLS::hasOutputReg(DataSignal* dataSignal) {
@@ -150,7 +150,6 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
 
     // If we can map multiple DataSignals to one Variable, we can replace these DataSignal by a new DataSignal
     // representing all these DataSignals
-    std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
     for (auto it = parentMap.cbegin(); it != parentMap.cend();) {
         Variable* reg = it->first;
         if (parentMap.count(reg) > 1) {
@@ -174,7 +173,6 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
             ++it;
         }
     }
-    replaceDataSignals(oldToNewDataSignalMap);
 
     // replace output signals by module signal
     for (const auto& moduleSignal : moduleToTopSignalMap) {
@@ -186,93 +184,96 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
             }
         }
     }
-}
 
-void OptimizerHLS::replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap) {
-    const auto& subVarMap = getSubVarMap(dataSignalMap);
-
-    std::cout << "Replace DataSignal by new DataSignal" << std::endl;
-    for (const auto& subVar : subVarMap) {
-        std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
-
-        for (const auto& property : propertySuiteHelper->getOperationProperties()) {
-            auto helper = (PropertyHelper *) property;
-            std::vector<Assignment* > assignments;
-            for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
-                // ignore self assignments
-                if (*commitment->getRhs() == *commitment->getLhs()) {
-                    continue;
-                }
-                if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
-                    auto dataSignal = dynamic_cast<DataSignalOperand*>(commitment->getLhs())->getDataSignal();
-                    if (dataSignal == subVar.first) {
-                        assignments.emplace_back(new Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
-                        continue;
-                    }
-                }
-                assignments.emplace_back(commitment);
-            }
-            helper->modifyCommitmentsList(std::move(assignments));
+    auto it = internalRegisterOut.begin();
+    while(it != internalRegisterOut.end()) {
+        if (registerToOutput.find(*it) != registerToOutput.end()) {
+            internalRegisterOut.erase(it++);
+        } else {
+            ++it;
         }
     }
 }
 
-void OptimizerHLS::replaceVariables() {
-    const auto& subVarMap = getSubVarMap(registerToOutputMap);
+void OptimizerHLS::modifyCommitmentLists() {
 
-    std::cout << "Replace OutputRegister by DataSignal" << std::endl;
-    for (const auto& subVar : subVarMap) {
-        std::cout << subVar.first->getFullName() << " -> " << subVar.second->getFullName() << std::endl;
+    for (auto &&property : propertySuiteHelper->getOperationProperties()) {
+        std::vector<Assignment *> assignments;
+        for (auto &&commitment : property->getOperation()->getCommitmentsList()) {
+            if (isSelfAssignments(commitment)) {
+                continue;
+            }
+            if (hasOutputRegisterAtRHS(commitment)) {
+                continue;
+            }
 
-        for (const auto& property : propertySuiteHelper->getOperationProperties()) {
-            auto helper = (PropertyHelper *) property;
-            std::vector<Assignment* > assignments;
-            for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
-                // Remove if LHS == RHS
-                if (*(commitment->getLhs()) == *(commitment->getRhs())) {
+            auto replacedAssignment = replaceDataSignals(commitment);
+            if (replacedAssignment) {
+                if (!isDuplicate(replacedAssignment.get(), assignments)) {
+                    assignments.push_back(replacedAssignment.get());
                     continue;
                 }
-                // Replace OutputRegister by DataSignal
-                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
-                    auto dataSignal = dynamic_cast<VariableOperand*>(commitment->getLhs())->getVariable();
-                    if (dataSignal == subVar.first) {
-                        assignments.emplace_back(
-                                new Assignment(new DataSignalOperand(subVar.second), commitment->getRhs()));
-                        continue;
-                    }
-                }
-                // Remove assignments with OutputRegister at RHS
-                const auto& varSet = ExprVisitor::getUsedVariables(commitment->getRhs());
-                if (varSet.find(subVar.first) != varSet.end()) {
+            }
+            replacedAssignment = replaceVariables(commitment);
+            if (replacedAssignment) {
+                if (!isDuplicate(replacedAssignment.get(), assignments)) {
+                    assignments.push_back(replacedAssignment.get());
                     continue;
                 }
-                assignments.emplace_back(commitment);
             }
-            helper->modifyCommitmentsList(std::move(assignments));
-        }
-    }
-
-    // Remove duplicate assignments
-    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
-        auto helper = (PropertyHelper *) property;
-        std::vector<Assignment* > assignments;
-
-        auto equalAssignments = [&assignments](Assignment* commitment) -> bool {
-            for (const auto& assignment : assignments) {
-                if (*assignment == *commitment) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
-            if (!equalAssignments(commitment)) {
+            if (!isDuplicate(commitment, assignments)) {
                 assignments.push_back(commitment);
             }
         }
-        helper->modifyCommitmentsList(std::move(assignments));
+        property->setModifiedCommitmentList(std::move(assignments));
     }
+}
+
+bool OptimizerHLS::isSelfAssignments(Assignment* assignment) {
+    return (*assignment->getLhs() == *assignment->getRhs());
+}
+
+boost::optional<Assignment *> OptimizerHLS::replaceDataSignals(Assignment* assignment)
+{
+    if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
+        auto dataSignal = dynamic_cast<DataSignalOperand*>(assignment->getLhs())->getDataSignal();
+        for (const auto subVar : getSubVarMap(oldToNewDataSignalMap)) {
+            if (dataSignal==subVar.first) {
+                return (new Assignment(new DataSignalOperand(subVar.second), assignment->getRhs()));
+            }
+        }
+    }
+    return boost::none;
+}
+
+boost::optional<Assignment *> OptimizerHLS::replaceVariables(Assignment* assignment) {
+    if (NodePeekVisitor::nodePeekVariableOperand(assignment->getLhs())) {
+        auto dataSignal = dynamic_cast<VariableOperand*>(assignment->getLhs())->getVariable();
+        for (const auto& subVar : getSubVarMap(registerToOutputMap)) {
+            if (dataSignal == subVar.first) {
+                return (new Assignment(new DataSignalOperand(subVar.second), assignment->getRhs()));
+            }
+        }
+    }
+    return boost::none;
+}
+
+bool OptimizerHLS::hasOutputRegisterAtRHS(Assignment* assignment) {
+    for (const auto& subVar : getSubVarMap(registerToOutputMap)) {
+        const auto& varSet = ExprVisitor::getUsedVariables(assignment->getRhs());
+        if (varSet.find(subVar.first) != varSet.end()) {
+            return true;
+        }
+    }
+}
+
+bool OptimizerHLS::isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList) {
+    for (const auto& assignment : assignmentList) {
+        if (*assignment == *newAssignment) {
+            return true;
+        }
+    }
+    return false;
 }
 
 template<typename Key, typename Value>
@@ -358,7 +359,7 @@ void OptimizerHLS::findVariables() {
         }
     }
 
-    auto eraseIfFunction = [this](Variable* var) {
+    auto eraseIfFunction = [this](Variable  *var) {
         for (const auto &operationProperties : propertySuiteHelper->getOperationProperties()) {
             for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
@@ -501,63 +502,3 @@ void OptimizerHLS::arraySlicing() {
         arrayPorts.insert({port, expressions});
     }
 }
-
-//    for (const auto& state : propertySuite->getStates()) {
-//        auto successorProperties = propertySuite->getSuccessorProperties(state);
-//        std::sort(successorProperties.begin(), successorProperties.end(), [](const AbstractProperty* prop1, const AbstractProperty* prop2) {
-//            return (prop1->getAssumptionList().size() < prop2->getAssumptionList().size());
-//        });
-//        for (auto property = successorProperties.begin(); property != successorProperties.end(); ++property) {
-//            auto assumptionList = (*property)->getAssumptionList();
-//            for (auto assumption : assumptionList) {
-//                std::cout << "Find Conditions: " << *assumption << std::endl;
-//            }
-//            std::cout << std::endl;
-//            for (auto otherProperty = std::next(property); otherProperty != successorProperties.end(); ++otherProperty) {
-//                auto otherAssumptionList = (*otherProperty)->getAssumptionList();
-//                for (auto &assumption : otherAssumptionList) {
-//                    if (NodePeekVisitor::nodePeekUnaryExpr(assumption) != nullptr) {
-//                        assumption = (dynamic_cast<UnaryExpr * >(assumption))->getExpr();
-//                    }
-//                }
-//                for (auto assumption : otherAssumptionList) {
-//                    std::cout << *assumption << std::endl;
-//                }
-//                bool allFound = true;
-//                for (auto assumption : assumptionList) {
-//                    bool found = false;
-//                    for (auto otherAssumption : otherAssumptionList) {
-//                        if (*assumption == *otherAssumption) {
-//                            found = true;
-//                        }
-//                    }
-//                    if (!found) {
-//                        allFound = false;
-//                    }
-//                }
-//                if (allFound) {
-//                    std::cout << "All found!" << std::endl;
-//                    for (const auto &assumption : assumptionList) {
-//                        (otherAssumptionList).erase(std::remove_if(
-//                                otherAssumptionList.begin(),
-//                                otherAssumptionList.end(),
-//                                [&assumption](Expr *expr) {
-//                                    if (NodePeekVisitor::nodePeekUnaryExpr(expr) != nullptr) {
-//                                        return (*assumption == *((dynamic_cast<UnaryExpr * >(expr))->getExpr()));
-//                                    }
-//                                    return false;
-//                                }), otherAssumptionList.end()
-//                        );
-//                    }
-//                    std::cout << std::endl << "New List" << std::endl;
-//                    for (auto assumption : otherAssumptionList) {
-//                        std::cout << *assumption << std::endl;
-//                    }
-//                } else {
-//                    std::cout << "Not all found!" << std::endl;
-//                }
-//                std::cout << std::endl << std::endl;
-//            }
-//            std::cout << std::endl << std::endl;
-//        }
-//    }

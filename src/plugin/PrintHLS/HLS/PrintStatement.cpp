@@ -36,9 +36,6 @@ std::string PrintStatement::getString() {
 }
 
 void PrintStatement::visit(Assignment &node) {
-    if (*node.getLhs() == *node.getRhs()) {
-        return;
-    }
     printIndent();
     side = Side::LHS;
     node.getLhs()->accept(*this);

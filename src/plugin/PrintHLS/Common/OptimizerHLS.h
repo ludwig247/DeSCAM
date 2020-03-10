@@ -5,6 +5,8 @@
 #ifndef SCAM_UTILITIES_HLS_H
 #define SCAM_UTILITIES_HLS_H
 
+#include <boost/optional.hpp>
+
 #include <list>
 #include <memory>
 #include <set>
@@ -51,6 +53,7 @@ namespace SCAM { namespace HLSPlugin {
         std::map<Variable *, DataSignal *> registerToOutputMap;
         std::map<DataSignal *, Variable *> outputToRegisterMap;
         std::map<DataSignal *, std::vector<DataSignal *>> moduleToTopSignalMap;
+        std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
 
         std::map<Port *, std::list<Expr *>> arrayPorts;
 
@@ -60,8 +63,13 @@ namespace SCAM { namespace HLSPlugin {
         void findInternalRegisterIn();
         void findInternalRegisterOut();
 
-        void replaceDataSignals(const std::map<DataSignal *, DataSignal *> &dataSignalMap);
-        void replaceVariables();
+        void modifyCommitmentLists();
+        bool isSelfAssignments(Assignment *assignment);
+        bool hasOutputRegisterAtRHS(Assignment *assignment);
+        bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
+        boost::optional<Assignment *> replaceDataSignals(Assignment *assignment);
+        boost::optional<Assignment *> replaceVariables(Assignment *assignment);
+
         void removeRedundantConditions();
         void mapOutputRegistersToOutput();
         void arraySlicing();

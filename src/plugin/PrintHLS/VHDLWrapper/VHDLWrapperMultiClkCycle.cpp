@@ -243,6 +243,7 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
             if (operation == operations.begin()) {
                 if (operations.size() == 1) {
                     noEndIf = true;
+                    skipAssumptions = true;
                 } else {
                     ss << "\t\t\tif (";
                 }

@@ -69,8 +69,7 @@ void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
             std::string const& suffix,
             bool const& asVector) {
         for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix)
-               << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
+            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix) << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
         }
     };
 
@@ -80,15 +79,14 @@ void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
             std::string const& suffix,
             bool const& asVector) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix)
-               << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
+            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix) << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
         }
     };
 
     ss << "\n\t-- Internal Registers\n";
     printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
     printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
-    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false);
+//    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false);
 
     ss << "\n\t-- Operation Module Inputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
@@ -216,6 +214,7 @@ void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
             if (operation == operations.begin()) {
                 if (operations.size() == 1) {
                     noEndIf = true;
+                    skipAssumptions = true;
                 } else {
                     ss << "\t\t\tif (";
                 }
@@ -335,7 +334,7 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
     for (const auto &arrayPort : optimizer->getArrayPorts()) {
         uint32_t exprNumber = 0;
         for (const auto &expr : arrayPort.second) {
-            ss << "\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
+            ss << "\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
                << PrintStatement::toString(expr, false) << ")));\n";
             exprNumber++;

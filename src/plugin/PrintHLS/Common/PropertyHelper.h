@@ -12,10 +12,14 @@ namespace SCAM { namespace HLSPlugin {
 class PropertyHelper : public Property {
 
 public:
-    void modifyCommitmentsList(std::vector<Assignment* >&& assignments);
+    explicit PropertyHelper(Property const& property);
+
+    std::vector<Assignment *> getModifiedCommitmentList();
+
+    void setModifiedCommitmentList(std::vector<Assignment *> &&commitmentList);
 
 private:
-
+    std::vector<Assignment *> modifiedCommitmentList = {};
 };
 
 }}

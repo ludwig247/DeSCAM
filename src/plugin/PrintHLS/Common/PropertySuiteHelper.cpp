@@ -15,12 +15,12 @@ PropertySuiteHelper::PropertySuiteHelper(PropertySuite const& propertySuite) :
     addWaitProperties();
 }
 
-std::vector<SCAM::Property*> PropertySuiteHelper::getWaitProperties() const
+std::vector<PropertyHelper *> PropertySuiteHelper::getWaitProperties() const
 {
     return waitProperties;
 }
 
-std::vector<SCAM::Property*> PropertySuiteHelper::getOperationProperties() const
+std::vector<PropertyHelper *> PropertySuiteHelper::getOperationProperties() const
 {
     return operationProperties;
 }
@@ -28,7 +28,8 @@ std::vector<SCAM::Property*> PropertySuiteHelper::getOperationProperties() const
 void PropertySuiteHelper::addOperationProperties() {
     for (const auto& property : getProperties()) {
         if (!property->getOperation()->IsWait()) {
-            operationProperties.push_back(property);
+            auto operationProperty = new PropertyHelper(*property);
+            operationProperties.push_back(operationProperty);
         }
     }
 }
@@ -36,7 +37,8 @@ void PropertySuiteHelper::addOperationProperties() {
 void PropertySuiteHelper::addWaitProperties() {
     for (const auto& property : getProperties()) {
         if (property->getOperation()->IsWait()) {
-            waitProperties.push_back(property);
+            auto waitProperty = new PropertyHelper(*property);
+            waitProperties.push_back(waitProperty);
         }
     }
 }

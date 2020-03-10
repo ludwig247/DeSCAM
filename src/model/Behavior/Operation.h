@@ -21,6 +21,8 @@ namespace SCAM {
 
         ~Operation();
 
+        Operation& operator=(const Operation &operation) = default;
+
         // Getter
         bool IsReset();
 

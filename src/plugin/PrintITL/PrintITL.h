@@ -55,7 +55,7 @@ private:
 
     // std::string pipelined();
 
-    std::string hls_macros();
+    std::string hlsMacros();
 
     // std::string hideConstants();
 };

@@ -64,7 +64,7 @@ void HLS::operations()
     for (auto operationProperty : propertySuiteHelper->getOperationProperties()) {
         const std::string& operationName = operationProperty->getName();
         ss << "\tcase " << operationName << ":\n";
-        for (auto commitment : operationProperty->getOperation()->getCommitmentsList()) {
+        for (auto commitment : operationProperty->getModifiedCommitmentList()) {
             ss << PrintStatement::toString(commitment, optimizer, hlsOption, 2, 2);
         }
         for (const auto& notifyStmt : propertySuiteHelper->getNotifyStatements(operationProperty)) {
@@ -107,7 +107,7 @@ void HLS::interface()
         ss << ",\n";
     }
 
-    // optimizerimized Array Inputs
+    // Array Inputs
     for (const auto& arrayPort : optimizer->getArrayPorts()) {
         for (unsigned long i = 0; i<arrayPort.second.size(); ++i) {
             ss << "\t" << Utilities::convertDataType(
