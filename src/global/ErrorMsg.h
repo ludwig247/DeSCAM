@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace SCAM {
 
@@ -21,17 +22,17 @@ namespace SCAM {
         };
 
         struct Error {
-            Error(const std::string msg, const std::string astMsg ="", const std::string file="", const std::string loc="", const std::vector<std::string> &errorLog={}) :
-                    msg(msg),
+            Error(const std::string statement, const std::string astMsg ="", const std::string file="", const std::string lineNumber="", const std::map<std::string,std::string> &errorMsgs={}) :
+                    statement(statement),
                     astMsg(astMsg),
                     file(file),
-                    loc(loc),
-                    errorLog(errorLog){};
-            const std::string msg;
+                    lineNumber(lineNumber),
+                    errorMsgs(errorMsgs){};
+            const std::string statement;
             const std::string astMsg;
             const std::string file;
-            const std::string loc;
-            const std::vector<std::string> errorLog;
+            const std::string lineNumber;
+            const std::map<std::string,std::string> errorMsgs;
         };
 
         //
@@ -43,7 +44,7 @@ namespace SCAM {
         static std::vector<Error> getErrorList();
 
         //SETTER
-        static void addErrorLog(std::string msg);
+        static void addErrorLog(std::string msg, std::string severityLevel);
 
         static void addError(std::string msg, std::string astMsg, std::string file = "", std::string loc="");
 
@@ -60,7 +61,7 @@ namespace SCAM {
         ~ErrorMsg() {};
 
         //error&warning log
-        std::vector<std::string> errorLog; //! Contains an entry for every feedback; is added to Error
+        std::map<std::string,std::string> errorMsgs; //! Contains an entry for every feedback; is added to Error
 
         //list containing the error information
         std::vector<Error> errorList;

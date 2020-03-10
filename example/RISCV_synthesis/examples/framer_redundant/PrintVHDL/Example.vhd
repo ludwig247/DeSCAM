@@ -25,7 +25,7 @@ architecture Example_arch of Example is
 	signal active_state: Example_state_t;
 	signal active_operation: Example_operation_t;
 	signal cnt: signed(31 downto 0);
-	signal msg: msg_t;
+	signal statement: msg_t;
 
 	-- Declare state signals that are used by ITL properties for OneSpin
 	signal frame_data_0: boolean;
@@ -70,7 +70,7 @@ begin
 		if (rst = '1') then
 			m_out_notify <= false;
 			s_out_sig <= false;
-			msg.data <= x"00000000";
+			statement.data <= x"00000000";
 			b_in_notify <= true;
 			cnt <= x"00000000";
 			active_state <= st_idle_4;
@@ -80,7 +80,7 @@ begin
 				b_in_notify <= false;
 				s_out_sig <= true;
 				m_out_notify <= true;
-				msg.data <= b_in_sig.data;
+				statement.data <= b_in_sig.data;
 				m_out_sig <= x"00000003";
 				cnt <= x"00000003";
 				active_state <= st_frame_start_2;
@@ -92,7 +92,7 @@ begin
 				m_out_notify <= false;
 				s_out_sig <= false;
 				b_in_notify <= true;
-				msg.data <= b_in_sig.data;
+				statement.data <= b_in_sig.data;
 				active_state <= st_idle_4;
 			when op_frame_start_2_write_3 =>
 				m_out_sig <= x"ffffffff" + cnt;
@@ -109,20 +109,20 @@ begin
 				m_out_notify <= false;
 				b_in_notify <= true;
 				active_state <= st_frame_data_0;
-				msg.data <= b_in_sig.data;
+				statement.data <= b_in_sig.data;
 			when op_frame_data_0_read_1 =>
 				cnt <= x"ffffffff" + cnt;
 				m_out_notify <= true;
 				b_in_notify <= true;
 				active_state <= st_frame_data_0;
-				m_out_sig <= msg.data;
+				m_out_sig <= statement.data;
 			when op_frame_data_0_read_2 =>
 				s_out_sig <= false;
 				cnt <= x"ffffffff" + cnt;
 				m_out_notify <= true;
 				b_in_notify <= true;
 				active_state <= st_idle_4;
-				m_out_sig <= msg.data;
+				m_out_sig <= statement.data;
 			end case;
 		end if;
 	end process;

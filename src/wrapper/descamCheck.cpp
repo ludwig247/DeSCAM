@@ -14,29 +14,45 @@
 
 namespace py = pybind11;
 
-void printErrorsJSON() {
+const std::string getFileName(std::string fileDir) {
+    std::string filename = "";
+    int i = fileDir.length() - 1;
+    while (fileDir[i] != '/' && i >= 0) {
+        i--;
+    }
+    filename = fileDir.substr(i + 1, fileDir.length() - i);
+    return filename;
+}
+
+void printErrorsJSON(std::string filedir) {
     std::stringstream json;
     if (ErrorMsg::hasError()) {
         auto errorList = SCAM::ErrorMsg::getInstance().getErrorList();
         json << "[\n";
-        for (const auto &err: errorList) {
-            // if (err.file != "" && err.loc != "") {
-            if (err.errorLog.size() > 0) {
-                json << "\t{\n";
-                json << "\t\t" << "file: '" << err.file << "'\n";
-                json << "\t\t" << "line: '" << err.loc << "'\n";
-                json << "\t\t" << "message: '" << err.msg << "'\n";
-                json << "\t\t" << "fix: '";
-                for (auto i = 0; i < err.errorLog.size(); i++) {
-                    if (i == err.errorLog.size() - 1) {
-                        json << err.errorLog[i] << "'\n";
+        for (auto errorListItr = errorList.begin(); errorListItr != errorList.end(); errorListItr++) {
+            if (!getFileName(errorListItr->file).compare(filedir) && errorListItr->lineNumber != "") {
+                if (errorListItr->errorMsgs.size() > 0) {
+                    json << "\t{\n";
+                    auto errMsgs = errorListItr->errorMsgs;
+                    for (auto msgItr = errMsgs.begin(); msgItr != errMsgs.end(); msgItr++) {
+                        json << "\t\t" << "file: '" << errorListItr->file << "'\n";
+                        json << "\t\t" << "statement: '" << errorListItr->statement << "'\n";
+                        json << "\t\t" << "line: '" << errorListItr->lineNumber << "'\n";
+                        json << "\t\t" << "severity: '" << msgItr->second << "'\n";
+                        json << "\t\t" << "message: '";
+                        if (std::next(msgItr, 1) == errMsgs.end()) {
+                            json << msgItr->first << "'\n";
+                        } else {
+                            json << msgItr->first << ", ";
+                        }
+                    }
+                    if (std::next(errorListItr, 1) == errorList.end()) {
+                        json << "\t}\n";
                     } else {
-                        json << err.errorLog[i] << ", ";
+                        json << "\t},\n";
                     }
                 }
-                json << "\t},\n";
             }
-            //  }
         }
         json << "]\n";
         std::cout << json.str();
@@ -48,24 +64,7 @@ int descamCheck(int argc, const char *argv[]) {
     CommandLineProcess cml = CommandLineProcess(argc, argv);
     //Create model
     SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true);
-    /* auto errorList = SCAM::ErrorMsg::getInstance().getErrorList();
-     if (ErrorMsg::hasError()) {
-         std::cout << "" << std::endl;
-         std::cout << "Errors: Translation of Stmts" << std::endl;
-         std::cout << "----------------------" << std::endl;
-         for (const auto &item: errorList) {
-             std::cout << "- msg: " << item.msg << std::endl;
-             std::cout << "- astMsg: " << item.astMsg << std::endl;
-             std::cout << "- file: " << item.file << std::endl;
-             std::cout << "- loc: " << item.loc << std::endl;
-             for (const auto &log: item.errorLog) {
-                 std::cout << "\t" << log << std::endl;
-             }
-             std::cout << std::endl;
-         }
-         ErrorMsg::clear();
-     }*/
-    printErrorsJSON();
+    printErrorsJSON(cml.getSourceFile());
     return 0;
 }
 

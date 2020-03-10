@@ -55,7 +55,7 @@ bool SCAM::CheckErrors::fire() {
 void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
     FindModules modules(decl);
 
-    //Fill the model with modules(structural describtion)
+    //Fill the model with modules(structural description)
     for (auto &scparModule: modules.getModuleMap()) {
         //Module Name
         std::string name = scparModule.first;
@@ -63,7 +63,7 @@ void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
             this->unimportantModules.end()) {
             continue;
         }
-//        std::cout << "Module: " << name << std::endl;
+//      std::cout << "Module: " << name << std::endl;
         auto module = new Module(scparModule.first);
         model->addModule(module);
         //Members
@@ -197,8 +197,8 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
         std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
         std::cout << "----------------------" << std::endl;
         for (auto item: ErrorMsg::getInstance().getErrorList()) {
-            std::cout << "- " << item.msg << std::endl;
-            for (auto log: item.errorLog) {
+            std::cout << "- " << item.statement << std::endl;
+            for (auto log: item.errorMsgs) {
                 std::cout << "\t" << log << std::endl;
             }
         }
@@ -313,8 +313,8 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
             std::cout << "----------------------" << std::endl;
             for (auto item: ErrorMsg::getInstance().getErrorList()) {
-                std::cout << "- " << item.msg << std::endl;
-                for (auto log: item.errorLog) {
+                std::cout << "- " << item.statement << std::endl;
+                for (auto log: item.errorMsgs) {
                     std::cout << "\t" << log << std::endl;
                 }
             }
@@ -356,8 +356,8 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
             func.second->setStmtList(functionFactory.getStmtList());
         } catch (std::runtime_error &e) {
 //            std::cout << e.what() << std::endl;
-//            for(auto msg:  ErrorMsg::getErrorList()){
-//                std::cout << msg.msg << std::endl;
+//            for(auto statement:  ErrorMsg::getErrorList()){
+//                std::cout << statement.statement << std::endl;
 //            }
            // ErrorMsg::clear();
             this->model->removeGlobalFunction(func.second);

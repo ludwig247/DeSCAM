@@ -25,7 +25,7 @@ architecture Example_arch of Example is
 	signal active_state: Example_state_t;
 	signal active_operation: Example_operation_t;
 	signal cnt: signed(31 downto 0);
-	signal msg: msg_t;
+	signal statement: msg_t;
 
 	-- Declare state signals that are used by ITL properties for OneSpin
 	signal frame_data_0: boolean;
@@ -74,14 +74,14 @@ begin
 			b_in_notify <= true;
 			cnt <= x"00000000";
 			active_state <= st_idle_3;
-			msg.data <= x"00000000";
+			statement.data <= x"00000000";
 			m_out_notify <= false;
 		elsif (clk = '1' and clk'event) then
 			case active_operation is
 			when op_frame_data_0_read_0 =>
 				b_in_notify <= true;
 				active_state <= st_frame_data_0;
-				msg.data <= b_in_sig.data;
+				statement.data <= b_in_sig.data;
 				m_out_notify <= false;
 			when op_frame_start_2_write_3 =>
 				b_in_notify <= true;
@@ -98,7 +98,7 @@ begin
 				m_out_sig <= x"00000003";
 				active_state <= st_frame_start_2;
 				b_in_notify <= false;
-				msg.data <= b_in_sig.data;
+				statement.data <= b_in_sig.data;
 				cnt <= x"00000003";
 				s_out_sig <= true;
 				m_out_notify <= true;
@@ -109,17 +109,17 @@ begin
 			when op_idle_3_read_6 =>
 				s_out_sig <= false;
 				b_in_notify <= true;
-				msg.data <= b_in_sig.data;
+				statement.data <= b_in_sig.data;
 				active_state <= st_idle_3;
 				m_out_notify <= false;
 			when op_frame_data_0_read_1 =>
-				m_out_sig <= msg.data;
+				m_out_sig <= statement.data;
 				b_in_notify <= true;
 				active_state <= st_frame_data_0;
 				m_out_notify <= true;
 				cnt <= x"ffffffff" + cnt;
 			when op_frame_data_0_read_2 =>
-				m_out_sig <= msg.data;
+				m_out_sig <= statement.data;
 				s_out_sig <= false;
 				b_in_notify <= true;
 				active_state <= st_idle_3;

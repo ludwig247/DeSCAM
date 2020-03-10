@@ -17,7 +17,7 @@ constraint no_reset := rst = '0'; end constraint;
 
 -- VISIBLE REGISTERS --
 --macro cnt : signed := end macro; 
-macro msg_data : signed := msg.data end macro; 
+macro msg_data : signed := statement.data end macro;
 
 
 -- STATES -- 

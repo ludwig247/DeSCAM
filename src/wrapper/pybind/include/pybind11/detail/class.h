@@ -279,7 +279,7 @@ extern "C" inline int pybind11_object_init(PyObject *self, PyObject *, PyObject 
     PyTypeObject *type = Py_TYPE(self);
     std::string msg;
 #if defined(PYPY_VERSION)
-    msg += handle((PyObject *) type).attr("__module__").cast<std::string>() + ".";
+    statement += handle((PyObject *) type).attr("__module__").cast<std::string>() + ".";
 #endif
     msg += type->tp_name;
     msg += ": No constructor defined!";

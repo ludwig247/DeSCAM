@@ -3,8 +3,8 @@ state_0[ label = "------"];
 state_1[ label = "section = run"];
 state_2[ label = "cnt = 0"];
 state_3[ label = "currentPhase = frame_data"];
-state_4[ label = "msg.data = 0"];
-state_5[ label = "msg.status = in_frame"];
+state_4[ label = "statement.data = 0"];
+state_5[ label = "statement.status = in_frame"];
 state_6[ label = "nextPhase = frame_data"];
 state_7[ label = "ready = false"];
 state_8[ label = "s_out.set(false)"];
@@ -14,7 +14,7 @@ state_11[ label = "currentPhase = nextPhase"];
 state_12[ label = "if ((currentPhase == idle))"];
 state_13[ label = "s_out.set(false)"];
 state_14[ label = "b_in_notify = true"];
-state_15[ label = "if ((msg.status == in_frame))"];
+state_15[ label = "if ((statement.status == in_frame))"];
 state_16[ label = "s_out.set(true)"];
 state_17[ label = "nextPhase = frame_start"];
 state_18[ label = "cnt = 3"];
@@ -26,15 +26,15 @@ state_23[ label = "if ((cnt == 0))"];
 state_24[ label = "cnt = 15"];
 state_25[ label = "nextPhase = frame_data"];
 state_26[ label = "if ((currentPhase == frame_data))"];
-state_27[ label = "ready = b_in.nb_read(msg)"];
+state_27[ label = "ready = b_in.nb_read(statement)"];
 state_28[ label = "if (not(ready))"];
-state_29[ label = "m_out.write(msg.data)"];
+state_29[ label = "m_out.write(statement.data)"];
 state_30[ label = "if ((cnt == 0))"];
 state_31[ label = "nextPhase = idle"];
 state_32[ label = "cnt = (cnt - 1)"];
 state_34[ label = "wait(SC_ZERO_TIME)"];
 state_35[ label = "if (b_in.sync())"];
-state_36[ label = "msg = b_in_sig"];
+state_36[ label = "statement = b_in_sig"];
 state_38[ label = "m_out_notify = true"];
 state_39[ label = "wait(SC_ZERO_TIME)"];
 
@@ -91,7 +91,7 @@ state_14
 state_34
 state_35
 state_36
-label = "b_in.read(msg)";
+label = "b_in.read(statement)";
 }
 subgraph cluster_1 {
 style=filled; color=slategray;

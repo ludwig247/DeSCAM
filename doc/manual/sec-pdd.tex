@@ -94,23 +94,23 @@ After completion the module goes back to the section \textit{idle} and waits for
     \begin{tabbing}
 99 \= XXX\=XXX\=XXX\=XXX\=XXX\=XXX\=XXX\=\kill
 1:\' enum status\_t \{in\_frame, oof\_frame\};\\
-2:\' struct msg\_t \{status\_t status; int data; \};\\
+2:\' struct statement\_t \{status\_t status; int data; \};\\
 3:\' SC\_MODULE(Example) \{ \\
 4:\'\> SC\_CTOR(Example): \\
 5:\'\>\> nextsection(idle)\{SC\_THREAD(fsm)\}; \\
 6:\'\> enum Sections\{idle,frame\_start,frame\_data\}; \\
 7:\'\> Sections section,nextsection; \\
-8:\'\> blocking\_in$<$msg\_t$>$ b\_in; \\
+8:\'\> blocking\_in$<$statement\_t$>$ b\_in; \\
 9:\'\> master\_out$<$int$>$m\_out; \\
 10:\'\> shared\_out$<$bool$>$ s\_out; \\
-11:\'\> int cnt;bool ready;msg\_t msg; \\
+11:\'\> int cnt;bool ready;statement\_t statement; \\
 12:\'\> void fsm()\{ \\
 13:\'\>\> while(true) \{ \\
 14:\'\>\>\> section = nextsection; \\
 15:\'\>\>\> if(section == idle)\{ \\
 16:\'\>\>\>\> s\_out$\rightarrow$set(false); \\
-17:\'\>\>\>\> b\_in$\rightarrow$read(msg);\\
-18:\'\>\>\>\> if(msg.status == in\_frame)\{\\
+17:\'\>\>\>\> b\_in$\rightarrow$read(statement);\\
+18:\'\>\>\>\> if(statement.status == in\_frame)\{\\
 19:\'\>\>\>\>\> s\_out$\rightarrow$set(true); \\
 20:\'\>\>\>\>\> nextsection = frame\_start;\\
 21:\'\>\>\>\>\> cnt = 3;\\
@@ -123,9 +123,9 @@ After completion the module goes back to the section \textit{idle} and waits for
 28:\'\>\>\>\>\> nextsection = frame\_data;\\
 29:\'\>\>\>\> \}\\
 30:\'\>\>\> \}else if(section == frame\_data)\{ \\
-31:\'\>\>\>\> ready = b\_in$\rightarrow$nb\_read(msg);\\
+31:\'\>\>\>\> ready = b\_in$\rightarrow$nb\_read(statement);\\
 32:\'\>\>\>\> if (!ready) \{ \\
-33:\'\>\>\>\>\> m\_out$\rightarrow$write(msg.data);\\
+33:\'\>\>\>\>\> m\_out$\rightarrow$write(statement.data);\\
 34:\'\>\>\>\>\> if(cnt == 0)\{nextsection = idle;\}\\
 35:\'\>\>\>\>\> cnt = cnt-1;\\
 36:\'\>\>\>\> \}\\
@@ -176,7 +176,7 @@ The respective nodes are marked and transformed to a state for the PPA.
 assume:
  state == L.17 and
  sync == true and 	
- msg.status==in_frame;
+ statement.status==in_frame;
 prove: 
  state == L.24
  s_out == true;
@@ -266,7 +266,7 @@ assume:
 prove: 
  state == L.31
  cnt == cnt-1;
- m_out == msg.data;
+ m_out == statement.data;
 \end{lstlisting}
 \end{small}
 \end{wrapfigure}
@@ -369,7 +369,7 @@ The datapath signal transports the actual message.
 The visible registers are part of the state space of the design. 
 There is a visible register for each variable that is used at the system level, if the register is not removed in the previous optimization step. 
 The macros for compound types are split into separate macros for each subtype. 
-For example, the variable \textit{msg} is separated into two macros \textit{msg\_data} and \textit{msg\_status}.
+For example, the variable \textit{statement} is separated into two macros \textit{statement\_data} and \textit{statement\_status}.
 
 \subsubsection{Important States}
 
@@ -470,7 +470,7 @@ The first condition is that hardware is in state \textit{idle\_3}, which means t
 The operation is only triggered if a new message is available and the \textit{b\_in\_sync} macro evaluates to \textit{true}. 
 The case that there is no new message is covered by the respective wait operation.
 The last condition of the assume part is more interesting, because it differentiates from what the designer may expect by looking at the SystemC-PPA. 
-The condition results from line~18. The condition is not described using the variable \textit{msg.status}, instead the evaluation of the condition is based on the macro \textit{b\_in\_sig\_status}. 
+The condition results from line~18. The condition is not described using the variable \textit{statement.status}, instead the evaluation of the condition is based on the macro \textit{b\_in\_sig\_status}.
 At the system level the value of a variable changes instantly upon assignment. 
 At the RTL the value of a register changes with the next clock event. 
 In order to evaluate the condition upon handshake completion, the value of the input signal has to be evaluated. 
@@ -505,7 +505,7 @@ end property;
 The last segment is \textit{prove}, which defines the next state of the hardware. 
 All changes of the state variables and outputs are proven at time point \textit{t\_end}. 
 In this case the hardware transitions from state \textit{idle\_3} to \textit{frame\_start\_2} and the signal \textit{cnt} takes the value 3.
-The variable \textit{msg} stores the message, which is frozen at time point \textit{t} in the freeze-variables \textit{b\_in\_sig\_data\_at\_t} and \textit{b\_in\_sig\_status\_at\_t}. 
+The variable \textit{statement} stores the message, which is frozen at time point \textit{t} in the freeze-variables \textit{b\_in\_sig\_data\_at\_t} and \textit{b\_in\_sig\_status\_at\_t}.
 The registers are updated to the value of \textit{b\_in} at \textit{t} not at \textit{t\_end}. 
 As mentioned earlier, outputs are set at \textit{t\_end} whereas inputs are read at \textit{t}. 
 
@@ -569,8 +569,8 @@ This largely increases the readability of the properties.
 If the designer decides to implement the \textit{enum} type manually, there has to be a mapping to the symbolic type of the system level.    
 
 We explain, via example, how the abstract ports at the system level are mapped to an arbitrary RTL implementation.
-The generated template from the golden reference has a port declaration \textit{b\_in} that transports a message of type \textit{msg\_t}. 
-This port provides the message as a 32-bit integer for \textit{msg.data} and a 1-bit boolean for \textit{msg.status}. 
+The generated template from the golden reference has a port declaration \textit{b\_in} that transports a message of type \textit{statement\_t}.
+This port provides the message as a 32-bit integer for \textit{statement.data} and a 1-bit boolean for \textit{statement.status}.
 
 It is assumed that the entire message is not provided by a 33-bit input port. 
 Instead, there is a 1-bit input receiving the message sequentially over multiple clock cycles.
@@ -614,12 +614,12 @@ In order to implement the operation, the designer starts with the trigger condit
 The hardware has to be in the important state \textit{idle\_3} and the incoming \textit{sync} is \textit{true}.  
 In \textit{idle\_3} the counter \textit{buffer\_cnt} is initially 0 and starts counting upon transmission start. 
 The transmission is finished if the counter reaches the value 31 and thus 32 values of \textit{data\_in} are buffered.
-The designer has to implement the expectations of the property, e.g., the visible register \textit{msg\_data} has to store the received message. 
+The designer has to implement the expectations of the property, e.g., the visible register \textit{statement\_data} has to store the received message.
 
 Here, an abstract view on this operation is provided, which is always implicitly given by a property. 
 The transmission starts at time point \textit{t} and the first value latched into the buffer is the value of \textit{data\_in} at \textit{t} and the last value is the value of \textit{data\_in} at \textit{t+31}. 
 This sums up to total 32 1-bit values at which part the transmission is over and the expectation part of the property is checked. 
-The expectations part of the properties specifies that after 32 clock cycles \textit{msg\_data} has the value of \textit{b\_in\_sig\_data} at \textit{t}. 
+The expectations part of the properties specifies that after 32 clock cycles \textit{statement\_data} has the value of \textit{b\_in\_sig\_data} at \textit{t}.
 
 Now, we assume that the implementation step for this operation is done and the correctness of the implementation is to be checked. 
 In order to do so, it is required to refine the behavior of the hardware within the properties. 

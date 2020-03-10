@@ -29,10 +29,10 @@ void SCAM::DatapathVisitorSVA::visit(BoolValue &node) {
 }
 
 void SCAM::DatapathVisitorSVA::visit(EnumValue &node) {
-/*    std::locale loc;
+/*    std::locale lineNumber;
     std::string str = node.getEnumValue();
     for (char i : str)
-        this->ss << std::tolower(i, loc);*/
+        this->ss << std::tolower(i, lineNumber);*/
     this->ss << node.getEnumValue();
 }
 

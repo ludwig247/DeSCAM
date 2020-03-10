@@ -19,7 +19,7 @@
 #define yyterminate() return token::END
 
 // The location of the current token.
-static yy::location loc;
+static yy::location lineNumber;
 %}
 
 %option noyywrap nounput batch debug noinput
@@ -34,169 +34,169 @@ blank [ \t]
 
 
 %{
-  #define YY_USER_ACTION  loc.columns(yyleng);
+  #define YY_USER_ACTION  lineNumber.columns(yyleng);
 %}
 
 %%
 
 %{
-  loc.step();
+  lineNumber.step();
 %}
-{blank}+   loc.step();
-[\n]+      loc.lines(yyleng);
+{blank}+   lineNumber.step();
+[\n]+      lineNumber.lines(yyleng);
 
 [ \n\t\f\r]     ;
 
 \/\*            {BEGIN(ACOMMENT);}
 <ACOMMENT>\*\/  {BEGIN(INITIAL);}
-<ACOMMENT>\n    {loc.lines();}
+<ACOMMENT>\n    {lineNumber.lines();}
 <ACOMMENT>.     ;
 
 \/\/            {BEGIN(LINECOMMENT);}
-<LINECOMMENT>\n {BEGIN(INITIAL);loc.lines();}
+<LINECOMMENT>\n {BEGIN(INITIAL);lineNumber.lines();}
 <LINECOMMENT>.  ;
 
 
-"init"          return yy::aml_parser::make_INIT(loc);
-"INIT"          return yy::aml_parser::make_INIT(loc);
-"enum"          return yy::aml_parser::make_ENUM(loc);
-"ENUM"          return yy::aml_parser::make_ENUM(loc);
-"const"         return yy::aml_parser::make_CONST(loc);
-"CONST"         return yy::aml_parser::make_CONST(loc);
-"function"      return yy::aml_parser::make_FUNC(loc);
-"FUNCTION"      return yy::aml_parser::make_FUNC(loc);
-"system"        return yy::aml_parser::make_SYSTEM(loc);
-"SYSTEM"        return yy::aml_parser::make_SYSTEM(loc);
-"sys"           return yy::aml_parser::make_SYSTEM(loc);
-"SYS"           return yy::aml_parser::make_SYSTEM(loc);
-"module"        return yy::aml_parser::make_MODULE(loc);
-"MODULE"        return yy::aml_parser::make_MODULE(loc);
-"mod"           return yy::aml_parser::make_MODULE(loc);
-"MOD"           return yy::aml_parser::make_MODULE(loc);
-"blocking"      return yy::aml_parser::make_BLOCKING(loc);
-"BLOCKING"      return yy::aml_parser::make_BLOCKING(loc);
-"shared"        return yy::aml_parser::make_SHARED(loc);
-"SHARED"        return yy::aml_parser::make_SHARED(loc);
-"input"         return yy::aml_parser::make_IN(loc);
-"INPUT"         return yy::aml_parser::make_IN(loc);
-"in"            return yy::aml_parser::make_IN(loc);
-"IN"            return yy::aml_parser::make_IN(loc);
-"output"        return yy::aml_parser::make_OUT(loc);
-"OUTPUT"        return yy::aml_parser::make_OUT(loc);
-"out"           return yy::aml_parser::make_OUT(loc);
-"OUT"           return yy::aml_parser::make_OUT(loc);
-"sections"      return yy::aml_parser::make_SECTIONS(loc);
-"SECTIONS"      return yy::aml_parser::make_SECTIONS(loc);
-"nextsection"   return yy::aml_parser::make_NEXTSECTION(loc);
-"NEXTSECTION"   return yy::aml_parser::make_NEXTSECTION(loc);
-"@"             return yy::aml_parser::make_AT(loc);
-"fsm"           return yy::aml_parser::make_FSM(loc);
-"FSM"           return yy::aml_parser::make_FSM(loc);
-"connect"       return yy::aml_parser::make_CONNECT(loc);
-"CONNECT"       return yy::aml_parser::make_CONNECT(loc);
-"bool"          return yy::aml_parser::make_BOOL(loc);
-"BOOL"          return yy::aml_parser::make_BOOL(loc);
-"int"           return yy::aml_parser::make_INT(loc);
-"INT"           return yy::aml_parser::make_INT(loc);
-"compound"      return yy::aml_parser::make_COMPOUND(loc);
-"COMPOUND"      return yy::aml_parser::make_COMPOUND(loc);
+"init"          return yy::aml_parser::make_INIT(lineNumber);
+"INIT"          return yy::aml_parser::make_INIT(lineNumber);
+"enum"          return yy::aml_parser::make_ENUM(lineNumber);
+"ENUM"          return yy::aml_parser::make_ENUM(lineNumber);
+"const"         return yy::aml_parser::make_CONST(lineNumber);
+"CONST"         return yy::aml_parser::make_CONST(lineNumber);
+"function"      return yy::aml_parser::make_FUNC(lineNumber);
+"FUNCTION"      return yy::aml_parser::make_FUNC(lineNumber);
+"system"        return yy::aml_parser::make_SYSTEM(lineNumber);
+"SYSTEM"        return yy::aml_parser::make_SYSTEM(lineNumber);
+"sys"           return yy::aml_parser::make_SYSTEM(lineNumber);
+"SYS"           return yy::aml_parser::make_SYSTEM(lineNumber);
+"module"        return yy::aml_parser::make_MODULE(lineNumber);
+"MODULE"        return yy::aml_parser::make_MODULE(lineNumber);
+"mod"           return yy::aml_parser::make_MODULE(lineNumber);
+"MOD"           return yy::aml_parser::make_MODULE(lineNumber);
+"blocking"      return yy::aml_parser::make_BLOCKING(lineNumber);
+"BLOCKING"      return yy::aml_parser::make_BLOCKING(lineNumber);
+"shared"        return yy::aml_parser::make_SHARED(lineNumber);
+"SHARED"        return yy::aml_parser::make_SHARED(lineNumber);
+"input"         return yy::aml_parser::make_IN(lineNumber);
+"INPUT"         return yy::aml_parser::make_IN(lineNumber);
+"in"            return yy::aml_parser::make_IN(lineNumber);
+"IN"            return yy::aml_parser::make_IN(lineNumber);
+"output"        return yy::aml_parser::make_OUT(lineNumber);
+"OUTPUT"        return yy::aml_parser::make_OUT(lineNumber);
+"out"           return yy::aml_parser::make_OUT(lineNumber);
+"OUT"           return yy::aml_parser::make_OUT(lineNumber);
+"sections"      return yy::aml_parser::make_SECTIONS(lineNumber);
+"SECTIONS"      return yy::aml_parser::make_SECTIONS(lineNumber);
+"nextsection"   return yy::aml_parser::make_NEXTSECTION(lineNumber);
+"NEXTSECTION"   return yy::aml_parser::make_NEXTSECTION(lineNumber);
+"@"             return yy::aml_parser::make_AT(lineNumber);
+"fsm"           return yy::aml_parser::make_FSM(lineNumber);
+"FSM"           return yy::aml_parser::make_FSM(lineNumber);
+"connect"       return yy::aml_parser::make_CONNECT(lineNumber);
+"CONNECT"       return yy::aml_parser::make_CONNECT(lineNumber);
+"bool"          return yy::aml_parser::make_BOOL(lineNumber);
+"BOOL"          return yy::aml_parser::make_BOOL(lineNumber);
+"int"           return yy::aml_parser::make_INT(lineNumber);
+"INT"           return yy::aml_parser::make_INT(lineNumber);
+"compound"      return yy::aml_parser::make_COMPOUND(lineNumber);
+"COMPOUND"      return yy::aml_parser::make_COMPOUND(lineNumber);
 
-"if"            return yy::aml_parser::make_IF(loc);
-"IF"            return yy::aml_parser::make_IF(loc);
-"else"          return yy::aml_parser::make_ELSE(loc);
-"ELSE"          return yy::aml_parser::make_ELSE(loc);
+"if"            return yy::aml_parser::make_IF(lineNumber);
+"IF"            return yy::aml_parser::make_IF(lineNumber);
+"else"          return yy::aml_parser::make_ELSE(lineNumber);
+"ELSE"          return yy::aml_parser::make_ELSE(lineNumber);
 
-"read"          return yy::aml_parser::make_READ(loc);
-"READ"          return yy::aml_parser::make_READ(loc);
-"write"         return yy::aml_parser::make_WRITE(loc);
-"WRITE"         return yy::aml_parser::make_WRITE(loc);
-"nb_read"       return yy::aml_parser::make_NBREAD(loc);
-"NB_READ"       return yy::aml_parser::make_NBREAD(loc);
-"nb_write"      return yy::aml_parser::make_NBWRITE(loc);
-"NB_WRITE"      return yy::aml_parser::make_NBWRITE(loc);
-"get"       return yy::aml_parser::make_GET(loc);
-"GET"       return yy::aml_parser::make_GET(loc);
-"set"      return yy::aml_parser::make_SET(loc);
-"SET"      return yy::aml_parser::make_SET(loc);
+"read"          return yy::aml_parser::make_READ(lineNumber);
+"READ"          return yy::aml_parser::make_READ(lineNumber);
+"write"         return yy::aml_parser::make_WRITE(lineNumber);
+"WRITE"         return yy::aml_parser::make_WRITE(lineNumber);
+"nb_read"       return yy::aml_parser::make_NBREAD(lineNumber);
+"NB_READ"       return yy::aml_parser::make_NBREAD(lineNumber);
+"nb_write"      return yy::aml_parser::make_NBWRITE(lineNumber);
+"NB_WRITE"      return yy::aml_parser::make_NBWRITE(lineNumber);
+"get"       return yy::aml_parser::make_GET(lineNumber);
+"GET"       return yy::aml_parser::make_GET(lineNumber);
+"set"      return yy::aml_parser::make_SET(lineNumber);
+"SET"      return yy::aml_parser::make_SET(lineNumber);
 
-"("           return yy::aml_parser::make_LPAREN(loc);
-")"           return yy::aml_parser::make_RPAREN(loc);
-"{"           return yy::aml_parser::make_LCURLY(loc);
-"}"           return yy::aml_parser::make_RCURLY(loc);
-":"           return yy::aml_parser::make_COLON(loc);
-";"           return yy::aml_parser::make_SEMICOLON(loc);
-"."           return yy::aml_parser::make_PUNKT(loc);
-","           return yy::aml_parser::make_COMMA(loc);
-"->"          return yy::aml_parser::make_ARROW(loc);
+"("           return yy::aml_parser::make_LPAREN(lineNumber);
+")"           return yy::aml_parser::make_RPAREN(lineNumber);
+"{"           return yy::aml_parser::make_LCURLY(lineNumber);
+"}"           return yy::aml_parser::make_RCURLY(lineNumber);
+":"           return yy::aml_parser::make_COLON(lineNumber);
+";"           return yy::aml_parser::make_SEMICOLON(lineNumber);
+"."           return yy::aml_parser::make_PUNKT(lineNumber);
+","           return yy::aml_parser::make_COMMA(lineNumber);
+"->"          return yy::aml_parser::make_ARROW(lineNumber);
 
-"="           return yy::aml_parser::make_ASSIGNMENT(loc);
+"="           return yy::aml_parser::make_ASSIGNMENT(lineNumber);
 
-"++"          return yy::aml_parser::make_INCREMENT(loc);
-"--"          return yy::aml_parser::make_DECREMENT(loc);
-"+"           return yy::aml_parser::make_PLUS(loc);
-"-"           return yy::aml_parser::make_MINUS(loc);
-"*"           return yy::aml_parser::make_MULTIPLY(loc);
-"/"           return yy::aml_parser::make_DIVIDE(loc);
-"%"           return yy::aml_parser::make_REMAINDER(loc);
+"++"          return yy::aml_parser::make_INCREMENT(lineNumber);
+"--"          return yy::aml_parser::make_DECREMENT(lineNumber);
+"+"           return yy::aml_parser::make_PLUS(lineNumber);
+"-"           return yy::aml_parser::make_MINUS(lineNumber);
+"*"           return yy::aml_parser::make_MULTIPLY(lineNumber);
+"/"           return yy::aml_parser::make_DIVIDE(lineNumber);
+"%"           return yy::aml_parser::make_REMAINDER(lineNumber);
 
-"&"           return yy::aml_parser::make_BITAND(loc);
-"bitand"      return yy::aml_parser::make_BITAND(loc);
-"BITAND"      return yy::aml_parser::make_BITAND(loc);
-"|"           return yy::aml_parser::make_BITOR(loc);
-"bitor"       return yy::aml_parser::make_BITOR(loc);
-"BITOR"       return yy::aml_parser::make_BITOR(loc);
-"^"           return yy::aml_parser::make_BITXOR(loc);
-"bitxor"      return yy::aml_parser::make_BITXOR(loc);
-"BITXOR"      return yy::aml_parser::make_BITXOR(loc);
-"~"           return yy::aml_parser::make_BITNOT(loc);
-"bitnot"      return yy::aml_parser::make_BITNOT(loc);
-"BITNOT"      return yy::aml_parser::make_BITNOT(loc);
-"<<"          return yy::aml_parser::make_SHIFTL(loc);
-">>"          return yy::aml_parser::make_SHIFTR(loc);
+"&"           return yy::aml_parser::make_BITAND(lineNumber);
+"bitand"      return yy::aml_parser::make_BITAND(lineNumber);
+"BITAND"      return yy::aml_parser::make_BITAND(lineNumber);
+"|"           return yy::aml_parser::make_BITOR(lineNumber);
+"bitor"       return yy::aml_parser::make_BITOR(lineNumber);
+"BITOR"       return yy::aml_parser::make_BITOR(lineNumber);
+"^"           return yy::aml_parser::make_BITXOR(lineNumber);
+"bitxor"      return yy::aml_parser::make_BITXOR(lineNumber);
+"BITXOR"      return yy::aml_parser::make_BITXOR(lineNumber);
+"~"           return yy::aml_parser::make_BITNOT(lineNumber);
+"bitnot"      return yy::aml_parser::make_BITNOT(lineNumber);
+"BITNOT"      return yy::aml_parser::make_BITNOT(lineNumber);
+"<<"          return yy::aml_parser::make_SHIFTL(lineNumber);
+">>"          return yy::aml_parser::make_SHIFTR(lineNumber);
 
-"=="          return yy::aml_parser::make_EQ(loc);
-"!="          return yy::aml_parser::make_NEQ(loc);
-">"           return yy::aml_parser::make_MORE(loc);
-">="          return yy::aml_parser::make_MOREEQ(loc);
-"<"           return yy::aml_parser::make_LESS(loc);
-"<="          return yy::aml_parser::make_LESSEQ(loc);
+"=="          return yy::aml_parser::make_EQ(lineNumber);
+"!="          return yy::aml_parser::make_NEQ(lineNumber);
+">"           return yy::aml_parser::make_MORE(lineNumber);
+">="          return yy::aml_parser::make_MOREEQ(lineNumber);
+"<"           return yy::aml_parser::make_LESS(lineNumber);
+"<="          return yy::aml_parser::make_LESSEQ(lineNumber);
 
-"&&"          return yy::aml_parser::make_AND(loc);
-"and"         return yy::aml_parser::make_AND(loc);
-"AND"         return yy::aml_parser::make_AND(loc);
-"||"          return yy::aml_parser::make_OR(loc);
-"or"          return yy::aml_parser::make_OR(loc);
-"OR"          return yy::aml_parser::make_OR(loc);
-"!"           return yy::aml_parser::make_NOT(loc);
-"not"         return yy::aml_parser::make_NOT(loc);
-"NOT"         return yy::aml_parser::make_NOT(loc);
-"xor"         return yy::aml_parser::make_XOR(loc);
-"XOR"         return yy::aml_parser::make_XOR(loc);
-"xnor"        return yy::aml_parser::make_XNOR(loc);
-"XNOR"        return yy::aml_parser::make_XNOR(loc);
-"nor"         return yy::aml_parser::make_NOR(loc);
-"NOR"         return yy::aml_parser::make_NOR(loc);
-"nand"        return yy::aml_parser::make_NAND(loc);
-"NAND"        return yy::aml_parser::make_NAND(loc);
+"&&"          return yy::aml_parser::make_AND(lineNumber);
+"and"         return yy::aml_parser::make_AND(lineNumber);
+"AND"         return yy::aml_parser::make_AND(lineNumber);
+"||"          return yy::aml_parser::make_OR(lineNumber);
+"or"          return yy::aml_parser::make_OR(lineNumber);
+"OR"          return yy::aml_parser::make_OR(lineNumber);
+"!"           return yy::aml_parser::make_NOT(lineNumber);
+"not"         return yy::aml_parser::make_NOT(lineNumber);
+"NOT"         return yy::aml_parser::make_NOT(lineNumber);
+"xor"         return yy::aml_parser::make_XOR(lineNumber);
+"XOR"         return yy::aml_parser::make_XOR(lineNumber);
+"xnor"        return yy::aml_parser::make_XNOR(lineNumber);
+"XNOR"        return yy::aml_parser::make_XNOR(lineNumber);
+"nor"         return yy::aml_parser::make_NOR(lineNumber);
+"NOR"         return yy::aml_parser::make_NOR(lineNumber);
+"nand"        return yy::aml_parser::make_NAND(lineNumber);
+"NAND"        return yy::aml_parser::make_NAND(lineNumber);
 
-"false"       return yy::aml_parser::make_BOOLVAL(false,loc);
-"FALSE"       return yy::aml_parser::make_BOOLVAL(false,loc);
-"true"        return yy::aml_parser::make_BOOLVAL(true,loc);
-"TRUE"        return yy::aml_parser::make_BOOLVAL(true,loc);
+"false"       return yy::aml_parser::make_BOOLVAL(false,lineNumber);
+"FALSE"       return yy::aml_parser::make_BOOLVAL(false,lineNumber);
+"true"        return yy::aml_parser::make_BOOLVAL(true,lineNumber);
+"TRUE"        return yy::aml_parser::make_BOOLVAL(true,lineNumber);
 
 {int}      {
   errno = 0;
   long n = strtol(yytext, NULL, 10);
   if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE))
-    driver.error(loc, "integer is out of range");
-  return yy::aml_parser::make_NUM(n, loc);
+    driver.error(lineNumber, "integer is out of range");
+  return yy::aml_parser::make_NUM(n, lineNumber);
 }
 
-{word}     return yy::aml_parser::make_NAME(yytext, loc);
+{word}     return yy::aml_parser::make_NAME(yytext, lineNumber);
 
-.          driver.error(loc, "invalid character");
+.          driver.error(lineNumber, "invalid character");
 
-<<EOF>>    return yy::aml_parser::make_END(loc);
+<<EOF>>    return yy::aml_parser::make_END(lineNumber);
 
 %%
 

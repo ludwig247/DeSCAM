@@ -305,9 +305,9 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
         std::cout << "----------------------" << std::endl;
         for (auto item: ErrorMsg::getInstance().getErrorList()) {
-            std::cout << "- " << item.msg << std::endl;
-            for (auto log: item.errorLog) {
-                std::cout << "\t" << log << std::endl;
+            std::cout << "- " << item.statement << std::endl;
+            for (auto log: item.errorMsgs) {
+                std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
             }
         }
         ErrorMsg::clear();
@@ -473,9 +473,9 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
             std::cout << "----------------------" << std::endl;
             for (auto item: ErrorMsg::getInstance().getErrorList()) {
-                std::cout << "- " << item.msg << std::endl;
-                for (auto log: item.errorLog) {
-                    std::cout << "\t" << log << std::endl;
+                std::cout << "- " << item.statement << std::endl;
+                for (auto log: item.errorMsgs) {
+                    std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
                 }
             }
             ErrorMsg::clear();
@@ -517,8 +517,8 @@ void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
             func.second->setStmtList(functionFactory.getStmtList());
         } catch (std::runtime_error &e) {
 //            std::cout << e.what() << std::endl;
-//            for(auto msg:  ErrorMsg::getErrorList()){
-//                std::cout << msg.msg << std::endl;
+//            for(auto statement:  ErrorMsg::getErrorList()){
+//                std::cout << statement.statement << std::endl;
 //            }
             ErrorMsg::clear();
             this->model->removeGlobalFunction(func.second);
