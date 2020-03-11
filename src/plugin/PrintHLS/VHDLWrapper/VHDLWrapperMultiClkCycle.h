@@ -17,6 +17,12 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
         class VHDLWrapperMultiClkCycle : public VHDLWrapper {
 
         public:
+            VHDLWrapperMultiClkCycle(
+                    Module* module,
+                    const std::string &moduleName,
+                    std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+                    std::shared_ptr<OptimizerHLS>& optimizer
+            );
             ~VHDLWrapperMultiClkCycle() = default;
 
             std::map<std::string, std::string> printModule() override ;

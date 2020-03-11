@@ -136,10 +136,10 @@ void PrintBitOperations::visit(VariableOperand &node) {
         isConstant = optimizer->isConstant(node.getVariable());
     }
 
-    if (!isConstant && hlsOption == HLSOption::OCCO) {
+    if (!isConstant && hlsOption == HLSOption::SCO) {
         suffix = "_tmp";
     }
-    if (!isConstant && hlsOption == HLSOption::MCCO) {
+    if (!isConstant && hlsOption == HLSOption::MCO) {
         prefix = "out_";
     }
 

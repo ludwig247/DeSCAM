@@ -14,13 +14,13 @@ using namespace SCAM::HLSPlugin;
 std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
     std::stringstream moduleNames;
 
-    if (getOptionMap().at("occo")) {
-        hlsOption = HLSOption::OCCO;
-    } else if (getOptionMap().at("mcco")) {
-        hlsOption = HLSOption::MCCO;
+    if (getOptionMap().at("sco")) {
+        hlsOption = HLSOption::SCO;
+    } else if (getOptionMap().at("mco")) {
+        hlsOption = HLSOption::MCO;
     } else {
-        std::cout << "\x1B[31mNo HLS Option selected. Default Option is \"Multi Clock Cycle Operation!\"\033[0m\t\t" << std::endl;
-        hlsOption = HLSOption::MCCO;
+        std::cout << "\x1B[31mNo HLS Option selected. Default Option is \"Multi Cycle Operation!\"\033[0m\t\t" << std::endl;
+        hlsOption = HLSOption::MCO;
     }
 
     for (auto& module: model->getModules()) {
@@ -32,12 +32,12 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
         auto propertySuiteHelper = std::make_shared<PropertySuiteHelper>(*module.second->getPropertySuite());
         auto optimizer = std::make_shared<OptimizerHLS>(propertySuiteHelper, module.second);
 
-        if (hlsOption == HLSOption::OCCO) {
+        if (hlsOption == HLSOption::SCO) {
             auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperOneClkCycle>(currentModule, moduleName, propertySuiteHelper, optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         } else {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMultiClkCycle>();
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMultiClkCycle>(currentModule, moduleName, propertySuiteHelper, optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         }

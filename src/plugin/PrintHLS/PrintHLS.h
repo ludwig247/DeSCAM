@@ -20,7 +20,7 @@ public:
 private:
     using hlsOptionEnum = SCAM::HLSPlugin::HLSOption;
 
-    hlsOptionEnum hlsOption = hlsOptionEnum::MCCO;;
+    hlsOptionEnum hlsOption = hlsOptionEnum::MCO;;
 };
 
 

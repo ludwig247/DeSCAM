@@ -22,7 +22,7 @@ PrintStatement::PrintStatement(
 
 std::string PrintStatement::toString(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     std::shared_ptr<OptimizerHLS> optimizerNullPtr;
-    PrintStatement printer(stmt, optimizerNullPtr, HLSOption::MCCO, indentSize, indentOffset);
+    PrintStatement printer(stmt, optimizerNullPtr, HLSOption::MCO, indentSize, indentOffset);
     return printer.getString();
 }
 
@@ -52,11 +52,11 @@ void PrintStatement::visit(VariableOperand &node) {
     }
 
     std::string suffix;
-    if (!isConstant && hlsOption == HLSOption::OCCO) {
+    if (!isConstant && hlsOption == HLSOption::SCO) {
          suffix = (side == Side::LHS ? "_reg" : "_tmp");
     }
 
-    if (!isConstant && hlsOption == HLSOption::MCCO) {
+    if (!isConstant && hlsOption == HLSOption::MCO) {
         if (optimizer) {
             if(side == Side::LHS) {
                 this->ss << "out_";
@@ -80,7 +80,7 @@ void PrintStatement::visit(VariableOperand &node) {
 
 void PrintStatement::visit(DataSignalOperand &node) {
     std::string suffix;
-    if (hlsOption == HLSOption::OCCO) {
+    if (hlsOption == HLSOption::SCO) {
         if (node.getDataSignal()->getPort()->getInterface()->getDirection() == "out") {
             suffix = "_reg";
         }

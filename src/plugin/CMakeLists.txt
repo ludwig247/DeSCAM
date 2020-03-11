@@ -51,15 +51,15 @@ add_plugin(PrintHLS; "Print C++ Files, VHDL Wrapper and scripts for Vivado High 
 #Add new options by calling:
 add_plugin_option(PrintITL; adjustmacros; "Adjusts macros to automatically fit them to the generated RTL")
 add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal with pipelining more easily")
-add_plugin_option(PrintITL; hls-occo; "Adjusts macros to automatically fit them to HLS generated RTL with one clk cycle operations")
-add_plugin_option(PrintITL; hls-mcco; "Adjusts macros to automatically fit them to HLS generated RTL with multiple clk cycle operations")
+add_plugin_option(PrintITL; hls-sco; "Adjusts macros for hls allowing only single cycle operations")
+add_plugin_option(PrintITL; hls-mco; "Adjusts macros for hls allowing multi cycle operations")
 
 #add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 
 add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
-add_plugin_option(PrintHLS; occo; "[One Clock Cycle Operations] Generates HLS file while trying to force Vivado HLS generating onc clock cylce designs")
-add_plugin_option(PrintHLS; mcco; "[Multiple Clock Cycle Operations] Generates HLS file while allowing Vivado HLS scheduling the operation over multiple cycles")
+add_plugin_option(PrintHLS; sco; "[Single Cycle Operations] Generates HLS file allowing only single cycle operations")
+add_plugin_option(PrintHLS; mco; "[Multi Cycle Operations] Generates HLS file allowing multi cycle operations")
 
 add_optimize_option(all; "Enable all optimizations")
 add_optimize_option(gvp; "Propagate the value of constant global variables")

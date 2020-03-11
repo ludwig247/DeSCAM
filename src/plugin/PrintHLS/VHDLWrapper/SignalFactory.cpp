@@ -117,7 +117,7 @@ void SignalFactory::setInternalRegister() {
 }
 
 void SignalFactory::setOutputRegister() {
-    outputRegister = optimizer->getInternalRegisterOut(); // TODO: check outputregister
+    outputRegister = optimizer->getOutputRegister();
 }
 
 void SignalFactory::setOperationModuleInputs() {

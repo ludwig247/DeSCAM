@@ -9,6 +9,20 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
+VHDLWrapperMultiClkCycle::VHDLWrapperMultiClkCycle(
+        Module* module,
+        const std::string &moduleName,
+        std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+        std::shared_ptr<OptimizerHLS>& optimizer
+)
+{
+    this->propertySuiteHelper = propertySuiteHelper;
+    this->currentModule = module;
+    this->moduleName = moduleName;
+    this->optimizer = optimizer;
+    this->signalFactory = nullptr;
+}
+
 std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule() {
     std::map<std::string, std::string> pluginOutput;
     signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, false);
@@ -86,13 +100,13 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
     printVars(signalFactory->getInternalRegisterIn(),Style::UL, "in_", "", false, true);
     printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true, true);
 
-    ss << "\n\t-- Input Registers\n";
+    ss << "\n\t-- Module Inputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
             Style::UL, "_in", false, true);
     printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", false, true);
 
     ss << "\n\t-- Output Register\n";
-    printVars(signalFactory->getOutputRegister(), Style::DOT, "", "", false, false);
+    printVars(Utilities::getParents(signalFactory->getOutputRegister()), Style::DOT, "", "", false, false);
     for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
     }
@@ -337,7 +351,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
         }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
-    for (const auto& out : signalFactory->getOperationModuleOutputs()) {
+    for (const auto& out : Utilities::getParents(signalFactory->getOperationModuleOutputs())) {
         if (optimizer->hasOutputReg(out)) {
             if (optimizer->isModuleSignal(out)) {
                 for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {

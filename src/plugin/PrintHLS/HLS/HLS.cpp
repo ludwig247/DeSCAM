@@ -51,7 +51,7 @@ void HLS::operations()
     interface();
     ss << "{\n";
 
-    if (hlsOption == HLSOption::OCCO) {
+    if (hlsOption == HLSOption::SCO) {
         registerVariables();
         ss << "\n";
         writeToOutput();
@@ -72,7 +72,7 @@ void HLS::operations()
         }
         ss << "\t\tbreak;\n";
     }
-    if (hlsOption == HLSOption::OCCO) {
+    if (hlsOption == HLSOption::SCO) {
         waitOperation();
     }
     ss << "\t}\n";
@@ -116,7 +116,7 @@ void HLS::interface()
         }
     }
 
-    if (hlsOption == HLSOption::MCCO) {
+    if (hlsOption == HLSOption::MCO) {
         // Internal Registers Input
         for (const auto reg : Utilities::getParents(optimizer->getInternalRegisterIn())) {
             bool isArrayType = reg->isArrayType();
@@ -274,7 +274,7 @@ void HLS::dataTypes()
             ss << ", ";
         }
     }
-    if (hlsOption == HLSOption::OCCO) {
+    if (hlsOption == HLSOption::SCO) {
         ss << ", state_wait";
     }
     ss << "};\n\n";

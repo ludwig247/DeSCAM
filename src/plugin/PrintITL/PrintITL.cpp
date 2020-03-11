@@ -13,7 +13,7 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 
     std::function<std::string()> macroFunction;
 
-    if (getOptionMap().at("hls-occo") || getOptionMap().at("hls-mcco")) {
+    if (getOptionMap().at("hls-sco") || getOptionMap().at("hls-mco")) {
         macroFunction = std::bind(&PrintITL::hlsMacros, this);
     } else {
         macroFunction = std::bind(&PrintITL::macros, this);
@@ -37,7 +37,7 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
 
     std::function<std::string()> macroFunction;
 
-    if (getOptionMap().at("hls-occo") || getOptionMap().at("hls-mcco")) {
+    if (getOptionMap().at("hls-sco") || getOptionMap().at("hls-mco")) {
         macroFunction = std::bind(&PrintITL::hlsMacros, this);
     } else {
         macroFunction = std::bind(&PrintITL::macros, this);
@@ -373,7 +373,7 @@ std::string PrintITL::hlsMacros() {
     for (auto st: ps->getStates()){
         ss << "macro " << st->getName() << " : " << convertDataTypeForHLS(st->getDataType()->getName())
            << " := " << "active_state = st_" << st->getName();
-        if (getOptionMap().at("hls-mcco")) {
+        if (getOptionMap().at("hls-mco")) {
             ss << " and (ready_sig = '1' or idle_sig = '1')";
         }
         ss << " end macro;\n";

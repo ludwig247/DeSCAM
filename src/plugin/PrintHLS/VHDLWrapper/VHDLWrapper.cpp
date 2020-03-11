@@ -86,12 +86,12 @@ std::string VHDLWrapper::printTypes() {
 
     typeStream << "\n"
                << "\t-- Constants\n";
-    for (const auto& var : optimizer->getVariables()) {
-        if (optimizer->isConstant(var)) {
-            typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
-                       << " := " << getResetValue(var) << ";\n";
-        }
-    }
+//    for (const auto& var : optimizer->getVariables()) {
+//        if (optimizer->isConstant(var)) {
+//            typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
+//                       << " := " << getResetValue(var) << ";\n";
+//        }
+//    }
 
     typeStream << "\n"
                << "end package " + moduleName << "_types;";
@@ -226,21 +226,19 @@ std::string VHDLWrapper::sensitivityList() {
     std::set<DataSignal* > sensListDataSignals;
     std::set<Variable* > sensListVars;
 
-    const auto& operationProperties = propertySuiteHelper->getProperties();
+    const auto& operationProperties = propertySuiteHelper->getOperationProperties();
     for (auto operationProperty : operationProperties) {
-        for (const auto& assumption : operationProperty->getAssumptionList()) {
-            if(assumption->isAt()) {
-                auto syncSignals = ExprVisitor::getUsedSynchSignals(assumption->getTimepointList().front());
-                sensListSyncSignals.insert(syncSignals.begin(), syncSignals.end());
+        for (const auto& assumption : operationProperty->getOperation()->getAssumptionsList()) {
+            auto syncSignals = ExprVisitor::getUsedSynchSignals(assumption);
+            sensListSyncSignals.insert(syncSignals.begin(), syncSignals.end());
 
-                const auto& dataSignals = ExprVisitor::getUsedDataSignals(assumption->getTimepointList().front());
-                sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
+            const auto& dataSignals = ExprVisitor::getUsedDataSignals(assumption);
+            sensListDataSignals.insert(dataSignals.begin(), dataSignals.end());
 
-                const auto& vars = ExprVisitor::getUsedVariables(assumption->getTimepointList().front());
-                for (const auto& var : vars) {
-                    if (!optimizer->isConstant(var)) {
-                        sensListVars.insert(var);
-                    }
+            const auto& vars = ExprVisitor::getUsedVariables(assumption);
+            for (const auto& var : vars) {
+                if (!optimizer->isConstant(var)) {
+                    sensListVars.insert(var);
                 }
             }
         }
