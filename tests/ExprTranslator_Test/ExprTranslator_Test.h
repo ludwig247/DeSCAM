@@ -393,7 +393,11 @@ TEST_F(ExprTranslator_Test, CompareOperatorTerminal) {
     //Terminal true ? x : y -> return x
     auto compare = new CompareOperator(boolTrue,valTrue, valFalse);
     z3::expr expr = exprTranslator.translate(compare);
+    std::cout << expr << std::endl;
     SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+
+    std::cout << *newExpr << std::endl;
+
     ASSERT_EQ((*valTrue), (*newExpr)) << PrintStmt::toString(valTrue)  << "!=" << PrintStmt::toString(newExpr);
 
 
@@ -427,9 +431,20 @@ TEST_F(ExprTranslator_Test, CompareOperatorNonTerminal) {
     auto compare3 = new CompareOperator(new Relational(variableOperand,">=", valFalse),valTrue,valFalse);
     z3::expr expr = exprTranslator.translate(compare3);
     auto newExpr = exprTranslator.translate(expr, &module);
-    bool test = (*compare3) ==  (*newExpr);
+
     ASSERT_EQ((*compare3), (*newExpr))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
 
+
+    compare3 = new CompareOperator(new Relational(valTrue,">=", valFalse),valTrue,valFalse);
+    expr = exprTranslator.translate(compare3);
+    newExpr = exprTranslator.translate(expr, &module);
+
+    ASSERT_EQ((*valFalse), (*newExpr))  <<  PrintStmt::toString(valFalse)  << " != " << PrintStmt::toString(newExpr);
+    ASSERT_TRUE(!((*valTrue) == (*newExpr)))  <<  PrintStmt::toString(valTrue)  << " != " << PrintStmt::toString(newExpr);
+    ASSERT_TRUE(!((*compare3) == (*newExpr)))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
+
+
+    //Continue here
 }
 
 

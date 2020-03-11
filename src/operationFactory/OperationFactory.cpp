@@ -124,6 +124,17 @@ namespace SCAM {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
             op->setCommitmentsList(assignmentOptimizer2.getNewAssignmentsList());
         }
+
+        for(auto op:operations){
+            for(auto commitment: op->getCommitmentsList()){
+
+                if(ExprVisitor::isCompareOperator(commitment->getRhs())){
+                        auto comp = NodePeekVisitor::nodePeekCompareOperator(commitment->getRhs());
+                        std::cout  << "###" << *commitment << std::endl;
+                }
+            }
+
+        }
     }
 
     void OperationFactory::optimizeOperations() {

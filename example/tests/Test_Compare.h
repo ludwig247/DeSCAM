@@ -32,11 +32,11 @@ bool compute3(bool param, unsigned int val){
 struct complex{int x; int y;};
 
 SC_MODULE(TestGlobal2) {
-    blocking_in<unsigned int> test_in;
+    blocking_in<int> test_in;
     blocking_out<int> test_out;
     shared_out<bool> test_out_bool;
 
-    unsigned int foo;
+    int foo;
     int bar;
 //    unsigned int list[5];
     bool test;
@@ -51,10 +51,13 @@ SC_MODULE(TestGlobal2) {
     void fsm() {
         while (true) {
             test_in->try_read(foo,test);
-            test = true;
             //test = (foo & 5) == 0;
-            bar = (test) ? static_cast<int>(foo+1) : static_cast<int>(foo+0);
-            if(test){
+            bar = (test) ? (foo+1) : foo+0;
+//            if(test){
+//                bar = bar +1;
+//            }
+
+            if(bar > 5){
                 bar = bar +1;
             }
             test_out_bool->set(test);
