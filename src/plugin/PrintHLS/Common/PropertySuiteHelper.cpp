@@ -49,15 +49,26 @@ std::vector<SCAM::Assignment *> PropertySuiteHelper::getNotifyStatements(Propert
     auto temporalExprs = property->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
         auto timePoint = PrintStmt::toString(temporalExpr->getTimepointList().back());
-        if (timePoint != "t_end") {
+        if (timePoint != "t_end" && temporalExpr->isDuring()) {
             continue;
         }
-
         if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
             auto statement = dynamic_cast<Assignment *>(temporalExpr->getStatement());
             if (NodePeekVisitor::nodePeekNotify(statement->getLhs())) {
                 assignmentList.push_back(statement);
             }
+        }
+    }
+    return assignmentList;
+}
+
+std::vector<SCAM::Assignment *> PropertySuiteHelper::getResetStatements() {
+    std::vector<SCAM::Assignment *> assignmentList;
+    auto temporalExprs = getResetProperty()->getCommitmentList();
+    for (auto temporalExpr : temporalExprs) {
+        if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
+            auto statement = dynamic_cast<Assignment *>(temporalExpr->getStatement());
+            assignmentList.push_back(statement);
         }
     }
     return assignmentList;

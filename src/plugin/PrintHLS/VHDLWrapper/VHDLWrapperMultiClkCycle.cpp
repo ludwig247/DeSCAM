@@ -249,6 +249,9 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
     };
 
     for (const auto& state : currentModule->getFSM()->getStateMap()) {
+        if (state.second->isInit()) {
+            continue;
+        }
         bool noEndIf = false;
         bool skipAssumptions = false;
         ss << "\t\twhen st_" << state.second->getName() << " =>\n";

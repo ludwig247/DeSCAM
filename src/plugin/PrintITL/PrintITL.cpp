@@ -336,7 +336,7 @@ std::string PrintITL::hlsMacros() {
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()){
-        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType())){
+        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType()) || (!dp->isSubVar())){
             ss << "-- ";
         }
         ss << "macro " ;
@@ -359,7 +359,7 @@ std::string PrintITL::hlsMacros() {
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
-        if (vr->isSubVar() && vr->getParentDataType()->isArrayType()) {
+        if (vr->isCompoundType() || (vr->isSubVar() && vr->getParentDataType()->isArrayType()) || (!vr->isSubVar())) {
             continue;
         }
         ss << "macro " << vr->getFullName("_");

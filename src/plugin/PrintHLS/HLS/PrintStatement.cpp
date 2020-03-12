@@ -301,3 +301,11 @@ void PrintStatement::printIndent() {
         this->ss << "\t";
     }
 }
+
+void PrintStatement::visit(Notify &node) {
+    std::string suffix;
+    if (hlsOption == HLSOption::SCO) {
+        suffix = "_reg";
+    }
+    this->ss << node.getPort()->getName() << "_notify" << suffix;
+}

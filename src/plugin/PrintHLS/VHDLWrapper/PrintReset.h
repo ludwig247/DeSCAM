@@ -27,7 +27,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
         void visit(BoolValue &node) override ;
     };
 
-    class PrintResetSignal : PrintStatement{
+    class PrintResetSignal : PrintStatement {
 
     public:
         PrintResetSignal(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);

@@ -51,6 +51,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         void visit(FunctionOperand &node) override ;
         void visit(ITE &node) override ;
         void visit(Logical &node) override ;
+        void visit(Notify &node) override ;
         void visit(ParamOperand &node) override ;
         void visit(Return &node) override ;
         void visit(SyncSignal &node) override ;

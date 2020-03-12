@@ -70,18 +70,6 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             void visit(Parameter& node) override {};
             void visit(Timepoint& node) override {};
         };
-
-        template<typename T>
-        boost::optional<std::string> HLS::getResetValue(T* signal)
-        {
-            for (const auto& commitment : propertySuiteHelper->getResetProperty()->getOperation()->getCommitmentsList()) {
-                auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
-                if (printResetValue.hasReset()) {
-                    return PrintStatement::toString(commitment->getRhs());
-                }
-            }
-            return boost::none;
-        }
 }}}
 
 #endif //SCAM_MAIN_HLS_H

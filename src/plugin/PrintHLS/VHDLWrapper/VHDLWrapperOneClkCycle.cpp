@@ -87,8 +87,8 @@ void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
     printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
     printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
 
-    ss << "\n\t-- Output Registers\n";
-    printVars(Utilities::getParents(signalFactory->getOutputRegister()), Style::DOT, "", "", false);
+//    ss << "\n\t-- Output Registers\n";
+//    printVars(Utilities::getParents(signalFactory->getOutputRegister()), Style::DOT, "", "", false);
 
     ss << "\n\t-- Operation Module Inputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
@@ -208,6 +208,9 @@ void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
     };
 
     for (const auto& state : currentModule->getFSM()->getStateMap()) {
+        if (state.second->isInit()) {
+            continue;
+        }
         bool noEndIf = false;
         bool skipAssumptions = false;
         ss << "\t\twhen st_" << state.second->getName() << " =>\n";
@@ -274,7 +277,7 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
     }
 
     ss << "\n\t-- Output Register to Output Mapping\n";
-    for (const auto& out : Utilities::getParents(signalFactory->getOperationModuleOutputs())) {
+    for (const auto& out : Utilities::getParents(signalFactory->getOutputs())) {
         if (optimizer->hasOutputReg(out)) {
             if (optimizer->isModuleSignal(out)) {
                 for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {

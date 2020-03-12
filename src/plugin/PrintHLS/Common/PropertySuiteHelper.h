@@ -18,6 +18,7 @@ public:
     std::vector<PropertyHelper *> getWaitProperties() const;
     std::vector<PropertyHelper *> getOperationProperties() const;
     std::vector<Assignment *> getNotifyStatements(Property *property) const;
+    std::vector<Assignment *> getResetStatements();
 
 private:
     void addWaitProperties();

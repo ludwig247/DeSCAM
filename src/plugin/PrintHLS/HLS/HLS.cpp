@@ -323,14 +323,12 @@ void HLS::dataTypes()
     ss << "\n// Constants\n";
     std::set<std::string> uniqueNames;
     for (const auto& var : Utilities::getParents(optimizer->getConstantVariables())) {
-        if (optimizer->isConstant(var)) {
-            if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
-                continue;
-            }
-            ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
-               << " " << var->getName() << " = " << getVariableReset(var) << ";\n";
-            uniqueNames.insert(var->getName());
+        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
+            continue;
         }
+        ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
+           << " " << var->getName() << " = " << getVariableReset(var) << ";\n";
+        uniqueNames.insert(var->getName());
     }
 
     ss << "\n#endif //DATA_TYPES_H";
@@ -533,6 +531,18 @@ std::string HLS::getVariableReset(Variable* variable)
     else {
         return getValue(variable);
     }
+}
+
+template<typename T>
+boost::optional<std::string> HLS::getResetValue(T* signal)
+{
+    for (const auto& commitment : propertySuiteHelper->getResetStatements()) {
+        auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
+        if (printResetValue.hasReset()) {
+            return PrintStatement::toString(commitment->getRhs());
+        }
+    }
+    return boost::none;
 }
 
 void HLS::waitOperation()
