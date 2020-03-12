@@ -312,8 +312,16 @@ namespace SCAM {
             std::string msgAST;
             llvm::raw_string_ostream ss(msgAST);
             clangStmt->dump(ss, ci.getSourceManager());
+            auto fileAndLineNumStream = std::istringstream(clangStmt->getLocStart().printToString(ci.getSourceManager()));
+            std::string fileDir = "", lineNumber = "",s;
+            if(std::getline(fileAndLineNumStream,s,':')){
+                fileDir = s;
+            }
+            if(std::getline(fileAndLineNumStream,s,':')){
+                lineNumber = s;
+            }
             //Add error to singleton
-            ErrorMsg::addError(msg, msgAST);
+            ErrorMsg::addError(msg, msgAST,fileDir,lineNumber);
             //assert(false);
         }
         return dataFlow.getStmt();
