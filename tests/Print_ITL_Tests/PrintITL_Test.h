@@ -23,7 +23,7 @@ static std::vector<SCAM::Module *> parameter() {
     commandLineArugmentsVector.push_back(bin.c_str());
 
     //SRC-File to be analyzed
-    std::string file_path = std::string(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/tests.h");
+    std::string file_path = std::string(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/Tests.h");
     commandLineArugmentsVector.push_back(file_path.c_str());
 
     //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
