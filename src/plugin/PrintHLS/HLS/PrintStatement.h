@@ -17,7 +17,7 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
     class PrintStatement : public PrintStmt {
 
     public:
-        explicit PrintStatement(
+        PrintStatement(
                 SCAM::Stmt *stmt,
                 std::shared_ptr<OptimizerHLS>& optimizer,
                 HLSOption hlsOption,

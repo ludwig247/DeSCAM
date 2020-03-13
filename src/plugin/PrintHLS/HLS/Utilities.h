@@ -20,7 +20,9 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
         static std::string subTypeBitwiseToString(SubTypeBitwise type);
         static std::string convertDataType(const std::string& type);
         static SubTypeBitwise getSubTypeBitwise(const std::string &name);
-        static std::string getFullName(Variable* variable, const std::string &delimiter);
+
+        template <typename T>
+        static std::string getFullName(T* variable, const std::string &delimiter);
 
         template <typename T>
         static std::set<T *> getParents(const std::set<T *> &subVars);
@@ -41,6 +43,15 @@ namespace SCAM { namespace HLSPlugin { namespace HLS {
             }
         }
         return parents;
+    }
+
+    template <typename T>
+    std::string Utilities::getFullName(T* variable, const std::string &delimiter)
+    {
+        if (variable->isSubVar()) {
+            return (variable->getParent()->getName() + delimiter + variable->getName());
+        }
+        return variable->getName();
     }
 
 }}}

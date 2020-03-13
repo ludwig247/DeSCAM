@@ -2,8 +2,10 @@
 // Created by johannes on 28.07.19.
 //
 
-#include "NodePeekVisitor.h"
 #include "HLS.h"
+#include "NodePeekVisitor.h"
+#include "PrintFunction.h"
+#include "Utilities.h"
 
 using namespace SCAM::HLSPlugin::HLS;
 
@@ -376,12 +378,12 @@ void HLS::functions()
                 auto subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
                     this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
-                             << (*subVar)->getName();
+                             << Utilities::getFullName(*subVar, "_"); //(*subVar)->getName();
                     if (std::next(subVar) != subVarList.end()) {
                         this->ss << ", ";
                     }
                 }
-                if (std::next(parameter)!=parameterMap.end()) {
+                if (std::next(parameter) != parameterMap.end()) {
                     this->ss << ", ";
                 }
             } else {
@@ -411,8 +413,7 @@ void HLS::visit(Function& node)
         if (parameter->second->isCompoundType()) {
             auto subVarList = parameter->second->getSubVarList();
             for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
-                this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
-                         << (*subVar)->getName();
+                this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " " << Utilities::getFullName(*subVar, "_");
                 if (std::next(subVar) != subVarList.end()) {
                     this->ss << ", ";
                 }
@@ -421,9 +422,8 @@ void HLS::visit(Function& node)
                 this->ss << ", ";
             }
         } else {
-            this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
-                     << parameter->first;
-            if (std::next(parameter)!=parameterMap.end()) {
+            this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " " << parameter->first;
+            if (std::next(parameter) != parameterMap.end()) {
                 this->ss << ", ";
             }
         }
@@ -445,7 +445,7 @@ void HLS::visit(Function& node)
                 for (auto condition = returnValue.second.begin();
                      condition != returnValue.second.end();
                      ++condition) {
-                    ss << PrintStatement::toString(*condition);
+                    ss << PrintFunction::toString(*condition);
                     if (std::next(condition) != returnValue.second.end()) {
                         ss << ") && (";
                     }
@@ -456,7 +456,7 @@ void HLS::visit(Function& node)
         if (node.getReturnValueConditionList().size() > 1 && numberOfBranches==1) {
             ss << "else {\n";
         }
-        ss << PrintStatement::toString(returnValue.first, 2, 2) << ";";
+        ss << PrintFunction::toString(returnValue.first, 2, 2) << ";";
         if (node.getReturnValueConditionList().size() > 1) {
             ss << "\n\t} ";
         }
@@ -521,7 +521,7 @@ std::string HLS::getVariableReset(Variable* variable)
         auto subVarList = variable->getSubVarList();
         for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
             resetValueStream << getValue(*subVar);
-            if (std::next(subVar)!=subVarList.end()) {
+            if (std::next(subVar) != subVarList.end()) {
                 resetValueStream << ", ";
             }
         }

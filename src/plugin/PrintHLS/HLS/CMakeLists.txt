@@ -1,7 +1,7 @@
 add_library(HLS
             HLS.cpp
             PrintBitOperations.cpp
-            #OptimizerHLS.cpp
+            PrintFunction.cpp
             #PrintArrayStatements.cpp
             PrintStatement.cpp
             PrintReset.cpp
