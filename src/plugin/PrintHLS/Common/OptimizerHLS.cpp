@@ -32,7 +32,7 @@ bool OptimizerHLS::hasOutputReg(DataSignal* dataSignal) {
     return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() || subVarMap.find(dataSignal) != subVarMap.end());
 }
 
-bool OptimizerHLS::isModuleSignal(DataSignal *dataSignal) const {
+bool OptimizerHLS::hasMultipleOutputs(DataSignal *dataSignal) const {
     return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
 }
 
@@ -93,7 +93,7 @@ void OptimizerHLS::removeRedundantConditions()
 }
 
 void OptimizerHLS::mapOutputRegistersToOutput() {
-    // If for every operation assignment of Variable equals assignment of DataSignal
+    // If for every operation the assignment of a Variable equals the assignment of a DataSignal
     // we can map Variable -> DataSignal
     auto compareAssignments = [this](DataSignal* output) -> std::set<Variable*> {
 
@@ -122,6 +122,14 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
                     if (dataSignal == output) {
                         getOutputReg(operationProperty, commitment->getRhs(), candidates);
                     }
+                }
+            }
+        }
+        for (const auto& commitment : propertySuiteHelper->getResetProperty()->getOperation()->getCommitmentsList()) {
+            if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
+                const auto &dataSignal = dynamic_cast<DataSignalOperand *>(commitment->getLhs())->getDataSignal();
+                if (dataSignal == output) {
+                    getOutputReg(propertySuiteHelper->getResetProperty(), commitment->getRhs(), candidates);
                 }
             }
         }
@@ -184,23 +192,25 @@ void OptimizerHLS::modifyCommitmentLists() {
 //            if (hasOutputRegisterAtRHS(commitment)) {
 //                continue;
 //            }
-
-            auto replacedAssignment = replaceDataSignals(commitment);
+            auto newAssignment = commitment;
+            auto replacedAssignment = replaceDataSignals(newAssignment);
             if (replacedAssignment) {
-                if (!isDuplicate(replacedAssignment.get(), assignments)) {
-                    assignments.push_back(replacedAssignment.get());
-                }
-                continue;
+//                if (!isDuplicate(replacedAssignment.get(), assignments)) {
+//                    assignments.push_back(replacedAssignment.get());
+//                }
+//                continue;
+                newAssignment = replacedAssignment.get();
             }
-            replacedAssignment = replaceByOutputRegister(commitment);
+            replacedAssignment = replaceByOutputRegister(newAssignment);
             if (replacedAssignment) {
-                if (!isDuplicate(replacedAssignment.get(), assignments)) {
-                    assignments.push_back(replacedAssignment.get());
-                }
-                continue;
+//                if (!isDuplicate(replacedByOutputRegister.get(), assignments)) {
+//                    assignments.push_back(replacedByOutputRegister.get());
+//                }
+//                continue;
+                newAssignment = replacedAssignment.get();
             }
-            if (!isDuplicate(commitment, assignments)) {
-                assignments.push_back(commitment);
+            if (!isDuplicate(newAssignment, assignments)) {
+                assignments.push_back(newAssignment);
             }
         }
         property->setModifiedCommitmentList(std::move(assignments));

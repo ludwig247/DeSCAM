@@ -271,25 +271,7 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
                    SignalFactory::getName(dataSignal, Style::UL, "_out"))
            << ";\n";
     };
-    ss << "\n\t-- Operation Module Outputs\n";
-    for (const auto& out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
-        printOutputProcess(out);
-    }
 
-    ss << "\n\t-- Output Register to Output Mapping\n";
-    for (const auto& out : Utilities::getParents(signalFactory->getOutputs())) {
-        if (optimizer->hasOutputReg(out)) {
-            if (optimizer->isModuleSignal(out)) {
-                for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {
-                    ss << "\t" << sig->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
-                }
-            } else {
-                ss << "\t" << out->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
-            }
-        }
-    }
-
-    ss << "\n\t-- Internal Register\n";
     auto printOutputProcessRegs = [&](Variable* var) {
         bool isEnum = var->isEnumType();
         ss << "\t" << SignalFactory::getName(var, Style::DOT) << " <= "
@@ -299,8 +281,24 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
                    "out_" + SignalFactory::getName(var, Style::UL, ""))
            << ";\n";
     };
+
+    ss << "\n\t-- Operation Module Outputs\n";
+    for (const auto& out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        printOutputProcess(out);
+    }
     for (const auto& internalRegs : signalFactory->getInternalRegisterOut()) {
         printOutputProcessRegs(internalRegs);
+    }
+
+    ss << "\n\t-- Output Register to Output Mapping\n";
+    for (const auto& registerOutputMap : optimizer->getOutputRegisterMap()) {
+        if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
+            for (const auto& output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
+                ss << "\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
+            }
+        } else {
+            ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
+        }
     }
 
     ss << "\n\t-- Notify Signals\n";

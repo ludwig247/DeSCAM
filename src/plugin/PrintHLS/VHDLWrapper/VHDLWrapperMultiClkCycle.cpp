@@ -356,7 +356,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
     ss << "\t\telsif (done_sig = '1') then\n";
     for (const auto& out : Utilities::getParents(signalFactory->getOperationModuleOutputs())) {
         if (optimizer->hasOutputReg(out)) {
-            if (optimizer->isModuleSignal(out)) {
+            if (optimizer->hasMultipleOutputs(out)) {
                 for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {
                     ss << "\t\t\t" << sig->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
                 }

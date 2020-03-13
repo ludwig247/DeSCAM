@@ -321,14 +321,14 @@ void HLS::dataTypes()
     }
 
     ss << "\n// Constants\n";
-    std::set<std::string> uniqueNames;
-    for (const auto& var : Utilities::getParents(optimizer->getConstantVariables())) {
-        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
-            continue;
-        }
+//    std::set<std::string> uniqueNames;
+    for (const auto& var : optimizer->getConstantVariables()) {
+//        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
+//            continue;
+//        }
         ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
-           << " " << var->getName() << " = " << getVariableReset(var) << ";\n";
-        uniqueNames.insert(var->getName());
+           << " " << Utilities::getFullName(var, "_") << " = " << getVariableReset(var) << ";\n";
+//        uniqueNames.insert(var->getName());
     }
 
     ss << "\n#endif //DATA_TYPES_H";

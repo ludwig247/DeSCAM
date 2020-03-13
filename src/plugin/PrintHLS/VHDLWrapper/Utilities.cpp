@@ -87,3 +87,11 @@ SCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &
         return SubTypeBitwise::UNKNOWN;
     }
 }
+
+std::string Utilities::getFullName(SCAM::Variable* variable, const std::string &delimiter)
+{
+    if (variable->isSubVar()) {
+        return (variable->getParent()->getName() + delimiter + variable->getName());
+    }
+    return variable->getName();
+}

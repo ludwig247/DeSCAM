@@ -59,6 +59,7 @@ std::string SynthesisScripts::directivesScript() {
     ss << "config_rtl -reset all -reset_async -reset_level high\n";
     ss << "config_schedule -effort high -relax_ii_for_timing=0 -verbose=0\n";
     ss << "config_bind -effort high\n";
+    ss << "config_interface -trim_dangling_port\n";
 
     if (hlsOption == HLSOption::SCO) {
         ss << "set_directive_latency -max=0 " << moduleName << "_operations\n";

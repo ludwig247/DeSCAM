@@ -373,21 +373,28 @@ void PrintStatement::visit(UnsignedValue &node) {
 }
 
 void PrintStatement::visit(UnaryExpr &node) {
-    bool tempUseParentheses = useParenthesesFlag;
-    useParenthesesFlag = true;
-    if ((node.getOperation() == "-") && (node.getDataType()->getName() == "unsigned")) {
-        if (tempUseParentheses) this->ss << "(";
+//    bool tempUseParentheses = useParenthesesFlag;
+//    useParenthesesFlag = true;
+//    if ((node.getOperation() == "-") && (node.getDataType()->getName() == "unsigned")) {
+//        if (tempUseParentheses) this->ss << "(";
+//        this->ss << "not(";
+//        useParenthesesFlag = false;
+//        node.getExpr()->accept(*this);
+//        this->ss << ") + 1";
+//        if (tempUseParentheses) this->ss << ")";
+//    } else {
+//        this->ss << node.getOperation() << "(";
+//        useParenthesesFlag = false;
+//        node.getExpr()->accept(*this);
+//        this->ss << ")";
+//    }
+    if(node.getOperation() == "~") {
         this->ss << "not(";
-        useParenthesesFlag = false;
-        node.getExpr()->accept(*this);
-        this->ss << ") + 1";
-        if (tempUseParentheses) this->ss << ")";
     } else {
         this->ss << node.getOperation() << "(";
-        useParenthesesFlag = false;
-        node.getExpr()->accept(*this);
-        this->ss << ")";
     }
+    node.getExpr()->accept(*this);
+    this->ss << ")";
 }
 
 void PrintStatement::visit(SyncSignal &node) {

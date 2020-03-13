@@ -22,9 +22,9 @@ namespace SCAM { namespace HLSPlugin {
         OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper, Module* module);
         ~OptimizerHLS() = default;
 
-        bool hasOutputReg(DataSignal* dataSignal) ;
+        bool hasOutputReg(DataSignal* dataSignal);
         bool isConstant(Variable* variable) const;
-        bool isModuleSignal(DataSignal *dataSignal) const;
+        bool hasMultipleOutputs(DataSignal *dataSignal) const;
 
         Variable* getCorrespondingRegister(DataSignal* dataSignal) ;
         std::set<Variable *> getOutputRegister();
@@ -36,6 +36,7 @@ namespace SCAM { namespace HLSPlugin {
         inline std::set<Variable *> getConstantVariables() const;
 
         inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
+        inline std::map<Variable *, DataSignal *> getOutputRegisterMap() const;
         inline std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal *dataSignal) const;
 
     private:
@@ -107,6 +108,10 @@ namespace SCAM { namespace HLSPlugin {
 
     std::set<Variable *> OptimizerHLS::getConstantVariables() const {
         return constantVariables;
+    }
+
+    std::map<Variable *, DataSignal *> OptimizerHLS::getOutputRegisterMap() const {
+        return registerToOutputMap;
     }
 
 }}

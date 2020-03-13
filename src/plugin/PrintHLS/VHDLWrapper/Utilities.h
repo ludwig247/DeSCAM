@@ -11,6 +11,7 @@
 #include "Constants.h"
 #include "DataSignal.h"
 #include "DataType.h"
+#include "Variable.h"
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper{
 
@@ -23,6 +24,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper{
         static std::string typeToString(StmtType type);
         static std::string subTypeBitwiseToString(SubTypeBitwise type);
         static SubTypeBitwise getSubTypeBitwise(const std::string &name);
+        static std::string getFullName(Variable* variable, const std::string &delimiter);
 
         template <typename Key, typename Value>
         static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);

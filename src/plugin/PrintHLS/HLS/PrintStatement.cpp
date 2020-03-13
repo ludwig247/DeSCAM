@@ -46,17 +46,20 @@ void PrintStatement::visit(Assignment &node) {
 }
 
 void PrintStatement::visit(VariableOperand &node) {
-    bool isConstant = false;
     if (optimizer) {
-        isConstant = optimizer->isConstant(node.getVariable());
+        bool isConstant = optimizer->isConstant(node.getVariable());
+        if (isConstant) {
+            this->ss << Utilities::getFullName(node.getVariable(), "_");
+            return;
+        }
     }
 
     std::string suffix;
-    if (!isConstant && hlsOption == HLSOption::SCO) {
+    if (hlsOption == HLSOption::SCO) {
          suffix = (side == Side::LHS ? "_reg" : "_tmp");
     }
 
-    if (!isConstant && hlsOption == HLSOption::MCO) {
+    if (hlsOption == HLSOption::MCO) {
         if (optimizer) {
             if(side == Side::LHS) {
                 this->ss << "out_";
@@ -123,15 +126,12 @@ void PrintStatement::visit(UnaryExpr &node) {
     this->ss << "(";
     if (node.getOperation() == "not") {
         this->ss << "!(";
-        node.getExpr()->accept(*this);
-        this->ss << ")";
     }
     else {
         this->ss << node.getOperation() << "(";
-        node.getExpr()->accept(*this);
-        this->ss << ")";
     }
-    this->ss << ")";
+    node.getExpr()->accept(*this);
+    this->ss << "))";
 }
 
 void PrintStatement::visit(CompoundExpr &node) {

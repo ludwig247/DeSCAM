@@ -86,13 +86,13 @@ std::string VHDLWrapper::printTypes() {
 
     typeStream << "\n"
                << "\t-- Constants\n";
-    std::set<std::string> uniqueNames;
+//    std::set<std::string> uniqueNames;
     for (const auto& var : Utilities::getParents(optimizer->getConstantVariables())) {
-        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
-            continue;
-        }
-            typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
-                       << " := " << getResetValue(var) << ";\n";
+//        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
+//            continue;
+//        }
+        typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
+                   << " := " << getResetValue(var) << ";\n";
     }
 
     typeStream << "\n"
