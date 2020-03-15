@@ -2,6 +2,21 @@
 // Created by schauss on 10.02.20.
 //
 
+/* TODO:
+- check Output Register (ex. Interconnect)
+- VHDL Wrapper change from std_logic_vector and std_logic to unsigned, signed and boolean
+- reserved names in VHDL (ex. Function0)
+- constant outputs (ex. requestQ)
+- array handling
+- global functions and global variables handling
+- add ReadMe
+- SCO: reset to input
+- SCO: script warning if initiation intervall > 1
+- MCO: operation vector size (one operation, ex. Basic00)
+- MCO: script set t_min, t_max, do not delete module in Wrapper
+- MCO: internal register handling
+*/
+
 #include "PrintHLS.h"
 #include "OptimizerHLS.h"
 #include "HLS/HLS.h"
