@@ -149,9 +149,11 @@ void PrintStatement::visit(FunctionOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getOperandName() << "(";
     auto paramMap = node.getParamValueMap();
-    for (auto begin = paramMap.begin(); begin != paramMap.end(); ++begin) {
-        begin->second->accept(*this);
-        if (begin != --paramMap.end()) this->ss << ", ";
+    for (auto parameter = paramMap.begin(); parameter != paramMap.end(); ++parameter) {
+        parameter->second->accept(*this);
+        if (std::next(parameter) != paramMap.end()) {
+            this->ss << ", ";
+        }
     }
     this->ss << ")";
 }
@@ -373,21 +375,6 @@ void PrintStatement::visit(UnsignedValue &node) {
 }
 
 void PrintStatement::visit(UnaryExpr &node) {
-//    bool tempUseParentheses = useParenthesesFlag;
-//    useParenthesesFlag = true;
-//    if ((node.getOperation() == "-") && (node.getDataType()->getName() == "unsigned")) {
-//        if (tempUseParentheses) this->ss << "(";
-//        this->ss << "not(";
-//        useParenthesesFlag = false;
-//        node.getExpr()->accept(*this);
-//        this->ss << ") + 1";
-//        if (tempUseParentheses) this->ss << ")";
-//    } else {
-//        this->ss << node.getOperation() << "(";
-//        useParenthesesFlag = false;
-//        node.getExpr()->accept(*this);
-//        this->ss << ")";
-//    }
     if(node.getOperation() == "~") {
         this->ss << "not(";
     } else {

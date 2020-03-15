@@ -146,7 +146,28 @@ std::string SignalFactory::convertDataType(const std::string& dataType)
     }
 }
 
-std::string SignalFactory::convertReturnType(const std::string &returnType) {
+//std::string SignalFactory::convertDataTypeFunction(const std::string &dataType) {
+//    if (dataType == "bool") {
+//        return "boolean";
+//    } else if (dataType == "int") {
+//        return "signed(31 downto 0)";
+//    } else if (dataType == "unsigned") {
+//        return "unsigned(31 downto 0)";
+//    } else {
+//        return dataType;
+//    }
+//}
+
+std::string SignalFactory::convertReturnTypeFunction(const std::string &returnType) {
+//    if (returnType == "bool") {
+//        return "boolean";
+//    } else if (returnType == "int") {
+//        return "signed";
+//    } else if (returnType == "unsigned") {
+//        return "unsigned";
+//    } else {
+//        return returnType;
+//    }
     if (returnType == "bool") {
         return "std_logic";
     } else if (returnType == "int" || returnType == "unsigned") {

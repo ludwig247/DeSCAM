@@ -48,7 +48,8 @@ public:
     static std::string enumToVector(T *dataSignal);
 
     static std::string convertDataType(const std::string &dataType);
-    static std::string convertReturnType(const std::string &returnType);
+    static std::string convertReturnTypeFunction(const std::string &returnType);
+//    static std::string convertDataTypeFunction(const std::string &dataType);
     std::set<Variable *> getInternalRegister() const;
 
     inline Variable *getActiveOperation() const;

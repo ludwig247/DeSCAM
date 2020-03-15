@@ -86,20 +86,24 @@ void HLS::interface()
     // Input
     for (const auto& input : Utilities::getParents(optimizer->getInputs())) {
         bool isArrayType = input->isArrayType();
-        if (!isArrayType) {
-            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName())
-               << " " << input->getName() << ",\n";
+        if (isArrayType) {
+            ss << "\t" << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
+        } else {
+            ss << "\t" << Utilities::convertDataType(input->getDataType()->getName()) << " ";
         }
+        ss << input->getName();
+        if (isArrayType) {
+            ss << "[" << input->getDataType()->getSubVarMap().size() << "]";
+        }
+        ss << ",\n";
     }
 
     // Output
     for (const auto& output : Utilities::getParents(optimizer->getOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
-            ss << "\t"
-               << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
-        }
-        else {
+            ss << "\t" << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
+        } else {
             ss << "\t" << Utilities::convertDataType(output->getDataType()->getName()) << " &";
         }
         ss << output->getName();
@@ -109,14 +113,14 @@ void HLS::interface()
         ss << ",\n";
     }
 
-    // Array Inputs
-    for (const auto& arrayPort : optimizer->getArrayPorts()) {
-        for (unsigned long i = 0; i<arrayPort.second.size(); ++i) {
-            ss << "\t" << Utilities::convertDataType(
-                    arrayPort.first->getDataType()->getSubVarMap().begin()->second->getName())
-               << " " << arrayPort.first->getDataSignal()->getName() << "_" << i << ",\n";
-        }
-    }
+//    // Array Inputs
+//    for (const auto& arrayPort : optimizer->getArrayPorts()) {
+//        for (unsigned long i = 0; i<arrayPort.second.size(); ++i) {
+//            ss << "\t" << Utilities::convertDataType(
+//                    arrayPort.first->getDataType()->getSubVarMap().begin()->second->getName())
+//               << " " << arrayPort.first->getDataSignal()->getName() << "_" << i << ",\n";
+//        }
+//    }
 
     if (hlsOption == HLSOption::MCO) {
         // Internal Registers Input
@@ -323,14 +327,9 @@ void HLS::dataTypes()
     }
 
     ss << "\n// Constants\n";
-//    std::set<std::string> uniqueNames;
     for (const auto& var : optimizer->getConstantVariables()) {
-//        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
-//            continue;
-//        }
         ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
            << " " << Utilities::getFullName(var, "_") << " = " << getVariableReset(var) << ";\n";
-//        uniqueNames.insert(var->getName());
     }
 
     ss << "\n#endif //DATA_TYPES_H";
@@ -378,7 +377,7 @@ void HLS::functions()
                 auto subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
                     this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
-                             << Utilities::getFullName(*subVar, "_"); //(*subVar)->getName();
+                             << Utilities::getFullName(*subVar, "_");
                     if (std::next(subVar) != subVarList.end()) {
                         this->ss << ", ";
                     }

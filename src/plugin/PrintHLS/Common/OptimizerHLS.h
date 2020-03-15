@@ -62,11 +62,9 @@ namespace SCAM { namespace HLSPlugin {
 
         void modifyCommitmentLists();
         bool isSelfAssignments(Assignment *assignment);
-        bool hasOutputRegisterAtRHS(Assignment *assignment);
         bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
         boost::optional<Assignment *> replaceDataSignals(Assignment *assignment);
         boost::optional<Assignment *> replaceByOutputRegister(Assignment *assignment);
-//        boost::optional<Assignment *> replaceVariables(Assignment *assignment);
 
         void removeRedundantConditions();
         void mapOutputRegistersToOutput();

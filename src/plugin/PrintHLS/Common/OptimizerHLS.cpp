@@ -51,7 +51,6 @@ void OptimizerHLS::removeRedundantConditions()
         auto branches = function.second->getReturnValueConditionList();
         for (auto branch = branches.begin(); std::next(branch) != branches.end(); ++branch) {
             auto conditionList = branch->second;
-
             for (auto otherBranches = std::next(branch); otherBranches != branches.end(); ++otherBranches) {
                 auto otherConditionList = otherBranches->second;
                 for (auto &cond : otherConditionList) {
@@ -59,7 +58,6 @@ void OptimizerHLS::removeRedundantConditions()
                         cond = (dynamic_cast<UnaryExpr * >(cond))->getExpr();
                     }
                 }
-
                 bool allFound = true;
                 for (auto cond : conditionList) {
                     bool found = false;
@@ -139,8 +137,12 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
     std::set<DataSignal *> outputSet;
     for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
-            const auto& out = ExprVisitor::getUsedDataSignals(commitment->getLhs());
-            outputSet.insert(out.begin(), out.end());
+            const auto& foundOutputs = ExprVisitor::getUsedDataSignals(commitment->getLhs());
+            for (const auto& out : foundOutputs) {
+                if (!(out->isSubVar() && out->getParent()->isArrayType())) {
+                    outputSet.insert(out);
+                }
+            }
         }
     }
 
@@ -152,7 +154,7 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
         }
     }
 
-    const auto& parentMap = getParentMap(registerToOutput);
+    const auto parentMap = getParentMap(registerToOutput);
 
     // If we can map multiple DataSignals to one Variable, we can replace these DataSignal by a new DataSignal
     // representing all these DataSignals
@@ -189,24 +191,13 @@ void OptimizerHLS::modifyCommitmentLists() {
             if (isSelfAssignments(commitment)) {
                 continue;
             }
-//            if (hasOutputRegisterAtRHS(commitment)) {
-//                continue;
-//            }
             auto newAssignment = commitment;
             auto replacedAssignment = replaceDataSignals(newAssignment);
             if (replacedAssignment) {
-//                if (!isDuplicate(replacedAssignment.get(), assignments)) {
-//                    assignments.push_back(replacedAssignment.get());
-//                }
-//                continue;
                 newAssignment = replacedAssignment.get();
             }
             replacedAssignment = replaceByOutputRegister(newAssignment);
             if (replacedAssignment) {
-//                if (!isDuplicate(replacedByOutputRegister.get(), assignments)) {
-//                    assignments.push_back(replacedByOutputRegister.get());
-//                }
-//                continue;
                 newAssignment = replacedAssignment.get();
             }
             if (!isDuplicate(newAssignment, assignments)) {
@@ -246,29 +237,6 @@ boost::optional<Assignment *> OptimizerHLS::replaceByOutputRegister(Assignment* 
     }
     return boost::none;
 }
-
-//boost::optional<Assignment *> OptimizerHLS::replaceVariables(Assignment* assignment) {
-//    if (NodePeekVisitor::nodePeekVariableOperand(assignment->getLhs())) {
-//        auto dataSignal = dynamic_cast<VariableOperand *>(assignment->getLhs())->getVariable();
-//        for (const auto& subVar : getSubVarMap(registerToOutputMap)) {
-//            if (dataSignal == subVar.first) {
-//                auto newAssigment = new Assignment(new DataSignalOperand(subVar.second), assignment->getRhs());
-//                return newAssigment;
-//            }
-//        }
-//    }
-//    return boost::none;
-//}
-
-//bool OptimizerHLS::hasOutputRegisterAtRHS(Assignment* assignment) {
-//    for (const auto& subVar : getSubVarMap(registerToOutputMap)) {
-//        const auto& varSet = ExprVisitor::getUsedVariables(assignment->getRhs());
-//        if (varSet.find(subVar.first) != varSet.end()) {
-//            return true;
-//        }
-//    }
-//    return false;
-//}
 
 bool OptimizerHLS::isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList) {
     for (const auto& assignment : assignmentList) {
@@ -348,10 +316,10 @@ void OptimizerHLS::findOperationModuleSignals() {
     std::set<Variable *> assumptionVariables;
     for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         for (const auto& commitment : property->getModifiedCommitmentList()) {
-            const auto& out = ExprVisitor::getUsedDataSignals(commitment->getLhs());
+            const auto out = ExprVisitor::getUsedDataSignals(commitment->getLhs());
             outputs.insert(out.begin(), out.end());
 
-            const auto& in = ExprVisitor::getUsedDataSignals(commitment->getRhs());
+            const auto in = ExprVisitor::getUsedDataSignals(commitment->getRhs());
             inputs.insert(in.begin(), in.end());
 
             auto lhsVariables = ExprVisitor::getUsedVariables(commitment->getLhs());
@@ -365,6 +333,7 @@ void OptimizerHLS::findOperationModuleSignals() {
             assumptionVariables.insert(var.begin(), var.end());
         }
     }
+
     // Remove constant Variable from Register Set
     auto it = internalRegisterIn.begin();
     while(it != internalRegisterIn.end()) {
@@ -387,11 +356,13 @@ void OptimizerHLS::findOperationModuleSignals() {
 void OptimizerHLS::findVariables() {
     for (const auto &var : module->getVariableMap()) {
         if (var.second->isCompoundType()) {
-            for (const auto &subVar : var.second->getSubVarList()) {
+            for (const auto& subVar : var.second->getSubVarList()) {
                 variables.insert(subVar);
             }
-        } else {
-            variables.insert(var.second);
+        } else if (!var.second->isArrayType()) {
+            if (!(var.second->isSubVar() && var.second->getParent()->isArrayType())) {
+                variables.insert(var.second);
+            }
         }
     }
 
@@ -419,11 +390,7 @@ void OptimizerHLS::findVariables() {
 }
 
 bool OptimizerHLS::isConstant(Variable *variable) const {
-    auto internalRegisterOutParents = getParents(internalRegisterOut);
-    if (variable->isSubVar()) {
-        return internalRegisterOutParents.find(variable->getParent()) == internalRegisterOutParents.end();
-    }
-    return internalRegisterOutParents.find(variable) == internalRegisterOutParents.end();
+    return constantVariables.find(variable) != constantVariables.end();
 }
 
 std::set<Variable*> OptimizerHLS::getOutputRegister() {
@@ -435,7 +402,6 @@ std::set<Variable*> OptimizerHLS::getOutputRegister() {
 }
 
 DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
-
     std::string combinedName = dataSignal.front()->getFullName();
     for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
         std::string name1 = combinedName;

@@ -126,7 +126,7 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
 }
 
 void VHDLWrapper::functions(std::stringstream &ss) {
-    std::set<Function* > usedFunctions;
+    std::set<Function *> usedFunctions;
     for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         for (const auto& assumption : property->getOperation()->getAssumptionsList()) {
             const auto& funcSet = ExprVisitor::getUsedFunction(assumption);
@@ -142,26 +142,48 @@ void VHDLWrapper::functions(std::stringstream &ss) {
     for (const auto& func : usedFunctions) {
         ss << "\tfunction " + func->getName() << "(";
 
-        const auto& paramMap = func->getParamMap();
-        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
-            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
-            if (std::next(param) != paramMap.end())
+        const auto& parameterMap = func->getParamMap();
+        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
+            if (parameter->second->isCompoundType()) {
+                auto subVarList = parameter->second->getSubVarList();
+                for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
+                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    if (std::next(subVar) != subVarList.end()) {
+                        ss << "; ";
+                    }
+                }
+            } else {
+                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
+            }
+            if (std::next(parameter) != parameterMap.end()) {
                 ss << "; ";
+            }
         }
-        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << ";\n";
+        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << ";\n";
     }
     ss << "\n";
 
     for (const auto& func : usedFunctions) {
         ss << "\tfunction " + func->getName() << "(";
 
-        auto paramMap = func->getParamMap();
-        for (auto param = paramMap.begin(); param != paramMap.end(); param++) {
-            ss << param->first << ": " << SignalFactory::convertDataType(param->second->getDataType()->getName());
-            if (std::next(param) != paramMap.end())
+        auto parameterMap = func->getParamMap();
+        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
+            if (parameter->second->isCompoundType()) {
+                auto subVarList = parameter->second->getSubVarList();
+                for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
+                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    if (std::next(subVar) != subVarList.end()) {
+                        ss << "; ";
+                    }
+                }
+            } else {
+                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
+            }
+            if (std::next(parameter) != parameterMap.end()) {
                 ss << "; ";
+            }
         }
-        ss << ") return " << SignalFactory::convertReturnType(func->getReturnType()->getName()) << " is\n";
+        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << " is\n";
         ss << "\tbegin\n";
 
         if (func->getReturnValueConditionList().empty())
@@ -208,14 +230,21 @@ std::string VHDLWrapper::printArchitecture() {
 
     signals(ss);
     functions(ss);
-    component(ss);
+
+    bool emptyOperationModule = optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() && propertySuiteHelper->getNotifySignals().empty();
+    if (!emptyOperationModule) {
+        component(ss);
+    }
 
     // begin of architecture implementation
     ss << "\nbegin\n\n";
 
-    componentInst(ss);
+    if (!emptyOperationModule) {
+        componentInst(ss);
+    }
     monitor(ss);
     moduleOutputHandling(ss);
+    printConstantOutputs(ss);
     controlProcess(ss);
 
     return ss.str();
@@ -281,4 +310,34 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
         }
     }
     return PrintStatement::toString(dataSignal->getInitialValue(), false);
+}
+
+void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
+{
+    return;
+    // TODO: Check all Signals
+    std::vector<DataSignal *> constantOutputs;
+    auto moduleOutputs = optimizer->getOutputs();
+    for (const auto& port : currentModule->getPorts()) {
+        if (port.second->getInterface()->isOutput()) {
+            if (port.second->getDataSignal()->isCompoundType()) {
+                for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+                    if (moduleOutputs.find(subVar) == moduleOutputs.end()) {
+                        constantOutputs.emplace_back(subVar);
+                    }
+                }
+            } else {
+                if (moduleOutputs.find(port.second->getDataSignal()) == moduleOutputs.end()) {
+                    constantOutputs.emplace_back(port.second->getDataSignal());
+                }
+            }
+        }
+    }
+    if (!constantOutputs.empty()) {
+        ss << "\n\n\t-- Constant Outputs\n";
+        for (const auto& constantOutput : constantOutputs) {
+            ss << "\t" << Utilities::getFullName(constantOutput, ".") << " <= " << getResetValue(constantOutput) << ";\n";
+        }
+        ss << "\n\n";
+    }
 }

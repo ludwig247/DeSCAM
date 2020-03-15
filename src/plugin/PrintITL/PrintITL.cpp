@@ -198,13 +198,17 @@ std::string PrintITL::printProperty(Property *property) {
 
     if (!property->getTimePoints().empty()) {
         ss << "for timepoints:\n";
-        for (auto tp = property->getTimePointsOrdered().begin(); tp != property->getTimePointsOrdered().end(); tp++) {
-            ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
-            if (std::next(tp) != property->getTimePointsOrdered().end()) {
-                ss << ",\n";
+        if (getOptionMap().at("hls-mco")) {
+            ss << "\tt_end = t+1..7 waits_for done_sig = '1';\n";
+        } else {
+            for (auto tp = property->getTimePointsOrdered().begin(); tp!=property->getTimePointsOrdered().end(); tp++) {
+                ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
+                if (std::next(tp)!=property->getTimePointsOrdered().end()) {
+                    ss << ",\n";
+                }
             }
+            ss << ";\n";
         }
-        ss << ";\n";
     }
 
     if (!property->getFreezeSignals().empty()) {
@@ -336,7 +340,7 @@ std::string PrintITL::hlsMacros() {
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()){
-        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType()) || (!dp->isSubVar())){
+        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType()) || (!dp->isSubVar()) && !dp->isArrayType()){
             ss << "-- ";
         }
         ss << "macro " ;
@@ -359,8 +363,8 @@ std::string PrintITL::hlsMacros() {
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
-        if (vr->isCompoundType() || (vr->isSubVar() && vr->getParentDataType()->isArrayType()) || (!vr->isSubVar())) {
-            continue;
+        if (vr->isCompoundType() || (vr->isSubVar() && vr->getParentDataType()->isArrayType()) || (!vr->isSubVar()) && !vr->isArrayType()) {
+            ss << "-- ";
         }
         ss << "macro " << vr->getFullName("_");
         ss << " : " << convertDataTypeForHLS(vr->getDataType()->getName()) << " := ";

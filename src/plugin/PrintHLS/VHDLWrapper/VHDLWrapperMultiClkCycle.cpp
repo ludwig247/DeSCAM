@@ -105,18 +105,15 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
             Style::UL, "_in", false, true);
     printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", false, true);
 
-    ss << "\n\t-- Output Register\n";
-    printVars(Utilities::getParents(signalFactory->getOutputRegister()), Style::DOT, "", "", false, false);
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
-        ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
-    }
-
     ss << "\n\t-- Module Outputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
             Style::UL, "_out", true, true);
     for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
+    }
+    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+        ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
     }
 
     ss << "\n\t-- Handshaking Protocol Signals (Communication between top and operations_inst)\n";
@@ -347,22 +344,37 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
        << "\tprocess(rst, done_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& out : Utilities::getSubVars(signalFactory->getOutputs())) {
-        if (optimizer->hasOutputReg(out)) {
-            ss << "\t\t\t" << SignalFactory::getName(out, Style::DOT) << " <= "
-               << getResetValue(out) << ";\n";
+    for (const auto& registerOutputMap : optimizer->getOutputRegisterMap()) {
+        if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
+            for (const auto& output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
+                if (output->isCompoundType()) {
+                    for (const auto& subVar : output->getSubVarList()) {
+                        ss << "\t\t\t" << SignalFactory::getName(subVar, Style::DOT) << " <= " << getResetValue(subVar) << ";\n";
+                    }
+                } else {
+                    ss << "\t\t\t" << SignalFactory::getName(registerOutputMap.second, Style::DOT) << " <= "
+                       << getResetValue(registerOutputMap.second) << ";\n";
+                }
+            }
+        } else {
+            if (registerOutputMap.second->isCompoundType()) {
+                for (const auto& subVar : registerOutputMap.second->getSubVarList()) {
+                    ss << "\t\t\t" << SignalFactory::getName(subVar, Style::DOT) << " <= " << getResetValue(subVar) << ";\n";
+                }
+            } else {
+                ss << "\t\t\t" << SignalFactory::getName(registerOutputMap.second, Style::DOT) << " <= "
+                   << getResetValue(registerOutputMap.second) << ";\n";
+            }
         }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
-    for (const auto& out : Utilities::getParents(signalFactory->getOperationModuleOutputs())) {
-        if (optimizer->hasOutputReg(out)) {
-            if (optimizer->hasMultipleOutputs(out)) {
-                for (const auto& sig : optimizer->getCorrespondingTopSignals(out)) {
-                    ss << "\t\t\t" << sig->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
-                }
-            } else {
-                ss << "\t\t\t" << out->getFullName() << " <= " << optimizer->getCorrespondingRegister(out)->getFullName() << ";\n";
+    for (const auto& registerOutputMap : optimizer->getOutputRegisterMap()) {
+        if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
+            for (const auto& output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
+                ss << "\t\t\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
             }
+        } else {
+            ss << "\t\t\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
         }
     }
     ss << "\t\tend if;\n"

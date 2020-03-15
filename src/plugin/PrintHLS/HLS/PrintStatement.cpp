@@ -92,23 +92,24 @@ void PrintStatement::visit(DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         this->ss << node.getDataSignal()->getParent()->getName() << suffix;
         if (node.getDataSignal()->getParent()->isArrayType()) {
-            if (optimizer) {
-                const auto arrayPorts = optimizer->getArrayPorts();
-                for (const auto &arrayPort : arrayPorts) {
-                    if (arrayPort.first->getDataSignal()->getName() == node.getDataSignal()->getParent()->getName()) {
-                        uint32_t pos = 0;
-                        for (const auto &expr : arrayPort.second) {
-                            if (NodePeekVisitor::nodePeekDataSignalOperand(expr)) {
-                                if (dynamic_cast<DataSignalOperand* >(expr) == &node) {
-                                    this->ss << "_" << pos;
-                                    return;
-                                }
-                            }
-                            pos++;
-                        }
-                    }
-                }
-            }
+//            if (optimizer) {
+//                const auto arrayPorts = optimizer->getArrayPorts();
+//                for (const auto &arrayPort : arrayPorts) {
+//                    if (arrayPort.first->getDataSignal()->getName() == node.getDataSignal()->getParent()->getName()) {
+//                        uint32_t pos = 0;
+//                        for (const auto &expr : arrayPort.second) {
+//                            if (NodePeekVisitor::nodePeekDataSignalOperand(expr)) {
+//                                if (dynamic_cast<DataSignalOperand* >(expr) == &node) {
+//                                    this->ss << "_" << pos;
+//                                    return;
+//                                }
+//                            }
+//                            pos++;
+//                        }
+//                    }
+//                }
+//            }
+            this->ss << "[" << node.getDataSignal()->getName() << "]";
         } else {
             this->ss << "." << node.getDataSignal()->getName();
         }
