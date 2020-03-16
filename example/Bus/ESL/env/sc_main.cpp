@@ -1,9 +1,9 @@
 #include <Blocking.h>
 #include "systemc.h"
-#include "Bus_new.h"
+#include "../Bus.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
 
 
 using namespace std;

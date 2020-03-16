@@ -4,12 +4,13 @@
 #include "../../Interfaces/Interfaces.h"
 #include "systemc.h"
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+//#include "../../SingleMasterMultiSlave/ESL/Compound.h" - several tests run only when this header is not specified in bus.h
+
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
 
-struct Bus_new : public sc_module {
+struct Bus : public sc_module {
 
     //In-port
     blocking_in<bus_req_t> master_in;
@@ -33,9 +34,9 @@ struct Bus_new : public sc_module {
     int foo;
 
     //Constructor
-    SC_HAS_PROCESS(Bus_new);
+    SC_HAS_PROCESS(Bus);
 
-    Bus_new(sc_module_name name) :
+    Bus(sc_module_name name) :
             master_in("master_in"),
             master_out("master_out"),
             slave_out0("slave_out0"),

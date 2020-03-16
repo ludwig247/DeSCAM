@@ -18,6 +18,6 @@ FILE(GLOB R_SRC *.cpp *.hpp *.h)
 add_executable(Framer_Simulation ${R_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
 
-        sc_main.cpp )
+        env/sc_main.cpp)
 
 target_link_libraries(Framer_Simulation systemc)

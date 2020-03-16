@@ -3,8 +3,8 @@
 //
 
 #include "systemc.h"
-#include "Framer_new.h"
-#include "Monitor_new.h"
+#include "../Framer_new.h"
+#include "../Monitor_new.h"
 #include "Environment.h"
 
 int sc_main(int, char **) {

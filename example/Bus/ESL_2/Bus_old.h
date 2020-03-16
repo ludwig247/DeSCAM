@@ -4,12 +4,12 @@
 #include <Interfaces.h>
 #include "systemc.h"
 
-#include "Compound.h"
+#include "env/Compound.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
 
-struct Bus : public sc_module {
+struct Bus_old : public sc_module {
 
     //In-port
     blocking_in<bus_req_t> master_in;
@@ -32,9 +32,9 @@ struct Bus : public sc_module {
     bus_resp_t resp;
 
     //Constructor
-    SC_HAS_PROCESS(Bus);
+    SC_HAS_PROCESS(Bus_old);
 
-    Bus(sc_module_name name) :
+    Bus_old(sc_module_name name) :
             master_in("master_in"),
             master_out("master_out"),
             slave_out0("slave_out0"),

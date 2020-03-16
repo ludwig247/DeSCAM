@@ -8,7 +8,7 @@
 
 #include "systemc.h"
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
 //#include "Interfaces.h"
 
 struct SlaveDummy : public sc_module {

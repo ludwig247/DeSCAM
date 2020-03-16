@@ -102,7 +102,7 @@ TEST_P(PrintSkeleton_Test, LocalTypesVHDL) {
     ASSERT_NE(GetParam(), nullptr) << "Module not found";
     std::cout << "Instance: " << GetParam()->getName() << std::endl;
     std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + GetParam()->getName() + "_types.vhdl");
-    ASSERT_TRUE(bool(ifs)) << "Can't open file";
+    ASSERT_TRUE(bool(ifs)) << "Can't open file" << SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + GetParam()->getName() + "_types.vhdl";
 
     std::stringstream buffer;
     std::string content((std::istreambuf_iterator<char>(ifs)),

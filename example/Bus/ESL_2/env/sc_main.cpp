@@ -2,10 +2,10 @@
 #include "systemc.h"
 //#include "../../Interfaces/Interfaces.h"
 #include "../../Interfaces_tlm1/Interfaces.h"
-#include "Bus.h"
+#include "../Bus_old.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
 
 
 using namespace std;

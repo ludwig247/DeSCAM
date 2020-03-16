@@ -7,7 +7,7 @@
 //
 
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 
 struct Environment : public sc_module {

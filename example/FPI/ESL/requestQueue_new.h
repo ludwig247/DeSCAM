@@ -6,7 +6,7 @@
 #define PROJECT_REQUESTQUEUE_H
 
 #include "systemc.h"
-#include "Types.h"
+#include "env/Types.h"
 #include "../../Interfaces/Interfaces.h"
 
 struct requesteQ_new : public sc_module {

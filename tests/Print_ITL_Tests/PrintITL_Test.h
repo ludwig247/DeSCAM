@@ -23,7 +23,7 @@ static std::vector<SCAM::Module *> parameter() {
     commandLineArugmentsVector.push_back(bin.c_str());
 
     //SRC-File to be analyzed
-    std::string file_path = std::string(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/Tests.h");
+    std::string file_path = std::string(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/tests.h");
     commandLineArugmentsVector.push_back(file_path.c_str());
 
     //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
@@ -75,8 +75,9 @@ TEST_P(ITL_Test, Basic) {
     ASSERT_NE(GetParam(), nullptr) << "Module not found";
     std::cout << "Instance: " << GetParam()->getName() << std::endl;
 
+//    std::ifstream ifs(SCAM_HOME"/example/" + GetParam()->getName() +"/RTL/properties/" + GetParam()->getName() + ".vhi");
     std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + GetParam()->getName() + ".vhi");
-    ASSERT_TRUE(bool(ifs)) << "Can't open file";
+    ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" << GetParam()->getName()  << ".vhi";
 
     std::stringstream buffer;
     std::string content((std::istreambuf_iterator<char>(ifs)),
