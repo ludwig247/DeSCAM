@@ -7,7 +7,7 @@
 
 
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 //FIXME: ALL created types need to be put in a separate file (like FPI example)
 struct Config {
