@@ -438,7 +438,7 @@ void SCAM::ExpressionSubstitution::visit(SCAM::ArrayExpr &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(SCAM::CompareOperator &node) {
+void SCAM::ExpressionSubstitution::visit(SCAM::Ternary &node) {
     throw std::runtime_error("Compare operator and -Optimize is not allwoed together");
 
 }

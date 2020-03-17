@@ -33,6 +33,7 @@ namespace SCAM {
 
         static std::set<SyncSignal *> getUsedSynchSignals(SCAM::Expr *expr);
 
+        static std::set<Ternary*> getUsedTernaryOperators(SCAM::Expr * expr);
 
         static std::set<DataSignal *> getUsedDataSignals(SCAM::Expr *expr);
 
@@ -42,7 +43,7 @@ namespace SCAM {
 
         void visit(class ArrayExpr &node) override;
 
-        static bool isCompareOperator(Expr *expr);
+        static bool isTernary(Expr *expr);
 
     private:
         ExprVisitor(SCAM::Expr *expr);
@@ -61,6 +62,7 @@ namespace SCAM {
         std::set<Port *> usedPorts;
         std::set<Function *> usedFunction;
         CompoundValue *compoundValue;
+        std::set<Ternary*> usedTernary;
 
         virtual void visit(struct VariableOperand &node);
 
@@ -127,7 +129,7 @@ namespace SCAM {
         virtual void visit(Peek &node);
 
         virtual void visit(struct TimePointOperand &node);
-        virtual void visit(struct CompareOperator &node);
+        virtual void visit(struct Ternary &node);
 
     };
 }

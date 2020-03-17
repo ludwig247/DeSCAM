@@ -98,7 +98,7 @@ namespace SCAM {
 
         void visit(SCAM::TimePointOperand &node) override;
 
-        void visit(SCAM::CompareOperator &node) override;
+        void visit(SCAM::Ternary &node) override;
 
     private:
         std::vector<std::vector<SCAM::CfgNode *>> stateAssumptions;//Temporary

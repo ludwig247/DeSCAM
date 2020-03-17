@@ -625,8 +625,8 @@ namespace SCAM {
     }
 
 
-    CompareOperator *StmtNodeAlloc::allocNode(CompareOperator &node, bool simplifyNode) {
-        throw std::runtime_error("StmtNodeAlloc::visit: CompareOperator not implemented");
+    Ternary *StmtNodeAlloc::allocNode(Ternary &node, bool simplifyNode) {
+        throw std::runtime_error("StmtNodeAlloc::visit: Ternary not implemented");
     }
 
 
@@ -686,8 +686,8 @@ namespace SCAM {
         throw std::runtime_error("StmtNodeAlloc::visit: ArrayExpr not implemented");
     }
 
-    void StmtNodeAlloc::visit(class CompareOperator &node) {
-        throw std::runtime_error("StmtNodeAlloc::visit: CompareOperator not implemented");
+    void StmtNodeAlloc::visit(class Ternary &node) {
+        throw std::runtime_error("StmtNodeAlloc::visit: Ternary not implemented");
     }
 
 

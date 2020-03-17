@@ -306,7 +306,7 @@ namespace SCAM {
     }
 
 
-    void SCAM::CreateOperationsSlave::visit(SCAM::CompareOperator &node) {
+    void SCAM::CreateOperationsSlave::visit(SCAM::Ternary &node) {
         this->newExpr = &node;
     }
 

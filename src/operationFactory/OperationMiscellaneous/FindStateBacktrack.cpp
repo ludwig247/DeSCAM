@@ -243,7 +243,7 @@ namespace SCAM {
         this->newExpr = &node;
     }
 
-    void FindStateBacktrack::visit(SCAM::CompareOperator &node) {
+    void FindStateBacktrack::visit(SCAM::Ternary &node) {
         this->newExpr = &node;
     }
 

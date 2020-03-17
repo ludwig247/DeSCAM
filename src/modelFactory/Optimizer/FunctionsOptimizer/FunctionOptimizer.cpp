@@ -462,7 +462,7 @@ bool SCAM::FunctionsOptimizer::noOptimizationAchieved(
     return true;
 }
 
-void SCAM::FunctionsOptimizer::visit(SCAM::CompareOperator &node) {
+void SCAM::FunctionsOptimizer::visit(SCAM::Ternary &node) {
     throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
 }
 

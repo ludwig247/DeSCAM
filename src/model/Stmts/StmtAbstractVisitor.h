@@ -75,7 +75,7 @@ namespace SCAM {
 
         virtual void visit(class TimePointOperand &node) = 0;
 
-        virtual void visit(class CompareOperator &node) = 0;
+        virtual void visit(class Ternary &node) = 0;
     };
 }
 

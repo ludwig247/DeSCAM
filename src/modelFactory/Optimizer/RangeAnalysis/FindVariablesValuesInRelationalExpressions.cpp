@@ -108,7 +108,7 @@ void SCAM::FindVariablesValuesInRelationalExpressions::visit(SCAM::FunctionOpera
     }
 }
 
-void SCAM::FindVariablesValuesInRelationalExpressions::visit(SCAM::CompareOperator &node) {
+void SCAM::FindVariablesValuesInRelationalExpressions::visit(SCAM::Ternary &node) {
 
     throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
 

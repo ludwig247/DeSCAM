@@ -117,7 +117,7 @@ namespace SCAM {
 
         void visit(struct TimePointOperand &node) override {};
 
-        void visit(struct CompareOperator &node) override;
+        void visit(struct Ternary &node) override;
 
     };
 }

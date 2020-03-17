@@ -64,10 +64,6 @@ SCAM::ExprTranslator::ExprTranslator(z3::context *context) :
 }
 
 
-SCAM::ExprTranslator::~ExprTranslator() {
-
-}
-
 z3::expr &SCAM::ExprTranslator::translate(SCAM::Expr *scam_expr) {
 
 //    std::cout << "ExprTranslator::translate: " << PrintStmt::toString(scam_expr) << "   ------ " << ExprVisitor::isBitwise(scam_expr) << "\n";
@@ -306,12 +302,11 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             return translate_intern(ret);
         } else if (oper == "if") {
             z3::expr simplifiedITE = z3_expr_intern.simplify();
-            std::cout << simplifiedITE << std::endl;
             if(simplifiedITE.num_args()==3){
                 auto cond = translate_intern(z3_expr_intern.arg(0));
                 auto trueExpr= translate_intern(z3_expr_intern.arg(1));
                 auto falseExpr= translate_intern(z3_expr_intern.arg(2));
-                return new CompareOperator(cond,trueExpr,falseExpr);
+                return new Ternary(cond,trueExpr,falseExpr);
             }else if((simplifiedITE.num_args()==0)){
                 return translate_intern(simplifiedITE);
             }
@@ -718,7 +713,7 @@ void SCAM::ExprTranslator::visit(struct ArrayOperand &node) {
 }
 
 
-void SCAM::ExprTranslator::visit(SCAM::CompareOperator &node) {
+void SCAM::ExprTranslator::visit(SCAM::Ternary &node) {
 
     auto condition = translate(node.getCondition());
     auto trueExpr = translate(node.getTrueExpr());

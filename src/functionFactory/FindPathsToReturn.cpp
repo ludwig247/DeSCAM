@@ -262,7 +262,7 @@ void SCAM::FindPathsToReturn::visit(SCAM::Return &node) {
 
 }
 
-void SCAM::FindPathsToReturn::visit(class SCAM::CompareOperator &node) {
+void SCAM::FindPathsToReturn::visit(class SCAM::Ternary &node) {
     this->appendStmtToPaths(&node);
 
 }

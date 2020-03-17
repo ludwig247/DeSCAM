@@ -56,7 +56,7 @@ namespace SCAM {
                     }
 
                     this->waitOp = false;
-                    /// to avoid creating more than one wait operation for the same statement
+                    /// to avoi creating more than one wait operation for the same statement
                     this->nodeWaitList.push_back((*node));
 
                 } else if (findComm.isNonBlockingAccess()) {
@@ -309,7 +309,7 @@ namespace SCAM {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::CompareOperator &node) {
+    void SCAM::CreateOperations::visit(SCAM::Ternary &node) {
         this->newExpr = &node;
     }
 

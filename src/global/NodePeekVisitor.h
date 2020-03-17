@@ -84,7 +84,7 @@ namespace SCAM {
 
         TimePointOperand * nodePeekTimePointOperand() const;
 
-        CompareOperator * nodePeekCompareOperator() const;
+        Ternary * nodePeekTernary() const;
 
         static VariableOperand *nodePeekVariableOperand(Stmt *node);
 
@@ -152,7 +152,7 @@ namespace SCAM {
 
         static TimePointOperand * nodePeekTimePointOperand(Stmt *node);
 
-        static CompareOperator * nodePeekCompareOperator(Stmt *node);
+        static Ternary * nodePeekTernary(Stmt *node);
 
     private:
         bool isConstTypeNodeFlag = false;
@@ -189,7 +189,7 @@ namespace SCAM {
         Peek *nodePtrPeek = nullptr;
         ArrayExpr * nodePtrArrayExpr = nullptr;
         TimePointOperand * nodePtrTimePointOperand= nullptr;
-        CompareOperator * nodePtrCompareOperator = nullptr;
+        Ternary * nodePtrTernary = nullptr;
 
 
     public:
@@ -259,7 +259,7 @@ namespace SCAM {
 
         virtual void visit(struct TimePointOperand &node);
 
-        virtual void visit(struct CompareOperator &node);
+        virtual void visit(struct Ternary &node);
 
     };
 }

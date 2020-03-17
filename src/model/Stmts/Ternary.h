@@ -2,26 +2,30 @@
 // Created by tobias on 19.02.20.
 //
 
-#ifndef DESCAM_COMPAREOPERATOR_H
-#define DESCAM_COMPAREOPERATOR_H
+#ifndef DESCAM_TERNARY_H
+#define DESCAM_TERNARY_H
 
 
 #include "Expr.h"
 
 namespace SCAM {
-    class CompareOperator : public Expr {
+    class Ternary : public Expr {
     public:
-        CompareOperator() = delete;
+        Ternary() = delete;
 
-        CompareOperator(Expr *condition, Expr *trueExpr, Expr *falseExpr);
+        Ternary(Expr * condition, Expr *trueExpr, Expr *falseExpr);
 
-        ~CompareOperator() = default;
+        ~Ternary() = default;
 
         Expr *getCondition() const;
 
         Expr *getTrueExpr() const;
 
         Expr *getFalseExpr() const;
+
+        void setTrivialTrue();
+        void setTrivialFalse();
+
 
         void accept(StmtAbstractVisitor &visitor) override;
 
@@ -37,4 +41,4 @@ namespace SCAM {
 }
 
 
-#endif //DESCAM_COMPAREOPERATOR_H
+#endif //DESCAM_TERNARY_H

@@ -122,8 +122,8 @@ namespace SCAM {
 
 
 
-    CompareOperator *NodePeekVisitor::nodePeekCompareOperator() const {
-        return nodePtrCompareOperator;
+    Ternary * NodePeekVisitor::nodePeekTernary() const {
+        return nodePtrTernary;
     }
 
 
@@ -328,9 +328,9 @@ namespace SCAM {
     }
 
 
-    CompareOperator *NodePeekVisitor::nodePeekCompareOperator(Stmt *node) {
+    Ternary *NodePeekVisitor::nodePeekTernary(Stmt *node) {
         NodePeekVisitor peekVisitor(node);
-        return peekVisitor.nodePeekCompareOperator();
+        return peekVisitor.nodePeekTernary();
     }
 
 
@@ -478,8 +478,8 @@ namespace SCAM {
     }
 
 
-    void NodePeekVisitor::visit(struct CompareOperator &node) {
-        nodePtrCompareOperator = &node;
+    void NodePeekVisitor::visit(struct Ternary &node) {
+        nodePtrTernary = &node;
     }
 
 

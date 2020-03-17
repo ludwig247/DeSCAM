@@ -829,7 +829,7 @@ bool SCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator *co
     if(condExpr && trueExpr && falseExpr){
         //conditionalOperator->dumpColor();
         //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
-        this->expr = new CompareOperator(condExpr,trueExpr,falseExpr);
+        this->expr = new Ternary(condExpr,trueExpr,falseExpr);
     }else return exitVisitor("Operator not correctly used!");
 
     return false;

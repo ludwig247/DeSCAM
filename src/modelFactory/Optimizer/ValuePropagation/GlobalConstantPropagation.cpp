@@ -289,7 +289,7 @@ namespace SCAM {
         this->newExpr = new ArrayExpr(valueMap, node.getDataType());
     }
 
-    void GlobalConstantPropagation::visit(class CompareOperator &node) {
+    void GlobalConstantPropagation::visit(class Ternary &node) {
         throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
 
     }

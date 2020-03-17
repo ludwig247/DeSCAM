@@ -451,7 +451,7 @@ namespace SCAM {
 
     }
 
-    void SimplifyVisitor::visit(class CompareOperator &node) {
+    void SimplifyVisitor::visit(class Ternary &node) {
 
     }
 
@@ -674,7 +674,7 @@ namespace SCAM {
         throw std::runtime_error("Not implemented");
     }
 
-    CompareOperator *SimplifyVisitor::simplifyNode(CompareOperator &node) {
+    Ternary *SimplifyVisitor::simplifyNode(Ternary &node) {
         throw std::runtime_error("Not implemented");
     }
 

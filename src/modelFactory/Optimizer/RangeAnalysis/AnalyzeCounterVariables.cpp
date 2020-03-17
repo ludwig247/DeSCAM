@@ -358,7 +358,7 @@ void SCAM::AnalyzeCounterVariables::addToMarginalValuesMap(std::string varName) 
     }
 }
 
-void SCAM::AnalyzeCounterVariables::visit(SCAM::CompareOperator &node) {
+void SCAM::AnalyzeCounterVariables::visit(SCAM::Ternary &node) {
     throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
 }
 

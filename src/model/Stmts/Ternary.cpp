@@ -3,9 +3,9 @@
 //
 
 #include <PrintStmt.h>
-#include "CompareOperator.h"
+#include "Ternary.h"
 
-SCAM::CompareOperator::CompareOperator(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *falseExpr):
+SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *falseExpr):
     condition(condition),
     trueExpr(trueExpr),
     falseExpr(falseExpr),
@@ -22,15 +22,15 @@ SCAM::CompareOperator::CompareOperator(SCAM::Expr *condition, SCAM::Expr *trueEx
 
 }
 
-void SCAM::CompareOperator::accept(SCAM::StmtAbstractVisitor &visitor) {
+void SCAM::Ternary::accept(SCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::CompareOperator::operator==(const SCAM::Stmt &other) const {
+bool SCAM::Ternary::operator==(const SCAM::Stmt &other) const {
     if (this == &other) return true;
-    if (NodePeekVisitor::nodePeekCompareOperator(const_cast<Stmt *>(&other)) == nullptr) return false;
-    auto thisPtr = (CompareOperator *) this;
-    auto otherPtr = (const CompareOperator *) &other;
+    if (NodePeekVisitor::nodePeekTernary(const_cast<Stmt *>(&other)) == nullptr) return false;
+    auto thisPtr = (Ternary *) this;
+    auto otherPtr = (const Ternary *) &other;
 
     auto is_equal = [] (Expr * a, Expr * b)-> bool {
         return (*a) == (*b);
@@ -42,14 +42,24 @@ bool SCAM::CompareOperator::operator==(const SCAM::Stmt &other) const {
    return conditions && trueExprs && falseExprs;
 }
 
-SCAM::Expr *SCAM::CompareOperator::getCondition() const {
+SCAM::Expr *SCAM::Ternary::getCondition() const {
     return condition;
 }
 
-SCAM::Expr *SCAM::CompareOperator::getTrueExpr() const {
+SCAM::Expr *SCAM::Ternary::getTrueExpr() const {
     return trueExpr;
 }
 
-SCAM::Expr *SCAM::CompareOperator::getFalseExpr() const {
+SCAM::Expr *SCAM::Ternary::getFalseExpr() const {
     return falseExpr;
+}
+
+void SCAM::Ternary::setTrivialTrue() {
+    this->condition = new BoolValue(true);
+
+}
+
+void SCAM::Ternary::setTrivialFalse() {
+    this->condition = new BoolValue(false);
+
 }

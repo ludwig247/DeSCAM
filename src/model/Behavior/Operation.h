@@ -30,7 +30,9 @@ namespace SCAM {
 
         const std::vector<Expr *> &getAssumptionsList() const;
 
-        const std::vector<Assignment *> &getCommitmentsList() const;
+        const std::vector<Assignment *> & getCommitmentsList() const;
+
+        const std::vector<SCAM::Assignment *> &getCommitmentList() const;
 
         SCAM::State *getState() const;
 

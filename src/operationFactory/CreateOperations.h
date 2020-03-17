@@ -113,7 +113,7 @@ namespace SCAM {
 
         void visit(SCAM::TimePointOperand &node) override;
 
-        void visit(SCAM::CompareOperator &node) override;
+        void visit(SCAM::Ternary &node) override;
     private:
         void addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation);
         void addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation);
