@@ -60,6 +60,31 @@ include(${PROJECT_SOURCE_DIR}/install/install_z3.make)
 # Include compiled binaries
 #include_directories( ${Z3_INCLUDES} )
 
+#################################
+## GTest
+#################################
+# Do not use system GoogleTest
+set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system googletest")
+
+# Include the ExternalProject compilation
+include(${PROJECT_SOURCE_DIR}/install/install_gtest.make)
+
+# Include the binary
+#include_directories( ${GTEST_INCLUDES} )
+
+
+## SystemC - Cmake, repo (https://github.com/accellera-official/systemc.git commit: 925838a21a90d4b98bde44a7cd5120361bd699a3
+################################
+# SystemC
+################################
+# Do not use system SystemC
+set(USE_SYSTEM_SYSTEMC OFF CACHE BOOL "Use system SystemC")
+
+# Include the ExternalProject compilation
+include(${PROJECT_SOURCE_DIR}/install/install_systemc.make)
+
+# Include the binary
+#include_directories( ${SYSTEMC_INCLUDES} )
 
 ################################################################################
 
