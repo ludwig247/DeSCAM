@@ -1,4 +1,4 @@
-add_library(PrintSystemC
+add_library(PrintSystemC SHARED
         PrintSystemC.cpp
         PrintStmtForSystemC.h)
 

@@ -111,16 +111,19 @@ void PrintSystemC::visit(SCAM::Module &node) {
     }
 
     //SECTIONS
-    printSpace(this->indent);
-    this->ss << "enum Sections {";
-    auto sections_vector = node.getFSM()->getSectionList();
-    this->ss << sections_vector[0];
-    sections_vector.erase(sections_vector.begin());
-    for (auto &i:sections_vector)
-        this->ss << ", " << i;
-    this->ss << "};" << std::endl;
-    printSpace(this->indent);
-    this->ss << "Sections section;" << std::endl << std::endl;
+  //  if (!node.getFSM()->getSectionList().empty()) {
+        printSpace(this->indent);
+        this->ss << "enum Sections {";
+      //  auto sections_vector = node.getFSM()->getSectionList();
+        auto sections_vector = node.getFSM()->getStateMap();
+        this->ss << sections_vector[0];
+        sections_vector.erase(sections_vector.begin());
+        for (auto &i:sections_vector)
+            this->ss << ", " << i.second;//I DID STH HERE
+        this->ss << "};" << std::endl;
+        printSpace(this->indent);
+        this->ss << "Sections section;" << std::endl << std::endl;
+  //  }
 
     //PORTS
     for (auto &&port :node.getPorts()) {
@@ -391,4 +394,8 @@ void PrintSystemC::visit(Function &node) {
 
 void PrintSystemC::visit(Parameter &node) {
     this->ss << node.getName();
+}
+
+void PrintSystemC::visit(Timepoint &node) {
+    throw (std::runtime_error("Not implemented yet."));
 }
