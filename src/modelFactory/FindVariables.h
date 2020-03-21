@@ -21,18 +21,19 @@ namespace SCAM{
 
     class FindVariables : public clang::RecursiveASTVisitor<FindVariables> {
     public:
-        FindVariables(clang::CXXRecordDecl* recordDecl);
+        FindVariables(clang::CXXRecordDecl* recordDecl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap);
         //Visitor
         bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
 
         //GETTER
         std::map<std::string, clang::QualType>  getVariableTypeMap() const;
         const std::map<std::string, clang::FieldDecl *> & getVariableMap() const;
+        void printVariableMap();
     private:
         clang::CXXRecordDecl* recordDecl;
         std::map<std::string,clang::FieldDecl*> memberMap; //! <NameOfField,Declaration>
         std::map<std::string, std::string> memberTypeMap; //! <NameOfField,Declaration>
-
+        std::map<std::string, clang::CXXRecordDecl *> _moduleMap;
 
     };
 

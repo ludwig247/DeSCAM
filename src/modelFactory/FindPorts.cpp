@@ -75,6 +75,14 @@ namespace SCAM {
                 }
                 else if (portTemplates.at(0) == "shared_out") {
                     this->outSharedPortMap.insert(std::make_pair(fieldDecl->getNameAsString(), portTemplates.at(1)));
+
+                }
+                else if (portTemplates.at(0) == "Shared") {
+                    //this->outSharedPortMap.insert(std::make_pair(fieldDecl->getNameAsString(), portTemplates.at(1)));
+
+                } else if (portTemplates.at(0) == "Blocking") {
+                    //this->outSharedPortMap.insert(std::make_pair(fieldDecl->getNameAsString(), portTemplates.at(1)));
+
                 }else{
                     throw std::runtime_error("Unknown interface: " + portTemplates.at(0));
                 }

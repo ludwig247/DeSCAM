@@ -24,6 +24,8 @@ namespace SCAM {
             //Pass the null definition of main
             if(pass == 1){
                 _scmainFunctionDecl = functionDecl;
+                std::string name = functionDecl->getNameInfo().getAsString(); 
+                
                 scMainFound = true;
                 return false;
             }

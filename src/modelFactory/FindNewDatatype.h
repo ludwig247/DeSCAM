@@ -19,7 +19,7 @@ namespace SCAM{
 class FindNewDatatype : public clang::RecursiveASTVisitor<FindNewDatatype> {
 public:
 
-    static SCAM::DataType*  getDataType(const clang::QualType& type);
+    static SCAM::DataType*  getDataType(const clang::QualType& type, std::map<std::string, clang::CXXRecordDecl *> _moduleMap);
     static std::string getTypeName(const clang::QualType& type);
     static bool isGlobal(const clang::QualType& type); //! Returns true, if datatype is not defined within a module class
 

@@ -10,7 +10,7 @@
 namespace SCAM {
 
 
-    SCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
+    SCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type, std::map<std::string, clang::CXXRecordDecl *> _moduleMap) {
 
         std::string typeName = FindNewDatatype::getTypeName(type);
         //DataType already exists?
@@ -30,12 +30,12 @@ namespace SCAM {
             //}
         } else if (type->isStructureType()) {
             auto recordDecl = type->getAsCXXRecordDecl();
-            FindVariables findVariables(recordDecl);
+            FindVariables findVariables(recordDecl, _moduleMap);
             //Create new dataType
             newType = new DataType(recordDecl->getName().str());
             //Add sub-variables
             for (auto var: findVariables.getVariableTypeMap()) {
-                auto subVarDataType = FindNewDatatype::getDataType(var.second);
+                auto subVarDataType = FindNewDatatype::getDataType(var.second, _moduleMap);
                 if (subVarDataType->isBuiltInType()) {
                     newType->addSubVar(var.first, subVarDataType);
                 } else if (subVarDataType->isEnumType()) {

@@ -17,10 +17,15 @@
 #include "FindFunctions.h"
 #include "FindGlobal.h"
 #include "../parser/CommandLineParameter.h"
+#include "FindInstancesInModule.h"
+#include "DotExportInstances.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
 #include <z3.h>
 #include <PropertyFactory.h>
+
+
+
 
 
 //Constructor
@@ -34,6 +39,7 @@ SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
     //Unimportant modules
     this->unimportantModules.push_back("sc_event_queue");//! Not important for the abstract model:
     this->unimportantModules.push_back("Testbench");//! Not important for the abstract model:
+    this->unimportantModules.push_back("MasterDummy");
 }
 
 
@@ -51,7 +57,9 @@ bool SCAM::ModelFactory::fire() {
     //SCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
+	
 
+	
     //Global variables
     this->addGlobalConstants(tu);
 
@@ -64,6 +72,8 @@ bool SCAM::ModelFactory::fire() {
 
     //Instances
     this->addInstances(tu);
+
+    
     //sc_main
     return true;
 }
@@ -76,15 +86,14 @@ bool SCAM::ModelFactory::fire() {
 //         * module declaration of the ast
 //        */
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
-
+    DotExportInstances dotExportInstances;
     FindModules modules(decl);
-
     //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
-
+		
 //        //Module Name
         std::string name = scparModule.first;
-
+		
 
 //        //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
@@ -95,33 +104,55 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         std::cout << "############################" << std::endl;
         std::cout << "Module: " << name << std::endl;
         std::cout << "############################" << std::endl;
-        //DataTypes::reset();//FIXME:
+        //scparModule.second->dumpColor();
+        FindInstancesInModules instances(scparModule.second, modules.getModuleMap());
+        instances.printInstanceMap();
+        dotExportInstances.addtoGraph(instances.getInstanceMap());
+        //DataTypes::reset();//FIXME:	
         auto module = new Module(scparModule.first);
         model->addModule(module);
         //Members
-        this->addVariables(module, scparModule.second);
+        this->addVariables(module, scparModule.second, modules.getModuleMap());
         //Ports
         this->addPorts(module, scparModule.second);
         //Combinational Functions
-        this->addFunctions(module, scparModule.second);
+        //this->addFunctions(module, scparModule.second);
         //Processe
         this->addBehavior(module, scparModule.second);
 
         //this->addCommunicationFSM(module);
     }
+    dotExportInstances.printInstanceMap();
+    dotExportInstances.exportDot();
 }
 
 //! Add structure ...
 void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
-    FindSCMain scmain(tu);
 
+    FindModules modules(tu);
+    DotExportInstances dotExportInstances;
+
+
+
+
+	std::cout << "############################" << std::endl;
+    std::cout << "Instances: " << std::endl;
+    std::cout << "############################" << std::endl;
+
+    for (auto &scparModule: modules.getModuleMap()) {
+
+        FindInstancesInModules instances(scparModule.second, modules.getModuleMap());
+        instances.printInstanceMap();
+        dotExportInstances.addtoGraph(instances.getInstanceMap());
+    }
+    FindSCMain scmain(tu);
     //The top instance is the sc_main. It doesn't contain any ports
     //Create empty dummy module for sc_main
     auto sc_main = new Module("main");
-    //this->model->addModule(sc_main);
+    this->model->addModule(sc_main);
     //Create instance for sc_main and add to model
     auto topInstance = new ModuleInstance("TopInstance", sc_main);
-    //std::cout << model->getModuleInstance() << std::cout;
+
     model->addTopInstance(topInstance);
     if (!scmain.isScMainFound()) {
         std::cout << "" << std::endl;
@@ -131,16 +162,33 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         std::cout << "-I- No main found, can't create netlist" << std::endl;
         return;
     }
+	
 
+	
     FindNetlist findNetlist(scmain.getSCMainFunctionDecl());
+    scmain.getSCMainFunctionDecl()->dumpColor();
+    findNetlist.printInstanceMap();
+
+    dotExportInstances.addtoGraph(findNetlist.getInstanceMap());
+    dotExportInstances.printInstanceMap();
+    dotExportInstances.exportDot();
+
+/*
+    for (auto &instance: findNetlist.getInstanceMap()) {
+//        //Search for pointer in modul map
+        Module *module = model->getModules().find(instance.first.second)->second;
+        std::cout << "+++" << module->getName().c_str() << std::endl;
+
+    }
+
 //    //findNetlist.getInstanceMap() = std::map<string instance_name,string sc_module>
     for (auto &instance: findNetlist.getInstanceMap()) {
 //        //Search for pointer in modul map
-        Module *module = model->getModules().find(instance.second)->second;
+        Module *module = model->getModules().find(instance.first.second)->second;
 //        //In case module is not found -> error!
         if (!module) { throw std::runtime_error("ModelFactory::addInstances module not found"); }
 //        //Add instance to model
-        topInstance->addModuleInstance(new ModuleInstance(instance.first, module));
+        topInstance->addModuleInstance(new ModuleInstance(instance.first.first, module));
     }
     //ChannelMap = <<Instance,Port>, channelDecl*> >
     //Create exactly one channel for each channelDecl and attach respective ports to this channel
@@ -180,7 +228,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         } else { throw std::runtime_error("Interface direction not supported"); }
         //Add instance to channel
 
-    }
+    }*/
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
@@ -188,9 +236,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Parse ports from CXXRecordDecl
     //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
     //Right now, we are not interested about the direction of the port.
-
     SCAM::FindPorts findPorts(decl, this->_context);
-
     //Add Ports -> requires Name, Interface and DataType
     //RendezVouz
     //Input ports
@@ -291,6 +337,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     //Find the process describing the behavior
     SCAM::FindProcess findProcess(decl);
     clang::CXXMethodDecl *methodDecl;
+    /*
     if(findProcess.isValidProcess()){
         methodDecl = findProcess.getProcess();
     }
@@ -332,13 +379,15 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         PropertyFactory propertyFactory(module);
         module->setPropertySuite(propertyFactory.getPropertySuite());
     }
+     */
 
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module
-void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap) {
     //Find all Variables within the Module
-    FindVariables findVariables(decl);
+    FindVariables findVariables(decl, ModuleMap);
+    //findVariables.printVariableMap();
 
     //Initial Values
     //FindInitalValues findInitalValues(decl, findVariables.getVariableMap(), module);
@@ -363,7 +412,7 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
             type = DataTypes::getLocalDataType(module->getName(), typeName);
         } else {
             //Step2 : Add new datatype either as local or global datatype
-            type = FindNewDatatype::getDataType(variable.second);
+            type = FindNewDatatype::getDataType(variable.second, ModuleMap);
             if (FindNewDatatype::isGlobal(variable.second)) {
                 DataTypes::addDataType(type);
             } else {
@@ -424,12 +473,12 @@ void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
     }
 }
 
-void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
+/*void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
     FindFunctions findFunction(decl);
     //Add datatypes for functions
-
+    std::map<std::string, clang::CXXRecordDecl *> dummyMap = new std::map<std::string, clang::CXXRecordDecl *>;
     for (auto func: findFunction.getFunctionMap()) {
-        auto newType = FindNewDatatype::getDataType(func.second->getResultType());
+        auto newType = FindNewDatatype::getDataType(func.second->getResultType(), dummyMap);
         if (FindNewDatatype::isGlobal(func.second->getResultType())) {
             DataTypes::addDataType(newType);
         } else DataTypes::addLocalDataType(module->getName(), newType);
@@ -482,7 +531,8 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         }
     }
 
-}
+}*/
+
 
 void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
     //Find all global functions and variables
@@ -635,9 +685,8 @@ void SCAM::ModelFactory::removeUnused() {
             this->model->removeGlobalFunction(func.first);
         }
     }
+
+
 }
-
-
-
 
 

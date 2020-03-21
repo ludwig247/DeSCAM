@@ -21,13 +21,16 @@ namespace SCAM {
         virtual bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce);
 
         //GETTER
-        std::map<std::string,std::string> getInstanceMap();
+        std::map<std::pair<std::string, std::string>, std::string> getInstanceMap();
         std::map<std::pair<std::string,std::string>,clang::DeclRefExpr*> getChannelMap();
+
+        void printInstanceMap();
+        void printChannelMap();
 
 
     private:
         int _pass;
-        std::map<std::string,std::string> _instanceMap; //! <instance_name, sc_module>
+        std::map<std::pair<std::string, std::string>, std::string> _instanceMap; //! <<instance_name, sc_module>, parent>
         std::map<std::pair<std::string,std::string>,clang::DeclRefExpr*> _channelMap; //! <<Instance,Port>,channelDecl >
     };
 }

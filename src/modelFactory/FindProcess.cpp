@@ -2,6 +2,7 @@
 // Created by ludwig on 28.09.15.
 //
 
+#include <iostream>
 #include "FindProcess.h"
 
 SCAM::FindProcess::FindProcess(clang::CXXRecordDecl* recordDecl):
@@ -124,7 +125,10 @@ const std::map<std::string, std::pair<clang::CXXMethodDecl *, SCAM::PROCESS_TYPE
 }
 
 bool SCAM::FindProcess::isValidProcess() const {
-    if(this->processMap.size() == 1){
+
+    if(this->processMap.size() == 0) {
+        std::cout << "Has no process" << std::endl;
+    } else if(this->processMap.size() == 1){
         auto process = (*this->processMap.begin());
         if(process.second.second == SCAM::PROCESS_TYPE::THREAD){
             return true;
