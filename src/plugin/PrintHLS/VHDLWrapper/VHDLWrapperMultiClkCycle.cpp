@@ -71,8 +71,7 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
             bool const& vld,
             bool const& asVector) {
         for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix)
-               << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
+            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix) << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
             if (vld) {
                 ss << "\tsignal " << prefix << SignalFactory::getName(var, style, "_vld") << ": std_logic;\n";
             }
@@ -86,8 +85,7 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
             bool const& vld,
             bool const& asVector) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix)
-               << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
+            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix) << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
             if (vld) {
                 ss << "\tsignal " << SignalFactory::getName(signal, style, "_vld") << ": std_logic;\n";
             }

@@ -142,7 +142,7 @@ while read line; do
 		# Use Python Script
 		cd ..
 		#FILE_NAME=$(echo ${input##*/} | cut -d'.' -f1)
-		$PYTHON3 $current_working_dir/check_hls_output.py -f $line
+		$PYTHON3 $current_working_dir/check_hls_output.py -f $line -t $hls_option
 	fi	
 
 # Create script for onespin

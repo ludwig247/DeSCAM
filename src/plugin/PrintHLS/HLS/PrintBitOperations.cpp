@@ -164,8 +164,7 @@ bool PrintBitOperations::sliceWithShift(Node *node) {
                 }
                 auto subChild = child->child;
                 for (auto &sub : subChild) {
-                    if (sub->type != StmtType::UNSIGNED_VALUE && sub->type != StmtType::VARIABLE_OPERAND
-                        && sub->type != StmtType::PARAM_OPERAND && sub->type != StmtType::DATA_SIGNAL_OPERAND) {
+                    if (sub->type != StmtType::UNSIGNED_VALUE && sub->type != StmtType::VARIABLE_OPERAND && sub->type != StmtType::PARAM_OPERAND && sub->type != StmtType::DATA_SIGNAL_OPERAND) {
                         return false;
                     }
                 }
@@ -239,9 +238,7 @@ bool PrintBitOperations::shiftWithConstant(Node *node) {
             if (types.find(StmtType::UNSIGNED_VALUE) == types.end()) {
                 return false;
             }
-            if (types.find(StmtType::VARIABLE_OPERAND) == types.end()
-                && types.find(StmtType::PARAM_OPERAND) == types.end()
-                && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end())
+            if (types.find(StmtType::VARIABLE_OPERAND) == types.end() && types.find(StmtType::PARAM_OPERAND) == types.end() && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end())
             {
                 return false;
             }
@@ -267,8 +264,7 @@ std::string PrintBitOperations::getString(Node *node) {
             }
         }
         for (auto &child : node->child) {
-            if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND
-            || child->type == StmtType::DATA_SIGNAL_OPERAND) {
+            if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND || child->type == StmtType::DATA_SIGNAL_OPERAND) {
                 ss << child->name << ".range(31, " << offset << ")";
             }
         }
@@ -276,8 +272,7 @@ std::string PrintBitOperations::getString(Node *node) {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {
                 for (auto &childChild : child->child) {
-                    if (childChild->type == StmtType::VARIABLE_OPERAND || childChild->type == StmtType::PARAM_OPERAND
-                    || childChild->type == StmtType::DATA_SIGNAL_OPERAND) {
+                    if (childChild->type == StmtType::VARIABLE_OPERAND || childChild->type == StmtType::PARAM_OPERAND || childChild->type == StmtType::DATA_SIGNAL_OPERAND) {
                         ss << childChild->name << ".range(";
                     }
                 }
@@ -288,8 +283,7 @@ std::string PrintBitOperations::getString(Node *node) {
                                  -static_cast<int>(childChild->value);
                     }
                 }
-            } else if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND
-            || child->type == StmtType::DATA_SIGNAL_OPERAND) {
+            } else if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND || child->type == StmtType::DATA_SIGNAL_OPERAND) {
                 ss << child->name << ".range(";
             }
         }

@@ -22,9 +22,9 @@ OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper,
     removeRedundantConditions();
     findVariables();
     mapOutputRegistersToOutput();
-    // arraySlicing();
     modifyCommitmentLists();
     findOperationModuleSignals();
+    // arraySlicing();
 }
 
 bool OptimizerHLS::hasOutputReg(DataSignal* dataSignal) {
@@ -184,7 +184,6 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
 }
 
 void OptimizerHLS::modifyCommitmentLists() {
-
     for (auto &&property : propertySuiteHelper->getOperationProperties()) {
         std::vector<Assignment *> assignments;
         for (const auto& commitment : property->getOperation()->getCommitmentsList()) {
