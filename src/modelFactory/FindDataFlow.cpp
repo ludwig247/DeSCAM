@@ -733,13 +733,13 @@ bool SCAM::FindDataFlow::exitVisitor(std::string msg, ErrorMsg::ErrorType errorT
 
     switch (errorType) {
         case ErrorMsg::ErrorType::error:
-            ErrorMsg::getInstance().addErrorLog("-E- " + msg);
+            ErrorMsg::getInstance().addErrorLog(msg,"E");
             break;
         case ErrorMsg::ErrorType::warning:
-            ErrorMsg::getInstance().addErrorLog("-W- " + msg);
+            ErrorMsg::getInstance().addErrorLog(msg, "W");
             break;
         case ErrorMsg::ErrorType::information:
-            ErrorMsg::getInstance().addErrorLog("-I- " + msg);
+            ErrorMsg::getInstance().addErrorLog(msg,"I");
             break;
     }
 

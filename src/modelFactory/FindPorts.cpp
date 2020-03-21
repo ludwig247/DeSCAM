@@ -39,7 +39,7 @@ namespace SCAM {
      * sc_port<shared_out_if<TYPE> >
      * sc_port<shared_in_if<TYPE> >
      */
-    bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
+bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
         clang::QualType qualType = fieldDecl->getType();
         //Synch: find by name, doesn't have a parameter
         if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
