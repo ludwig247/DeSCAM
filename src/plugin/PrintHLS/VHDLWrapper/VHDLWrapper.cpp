@@ -306,7 +306,7 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
     for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
         auto printResetValue = PrintResetSignal(commitment->getStatement(), dataSignal->getFullName());
         if (printResetValue.toString()) {
-            return printResetValue.getString();
+            return PrintStatement::toString(commitment->getStatement(), false);
         }
     }
     return PrintStatement::toString(dataSignal->getInitialValue(), false);

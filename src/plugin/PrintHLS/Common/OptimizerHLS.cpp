@@ -402,7 +402,7 @@ std::set<Variable*> OptimizerHLS::getOutputRegister() {
 
 DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
     std::string combinedName = dataSignal.front()->getFullName();
-    for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
+    for (auto it = std::next(dataSignal.begin()); it != --dataSignal.end(); ++it) {
         std::string name1 = combinedName;
         std::string name2 = (*it)->getFullName();
 
@@ -439,6 +439,7 @@ DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &
             nullptr,
             nullptr,
             dataSignal.front()->getPort());
+
     return combinedDataSignal;
 }
 
