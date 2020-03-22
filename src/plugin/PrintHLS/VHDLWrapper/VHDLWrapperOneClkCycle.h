@@ -37,6 +37,8 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
             void monitor(std::stringstream& ss) override ;
             void moduleOutputHandling(std::stringstream& ss) override ;
             void controlProcess(std::stringstream& ss) override ;
+
+            bool emptyModule();
         };
 
 }}}

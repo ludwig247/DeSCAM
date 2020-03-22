@@ -402,8 +402,8 @@ std::set<Variable*> OptimizerHLS::getOutputRegister() {
 
 DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
     std::string combinedName = dataSignal.front()->getFullName();
-    for (auto it = std::next(dataSignal.begin()); it != --dataSignal.end(); ++it) {
-        std::string name1 = combinedName;
+    for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
+//        std::string name1 = combinedName;
         std::string name2 = (*it)->getFullName();
 
         uint32_t m = combinedName.length();
@@ -418,7 +418,7 @@ DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &
             for (uint32_t j = 0; j <= n; j++) {
                 if (i == 0 || j == 0) {
                     len[currRow][j] = 0;
-                } else if (name1[i - 1] == name2[j - 1]) {
+                } else if (combinedName[i - 1] == name2[j - 1]) {
                     len[currRow][j] = len[1 - currRow][j - 1] + 1;
                     if (len[currRow][j] > result) {
                         result = len[currRow][j];
@@ -430,7 +430,13 @@ DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &
             }
             currRow = 1 - currRow;
         }
-        combinedName = name1.substr(end - result + 1, result);
+
+        combinedName = combinedName.substr(end - result + 1, result);
+
+        if (combinedName.empty()) {
+            combinedName = dataSignal.front()->getName() + "_combined";
+            break;
+        }
     }
 
     auto combinedDataSignal = new DataSignal(

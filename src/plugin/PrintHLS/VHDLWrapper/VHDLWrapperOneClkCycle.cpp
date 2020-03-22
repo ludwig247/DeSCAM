@@ -108,6 +108,10 @@ void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
 }
 
 void VHDLWrapperOneClkCycle::component(std::stringstream& ss) {
+    if (emptyModule()) {
+        return;
+    }
+
     // Print Component
     ss << "\n\tcomponent " << moduleName << "_operations is\n";
     ss << "\tport(\n";
@@ -150,6 +154,10 @@ void VHDLWrapperOneClkCycle::component(std::stringstream& ss) {
 
 // Print Component Instantiation
 void VHDLWrapperOneClkCycle::componentInst(std::stringstream& ss) {
+    if (emptyModule()) {
+        return;
+    }
+
     ss << "\toperations_inst: " << moduleName << "_operations\n"
        << "\tport map(\n";
 
@@ -371,4 +379,9 @@ std::string VHDLWrapperOneClkCycle::operationEnum()
     ss << "op_state_wait);\n\n";
 
     return ss.str();
+}
+
+bool VHDLWrapperOneClkCycle::emptyModule()
+{
+    return optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() && propertySuiteHelper->getNotifySignals().empty();
 }

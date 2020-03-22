@@ -199,7 +199,7 @@ std::string PrintITL::printProperty(Property *property) {
     if (!property->getTimePoints().empty()) {
         ss << "for timepoints:\n";
         if (getOptionMap().at("hls-mco")) {
-            ss << "\tt_end = t+1..7 waits_for done_sig = '1';\n";
+            ss << "\tt_end = t+t_min..t_max waits_for done_sig = '1';\n";
         } else {
             for (auto tp = property->getTimePointsOrdered().begin(); tp!=property->getTimePointsOrdered().end(); tp++) {
                 ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);

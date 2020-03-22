@@ -198,7 +198,7 @@ void PrintStatement::visit(BoolValue &node) {
 
 void PrintStatement::visit(DataSignalOperand &node) {
     bool isBoolean = node.getDataType()->isBoolean();
-    if (isBoolean) {
+    if (isBoolean && printAssumption) {
         this->ss << "(";
     }
     if (arithmeticOp) {
@@ -219,7 +219,7 @@ void PrintStatement::visit(DataSignalOperand &node) {
     if(arithmeticOp) {
         this->ss << ")";
     }
-    if (isBoolean) {
+    if (isBoolean && printAssumption) {
         this->ss << " = '1')";
     }
 }

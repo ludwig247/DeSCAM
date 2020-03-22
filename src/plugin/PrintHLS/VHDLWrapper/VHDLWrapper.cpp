@@ -86,11 +86,7 @@ std::string VHDLWrapper::printTypes() {
 
     typeStream << "\n"
                << "\t-- Constants\n";
-//    std::set<std::string> uniqueNames;
     for (const auto& var : Utilities::getParents(optimizer->getConstantVariables())) {
-//        if (uniqueNames.find(var->getName()) != uniqueNames.end()) {
-//            continue;
-//        }
         typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
                    << " := " << getResetValue(var) << ";\n";
     }
@@ -230,18 +226,11 @@ std::string VHDLWrapper::printArchitecture() {
 
     signals(ss);
     functions(ss);
+    component(ss);
 
-    bool emptyOperationModule = optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() && propertySuiteHelper->getNotifySignals().empty();
-    if (!emptyOperationModule) {
-        component(ss);
-    }
-
-    // begin of architecture implementation
     ss << "\nbegin\n\n";
 
-    if (!emptyOperationModule) {
-        componentInst(ss);
-    }
+    componentInst(ss);
     monitor(ss);
     moduleOutputHandling(ss);
     printConstantOutputs(ss);
@@ -292,10 +281,10 @@ std::string VHDLWrapper::sensitivityList() {
 
 std::string VHDLWrapper::getResetValue(Variable* variable)
 {
-    for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetSignal(commitment->getStatement(), variable->getName());
+    for (const auto& statement : propertySuiteHelper->getResetStatements()) {
+        auto printResetValue = PrintResetSignal(statement, variable->getName());
         if (printResetValue.toString()) {
-            return printResetValue.getString();
+            return PrintStatement::toString(statement->getRhs(), false);
         }
     }
     return PrintStatement::toString(variable->getInitialValue(), false);
@@ -303,10 +292,10 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
 
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 {
-    for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
-        auto printResetValue = PrintResetSignal(commitment->getStatement(), dataSignal->getFullName());
+    for (const auto& statement : propertySuiteHelper->getResetStatements()) {
+        auto printResetValue = PrintResetSignal(statement, dataSignal->getFullName());
         if (printResetValue.toString()) {
-            return PrintStatement::toString(commitment->getStatement(), false);
+            return PrintStatement::toString(statement->getRhs(), false);
         }
     }
     return PrintStatement::toString(dataSignal->getInitialValue(), false);

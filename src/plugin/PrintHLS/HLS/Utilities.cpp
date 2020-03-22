@@ -61,7 +61,7 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
             return "<<";
         case SubTypeBitwise::RIGHT_SHIFT:
             return ">>";
-        case SubTypeBitwise::UNKNOWN:
+        default:
             return "unknown operation";
     }
 }

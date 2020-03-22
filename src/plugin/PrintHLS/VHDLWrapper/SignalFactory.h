@@ -100,7 +100,7 @@ template<typename T>
 std::string SignalFactory::asVector(T *dataSignal) {
     if (dataSignal->getDataType()->isEnumType()) {
         uint32_t vectorSize = ceil(log2(dataSignal->getDataType()->getEnumValueMap().size()));
-        if (vectorSize == 1) {
+        if (vectorSize == 0) {
             vectorSize++;
         }
         return ("std_logic_vector(" + std::to_string(vectorSize - 1) + " downto 0)");
@@ -137,7 +137,7 @@ SignalFactory::vectorToEnum(T *dataSignal, const std::string &suffix, const std:
 template<typename T>
 std::string SignalFactory::enumToVector(T *dataSignal) {
     uint32_t vectorSize = ceil(log2(dataSignal->getDataType()->getEnumValueMap().size()));
-    if (vectorSize == 1) {
+    if (vectorSize == 0) {
         vectorSize++;
     }
     return "std_logic_vector(to_unsigned(" + dataSignal->getDataType()->getName() + "\'pos(" +
