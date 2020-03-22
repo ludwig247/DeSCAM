@@ -86,6 +86,54 @@ include(${PROJECT_SOURCE_DIR}/install/install_systemc.make)
 # Include the binary
 #include_directories( ${SYSTEMC_INCLUDES} )
 
+## llvm - Cmake, repo (https://github.com/llvm/llvm-project.git) tag: release/3.4.x | path: llvm-project/llvm/
+################################
+# llvm
+################################
+# Do not use system LLVM
+set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
+
+# Include the ExternalProject compilation
+include(${PROJECT_SOURCE_DIR}/install/install_llvm.make)
+
+# Include the binary
+#include_directories( ${LLVM_INCLUDES} )
+
+
+
+# TODO: forget commands like add_compile_options, include_directories, link_directories, link_libraries
+include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces)
+include_directories(${CMAKE_SOURCE_DIR}/src/plugin)
+include_directories(${CMAKE_SOURCE_DIR}/src/parser)
+include_directories(${CMAKE_SOURCE_DIR}/src/cfgFactory)
+include_directories(${CMAKE_SOURCE_DIR}/src/ParseAML)
+include_directories(${CMAKE_SOURCE_DIR}/src/global/)
+include_directories(${CMAKE_SOURCE_DIR}/src/propertyFactory/)
+include_directories(${CMAKE_SOURCE_DIR}/src/functionFactory)
+include_directories(${CMAKE_SOURCE_DIR}/src/operationFactory/)
+include_directories(${CMAKE_SOURCE_DIR}/src/propertyFactory/operationGraph)#do include this directory? its files already included in propertyFactory library
+include_directories(${CMAKE_SOURCE_DIR}/src/propertySuite/)
+include_directories(${CMAKE_SOURCE_DIR}/src/model/)
+include_directories(${CMAKE_SOURCE_DIR}/src/model/Behavior)
+include_directories(${CMAKE_SOURCE_DIR}/src/model/Stmts)#do include this directory? its files already included in model library
+include_directories(${CMAKE_SOURCE_DIR}/src/model/propertySuite)
+include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
+include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
+include_directories(${CMAKE_SOURCE_DIR}/tests/)
+
+add_subdirectory(src)
+add_subdirectory(example)
+add_subdirectory(tests)
+add_subdirectory(doc)
+
+# TODO: cpack generates installer
+#include(InstallRequiredSystemLibraries)
+#set(CPACK_PACKAGE_CONTACT "Kilgore Trout")
+#include(CPack)
+
+# Notes: for library linking
+#target_link_libraries(cmake_example ${FFTW_LIBRARIES} ${SYSTEMC_LIBRARIES} m)
 ################################################################################
 
 #cmake_minimum_required(VERSION 3.0)

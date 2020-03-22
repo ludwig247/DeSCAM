@@ -36,12 +36,12 @@ struct Example3 : public sc_module {
         while (true) {
             section = nextsection;
             if(section == idle){
-                ret = value_in->nb_read(var);
+                value_in->try_read(var, ret);
                 nextsection = reading;
             }
             if(section == reading) {
-                if(var == 0) master_out1->write(true);
-                else master_out1->write(false);
+                if(var == 0) master_out1->master_write(true);
+                else master_out1->master_write(false);
                 nextsection=idle;
             }
         }

@@ -17,7 +17,7 @@ install/*
 !install/Readme.txt
 #!install/requirements.txt
 !install/install_gtest.make
-#!install/install_llvm.make
+!install/install_llvm.make
 !install/install_z3.make
 !install/install_systemc.make
 src/plugin/PluginFactory.cpp
