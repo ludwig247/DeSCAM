@@ -9,8 +9,8 @@
 macro data_in_sig : unsigned := data_in & next(data_in, 1) & next(data_in, 2) & next(data_in, 3) & next(data_in, 4)
  & next(data_in, 5) & next(data_in, 6) & next(data_in, 7) & next(data_in, 8) & next(data_in, 9) & next(data_in, 10) end macro;
 
-macro data_out_sig : unsigned := data_out & next(data_out, 1) & next(data_out, 2) & next(data_out, 3) & next(data_out, 4)
- & next(data_out, 5) & next(data_out, 6) & next(data_out, 7) & next(data_out, 8) & next(data_out, 9) & next(data_out, 10) end macro;
+macro data_out_sig : unsigned := valid_out & next(valid_out, 1) & next(valid_out, 2) & next(valid_out, 3) & next(valid_out, 4)
+ & next(valid_out, 5) & next(valid_out, 6) & next(valid_out, 7) & next(valid_out, 8) & next(valid_out, 9) & next(valid_out, 10) end macro;
 
 
 
@@ -101,8 +101,8 @@ end if;
 end macro;
 
 
-macro data_out_sig : unsigned := data_out & next(data_out, 1) & next(data_out, 2) & next(data_out, 3) & next(data_out, 4)
- & next(data_out, 5) & next(data_out, 6) & next(data_out, 7) & next(data_out, 8) & next(data_out, 9) & next(data_out, 10) end macro;
+macro data_out_sig : unsigned := valid_out & next(valid_out, 1) & next(valid_out, 2) & next(valid_out, 3) & next(valid_out, 4)
+ & next(valid_out, 5) & next(valid_out, 6) & next(valid_out, 7) & next(valid_out, 8) & next(valid_out, 9) & next(valid_out, 10) end macro;
 
 
 

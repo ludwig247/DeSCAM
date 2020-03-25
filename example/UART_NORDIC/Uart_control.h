@@ -17,7 +17,7 @@ SC_MODULE(Uart_control) {
     master_out<events_t> events_out;
 
     slave_in<bool> cts_in;
-    //master_out<bool> rts_out;
+    //master_out<bool> rts_out
     slave_out<rx_control_out_t> hwfc_control_out;
 
     slave_out<tx_control_out_t> tx_control_out;

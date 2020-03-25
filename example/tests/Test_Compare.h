@@ -29,47 +29,37 @@ bool compute3(bool param, unsigned int val){
 }
 
 
-struct complex{int x; int y;};
 
-SC_MODULE(TestGlobal2) {
-    blocking_in<int> test_in;
-    blocking_out<int> test_out;
-    shared_out<bool> test_out_bool;
 
-    int foo;
-    int bar;
-//    unsigned int list[5];
-    bool test;
+SC_MODULE(TestTernary01) {
+    blocking_in<int> data_in;
+    blocking_out<int> valid_out;
+    shared_out<bool> data_out;
 
-    SC_CTOR(TestGlobal2):
-            test_in("test_in"),
-            test_out("test_out") {
+    int value_in;
+    int new_value;
+    bool valid;
+
+    SC_CTOR(TestTernary01){
         SC_THREAD(fsm);
     }
 
-    //complex type;
     void fsm() {
         while (true) {
-            test_in->try_read(foo,test);
-            //test = (foo & 5) == 0;
-            bar = (test) ? (foo+1) : foo+0;
-//            if(test){
-//                bar = bar +1;
-//            }
-
-            if(bar > 5){
-                bar = bar +1;
+            data_in->try_read(value_in, valid);
+            new_value = (valid) ? (value_in + 1) : value_in + 0;
+            if(new_value > 5){
+                new_value = new_value + 1;
             }
-            test_out_bool->set(test);
-            test_out->write(bar);
-//            type.x = type.x + 5;
-//            type.y = type.x + 10;
+            data_out->set(valid);
+            valid_out->write(new_value, "output1");
+            new_value = value_in > 0 ? 1 : 0;
+            data_out->set(valid);
+            valid_out->write(new_value, "output2");
+
         }
     }
 };
-//};
-//
-//
 
 
 #endif //PROJECT_SLAVEDAVEBAVE_H_H

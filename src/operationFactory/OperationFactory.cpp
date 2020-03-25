@@ -120,12 +120,9 @@ namespace SCAM {
     }
 
     void OperationFactory::optimizeAssignments() {
-        int logTT;
-        int logTF;
-        int logNoChange;
+
         for (auto op:operations) {
             auto conditionList = op->getAssumptionsList();
-
             //FIXME: this is the weiredest thing ever ... I cant use a range based loop without getting an exception ... why?
             //for(auto commitment: op->getCommitmentsList()){
             for(int i = 0; i < op->getCommitmentsList().size(); i++) {
@@ -177,23 +174,11 @@ namespace SCAM {
                                 trivialTrue = true;
                             }
                         }
-
                         assert(!(trivialTrue && trivialFalse) && "Ternary can't be trivial true and trivial false at the same time");
-                        if(trivialTrue) logTT++;
-                        else if(trivialFalse) logTF++;
-                        else logNoChange++;
-
                     }
-
                 }
             }
-
         }
-
-        std::cout << "No change:" << logNoChange << std::endl;
-        std::cout << "Trivial True:" << logTT << std::endl;
-        std::cout << "Trivial False" << logTF << std::endl;
-
 
         for (auto op : operations) {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
