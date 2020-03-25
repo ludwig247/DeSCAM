@@ -33,6 +33,7 @@ namespace SCAM {
     class AssignmentOptimizer2 {
     public:
         AssignmentOptimizer2(const std::vector<SCAM::Assignment *> &assignmentsList, SCAM::Module *module);
+        AssignmentOptimizer2(const Operation * operation, SCAM::Module *module);
         static SCAM::Assignment * optimizeAssignment(SCAM::Assignment * assignment, SCAM::Module *module);
 
         virtual ~AssignmentOptimizer2() = default;

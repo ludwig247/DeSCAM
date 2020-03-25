@@ -15,9 +15,9 @@
 namespace SCAM {
     class ExprTranslator : public StmtAbstractVisitor {
     public:
-        ExprTranslator(z3::context *context);
+        explicit ExprTranslator(z3::context *context);
 
-        virtual ~ExprTranslator();
+        virtual ~ExprTranslator() = default;
 
         Expr *translate(z3::expr &z3_expr, const SCAM::Module *module = nullptr);
 
@@ -29,16 +29,12 @@ namespace SCAM {
 
         void reset();
 
+        void visit(class Ternary &node) override;
+
     private:
         ExprTranslator();
-
         //terminal expression, values
         void visit(SCAM::IntegerValue &node);
-
-    public:
-
-
-    private:
 
         void visit(SCAM::BoolValue &node);
 
@@ -126,7 +122,7 @@ namespace SCAM {
         const SCAM::Module *module;
 
         //recursive version of translate to SCAM
-        SCAM::Expr *translate_intern(z3::expr &z3_expr);
+        SCAM::Expr *translate_intern(const z3::expr &z3_expr_intern);
 
         z3::sort find_or_add_sort(const DataType *pType);
 
@@ -140,7 +136,9 @@ namespace SCAM {
         std::map<std::string, std::string> arithOperatorMap;
         std::map<std::string, std::string> bvArithOperatorMap;
         std::map<std::string, std::string> bvBitwiseOperatorMap;
+
         std::map<std::string, std::string> bvRelationalOperatorMap;
+
     };
 
 }

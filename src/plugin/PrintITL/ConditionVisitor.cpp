@@ -222,4 +222,3 @@ void SCAM::ConditionVisitor::visit(SCAM::Timepoint &node) {
 }
 
 
-

@@ -264,6 +264,10 @@ void SCAM::ValueSubstitution::visit(SCAM::ArrayExpr &node) {
     }
 }
 
+void SCAM::ValueSubstitution::visit(SCAM::Ternary &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+}
+
 
 
 

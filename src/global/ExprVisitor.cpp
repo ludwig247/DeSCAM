@@ -242,6 +242,11 @@ void SCAM::ExprVisitor::visit(SCAM::CompoundExpr &node) {
     }
 }
 
+std::set<SCAM::Ternary *> SCAM::ExprVisitor::getUsedTernaryOperators(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedTernary;
+}
+
 void SCAM::ExprVisitor::visit(SCAM::ParamOperand &node) {
     this->usedOperands.insert(&node);
     this->constVal = false;
@@ -258,6 +263,12 @@ bool SCAM::ExprVisitor::isParameter(SCAM::Expr *expr) {
     return exprVisitor.parameter;
 }
 
+bool SCAM::ExprVisitor::isTernary(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.compare;
+}
+
+
 void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
     this->usedPorts.insert(node.getPort());
     this->constVal = false;
@@ -271,6 +282,19 @@ void SCAM::ExprVisitor::visit(struct TimePointOperand &node) {
     this->var = (this->usedOperands.size() == 1) && (this->usedVar.size() == 1);
 
 }
+
+void SCAM::ExprVisitor::visit(SCAM::Ternary &node) {
+    this->constVal = false;
+    this->compare = true;
+
+    this->usedTernary.insert(&node);
+    node.getCondition()->accept(*this);
+    node.getTrueExpr()->accept(*this);
+    node.getFalseExpr()->accept(*this);
+}
+
+
+
 
 
 
