@@ -52,6 +52,9 @@ private:
 
     void visit(Parameter &node);
 
+    void visit(Timepoint &node);
+
+
     unsigned int indent = 0;
     unsigned int indentSize = 2;
 

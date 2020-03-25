@@ -26,7 +26,7 @@ macro (add_plugin)
 
         list(APPEND PLUGIN_DIRECTORIES ${third_arg}) # always append the directory even if it's repeated,
         # later before adding the subdirectories duplicates will be removed
-
+#        message(STATUS "${first_arg}")
     endif ()
 endmacro(add_plugin)
 

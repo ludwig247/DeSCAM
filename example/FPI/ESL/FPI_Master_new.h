@@ -492,8 +492,6 @@ struct FPI_Master_new : public sc_module {
             //wait(SC_ZERO_TIME);
         }
     }
-
-
 };
 
 

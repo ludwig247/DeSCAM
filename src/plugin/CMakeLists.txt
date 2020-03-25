@@ -35,7 +35,7 @@ add_plugin(PrintSkeleton; "Structure and FSM in AML")
 #add_plugin(PrintMonitor; "fill out")
 
 #UNDER MAINTANANCE
-#add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
+add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
 
 
 
@@ -81,7 +81,7 @@ foreach (plugin_lib ${PLUGIN_NAMES})
 endforeach ()
 
 # First we add the executable that generates the table
-add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp )
+add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp EstimatePower/EstimatePower.h)
 set_target_properties(MakeStyles PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON
