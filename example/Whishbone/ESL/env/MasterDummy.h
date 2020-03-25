@@ -6,8 +6,8 @@
 #define PROJECT_MASTERDUMMY_H
 #include "systemc.h"
 #include "Compound_Bus.h"
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
-#include "../../Interfaces/Interfaces.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "Interfaces.h"
 
 struct MasterDummy : public sc_module {
 public:

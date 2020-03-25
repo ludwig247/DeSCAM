@@ -10,7 +10,7 @@
 //#include "Compound_Bus.h"
 //#include "../../SingleMasterMultiSlave/ESL/Compound.h"
 #include "types_reduced.h"
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 struct SlaveDummy : public sc_module {
 public:

@@ -7,7 +7,7 @@
 
 #include "systemc.h"
 #include "../../../example/Interfaces/Interfaces.h"
-#include "../../../example/Whishbone/ESL/Compound_Bus.h"
+#include "../../../example/Whishbone/ESL/env/Compound_Bus.h"
 #include "Types.h"
 
 

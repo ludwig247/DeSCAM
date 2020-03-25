@@ -1,12 +1,12 @@
 #include "systemc.h"
-#include "MasterAgent.h"
-#include "SlaveAgent.h"
-#include "Interconnect.h"
+#include "../MasterAgent.h"
+#include "../SlaveAgent.h"
+#include "../Interconnect.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
+#include "Clk.h"
 
-
-//using namespace std;
+using namespace std;
 
 int sc_main(int, char **) {
 
@@ -17,7 +17,31 @@ int sc_main(int, char **) {
     SlaveAgent slaveAgent3("slaveAgent3");
     Interconnect interconnect("interconnect");
 
+    Clk clk("clk");
+    //CLK
+    MasterSlave<bool> clk1("clk1");
+    masterAgent.clk(clk1);
+    clk.clk1(clk1);
 
+    MasterSlave<bool> clk2("clk2");
+    interconnect.clk(clk2);
+    clk.clk2(clk2);
+
+    MasterSlave<bool> clk3("clk3");
+    slaveAgent0.clk(clk3);
+    clk.clk3(clk3);
+
+    MasterSlave<bool> clk4("clk4");
+    slaveAgent1.clk(clk4);
+    clk.clk4(clk4);
+
+    MasterSlave<bool> clk5("clk5");
+    slaveAgent2.clk(clk5);
+    clk.clk5(clk5);
+
+    MasterSlave<bool> clk6("clk6");
+    slaveAgent3.clk(clk6);
+    clk.clk6(clk6);
 
 
 

@@ -15,5 +15,5 @@ FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
 add_executable(Whisbone_hierarchy ${R_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
-        MasterAgent.h SlaveAgent.h Interconnect.h MasterDummy.h SlaveDummy.h )
+        MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
 target_link_libraries(Whisbone_hierarchy systemc)

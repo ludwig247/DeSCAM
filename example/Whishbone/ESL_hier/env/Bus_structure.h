@@ -6,12 +6,12 @@
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
-#include "../../Interfaces/Interfaces.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "Interfaces.h"
 #include "Compound_Bus.h"
-#include "Interconnect.h"
-#include "MasterAgent.h"
-#include "SlaveAgent.h"
+#include "../Interconnect.h"
+#include "../MasterAgent.h"
+#include "../SlaveAgent.h"
 #include "systemc.h"
 
 struct Bus_structure : public sc_module {
