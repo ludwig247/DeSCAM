@@ -106,7 +106,6 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         this->addFunctions(module, scparModule.second);
         //Processe
         this->addBehavior(module, scparModule.second);
-
         //this->addCommunicationFSM(module);
     }
 }

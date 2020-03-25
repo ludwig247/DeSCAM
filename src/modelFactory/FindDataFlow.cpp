@@ -250,6 +250,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     } else if (memberCallExpr->getNumArgs() > 0 && hasValidArgument(memberCallExpr->getArg((0)))) {
                         //Blocking read
                         if (methodString == "read") {
+                            assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 4 && "Wrong number of arguments arguments");
                             //add variable as parameter
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg((0))))) {
                                 auto read = new Read(operand->getPort(), variableOp);
