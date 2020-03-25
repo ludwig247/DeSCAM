@@ -14,16 +14,16 @@ struct marker_t {
     int markerAlignment;
 };
 
-struct Framer : public sc_module {
+struct Framer_old : public sc_module {
     enum Sections {
         INITIALISE, SEARCH, FIND_SYNC, SYNC, MISS
     };
     Sections section;
     Sections nextsection;
     //Constructor
-    SC_HAS_PROCESS(Framer);
+    SC_HAS_PROCESS(Framer_old);
 
-    Framer(sc_module_name name) :
+    Framer_old(sc_module_name name) :
             frame_pulse("frame_pulse"),
             data_word("data_word"),
             lof("lof"),

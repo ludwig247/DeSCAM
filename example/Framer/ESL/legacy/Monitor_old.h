@@ -15,7 +15,7 @@ struct Config {
     int LOFreset;
 };
 
-struct Monitor : public sc_module {
+struct Monitor_old : public sc_module {
     //
     enum Sections {
         LOF, N_LOF
@@ -26,9 +26,9 @@ struct Monitor : public sc_module {
 
 
     //Constructor
-    SC_HAS_PROCESS(Monitor);
+    SC_HAS_PROCESS(Monitor_old);
 
-    Monitor(sc_module_name name) :
+    Monitor_old(sc_module_name name) :
             frame_pulse("frame_pulse"),
             oof("oof"),
             lof("lof"),

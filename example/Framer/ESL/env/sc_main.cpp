@@ -3,14 +3,14 @@
 //
 
 #include "systemc.h"
-#include "../Framer_new.h"
-#include "../Monitor_new.h"
+#include "../Framer.h"
+#include "../Monitor.h"
 #include "Environment.h"
 
 int sc_main(int, char **) {
 
-    Framer_new framer("framer");
-    Monitor_new monitor("monitor");
+    Framer framer("framer");
+    Monitor monitor("monitor");
     Environment environment("environment");
 
 

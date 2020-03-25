@@ -13,7 +13,7 @@ include_directories(Interfaces)
 
 
 add_executable(IC2_Simulation
-        sc_main.cpp
+        env/sc_main.cpp
         Slave.h
         Master.h
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h)

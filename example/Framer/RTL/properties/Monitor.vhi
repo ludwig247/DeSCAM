@@ -13,138 +13,190 @@ macro config_in_sig_LOFset : unsigned := monitor_comp/lof_set end macro;
 constraint no_reset := reset_n = '1'; end constraint;
 
 -- VISIBLE REGISTERS --
-
-macro cnt : natural := 
-	if(N_LOF_1) then monitor_comp/oof_cnt;
+macro cnt : natural :=
+	if(state_25) then monitor_comp/oof_cnt;
 	else monitor_comp/if_cnt;
 	end if;
-end macro; 
+end macro;
+macro nextphase : Phases_Monitor :=
+	if(state_16) then Monitor_LOF;
+--	elsif (state_25) then Monitor_N_LOF;
+	else Monitor_N_LOF;
+	end if;
+end macro;
+macro phase : Phases_Monitor :=
+	if(state_16) then Monitor_LOF;
+--	elsif (state_25) then Monitor_N_LOF;
+	else Monitor_N_LOF;
+	end if;
+end macro;
+
 
 -- STATES --
-macro N_LOF_1 : boolean := not(monitor_comp/lof) end macro;
-macro LOF_0 : boolean := monitor_comp/lof end macro;
+macro state_16 : boolean := monitor_comp/lof end macro;
+macro state_25 : boolean := not(monitor_comp/lof) end macro;
 
---Operations -- 
+
+-- OPERATIONS --
 property reset is
 assume:
 	 reset_sequence;
 prove:
-	 at t: N_LOF_1;
-	 at t: cnt = 0;
+	 at t: state_25;
+	 at t: cnt = resize(0,32);
 	 at t: lof_sig = false;
+	 at t: nextphase = Monitor_N_LOF;
+	 at t: phase = Monitor_N_LOF;
 end property;
 
 
-property LOF_0_read_0 is
+property state_16_1 is
+dependencies: no_reset;
+freeze:
+	nextphase_at_t = nextphase@t;
+assume:
+	at t: state_16;
+	at t: frame_pulse_sync;
+	at t: oof_sig;
+	at t: not((phase = Monitor_N_LOF));
+	at t: (nextphase = Monitor_LOF);
+prove:
+	at t+1: state_16;
+	at t+1: cnt = 0;
+	at t+1: lof_sig = true;
+	at t+1: nextphase = nextphase_at_t;
+	at t+1: phase = nextphase_at_t;
+end property;
+
+
+property state_16_3 is
 dependencies: no_reset;
 freeze:
 	cnt_at_t = cnt@t,
-	lof_sig_at_t = lof_sig@t;
-assume: 
-	 at t: LOF_0;
-	 at t: not(frame_pulse_sync);
+	nextphase_at_t = nextphase@t;
+assume:
+	at t: state_16;
+	at t: frame_pulse_sync;
+	at t: not(oof_sig);
+	at t: not((config_in_sig_LOFreset <= cnt));
+	at t: not((phase = Monitor_N_LOF));
+	at t: (nextphase = Monitor_LOF);
 prove:
-	 at t+1: LOF_0;
-	 at t+1: cnt = cnt_at_t;
-	 at t+1: lof_sig = lof_sig_at_t;
+	at t+1: state_16;
+	at t+1: cnt = (1 + cnt_at_t)(31 downto 0);
+	at t+1: lof_sig = true;
+	at t+1: nextphase = nextphase_at_t;
+	at t+1: phase = nextphase_at_t;
 end property;
 
-property LOF_0_read_1 is
+
+property state_16_5 is
 dependencies: no_reset;
-assume: 
-	 at t: LOF_0;
-	 at t: frame_pulse_sync;
-	 at t: oof_sig;
-	 at t: frame_pulse_sync;
+assume:
+	at t: state_16;
+	at t: frame_pulse_sync;
+	at t: not(oof_sig);
+	at t: (config_in_sig_LOFreset <= cnt);
+	at t: not((phase = Monitor_N_LOF));
 prove:
-	 at t+1: LOF_0;
-	 at t+1: cnt = 0;
-	 at t+1: lof_sig = true;
+	at t+1: state_25;
+	at t+1: cnt = 0;
+	at t+1: lof_sig = false;
+	at t+1: nextphase = Monitor_N_LOF;
+	at t+1: phase = Monitor_N_LOF;
 end property;
 
-property LOF_0_read_2 is
-dependencies: no_reset;
-freeze:
-	cnt_at_t = cnt@t;
-assume: 
-	 at t: LOF_0;
-	 at t: frame_pulse_sync;
-	 at t: not(oof_sig);
-	 at t: not((config_in_sig_LOFreset <= cnt));
-	 at t: frame_pulse_sync;
-prove:
-	 at t+1: LOF_0;
-	 at t+1: cnt = (1 + cnt_at_t);
-	 at t+1: lof_sig = true;
-end property;
 
-property LOF_0_read_3 is
-dependencies: no_reset;
-assume: 
-	 at t: LOF_0;
-	 at t: frame_pulse_sync;
-	 at t: not(oof_sig);
-	 at t: (config_in_sig_LOFreset <= cnt);
-	 at t: frame_pulse_sync;
-prove:
-	 at t+1: N_LOF_1;
-	 at t+1: cnt = 0;
-	 at t+1: lof_sig = false;
-end property;
-
-property N_LOF_1_read_4 is
-dependencies: no_reset;
-assume: 
-	 at t: N_LOF_1;
-	 at t: frame_pulse_sync;
-	 at t: oof_sig;
-	 at t: (config_in_sig_LOFset <= cnt);
-	 at t: frame_pulse_sync;
-prove:
-	 at t+1: LOF_0;
-	 at t+1: cnt = 0;
-	 at t+1: lof_sig = true;
-end property;
-
-property N_LOF_1_read_5 is
+property state_16_8 is
 dependencies: no_reset;
 freeze:
 	cnt_at_t = cnt@t,
-	lof_sig_at_t = lof_sig@t;
-assume: 
-	 at t: N_LOF_1;
-	 at t: not(frame_pulse_sync);
+	lof_sig_at_t = lof_sig@t,
+	nextphase_at_t = nextphase@t;
+assume:
+	at t: state_16;
+	at t: not(frame_pulse_sync);
+	at t: not((phase = Monitor_N_LOF));
+	at t: (nextphase = Monitor_LOF);
 prove:
-	 at t+1: N_LOF_1;
-	 at t+1: cnt = cnt_at_t;
-	 at t+1: lof_sig = lof_sig_at_t;
+	at t+1: state_16;
+	at t+1: cnt = cnt_at_t;
+	at t+1: lof_sig = lof_sig_at_t;
+	at t+1: nextphase = nextphase_at_t;
+	at t+1: phase = nextphase_at_t;
 end property;
 
-property N_LOF_1_read_6 is
-dependencies: no_reset;
-assume: 
-	 at t: N_LOF_1;
-	 at t: frame_pulse_sync;
-	 at t: not(oof_sig);
-	 at t: frame_pulse_sync;
-prove:
-	 at t+1: N_LOF_1;
-	 at t+1: cnt = 0;
-	 at t+1: lof_sig = false;
-end property;
 
-property N_LOF_1_read_7 is
+property state_25_9 is
 dependencies: no_reset;
 freeze:
-	cnt_at_t = cnt@t;
-assume: 
-	 at t: N_LOF_1;
-	 at t: frame_pulse_sync;
-	 at t: oof_sig;
-	 at t: not((config_in_sig_LOFset <= cnt));
-	 at t: frame_pulse_sync;
+	cnt_at_t = cnt@t,
+	nextphase_at_t = nextphase@t;
+assume:
+	at t: state_25;
+	at t: frame_pulse_sync;
+	at t: oof_sig;
+	at t: not((config_in_sig_LOFset <= cnt));
+	at t: (nextphase = Monitor_N_LOF);
 prove:
-	 at t+1: N_LOF_1;
-	 at t+1: cnt = (1 + cnt_at_t);
-	 at t+1: lof_sig = false;
+	at t+1: state_25;
+	at t+1: cnt = (1 + cnt_at_t)(31 downto 0);
+	at t+1: lof_sig = false;
+	at t+1: nextphase = nextphase_at_t;
+	at t+1: phase = nextphase_at_t;
 end property;
+
+
+property state_25_11 is
+dependencies: no_reset;
+assume:
+	at t: state_25;
+	at t: frame_pulse_sync;
+	at t: oof_sig;
+	at t: (config_in_sig_LOFset <= cnt);
+prove:
+	at t+1: state_16;
+	at t+1: cnt = 0;
+	at t+1: lof_sig = true;
+	at t+1: nextphase = Monitor_LOF;
+	at t+1: phase = Monitor_LOF;
+end property;
+
+
+property state_25_13 is
+dependencies: no_reset;
+freeze:
+	nextphase_at_t = nextphase@t;
+assume:
+	at t: state_25;
+	at t: frame_pulse_sync;
+	at t: not(oof_sig);
+	at t: (nextphase = Monitor_N_LOF);
+prove:
+	at t+1: state_25;
+	at t+1: cnt = 0;
+	at t+1: lof_sig = false;
+	at t+1: nextphase = nextphase_at_t;
+	at t+1: phase = nextphase_at_t;
+end property;
+
+
+property state_25_16 is
+dependencies: no_reset;
+freeze:
+	cnt_at_t = cnt@t,
+	lof_sig_at_t = lof_sig@t,
+	nextphase_at_t = nextphase@t;
+assume:
+	at t: state_25;
+	at t: not(frame_pulse_sync);
+	at t: (nextphase = Monitor_N_LOF);
+prove:
+	at t+1: state_25;
+	at t+1: cnt = cnt_at_t;
+	at t+1: lof_sig = lof_sig_at_t;
+	at t+1: nextphase = nextphase_at_t;
+	at t+1: phase = nextphase_at_t;
+end property;
+
+
