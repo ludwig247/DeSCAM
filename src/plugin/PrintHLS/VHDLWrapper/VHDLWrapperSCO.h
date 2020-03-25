@@ -14,16 +14,16 @@
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-        class VHDLWrapperOneClkCycle : public VHDLWrapper {
+        class VHDLWrapperSCO : public VHDLWrapper {
 
         public:
-            VHDLWrapperOneClkCycle(
+            VHDLWrapperSCO(
                     Module* module,
                     const std::string &moduleName,
                     std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
                     std::shared_ptr<OptimizerHLS>& optimizer
             );
-            ~VHDLWrapperOneClkCycle() = default;
+            ~VHDLWrapperSCO() = default;
 
             std::map<std::string, std::string> printModule() override ;
 

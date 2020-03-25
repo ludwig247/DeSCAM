@@ -1,17 +1,35 @@
-include_directories(Common)
+add_library(PrintHLS SHARED
+        PrintHLS.cpp
 
-add_subdirectory(Common)
-add_subdirectory(HLS)
-add_subdirectory(VHDLWrapper)
-add_subdirectory(SynthesisScript)
+        Common/OptimizerHLS.cpp
+        Common/PrintArrayStatements.cpp
+        Common/PropertyHelper.cpp
+        Common/PropertySuiteHelper.cpp
+        Common/Constants.h
 
-add_library(PrintHLS
-            PrintHLS.cpp)
+        HLS/HLS.cpp
+        HLS/PrintBitOperations.cpp
+        HLS/PrintFunction.cpp
+        HLS/PrintReset.cpp
+        HLS/PrintStatement.cpp
+        HLS/Utilities.cpp
 
-target_compile_options(PrintHLS PRIVATE -fPIC -O2 )
+        SynthesisScript/SynthesisScripts.cpp
 
-target_include_directories(PrintHLS PRIVATE HLS VHDLWrapper SynthesisScript CommonHLS)
-target_link_libraries(PrintHLS HLS)
-target_link_libraries(PrintHLS VHDLWrapper)
-target_link_libraries(PrintHLS SynthesisScript)
-target_link_libraries(PrintHLS CommonHLS)
+        VHDLWrapper/PrintBitOperations.cpp
+        VHDLWrapper/PrintReset.cpp
+        VHDLWrapper/PrintStatement.cpp
+        VHDLWrapper/SignalFactory.cpp
+        VHDLWrapper/Utilities.cpp
+        VHDLWrapper/VHDLWrapper.cpp
+        VHDLWrapper/VHDLWrapperMCO.cpp
+        VHDLWrapper/VHDLWrapperSCO.cpp
+)
+
+target_include_directories(PrintHLS
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/Common
+    ${CMAKE_CURRENT_SOURCE_DIR}/HLS
+    ${CMAKE_CURRENT_SOURCE_DIR}/SynthesisScript
+    ${CMAKE_CURRENT_SOURCE_DIR}/VHDLWrapper
+)

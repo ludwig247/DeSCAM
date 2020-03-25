@@ -9,8 +9,6 @@
 #add_subdirectory(I2C)
 #add_subdirectory(Comm_Test_newInterfaces)
 
-
-
 include(AddExample.cmake)
 
 # Add a new example, the directory of the tests it's used for and it's directory using macro "add_example"
@@ -33,6 +31,9 @@ add_example(Framer; Print_ITL_Tests)
 
 
 
+
+
+#add_subdirectory(UART_NORDIC)
 
 
 

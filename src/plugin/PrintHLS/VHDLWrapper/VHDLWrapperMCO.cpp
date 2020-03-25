@@ -5,11 +5,11 @@
 #include "PrintReset.h"
 #include "PrintStatement.h"
 #include "Utilities.h"
-#include "VHDLWrapperMultiClkCycle.h"
+#include "VHDLWrapperMCO.h"
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-VHDLWrapperMultiClkCycle::VHDLWrapperMultiClkCycle(
+VHDLWrapperMCO::VHDLWrapperMCO(
         Module* module,
         const std::string &moduleName,
         std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
@@ -23,7 +23,7 @@ VHDLWrapperMultiClkCycle::VHDLWrapperMultiClkCycle(
     this->signalFactory = nullptr;
 }
 
-std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule() {
+std::map<std::string, std::string> VHDLWrapperMCO::printModule() {
     std::map<std::string, std::string> pluginOutput;
     signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, false);
 
@@ -33,7 +33,7 @@ std::map<std::string, std::string> VHDLWrapperMultiClkCycle::printModule() {
     return pluginOutput;
 }
 
-void VHDLWrapperMultiClkCycle::entity(std::stringstream &ss) {
+void VHDLWrapperMCO::entity(std::stringstream &ss) {
     // Print Entity
     ss << "entity " << propertySuiteHelper->getName() << "_module is\n";
     ss << "port(\n";
@@ -62,7 +62,7 @@ void VHDLWrapperMultiClkCycle::entity(std::stringstream &ss) {
 }
 
 // Print Signals
-void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
+void VHDLWrapperMCO::signals(std::stringstream &ss) {
     auto printVars = [&ss](
             std::set<Variable *> const& vars,
             Style const& style,
@@ -120,7 +120,7 @@ void VHDLWrapperMultiClkCycle::signals(std::stringstream &ss) {
     printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false, false);
 }
 
-void VHDLWrapperMultiClkCycle::component(std::stringstream& ss) {
+void VHDLWrapperMCO::component(std::stringstream& ss) {
     // Print Component
     ss << "\n\tcomponent " << moduleName << "_operations is\n";
     ss << "\tport(\n";
@@ -173,7 +173,7 @@ void VHDLWrapperMultiClkCycle::component(std::stringstream& ss) {
 }
 
 // Print Component Instantiation
-void VHDLWrapperMultiClkCycle::componentInst(std::stringstream& ss) {
+void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
     ss << "\toperations_inst: " << moduleName << "_operations\n"
        << "\tport map(\n";
 
@@ -225,7 +225,7 @@ void VHDLWrapperMultiClkCycle::componentInst(std::stringstream& ss) {
 }
 
 // Print Monitor
-void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
+void VHDLWrapperMCO::monitor(std::stringstream &ss) {
     ss << "\t-- Monitor\n"
        << "\tprocess (" << sensitivityList() << ")\n"
        << "\tbegin\n"
@@ -289,7 +289,7 @@ void VHDLWrapperMultiClkCycle::monitor(std::stringstream &ss) {
        << "\tend process;\n\n";
 }
 
-void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
+void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
 {
     // Print Output_Vld Processes
     auto printOutputProcess = [&](DataSignal* dataSignal) {
@@ -407,7 +407,7 @@ void VHDLWrapperMultiClkCycle::moduleOutputHandling(std::stringstream& ss)
        << "\tend process;\n\n";
 }
 
-void VHDLWrapperMultiClkCycle::controlProcess(std::stringstream& ss)
+void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
 {
     auto printModuleInputSignals = [this, &ss](std::set<DataSignal*> const& dataSignals) {
         for (const auto& dataSignal : dataSignals) {
@@ -465,7 +465,7 @@ void VHDLWrapperMultiClkCycle::controlProcess(std::stringstream& ss)
        << "end " << propertySuiteHelper->getName() << "_arch;\n";
 }
 
-std::string VHDLWrapperMultiClkCycle::operationEnum()
+std::string VHDLWrapperMCO::operationEnum()
 {
     std::stringstream ss;
     ss << "\t-- Operations\n"

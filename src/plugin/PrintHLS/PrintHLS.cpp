@@ -11,18 +11,15 @@
 - global functions and global variables handling
 - add ReadMe
 - SCO: reset to input
-- SCO: script warning if initiation intervall > 1
-- MCO: operation vector size (one operation, ex. Basic00)
-- MCO: script set t_min, t_max, do not delete module in Wrapper
 - MCO: internal register handling
 */
 
 #include "PrintHLS.h"
 #include "OptimizerHLS.h"
-#include "HLS/HLS.h"
-#include "SynthesisScript/SynthesisScripts.h"
-#include "VHDLWrapper/VHDLWrapperOneClkCycle.h"
-#include "VHDLWrapper/VHDLWrapperMultiClkCycle.h"
+#include "HLS.h"
+#include "SynthesisScripts.h"
+#include "VHDLWrapperSCO.h"
+#include "VHDLWrapperMCO.h"
 
 using namespace SCAM::HLSPlugin;
 
@@ -48,11 +45,11 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
         auto optimizer = std::make_shared<OptimizerHLS>(propertySuiteHelper, module.second);
 
         if (hlsOption == HLSOption::SCO) {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperOneClkCycle>(currentModule, moduleName, propertySuiteHelper, optimizer);
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperSCO>(currentModule, moduleName, propertySuiteHelper, optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         } else {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMultiClkCycle>(currentModule, moduleName, propertySuiteHelper, optimizer);
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMCO>(currentModule, moduleName, propertySuiteHelper, optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         }

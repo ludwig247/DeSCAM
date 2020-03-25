@@ -4,11 +4,11 @@
 
 #include "PrintStatement.h"
 #include "Utilities.h"
-#include "VHDLWrapperOneClkCycle.h"
+#include "VHDLWrapperSCO.h"
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-VHDLWrapperOneClkCycle::VHDLWrapperOneClkCycle(
+VHDLWrapperSCO::VHDLWrapperSCO(
         Module* module,
         const std::string &moduleName,
         std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
@@ -22,7 +22,7 @@ VHDLWrapperOneClkCycle::VHDLWrapperOneClkCycle(
     this->signalFactory = nullptr;
 }
 
-std::map<std::string, std::string> VHDLWrapperOneClkCycle::printModule() {
+std::map<std::string, std::string> VHDLWrapperSCO::printModule() {
     std::map<std::string, std::string> pluginOutput;
     signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, true);
 
@@ -32,7 +32,7 @@ std::map<std::string, std::string> VHDLWrapperOneClkCycle::printModule() {
     return pluginOutput;
 }
 
-void VHDLWrapperOneClkCycle::entity(std::stringstream &ss) {
+void VHDLWrapperSCO::entity(std::stringstream &ss) {
     // Print Entity
     ss << "entity " + propertySuiteHelper->getName() + "_module is\n";
     ss << "port(\n";
@@ -61,7 +61,7 @@ void VHDLWrapperOneClkCycle::entity(std::stringstream &ss) {
 }
 
 // Print Signals
-void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
+void VHDLWrapperSCO::signals(std::stringstream &ss) {
     auto printVars = [&ss](
             std::set<Variable *> const& vars,
             Style const& style,
@@ -107,7 +107,7 @@ void VHDLWrapperOneClkCycle::signals(std::stringstream &ss) {
 
 }
 
-void VHDLWrapperOneClkCycle::component(std::stringstream& ss) {
+void VHDLWrapperSCO::component(std::stringstream& ss) {
     if (emptyModule()) {
         return;
     }
@@ -153,7 +153,7 @@ void VHDLWrapperOneClkCycle::component(std::stringstream& ss) {
 }
 
 // Print Component Instantiation
-void VHDLWrapperOneClkCycle::componentInst(std::stringstream& ss) {
+void VHDLWrapperSCO::componentInst(std::stringstream& ss) {
     if (emptyModule()) {
         return;
     }
@@ -197,7 +197,7 @@ void VHDLWrapperOneClkCycle::componentInst(std::stringstream& ss) {
 }
 
 // Print Monitor
-void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
+void VHDLWrapperSCO::monitor(std::stringstream &ss) {
     ss << "\t-- Monitor\n"
        << "\tprocess (" << sensitivityList() << ")\n"
        << "\tbegin\n"
@@ -261,7 +261,7 @@ void VHDLWrapperOneClkCycle::monitor(std::stringstream &ss) {
        << "\tend process;\n\n";
 }
 
-void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
+void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
 {
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool isEnum = dataSignal->isEnumType();
@@ -353,7 +353,7 @@ void VHDLWrapperOneClkCycle::moduleOutputHandling(std::stringstream& ss)
     }
 }
 
-void VHDLWrapperOneClkCycle::controlProcess(std::stringstream &ss) {
+void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
     // Print Control Process
     ss << "\n\t-- Control process\n"
        << "\tprocess (clk, rst)\n"
@@ -367,7 +367,7 @@ void VHDLWrapperOneClkCycle::controlProcess(std::stringstream &ss) {
        << "end " << propertySuiteHelper->getName() << "_arch;\n";
 }
 
-std::string VHDLWrapperOneClkCycle::operationEnum()
+std::string VHDLWrapperSCO::operationEnum()
 {
     std::stringstream ss;
     ss << "\t-- Operations\n"
@@ -381,7 +381,7 @@ std::string VHDLWrapperOneClkCycle::operationEnum()
     return ss.str();
 }
 
-bool VHDLWrapperOneClkCycle::emptyModule()
+bool VHDLWrapperSCO::emptyModule()
 {
     return optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() && propertySuiteHelper->getNotifySignals().empty();
 }

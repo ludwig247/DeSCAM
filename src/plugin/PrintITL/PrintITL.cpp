@@ -2,23 +2,25 @@
 // Created by ludwig on 27.10.16.
 //
 
-#include <functional>
-
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
 #include "PrintITL.h"
 
 
-std::map<std::string, std::string> PrintITL::printModel(Model *node) {
+using namespace SCAM;
 
-    std::function<std::string()> macroFunction;
-
+PrintITL::PrintITL()
+{
     if (getOptionMap().at("hls-sco") || getOptionMap().at("hls-mco")) {
-        macroFunction = std::bind(&PrintITL::hlsMacros, this);
-    } else {
+        macroFunction = std::bind(&PrintITL::macrosForHLS, this);
+    }
+    else {
         macroFunction = std::bind(&PrintITL::macros, this);
     }
+}
 
+std::map<std::string, std::string> PrintITL::printModel(Model *node) {
+    this->model = node;
     for (auto &module: node->getModules()) {
 
         this->module = module.second;
@@ -30,18 +32,15 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
             pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
 
     }
+
+    if(!node->getGlobalFunctionMap().empty()){
+        pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.vhi", globalFunctions()));
+    }
+
     return pluginOutput;
 }
 
 std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
-
-    std::function<std::string()> macroFunction;
-
-    if (getOptionMap().at("hls-sco") || getOptionMap().at("hls-mco")) {
-        macroFunction = std::bind(&PrintITL::hlsMacros, this);
-    } else {
-        macroFunction = std::bind(&PrintITL::macros, this);
-    }
 
     this->module = node;
 
@@ -325,25 +324,29 @@ std::string PrintITL::operations() {
     return ss.str();
 }
 
-std::string PrintITL::hlsMacros() {
-    PropertySuite * ps = this->module->getPropertySuite();
+std::string PrintITL::macrosForHLS()
+{
+    PropertySuite* ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
-    for (auto sync: ps->getSyncSignals()){
-        ss << "-- macro " << sync->getName() << " : " << convertDataTypeForHLS(sync->getDataType()->getName()) << " := end macro;" << std::endl;
+    for (auto sync: ps->getSyncSignals()) {
+        ss << "-- macro " << sync->getName() << " : " << convertDataTypeForHLS(sync->getDataType()->getName())
+           << " := end macro;" << std::endl;
     }
-    for (auto notify: ps->getNotifySignals()){
-        ss << "-- macro " << notify->getName() << " : " << convertDataTypeForHLS(notify->getDataType()->getName()) << " := end macro;" << std::endl;
+    for (auto notify: ps->getNotifySignals()) {
+        ss << "-- macro " << notify->getName() << " : " << convertDataTypeForHLS(notify->getDataType()->getName())
+           << " := end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
     ss << "-- DP SIGNALS --" << std::endl;
-    for (auto dp: ps->getDpSignals()){
-        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType()) || (!dp->isSubVar()) && !dp->isArrayType()){
+    for (auto dp: ps->getDpSignals()) {
+        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType())
+                || (!dp->isSubVar()) && !dp->isArrayType()) {
             ss << "-- ";
         }
-        ss << "macro " ;
+        ss << "macro ";
         ss << dp->getFullName("_");
         ss << " : " << convertDataTypeForHLS(dp->getDataType()->getName()) << " := ";
         ss << dp->getFullName(".");
@@ -355,15 +358,17 @@ std::string PrintITL::hlsMacros() {
     // Reset constraint is print out extra because of the quotation marks ('0')
     ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
     for (auto co: ps->getConstraints()) {
-        if (co->getName() != "no_reset") {
-            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression()) << "; end constraint;" << std::endl;
+        if (co->getName()!="no_reset") {
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression())
+               << "; end constraint;" << std::endl;
         }
     }
     ss << std::endl << std::endl;
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
-        if (vr->isCompoundType() || (vr->isSubVar() && vr->getParentDataType()->isArrayType()) || (!vr->isSubVar()) && !vr->isArrayType()) {
+        if (vr->isCompoundType() || (vr->isSubVar() && vr->getParentDataType()->isArrayType())
+                || ((!vr->isSubVar()) && !vr->isArrayType())) {
             ss << "-- ";
         }
         ss << "macro " << vr->getFullName("_");
@@ -374,7 +379,7 @@ std::string PrintITL::hlsMacros() {
     ss << std::endl << std::endl;
 
     ss << "-- STATES --" << std::endl;
-    for (auto st: ps->getStates()){
+    for (auto st: ps->getStates()) {
         ss << "macro " << st->getName() << " : " << convertDataTypeForHLS(st->getDataType()->getName())
            << " := " << "active_state = st_" << st->getName();
         if (getOptionMap().at("hls-mco")) {
@@ -386,3 +391,69 @@ std::string PrintITL::hlsMacros() {
     return ss.str();
 }
 
+
+std::string PrintITL::globalFunctions() {
+    std::stringstream ss;
+    if (model->getGlobalFunctionMap().empty()) return ss.str();
+    ss << "-- GLOBAL FUNCTIONS --\n";
+    for (auto function: model->getGlobalFunctionMap()) {
+        ss << "macro " + function.first << "(";
+        auto paramMap = function.second->getParamMap();
+        for (auto param = paramMap.begin(); param != paramMap.end(); ++param) {
+            if (param->second->getDataType()->isCompoundType()) {
+                for (auto iterator = param->second->getDataType()->getSubVarMap().begin();
+                     iterator != param->second->getDataType()->getSubVarMap().end(); ++iterator) {
+                    ss << param->first << "_" << iterator->first << ": " << convertDataType(iterator->second->getName());
+                    if (iterator != --param->second->getDataType()->getSubVarMap().end()) ss << ";";
+                }
+            } else {
+                ss << param->first << ": " << convertDataType(param->second->getDataType()->getName());
+            }
+            if (param != --paramMap.end()) ss << ";";
+        }
+        ss << ") : " << convertDataType(function.second->getReturnType()->getName()) << " :=\n";
+
+        if (function.second->getReturnValueConditionList().empty())
+            throw std::runtime_error(" No return value for function " + function.first + "()");
+        auto branchNum = function.second->getReturnValueConditionList().size();
+        for (auto returnValue: function.second->getReturnValueConditionList()) {
+            ss << "\t";
+            //Any conditions?
+            if (!returnValue.second.empty()) {
+                if (branchNum > 1) {
+                    if (branchNum == function.second->getReturnValueConditionList().size())
+                        ss << "if (";
+                    else
+                        ss << "elsif (";
+
+                    auto condNum = returnValue.second.size();
+                    for (auto cond_it: returnValue.second) {
+                        ss << ConditionVisitor::toString(cond_it);
+                        if (condNum > 1) ss << " and ";
+                        condNum--;
+                    }
+                    ss << ") then ";
+                }
+            }
+
+            // Handle optimized functions (last branch does not have any conditions)
+            if (1 != function.second->getReturnValueConditionList().size()) {
+                if (branchNum == 1) ss << "else ";
+            }
+
+            if (function.second->getReturnType()->getName() == "int" || function.second->getReturnType()->getName() == "unsigned") {
+                ss << convertDataType(function.second->getReturnType()->getName());
+            }
+            ss << "(" << ConditionVisitor::toString(returnValue.first->getReturnValue()) << ")";
+            if (!returnValue.second.empty()) {
+                ss << "\n";
+            } else {
+                ss << ";\n";
+            }
+            --branchNum;
+        }
+        if (function.second->getReturnValueConditionList().size() > 1) ss << "end if;\n";
+        ss << "end macro;\n\n";
+    }
+    return ss.str();
+}
