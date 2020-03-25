@@ -16,7 +16,7 @@
 
 #define is_BTR(opc) (opc==BTR2_OPC || opc==BTR4_OPC || opc==BTR8_OPC)
 
-struct FPI_Master : public sc_module {
+struct FPI_Master_old : public sc_module {
 
     enum Sections {
         IDLE, ADDR, DATA, DATA_ADDR, BTR_CONT, WAIT_BEFORE_RETRY
@@ -26,7 +26,7 @@ struct FPI_Master : public sc_module {
     Sections nextsection;
 
     //Constructor
-    FPI_Master(sc_module_name name):
+    FPI_Master_old(sc_module_name name):
                 section(IDLE),
                 nextsection(IDLE),
                 ready_i("ready_i"),
@@ -51,7 +51,7 @@ struct FPI_Master : public sc_module {
                 master_done("master_done"){
                     SC_THREAD(fsm);
                 }
-        SC_HAS_PROCESS(FPI_Master);
+        SC_HAS_PROCESS(FPI_Master_old);
 
 
             //Ports

@@ -9,7 +9,7 @@
 #include "env/Types.h"
 #include "../../Interfaces/Interfaces.h"
 
-struct requesteQ_new : public sc_module {
+struct requesteQ : public sc_module {
     enum Phases {
         STARTUP, EMPTY, NON_EMPTY
     };
@@ -17,11 +17,11 @@ struct requesteQ_new : public sc_module {
     Phases phase;
     Phases nextphase;
 
-    requesteQ_new(sc_module_name name) {
+    requesteQ(sc_module_name name) {
         SC_THREAD(fsm);
     }
 
-    SC_HAS_PROCESS(requesteQ_new);
+    SC_HAS_PROCESS(requesteQ);
 
     master_in<req_t> peripheral_request_i; //a new request from peripheral //FIXME: in .vhi it says a new value in each clock cycle
     shared_out<bool> req_o; //the request signal for the master agent

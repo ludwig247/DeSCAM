@@ -12,7 +12,7 @@
 
 #define is_BTR(opc) (opc==BTR2_OPC || opc==BTR4_OPC || opc==BTR8_OPC)
 
-struct FPI_Master_new : public sc_module {
+struct FPI_Master : public sc_module {
 
     enum Phases {
         IDLE, ADDR, DATA, DATA_ADDR, BTR_CONT, WAIT_BEFORE_RETRY
@@ -22,7 +22,7 @@ struct FPI_Master_new : public sc_module {
     Phases nextphase;
 
     //Constructor
-    FPI_Master_new(sc_module_name name):
+    FPI_Master(sc_module_name name):
 //            phase(IDLE),
 //            nextphase(IDLE),
             ready_i("ready_i"),
@@ -47,7 +47,7 @@ struct FPI_Master_new : public sc_module {
             master_done("master_done"){
         SC_THREAD(fsm);
     }
-    SC_HAS_PROCESS(FPI_Master_new);
+    SC_HAS_PROCESS(FPI_Master);
 
 
     //Ports
