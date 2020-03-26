@@ -313,3 +313,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::ParamOperand &node) {
     }
 }
 
+void SCAM::ParamValuePropagation::visit(SCAM::Ternary &node) {
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+}
+

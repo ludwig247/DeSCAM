@@ -38,6 +38,10 @@ namespace SCAM {
         return this->commitmentList;
     }
 
+    const std::vector<SCAM::Assignment *> &Operation::getCommitmentList() const {
+        return commitmentList;
+    }
+
     SCAM::State *SCAM::Operation::getState() const {
         return this->state;
     }
@@ -99,5 +103,7 @@ namespace SCAM {
 
         return ss.str();
     }
+
+
 
 }

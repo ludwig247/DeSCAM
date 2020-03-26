@@ -7,10 +7,10 @@
 
 
 #include "systemc.h"
-#include "Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 #include "CPU_Interfaces.h"
-#include "ISA_old.h"
-#include "regs_old.h"
+#include "ISA.h"
+#include "regs.h"
 
 #define REGFILE(x) RF.reg_file_##x
 #define PCREG isa.pcReg

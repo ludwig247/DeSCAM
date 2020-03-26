@@ -106,7 +106,6 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         this->addFunctions(module, scparModule.second);
         //Processe
         this->addBehavior(module, scparModule.second);
-
         //this->addCommunicationFSM(module);
     }
 }
@@ -305,9 +304,11 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
         std::cout << "----------------------" << std::endl;
         for (auto item: ErrorMsg::getInstance().getErrorList()) {
+
             std::cout << "- " << item.statement << std::endl;
             for (auto log: item.errorMsgs) {
                 std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
+
             }
         }
         ErrorMsg::clear();
@@ -332,6 +333,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         PropertyFactory propertyFactory(module);
         module->setPropertySuite(propertyFactory.getPropertySuite());
     }
+
 
 }
 

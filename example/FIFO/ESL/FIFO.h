@@ -19,7 +19,7 @@ struct FIFO : public sc_module {
             from_reset(false),
             is_empty(true),
             is_full(false)
-    {SC_THREAD(fsm); }
+    {SC_THREAD(fsm);}
 
     //Variables
     //Data Array

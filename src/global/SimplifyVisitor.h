@@ -81,6 +81,8 @@ namespace SCAM {
 
         static TimePointOperand *simplifyNode(TimePointOperand &node);
 
+        static Ternary *simplifyNode(Ternary &node);
+
 
     private:
         Stmt *nodePointer;
@@ -143,10 +145,9 @@ namespace SCAM {
 
         void visit(class TimePointOperand &node) override;
 
-    public:
-        void visit(class ArrayExpr &node) override;
+        void visit(class Ternary &node) override;
 
-    protected:
+        void visit(class ArrayExpr &node) override;
 
         void visit(class CompoundExpr &node) override;
 
