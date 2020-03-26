@@ -2,12 +2,13 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
-#define ERROR_BIT(x)   (x & 0xF)
-#define ENABLE_BIT(x)  (x & 1)
-#define CONFIG_BIT(x)  (x & 0x1F)
-#define PARITY_BIT(x)  (x & 0xE)
-#define STOP_BIT(x)    (x & 0x1)
-#define HWFC_BIT(x)    (x & 0x10)
+#define TASK_MASK(x)    (x & 0x1)
+#define ERROR_MASK(x)   (x & 0xF)
+#define ENABLE_MASK(x)  (x & 0x1)
+#define CONFIG_MASK(x)  (x & 0x1F)
+#define PARITY_MASK(x)  (x & 0xE)
+#define STOP_MASK(x)    (x & 0x1)
+#define HWFC_MASK(x)    (x & 0x10)
 
 SC_MODULE(Uart_control) {
     slave_in<bus_req_t> bus_in;
@@ -15,8 +16,8 @@ SC_MODULE(Uart_control) {
     slave_in<tasks_t> tasks_in;
     master_out<events_t> events_out;
 
-    //slave_in<bool> cts_in;
-    //master_out<bool> rts_out;
+    slave_in<bool> cts_in;
+    //master_out<bool> rts_out
     slave_out<rx_control_out_t> hwfc_control_out;
 
     slave_out<tx_control_out_t> tx_control_out;
@@ -27,45 +28,39 @@ SC_MODULE(Uart_control) {
     slave_out<config_t> rx_config_out;
     slave_out<config_t> tx_config_out;
 
-    bus_req_t bus_request;
-    bus_resp_t bus_response;
+    bus_req_t bus_in_msg;
+    bus_resp_t bus_out_msg;
+    tx_control_out_t ctrl_to_tx_msg;
+    tx_control_in_t tx_to_ctrl_msg;
+    rx_control_out_t ctrl_to_rx_msg;
+    rx_control_in_t rx_to_ctrl_msg;
+    rx_control_out_t ctrl_to_hwfc_msg;
+    tasks_t tasks_in_msg;
+    events_t events_out_msg;
+    bool cts_in_msg;
+    config_t config_msg;
 
-    tx_control_out_t tx_control_req;
-    tx_control_in_t tx_control_resp;
-    rx_control_out_t rx_control_req;
-    rx_control_in_t rx_control_resp;
-    rx_control_out_t hwfc_control_req;
-    tasks_t tasks;
-    tasks_t tasks_internal;
-    events_t events;
-    bool cts;
-    bool cts_in_valid;
     //bool rts;
+    // Valid signals
     bool bus_in_valid;
     bool tasks_in_valid;
     bool tx_control_in_valid;
     bool rx_control_in_valid;
+    bool cts_in_valid;
     bool is_bus_write;
-    bool is_bus_read;
+    //bool is_bus_read;
 
     // Registers
     unsigned int error_src;
     unsigned int enable;
     unsigned int config;
-    //bool error_overrun;
-    //bool error_parity;
-    //bool error_framing;
-    //bool error_break;
-    //bool enable;
-    //bool hwfc;
-    config_t config_msg;
+    tasks_t tasks_internal;
+    bool cts_internal;
 
-    // Registers
-    //registers_t registers;
 
     SC_CTOR(Uart_control) :
-            //rts(RTS_DEACTIVATED),
-            cts(CTS_DEACTIVATED),
+    //rts(RTS_ACTIVATED),
+            cts_in_msg(CTS_DEACTIVATED),
             cts_in_valid(false),
             bus_in_valid(false),
             tx_control_in_valid(false),
@@ -74,6 +69,7 @@ SC_MODULE(Uart_control) {
             error_src(0),
             enable(0),
             config(0),
+            cts_internal(CTS_DEACTIVATED),
             bus_in("bus_in"),
             bus_out("bus_out"),
             tx_control_in("tx_control_in"),
@@ -86,13 +82,9 @@ SC_MODULE(Uart_control) {
             tx_config_out("tx_config_out"),
             rx_config_out("rx_config_out"),
             is_bus_write(false),
-            is_bus_read(false)//,
-            //cts_in("cts_in")//,
-            //rts_out("rts_out") 
-            {
-        //registers.error_src = 0;
-        //registers.enable = 0;
-        //registers.config = 0;
+            cts_in("cts_in")//,
+    //rts_out("rts_out")
+    {
         SC_THREAD(fsm);
     }
 
@@ -119,179 +111,114 @@ SC_MODULE(Uart_control) {
              *   insert_state() can be used in any module.
              */
 
-            tasks_in->slave_read(tasks, tasks_in_valid);
-            tx_control_in->slave_read(tx_control_resp, tx_control_in_valid);
-            rx_control_in->slave_read(rx_control_resp, rx_control_in_valid);
-            bus_in->slave_read(bus_request, bus_in_valid);
-            //cts_in->slave_read(cts, cts_in_valid);
+            tasks_in->slave_read(tasks_in_msg, tasks_in_valid);
+            tx_control_in->slave_read(tx_to_ctrl_msg, tx_control_in_valid);
+            rx_control_in->slave_read(rx_to_ctrl_msg, rx_control_in_valid);
+            bus_in->slave_read(bus_in_msg, bus_in_valid);
+            cts_in->slave_read(cts_in_msg, cts_in_valid);
 
-            events.cts = false;
-            events.ncts = false;
-            //events.cts   = event_triggered_cts(cts_in_valid, cts, hwfc);
-            //events.ncts  = event_triggered_ncts(cts_in_valid, cts, hwfc);
-
-            //FIXME: mabye extend trans_type to none ... and check for this?
-            is_bus_write = is_bus_write_transaction(bus_request.trans_type, bus_in_valid); //FIXME: can it be true at the same time?
-            bus_response.valid  = is_bus_read_transaction(bus_request.trans_type, bus_in_valid); //FIXME: can it be true at the same time?
-
-//            if (is_bus_write) {//is_bus_write_transaction(bus_request.trans_type, bus_in_valid)) {
-            //FIXME: is this better?
-            if (bus_in_valid && bus_request.trans_type == WRITE) {//is_bus_write_transaction(bus_request.trans_type, bus_in_valid)) {
-                //std::cout << "--- CONTROL: WRITE TRANS" << std::endl;
-                //insert_state("BUS_WRITE");
-                // tasks_internal.start_rx = is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_START_RX);
-                // tasks_internal.stop_rx  = is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_STOP_RX);
-                // tasks_internal.start_tx = is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_START_TX);
-                // tasks_internal.stop_tx  = is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_STOP_TX);
-                // tasks_internal.suspend  = is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_SUSPEND);
-                    tasks_internal.start_rx = ite_bool(tasks_internal.start_rx,read_bus_bit(bus_request.data, 0),bus_request.addr == ADDR_TASKS_START_RX);
-                    //tasks_internal.start_rx = read_bus_bit(bus_request.data, 0);
-                    tasks_internal.stop_rx = ite_bool(tasks_internal.stop_rx,read_bus_bit(bus_request.data, 0),bus_request.addr == ADDR_TASKS_STOP_RX);
-
-                    enable =  ite_unsigned(enable,ENABLE_BIT(bus_request.data),bus_request.addr == ADDR_ENABLE);
-                    error_src =  ite_unsigned(error_src,ERROR_BIT(~bus_request.data & error_src),bus_request.addr == ADDR_ERROR_SRC);
-                    config =  ite_unsigned(config,CONFIG_BIT(bus_request.data),bus_request.addr == ADDR_CONFIG);
-
-                /* //FIXME: old
-                if (bus_request.addr == ADDR_TASKS_START_RX) {
-                    tasks_internal.start_rx = read_bus_bit(bus_request.data, 0);
-                } else if (bus_request.addr == ADDR_TASKS_STOP_RX) {
-                    tasks_internal.stop_rx = read_bus_bit(bus_request.data, 0);
-                }
-
-                //registers.error_src = read_bus_data_error_src(bus_request.addr, bus_request.data, registers.error_src);
-                //registers.enable    = read_bus_data_enable(bus_request.addr, bus_request.data, registers.enable);
-                //registers.config    = read_bus_data_config(bus_request.addr, bus_request.data, registers.config);
-                else if (bus_request.addr == ADDR_ERROR_SRC) // clear on 1 //FIXME: changed this to else if  - 100 operations
-                {
-                    error_src = ERROR_BIT(~bus_request.data & error_src);
-                    // error_overrun = error_overrun && !read_bus_bit(bus_request.data, 0);
-                    // error_parity  = error_parity  && !read_bus_bit(bus_request.data, 1);
-                    // error_framing = error_framing && !read_bus_bit(bus_request.data, 2);
-                    // error_break   = error_break   && !read_bus_bit(bus_request.data, 3);
-                }
-                else if (bus_request.addr == ADDR_ENABLE)
-                {
-                    enable =  ENABLE_BIT(bus_request.data);
-                }
-
-                else if (bus_request.addr == ADDR_CONFIG)
-                {
-                    config = CONFIG_BIT(bus_request.data);
-                }*/
-
-            } 
-            else if (bus_in_valid && bus_request.trans_type == READ) // BUS READ
-                //FIXME: old
-//            else if (bus_response.valid) // BUS READ
-            {
-                bus_response.valid = true;
-                //insert_state("BUS_READ");
-
-                bus_response.data = ite_unsigned(bus_response.data,error_src,bus_request.addr == ADDR_ERROR_SRC);
-                bus_response.data = ite_unsigned(bus_response.data,enable,bus_request.addr ==  ADDR_ENABLE);
-                bus_response.data = ite_unsigned(bus_response.data,config,bus_request.addr == ADDR_CONFIG);
-
-                /*FIXME: old
-                if (bus_request.addr == ADDR_ERROR_SRC)
-                {
-                    // bus_response.data = write_bus_bit(error_overrun, 0) |
-                    //                     write_bus_bit(error_parity, 1) |
-                    //                     write_bus_bit(error_framing, 2) |
-                    //                     write_bus_bit(error_break, 3);
-                    bus_response.data = error_src;
-                }
-                else if (bus_request.addr == ADDR_ENABLE)
-                {
-                    bus_response.data = enable;
-                }
-                else if (bus_request.addr == ADDR_CONFIG)
-                {
-                    bus_response.data = config;
-                }
-                 */
-            }
-            // EVENTS/home/tobias/DeSCAM/example/UART_NORDIC/Uart_control.h
-            // events.txd_ready = update_event(tx_control_resp.ready, tx_control_in_valid);
-            // events.rxd_ready = update_event(rx_control_resp.ready, rx_control_in_valid);
-            // events.rx_timeout = update_event(rx_control_resp.timeout, rx_control_in_valid);
-            // events.error = update_event(rx_control_resp.error_overrun
-            //                             || rx_control_resp.error_parity
-            //                             || rx_control_resp.error_framing
-            //                             || rx_control_resp.error_break,
-            //                             rx_control_in_valid);
+            is_bus_write = bus_in_valid && bus_in_msg.trans_type == WRITE;
+            bus_out_msg.valid = bus_in_valid && bus_in_msg.trans_type == READ;
 
 
+//
+//            if (is_bus_write)
+//            {
+            // Task suspend is not included in PS for nRF53 UART
+            //tasks_internal.suspend  = is_task_bus(bus_in_msg.addr, bus_in_msg.data, ADDR_tasks_SUSPEND);
+            //if (bus_in_msg.addr == ADDR_TASKS_START_RX)        tasks_internal.start_rx = TASK_MASK(bus_in_msg.data) != 0;
+//                else if (bus_in_msg.addr == ADDR_TASKS_STOP_RX)    tasks_internal.stop_rx = TASK_MASK(bus_in_msg.data) != 0;
+            //else if (bus_in_msg.addr == ADDR_TASKS_START_TX)   tasks_internal.start_tx = TASK_MASK(bus_in_msg.data) != 0;
+            //else if (bus_in_msg.addr == ADDR_TASKS_STOP_TX)    tasks_internal.stop_tx = TASK_MASK(bus_in_msg.data) != 0;
+            //else if (bus_in_msg.addr == ADDR_ERROR_SRC)        error_src = ERROR_MASK(~bus_in_msg.data & error_src); // clear on 1
+            //else if (bus_in_msg.addr == ADDR_ENABLE)           enable = ENABLE_MASK(bus_in_msg.data);
+//                else if (bus_in_msg.addr == ADDR_CONFIG)           config = CONFIG_MASK(bus_in_msg.data);
+//            }
+            // Task suspend is not included in PS for nRF53 UART
+            //tasks_internal.suspend  = is_task_bus(bus_in_msg.addr, bus_in_msg.data, ADDR_tasks_SUSPEND);
+            //if (bus_in_msg.addr == ADDR_TASKS_START_RX)        tasks_internal.start_rx = TASK_MASK(bus_in_msg.data) != 0;
+            tasks_internal.start_rx = (bus_in_msg.addr == ADDR_TASKS_START_RX) ? true : tasks_internal.start_rx;
+//                else if (bus_in_msg.addr == ADDR_TASKS_STOP_RX)    tasks_internal.stop_rx = TASK_MASK(bus_in_msg.data) != 0;
+            tasks_internal.stop_rx = (bus_in_msg.addr == ADDR_TASKS_STOP_RX && is_bus_write) ? bus_in_msg.data != 0 : tasks_internal.stop_rx;
+            //else if (bus_in_msg.addr == ADDR_TASKS_START_TX)   tasks_internal.start_tx = TASK_MASK(bus_in_msg.data) != 0;
+            tasks_internal.start_tx = (bus_in_msg.addr == ADDR_TASKS_START_TX && is_bus_write) ? bus_in_msg.data != 0 : tasks_internal.start_tx;
+            //else if (bus_in_msg.addr == ADDR_TASKS_STOP_TX)    tasks_internal.stop_tx = TASK_MASK(bus_in_msg.data) != 0;
+            tasks_internal.stop_tx = (bus_in_msg.addr == ADDR_TASKS_STOP_TX && is_bus_write) ? bus_in_msg.data != 0 : tasks_internal.start_tx;
+            //else if (bus_in_msg.addr == ADDR_ERROR_SRC)        error_src = ERROR_MASK(~bus_in_msg.data & error_src); // clear on 1
+            error_src = (bus_in_msg.addr == ADDR_ERROR_SRC && is_bus_write) ? bus_in_msg.data : error_src;
+            //else if (bus_in_msg.addr == ADDR_ENABLE)           enable = ENABLE_MASK(bus_in_msg.data);
+            enable = (bus_in_msg.addr == ADDR_ENABLE && is_bus_write) ? bus_in_msg.data : enable;
+//                else if (bus_CONFIG_MASK(bus_in_msg.data)in_msg.addr == ADDR_CONFIG)           config = CONFIG_MASK(bus_in_msg.data);
+            config = (bus_in_msg.addr == ADDR_CONFIG && is_bus_write) ? bus_in_msg.data : config;
 
-            // tasks.start_rx = update_task(tasks.start_rx,
-            //                              tasks_in_valid,
-            //                              is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_START_RX),
-            //                              is_bus_write_transaction(bus_request.trans_type, bus_in_valid));
-            // tasks.stop_rx = update_task(tasks.stop_rx,
-            //                             tasks_in_valid,
-            //                             is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_STOP_RX),
-            //                             is_bus_write_transaction(bus_request.trans_type, bus_in_valid));
-            // if (tasks_in_valid) //FIXME: add ite for this
-            // {
-            //     tasks_internal.start_rx = tasks_internal.start_rx || tasks.start_rx;
-            //     tasks_internal.stop_rx  = tasks_internal.stop_rx  || tasks.stop_rx;
-            // }
-            // tasks.start_tx = update_task(tasks.start_tx,
-            //                              tasks_in_valid,
-            //                              is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_START_TX),
-            //                              is_bus_write_transaction(bus_request.trans_type, bus_in_valid));
-            // tasks.stop_tx = update_task(tasks.stop_tx,
-            //                             tasks_in_valid,
-            //                             is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_STOP_TX),
-            //                             is_bus_write_transaction(bus_request.trans_type, bus_in_valid));
-            // tasks.suspend = update_task(tasks.suspend,
-            //                             tasks_in_valid,
-            //                             is_task_bus(bus_request.addr, bus_request.data, ADDR_TASKS_SUSPEND),
-            //                             is_bus_write_transaction(bus_request.trans_type, bus_in_valid));
 
-            // tx_control_req.active = update_active(tx_control_req.active,
-            //                                       tasks_internal.start_tx,// || ((cts == CTS_ACTIVATED) && hwfc),// || cts_enabled_activated(cts, registers.config),
-            //                                       tasks.stop_tx || tasks.suspend,// || cts_enabled_deactivated(cts, hwfc),
-            //                                       enable);
+//            else if (bus_out_msg.valid) // BUS READ
+//            {
+            //if (bus_in_msg.addr == ADDR_ERROR_SRC) bus_out_msg.data = error_src;
+//                else if (bus_in_msg.addr == ADDR_ENABLE) bus_out_msg.data = enable;
+//                else if (bus_in_msg.addr == ADDR_CONFIG) bus_out_msg.data = config;
+//            }
 
-            // rx_control_req.active = update_active(rx_control_req.active,
-            //                                       tasks.start_rx,
-            //                                       tasks.stop_rx || tasks.suspend,
-            //                                       enable);
+            //if (bus_in_msg.addr == ADDR_ERROR_SRC) bus_out_msg.data = error_src;
+            bus_out_msg.data = (bus_in_msg.addr == ADDR_ERROR_SRC && bus_out_msg.valid) ? error_src : bus_out_msg.data;
+//                else if (bus_in_msg.addr == ADDR_ENABLE) bus_out_msg.data = enable;
+            bus_out_msg.data = (bus_in_msg.addr == ADDR_ENABLE && bus_out_msg.valid) ? enable : bus_out_msg.data;
+//                else if (bus_in_msg.addr == ADDR_CONFIG) bus_out_msg.data = config;
+            bus_out_msg.data = (bus_in_msg.addr == ADDR_CONFIG && bus_out_msg.valid) ? config : bus_out_msg.data;
 
-            //hwfc_control_req.active = rx_control_req.active && hwfc_enabled(config);
+            // EVENTS
+            events_out_msg.txd_ready = update_event(tx_to_ctrl_msg.ready, tx_control_in_valid);
+            events_out_msg.rxd_ready = update_event(rx_to_ctrl_msg.ready, rx_control_in_valid);
+            events_out_msg.rx_timeout = update_event(rx_to_ctrl_msg.timeout, rx_control_in_valid);
+            events_out_msg.error = update_event(rx_to_ctrl_msg.error_src != 0, rx_control_in_valid);
+            // TODO: Move cts to another file? Will be located in another clock/power domain
+            events_out_msg.cts = event_triggered_cts(cts_in_valid, cts_in_msg, HWFC_MASK(config) != 0);
+            events_out_msg.ncts = event_triggered_ncts(cts_in_valid, cts_in_msg, HWFC_MASK(config) != 0);
+            //if (HWFC_MASK(config) == 0 || events_out_msg.cts)   cts_internal = CTS_ACTIVATED;
+            cts_internal = (HWFC_MASK(config) == 0 || events_out_msg.cts) ? CTS_ACTIVATED : cts_internal;
+            //else if (events_out_msg.ncts)                       cts_internal = CTS_DEACTIVATED;
+            cts_internal = (!(HWFC_MASK(config) == 0 || events_out_msg.cts) && events_out_msg.ncts) ? CTS_DEACTIVATED : cts_internal;
+
+            // tasks
+            tasks_internal.start_rx = tasks_internal.start_rx || (tasks_in_valid && tasks_in_msg.start_rx);
+            tasks_internal.stop_rx = tasks_internal.stop_rx || (tasks_in_valid && tasks_in_msg.stop_rx);
+            tasks_internal.start_tx = tasks_internal.start_tx || (tasks_in_valid && tasks_in_msg.start_tx) || events_out_msg.cts;
+            tasks_internal.stop_tx = tasks_internal.stop_tx || (tasks_in_valid && tasks_in_msg.stop_tx) || events_out_msg.ncts;
+
+            ctrl_to_tx_msg.active = update_active(ctrl_to_tx_msg.active,
+                                                  tasks_internal.start_tx,
+                                                  tasks_internal.stop_tx,
+                                                  (ENABLE_MASK(enable) != 0) && cts_internal == CTS_ACTIVATED); // cts is activated also when hwfc is off
+
+            ctrl_to_rx_msg.active = update_active(ctrl_to_rx_msg.active,
+                                                  tasks_internal.start_rx,
+                                                  tasks_internal.stop_rx,
+                                                  ENABLE_MASK(enable) != 0);
+
+            ctrl_to_hwfc_msg.active = ctrl_to_rx_msg.active && (HWFC_MASK(config) != 0);
 
             // Update ERROR_SRC register in case of errors.
             // New errors have priority over clearance
-            //if (rx_control_in_valid) //ITE here
-            //{
-                // error_src = error_src | ((static_cast<unsigned int> (rx_control_resp.error_overrun)) << 0) |
-                //                         ((static_cast<unsigned int> (rx_control_resp.error_parity)) << 1) |
-                //                         ((static_cast<unsigned int> (rx_control_resp.error_framing)) << 2) |
-                //                         ((static_cast<unsigned int>(rx_control_resp.error_break)) << 3);
-                // if (rx_control_resp.error_overrun)      error_src = error_src | ERROR_OVERRUN_MASK;
-                // else if (rx_control_resp.error_parity)  error_src = error_src | ERROR_PARITY_MASK;
-                // else if (rx_control_resp.error_framing) error_src = error_src | ERROR_FRAMING_MASK;
-                // else if (rx_control_resp.error_break)   error_src = error_src | ERROR_BREAK_MASK;
-                //error_src = error_src | rx_control_resp.error_src;
-                //std::cout << "Control: register ERROR_SRC after update: " << error_src << std::endl;
-            //}
-            // if (rx_control_in_valid) // FIXME: merge with previous if ... use "ite trick"
-            // {
-            //     error_overrun = error_overrun || rx_control_resp.error_overrun;
-            //     error_parity = error_parity || rx_control_resp.error_parity;
-            //     error_framing = error_framing || rx_control_resp.error_framing;
-            //     error_break = error_break || rx_control_resp.error_break;
-            //     //std::cout << "Control: register ERROR_SRC after update: " << registers.error_src << std::endl;
-            // }
+//            if (rx_control_in_valid)
+//            {
+//                error_src = error_src | rx_to_ctrl_msg.error_src;
+//                // if (rx_to_ctrl_msg.error_overrun)      error_src = error_src | ERROR_OVERRUN_MASK;
+//                // else if (rx_to_ctrl_msg.error_parity)  error_src = error_src | ERROR_PARITY_MASK;
+//                // else if (rx_to_ctrl_msg.error_framing) error_src = error_src | ERROR_FRAMING_MASK;
+//                // else if (rx_to_ctrl_msg.error_break)   error_src = error_src | ERROR_BREAK_MASK;
+//
+//                //std::cout << "Control: register ERROR_SRC after update: " << error_src << std::endl;
+//            }
+            error_src = (rx_control_in_valid) ? error_src | rx_to_ctrl_msg.error_src : error_src;
 
-            //config_msg.parity        = PARITY_BIT(config) > 0;
-            //config_msg.two_stop_bits = STOP_BIT(config) > 0;
+            config_msg.parity = PARITY_MASK(config) != 0;
+            config_msg.two_stop_bits = STOP_MASK(config) != 0;
 
+            // Consider moving back here
             // if (hwfc_enabled(registers.config))
             // {
 
-            //     if (rx_control_req.active && rts == RTS_DEACTIVATED) //FIXME: does the write happen in any case? possible ite trick ...
+            //     if (ctrl_to_rx_msg.active && rts == RTS_DEACTIVATED)
             //     {
             //         rts = RTS_ACTIVATED;
             //         rts_out->master_write(rts);
@@ -301,67 +228,28 @@ SC_MODULE(Uart_control) {
             //         rts = RTS_DEACTIVATED;
             //         rts_out->master_write(rts);
             //     }
-                
+
             // }
 
-            // if (events.cts ||
-            //     events.ncts ||
-            //     events.rxd_ready ||
-            //     events.txd_ready ||
-            //     events.rx_timeout ||
-            //     events.error) {
-            //     events_out->master_write(events);
-            // }
-            //events_out->write(events);
-            tx_control_out->slave_write(tx_control_req);
-            rx_control_out->slave_write(rx_control_req);
-            hwfc_control_out->slave_write(hwfc_control_req);
-            bus_out->slave_write(bus_response);
+            if (events_out_msg.cts ||
+                events_out_msg.ncts ||
+                events_out_msg.rxd_ready ||
+                events_out_msg.txd_ready ||
+                events_out_msg.rx_timeout ||
+                events_out_msg.error) {
+                events_out->master_write(events_out_msg);
+            }
+            tx_control_out->slave_write(ctrl_to_tx_msg);
+            rx_control_out->slave_write(ctrl_to_rx_msg);
+            hwfc_control_out->slave_write(ctrl_to_hwfc_msg);
+            bus_out->slave_write(bus_out_msg);
             tx_config_out->slave_write(config_msg);
             rx_config_out->slave_write(config_msg);
-
 
         }
     }
 
 private:
-    bool cts_enabled_activated(bool cts, bool hwfc_enabled) const {
-        return (cts == CTS_ACTIVATED) && hwfc_enabled;
-    }
-
-    bool cts_enabled_deactivated(bool cts, bool hwfc_enabled) const {
-        return (cts == CTS_DEACTIVATED) && hwfc_enabled;
-    }
-
-    bool is_bus_read_transaction(trans_t trans_type, bool valid) const {
-        if (valid) return trans_type == READ;
-        return false;
-    }
-
-    bool is_bus_write_transaction(trans_t trans_type, bool valid) const {
-        if (valid) return trans_type == WRITE;
-        return false;
-    }
-
-    bool parity_enabled(unsigned int config) const {
-        return (config & CONFIG_PARITY_MASK) == CONFIG_PARITY_MASK;
-    }
-
-    bool two_stop_bits_enabled(unsigned int config) const {
-        return (config & CONFIG_STOP_MASK) == CONFIG_STOP_MASK;
-    }
-
-    bool hwfc_enabled(unsigned int config) const {
-        return (config & CONFIG_HWFC_MASK) == CONFIG_HWFC_MASK;
-    }
-
-    bool is_one(unsigned int reg_value) const {
-        return reg_value == 1;
-    }
-
-    bool is_task_bus(unsigned int bus_addr, unsigned int bus_data, unsigned int addr) const {
-        return bus_addr == addr && is_one(bus_data & 1);
-    }
 
     bool event_triggered_cts(bool valid, bool cts, bool hwfc_enabled) const {
         if (valid && hwfc_enabled) return cts == CTS_ACTIVATED;
@@ -373,146 +261,20 @@ private:
         return false;
     }
 
-    bool update_active(bool already_active, bool start, bool stop, bool enable) const {
-        if (!enable) {
+    bool update_active(bool already_active, bool start, bool stop, bool enabled) const {
+        if (!enabled) {
             return false;
-        }
-        if (already_active) {
-            return !(stop) || start;
+        } else if (already_active) {
+            if(stop == false ){
+                return true;
+            }else return start;
         }
         return start;
-    }
-
-    bool update_task(bool task, bool task_valid, bool bus_task, bool bus_task_valid) const {
-        if (task_valid && task) return task;
-        if (bus_task_valid && bus_task) return bus_task;
-        return false;
     }
 
     bool update_event(bool event, bool valid) const {
         if (valid) return event;
         return false;
-    }
-
-    // Function to SET the event register in case of an event. Returns the previous value if no event was given
-    unsigned int set_event(bool event, unsigned int prev_value) const {
-        if (event) return EVENT;
-        return prev_value;
-    }
-
-    unsigned int read_bus_data_event(unsigned int bus_addr, unsigned int bus_data, unsigned int addr, unsigned int prev_value) const {
-        if (bus_addr == addr && ((bus_data & EVENT) == NO_EVENT)) // event register is cleared by system bus
-        {
-            return NO_EVENT;
-        }
-        return prev_value; // this is not the event you are looking for
-    }
-
-    // Rewrite in RTL. NOT(~) is not supported by this version of DeSCAM
-    unsigned int read_bus_data_error_src(unsigned int bus_addr, unsigned int bus_data, unsigned int error_src) const {
-        if (bus_addr == ADDR_ERROR_SRC) {
-            //return (~bus_data & error_src) & ERROR_SRC_MASK;
-            // if ((bus_data & ERROR_OVERRUN_MASK) > 0) error_overrun = false;
-            // if ((bus_data & ERROR_PARITY_MASK)  > 0) error_parity  = false;
-            // if ((bus_data & ERROR_FRAMING_MASK) > 0) error_framing = false;
-            // if ((bus_data & ERROR_BREAK_MASK)   > 0) error_break   = false;
-        }
-        return error_src;
-    }
-
-    bool read_bus_data_enable(unsigned int bus_addr, unsigned int bus_data, bool enable) const {
-        if (bus_addr == ADDR_ENABLE) {
-            //std::cout << "--- CONTROL: Writing " << (bus_request.data & 1) << " to enable" << std::endl;
-            return (bus_data & 1) == 1;
-        }
-        return enable;
-    }
-    bool read_bus_bit(unsigned int bus_data, unsigned int pos) const
-    {
-        return (bus_data & (1 << pos)) == 1;
-    }
-
-    unsigned int read_bus_data_config(unsigned int bus_addr, unsigned int bus_data, unsigned int config) const {
-        if (bus_addr == ADDR_CONFIG) {
-            return bus_data & (CONFIG_BIT_MASK);
-        }
-        return config;
-    }
-
-    bool ite_bool(bool value_old,bool value_new,bool condition) const{
-        if(condition) return value_new;
-        else return value_old;
-    };
-
-    unsigned int ite_unsigned(unsigned int value_old,unsigned int value_new,bool condition) const{
-        if(condition) return value_new;
-        else return value_old;
-    };
-
-    // unsigned int write_bus_data(unsigned int bus_addr,
-    //                             // unsigned int events_cts,
-    //                             // unsigned int events_ncts,
-    //                             // unsigned int events_rxd_ready,
-    //                             // unsigned int events_txd_ready,
-    //                             // unsigned int events_error,
-    //                             // unsigned int events_rx_timeout,
-    //                             unsigned int error_src,
-    //                             unsigned int enable,
-    //                             unsigned int config) const {
-    //     // if (bus_addr == ADDR_EVENTS_CTS) {
-    //     //     return events_cts;
-    //     // }
-    //     // if (bus_addr == ADDR_EVENTS_NCTS) {
-    //     //     return events_ncts;
-    //     // }
-    //     // if (bus_addr == ADDR_EVENTS_RXD_READY) {
-    //     //     return events_rxd_ready;
-    //     // }
-    //     // if (bus_addr == ADDR_EVENTS_TXD_READY) {
-    //     //     return events_txd_ready;
-    //     // }
-    //     // if (bus_addr == ADDR_EVENTS_ERROR) {
-    //     //     return events_error;
-    //     // }
-    //     // if (bus_addr == ADDR_EVENTS_RX_TIMEOUT) {
-    //     //     return events_rx_timeout;
-    //     // }
-    //     if (bus_addr == ADDR_ERROR_SRC) {
-    //         //std::cout << "Control: reading error_src " << error_src << std::endl;
-    //         return error_src;
-    //     }
-    //     if (bus_addr == ADDR_ENABLE) {
-    //         return enable;
-    //     }
-    //     if (bus_addr == ADDR_CONFIG) {
-    //         return config;
-    //     }
-    //     return 0;
-    // }
-    // unsigned int convert_overrun(bool overrun)
-    // {
-    //     if (overrun) return ERROR_OVERRUN_MASK;
-    //     return 0;
-    // }
-    //     unsigned int convert_parity(bool parity)
-    // {
-    //     if (parity) return ERROR_parity_MASK;
-    //     return 0;
-    // }
-    //     unsigned int convert_framing(bool framing)
-    // {
-    //     if (framing) return ERROR_FRAMING_MASK;
-    //     return 0;
-    // }
-    //     unsigned int convert_break(bool error_break)
-    // {
-    //     if (error_break) return ERROR_BREAK_MASK;
-    //     return 0;
-    // }
-    unsigned int write_bus_bit(bool val, unsigned int pos) const
-    {
-        if (val) return 1 << pos;
-        return 0;
     }
 
 };

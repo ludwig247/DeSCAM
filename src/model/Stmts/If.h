@@ -11,18 +11,16 @@
 namespace SCAM {
     class If : public Branch {
     public:
-        If(SCAM::Expr *conditionStmt);
+        explicit If(SCAM::Expr * conditionStmt);
 
         //GETTER
         bool hasElseStmt();
 
-        SCAM::Expr *getConditionStmt() const;
+        SCAM::Expr * getConditionStmt() const override;
 
         //ACCEPT
-        virtual void accept(StmtAbstractVisitor &visitor);
-
-        virtual bool operator==(const Stmt &other) const;
-
+        void accept(StmtAbstractVisitor &visitor) override;
+        virtual bool operator==(const Stmt &other) const override ;
 
     protected:
         Expr *conditionStmt;

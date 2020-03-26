@@ -120,6 +120,66 @@ namespace SCAM {
     }
 
     void OperationFactory::optimizeAssignments() {
+
+        for (auto op:operations) {
+            auto conditionList = op->getAssumptionsList();
+            //FIXME: this is the weiredest thing ever ... I cant use a range based loop without getting an exception ... why?
+            //for(auto commitment: op->getCommitmentsList()){
+            for(int i = 0; i < op->getCommitmentsList().size(); i++) {
+                auto commitment = op->getCommitmentsList().at(i);
+                if (ExprVisitor::isTernary(commitment->getRhs())) {
+                    //Idea: get all compare operations.
+                    auto compareSet = ExprVisitor::getUsedTernaryOperators(commitment->getRhs());
+                    for (auto comp: compareSet) {
+                        bool trivialFalse = false;
+                        bool trivialTrue = false;
+                        auto cList = conditionList;
+                        cList.push_back(comp->getCondition());
+                        {
+                            z3::context context;
+                            z3::solver solver(context);
+                            ExprTranslator translator(&context);
+                            //Idea: check for satisfiability of assumptions_of_operation & assumption_of_ternary
+                            //If unsat -> always false
+                            //Translate each expression with the ExprtTranslator and add to solver
+                            for (auto condition: conditionList) {
+                                solver.add(translator.translate(condition));
+                            }
+                            solver.add(translator.translate(comp->getCondition()));
+                            // Check for SAT if unsat -> erase path
+                            if ((solver.check() == z3::unsat)){
+                                comp->setTrivialFalse();
+                                trivialFalse = true;
+                            }
+                        }
+
+                        {
+                            z3::context context;
+                            z3::solver solver(context);
+                            ExprTranslator translator(&context);
+
+                            //Idea: check for satisfiability of not(assumptions_of_operation -> assumption_of_ternary)
+                            //If no model exist, the the condition of ternary is always true (IPC idea)
+                            z3::expr expr(context);
+                            expr = context.bool_val(true);
+                            for (auto condition: conditionList) {
+                                expr = expr && translator.translate(condition);
+                            }
+                            expr = !expr || translator.translate(comp->getCondition());
+                            solver.add(!expr);
+
+                            // Check for SAT if unsat -> erase path
+                            if ((solver.check() == z3::unsat)){
+                                comp->setTrivialTrue();
+                                trivialTrue = true;
+                            }
+                        }
+                        assert(!(trivialTrue && trivialFalse) && "Ternary can't be trivial true and trivial false at the same time");
+                    }
+                }
+            }
+        }
+
         for (auto op : operations) {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
             op->setCommitmentsList(assignmentOptimizer2.getNewAssignmentsList());

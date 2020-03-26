@@ -56,6 +56,7 @@ namespace SCAM { namespace HLSPlugin {
         void visit(UnaryExpr &node) override ;
         void visit(UnsignedValue &node) override {};
         void visit(TimePointOperand &node) override {}
+        void visit(Ternary &node) override {};
     };
 
 }}
