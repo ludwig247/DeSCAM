@@ -8,7 +8,7 @@ add_example(Bus; "What busses do")
 #add_example(FIFO;) #not working
 add_example(myFPI; "unsure" ;FPI)
 #add_example(I2C; "Print_ITL_Tests" )
-#add_example(Framer; "Print_ITL_Tests")
+add_example(Framer; "Print_ITL_Tests")
 add_example(Paper; "Print_ITL_Tests")
 add_example(Whishbone; "Print_ITL_Tests")
 
