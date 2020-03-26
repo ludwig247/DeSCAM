@@ -13,6 +13,7 @@ src/global/Config.h
 install/*
 !install/install_new.zip
 !install/github/*
+!install/github/install.sh
 #!install/install_new.sh
 !install/Readme.txt
 #!install/requirements.txt

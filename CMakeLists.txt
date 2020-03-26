@@ -97,7 +97,7 @@ set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
 include(${PROJECT_SOURCE_DIR}/install/install_llvm.make)
 
 # Include the binary
-#include_directories( ${LLVM_INCLUDES} )
+include_directories( ${LLVM_INCLUDES} )
 
 
 
