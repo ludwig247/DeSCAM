@@ -114,7 +114,7 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
         //        std::cout << "after simplification Expr is " << z3Expr << std::endl;
 #endif
-        bool abort = SCAM::OptUtilities::isAbortTranslation(z3Expr);
+        bool abort = SCAM::GlobalUtilities::isAbortTranslation(z3Expr);
         if (abort) {
 #if defined(DEBUG_SIMPLIFY_EXPRESSIONS) || defined(DEBUG_FUNCTIONS_SIMPLIFY_EXPRESSIONS)
             //            std::cout << "translation aborted" << std::endl;

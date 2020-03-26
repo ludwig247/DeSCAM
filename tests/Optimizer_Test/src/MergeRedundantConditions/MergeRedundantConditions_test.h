@@ -26,7 +26,7 @@ TEST_P(MergeRedundantConditions_Test, merging_redundant_conditions) {
                                         << " is empty\n";
 
 
-            std::string CFG_str = SCAM::OptUtilities::printCFG(module.second->getCFG());
+            std::string CFG_str = SCAM::GlobalUtilities::printCFG(module.second->getCFG());
             std::string refFilePath =
                     SCAM_HOME"/tests/Optimizer_Test/src/MergeRedundantConditions/ref_files/" + module.first +
                     "_out.txt";

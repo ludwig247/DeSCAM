@@ -33,6 +33,7 @@ std::string SCAM::FindDataFlow::functionName = "";
 
 SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigned_flag) :
         module(module),
+        clangStmt(stmt),
         stmt(nullptr),
         expr(nullptr),
         rhsExpr(nullptr),
@@ -729,22 +730,21 @@ void SCAM::FindDataFlow::switchPassExpr(SCAM::Expr *expr) {
     }
 }
 
-bool SCAM::FindDataFlow::exitVisitor(std::string msg, ErrorMsg::ErrorType errorType) {
-
-    switch (errorType) {
-        case ErrorMsg::ErrorType::error:
-            ErrorMsg::getInstance().addErrorLog(msg,"E");
+bool SCAM::FindDataFlow::exitVisitor(std::string msg, LoggerMsg::SeverityLevel severityLevel) {
+    /*switch (severityLevel) {
+        case Logger::ErrorType::error:
+            Logger::getInstance().addErrorLog(msg, "Error","SystemC Compliance");
             break;
-        case ErrorMsg::ErrorType::warning:
-            ErrorMsg::getInstance().addErrorLog(msg, "W");
+        case Logger::ErrorType::warning:
+            Logger::getInstance().addErrorLog(msg, "Warning","SystemC Compliance");
             break;
-        case ErrorMsg::ErrorType::information:
-            ErrorMsg::getInstance().addErrorLog(msg,"I");
+        case Logger::ErrorType::information:
+            Logger::getInstance().addErrorLog(msg, "Information","SystemC Compliance");
             break;
-    }
+    }*/
 
     this->stmt = nullptr;
-    if (errorType == ErrorMsg::ErrorType::information || errorType == ErrorMsg::ErrorType::warning) {
+    if (severityLevel == LoggerMsg::SeverityLevel::Info || severityLevel == LoggerMsg::SeverityLevel::Warning) {
         return true;
     }
     return false;
@@ -809,6 +809,3 @@ bool SCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arra
         } else return exitVisitor("Stmt is null");
     } else return exitVisitor("Not an array type!");
 }
-
-
-

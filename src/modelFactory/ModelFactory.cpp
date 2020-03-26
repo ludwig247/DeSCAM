@@ -8,7 +8,7 @@
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include <CreateRealCFG.h>
@@ -38,10 +38,11 @@ SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
 
 
 bool SCAM::ModelFactory::preFire() {
-    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
-        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
-    }
-    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
+//    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
+//        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
+//    }
+//    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
+    return !SCAM::Logger::isTerminate();
 }
 
 bool SCAM::ModelFactory::fire() {
@@ -299,18 +300,19 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
 
 
     //Print out error msgs
-    if (ErrorMsg::hasError()) {
+    if (Logger::hasError()) {
         std::cout << "" << std::endl;
         std::cout << "======================" << std::endl;
         std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
         std::cout << "----------------------" << std::endl;
-        for (auto item: ErrorMsg::getInstance().getErrorList()) {
+/*        for (auto item: Logger::getInstance().getErrorList()) {
             std::cout << "- " << item.statement << std::endl;
             for (auto log: item.errorMsgs) {
-                std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
+                std::cout << "\t" << "-" << log.first << "- " << log.second.first << std::endl;
             }
         }
-        ErrorMsg::clear();
+        Logger::clear();
+        */
     }
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
@@ -406,9 +408,7 @@ bool SCAM::ModelFactory::postFire() {
 
 void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 // Pass 1: Find the necessary information.
-    bool pre = false;
-    pre = preFire();
-    if (!pre) {
+    if (!preFire()) {
         std::cout << "#################################" << std::endl;
         std::cout << "######## Syntax Errors ##########" << std::endl;
         std::cout << "#################################" << std::endl;
@@ -467,18 +467,19 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        if (ErrorMsg::hasError()) {
+        if (Logger::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
             std::cout << "----------------------" << std::endl;
-            for (auto item: ErrorMsg::getInstance().getErrorList()) {
+            /*            for (auto item: Logger::getInstance().getErrorList()) {
                 std::cout << "- " << item.statement << std::endl;
                 for (auto log: item.errorMsgs) {
-                    std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
+                    std::cout << "\t" << "-" << log.first << "- " << log.second.first << std::endl;
                 }
             }
-            ErrorMsg::clear();
+            Logger::clear();
+            */
         }
     }
 
@@ -517,10 +518,10 @@ void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
             func.second->setStmtList(functionFactory.getStmtList());
         } catch (std::runtime_error &e) {
 //            std::cout << e.what() << std::endl;
-//            for(auto statement:  ErrorMsg::getErrorList()){
+//            for(auto statement:  Logger::getErrorList()){
 //                std::cout << statement.statement << std::endl;
 //            }
-            ErrorMsg::clear();
+//            Logger::clear();
             this->model->removeGlobalFunction(func.second);
         }
     }

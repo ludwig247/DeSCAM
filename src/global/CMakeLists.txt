@@ -1,7 +1,8 @@
-
 add_subdirectory(tinyxml)
 
-add_library(global SHARED ErrorMsg.cpp
+file(GLOB LoggerSrc "Logger/*.cpp")
+
+add_library(global SHARED
         DataTypes.cpp
         ModelGlobal.h
         ExprTranslator.cpp
@@ -12,7 +13,6 @@ add_library(global SHARED ErrorMsg.cpp
         NodePeekVisitor.cpp
         StmtNodeAlloc.cpp
         SimplifyVisitor.cpp
-        ModelGlobal.cpp)
-
-
-
+        GlobalUtilities.cpp
+        ${LoggerSrc}
+        Logger/FileSink.cpp Logger/ConsoleSink.cpp)

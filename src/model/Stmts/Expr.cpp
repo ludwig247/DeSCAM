@@ -22,3 +22,4 @@ std::ostream &SCAM::Expr::print(std::ostream &ostream) const {
     ostream << PrintStmt::toString(this);
     return ostream;
 }
+

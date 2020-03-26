@@ -61,7 +61,7 @@ SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *ass
             //Only interested in the simplification of RHS
             //Retrive new RHS
             auto expr = result.operator[](0).as_expr().arg(1);
-            if(SCAM::OptUtilities::isAbortTranslation(expr)) return assignment;
+            if(SCAM::GlobalUtilities::isAbortTranslation(expr)) return assignment;
             SCAM::Expr *newRHS = this->translator.translate(expr, module);
             if (this->translator.isAbort()) return assignment;
             //Create old RHS

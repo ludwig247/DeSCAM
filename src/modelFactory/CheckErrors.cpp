@@ -4,7 +4,7 @@
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include <CreateRealCFG.h>
@@ -28,10 +28,8 @@ SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
 }
 
 bool SCAM::CheckErrors::preFire() {
-    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
-        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
-    }
-    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
+
+    return !SCAM::Logger::isTerminate();
 }
 
 bool SCAM::CheckErrors::fire() {
@@ -191,18 +189,18 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
     //Create blockCFG for this process
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
     //Print out error msgs
-   /* if (ErrorMsg::hasError()) {
+   /* if (Logger::hasError()) {
         std::cout << "" << std::endl;
         std::cout << "======================" << std::endl;
         std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
         std::cout << "----------------------" << std::endl;
-        for (auto item: ErrorMsg::getInstance().getErrorList()) {
+        for (auto item: Logger::getInstance().getErrorList()) {
             std::cout << "- " << item.statement << std::endl;
             for (auto log: item.errorMsgs) {
                 std::cout << "\t" << log << std::endl;
             }
         }
-        ErrorMsg::clear();
+        Logger::clear();
     } */
 }
 
@@ -307,18 +305,18 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        /*if (ErrorMsg::hasError()) {
+        /*if (Logger::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
             std::cout << "----------------------" << std::endl;
-            for (auto item: ErrorMsg::getInstance().getErrorList()) {
+            for (auto item: Logger::getInstance().getErrorList()) {
                 std::cout << "- " << item.statement << std::endl;
                 for (auto log: item.errorMsgs) {
                     std::cout << "\t" << log << std::endl;
                 }
             }
-            ErrorMsg::clear();
+            Logger::clear();
         }*/
     }
 
@@ -356,10 +354,10 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
             func.second->setStmtList(functionFactory.getStmtList());
         } catch (std::runtime_error &e) {
 //            std::cout << e.what() << std::endl;
-//            for(auto statement:  ErrorMsg::getErrorList()){
+//            for(auto statement:  Logger::getErrorList()){
 //                std::cout << statement.statement << std::endl;
 //            }
-           // ErrorMsg::clear();
+           // Logger::clear();
             this->model->removeGlobalFunction(func.second);
         }
     }

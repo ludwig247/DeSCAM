@@ -16,7 +16,7 @@ SCAM::LocalValuePropagation::LocalValuePropagation(const std::map<int, SCAM::Cfg
                                                                                                 propagationValid(false),
                                                                                                 newExpr(nullptr) {
     //Finding all possible paths from while to the sink node
-    whileNodeID = SCAM::OptUtilities::findWhileNodeId(this->CFG);
+    whileNodeID = SCAM::GlobalUtilities::findWhileNodeId(this->CFG);
     FindCfgPaths pathsFromWhile(this->CFG, whileNodeID);
     this->setPathsMap(pathsFromWhile.getPathsMap());
     this->setNodeAndAllPathsReachingItMap(pathsFromWhile.getNodeAndAllPathsReachingItMap());

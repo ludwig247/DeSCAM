@@ -3,7 +3,8 @@
 //
 
 #include <clang/Lex/Lexer.h>
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
+#include <GlobalUtilities.h>
 #include "CreateInitSection2.h"
 
 #include "CFGFactory.h"
@@ -18,7 +19,8 @@ namespace SCAM {
             module(module) {
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(), b);
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(),
+                                        b);
         if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
@@ -26,7 +28,8 @@ namespace SCAM {
         this->translateToScamCFG();
     }
 
-    CFGFactory::CFGFactory(const clang::FunctionDecl * functionDecl, clang::CompilerInstance &ci, Module *module, bool sourceModule):
+    CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl, clang::CompilerInstance &ci, Module *module,
+                           bool sourceModule) :
             sourceModule(sourceModule),
             methodDecl(nullptr),
             ci(ci),
@@ -35,7 +38,8 @@ namespace SCAM {
         //TODO: remove ci and methodDecl from class
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(), &functionDecl->getASTContext(), b);
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(),
+                                        &functionDecl->getASTContext(), b);
         if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
@@ -104,7 +108,7 @@ namespace SCAM {
             SCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
             //Check that the stmt is not null and the statement is not an Expr*
             //In case of an Expr* skips the statement, because the statementlist should only contain Statements
-            if (scamStmt != nullptr && dynamic_cast<Expr*>(scamStmt)== nullptr) {
+            if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
                 cfgNode->addStmt(this->getScamStmt(clangStmt));
             }
         }
@@ -201,10 +205,12 @@ namespace SCAM {
                     clang::CFGBlock *falseSucc = *succ_it_false;
                     CfgBlock *cfgNode = this->createCFGNode(block, parent);
                     //If both successors are not null, search for the sucessor containing the hole "if" ignore others
-                    if (trueSucc->getTerminator().getStmt() != nullptr && falseSucc->getTerminator().getStmt() != nullptr) {
+                    if (trueSucc->getTerminator().getStmt() != nullptr &&
+                        falseSucc->getTerminator().getStmt() != nullptr) {
                         clang::Stmt *trueStmt = trueSucc->getTerminator().getStmt();
                         clang::Stmt *falseStmt = falseSucc->getTerminator().getStmt();
-                        if (trueStmt->getStmtClass() != clang::Stmt::IfStmtClass && falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
+                        if (trueStmt->getStmtClass() != clang::Stmt::IfStmtClass &&
+                            falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
                             traverseBlocks(trueSucc, cfgNode);
                         } else if (trueStmt->getStmtClass() == clang::Stmt::IfStmtClass &&
                                    falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
@@ -221,13 +227,16 @@ namespace SCAM {
                         } else throw std::runtime_error("Missed case here");
                     }
                         // If one of the succesors is null visit the otherone
-                    else if (trueSucc->getTerminator().getStmt() != nullptr && falseSucc->getTerminator().getStmt() == nullptr) {
+                    else if (trueSucc->getTerminator().getStmt() != nullptr &&
+                             falseSucc->getTerminator().getStmt() == nullptr) {
                         traverseBlocks(trueSucc, cfgNode);
-                    } else if (trueSucc->getTerminator().getStmt() == nullptr && falseSucc->getTerminator().getStmt() != nullptr) {
+                    } else if (trueSucc->getTerminator().getStmt() == nullptr &&
+                               falseSucc->getTerminator().getStmt() != nullptr) {
                         traverseBlocks(falseSucc, cfgNode);
                         //Both succeors have no terminators:
                     } else {
-                        std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
+                        std::cout << "-W- Please check AML for correct translation"
+                                  << std::endl; //TODO: is this acutally valid?
                         traverseBlocks(trueSucc, cfgNode);
                         //throw std::runtime_error(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
                     }
@@ -288,7 +297,8 @@ namespace SCAM {
             //IF: Terminator in block: Check last element of statementlist -> might belong to terminator
             if (i == stmtList.size() - 1) {
                 if (block->getTerminator().getStmt() != nullptr) {
-                    if (stmt->getLocStart().getRawEncoding() >= block->getTerminator().getStmt()->getLocStart().getRawEncoding()) {
+                    if (stmt->getLocStart().getRawEncoding() >=
+                        block->getTerminator().getStmt()->getLocStart().getRawEncoding()) {
                         continue;
                     }
                 }
@@ -302,27 +312,40 @@ namespace SCAM {
 
     //! Methods that translates a Clang::Stmt into a SCAM::Stmt
     SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
+        auto locStartVec = SCAM::GlobalUtilities::stringSplit(
+                clangStmt->getLocStart().printToString(ci.getSourceManager()), ':');
+        auto locEndVec = SCAM::GlobalUtilities::stringSplit(
+                clangStmt->getLocEnd().printToString(ci.getSourceManager()), ':');
+        auto fileDir = locStartVec[0];
+        auto rowStartNum = std::stoi(locStartVec[1]);
+        auto rowEndNum = std::stoi(locEndVec[1]);
+        auto colStartNum = std::stoi(locStartVec[2]);
+        auto colEndNum = std::stoi(locEndVec[2]);
+        auto message = "";
+        if (colEndNum < colStartNum && rowStartNum == rowEndNum) colEndNum = colStartNum + 1;
+        if (rowEndNum < rowStartNum) rowEndNum = rowStartNum;
+        SCAM::StmtLocationInfo stmtLocationInfo(fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
+        auto severityLevel = SCAM::LoggerMsg::SeverityLevel::Error;
+        auto violationType = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;
         SCAM::FindDataFlow dataFlow(clangStmt, module, false);
         //Is stmt properly initialized?
-        if (dataFlow.getStmt() == nullptr) {
+        auto descamStmt = dataFlow.getStmt();
+        if (!descamStmt) {
             //Get the source code as string
-            std::string msg = clang::Lexer::getSourceText(clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
-                                                          ci.getSourceManager(), ci.getLangOpts()).str();
+            std::string stmt = clang::Lexer::getSourceText(
+                    clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
+                    ci.getSourceManager(), ci.getLangOpts()).str();
+
             //Get the ast for the stms as string
-            std::string msgAST;
-            llvm::raw_string_ostream ss(msgAST);
-            clangStmt->dump(ss, ci.getSourceManager());
-            auto fileAndLineNumStream = std::istringstream(clangStmt->getLocStart().printToString(ci.getSourceManager()));
-            std::string fileDir = "", lineNumber = "",s;
-            if(std::getline(fileAndLineNumStream,s,':')){
-                fileDir = s;
-            }
-            if(std::getline(fileAndLineNumStream,s,':')){
-                lineNumber = s;
-            }
-            //Add error to singleton
-            ErrorMsg::addError(msg, msgAST,fileDir,lineNumber);
-            //assert(false);
+//            std::string msgAST;
+//            llvm::raw_string_ostream ss(msgAST);
+//            clangStmt->dump(ss, ci.getSourceManager());
+
+            //Add msg to Logger
+            SCAM::LoggerMsg loggerMsg(message, stmt, stmtLocationInfo, severityLevel, violationType);
+            SCAM::Logger::addMsg(loggerMsg);
+        } else {
+            descamStmt->setStmtInfo(stmtLocationInfo);
         }
         return dataFlow.getStmt();
     }
@@ -345,11 +368,13 @@ namespace SCAM {
                 SCAM::CfgBlock *succ; //! depending whether it
                 //Check whether current block belongs to an AND or an OR
                 //AND
-                if (currentBlock->getSuccessorList().at(0) != currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
+                if (currentBlock->getSuccessorList().at(0) !=
+                    currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[0];
                 }
-                //OR
-                else if (currentBlock->getSuccessorList().at(0) == currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
+                    //OR
+                else if (currentBlock->getSuccessorList().at(0) ==
+                         currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[1];
                 } else {
                     std::cout << currentBlock->print() << std::endl;
@@ -434,7 +459,6 @@ namespace SCAM {
         return false;
 
     }
-
 
 
 }

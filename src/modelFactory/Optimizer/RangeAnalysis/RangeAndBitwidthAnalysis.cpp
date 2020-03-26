@@ -259,13 +259,13 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Arithmetic &node) {
             int lhsMaxVal = pow(lhsPropagatedValue - 1, 2) - 1;
             int rhsMaxVal = pow(rhsPropagatedValue - 1, 2) - 1;
             int rem = lhsMaxVal - (rhsMaxVal * (floor(lhsMaxVal / rhsMaxVal)));
-            int remWidth = SCAM::OptUtilities::getRequiredBits(rem);
+            int remWidth = SCAM::GlobalUtilities::getRequiredBits(rem);
             this->propagatedBitWidth = remWidth;
         } else if (node.getDataType()->getName() == "unsigned") {
             unsigned int lhsMaxVal = pow(lhsPropagatedValue, 2) - 1;
             unsigned int rhsMaxVal = pow(rhsPropagatedValue, 2) - 1;
             unsigned int rem = lhsMaxVal - (rhsMaxVal * (floor(lhsMaxVal / rhsMaxVal)));
-            int remWidth = SCAM::OptUtilities::getRequiredBits(rem);
+            int remWidth = SCAM::GlobalUtilities::getRequiredBits(rem);
             this->propagatedBitWidth = remWidth;
         }
     }

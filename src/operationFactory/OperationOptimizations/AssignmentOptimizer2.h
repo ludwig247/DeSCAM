@@ -8,7 +8,7 @@
 #include <vector>
 #include <ExprTranslator.h>
 #include "Behavior/Operation.h"
-#include <Optimizer/Utilities/OptUtilities.h>
+#include <GlobalUtilities.h>
 
 namespace SCAM {
 

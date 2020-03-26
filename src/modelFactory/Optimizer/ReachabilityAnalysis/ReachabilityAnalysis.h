@@ -14,7 +14,7 @@
 #include "Optimizer/Utilities/PropagateConstantValue.h"
 #include <Optimizer/Utilities/FindVariablesAndFunctionsInStatement.h>
 #include "Optimizer/Utilities/ValueSubstitution.h"
-#include "Optimizer/Utilities/OptUtilities.h"
+#include "GlobalUtilities.h"
 #include <utility>
 
 

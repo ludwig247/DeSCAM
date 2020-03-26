@@ -7,6 +7,8 @@
 #include "ManageOutput.h"
 #include "PluginFactory.h"
 #include <ModelGlobal.h>
+#include <Logger/ConsoleSink.h>
+#include <Logger/FileSink.h>
 
 int main(int argc, const char **argv) {
     //Process commandline data
@@ -15,8 +17,14 @@ int main(int argc, const char **argv) {
     std::cout << "==================================================================" << std::endl;
     std::cout << "......................... Creating model ........................." << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
-    SCAM::ModelGlobal::createModel(argc, "DeSCAM", cml.getSourceFile());
-
+//initialize logger
+    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>());
+    SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
+    //Create model
+    SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile());
+    // write log messages to all sinks
+    SCAM::Logger::log();
+    if(SCAM::Logger::isTerminate()) return -1;
     //Printing options according to commandline styles chosen
     std::cout << "==================================================================" << std::endl;
     std::cout << "......................... Printing model ........................." << std::endl;

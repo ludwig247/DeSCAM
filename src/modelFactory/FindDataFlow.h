@@ -11,7 +11,7 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 
 
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
 #include <Model.h>
 #include "PrintStmt.h"
 
@@ -58,6 +58,7 @@ namespace SCAM{
         private:
             Module * module; //! Module the dataflow is generated for
             SCAM::Stmt* stmt; //! Represents the stmt in case of operator, values are stored in lhs and rhs
+            clang::Stmt* clangStmt;
 
             Expr * expr;
             Expr* lhsExpr; //! Assign Operation lValue = rValue
@@ -67,7 +68,7 @@ namespace SCAM{
             std::stringstream logStream; //! Contains every message that is generated during
 
             void switchPassExpr(Expr * stmt); //! Depending on the current value of pass assigns value to stmt(pass==0), lhs(1) or rhs(2)
-            bool exitVisitor(std::string msg, ErrorMsg::ErrorType errorType = ErrorMsg::ErrorType::error);
+            bool exitVisitor(std::string msg, LoggerMsg::SeverityLevel severityLevel = LoggerMsg::SeverityLevel::Error);
 
             bool unsigned_flag;
         };

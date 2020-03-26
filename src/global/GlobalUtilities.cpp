@@ -3,9 +3,9 @@
 //
 
 
-#include "OptUtilities.h"
+#include "GlobalUtilities.h"
 
-std::string SCAM::OptUtilities::printCFG(const std::map<int, SCAM::CfgBlock *> &CFG) {
+std::string SCAM::GlobalUtilities::printCFG(const std::map<int, SCAM::CfgBlock *> &CFG) {
     std::stringstream ss;
     for (auto node: CFG) {
         CfgBlock *sus = node.second;
@@ -38,7 +38,7 @@ std::string SCAM::OptUtilities::printCFG(const std::map<int, SCAM::CfgBlock *> &
     return ss.str();
 }
 
-std::string SCAM::OptUtilities::printCFG(const std::map<int, SCAM::CfgNode *> &CFG) {
+std::string SCAM::GlobalUtilities::printCFG(const std::map<int, SCAM::CfgNode *> &CFG) {
     std::stringstream ss;
     for (auto node: CFG) {
         CfgNode *sus = node.second;
@@ -64,7 +64,7 @@ std::string SCAM::OptUtilities::printCFG(const std::map<int, SCAM::CfgNode *> &C
     return ss.str();
 }
 
-int SCAM::OptUtilities::findWhileNodeId(const std::map<int, SCAM::CfgNode *> &CFG) {
+int SCAM::GlobalUtilities::findWhileNodeId(const std::map<int, SCAM::CfgNode *> &CFG) {
     for (auto node : CFG) {
         if (node.second->getStmt()) {
             if (dynamic_cast<SCAM::While *>(node.second->getStmt())) {
@@ -75,7 +75,7 @@ int SCAM::OptUtilities::findWhileNodeId(const std::map<int, SCAM::CfgNode *> &CF
     return 0;
 }
 
-bool SCAM::OptUtilities::isAbortTranslation(const z3::expr& expr) {
+bool SCAM::GlobalUtilities::isAbortTranslation(const z3::expr& expr) {
     if (expr.is_const()) {
         return false;
     }
@@ -96,7 +96,7 @@ bool SCAM::OptUtilities::isAbortTranslation(const z3::expr& expr) {
      }*/
 }
 
-int SCAM::OptUtilities::getRequiredBits(int value) {
+int SCAM::GlobalUtilities::getRequiredBits(int value) {
     if (value == 0) {
         return 1;
     }
@@ -114,7 +114,7 @@ int SCAM::OptUtilities::getRequiredBits(int value) {
     return width;
 }
 
-int SCAM::OptUtilities::getRequiredBits(unsigned int value) {
+int SCAM::GlobalUtilities::getRequiredBits(unsigned int value) {
     if (value == 0) {
         return 1;
     }
@@ -124,5 +124,25 @@ int SCAM::OptUtilities::getRequiredBits(unsigned int value) {
         value = value / 2;
     }
     return width;
+}
+
+std::vector<std::string> SCAM::GlobalUtilities::stringSplit(const std::string& str, char delimiter) {
+    std::vector<std::string> subStrings = {};
+    std::string subString = "";
+    std::istringstream substringStream(str);
+    while (std::getline(substringStream, subString, delimiter)) {
+        subStrings.push_back(subString);
+    }
+    return subStrings;
+}
+
+std::string SCAM::GlobalUtilities::removeIndentation(const std::string &str) {
+    std::string noIndentString = "";
+    bool firstChrNotSpace = false;
+    for (char chr : str) {
+        if (chr != ' ') { firstChrNotSpace = true; }
+        if (firstChrNotSpace) noIndentString.append(1, chr);
+    }
+    return noIndentString;
 }
 

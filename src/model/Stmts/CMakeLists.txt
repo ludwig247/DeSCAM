@@ -39,4 +39,4 @@ add_library(Stmts SHARED
         Wait.cpp
         Peek.cpp
         ArrayExpr.cpp
-        TimePointOperand.cpp)
+        TimePointOperand.cpp StmtLocationInfo.h StmtLocationInfo.cpp)

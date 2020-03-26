@@ -7,6 +7,8 @@
 
 #include "StmtAbstractVisitor.h"
 #include <iostream>
+#include <utility>
+#include "StmtLocationInfo.h"
 
 
 namespace SCAM {
@@ -38,7 +40,15 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const = 0;
 
         virtual std::ostream &print(std::ostream &) const = 0;
+
+        const StmtLocationInfo& getStmtInfo() {return this->stmtInfo;};
+
+        void setStmtInfo(StmtLocationInfo& info){ this->stmtInfo = info;};
+
+    private:
+        StmtLocationInfo stmtInfo;
     };
+
 }
 
 inline std::ostream &operator<<(std::ostream &os, SCAM::Stmt const &stmt) {

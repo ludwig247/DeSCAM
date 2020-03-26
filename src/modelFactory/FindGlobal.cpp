@@ -30,7 +30,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                 auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
                 try {
                     FindDataFlow checkForExpr(const_cast<clang::Expr *>(init), &module, isUnsigned);
-                    ErrorMsg::clear();
+                    Logger::clear();
                     if (checkForExpr.getExpr()) {
                         std::string typeName = init->getType().getAsString();
                         if (typeName == "_Bool") typeName = "bool";

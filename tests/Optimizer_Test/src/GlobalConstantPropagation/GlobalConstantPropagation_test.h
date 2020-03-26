@@ -29,7 +29,7 @@ TEST_P(GlobalConstantPropagation_Test, propagate_globally_constant_values) {
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(globalConstantPropagation.getCFG());
+    std::string CFG_str = SCAM::GlobalUtilities::printCFG(globalConstantPropagation.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/GlobalConstantPropagation/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

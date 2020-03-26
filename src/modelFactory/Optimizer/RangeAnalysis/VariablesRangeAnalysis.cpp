@@ -312,7 +312,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
                 this->variableBitWidthMap.insert(std::make_pair(var.first, 2));
             } else {
                 if (largestValue < 0) { largestValue *= -1; }
-                this->variableBitWidthMap.insert(std::make_pair(var.first, SCAM::OptUtilities::getRequiredBits(largestValue) + 1));
+                this->variableBitWidthMap.insert(std::make_pair(var.first, SCAM::GlobalUtilities::getRequiredBits(largestValue) + 1));
             }
             bool canBeUnsigned = true;
             for (auto val : intValuesVector) {
@@ -341,7 +341,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
             if (largestValue == 0) {
                 this->variableBitWidthMap.insert(std::make_pair(var.first, 1));
             } else {
-                this->variableBitWidthMap.insert(std::make_pair(var.first, SCAM::OptUtilities::getRequiredBits(largestValue)));
+                this->variableBitWidthMap.insert(std::make_pair(var.first, SCAM::GlobalUtilities::getRequiredBits(largestValue)));
             }
         }
     }
