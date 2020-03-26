@@ -41,7 +41,6 @@ namespace SCAM {
 
         static std::set<SCAM::Function *> getUsedFunction(SCAM::Expr *expr);
 
-
         static Operand *getOperand(SCAM::Expr *expr);
 
         void visit(class ArrayExpr &node) override;

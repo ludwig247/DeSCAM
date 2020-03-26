@@ -58,6 +58,7 @@ add_plugin_option(PrintITL; hls-mco; "Adjusts macros for hls allowing multi cycl
 
 add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
+
 add_plugin_option(PrintHLS; sco; "[Single Cycle Operations] Generates HLS file allowing only single cycle operations")
 add_plugin_option(PrintHLS; mco; "[Multi Cycle Operations] Generates HLS file allowing multi cycle operations")
 
