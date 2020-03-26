@@ -12,9 +12,9 @@
 enum status_t{in_frame,oof_frame};
 struct msg_t{status_t status;int data;};
 
-struct Example : public sc_module {
+struct Paper : public sc_module {
 	//Constructor
-	SC_CTOR(Example) {
+	SC_CTOR(Paper) {
 	    SC_THREAD(fsm);
 	}
 	//Sections

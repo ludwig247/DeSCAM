@@ -7,7 +7,9 @@
 #include "systemc.h"
 #include "../../../example/Interfaces/Interfaces.h"
 #include "../../../example/Whishbone/ESL/env/Compound_Bus.h"
-//#include "Types.h"
+//#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "/import/lab/users/hesselberg/Simon_repo/DeSCAM/tests/Print_ITL_Tests/TestCases/Types.h"
+
 
 
 struct SlaveAgent : public sc_module {
