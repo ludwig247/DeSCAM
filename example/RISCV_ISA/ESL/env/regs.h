@@ -3,16 +3,16 @@
 
 #include "systemc.h"
 #include <iomanip>
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 #include "CPU_Interfaces.h"
 
-class Regs_new : public sc_module {
+class Regs : public sc_module {
 public:
 
     //Constructor
-    SC_HAS_PROCESS(Regs_new);
+    SC_HAS_PROCESS(Regs);
 
-    Regs_new(sc_module_name name) :
+    Regs(sc_module_name name) :
             toRegsPort("regsInPort"),
             fromRegsPort("regsOutPort"),
             reg_file_01(0),
@@ -96,7 +96,7 @@ public:
 };
 
 
-void Regs_new::run() {
+void Regs::run() {
 
     while (true) {
         // return current data

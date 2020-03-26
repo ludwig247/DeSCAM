@@ -7,13 +7,13 @@
 #include "CPU_Interfaces.h"
 
 
-class Regs : public sc_module {
+class Regs_old : public sc_module {
 public:
 
     //Constructor
-    SC_HAS_PROCESS(Regs);
+    SC_HAS_PROCESS(Regs_old);
 
-    Regs(sc_module_name name) :
+    Regs_old(sc_module_name name) :
             toRegsPort("regsInPort"),
             fromRegsPort("regsOutPort"),
             reg_file_01(0),

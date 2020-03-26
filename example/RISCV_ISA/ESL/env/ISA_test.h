@@ -6,7 +6,7 @@
 #define PROJECT_SIMPLIFIED_RISCV_ISA_H
 
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 #ifdef SC_SIMULATE
 #include "../../../RISCV_commons/Memory_Interfaces.h"

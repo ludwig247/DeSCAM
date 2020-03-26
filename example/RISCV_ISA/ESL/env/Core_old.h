@@ -9,16 +9,16 @@
 #include "systemc.h"
 #include "Interfaces.h"
 #include "CPU_Interfaces.h"
-#include "ISA.h"
-#include "regs.h"
+#include "ISA_old.h"
+#include "regs_old.h"
 
 #define REGFILE(x) RF.reg_file_##x
 #define PCREG isa.pcReg
 
-class Core : public sc_module {
+class Core_old : public sc_module {
 public:
     // Constructor
-    SC_HAS_PROCESS(Core);
+    SC_HAS_PROCESS(Core_old);
 
     // Ports (Memory Interface)
     blocking_out<CUtoME_IF> COtoME_port;
@@ -31,7 +31,7 @@ public:
     MasterSlave<RegfileWriteType> toRegsChannel;
     MasterSlave<RegfileType> fromRegsChannel;
 
-    Core(sc_module_name name) :
+    Core_old(sc_module_name name) :
             isa("isa"),
             RF("RF"),
             toRegsChannel("toRegsChannel"),

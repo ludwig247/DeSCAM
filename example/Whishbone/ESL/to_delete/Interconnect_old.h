@@ -7,20 +7,20 @@
 
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
-#include "../../../example/Whishbone/ESL/env/Compound_Bus.h"
+#include "../../Interfaces/Interfaces.h"
+#include "env/Compound_Bus.h"
 
 
-struct Interconnect : public sc_module {
+struct Interconnect_old : public sc_module {
     //Sections
-    enum Phases {
+    enum Sections {
         IDLE, START, TRANSMITTING, DONE
     };
-    Phases phase;
-    Phases nextphase;
+    Sections section;
+    Sections nextsection;
     //clock
-    master_in<bool> clk;
-    bool clk_pulse;
+//    master_in<bool> clk;
+//    bool clk_pulse;
 
     //Master
     shared_in<master_signals> master_input;
@@ -43,29 +43,31 @@ struct Interconnect : public sc_module {
     slave_signals to_master;
     int slave_number;
     //Constructor
-    SC_HAS_PROCESS(Interconnect);
+    SC_HAS_PROCESS(Interconnect_old);
 
-    Interconnect(sc_module_name name) :
+    Interconnect_old(sc_module_name name) :
+            section(IDLE),
+            nextsection(IDLE),
             master_input("master_input"),
             master_output("master_output"){
-        SC_THREAD(fsm)
+        SC_THREAD(fsm);
     }
 
     void fsm() {
-        nextphase = IDLE;
         while (true) {
-            phase = nextphase;
-            if (phase == IDLE) {
-//                std::cout << this->name() << " - IDLE" << std::endl;
-                clk->master_read(clk_pulse);
+
+            section = nextsection;
+            if (section == IDLE) {
+                insert_state();
+                //std::cout << this->name() << " - IDLE" << std::endl;
                 master_input->get(from_master);
                 if (from_master.cyc == true && from_master.stb == true) {
-                    nextphase = START;
+                    nextsection = START;
                 }
             }
-            else if (phase == START) {
-//                std::cout << this->name() << " - START addr" << from_master.addr << std::endl;
-                nextphase = TRANSMITTING;
+            if (section == START) {
+                //std::cout << this->name() << " - START addr" << from_master.addr << std::endl;
+                nextsection = TRANSMITTING;
                 if (from_master.addr >= 0 && from_master.addr < 8) {
                     slave_out0->set(from_master);
                     slave_number = 0;
@@ -85,55 +87,54 @@ struct Interconnect : public sc_module {
                     to_master.ack = true;
                     to_master.data = 0;
                     to_master.err = false;
-                    nextphase = DONE;
+                    nextsection = DONE;
                 }
             }
-            else if (phase == TRANSMITTING) {
-                //nextphase = DONE;
+            if (section == TRANSMITTING) {
+                //nextsection = DONE;
                 from_master.data = 0;
                 from_master.addr = 0;
                 from_master.cyc = false;
                 from_master.stb = false;
                 from_master.we = false;
-//                std::cout << this->name() << "- TRANSMITTING: " << slave_number << " - ack=" << to_master.ack << std::endl;
-                clk->master_read(clk_pulse);
+                insert_state();
+                //std::cout << this->name() << "- TRANSMITTING" << std::endl;
                 if (slave_number == 0) {
                     slave_in0->get(to_master);
                     slave_number = 0;
                     if (to_master.ack == true) {
                         slave_out0->set(from_master);
-                        nextphase = DONE;
+                        nextsection = DONE;
                     }
                 } else if (slave_number == 1) {
                     slave_in1->get(to_master);
                     slave_number = 1;
                     if (to_master.ack == true) {
                         slave_out1->set(from_master);
-                        nextphase = DONE;
+                        nextsection = DONE;
                     }
                 } else if (slave_number == 2) {
                     slave_in2->get(to_master);
                     slave_number = 2;
                     if (to_master.ack == true) {
                         slave_out2->set(from_master);
-                        nextphase = DONE;
+                        nextsection = DONE;
                     }
                 } else {
                     slave_in3->get(to_master);
                     slave_number = 3;
                     if (to_master.ack == true) {
                         slave_out3->set(from_master);
-                        nextphase = DONE;
+                        nextsection = DONE;
                     }
                 }
             }
-            else if (phase == DONE) {
+            if (section == DONE) {
                 //Send response from slave to master
                 master_output->set(to_master);
 
-//                std::cout << this->name() << " - DONE " << std::endl;
                 //Wait until master has read the signals
-                clk->master_read(clk_pulse);
+                insert_state();
                 master_input->get(from_master);
                 if (from_master.cyc == false && from_master.stb == false) {
                     //std::cout << this->name() << " - DONE " << std::endl;
@@ -141,12 +142,10 @@ struct Interconnect : public sc_module {
                     to_master.err = false;
                     to_master.data = 0;
                     master_output->set(to_master);
-                    nextphase = IDLE;
+                    nextsection = IDLE;
                 }
-
             }
-//            wait(WAIT_TIME, SC_PS);
-//            wait(SC_ZERO_TIME);
+
         }
     }
 };

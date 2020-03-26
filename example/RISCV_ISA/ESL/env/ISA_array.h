@@ -7,10 +7,10 @@
 
 #include "systemc.h"
 //#include "Interfaces.h"
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 #include "CPU_Interfaces.h"
-#include "../../RISCV_commons/Utilities.h"
-#include "../../RISCV_commons/Memory_Interfaces.h"
+#include "../../../RISCV_commons/Utilities.h"
+#include "../../../RISCV_commons/Memory_Interfaces.h"
 
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
@@ -18,12 +18,12 @@
 #define SCAM 1
 
 
-class ISA_new : public sc_module {
+class ISA : public sc_module {
 public:
     //Constructor
-    SC_HAS_PROCESS(ISA_new);
+    SC_HAS_PROCESS(ISA);
 
-    ISA_new(sc_module_name name) :
+    ISA(sc_module_name name) :
             fromMemoryPort("fromMemoryPort"),
             toMemoryPort("toMemoryPort"),
             toRegsPort("toRegsPort"),
