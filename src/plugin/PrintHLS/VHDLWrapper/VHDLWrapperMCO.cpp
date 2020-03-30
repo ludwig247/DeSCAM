@@ -324,8 +324,55 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
-    for (const auto& internalRegs : signalFactory->getInternalRegisterOut()) {
-        printOutputProcessRegs(internalRegs);
+
+    std::set<Variable * > inOutReg;
+    for (const auto& internalRegsOut : signalFactory->getInternalRegisterOut()) {
+        auto internalRegsIn = signalFactory->getInternalRegisterIn();
+        if (internalRegsIn.find(internalRegsOut) != internalRegsIn.end()) {
+            inOutReg.insert(internalRegsOut);
+            continue;
+        }
+        printOutputProcessRegs(internalRegsOut);
+    }
+
+    for (const auto& reg : inOutReg) {
+        bool isEnum = reg->isEnumType();
+        std::string signalIn;
+        std::string signalOut;
+        if (isEnum) {
+            signalIn = SignalFactory::vectorToEnum(reg, "", "in_");
+            signalOut = SignalFactory::vectorToEnum(reg, "", "out_");
+        } else {
+            signalIn = "in_" + SignalFactory::getName(reg, Style::UL);
+            signalOut = "out_" + SignalFactory::getName(reg, Style::UL);
+        }
+        ss << "\twith out_" << SignalFactory::getName(reg, Style::UL, "_vld") << " select\n"
+           << "\t\t" << SignalFactory::getName(reg, Style::DOT) << " <= " << signalIn << " when '0',\n"
+           << "\t\t\t" << signalOut << " when others;\n\n";
+    }
+
+    for (const auto& reg : inOutReg) {
+        bool isEnum = reg->isEnumType();
+        std::string SignalRegister;
+        std::string SignalReset;
+        if (isEnum) {
+            SignalRegister = SignalFactory::enumToVector(reg);
+            SignalReset = SignalRegister;
+            std::string replaceWith = getResetValue(reg);
+            std::string toReplace = SignalFactory::getName(reg, Style::DOT);
+            SignalReset.replace(SignalReset.find(toReplace), toReplace.length(), replaceWith);
+        } else {
+            SignalRegister = SignalFactory::getName(reg, Style::DOT);
+            SignalReset = getResetValue(reg);
+        }
+        ss << "\tprocess(clk ,rst)\n"
+           << "\tbegin\n"
+           << "\t\tif (rst = '1') then\n"
+           << "\t\t\tin_" << SignalFactory::getName(reg, Style::UL) << " <= " << SignalReset << ";\n"
+           << "\t\telsif (clk = '1' and clk'event) then\n"
+           << "\t\t\tin_" << SignalFactory::getName(reg, Style::UL) << " <= " << SignalRegister << ";\n"
+           << "\t\tend if;\n"
+           << "\tend process;\n\n";
     }
 
     for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
@@ -421,14 +468,12 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
         }
     };
 
-    auto printModuleInputVars = [&ss](std::set<Variable*> const& vars, std::string const& prefix, std::string const& suffix) {
-        for (const auto& var : vars) {
-            ss << "\t\t\t\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
-               << (var->isEnumType() ?
-                   SignalFactory::enumToVector(var) :
-                   SignalFactory::getName(var, Style::DOT))
-               << ";\n";
-        }
+    auto printModuleInputVars = [&ss](Variable* var, std::string const& prefix, std::string const& suffix) {
+        ss << "\t\t\t\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
+           << (var->isEnumType() ?
+               SignalFactory::enumToVector(var) :
+               SignalFactory::getName(var, Style::DOT))
+           << ";\n";
     };
 
     // Print Control Process
@@ -445,7 +490,14 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
 
     printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
     printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
-    printModuleInputVars(signalFactory->getInternalRegisterIn(), "in_", "");
+
+    for (auto&& internalRegIn : signalFactory->getInternalRegisterIn()) {
+        auto internalRegsOut = signalFactory->getInternalRegisterOut();
+        if (internalRegsOut.find(internalRegIn) != internalRegsOut.end()) {
+            continue;
+        }
+        printModuleInputVars(internalRegIn, "in_", "");
+    }
 
     for (const auto &arrayPort : optimizer->getArrayPorts()) {
         uint32_t exprNumber = 0;
@@ -461,8 +513,7 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
        << "\t\t\t\tstart_sig <= '0';\n"
        << "\t\t\tend if;\n"
        << "\t\tend if;\n"
-       << "\tend process;\n\n"
-       << "end " << propertySuiteHelper->getName() << "_arch;\n";
+       << "\tend process;\n\n";
 }
 
 std::string VHDLWrapperMCO::operationEnum()

@@ -112,14 +112,14 @@ def main(argv):
     if not find_operation_selector():
         print(f"{orange}All operations produce same output => removing operation selector from wrapper{white}")
         remove_operation_selector(module_name)
-    else:
-        t_min, t_max = get_timings(module_name)
 
-        if int(t_min) > 1 and hls_option == "sco":
-            print(f"{red}SCO-Design has operation module with initiation interval > 1. Properties can not hold for this design. Use mco option or try to fix this manually in Vivado HLS{white}")
-            sys.exit()
-        elif hls_option == "mco":
-            add_timing_to_property_macros(module_name, t_min, t_max)
+    t_min, t_max = get_timings(module_name)
+
+    if int(t_min) > 1 and hls_option == "sco":
+        print(f"{red}SCO-Design has operation module with initiation interval > 1. Properties can not hold for this design. Use mco option or try to fix this manually in Vivado HLS{white}")
+        sys.exit()
+    elif hls_option == "mco":
+        add_timing_to_property_macros(module_name, t_min, t_max)
 
 
 if __name__ == '__main__':

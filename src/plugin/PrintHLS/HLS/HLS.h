@@ -6,12 +6,11 @@
 #define SCAM_MAIN_HLS_H
 
 #include <memory>
-#include <boost/optional.hpp>
-
-#include <PluginFactory.h>
+#include <optional>
 
 #include "Model.h"
 #include "OptimizerHLS.h"
+#include "PluginFactory.h"
 #include "PrintStatement.h"
 #include "PrintReset.h"
 #include "Utilities.h"
@@ -54,7 +53,7 @@ namespace SCAM { namespace HLSPlugin { namespace  HLS {
             std::string getValue(Variable* variable);
 
             template<typename T>
-            boost::optional<std::string> getResetValue(T* signal);
+            std::optional<std::string> getResetValue(T* signal);
 
             void visit(Model& node) override {};
             void visit(Module& node) override {};

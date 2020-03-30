@@ -2,6 +2,8 @@
 // Created by johannes on 28.07.19.
 //
 
+#include <optional>
+
 #include "HLS.h"
 #include "NodePeekVisitor.h"
 #include "PrintFunction.h"
@@ -215,7 +217,7 @@ void HLS::registerVariables()
     for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
         auto resetValue = getResetValue(notifySignal);
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
-           << (resetValue ? resetValue.get() : "false") << ";\n";
+           << resetValue.value_or("false") << ";\n";
     }
 
     ss << "\n";
@@ -469,7 +471,7 @@ std::string HLS::getDataSignalReset(DataSignal* dataSignal)
     auto getDataSignalValue = [this](DataSignal* dataSignal) {
         auto resetValue = getResetValue(dataSignal);
         if (resetValue) {
-            return resetValue.get();
+            return resetValue.value();
         }
         else {
             if (optimizer->hasOutputReg(dataSignal)) {
@@ -504,7 +506,7 @@ std::string HLS::getValue(Variable* variable)
 {
     auto resetValue = getResetValue(variable);
     if (resetValue) {
-        return resetValue.get();
+        return resetValue.value();
     }
     else {
         std::string resetString = variable->getInitialValue()->getValueAsString();
@@ -533,7 +535,7 @@ std::string HLS::getVariableReset(Variable* variable)
 }
 
 template<typename T>
-boost::optional<std::string> HLS::getResetValue(T* signal)
+std::optional<std::string> HLS::getResetValue(T* signal)
 {
     for (const auto& commitment : propertySuiteHelper->getResetStatements()) {
         auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
@@ -541,7 +543,7 @@ boost::optional<std::string> HLS::getResetValue(T* signal)
             return PrintStatement::toString(commitment->getRhs());
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 void HLS::waitOperation()

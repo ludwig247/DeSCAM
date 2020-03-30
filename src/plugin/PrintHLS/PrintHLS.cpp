@@ -6,11 +6,9 @@
 - check Output Register (ex. Interconnect)
 - VHDL Wrapper change from std_logic_vector and std_logic to unsigned, signed and boolean for arithmetic ops
 - reserved names in VHDL (ex. record for Function0)
-- constant outputs (ex. requestQ)
 - array handling
-- global functions and global variables handling
 - SCO: reset to input
-- MCO: internal register handling
+- global functions and global variables handling
 */
 
 #include "PrintHLS.h"

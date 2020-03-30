@@ -193,11 +193,11 @@ void OptimizerHLS::modifyCommitmentLists() {
             auto newAssignment = commitment;
             auto replacedAssignment = replaceDataSignals(newAssignment);
             if (replacedAssignment) {
-                newAssignment = replacedAssignment.get();
+                newAssignment = replacedAssignment.value();
             }
             replacedAssignment = replaceByOutputRegister(newAssignment);
             if (replacedAssignment) {
-                newAssignment = replacedAssignment.get();
+                newAssignment = replacedAssignment.value();
             }
             if (!isDuplicate(newAssignment, assignments)) {
                 assignments.push_back(newAssignment);
@@ -211,7 +211,7 @@ bool OptimizerHLS::isSelfAssignments(Assignment* assignment) {
     return (*assignment->getLhs() == *assignment->getRhs());
 }
 
-boost::optional<Assignment *> OptimizerHLS::replaceDataSignals(Assignment* assignment) {
+std::optional<Assignment *> OptimizerHLS::replaceDataSignals(Assignment* assignment) {
     if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
         auto dataSignal = dynamic_cast<DataSignalOperand *>(assignment->getLhs())->getDataSignal();
         for (const auto subVar : getSubVarMap(oldToNewDataSignalMap)) {
@@ -221,10 +221,10 @@ boost::optional<Assignment *> OptimizerHLS::replaceDataSignals(Assignment* assig
             }
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<Assignment *> OptimizerHLS::replaceByOutputRegister(Assignment* assignment) {
+std::optional<Assignment *> OptimizerHLS::replaceByOutputRegister(Assignment* assignment) {
     if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
         auto dataSignal = dynamic_cast<DataSignalOperand *>(assignment->getLhs())->getDataSignal();
         for (const auto& subVar : getSubVarMap(registerToOutputMap)) {
@@ -234,7 +234,7 @@ boost::optional<Assignment *> OptimizerHLS::replaceByOutputRegister(Assignment* 
             }
         }
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 bool OptimizerHLS::isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList) {
@@ -273,23 +273,6 @@ std::map<Key *, Value *> OptimizerHLS::getSubVarMap(const std::map<Key *, Value 
         subVarMap.insert({keys.at(it), values.at(it)});
     }
     return subVarMap;
-}
-
-template <typename T>
-std::set<T *> OptimizerHLS::getParents(const std::set<T *> &subVars) {
-    std::set<T *> parents;
-    for (const auto& var : subVars) {
-        if (var->isSubVar()) {
-            if (parents.find(var->getParent()) == parents.end()) {
-                parents.insert(var->getParent());
-            }
-        } else {
-            if (parents.find(var) == parents.end()) {
-                parents.insert(var);
-            }
-        }
-    }
-    return parents;
 }
 
 std::multimap<Variable*, DataSignal*> OptimizerHLS::getParentMap(const std::multimap<Variable*, DataSignal*> &multimap) {
@@ -400,10 +383,69 @@ std::set<Variable*> OptimizerHLS::getOutputRegister() {
     return outputRegister;
 }
 
+std::vector<DataSignal *> OptimizerHLS::getConstantOutputs() {
+    auto nonConstantOutputs = outputs;
+    for (const auto& var : registerToOutputMap) {
+        if (var.second->isCompoundType()) {
+            for (auto&& subVar : var.second->getSubVarList()) {
+                nonConstantOutputs.insert(subVar);
+            }
+        } else {
+            nonConstantOutputs.insert(var.second);
+        }
+    }
+    for (const auto& moduleToTopSignal : moduleToTopSignalMap) {
+        auto topSignals = moduleToTopSignal.second;
+        for (const auto topSignal : topSignals) {
+            if (topSignal->isCompoundType()) {
+                for (auto&& subVar : topSignal->getSubVarList()) {
+                    nonConstantOutputs.insert(subVar);
+                }
+            } else {
+                nonConstantOutputs.insert(topSignal);
+            }
+        }
+    }
+    std::vector<DataSignal *> constantOutputs;
+    for (const auto& port : module->getPorts()) {
+        if (port.second->getInterface()->isOutput()) {
+            auto outPort = port.second;
+            if (outPort->getDataSignal()->isCompoundType()) {
+                for (auto&& subVar : outPort->getDataSignal()->getSubVarList()) {
+                    constantOutputs.push_back(subVar);
+                }
+            } else {
+                constantOutputs.push_back(port.second->getDataSignal());
+            }
+        }
+    }
+
+    auto removeFunction = [&nonConstantOutputs](DataSignal* signal) -> bool {
+        return nonConstantOutputs.find(signal) != nonConstantOutputs.end();
+    };
+
+    constantOutputs.erase(std::remove_if(constantOutputs.begin(),
+            constantOutputs.end(),
+            removeFunction),
+            constantOutputs.end());
+
+    std::cout << "const:" << std::endl;
+    for (const auto& out : constantOutputs) {
+        std::cout << out->getFullName() << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "non-const:" << std::endl;
+    for (const auto& out : nonConstantOutputs) {
+        std::cout << out->getFullName() << std::endl;
+    }
+    std::cout << std::endl;
+
+    return constantOutputs;
+}
+
 DataSignal* OptimizerHLS::getCombinedDataSignal(const std::vector<DataSignal*> &dataSignal) {
     std::string combinedName = dataSignal.front()->getFullName();
     for (auto it = std::next(dataSignal.begin()); it != dataSignal.end(); ++it) {
-//        std::string name1 = combinedName;
         std::string name2 = (*it)->getFullName();
 
         uint32_t m = combinedName.length();

@@ -5,8 +5,7 @@
 #ifndef SCAM_UTILITIES_HLS_H
 #define SCAM_UTILITIES_HLS_H
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <list>
 #include <memory>
 #include <set>
@@ -28,6 +27,7 @@ namespace SCAM { namespace HLSPlugin {
 
         Variable* getCorrespondingRegister(DataSignal* dataSignal) ;
         std::set<Variable *> getOutputRegister();
+        std::vector<DataSignal *> getConstantOutputs();
 
         inline std::set<DataSignal *> getOutputs() const;
         inline std::set<DataSignal *> getInputs() const;
@@ -63,8 +63,8 @@ namespace SCAM { namespace HLSPlugin {
         void modifyCommitmentLists();
         bool isSelfAssignments(Assignment *assignment);
         bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
-        boost::optional<Assignment *> replaceDataSignals(Assignment *assignment);
-        boost::optional<Assignment *> replaceByOutputRegister(Assignment *assignment);
+        std::optional<Assignment *> replaceDataSignals(Assignment *assignment);
+        std::optional<Assignment *> replaceByOutputRegister(Assignment *assignment);
 
         void removeRedundantConditions();
         void mapOutputRegistersToOutput();
@@ -75,9 +75,6 @@ namespace SCAM { namespace HLSPlugin {
 
         template <typename Key, typename Value>
         std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
-
-        template <typename T>
-        static std::set<T *> getParents(const std::set<T *> &subVars);
     };
 
     std::map<Port *, std::list<Expr *>> OptimizerHLS::getArrayPorts() const {

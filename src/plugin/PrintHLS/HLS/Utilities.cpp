@@ -46,6 +46,8 @@ std::string Utilities::typeToString(StmtType type) {
             return "assignment";
         case StmtType::UNKNOWN:
             return "unknown type";
+        default:
+            throw std::runtime_error("Unknown statement!");
     }
 }
 
@@ -62,7 +64,7 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
         case SubTypeBitwise::RIGHT_SHIFT:
             return ">>";
         default:
-            return "unknown operation";
+            throw std::runtime_error("unknown operation");
     }
 }
 

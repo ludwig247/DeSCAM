@@ -363,8 +363,7 @@ void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
        << "\t\telsif (clk = '1' and clk'event) then\n"
        << "\t\t\tactive_state <= next_state;\n"
        << "\t\tend if;\n"
-       << "\tend process;\n\n"
-       << "end " << propertySuiteHelper->getName() << "_arch;\n";
+       << "\tend process;\n\n";
 }
 
 std::string VHDLWrapperSCO::operationEnum()

@@ -236,6 +236,8 @@ std::string VHDLWrapper::printArchitecture() {
     printConstantOutputs(ss);
     controlProcess(ss);
 
+    ss << "end " << propertySuiteHelper->getName() << "_arch;\n";
+
     return ss.str();
 }
 
@@ -303,30 +305,13 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 
 void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
 {
-    return;
-    // TODO: Check all Signals
-    std::vector<DataSignal *> constantOutputs;
-    auto moduleOutputs = optimizer->getOutputs();
-    for (const auto& port : currentModule->getPorts()) {
-        if (port.second->getInterface()->isOutput()) {
-            if (port.second->getDataSignal()->isCompoundType()) {
-                for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
-                    if (moduleOutputs.find(subVar) == moduleOutputs.end()) {
-                        constantOutputs.emplace_back(subVar);
-                    }
-                }
-            } else {
-                if (moduleOutputs.find(port.second->getDataSignal()) == moduleOutputs.end()) {
-                    constantOutputs.emplace_back(port.second->getDataSignal());
-                }
-            }
-        }
+    auto constantOutputs = optimizer->getConstantOutputs();
+    if (constantOutputs.empty()) {
+        return;
     }
-    if (!constantOutputs.empty()) {
-        ss << "\n\n\t-- Constant Outputs\n";
-        for (const auto& constantOutput : constantOutputs) {
-            ss << "\t" << Utilities::getFullName(constantOutput, ".") << " <= " << getResetValue(constantOutput) << ";\n";
-        }
-        ss << "\n\n";
+    ss << "\t-- Constant outputs\n";
+    for (const auto& out : constantOutputs) {
+        ss << "\t" << out->getFullName() << " <= " << getResetValue(out) << ";\n";
     }
+    ss << "\n";
 }
