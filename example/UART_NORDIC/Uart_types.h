@@ -45,19 +45,31 @@ const unsigned int CONFIG_BIT_MASK        = 0x1F;
 #define UART_ENABLE             1
 #define UART_DISABLE            0
 
-#define UART_TIMEOUT            44
+#define UART_TIMEOUT            39
 
 #define EVENT                   1
 #define NO_EVENT                0
 
-
-
 #define bits(x) ((x & 1) + ((x >> 1) & 1) + ((x >> 2) & 1) + ((x >> 3) & 1) + ((x >> 4) & 1) + ((x >> 5) & 1)+ ((x >> 6) & 1) + ((x >> 7) & 1))
 #define bits_xor(x) ((x & 1) ^ ((x >> 1) & 1) ^ ((x >> 2) & 1) ^ ((x >> 3) & 1) ^ ((x >> 4) & 1) ^ ((x >> 5) & 1) ^ ((x >> 6) & 1) ^ ((x >> 7) & 1))
 
-enum trans_t {READ, WRITE};
+#ifdef SIM
+enum debug_component_t {RX, TX, CONTROL, STIMULI};
+void debug_print(debug_component_t comp, const std::string& msg)
+{
+    switch (comp)
+    {
+        case RX: std::cout << "Module RX: "; break;
+        case TX: std::cout << "Module TX: "; break;
+        case CONTROL: std::cout << "Module CONTROL: "; break;
+        case STIMULI: std::cout << "Stimuli: "; break;
+    }
+    std::cout << "........ " << msg << std::endl;
+}
+#endif
 
-enum task_types {START_RX, STOP_RX, START_TX, STOP_TX, SUSPEND};
+
+enum trans_t {READ, WRITE};
 
 struct bus_req_t
 {
@@ -87,6 +99,11 @@ struct config_t
 struct tx_control_in_t
 {
     bool ready;
+    //bool in_idle;
+};
+struct tx_events_t
+{
+    bool done;
 };
 
 struct rx_control_out_t
@@ -98,20 +115,13 @@ struct rx_control_in_t
 {
     bool ready;
     bool timeout;
-    // bool error_overrun;
-    // bool error_parity;
-    // bool error_framing;
-    // bool error_break;
     unsigned int error_src;
 };
 struct rx_events_t
 {
     bool ready;
     bool timeout;
-    bool error_overrun;
-    bool error_parity;
-    bool error_framing;
-    bool error_break;
+    unsigned int error_src;
 };
 
 
@@ -121,7 +131,7 @@ struct tasks_t
     bool stop_rx;
     bool start_tx;
     bool stop_tx;
-    bool suspend;
+    //bool suspend;
 };
 
 struct events_t
@@ -139,6 +149,18 @@ struct registers_t
     unsigned int error_src; // from RX
     unsigned int enable; // CORE
     unsigned int config; // RX, TX
+};
+
+struct data_in_t
+{
+    unsigned int data;
+    bool valid;
+};
+
+struct data_t
+{
+    unsigned int data;
+    bool valid;
 };
 
 #endif

@@ -179,6 +179,7 @@ namespace SCAM {
                 }
             }
         }
+        std::cout << "##################1 ###########" << std::endl;
 
         for (auto op : operations) {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
