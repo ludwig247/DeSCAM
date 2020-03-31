@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: export
-        run: SCAM_HOME="${GITHUB_WORKSPACE}" && export SCAM_HOME
+        run: SCAM_HOME="${GITHUB_WORKSPACE}" && export SCAM_HOME && echo $SCAM_HOME
       - name: echo
         run: echo $GITHUB_WORKSPACE
       - name: Build System Generation
