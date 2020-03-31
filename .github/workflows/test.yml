@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build System Generation
-        run: cd $SCAM_HOME_PATH && mkdir build && cd $SCAM_HOME_PATH/build && $CMAKE_BIN ../
+        run: cd $GITHUB_WORKSPACE && mkdir build && cd $GITHUB_WORKSPACE/build && $CMAKE_BIN ../
       - name: Build SYSTEMC
-        run: $CMAKE_BIN --build $SCAM_HOME_PATH/build/ --target SYSTEMC -- -j4
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
       - name: Clean up
-        run: rm -rf $SCAM_HOME_PATH/build
+        run: rm -rf $GITHUB_WORKSPACE/build
