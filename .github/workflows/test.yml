@@ -20,7 +20,7 @@ jobs:
       - name: echo
         run: echo $GITHUB_WORKSPACE
       - name: Build System Generation
-        run: cd $SCAM_HOME && mkdir build && cd $SCAM_HOME/build && $CMAKE_BIN ../
+        run: cd $SCAM_HOME && mkdir build && cd build && $CMAKE_BIN ../
       - name: Build SYSTEMC
         run: $CMAKE_BIN --build $SCAM_HOME/build/ --target SYSTEMC -- -j4
       - name: Clean up
