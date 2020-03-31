@@ -9,11 +9,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-16.04, ubuntu-18.04]
+    env:
+      SCAM_HOME: "${GITHUB_WORKSPACE}"
+      CMAKE_BIN: "cmake"
+      PYTHON3: "python3"
     steps:
       - uses: actions/checkout@v1
-      - name: install
-        run: sh install/github/install.sh
-      - name: run_tests
-        run: sh install/github/install_run_tests.sh
-      - name: cleanup
-        run: sh install/github/install_cleanup.sh
+      - name: Build System Generation
+        run: cd $SCAM_HOME && mkdir build && cd $SCAM_HOME/build && $CMAKE_BIN ../
+      - name: Build SYSTEMC
+        run: $CMAKE_BIN --build $SCAM_HOME/build/ --target SYSTEMC -- -j4
