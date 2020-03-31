@@ -24,6 +24,5 @@ jobs:
         run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
       - name: Build LLVM/CLANG
         run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
-      -
       - name: Clean up
         run: rm -rf $GITHUB_WORKSPACE/build
