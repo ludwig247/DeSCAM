@@ -16,6 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Build System Generation
-        run: cd $SCAM_HOME && mkdir build && cd $SCAM_HOME/build && $CMAKE_BIN ../
+        run: mkdir build && cd ./build && $CMAKE_BIN ../
       - name: Build SYSTEMC
-        run: $CMAKE_BIN --build $SCAM_HOME/build/ --target SYSTEMC -- -j4
+        run: $CMAKE_BIN --build ./build/ --target SYSTEMC -- -j4
