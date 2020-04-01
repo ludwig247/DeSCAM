@@ -5,9 +5,10 @@
 #include "BoolValue.h"
 #include "NodePeekVisitor.h"
 
-SCAM::BoolValue::BoolValue(bool value) :
+SCAM::BoolValue::BoolValue(bool value, StmtLocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("bool")) {
+    this->stmtLocationInfo = stmtLocationInfo;
 }
 
 

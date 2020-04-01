@@ -5,15 +5,17 @@
 #include <PrintStmt.h>
 #include "Write.h"
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
 namespace SCAM {
 
-    Write::Write(Port *portOperand, Expr *value, bool is_non_blocking_access, VariableOperand *status) :
+    Write::Write(Port *portOperand, Expr *value, bool is_non_blocking_access, VariableOperand *status, StmtLocationInfo stmtLocationInfo) :
             value(value),
             status(status),
             Communication(portOperand, is_non_blocking_access) {
+        this->stmtLocationInfo = std::move(stmtLocationInfo);
         if (portOperand->getDataType() != value->getDataType()) {
-            throw std::runtime_error("Port " + portOperand->getName() + " and Value '" + PrintStmt::toString(value) + "' are not of the same datatype");
+            throw SCAM::StmtException("Port " + portOperand->getName() + " and Value '" + PrintStmt::toString(value) + "' are not of the same datatype",this->stmtLocationInfo);
         }
     }
 

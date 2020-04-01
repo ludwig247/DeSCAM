@@ -11,7 +11,7 @@ namespace SCAM {
 
     class CompoundValue : public ConstValue {
     public:
-        CompoundValue(const std::vector<ConstValue *> &values, const DataType *dataType);
+        CompoundValue(const std::vector<ConstValue *> &values, const DataType *dataType, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         //GETTER
         const std::map<std::string, ConstValue *> &getValues() const;

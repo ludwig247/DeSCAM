@@ -12,7 +12,7 @@
 namespace SCAM {
     class Write : public Communication, public Stmt {
     public:
-        Write(Port *portOperand, Expr *value, bool is_non_blocking_access = false, VariableOperand *status = nullptr);
+        Write(Port *portOperand, Expr *value, bool is_non_blocking_access = false, VariableOperand *status = nullptr, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         Expr *getValue() const;
 

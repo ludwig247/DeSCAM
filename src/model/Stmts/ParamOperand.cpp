@@ -6,11 +6,10 @@
 #include "ParamOperand.h"
 
 
-SCAM::ParamOperand::ParamOperand(SCAM::Parameter *parameter) :
+SCAM::ParamOperand::ParamOperand(SCAM::Parameter *parameter, StmtLocationInfo stmtLocationInfo) :
         parameter(parameter),
         Operand(parameter->getDataType()) {
-
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 void SCAM::ParamOperand::accept(SCAM::StmtAbstractVisitor &visitor) {

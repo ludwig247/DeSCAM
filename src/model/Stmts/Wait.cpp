@@ -3,10 +3,13 @@
 //
 
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Wait.h"
+#include "StmtException.h"
 
-SCAM::Wait::Wait() {
-
+SCAM::Wait::Wait(StmtLocationInfo stmtLocationInfo) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 void SCAM::Wait::accept(SCAM::StmtAbstractVisitor &visitor) {
@@ -15,7 +18,7 @@ void SCAM::Wait::accept(SCAM::StmtAbstractVisitor &visitor) {
 
 bool SCAM::Wait::operator==(const SCAM::Stmt &other) const {
     //TODO: implement == for wait
-    throw std::runtime_error("Not implemented");
+    throw SCAM::StmtException("== Not implemented",this->stmtLocationInfo);
 
 }
 

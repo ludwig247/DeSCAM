@@ -24,13 +24,11 @@ namespace SCAM {
 
         LoggerMsg() = default;
 
-        LoggerMsg(const std::string &message,  const std::string &statement, const SCAM::StmtLocationInfo& stmtLocationInfo, SeverityLevel severityLevel, ViolationType violationType);
+        LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo& stmtInfo, SeverityLevel severityLevel, ViolationType violationType);
 
         const std::string &getMessage();
 
-        const std::string &getStatement();
-
-        const SCAM::StmtLocationInfo& getStmtLocationInfo();
+        const SCAM::StmtLocationInfo& getStmtInfo();
 
         std::string getSeverityLevel();
 
@@ -38,9 +36,7 @@ namespace SCAM {
 
         inline void setMessage(const std::string &message);
 
-        inline void setStatement(const std::string &statement);
-
-        inline void setStmtLocationInfo(const SCAM::StmtLocationInfo& stmtLocationInfo);
+        inline void setStmtInfo(const SCAM::StmtLocationInfo& stmtInfo);
 
         inline void setViolationType(ViolationType violationType);
 
@@ -48,7 +44,7 @@ namespace SCAM {
 
     protected:
         std::string message = "",  statement = "";
-        SCAM::StmtLocationInfo stmtLocationInfo;
+        SCAM::StmtLocationInfo stmtInfo;
         ViolationType violationType = ViolationType::NA;
         SeverityLevel severityLevel = SeverityLevel::Info;
     };

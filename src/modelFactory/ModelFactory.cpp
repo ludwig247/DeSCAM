@@ -380,7 +380,7 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
             module->addVariable(new Variable(variable.first, type));
         } else {
             auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
-            ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module);
+            ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
             //FindInitalValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
             //auto intitalValMap = findInitalValues.getVariableInitialMap();
             //Variable not initialized -> intialize with default value

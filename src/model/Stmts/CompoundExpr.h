@@ -11,7 +11,7 @@
 namespace SCAM {
     class CompoundExpr : public Expr {
     public:
-        CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType);
+        CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         virtual ~CompoundExpr();
 

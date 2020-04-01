@@ -10,7 +10,7 @@
 namespace SCAM {
     class While : public Branch {
     public:
-        While(SCAM::Expr *conditionStmt);
+        While(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         //GETTER
         SCAM::Expr *getConditionStmt() const;

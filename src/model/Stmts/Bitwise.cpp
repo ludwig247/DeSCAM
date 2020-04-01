@@ -3,20 +3,24 @@
 //
 
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Bitwise.h"
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
-SCAM::Bitwise::Bitwise(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs) :
+SCAM::Bitwise::Bitwise(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, StmtLocationInfo stmtLocationInfo) :
         lhs(lhs),
         operation(operation),
         rhs(rhs),
         Expr(lhs->getDataType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (operation != "<<" && operation != ">>" && operation != "&" && operation != "|" && operation != "^") {
-        throw std::runtime_error("Bitwise: " + operation + " not a bitwise op");
+        throw SCAM::StmtException("Bitwise: " + operation + " not a bitwise op",this->stmtLocationInfo);
     } else if (lhs->getDataType() != rhs->getDataType()) {
         std::string msg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs) + "\n";
-        throw std::runtime_error(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype");
-    } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw std::runtime_error("operands must be numeric");
+        throw SCAM::StmtException(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
+    } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw SCAM::StmtException("operands must be numeric",this->stmtLocationInfo);
 
 }
 

@@ -17,10 +17,13 @@ namespace SCAM {
     public:
         StmtLocationInfo() = default;
 
-        StmtLocationInfo(const std::string &file, int rowStartNumber, int rowEndNumber, int columnStartNumber,
+        StmtLocationInfo(const std::string &stmt, const std::string &file, int rowStartNumber, int rowEndNumber,
+                         int columnStartNumber,
                          int columnEndNumber);
 
         const std::string &getFile();
+
+        const std::string &getStmt();
 
         int getRowStartNumber();
 
@@ -30,21 +33,24 @@ namespace SCAM {
 
         int getColumnEndNumber();
 
-        void setInfo(const std::string &file, int rowStartNumber, int rowEndNumber, int columnStartNumber,
-                     int columnEndNumber);
+        inline void setInfo(const std::string &stmt, const std::string &file, int rowStartNumber, int rowEndNumber,
+                            int columnStartNumber,
+                            int columnEndNumber);
 
-        void setFile(const std::string &file);
+        inline void setFile(const std::string &file);
 
-        void setRowStartNumber(int rowStartNumber);
+        inline void setStmt(const std::string &stmt);
 
-        void setRowEndNumber(int rowEndNumber);
+        inline void setRowStartNumber(int rowStartNumber);
 
-        void setColumnStartNumber(int columnStartNumber);
+        inline void setRowEndNumber(int rowEndNumber);
 
-        void setColumnEndNumber(int columnEndNumber);
+        inline void setColumnStartNumber(int columnStartNumber);
+
+        inline void setColumnEndNumber(int columnEndNumber);
 
     private:
-        std::string fileDir = "";
+        std::string stmt = "", fileDir = "";
         int rowStartNumber = 0, rowEndNumber = 0, columnStartNumber = 0, columnEndNumber = 0;
 
     };

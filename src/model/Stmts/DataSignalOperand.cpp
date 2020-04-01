@@ -5,10 +5,13 @@
 
 #include "DataSignalOperand.h"
 #include "Operand.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::DataSignalOperand::DataSignalOperand(DataSignal *dataSignal) :
+SCAM::DataSignalOperand::DataSignalOperand(DataSignal *dataSignal, StmtLocationInfo stmtLocationInfo) :
         dataSignal(dataSignal), Operand(dataSignal->getDataType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 
 }
 

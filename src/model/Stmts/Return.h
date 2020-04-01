@@ -10,7 +10,7 @@
 namespace SCAM {
     class Return : public Stmt {
     public:
-        explicit Return(Expr *returnValue);
+        explicit Return(Expr *returnValue, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         virtual ~Return() = default;
 

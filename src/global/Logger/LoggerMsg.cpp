@@ -1,10 +1,9 @@
 #include "LoggerMsg.h"
 
 
-SCAM::LoggerMsg::LoggerMsg(const std::string &message,  const std::string &statement, const SCAM::StmtLocationInfo& stmtLocationInfo, SeverityLevel severityLevel, ViolationType violationType) {
+SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo& stmtInfo, SeverityLevel severityLevel, ViolationType violationType) {
     setMessage(message);
-    setStatement(statement);
-    setStmtLocationInfo(stmtLocationInfo);
+    setStmtInfo(stmtInfo);
     setSeverityLevel(severityLevel);
     setViolationType(violationType);
 }
@@ -13,12 +12,8 @@ const std::string &SCAM::LoggerMsg::getMessage() {
     return this->message;
 }
 
-const std::string &SCAM::LoggerMsg::getStatement() {
-    return this->statement;
-}
-
-const SCAM::StmtLocationInfo &SCAM::LoggerMsg::getStmtLocationInfo() {
-    return this->stmtLocationInfo;
+const SCAM::StmtLocationInfo &SCAM::LoggerMsg::getStmtInfo() {
+    return this->stmtInfo;
 }
 
 std::string SCAM::LoggerMsg::getSeverityLevel() {
@@ -48,10 +43,6 @@ void SCAM::LoggerMsg::setMessage(const std::string &message) {
     this->message = message;
 }
 
-void SCAM::LoggerMsg::setStatement(const std::string &statement) {
-    this->statement = statement;
-}
-
 void SCAM::LoggerMsg::setViolationType(SCAM::LoggerMsg::ViolationType violationType) {
     this->violationType = violationType;
 }
@@ -60,7 +51,7 @@ void SCAM::LoggerMsg::setSeverityLevel(SCAM::LoggerMsg::SeverityLevel severityLe
     this->severityLevel = severityLevel;
 }
 
-void SCAM::LoggerMsg::setStmtLocationInfo(const SCAM::StmtLocationInfo &stmtLocationInfo) {
-    this->stmtLocationInfo = stmtLocationInfo;
+void SCAM::LoggerMsg::setStmtInfo(const SCAM::StmtLocationInfo &stmtInfo) {
+    this->stmtInfo = stmtInfo;
 }
 

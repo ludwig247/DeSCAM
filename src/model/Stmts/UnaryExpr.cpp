@@ -3,15 +3,19 @@
 //
 
 #include "UnaryExpr.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
 
-SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr) :
+SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr, StmtLocationInfo stmtLocationInfo) :
         expr(expr),
         operation(operation),
         Expr(expr->getDataType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (!(operation == "not" || operation == "-"|| operation == "~") ) {
-        throw std::runtime_error("UnaryExpr: unsuported operator: " + operation);
+        throw SCAM::StmtException("UnaryExpr: unsuported operator: " + operation,this->stmtLocationInfo);
     }
 }
 

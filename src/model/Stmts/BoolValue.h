@@ -11,7 +11,7 @@ namespace SCAM {
 
     class BoolValue : public ConstValue {
     public:
-        BoolValue(bool value);
+        BoolValue(bool value, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         //GETTER
         bool getValue();

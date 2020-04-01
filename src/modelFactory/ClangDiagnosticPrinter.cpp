@@ -91,9 +91,9 @@ void ClangDiagnosticPrinter::addDiagnosticsToLogger(std::string diagnostics) {
             std::string message = SCAM::GlobalUtilities::removeIndentation(
                     errorLineVec[4 + parsableSourceRangesOffset]);
 
-            SCAM::StmtLocationInfo stmtLocationInfo(fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
+            SCAM::StmtLocationInfo stmtInfo(stmt, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
             //Add loggerMsg to the logger
-            SCAM::LoggerMsg loggerMsg(message, stmt, stmtLocationInfo, severityLevel, violationType);
+            SCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType);
             SCAM::Logger::addMsg(loggerMsg);
         }
     }

@@ -3,11 +3,13 @@
 //
 
 #include "While.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::While::While(SCAM::Expr *conditionStmt) :
+SCAM::While::While(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo) :
         conditionStmt(conditionStmt) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 SCAM::Expr *SCAM::While::getConditionStmt() const {

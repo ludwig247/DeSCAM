@@ -4,13 +4,16 @@
 
 #include <NodePeekVisitor.h>
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Return.h"
+#include "StmtException.h"
 
-SCAM::Return::Return(SCAM::Expr *returnValue) :
+SCAM::Return::Return(SCAM::Expr *returnValue, StmtLocationInfo stmtLocationInfo) :
         returnValue(returnValue) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (returnValue == nullptr) {
-        throw std::runtime_error(" Return value is null ");
+        throw SCAM::StmtException(" Return value is null ",this->stmtLocationInfo);
     }
 
 }

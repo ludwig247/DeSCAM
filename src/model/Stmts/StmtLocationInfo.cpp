@@ -24,6 +24,15 @@ int SCAM::StmtLocationInfo::getColumnEndNumber() {
     return this->columnEndNumber;
 }
 
+
+const std::string &SCAM::StmtLocationInfo::getStmt() {
+    return this->stmt;
+}
+
+void SCAM::StmtLocationInfo::setStmt(const std::string &stmt) {
+    this->stmt = stmt;
+}
+
 void SCAM::StmtLocationInfo::setFile(const std::string &fileDir) {
     this->fileDir = fileDir;
 }
@@ -44,8 +53,9 @@ void SCAM::StmtLocationInfo::setColumnEndNumber(int columnEndNumber) {
     this->columnEndNumber = columnEndNumber;
 }
 
-void SCAM::StmtLocationInfo::setInfo(const std::string &fileDir, int rowStartNumber, int rowEndNumber, int columnStartNumber,
+void SCAM::StmtLocationInfo::setInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber, int columnStartNumber,
                                      int columnEndNumber) {
+setStmt(stmt);
 setFile(fileDir);
 setRowStartNumber(rowStartNumber);
 setRowEndNumber(rowEndNumber);
@@ -53,7 +63,9 @@ setColumnStartNumber(columnStartNumber);
 setColumnEndNumber(columnEndNumber);
 }
 
-SCAM::StmtLocationInfo::StmtLocationInfo(const std::string &fileDir, int rowStartNumber, int rowEndNumber, int columnStartNumber,
+SCAM::StmtLocationInfo::StmtLocationInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber, int columnStartNumber,
                                          int columnEndNumber) {
-    setInfo(fileDir,rowStartNumber,rowEndNumber,columnStartNumber,columnEndNumber);
+    setInfo(stmt, fileDir,rowStartNumber,rowEndNumber,columnStartNumber,columnEndNumber);
 }
+
+

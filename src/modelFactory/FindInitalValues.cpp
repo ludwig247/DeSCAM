@@ -44,7 +44,7 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
                     //Find value and store in this->value
                     //If something goes wrong
                     try {
-                        FindDataFlow findDataFlow(initializer->getInit(), module);
+                        FindDataFlow findDataFlow(initializer->getInit(), module, ci);
 
                         auto initExpr = findDataFlow.getExpr();
                         if (initExpr != nullptr) {
@@ -72,17 +72,18 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
 }
 
 
-SCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, SCAM::Module *module):
+SCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, SCAM::Module *module, clang::CompilerInstance& ci):
     module(module),
     fieldDecl(fieldDecl),
     initValue(nullptr),
+    ci(ci),
     pass(0) {
     TraverseDecl(recordDecl);
 
 }
 
-SCAM::ConstValue *SCAM::FindInitalValues::getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl *fieldDecl, SCAM::Module *module) {
-    FindInitalValues findInitalValues(recordDecl,fieldDecl,module);
+SCAM::ConstValue *SCAM::FindInitalValues::getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl *fieldDecl, SCAM::Module *module, clang::CompilerInstance& ci) {
+    FindInitalValues findInitalValues(recordDecl,fieldDecl,module,ci);
     return findInitalValues.initValue;
 }
 

@@ -14,7 +14,7 @@ namespace SCAM {
 
     class Read : public Stmt, public Communication {
     public:
-        Read(Port *port, VariableOperand *variable, bool is_non_blocking_access = false, VariableOperand *status = nullptr);
+        Read(Port *port, VariableOperand *variable, bool is_non_blocking_access = false, VariableOperand *status = nullptr, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         VariableOperand *getVariableOperand() const;
 

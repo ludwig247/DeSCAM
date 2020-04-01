@@ -237,7 +237,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
             module->addVariable(new Variable(variable.first, type));
         } else {
             auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
-            ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module);
+            ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
             //Variable not initialized -> intialize with default value
             if (initialValue == nullptr) {
                 if (type == DataTypes::getDataType("int")) {

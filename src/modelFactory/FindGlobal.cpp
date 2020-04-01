@@ -29,7 +29,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
             if (init->getType()->isBuiltinType()) {
                 auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
                 try {
-                    FindDataFlow checkForExpr(const_cast<clang::Expr *>(init), &module, isUnsigned);
+                    FindDataFlow checkForExpr(const_cast<clang::Expr *>(init), &module, ci, isUnsigned);
                     Logger::clear();
                     if (checkForExpr.getExpr()) {
                         std::string typeName = init->getType().getAsString();

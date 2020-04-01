@@ -3,11 +3,14 @@
 //
 
 #include "Notify.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::Notify::Notify(SCAM::Port *port) :
+SCAM::Notify::Notify(SCAM::Port *port, StmtLocationInfo stmtLocationInfo) :
         port(port),
         Expr(DataTypes::getDataType("bool")) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 SCAM::Port *SCAM::Notify::getPort() const {

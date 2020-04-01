@@ -3,22 +3,26 @@
 //
 
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Arithmetic.h"
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
-SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs) :
+SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs,StmtLocationInfo stmtLocationInfo) :
         lhs(lhs),
         operation(operation),
         rhs(rhs),
         Expr(lhs->getDataType()) {
     if (lhs->getDataType() != rhs->getDataType()) {
+        setStmtInfo(stmtLocationInfo);
         std::string errorMsg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs);
-        errorMsg += "Arithmetic: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype";
-        throw std::runtime_error(errorMsg);
+        errorMsg += " Arithmetic: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype";
+        throw StmtException(errorMsg,getStmtInfo());
     }
-    if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw std::runtime_error("operands must be numeric");
+    if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw StmtException("operands must be numeric",this->stmtLocationInfo);
     if (!(operation == "+" || operation == "-" || operation == "*" || operation == "/" || operation == "%")) {
-        throw std::runtime_error("Arithmetic: unsuported operator");
+        throw StmtException("Arithmetic: unsuported operator",getStmtInfo());
     }
 }
 

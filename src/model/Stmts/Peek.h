@@ -14,7 +14,7 @@ namespace SCAM {
 
     class Peek : public Expr, public Communication {
     public:
-        explicit Peek(SCAM::Port *port);
+        explicit Peek(SCAM::Port *port, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         void accept(StmtAbstractVisitor &visitor) override;
 

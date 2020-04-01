@@ -11,7 +11,7 @@
 namespace SCAM {
     class ParamOperand : public Operand {
     public:
-        explicit ParamOperand(Parameter *parameter);
+        explicit ParamOperand(Parameter *parameter, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         virtual ~ParamOperand() = default;
 

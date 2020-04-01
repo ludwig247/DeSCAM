@@ -312,40 +312,20 @@ namespace SCAM {
 
     //! Methods that translates a Clang::Stmt into a SCAM::Stmt
     SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
-        auto locStartVec = SCAM::GlobalUtilities::stringSplit(
-                clangStmt->getLocStart().printToString(ci.getSourceManager()), ':');
-        auto locEndVec = SCAM::GlobalUtilities::stringSplit(
-                clangStmt->getLocEnd().printToString(ci.getSourceManager()), ':');
-        auto fileDir = locStartVec[0];
-        auto rowStartNum = std::stoi(locStartVec[1]);
-        auto rowEndNum = std::stoi(locEndVec[1]);
-        auto colStartNum = std::stoi(locStartVec[2]);
-        auto colEndNum = std::stoi(locEndVec[2]);
-        auto message = "";
-        if (colEndNum < colStartNum && rowStartNum == rowEndNum) colEndNum = colStartNum + 1;
-        if (rowEndNum < rowStartNum) rowEndNum = rowStartNum;
-        SCAM::StmtLocationInfo stmtLocationInfo(fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
-        auto severityLevel = SCAM::LoggerMsg::SeverityLevel::Error;
-        auto violationType = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;
-        SCAM::FindDataFlow dataFlow(clangStmt, module, false);
+        // traverse clang stmt and create its equivalent descam stmt
+        SCAM::FindDataFlow dataFlow(clangStmt, module, ci, false);
         //Is stmt properly initialized?
         auto descamStmt = dataFlow.getStmt();
         if (!descamStmt) {
             //Get the source code as string
-            std::string stmt = clang::Lexer::getSourceText(
-                    clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
-                    ci.getSourceManager(), ci.getLangOpts()).str();
+//            std::string stmt = clang::Lexer::getSourceText(
+//                    clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
+//                    ci.getSourceManager(), ci.getLangOpts()).str();
 
             //Get the ast for the stms as string
 //            std::string msgAST;
 //            llvm::raw_string_ostream ss(msgAST);
 //            clangStmt->dump(ss, ci.getSourceManager());
-
-            //Add msg to Logger
-            SCAM::LoggerMsg loggerMsg(message, stmt, stmtLocationInfo, severityLevel, violationType);
-            SCAM::Logger::addMsg(loggerMsg);
-        } else {
-            descamStmt->setStmtInfo(stmtLocationInfo);
         }
         return dataFlow.getStmt();
     }

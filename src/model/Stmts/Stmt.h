@@ -41,12 +41,12 @@ namespace SCAM {
 
         virtual std::ostream &print(std::ostream &) const = 0;
 
-        const StmtLocationInfo& getStmtInfo() {return this->stmtInfo;};
+        const StmtLocationInfo& getStmtInfo() {return this->stmtLocationInfo;};
 
-        void setStmtInfo(StmtLocationInfo& info){ this->stmtInfo = info;};
+        void setStmtInfo(StmtLocationInfo& info){ this->stmtLocationInfo = info;};
 
-    private:
-        StmtLocationInfo stmtInfo;
+    protected:
+        StmtLocationInfo stmtLocationInfo;
     };
 
 }

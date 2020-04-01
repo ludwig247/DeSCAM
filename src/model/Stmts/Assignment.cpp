@@ -5,17 +5,20 @@
 #include "Assignment.h"
 #include "PrintStmt.h"
 #include <iostream>
+#include <utility>
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
-SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs) :
+SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs, StmtLocationInfo stmtLocationInfo) :
         lhs(lhs),
         rhs(rhs) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (lhs == nullptr && rhs != nullptr) {
-        throw std::runtime_error("Assignment: LHS is null");
+        throw SCAM::StmtException("Assignment: LHS is null",this->stmtLocationInfo);
     } else if (lhs != nullptr && rhs == nullptr) {
-        throw std::runtime_error("Assignment: RHS is null");
+        throw SCAM::StmtException("Assignment: RHS is null",this->stmtLocationInfo);
     } else if (lhs == nullptr && rhs == nullptr) {
-        throw std::runtime_error("Assignment: RHS && LHS is null");
+        throw SCAM::StmtException("Assignment: RHS && LHS is null",this->stmtLocationInfo);
     }
 
     if (lhs->getDataType() != rhs->getDataType()) {
@@ -23,20 +26,20 @@ SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs) :
         ss << "ERROR: " << lhs->getDataType()->getName() << " != " << rhs->getDataType()->getName();
         ss << " in assignment: " << PrintStmt::toString(lhs) << " = " << PrintStmt::toString(rhs) << std::endl;
         ss << "Assignment: differnt DataTypes not allowed!";
-        throw std::runtime_error(ss.str());
+        throw SCAM::StmtException(ss.str(),this->stmtLocationInfo);
     }
 
     if (NodePeekVisitor::nodePeekArrayOperand(lhs)) {
         std::string msg = "ERROR:\n";
         msg += "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index\n";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
-        throw std::runtime_error(msg);
+        throw SCAM::StmtException(msg,this->stmtLocationInfo);
     }
     if (NodePeekVisitor::isConstTypeNode(lhs)) {
         std::string msg = "ERROR:\n";
         msg += "LHS of assignemnt has to be a variable\n";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
-        throw std::runtime_error(msg);
+        throw SCAM::StmtException(msg,this->stmtLocationInfo);
     }
 }
 

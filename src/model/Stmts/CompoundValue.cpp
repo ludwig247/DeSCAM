@@ -7,15 +7,17 @@
 #include "CompoundValue.h"
 #include "PrintStmt.h"
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
-SCAM::CompoundValue::CompoundValue(const std::vector<ConstValue *> &values, const SCAM::DataType *dataType) : ConstValue(dataType) {
+SCAM::CompoundValue::CompoundValue(const std::vector<ConstValue *> &values, const SCAM::DataType *dataType, StmtLocationInfo stmtLocationInfo) : ConstValue(dataType) {
+    this->stmtLocationInfo = stmtLocationInfo;
     assert(dataType != nullptr);
-    if (!dataType->isCompoundType() && !dataType->isArrayType())throw std::runtime_error("Type " + dataType->getName() + "is not a compound type");
+    if (!dataType->isCompoundType() && !dataType->isArrayType())throw SCAM::StmtException("Type " + dataType->getName() + "is not a compound type",this->stmtLocationInfo);
     auto subTypes = dataType->getSubVarMap();
-    if (subTypes.size() != values.size()) throw std::runtime_error("Wrong number of values specified for compound value");
+    if (subTypes.size() != values.size()) throw SCAM::StmtException("Wrong number of values specified for compound value",this->stmtLocationInfo);
     int i = 0;
     for (auto subType : subTypes) {
-        if (subType.second != values[i]->getDataType()) throw std::runtime_error("Wrong datatype for compound value");
+        if (subType.second != values[i]->getDataType()) throw SCAM::StmtException("Wrong datatype for compound value",this->stmtLocationInfo);
         this->values.insert(std::make_pair(subType.first, values[i]));
         i++;
     }
