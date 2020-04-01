@@ -132,9 +132,7 @@ void SCAM::ExprVisitor::visit(SCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     node.getArrayOperand()->accept(*this);
     this->usedOperands.insert(node.getArrayOperand());
-
 }
-
 
 void SCAM::ExprVisitor::visit(struct Read &node) {
     throw std::runtime_error("ExprVisitor::Read not implemented");

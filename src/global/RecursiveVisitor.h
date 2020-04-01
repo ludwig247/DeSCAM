@@ -10,7 +10,9 @@
 namespace SCAM{
     //! Visits a SCAM::Stmt recursively until all leaf nodes are reached. This class should be used a base for all recursive visitors
     class RecursiveVisitor: public StmtAbstractVisitor {
+    public:
         RecursiveVisitor() = default;
+        RecursiveVisitor(Stmt * stmt);
         ~RecursiveVisitor() = default;
 
     public:

@@ -19,6 +19,7 @@
 #include "../parser/CommandLineParameter.h"
 #include <thread>
 #include <CreatePropertySuite.h>
+#include <OperationOptimizations/TernaryOptimizer.h>
 
 namespace SCAM {
     OperationFactory::OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module *module) :
@@ -179,6 +180,22 @@ namespace SCAM {
                 }
             }
         }
+        for(auto op : operations){
+            std::vector<Assignment*> newCommList;
+            for(auto stmt: op->getCommitmentList()){
+                TernaryOptimizer ternaryOptimizer(stmt);
+                if(!ExprVisitor::getUsedTernaryOperators(stmt->getRhs()).empty()) {
+                    std::cout << "OLD:\t " << *stmt << std::endl;
+                    std::cout << "NEW:\t " << *ternaryOptimizer.getStmt() << std::endl;
+                    std::cout << "---" << std::endl;
+                }
+                if(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt())){
+                    newCommList.push_back(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt()));
+                }else throw std::runtime_error("Commitment has to be a statement");
+            }
+            op->setCommitmentsList(newCommList);
+        }
+
 
 
         for (auto op : operations) {

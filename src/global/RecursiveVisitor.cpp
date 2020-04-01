@@ -163,4 +163,8 @@ void SCAM::RecursiveVisitor::visit(SCAM::Ternary &node) {
     node.getFalseExpr()->accept(*this);
 }
 
+SCAM::RecursiveVisitor::RecursiveVisitor(SCAM::Stmt *stmt) {
+    stmt->accept(*this);
+}
+
 
