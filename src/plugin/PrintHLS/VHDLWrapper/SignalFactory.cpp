@@ -8,16 +8,16 @@
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
-const std::set<std::tuple<std::string, std::string, std::string>> HANDSHAKING_PROTOCOL_SIGNALS = {
-        {"start", "bool", "in"},
-        {"done", "bool", "out"},
-        {"idle", "bool", "out"},
-        {"ready", "bool", "out"}
+static const std::set<std::tuple<std::string, std::string, std::string>> HANDSHAKING_PROTOCOL_SIGNALS = {
+        std::make_tuple("start", "bool", "in"),
+        std::make_tuple("done", "bool", "out"),
+        std::make_tuple("idle", "bool", "out"),
+        std::make_tuple("ready", "bool", "out")
 };
 
-const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNALS = {
-        {"clk", "bool", "in"},
-        {"rst", "bool", "in"}
+static const std::set<std::tuple<std::string, std::string, std::string>> CONTROL_SIGNALS = {
+        std::make_tuple("clk", "bool", "in"),
+        std::make_tuple("rst", "bool", "in")
 };
 
 SignalFactory::SignalFactory(

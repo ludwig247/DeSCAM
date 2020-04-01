@@ -24,7 +24,6 @@ OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper,
     mapOutputRegistersToOutput();
     modifyCommitmentLists();
     findOperationModuleSignals();
-    // arraySlicing();
 }
 
 bool OptimizerHLS::hasOutputReg(DataSignal* dataSignal) {
