@@ -59,6 +59,7 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
         auto lhsLocationInfo = getStmtInfo(lhs);
         this->lhsExpr = findLHS.getExpr();
         //RHS Operator
+        if(this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
         auto rhs = binaryOperator->getRHS();
         FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
         this->rhsExpr = findRHS.getExpr();
@@ -133,6 +134,22 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
         return false;
     }
     return true;
+}
+
+bool SCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator* conditionalOperator){
+    auto condOpLocationInfo = getStmtInfo(conditionalOperator);
+    FindDataFlow findCond(conditionalOperator->getCond(), this->module,ci, false);
+    auto condExpr = findCond.getExpr();
+    FindDataFlow findTrue(conditionalOperator->getTrueExpr(), this->module,ci, unsigned_flag);
+    auto trueExpr = findTrue.getExpr();
+    FindDataFlow findFalse(conditionalOperator->getFalseExpr(), this->module,ci, unsigned_flag);
+    auto falseExpr = findFalse.getExpr();
+    if(condExpr && trueExpr && falseExpr){
+    //conditionalOperator->dumpColor();
+    //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
+    this->expr = new Ternary(condExpr,trueExpr,falseExpr,condOpLocationInfo);
+    }else return exitVisitor("Operator not correctly used!",condOpLocationInfo);
+    return false;
 }
 
 bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memberCallExpr) {

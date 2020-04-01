@@ -3,6 +3,10 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
+#ifndef STOP_BIT
+    #define STOP_BIT 1
+#endif
+
 SC_MODULE(Uart_tx)
 {
     blocking_in<unsigned int> data_in;
@@ -17,8 +21,8 @@ SC_MODULE(Uart_tx)
         TRANSMITTING_START, 
         TRANSMITTING_DATA,
         TRANSMITTING_PARITY,
-        TRANSMITTING_STOP,
-        TRANSMITTING_STOP_SECOND};
+        TRANSMITTING_STOP};//,
+        //TRANSMITTING_STOP_SECOND};
     Sections section, nextsection;
 
     tx_control_out_t control_req;
@@ -55,9 +59,9 @@ SC_MODULE(Uart_tx)
                 control_in->master_read(control_req,"IDLE_GET_CONTROL");
                 
                 txd->try_write(STOP_BIT,success,"IDLE_WRITE_STOP");
-                if (control_req.active && success)// && success_data)
+                if (control_req.active && success)
                 {
-                     data_in->try_read(data,success,"IDLE_GET_DATA");
+                    data_in->try_read(data,success,"IDLE_GET_DATA");
                     if (success)
                     {
                         //std::cout << "TX: got data!" << std::endl;
@@ -95,8 +99,20 @@ SC_MODULE(Uart_tx)
             {
                 next_bit = get_parity(data);
                 txd->write(next_bit,"TRANSMITTING_PARITY");
-                nextsection = TRANSMITTING_STOP;
-                config_in->master_read(config);
+                //nextsection = TRANSMITTING_STOP;
+                config_in->master_read(config);   
+                if (!config.two_stop_bits)  
+                {             
+                    control_resp.ready = true;
+                    nextsection = IDLE;
+                    //std::cout << ".... TX: READY EVENT" << std::endl;
+                    control_out->master_write(control_resp,"TRANSMITTING_STOP");
+                }
+                else
+                {
+                    nextsection = TRANSMITTING_STOP;
+                }
+                
             }
             else if (section == TRANSMITTING_STOP)
             {
@@ -104,7 +120,11 @@ SC_MODULE(Uart_tx)
                 if (config.two_stop_bits)
                 {
                     txd->write(STOP_BIT,"TRANSMITTING_STOP_FIRST");
-                    nextsection = TRANSMITTING_STOP_SECOND;
+                    control_resp.ready = true;  
+                    nextsection = IDLE;
+                    //std::cout << ".... TX: READY EVENT" << std::endl;
+                    control_out->master_write(control_resp,"TRANSMITTING_STOP_SECOND");
+                    //nextsection = TRANSMITTING_STOP_SECOND;
                 }
                 else
                 {
@@ -114,14 +134,14 @@ SC_MODULE(Uart_tx)
                     control_out->master_write(control_resp,"TRANSMITTING_STOP");
                 }
             }
-            else if (section == TRANSMITTING_STOP_SECOND)
-            {
+            //else if (section == TRANSMITTING_STOP_SECOND)
+            //{
                 //TODO: this should be send along t with the first stop bit ... is that correct? I'd expect another txd_write
-                control_resp.ready = true;  
-                nextsection = IDLE;
-                //std::cout << ".... TX: READY EVENT" << std::endl;
-                control_out->master_write(control_resp,"TRANSMITTING_STOP_SECOND");
-            }
+                    // control_resp.ready = true;  
+                    // nextsection = IDLE;
+                    // //std::cout << ".... TX: READY EVENT" << std::endl;
+                    // control_out->master_write(control_resp,"TRANSMITTING_STOP_SECOND");
+            //}
             //wait(SC_ZERO_TIME); //FIXME: don't use anymore
         }
     }

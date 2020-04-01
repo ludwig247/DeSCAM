@@ -107,7 +107,6 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         this->addFunctions(module, scparModule.second);
         //Processe
         this->addBehavior(module, scparModule.second);
-
         //this->addCommunicationFSM(module);
     }
 }
@@ -297,23 +296,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     }
 
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
-
-
-    //Print out error msgs
-    if (Logger::hasError()) {
-        std::cout << "" << std::endl;
-        std::cout << "======================" << std::endl;
-        std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
-        std::cout << "----------------------" << std::endl;
-/*        for (auto item: Logger::getInstance().getErrorList()) {
-            std::cout << "- " << item.statement << std::endl;
-            for (auto log: item.errorMsgs) {
-                std::cout << "\t" << "-" << log.first << "- " << log.second.first << std::endl;
-            }
-        }
-        Logger::clear();
-        */
-    }
+    //TODO if errors found terminate
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
@@ -334,6 +317,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         PropertyFactory propertyFactory(module);
         module->setPropertySuite(propertyFactory.getPropertySuite());
     }
+
 
 }
 

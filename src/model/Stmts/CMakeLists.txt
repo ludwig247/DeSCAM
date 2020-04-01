@@ -40,4 +40,7 @@ add_library(Stmts SHARED
         Peek.cpp
         ArrayExpr.cpp
         TimePointOperand.cpp
-        StmtLocationInfo.cpp StmtException.cpp)
+        Ternary.cpp
+        StmtLocationInfo.cpp
+        StmtException.cpp)
+

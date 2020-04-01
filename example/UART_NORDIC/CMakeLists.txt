@@ -1,4 +1,4 @@
-add_library(uart_ashild
+add_library(NORDIC
         sc_main.cpp
         Stimuli.h Uart.h
         Uart_control.h

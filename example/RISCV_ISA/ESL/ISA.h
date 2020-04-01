@@ -249,6 +249,7 @@ void ISA::run() {
 #ifdef LOGTOFILE
                 cout << "S3: @AL: Result = 0x" << hex << aluResult << "(hex) = " << dec << aluResult << "(dec)" << endl;
 #endif
+
                 //Set up write back
                 regfileWrite.dst = getRdAddr(encodedInstr);
                 regfileWrite.dstData = aluResult; //Compute result

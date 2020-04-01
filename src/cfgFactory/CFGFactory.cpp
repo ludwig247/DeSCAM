@@ -28,8 +28,8 @@ namespace SCAM {
         this->translateToScamCFG();
     }
 
-    CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl, clang::CompilerInstance &ci, Module *module,
-                           bool sourceModule) :
+    CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl, clang::CompilerInstance &ci, Module *module, bool sourceModule) :
+
             sourceModule(sourceModule),
             methodDecl(nullptr),
             ci(ci),
@@ -55,8 +55,8 @@ namespace SCAM {
  */
     void CFGFactory::translateToScamCFG() {
 
-//        clang::LangOptions LO;
-//        LO.CPlusPlus = true;
+        clang::LangOptions LO;
+        LO.CPlusPlus = true;
 //        clangCFG->dump(LO, true);
 
         clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
@@ -235,9 +235,14 @@ namespace SCAM {
                         traverseBlocks(falseSucc, cfgNode);
                         //Both succeors have no terminators:
                     } else {
-                        std::cout << "-W- Please check AML for correct translation"
-                                  << std::endl; //TODO: is this acutally valid?
-                        traverseBlocks(trueSucc, cfgNode);
+                        //ConditionalOperator x = cond ? trueVal : falseVal
+                        if (block->getTerminator().getStmt()->getStmtClass() == clang::Stmt::ConditionalOperatorClass) {
+                            //Jump over conditional expressions
+                            traverseBlocks(trueSucc, cfgNode);
+                        } else {
+                            std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
+                            trueSucc->dump(clangCFG, {}, true);
+                        }
                         //throw std::runtime_error(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
                     }
 
@@ -313,20 +318,7 @@ namespace SCAM {
     //! Methods that translates a Clang::Stmt into a SCAM::Stmt
     SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
         // traverse clang stmt and create its equivalent descam stmt
-        SCAM::FindDataFlow dataFlow(clangStmt, module, ci, false);
-        //Is stmt properly initialized?
-        auto descamStmt = dataFlow.getStmt();
-        if (!descamStmt) {
-            //Get the source code as string
-//            std::string stmt = clang::Lexer::getSourceText(
-//                    clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
-//                    ci.getSourceManager(), ci.getLangOpts()).str();
-
-            //Get the ast for the stms as string
-//            std::string msgAST;
-//            llvm::raw_string_ostream ss(msgAST);
-//            clangStmt->dump(ss, ci.getSourceManager());
-        }
+        SCAM::FindDataFlow dataFlow(clangStmt, module,ci, false);
         return dataFlow.getStmt();
     }
 
@@ -353,8 +345,7 @@ namespace SCAM {
                     succ = currentBlock->getSuccessorList()[0];
                 }
                     //OR
-                else if (currentBlock->getSuccessorList().at(0) ==
-                         currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
+                else if (currentBlock->getSuccessorList().at(0) == currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[1];
                 } else {
                     std::cout << currentBlock->print() << std::endl;

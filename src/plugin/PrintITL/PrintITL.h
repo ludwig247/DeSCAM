@@ -34,7 +34,6 @@ private:
     std::string functions();
 
     std::string globalFunctions();
-
     std::string convertDataType(std::string dataTypeName);
 
     std::string location(bool loc);
@@ -52,6 +51,7 @@ private:
 
 //        std::string hideConstants();
     SCAM::Module *module;
+    Model *model;
 };
 
 
