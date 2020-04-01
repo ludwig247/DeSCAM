@@ -564,6 +564,25 @@ namespace SCAM {
         return check;
     }
 
+
+    void ReconstructOperations::simplifyTernary( SCAM::Operation * operation ) {
+            for(auto assign: operation->getCommitmentList()){
+                assign->accept(*this);
+            }
+
+          std::vector<Assignment*> newCommList;
+          for (const auto &var : this->variableMap) {
+            if (this->variableAssignmentMap.find(var.first) != this->variableAssignmentMap.end()) {
+                newCommList.push_back(new Assignment(var.second, this->variableAssignmentMap.at(var.first)));
+            } else {
+                if (std::find(this->dpSignalsList.begin(), this->dpSignalsList.end(), var.first) == this->dpSignalsList.end()) /// variable is NOT a port signal
+                    newCommList.push_back(new Assignment(var.second, var.second));
+            }
+        }
+          operation->setCommitmentsList(newCommList);
+
+    }
+
     void ReconstructOperations::visit(ArrayExpr &node) {
         std::map<std::string, Expr *> valueMap;
         for (auto val: node.getValueMap()) {
@@ -585,11 +604,17 @@ namespace SCAM {
     void SCAM::ReconstructOperations::visit(SCAM::Ternary &node) {
         node.getCondition()->accept(*this);
         auto cond = this->newExpr;
+
+        if(*node.getCondition() == BoolValue(true)){
+            std::cout << "YES" << std::endl;
+        }
+
         node.getTrueExpr()->accept(*this);
         auto trueExpr = this->newExpr;
         node.getFalseExpr()->accept(*this);
         auto falseExpr = this->newExpr;
         //Create new stmt
+
         this->newExpr = new SCAM::Ternary(cond, trueExpr, falseExpr);
     }
 }
