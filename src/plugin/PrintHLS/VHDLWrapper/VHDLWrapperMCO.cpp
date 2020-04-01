@@ -2,8 +2,9 @@
 // Created by johannes on 02.11.19.
 //
 
+#include "PrintCondition.h"
+#include "PrintFunction.h"
 #include "PrintReset.h"
-#include "PrintStatement.h"
 #include "Utilities.h"
 #include "VHDLWrapperMCO.h"
 
@@ -236,7 +237,7 @@ void VHDLWrapperMCO::monitor(std::stringstream &ss) {
             ss << "true";
         }
         for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {
-            ss << PrintStatement::toString(*expr, true);
+            ss << PrintCondition::toString(*expr);
             if (std::next(expr) != exprList.end()) {
                 ss << " and ";
             }
@@ -504,7 +505,7 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
         for (const auto &expr : arrayPort.second) {
             ss << "\t\t\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
-               << PrintStatement::toString(expr, false) << ")));\n";
+               << PrintFunction::toString(expr) << ")));\n";
             exprNumber++;
         }
     }

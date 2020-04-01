@@ -168,7 +168,7 @@ bool PrintBitOperations::sliceWithoutShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
         std::set<StmtType > types;
         for (auto &child : node->child) {
-            if (child->type == StmtType::UNSIGNED_VALUE) {
+            if (child->type == StmtType::UNSIGNED_VALUE || child->type == StmtType::INTEGER_VALUE) {
                 unsigned int firstBit;
                 unsigned int lastBit;
                 if (!getRange(child->value, firstBit, lastBit)) {
@@ -180,7 +180,7 @@ bool PrintBitOperations::sliceWithoutShift(Node *node) {
             }
             types.insert(child->type);
         }
-        if (types.find(StmtType::UNSIGNED_VALUE) == types.end()) {
+        if (types.find(StmtType::UNSIGNED_VALUE) == types.end() && types.find(StmtType::INTEGER_VALUE) == types.end()) {
             return false;
         }
         if (types.find(StmtType::VARIABLE_OPERAND) == types.end() && types.find(StmtType::PARAM_OPERAND) == types.end() && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end())
@@ -199,8 +199,17 @@ bool PrintBitOperations::shiftWithConstant(Node *node) {
             std::set<StmtType > types;
             for (auto &child : node->child) {
                 types.insert(child->type);
+                if (child->type == StmtType::UNSIGNED_VALUE || child->type == StmtType::INTEGER_VALUE) {
+                    if (node->subType == SubTypeBitwise::RIGHT_SHIFT) {
+                        node->lastBit = 31;
+                        node->firstBit = static_cast<int>(child->value);
+                    } else {
+                        node->lastBit = 31 - static_cast<int>(child->value);
+                        node->firstBit = 0;
+                    }
+                }
             }
-            if (types.find(StmtType::UNSIGNED_VALUE) == types.end()) {
+            if (types.find(StmtType::UNSIGNED_VALUE) == types.end() && types.find(StmtType::INTEGER_VALUE) == types.end()) {
                 return false;
             }
             if (types.find(StmtType::VARIABLE_OPERAND) == types.end() && types.find(StmtType::PARAM_OPERAND) == types.end() && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end())
@@ -222,15 +231,8 @@ std::string PrintBitOperations::getString(Node *node) {
     int offset = 0;
     if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
         for (auto &child : node->child) {
-            if (child->type == StmtType::UNSIGNED_VALUE) {
-                offset = (node->subType == SubTypeBitwise::RIGHT_SHIFT) ?
-                         static_cast<int>(child->value) :
-                         -static_cast<int>(child->value);
-            }
-        }
-        for (auto &child : node->child) {
             if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND || child->type == StmtType::DATA_SIGNAL_OPERAND) {
-                ss << child->name << "(31 downto " << offset << ")";
+                ss << child->name << "(" << node->lastBit << " downto " << node->firstBit << ")";
             }
         }
     } else {
@@ -253,7 +255,7 @@ std::string PrintBitOperations::getString(Node *node) {
             }
         }
         for (auto &child : node->child) {
-            if (child->type == StmtType::UNSIGNED_VALUE) {
+            if (child->type == StmtType::UNSIGNED_VALUE || child->type == StmtType::INTEGER_VALUE) {
                 ss << (offset + node->lastBit) << " downto " << (node->firstBit + offset) << ")";
             }
         }

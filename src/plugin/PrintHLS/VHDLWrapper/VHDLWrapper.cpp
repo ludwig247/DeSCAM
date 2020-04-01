@@ -4,9 +4,10 @@
 
 #include "ExprVisitor.h"
 #include "PrintReset.h"
-#include "PrintStatement.h"
+#include "PrintCondition.h"
 #include "Utilities.h"
 #include "VHDLWrapper.h"
+#include "PrintFunction.h"
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
 
@@ -198,12 +199,12 @@ void VHDLWrapper::functions(std::stringstream &ss) {
                     ss << "elsif ";
                 }
                 for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
-                    ss << PrintStatement::toString(*cond, true);
+                    ss << PrintFunction::toString(*cond);
                     if (cond != --retValData->second.end()) ss << " and ";
                 }
                 ss << " then ";
             }
-            ss << PrintStatement::toString(retValData->first, false) << ";\n";
+            ss << PrintFunction::toString(retValData->first) << ";\n";
         }
         if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
         ss << "\tend " + func->getName() + ";\n\n";
@@ -268,7 +269,7 @@ std::string VHDLWrapper::sensitivityList() {
 
     sensitivityListStream << "active_state";
     for (const auto& syncSignals : sensListSyncSignals) {
-        sensitivityListStream << ", " << PrintStatement::toString(syncSignals, false);
+        sensitivityListStream << ", " << PrintFunction::toString(syncSignals);
     }
 
     for (const auto& dataSignals : sensListDataSignals) {
@@ -286,10 +287,10 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
     for (const auto& statement : propertySuiteHelper->getResetStatements()) {
         auto printResetValue = PrintResetSignal(statement, variable->getName());
         if (printResetValue.toString()) {
-            return PrintStatement::toString(statement->getRhs(), false);
+            return PrintFunction::toString(statement->getRhs());
         }
     }
-    return PrintStatement::toString(variable->getInitialValue(), false);
+    return PrintFunction::toString(variable->getInitialValue());
 }
 
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
@@ -297,10 +298,10 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
     for (const auto& statement : propertySuiteHelper->getResetStatements()) {
         auto printResetValue = PrintResetSignal(statement, dataSignal->getFullName());
         if (printResetValue.toString()) {
-            return PrintStatement::toString(statement->getRhs(), false);
+            return PrintFunction::toString(statement->getRhs());
         }
     }
-    return PrintStatement::toString(dataSignal->getInitialValue(), false);
+    return PrintFunction::toString(dataSignal->getInitialValue());
 }
 
 void VHDLWrapper::printConstantOutputs(std::stringstream &ss)

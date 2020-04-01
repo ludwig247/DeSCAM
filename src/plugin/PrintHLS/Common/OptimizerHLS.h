@@ -5,7 +5,6 @@
 #ifndef SCAM_UTILITIES_HLS_H
 #define SCAM_UTILITIES_HLS_H
 
-#include <optional>
 #include <list>
 #include <memory>
 #include <set>
@@ -14,6 +13,11 @@
 #include "PropertySuiteHelper.h"
 
 namespace SCAM { namespace HLSPlugin {
+
+    struct optional {
+        bool valid = false;
+        Assignment* value = nullptr;
+    };
 
     class OptimizerHLS {
 
@@ -63,8 +67,9 @@ namespace SCAM { namespace HLSPlugin {
         void modifyCommitmentLists();
         bool isSelfAssignments(Assignment *assignment);
         bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
-        std::optional<Assignment *> replaceDataSignals(Assignment *assignment);
-        std::optional<Assignment *> replaceByOutputRegister(Assignment *assignment);
+
+        optional replaceDataSignals(Assignment *assignment);
+        optional replaceByOutputRegister(Assignment *assignment);
 
         void removeRedundantConditions();
         void mapOutputRegistersToOutput();

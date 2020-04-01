@@ -206,8 +206,7 @@ void PrintStatement::visit(Return &node) {
 
 void PrintStatement::visit(ParamOperand &node) {
     if (node.getParameter()->isSubVar()) {
-        this->ss << node.getParameter()->getParent()->getName() << "."
-            << node.getParameter()->getName();
+        this->ss << node.getParameter()->getParent()->getName() << "." << node.getParameter()->getName();
     }
     else {
         this->ss << node.getOperandName();

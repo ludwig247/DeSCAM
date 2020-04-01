@@ -192,12 +192,12 @@ void OptimizerHLS::modifyCommitmentLists() {
             }
             auto newAssignment = commitment;
             auto replacedAssignment = replaceDataSignals(newAssignment);
-            if (replacedAssignment) {
-                newAssignment = replacedAssignment.value();
+            if (replacedAssignment.valid) {
+                newAssignment = replacedAssignment.value;
             }
             replacedAssignment = replaceByOutputRegister(newAssignment);
-            if (replacedAssignment) {
-                newAssignment = replacedAssignment.value();
+            if (replacedAssignment.valid) {
+                newAssignment = replacedAssignment.value;
             }
             if (!isDuplicate(newAssignment, assignments)) {
                 assignments.push_back(newAssignment);
@@ -211,30 +211,30 @@ bool OptimizerHLS::isSelfAssignments(Assignment* assignment) {
     return (*assignment->getLhs() == *assignment->getRhs());
 }
 
-std::optional<Assignment *> OptimizerHLS::replaceDataSignals(Assignment* assignment) {
+optional OptimizerHLS::replaceDataSignals(Assignment* assignment) {
     if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
         auto dataSignal = dynamic_cast<DataSignalOperand *>(assignment->getLhs())->getDataSignal();
         for (const auto subVar : getSubVarMap(oldToNewDataSignalMap)) {
             if (dataSignal == subVar.first) {
                 auto newAssignment = new Assignment(new DataSignalOperand(subVar.second), assignment->getRhs());
-                return newAssignment;
+                return {true, newAssignment};
             }
         }
     }
-    return std::nullopt;
+    return {false, nullptr};
 }
 
-std::optional<Assignment *> OptimizerHLS::replaceByOutputRegister(Assignment* assignment) {
+optional OptimizerHLS::replaceByOutputRegister(Assignment* assignment) {
     if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
         auto dataSignal = dynamic_cast<DataSignalOperand *>(assignment->getLhs())->getDataSignal();
         for (const auto& subVar : getSubVarMap(registerToOutputMap)) {
             if (dataSignal == subVar.second) {
                 auto newAssigment = new Assignment(new VariableOperand(subVar.first), assignment->getRhs());
-                return newAssigment;
+                return {true, newAssigment};
             }
         }
     }
-    return std::nullopt;
+    return {false, nullptr};
 }
 
 bool OptimizerHLS::isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList) {

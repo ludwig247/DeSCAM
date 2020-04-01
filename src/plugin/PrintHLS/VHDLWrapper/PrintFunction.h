@@ -1,24 +1,23 @@
 //
-// Created by johannes on 10.09.19.
+// Created by johannes on 31.03.20.
 //
 
-#ifndef SCAM_VHDLPRINTVISITORHLS_H
-#define SCAM_VHDLPRINTVISITORHLS_H
+#ifndef DESCAM_PRINTFUNCTION_H
+#define DESCAM_PRINTFUNCTION_H
 
 #include <PrintStmt.h>
 
 namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-    class PrintStatement : public PrintStmt {
+    class PrintFunction : public PrintStmt {
     public:
-        PrintStatement() = default;
+        PrintFunction() = default;
 
-        explicit PrintStatement(SCAM::Stmt *stmt, bool printAssumption, unsigned int indentSize = 2, unsigned int indentOffset = 0);
-        static std::string toString(Stmt *stmt, bool printAssumption, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintFunction(SCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
     protected:
         bool useHexFlag = true;
-        bool printAssumption = false;
 
         void visit(Arithmetic &node) override ;
         void visit(ArrayOperand &node) override ;
@@ -30,6 +29,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
         void visit(DataSignalOperand &node) override ;
         void visit(FunctionOperand &node) override ;
         void visit(IntegerValue &node) override ;
+        void visit(ParamOperand &node) override ;
         void visit(Relational &node) override ;
         void visit(Return &node) override;
         void visit(SyncSignal &node) override ;
@@ -40,9 +40,8 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
         virtual std::string getString();
 
     private:
-
-        bool arithmeticOp = false;
         bool slice = false;
+        bool arithmeticOp = false;
         unsigned int firstBit = 0;
         unsigned int lastBit = 0;
 
@@ -51,4 +50,4 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
 }}}
 
-#endif //SCAM_VHDLPRINTVISITORHLS_H
+#endif //DESCAM_PRINTFUNCTION_H

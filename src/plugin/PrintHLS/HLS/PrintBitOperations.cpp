@@ -140,7 +140,7 @@ void PrintBitOperations::visit(VariableOperand &node) {
         suffix = "_tmp";
     }
     if (!isConstant && hlsOption == HLSOption::MCO) {
-        prefix = "out_";
+        prefix = "in_";
     }
 
     actualNode->type = StmtType::VARIABLE_OPERAND;

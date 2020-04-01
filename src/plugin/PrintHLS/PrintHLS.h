@@ -2,6 +2,15 @@
 // Created by schauss on 10.02.20.
 //
 
+/* TODO:
+- ITL property checking std_logic_vector to unsigned and signed [Bug]
+- reserved names in VHDL (ex. record for Function0) [Bug]
+- array handling [Feature]
+- global functions and global variables handling [Feature]
+- reset to input [Bug]
+- check Output Register (ex. Interconnect) [Bug]
+*/
+
 #ifndef DESCAM_PRINTHLS_H
 #define DESCAM_PRINTHLS_H
 

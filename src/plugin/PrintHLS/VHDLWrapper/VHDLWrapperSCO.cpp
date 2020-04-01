@@ -2,7 +2,8 @@
 // Created by johannes on 02.11.19.
 //
 
-#include "PrintStatement.h"
+#include "PrintCondition.h"
+#include "PrintFunction.h"
 #include "Utilities.h"
 #include "VHDLWrapperSCO.h"
 
@@ -208,7 +209,7 @@ void VHDLWrapperSCO::monitor(std::stringstream &ss) {
             ss << "true";
         }
         for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {
-            ss << PrintStatement::toString(*expr, true);
+            ss << PrintCondition::toString(*expr);
             if (std::next(expr) != exprList.end()) {
                 ss << " and ";
             }
@@ -347,7 +348,7 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
         for (const auto &expr : arrayPort.second) {
             ss << "\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
-               << PrintStatement::toString(expr, false) << ")));\n";
+               << PrintFunction::toString(expr) << ")));\n";
             exprNumber++;
         }
     }

@@ -2,15 +2,6 @@
 // Created by schauss on 10.02.20.
 //
 
-/* TODO:
-- check Output Register (ex. Interconnect)
-- VHDL Wrapper change from std_logic_vector and std_logic to unsigned, signed and boolean for arithmetic ops
-- reserved names in VHDL (ex. record for Function0)
-- array handling
-- SCO: reset to input
-- global functions and global variables handling
-*/
-
 #include "PrintHLS.h"
 #include "OptimizerHLS.h"
 #include "HLS.h"
