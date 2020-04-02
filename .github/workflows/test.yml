@@ -33,7 +33,7 @@ jobs:
       - name: Run Tests
         run: |
           $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
-          $SCAM_HOME/bin/PrintSkeleton_Test_Run
+          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
       - name: Clean up
         run: rm -rf $GITHUB_WORKSPACE/build
 
