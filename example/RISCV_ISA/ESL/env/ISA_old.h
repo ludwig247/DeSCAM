@@ -729,5 +729,4 @@ unsigned int ISA::getEncUALUresult(unsigned int encodedInstr, unsigned int pcReg
     }
 }
 
-
 #endif //RISCV_ISA_H_
