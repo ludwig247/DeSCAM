@@ -10,9 +10,11 @@
 namespace SCAM{
 class TernaryOptimizer: public RecursiveVisitor {
 public:
-        TernaryOptimizer(Stmt * stmt);
+    explicit TernaryOptimizer(Stmt * stmt);
 
     Stmt *getStmt() const;
+
+    Expr *getExpr() const;
 
 private:
     virtual void visit(struct VariableOperand &node);
@@ -85,8 +87,8 @@ private:
 
     virtual void visit(struct Ternary &node);
 
-    Expr *  expr;
-    Stmt * stmt;
+    Expr *  expr = nullptr;
+    Stmt * stmt = nullptr;
 };
 }
 

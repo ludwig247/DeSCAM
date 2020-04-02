@@ -184,11 +184,6 @@ namespace SCAM {
             std::vector<Assignment*> newCommList;
             for(auto stmt: op->getCommitmentList()){
                 TernaryOptimizer ternaryOptimizer(stmt);
-                if(!ExprVisitor::getUsedTernaryOperators(stmt->getRhs()).empty()) {
-                    std::cout << "OLD:\t " << *stmt << std::endl;
-                    std::cout << "NEW:\t " << *ternaryOptimizer.getStmt() << std::endl;
-                    std::cout << "---" << std::endl;
-                }
                 if(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt())){
                     newCommList.push_back(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt()));
                 }else throw std::runtime_error("Commitment has to be a statement");
@@ -196,11 +191,26 @@ namespace SCAM {
             op->setCommitmentsList(newCommList);
         }
 
-
-
         for (auto op : operations) {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
             op->setCommitmentsList(assignmentOptimizer2.getNewAssignmentsList());
+        }
+
+        for(auto op : operations){
+            std::vector<Expr*> newAssumptionList;
+            for(auto stmt: op->getAssumptionsList()){
+                TernaryOptimizer ternaryOptimizer(stmt);
+
+                if(op->getId() == 75){
+                    std::cout << "OLD:\t " << *stmt << std::endl;
+                    std::cout << "NEW:\t " << *ternaryOptimizer.getExpr() << std::endl;
+                    TernaryOptimizer ternaryOptimizer(stmt);
+                }
+                if(ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean() ){
+                    newAssumptionList.push_back(ternaryOptimizer.getExpr());
+                }else throw std::runtime_error("Assumption has to be boolean");
+            }
+            op->setAssumptionsList(newAssumptionList);
         }
 
     }

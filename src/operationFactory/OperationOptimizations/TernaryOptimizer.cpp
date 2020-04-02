@@ -4,7 +4,7 @@
 
 #include "TernaryOptimizer.h"
 
-SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt) {
+SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt){
     stmt->accept(*this);
 }
 
@@ -54,7 +54,7 @@ void SCAM::TernaryOptimizer::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
     auto unaryExpr = this->expr;
 
-    if( (*  node.getExpr() == *unaryExpr)){
+    if( (*node.getExpr() == *unaryExpr)){
         this->expr = &node;
     }else{
         this->expr = new UnaryExpr(node.getOperation(),unaryExpr);
@@ -237,16 +237,27 @@ void SCAM::TernaryOptimizer::visit(struct TimePointOperand &node) {
 
 void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
 
-    node.getCondition()->accept(*this);
-    auto condExpr = this->expr;
+
     node.getTrueExpr()->accept(*this);
     auto trueExpr = this->expr;
     node.getFalseExpr()->accept(*this);
     auto falseExpr = this->expr;
+    node.getCondition()->accept(*this);
+    auto condExpr = this->expr;
 
     if(*condExpr == BoolValue(true)){
         this->expr = trueExpr;
     }else if(*condExpr == BoolValue(false)){
         this->expr = falseExpr;
-    }else this->expr = &node;
+    }else{
+        if(*node.getTrueExpr() == *trueExpr && *node.getFalseExpr() == *falseExpr && *node.getCondition() == *condExpr ){
+            this->expr = &node;
+        }else{
+            this->expr = new Ternary(condExpr,trueExpr,falseExpr);
+        }
+    }
+}
+
+SCAM::Expr *SCAM::TernaryOptimizer::getExpr() const {
+    return expr;
 }
