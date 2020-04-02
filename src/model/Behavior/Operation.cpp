@@ -22,7 +22,7 @@ namespace SCAM {
         return this->resetOperation;
     }
 
-    bool SCAM::Operation::IsWait() {
+    bool SCAM::Operation::IsWait() const{
         return this->waitOperation;
     }
 

@@ -1,9 +1,23 @@
 //
 // Created by ludwig on 27.10.16.
 //
-#include <fstream>
 
+#include "ConditionVisitor.h"
+#include "DatapathVisitor.h"
 #include "PrintITL.h"
+
+
+using namespace SCAM;
+
+PrintITL::PrintITL()
+{
+    if (getOptionMap().at("hls-sco") || getOptionMap().at("hls-mco")) {
+        macroFunction = std::bind(&PrintITL::macrosForHLS, this);
+    }
+    else {
+        macroFunction = std::bind(&PrintITL::macros, this);
+    }
+}
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     this->model = node;
@@ -11,11 +25,12 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 
         this->module = module.second;
 
-        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macros()));
+        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macroFunction()));
         pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
         std::string funString = functions();
-        if (funString != "")
+        if (!funString.empty())
             pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
+
     }
 
     if(!node->getGlobalFunctionMap().empty()){
@@ -29,7 +44,7 @@ std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
 
     this->module = node;
 
-    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macros() + operations()));
+    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macroFunction() + operations()));
     pluginOutput.insert(std::make_pair(node->getName() + "_functions.vhi", functions()));
 
     return pluginOutput;
@@ -115,12 +130,23 @@ std::string PrintITL::convertDataType(std::string dataTypeName) {
     }
 }
 
+std::string PrintITL::convertDataTypeForHLS(std::string dataTypeName) {
+    if (dataTypeName == "bool") {
+        return "boolean";
+    } else if (dataTypeName == "int" || dataTypeName == "unsigned") {
+        return "std_logic_vector";
+    } else {
+        return dataTypeName;
+    }
+}
+
 std::string PrintITL::location(bool loc) {
     if (getOptionMap()["pipelined"]) {
         if (loc) return "(true)";
         else return "(false)";
     } else return "";
 }
+
 
 std::string PrintITL::printTemporalExpr(TemporalExpr* temporalExpr) {
 
@@ -171,13 +197,17 @@ std::string PrintITL::printProperty(Property *property) {
 
     if (!property->getTimePoints().empty()) {
         ss << "for timepoints:\n";
-        for (auto tp = property->getTimePointsOrdered().begin(); tp != property->getTimePointsOrdered().end(); tp++) {
-            ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
-            if (std::next(tp) != property->getTimePointsOrdered().end()) {
-                ss << ",\n";
+        if (getOptionMap().at("hls-mco")) {
+            ss << "\tt_end = t+t_min..t_max waits_for done_sig = '1';\n";
+        } else {
+            for (auto tp = property->getTimePointsOrdered().begin(); tp!=property->getTimePointsOrdered().end(); tp++) {
+                ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
+                if (std::next(tp)!=property->getTimePointsOrdered().end()) {
+                    ss << ",\n";
+                }
             }
+            ss << ";\n";
         }
-        ss << ";\n";
     }
 
     if (!property->getFreezeSignals().empty()) {
@@ -294,6 +324,74 @@ std::string PrintITL::operations() {
     return ss.str();
 }
 
+std::string PrintITL::macrosForHLS()
+{
+    PropertySuite* ps = this->module->getPropertySuite();
+    std::stringstream ss;
+
+    ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
+    for (auto sync: ps->getSyncSignals()) {
+        ss << "-- macro " << sync->getName() << " : " << convertDataTypeForHLS(sync->getDataType()->getName())
+           << " := end macro;" << std::endl;
+    }
+    for (auto notify: ps->getNotifySignals()) {
+        ss << "-- macro " << notify->getName() << " : " << convertDataTypeForHLS(notify->getDataType()->getName())
+           << " := end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- DP SIGNALS --" << std::endl;
+    for (auto dp: ps->getDpSignals()) {
+        if (dp->isCompoundType() || (dp->isSubVar() && dp->getParentDataType()->isArrayType())
+                || (!dp->isSubVar()) && !dp->isArrayType()) {
+            ss << "-- ";
+        }
+        ss << "macro ";
+        ss << dp->getFullName("_");
+        ss << " : " << convertDataTypeForHLS(dp->getDataType()->getName()) << " := ";
+        ss << dp->getFullName(".");
+        ss << " end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- CONSTRAINTS --" << std::endl;
+    // Reset constraint is print out extra because of the quotation marks ('0')
+    ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
+    for (auto co: ps->getConstraints()) {
+        if (co->getName()!="no_reset") {
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression())
+               << "; end constraint;" << std::endl;
+        }
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- VISIBLE REGISTERS --" << std::endl;
+    for (auto vr: ps->getVisibleRegisters()) {
+        if (vr->isCompoundType() || (vr->isSubVar() && vr->getParentDataType()->isArrayType())
+                || ((!vr->isSubVar()) && !vr->isArrayType())) {
+            ss << "-- ";
+        }
+        ss << "macro " << vr->getFullName("_");
+        ss << " : " << convertDataTypeForHLS(vr->getDataType()->getName()) << " := ";
+        ss << vr->getFullName(".");
+        ss << " end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- STATES --" << std::endl;
+    for (auto st: ps->getStates()) {
+        ss << "macro " << st->getName() << " : " << convertDataTypeForHLS(st->getDataType()->getName())
+           << " := " << "active_state = st_" << st->getName();
+        if (getOptionMap().at("hls-mco")) {
+            ss << " and (ready_sig = '1' or idle_sig = '1')";
+        }
+        ss << " end macro;\n";
+    }
+    ss << std::endl << std::endl;
+    return ss.str();
+}
+
+
 std::string PrintITL::globalFunctions() {
     std::stringstream ss;
     if (model->getGlobalFunctionMap().empty()) return ss.str();
@@ -359,4 +457,3 @@ std::string PrintITL::globalFunctions() {
     }
     return ss.str();
 }
-
