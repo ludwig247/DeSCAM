@@ -129,6 +129,7 @@ namespace SCAM {
         virtual void visit(Peek &node);
 
         virtual void visit(struct TimePointOperand &node);
+
         virtual void visit(struct Ternary &node);
 
     };

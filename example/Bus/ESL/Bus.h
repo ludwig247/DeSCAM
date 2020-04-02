@@ -19,7 +19,6 @@ struct Bus : public sc_module {
     blocking_in<bus_resp_t> slave_in2;
     blocking_in<bus_resp_t> slave_in3;
 
-
     //Out-por
     blocking_out<bus_resp_t> master_out;
     blocking_out<bus_req_t> slave_out0;
@@ -49,7 +48,6 @@ struct Bus : public sc_module {
             slave_in3("slave_in3") {
         SC_THREAD(fsm);
     }
-
 
     void fsm() {
 
