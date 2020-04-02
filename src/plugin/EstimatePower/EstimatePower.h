@@ -26,7 +26,7 @@ private:
 
     void registerOperations(FSM &node);
 
-    void traverseProcessBody(FSM &node);
+    void traverseProcessBody(FSM &node, unsigned int processPosition);
 
     std::string writeFile(std::pair <std::string, Module* > module);
 
@@ -40,8 +40,18 @@ private:
 
     std::vector <std::string> processBody;
 
-    void insertOperationLines(State *currentState, State *nextState);
+    void insertOperationLines(std::vector <Operation *> &operationsList, int line);
 
     void debug(Module &node);
+
+    void mapStates(FSM &node);
+
+    std::map <Port*, std::vector <State*>> ports2States;
+
+    std::map <int, State *> stateLines;
+
+    int whichLine(State &state);
+
+    void mapStates2Lines(FSM &node);
 
 };

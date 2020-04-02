@@ -21,6 +21,8 @@
 class ISA_new : public sc_module {
 public:
     //Constructor
+unsigned int operations[15];
+unsigned int originState;
     SC_HAS_PROCESS(ISA_new);
 
     ISA_new(sc_module_name name) :
@@ -95,6 +97,7 @@ public:
 void ISA_new::run() {
 
 /*State 0*/
+originState = 0;
     nextphase = Phases::fetch_PH;
     while (true) {
         phase = nextphase;
@@ -107,8 +110,66 @@ void ISA_new::run() {
             memoryAccess.addrIn = pcReg;
             memoryAccess.dataIn = 0;    // not relevant
 
+if (originState == 6)
+operations[14]++;
+if (originState == 4)
+operations[12]++;
+if (originState == 2)
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_J)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_L)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[10]++;
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_J))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_L)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[9]++;
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[7]++;
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[6]++;
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[5]++;
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[3]++;
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R))
+operations[2]++;
+if (originState == 0)
+operations[0]++;
 /*State 1*/            toMemoryPort->write(memoryAccess); //Send request to memory
+originState = 1;
+if (originState == 1)
+operations[1]++;
 /*State 2*/            fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
+originState = 2;
 
             encodedInstr = fromMemoryData.loadedData;
 
@@ -197,10 +258,19 @@ void ISA_new::run() {
                 memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for stores
                 memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
 
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[4]++;
 /*State 3*/                toMemoryPort->write(memoryAccess); // Request store
+originState = 3;
 
                 // Store done
+if (originState == 3)
+operations[11]++;
 /*State 4*/                fromMemoryPort->read(fromMemoryData); //Fixme: Why do we need this read? For store a write should be sufficient
+originState = 4;
 
                 //Set-up PC
                 pcReg = pcReg + 4;
@@ -285,10 +355,23 @@ void ISA_new::run() {
                 regfileWrite.dst = getRdAddr(encodedInstr);
 
                 // Request load
+if (originState == 2)
+if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_L))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
+if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
+operations[8]++;
 /*State 5*/                toMemoryPort->write(memoryAccess);
+originState = 5;
 
                 // Load done
+if (originState == 5)
+operations[13]++;
 /*State 6*/                fromMemoryPort->read(fromMemoryData);
+originState = 6;
 
                 //Set up write back
                 regfileWrite.dstData = fromMemoryData.loadedData;

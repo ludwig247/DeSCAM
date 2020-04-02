@@ -51,7 +51,7 @@ struct Bus_new : public sc_module {
 
 
     void fsm() {
-
+/*State 0*/
         while (true) {
             /*
             0 - 7  HEAT
@@ -59,7 +59,7 @@ struct Bus_new : public sc_module {
             16 - 23 TEMP_TOP
             24 - 31 TEMP_BOT
              */
-            master_in->read(req);
+/*State 1*/            master_in->read(req);
 //	    std::cout << "req addrs:" << req.addr << std::endl;
 //	    std::cout << "req data:" << req.data << std::endl;
 //	    std::cout << "req mode:" << req.trans_type << std::endl;
@@ -69,24 +69,24 @@ struct Bus_new : public sc_module {
             }
 
             if  (req.addr >= 0 && req.addr < 8) {
-                slave_out0->write(req);
-                slave_in0->read(resp);
+/*State 2*/                slave_out0->write(req);
+/*State 3*/                slave_in0->read(resp);
             }
 
             else if (req.addr >= 8 && req.addr < 16) {
                 req.addr = req.addr - 8;
-                slave_out1->write(req);
-                slave_in1->read(resp);
+/*State 5*/                slave_out1->write(req);
+/*State 6*/                slave_in1->read(resp);
             }
             else if (req.addr >= 16 && req.addr < 24) {
                 req.addr = req.addr - 16;
-                slave_out2->write(req);
-                slave_in2->read(resp);
+/*State 7*/                slave_out2->write(req);
+/*State 8*/                slave_in2->read(resp);
             }
             else if (req.addr >= 24 && req.addr < 32) {
                 req.addr = req.addr - 24;
-                slave_out3->write(req);
-                slave_in3->read(resp);
+/*State 9*/                slave_out3->write(req);
+/*State 10*/                slave_in3->read(resp);
             }
             else {
 //                resp.ack = OK;
@@ -95,7 +95,7 @@ struct Bus_new : public sc_module {
             if(SINGLE_WRITE== req.trans_type){
                 resp.data = 0;
             }
-            master_out->write(resp);
+/*State 4*/            master_out->write(resp);
 
             //wait(SC_ZERO_TIME);
         }

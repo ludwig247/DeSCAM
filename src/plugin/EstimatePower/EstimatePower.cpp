@@ -5,6 +5,7 @@
 #include "EstimatePower.h"
 #include <sstream>
 #include <string>
+#include <PrintStmt.h>
 
 std::map<std::string, std::string> EstimatePower::printModel(Model *node) {
 
@@ -13,8 +14,9 @@ std::map<std::string, std::string> EstimatePower::printModel(Model *node) {
         portMap = module.second->getPorts();
         std::cout << "Module " << module.first << std::endl;
         registerOperations(*module.second->getFSM());
+     //   debug(*module.second);
+  //      mapStates2Lines(*module.second->getFSM());
         pluginOutput.insert(std::make_pair(module.first + "_instrumented.h", writeFile(module)));
-        debug(*module.second);
     }
 
     return pluginOutput;
@@ -23,8 +25,9 @@ std::map<std::string, std::string> EstimatePower::printModel(Model *node) {
 void EstimatePower::registerOperations(FSM &node) {
     for (auto state : node.getStateMap())  {
         for (auto operation : state.second->getOutgoingOperationsList())  {
-            operationsMap.insert (std::pair<unsigned int, Operation*> (operationsCounter++, operation));
-            operationsCounted.insert(std::pair <Operation *, bool> (operation, false));
+            if (operation->getNextState() != operation->getState())
+                operationsCounter++;
+                operationsCounted.insert(std::pair <Operation *, bool> (operation, false));
         }
     }
 }
@@ -46,6 +49,8 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
     std::size_t endPosition;
     unsigned int bracketCounter = 0;
     unsigned int bracketTarget = 0;
+    unsigned int lineCounter = 0;
+    unsigned int processPosition;
     while (std::getline(inFile, line))  {
         if (line.find("{") != std::string::npos)
             bracketCounter++;
@@ -53,14 +58,16 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
             bracketCounter--;
         if (insideProcess && bracketCounter < bracketTarget)  {
             insideProcess = false;
-            traverseProcessBody(*module.second->getFSM());
+            traverseProcessBody(*module.second->getFSM(), processPosition);
             for (auto process_line : processBody)
                 ss += (process_line + "\n");
         }
         if (insideProcess)
             processBody.push_back(line);
-        if (line.find("SC_HAS_PROCESS(") != std::string::npos)
+        if (line.find("SC_HAS_PROCESS(") != std::string::npos)  {
             ss += ("unsigned int operations[" + std::to_string(operationsCounter) + "];\n");
+            ss += ("unsigned int originState;\n");
+        }
         startPosition = line.find("SC_THREAD(");
         if (startPosition != std::string::npos) {
             startPosition += 10;
@@ -68,6 +75,8 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
             functionName = line.substr(startPosition, length);
             std::cout << "Function name: " << functionName << std::endl;
         }
+        if (!insideProcess)
+            ss += (line + "\n");
         startPosition = line.find("void ");
         if (startPosition != std::string::npos) {
             startPosition = line.find(functionName);
@@ -76,11 +85,12 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
                 if (startPosition == std::string::npos) {
                     insideProcess = true;
                     bracketTarget = bracketCounter;
+                    processPosition = lineCounter;
                 }
             }
         }
-        if (!insideProcess)
-            ss += (line + "\n");
+
+        lineCounter++;
 
     }
     inFile.close();
@@ -88,48 +98,52 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
     return ss;
 }
 
-void EstimatePower::insertOperationLines(State *currentState, State *nextState) {
-    std::size_t startPosition;
-   // std::vector<std::string>::iterator it = processBody.begin();
-   int it = 0;
-    for (auto line : processBody) {
-        for (auto port : portMap) {
-            startPosition = line.find(port.first);
-            if (startPosition != std::string::npos) {
-                 if (nextState->getCommunicationPort() == port.second) {
-                     for (auto operation : nextState->getIncomingOperationsList())
-                         if (operation->getState() == currentState && !operationsCounted.at(operation))  {
-                             processBody.insert(processBody.begin() + it, "operations[" + std::to_string(operation->getId()) + "]++;");
-                             operationsCounted.at(operation) = true;
-                         }
-                     break;
-                 }
-            }
-        }
-        it++;
-    }
+void EstimatePower::insertOperationLines(std::vector <Operation *> &operationsList, int line) {
+
 }
 
-void EstimatePower::traverseProcessBody(FSM &node) {
-    std::vector <State *> possibleNextStates;
-    for (auto state : node.getStateMap())  {
-        for (auto operation : state.second->getOutgoingOperationsList())  {
-            if (std::find(possibleNextStates.begin(), possibleNextStates.end(), operation->getNextState()) == possibleNextStates.end())
-                possibleNextStates.push_back(operation->getNextState());
+void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
+    std::size_t endPosition;
+    std::string number;
+    std::string assumptionString;
+    std::string line;
+    State* currentState;
+  //  for (auto stateLine : stateLines)
+     //   processBody.at(stateLine.first - processPosition - 2).insert(0, "/*State " + std::to_string(stateLine.second->getStateId()) + "*/");
+    for (int i = 0; i < processBody.size(); i++)   {
+        line = processBody.at(i);
+        if (line.find("/*State ") != std::string::npos)  {
+            endPosition = line.find("*/");
+            number = line.substr(8, endPosition - 8);
+            currentState = node.getStateMap().at(std::stoi(number));
+            if (processBody.at(i + 1) != "originState = " + std::to_string(currentState->getStateId()) + ";")
+                processBody.insert(processBody.begin() + i + 1, "originState = " + std::to_string(currentState->getStateId()) + ";");
+            for (auto operation : currentState->getIncomingOperationsList())  {
+                if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
+                    processBody.insert(processBody.begin() + i, "operations[" + std::to_string(operation->getId()) + "]++;");
+                    for (auto assumption : operation->getAssumptionsList())  {
+                        assumptionString = PrintStmt::toString(assumption);
+                        if (assumptionString.find(".sync") == std::string::npos)//  {
+                            processBody.insert(processBody.begin() + i, "if(" + assumptionString + ")");
+                        //}
+                    }
+                    processBody.insert(processBody.begin() + i, "if (originState == " + std::to_string(operation->getState()->getStateId()) + ")");
+                    operationsCounted.at(operation) = true;
+
+                }
+            }
         }
-        for (auto nextState : possibleNextStates)
-            insertOperationLines(state.second, nextState);
-        possibleNextStates.clear();
     }
+
 }
 
 void EstimatePower::debug(Module &node) {
     std::cout << "Module: " << node.getName() << std::endl;
-    int i = 0;
+   // int i = 0;
     for (auto state : node.getFSM()->getStateMap())  {
-        std::cout << "\tState: " << state.second->getName() <<std::endl;
+        std::cout << "\tState " << state.second->getStateId() << ": " << (state.second->isInit() || state.second->isWait()? "init or wait" : state.second->getCommunicationPort()->getName()) << std::endl;
         for (auto operation : state.second->getOutgoingOperationsList())  {
-            std::cout << "\t\tOperation: " << i++ << "\tto " << operation->getNextState()->getName() <<std::endl;
+            std::cout << "\t\tOperation: " << operation->getId() << "\tto " << operation->getNextState()->getName() <<std::endl;
             for (auto assumption : operation->getAssumptionsList())  {
                 std::cout << "\t\t\t";
                 assumption->print(std::cout);
@@ -137,4 +151,31 @@ void EstimatePower::debug(Module &node) {
             }
         }
     }
+    mapStates(*node.getFSM());
+    for (auto port : ports2States)  {
+        std::cout << "Port " << port.first->getName() << ": " << std::endl;
+        for (auto state : port.second)
+            std::cout << "\t" << state->getName() << std::endl;
+    }
 }
+
+void EstimatePower::mapStates(FSM &node) {
+    for (auto port : portMap)
+        ports2States.insert(std::pair <Port*, std::vector <State *>> (port.second, std::vector<State*> {}));
+    for (auto state : node.getStateMap())
+        if (!state.second->isInit() && !state.second->isWait())
+            ports2States.at(state.second->getCommunicationPort()).push_back(state.second);
+}
+
+int EstimatePower::whichLine(State &state) {
+    int line;
+    std::cout << "Please enter line number for state " << state.getStateId() << std::endl;
+    std::cin >> line;
+    return line;
+}
+
+void EstimatePower::mapStates2Lines(FSM &node) {
+    for (auto state : node.getStateMap())
+        stateLines.insert(std::pair<int, State*> (whichLine(*state.second), state.second));
+}
+
