@@ -236,8 +236,6 @@ void SCAM::TernaryOptimizer::visit(struct TimePointOperand &node) {
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
-
-
     node.getTrueExpr()->accept(*this);
     auto trueExpr = this->expr;
     node.getFalseExpr()->accept(*this);
