@@ -2,17 +2,52 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
-#define TASK_MASK(x)        (x & 1)
-#define ERROR_MASK(x)       (x & 0xF)
-#define ENABLE_MASK(x)      (x & 1)
-#define CONFIG_MASK(x)      (x & 0x1F)
-#define PARITY_MASK(x)      (x & 0xE)
-#define STOP_MASK(x)        (x & 0x1)
-#define HWFC_MASK(x)        (x & 0x10)
-#define ODD_PARITY_MASK(x)  (x & 0x100)
+//#define TASK_MASK(x)        (x & 1)
+//#define ERROR_MASK(x)       (x & 0xF)
+//#define ENABLE_MASK(x)      (x & 1)
+//#define CONFIG_MASK(x)      (x & 0x1F)
+//#define PARITY_MASK(x)      (x & 0xE)
+//#define STOP_MASK(x)        (x & 0x1)
+//#define HWFC_MASK(x)        (x & 0x10)
+//#define ODD_PARITY_MASK(x)  (x & 0x100)
+//#define BOOL(x) ((x & 1) != 0)
 
-#define BOOL(x) ((x & 1) != 0)
 
+unsigned int TASK_MASK(unsigned x){
+    return (x & 1);
+}
+
+unsigned int ERROR_MASK(unsigned x){
+    return (x & 0xF);
+}
+
+unsigned int ENABLE_MASK(unsigned x){
+    return (x & 1);
+}
+
+unsigned int CONFIG_MASK(unsigned x){
+    return (x & 0x1F);
+}
+
+unsigned int PARITY_MASK(unsigned x){
+    return  (x & 0xE);
+}
+
+unsigned int STOP_MASK(unsigned x) {
+    return (x & 0x1);
+}
+
+unsigned int HWFC_MASK(unsigned x){
+    return  (x & 0x10);
+}
+
+unsigned int ODD_PARITY_MASK(unsigned x){
+    return  (x & 0x100);
+}
+
+bool BOOL(unsigned x){
+    return ((x & 1) != 0);
+}
 
 SC_MODULE(Uart_control) {
     slave_in<bus_req_t>     bus_in;

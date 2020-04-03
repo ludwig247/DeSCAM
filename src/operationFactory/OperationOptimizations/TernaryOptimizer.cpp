@@ -196,11 +196,12 @@ void SCAM::TernaryOptimizer::visit(struct DataSignalOperand &node) {
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::FunctionOperand &node) {
-    //TODO
-    std::cout << "-W- " << node << " not optmized" << std::endl;
+    std::map<std::string, SCAM::Expr *> newParamMap;
     for (auto &&param : node.getParamValueMap()) {
         param.second->accept(*this);
+        newParamMap.insert(std::make_pair(param.first,this->expr));
     }
+    node.setParamValueMap(newParamMap);
     this->expr = &node;
 }
 
@@ -249,8 +250,10 @@ void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
 
     if(*condExpr == BoolValue(true)){
         this->expr = trueExpr;
-    }else if(*condExpr == BoolValue(false)){
+    }else if(*condExpr == BoolValue(false)) {
         this->expr = falseExpr;
+    }else if(*trueExpr == *falseExpr || *node.getTrueExpr() == *node.getFalseExpr() || *trueExpr == *node.getFalseExpr() || *falseExpr == *node.getTrueExpr()){
+        this->expr = trueExpr;
     }else{
         if(*node.getTrueExpr() == *trueExpr && *node.getFalseExpr() == *falseExpr && *node.getCondition() == *condExpr ){
             this->expr = &node;
