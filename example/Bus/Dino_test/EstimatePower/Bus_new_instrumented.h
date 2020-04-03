@@ -1,10 +1,10 @@
 //
 // Created by ludwig on 30.01.17.
 //
-#include "../../Interfaces/Interfaces.h"
+#include "../../../Interfaces/Interfaces.h"
 #include "systemc.h"
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
@@ -78,14 +78,12 @@ originState = 1;
 
             if  (req.addr >= 0 && req.addr < 8) {
 if (originState == 1)
-if((master_in_sig[addr] <= 7))
-if((master_in_sig[addr] >= 0))
-if(not((SINGLE_READ == master_in_sig[trans_type])))
+if (((req.addr >= 0) and (req.addr < 8)))
+if (not((SINGLE_READ == req.trans_type)))
 operations[6]++;
 if (originState == 1)
-if((master_in_sig[addr] <= 7))
-if((master_in_sig[addr] >= 0))
-if((SINGLE_READ == master_in_sig[trans_type]))
+if (((req.addr >= 0) and (req.addr < 8)))
+if ((SINGLE_READ == req.trans_type))
 operations[1]++;
 /*State 2*/                slave_out0->write(req);
 originState = 2;
@@ -98,14 +96,14 @@ originState = 3;
             else if (req.addr >= 8 && req.addr < 16) {
                 req.addr = req.addr - 8;
 if (originState == 1)
-if((master_in_sig[addr] <= 15))
-if((master_in_sig[addr] >= 8))
-if(not((SINGLE_READ == master_in_sig[trans_type])))
+if (((req.addr >= 8) and (req.addr < 16)))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if (not((SINGLE_READ == req.trans_type)))
 operations[7]++;
 if (originState == 1)
-if((master_in_sig[addr] <= 15))
-if((master_in_sig[addr] >= 8))
-if((SINGLE_READ == master_in_sig[trans_type]))
+if (((req.addr >= 8) and (req.addr < 16)))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if ((SINGLE_READ == req.trans_type))
 operations[2]++;
 /*State 5*/                slave_out1->write(req);
 originState = 5;
@@ -117,14 +115,16 @@ originState = 6;
             else if (req.addr >= 16 && req.addr < 24) {
                 req.addr = req.addr - 16;
 if (originState == 1)
-if((master_in_sig[addr] <= 23))
-if((master_in_sig[addr] >= 16))
-if(not((SINGLE_READ == master_in_sig[trans_type])))
+if (((req.addr >= 16) and (req.addr < 24)))
+if (not(((req.addr >= 8) and (req.addr < 16))))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if (not((SINGLE_READ == req.trans_type)))
 operations[8]++;
 if (originState == 1)
-if((master_in_sig[addr] <= 23))
-if((master_in_sig[addr] >= 16))
-if((SINGLE_READ == master_in_sig[trans_type]))
+if (((req.addr >= 16) and (req.addr < 24)))
+if (not(((req.addr >= 8) and (req.addr < 16))))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if ((SINGLE_READ == req.trans_type))
 operations[3]++;
 /*State 7*/                slave_out2->write(req);
 originState = 7;
@@ -136,14 +136,18 @@ originState = 8;
             else if (req.addr >= 24 && req.addr < 32) {
                 req.addr = req.addr - 24;
 if (originState == 1)
-if((master_in_sig[addr] <= 31))
-if((master_in_sig[addr] >= 24))
-if(not((SINGLE_READ == master_in_sig[trans_type])))
+if (((req.addr >= 24) and (req.addr < 32)))
+if (not(((req.addr >= 16) and (req.addr < 24))))
+if (not(((req.addr >= 8) and (req.addr < 16))))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if (not((SINGLE_READ == req.trans_type)))
 operations[9]++;
 if (originState == 1)
-if((master_in_sig[addr] <= 31))
-if((master_in_sig[addr] >= 24))
-if((SINGLE_READ == master_in_sig[trans_type]))
+if (((req.addr >= 24) and (req.addr < 32)))
+if (not(((req.addr >= 16) and (req.addr < 24))))
+if (not(((req.addr >= 8) and (req.addr < 16))))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if ((SINGLE_READ == req.trans_type))
 operations[4]++;
 /*State 9*/                slave_out3->write(req);
 originState = 9;
@@ -160,48 +164,55 @@ originState = 10;
                 resp.data = 0;
             }
 if (originState == 10)
-if(not((SINGLE_WRITE == req.trans_type)))
+if (not((SINGLE_WRITE == req.trans_type)))
 operations[23]++;
 if (originState == 10)
-if((SINGLE_WRITE == req.trans_type))
+if ((SINGLE_WRITE == req.trans_type))
 operations[22]++;
 if (originState == 8)
-if(not((SINGLE_WRITE == req.trans_type)))
+if (not((SINGLE_WRITE == req.trans_type)))
 operations[20]++;
 if (originState == 8)
-if((SINGLE_WRITE == req.trans_type))
+if ((SINGLE_WRITE == req.trans_type))
 operations[19]++;
 if (originState == 6)
-if(not((SINGLE_WRITE == req.trans_type)))
+if (not((SINGLE_WRITE == req.trans_type)))
 operations[17]++;
 if (originState == 6)
-if((SINGLE_WRITE == req.trans_type))
+if ((SINGLE_WRITE == req.trans_type))
 operations[16]++;
 if (originState == 3)
-if(not((SINGLE_WRITE == req.trans_type)))
+if (not((SINGLE_WRITE == req.trans_type)))
 operations[13]++;
 if (originState == 3)
-if((SINGLE_WRITE == req.trans_type))
+if ((SINGLE_WRITE == req.trans_type))
 operations[12]++;
 if (originState == 1)
-if((SINGLE_WRITE == master_in_sig[trans_type]))
-if(not(((master_in_sig[addr] >= 24) and not((32 <= master_in_sig[addr])))))
-if(not(((master_in_sig[addr] >= 16) and not((24 <= master_in_sig[addr])))))
-if(not(((master_in_sig[addr] >= 8) and not((16 <= master_in_sig[addr])))))
-if(not(((master_in_sig[addr] >= 0) and not((8 <= master_in_sig[addr])))))
+if ((SINGLE_WRITE == req.trans_type))
+if (not(((req.addr >= 24) and (req.addr < 32))))
+if (not(((req.addr >= 16) and (req.addr < 24))))
+if (not(((req.addr >= 8) and (req.addr < 16))))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if (not((SINGLE_READ == req.trans_type)))
 operations[10]++;
 if (originState == 1)
-if(not(((master_in_sig[addr] >= 24) and not((32 <= master_in_sig[addr])))))
-if(not(((master_in_sig[addr] >= 16) and not((24 <= master_in_sig[addr])))))
-if(not(((master_in_sig[addr] >= 8) and not((16 <= master_in_sig[addr])))))
-if(not(((master_in_sig[addr] >= 0) and not((8 <= master_in_sig[addr])))))
-if((SINGLE_READ == master_in_sig[trans_type]))
+if (not((SINGLE_WRITE == req.trans_type)))
+if (not(((req.addr >= 24) and (req.addr < 32))))
+if (not(((req.addr >= 16) and (req.addr < 24))))
+if (not(((req.addr >= 8) and (req.addr < 16))))
+if (not(((req.addr >= 0) and (req.addr < 8))))
+if ((SINGLE_READ == req.trans_type))
 operations[5]++;
 /*State 4*/            master_out->write(resp);
 originState = 4;
 
             //wait(SC_ZERO_TIME);
         }
+    }
+
+    void operationsCounter()  {
+        for(int i = 0; i < 24; i++)
+            std::cout << "Operation " << i << ":" << operations[i] << std::endl;
     }
 };
 

@@ -15,6 +15,6 @@ FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
 add_executable(Bus ${R_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
-        MasterDummy.h SlaveDummy.h)
+        ../../ESL/MasterDummy.h ../../ESL/SlaveDummy.h)
 target_link_libraries(Bus systemc)
 target_link_libraries(Bus systemc)

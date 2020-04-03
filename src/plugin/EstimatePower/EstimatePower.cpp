@@ -14,8 +14,8 @@ std::map<std::string, std::string> EstimatePower::printModel(Model *node) {
         portMap = module.second->getPorts();
         std::cout << "Module " << module.first << std::endl;
         registerOperations(*module.second->getFSM());
-     //   debug(*module.second);
-  //      mapStates2Lines(*module.second->getFSM());
+        debug(*module.second);
+      //  mapStates2Lines(*module.second->getFSM());
         pluginOutput.insert(std::make_pair(module.first + "_instrumented.h", writeFile(module)));
     }
 
@@ -105,7 +105,7 @@ void EstimatePower::insertOperationLines(std::vector <Operation *> &operationsLi
 void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
     std::size_t endPosition;
     std::string number;
-    std::string assumptionString;
+    std::string statementString;
     std::string line;
     State* currentState;
   //  for (auto stateLine : stateLines)
@@ -121,10 +121,11 @@ void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition)
             for (auto operation : currentState->getIncomingOperationsList())  {
                 if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
                     processBody.insert(processBody.begin() + i, "operations[" + std::to_string(operation->getId()) + "]++;");
-                    for (auto assumption : operation->getAssumptionsList())  {
-                        assumptionString = PrintStmt::toString(assumption);
-                        if (assumptionString.find(".sync") == std::string::npos)//  {
-                            processBody.insert(processBody.begin() + i, "if(" + assumptionString + ")");
+                    for (auto statement : operation->getStatementsList())  {
+                        statementString = PrintStmt::toString(statement);
+                        if (statementString.find(".sync") == std::string::npos)//  {
+                            if (statementString.find("if") != std::string::npos && statementString.find("(") != std::string::npos && statementString.find(")") != std::string::npos)
+                                processBody.insert(processBody.begin() + i, statementString);
                         //}
                     }
                     processBody.insert(processBody.begin() + i, "if (originState == " + std::to_string(operation->getState()->getStateId()) + ")");
@@ -144,9 +145,9 @@ void EstimatePower::debug(Module &node) {
         std::cout << "\tState " << state.second->getStateId() << ": " << (state.second->isInit() || state.second->isWait()? "init or wait" : state.second->getCommunicationPort()->getName()) << std::endl;
         for (auto operation : state.second->getOutgoingOperationsList())  {
             std::cout << "\t\tOperation: " << operation->getId() << "\tto " << operation->getNextState()->getName() <<std::endl;
-            for (auto assumption : operation->getAssumptionsList())  {
+            for (auto statement : operation->getStatementsList())  {
                 std::cout << "\t\t\t";
-                assumption->print(std::cout);
+                statement->print(std::cout);
                 std::cout << std::endl;
             }
         }
