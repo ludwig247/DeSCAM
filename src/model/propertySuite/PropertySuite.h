@@ -24,6 +24,7 @@ namespace SCAM {
 
         // Constructor
         explicit PropertySuite(std::string name);
+        PropertySuite(PropertySuite const&) = default;
 
         // Name
         const std::string &getName() const;
