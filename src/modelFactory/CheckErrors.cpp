@@ -209,7 +209,7 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
 //! Adds every Member of a sc_module to the SCAM::Module
 void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
     //Find all Variables within the Module
-    FindVariables findVariables(decl);
+/*    FindVariables findVariables(decl);
     //Add members to module
     for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
@@ -254,7 +254,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
             }
             module->addVariable(new Variable(variable.first, type, initialValue));
         }
-    }
+    }*/
 }
 
 bool SCAM::CheckErrors::postFire() {
@@ -266,6 +266,7 @@ void SCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
 }
 
 void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
+    /*
     FindFunctions findFunction(decl);
     //Add datatypes for functions
     for (auto func: findFunction.getFunctionMap()) {
@@ -307,6 +308,7 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
+        */
         /*if (ErrorMsg::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
@@ -319,13 +321,14 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
                 }
             }
             ErrorMsg::clear();
-        }*/
-    }
+        }
+    }*/
 
 }
 
 void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
     //Find all global functions and variables
+    /*
     FindGlobal findGlobal(pDecl, _ci);
 
     for (auto var: findGlobal.getVariableMap()) {
@@ -362,5 +365,5 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
            // ErrorMsg::clear();
             this->model->removeGlobalFunction(func.second);
         }
-    }
+    }*/
 }

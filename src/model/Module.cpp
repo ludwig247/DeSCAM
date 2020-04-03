@@ -4,6 +4,7 @@
 
 #include <Stmts/EnumValue.h>
 #include <cassert>
+#include "clang/AST/RecursiveASTVisitor.h"
 #include "Module.h"
 #include "Model.h"
 
@@ -165,6 +166,29 @@ namespace SCAM {
         if (functionMap.find(name) == functionMap.end()) {
             throw std::runtime_error("Function " + name + " is not part of module " + this->getName());
         } else return functionMap.find(name)->second;
+    }
+
+    bool Module::isStructural() {
+        return _isStructural;
+    }
+
+    void Module::setStructural(bool isStructural) {
+        _isStructural = isStructural;
+    }
+
+    void Module::addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap) {
+        _instanceMap = instanceMap;
+    }
+
+    std::map<std::pair<std::string, std::string>, std::string> Module::getInstanceMap() {
+        return _instanceMap;
+    }
+
+    clang::CXXRecordDecl * Module::getRecordDecl() {
+        return _recordDecl;
+    }
+    void Module::addRecordDecl(clang::CXXRecordDecl *recordDecl) {
+        _recordDecl = recordDecl;
     }
 
     bool Module::isFunction(std::string name) const {

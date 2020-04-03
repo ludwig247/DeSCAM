@@ -1,7 +1,7 @@
 #!/bin/bash
 #BINARY LOCATIONS
-SCAM_HOME="/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM" #NO SLASH AT THE END
-CMAKE_BIN="cmake" #NO SLASH AT THE END
+SCAM_HOME="/import/lab/users/schmitz/DeSCAM" #NO SLASH AT THE END
+CMAKE_BIN="/import/lab/users/schmitz/Downloads/cmake-3.17.0-rc1-Linux-x86_64/bin/cmake" #NO SLASH AT THE END
 PYTHON3="python3" #NO SLASH AT THE END
 
 #UNZIPPING FILES
@@ -68,7 +68,7 @@ cp -r $SCAM_HOME/install/tmp/files/z3/include/* ./include
 cp -r $SCAM_HOME/install/tmp/files/gtest/include/* ./include
 mv $SCAM_HOME/install/tmp/files/llvm/lib/clang/3.4.2/ $SCAM_HOME/include/clang/3.4.2
 
-//LIB
+#LIB
 find $SCAM_HOME/install/tmp/files/ -name "*.a" | while read f; do
     cp "$f" $SCAM_HOME/lib/
 done

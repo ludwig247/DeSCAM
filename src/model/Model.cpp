@@ -50,6 +50,11 @@ namespace SCAM {
         return moduleInstanceMap;
     }
 
+    void Model::addModuleInstance(ModuleInstance* modInstance) {
+        auto entry = std::pair<std::string, ModuleInstance *>(modInstance->getName(), modInstance);
+        this->moduleInstanceMap.insert(entry);
+    }
+
     ModuleInstance *Model::getTopInstance() const {
         return topInstance;
     }

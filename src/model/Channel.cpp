@@ -58,6 +58,10 @@ namespace SCAM {
         return this->toInstance;
     }
 
+    ModuleInstance *Channel::getParentInstance() {
+        return this->parentInstance;
+    }
+
     void Channel::setFromInstance(ModuleInstance *instance) {
         this->fromInstance = instance;
 
@@ -66,5 +70,18 @@ namespace SCAM {
     void Channel::setToInstance(ModuleInstance *instance) {
         this->toInstance = instance;
 
+    }
+
+    void Channel::setParentInstance(SCAM::ModuleInstance *instance) {
+        this->parentInstance = instance;
+
+    }
+
+    std::string Channel::getType() {
+        return this->type;
+    }
+
+    void Channel::setType(std::string Type) {
+        this->type = Type;
     }
 }

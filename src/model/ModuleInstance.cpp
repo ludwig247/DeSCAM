@@ -7,6 +7,13 @@
 
 SCAM::ModuleInstance::ModuleInstance(std::string name, Module *structure) :
         structure(structure),
+        parentModule(nullptr),
+        AbstractNode(name) {
+}
+
+SCAM::ModuleInstance::ModuleInstance(std::string name, Module *structure, Module *parentModule) :
+        structure(structure),
+        parentModule(parentModule),
         AbstractNode(name) {
 }
 
@@ -31,6 +38,10 @@ SCAM::Module *SCAM::ModuleInstance::getStructure() {
     return this->structure;
 }
 
+SCAM::Module *SCAM::ModuleInstance::getParent() {
+    return this->parentModule;
+}
+
 void SCAM::ModuleInstance::addChannel(SCAM::Channel *channel) {
     this->channelMap.insert(std::make_pair(channel->getName(), channel));
 
@@ -43,7 +54,8 @@ std::map<std::string, SCAM::Channel *> SCAM::ModuleInstance::getChannelMap() {
 
 SCAM::ModuleInstance::ModuleInstance() :
         structure(nullptr),
-        AbstractNode("TopInstance") {
+        AbstractNode("TopInstance"),
+        parentModule(nullptr) {
 }
 
 SCAM::Channel *SCAM::ModuleInstance::getChannel(SCAM::Port *port) {

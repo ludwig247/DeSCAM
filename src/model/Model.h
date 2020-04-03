@@ -42,6 +42,8 @@ namespace SCAM {
 
         const std::map<std::string, ModuleInstance *> &getModuleInstanceMap() const;
 
+        void addModuleInstance(ModuleInstance* modInstance);
+
     private:
         std::map<std::string, Module *> moduleMap; //! Contains the structural describtion of each _module
         std::map<std::string, Variable*> globalVariableMap; //! Contains variables that are used throughout the model

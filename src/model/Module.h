@@ -8,6 +8,7 @@
 #include <vector>
 #include <PropertySuite.h>
 #include <Behavior/CfgNode.h>
+#include "clang/AST/RecursiveASTVisitor.h"
 
 #include "Port.h"
 #include "Variable.h"
@@ -46,8 +47,16 @@ namespace SCAM {
         const std::map<std::string, Function *> &getFunctionMap() const;
         void addFunction(Function *function);
         bool isFunction(std::string name) const;
+
         Function *getFunction(std::string name);
 
+        //Hierarchy Functions
+        bool isStructural();
+        void setStructural(bool isStructural);
+        void addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap);
+        std::map<std::pair<std::string, std::string>, std::string> getInstanceMap();
+        clang::CXXRecordDecl * getRecordDecl();
+        void addRecordDecl(clang::CXXRecordDecl *recordDecl);
         //Accept
         void accept(AbstractVisitor &visitor);
 
@@ -75,6 +84,11 @@ namespace SCAM {
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
 
         PropertySuite *propertySuite;
+
+        bool _isStructural;
+        std::map<std::pair<std::string, std::string>, std::string> _instanceMap;
+        clang::CXXRecordDecl *_recordDecl;
+
     };
 }
 

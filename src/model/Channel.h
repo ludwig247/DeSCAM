@@ -32,6 +32,10 @@ namespace SCAM {
 
         ModuleInstance *getToInstance();
 
+        ModuleInstance *getParentInstance();
+
+        std::string getType();
+
         //SETTER
         void setFromPort(Port *port);
 
@@ -41,12 +45,18 @@ namespace SCAM {
 
         void setToInstance(ModuleInstance *instance);
 
+        void setParentInstance(ModuleInstance *instance);
+
+        void setType(std::string Type);
+
 
     private:
         Port *fromPort;
         Port *toPort;
         ModuleInstance *fromInstance;
         ModuleInstance *toInstance;
+        ModuleInstance *parentInstance;
+        std::string type;
 
     };
 

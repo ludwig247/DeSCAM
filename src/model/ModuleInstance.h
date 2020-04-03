@@ -20,6 +20,8 @@ namespace SCAM {
 
         ModuleInstance();
 
+        ModuleInstance(std::string name, Module *structure, Module *parentModule);
+
         virtual  ~ModuleInstance();
 
         void accept(AbstractVisitor &visitor);
@@ -38,13 +40,17 @@ namespace SCAM {
 
         //GETTER
         Module *getStructure();
+        Module *getParent();
 
 
     private:
         Module *structure; //! Pointing to the structure of the model
         std::map<std::string, SCAM::Channel *> channelMap; //! List of channels bound within this instance
-        std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains all instances of sub-modules instantiated in this modul
+        std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains all instances of sub-modules instantiated in this module
         std::map<SCAM::Port *, SCAM::Channel *> portChannelMap;
+
+        Module *parentModule;
+
     };
 
 }

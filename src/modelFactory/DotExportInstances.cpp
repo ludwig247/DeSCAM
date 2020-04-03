@@ -15,6 +15,11 @@ namespace SCAM {
         }
     }
 
+    void  DotExportInstances::addChannels(Model* model) {
+
+
+    }
+
     void DotExportInstances::printInstanceMap() {
         std::cout << "Instance Map:" << std::endl;
         for (auto elem : _instanceMap) {
@@ -54,28 +59,96 @@ namespace SCAM {
         file << "}\n"; //End Graph
         file.close();
     }
+
+    void DotExportInstances::exportMain(Model* model) {
+        std::ofstream file;
+        file.open ("Main.dot");
+        //Begin Graph
+        file << "digraph g {\n";
+        file << "node [shape = record,height=.1];" << "\n";
+
+        //create nodes
+        int i = 0;
+        for (auto instance: model->getModuleInstanceMap()) {
+
+            if (!instance.second->getStructure()->isStructural()) {
+                _nodedata.push_back(nodedata());
+                int j = 1;
+                file << "node" << i << "[label = \"<f0>" << instance.first;
+                _nodedata.at(i).nodenumber = i;
+                _nodedata.at(i).nodename = instance.first;
+                for (auto ports: instance.second->getStructure()->getPorts()) {
+                    file << "| <f" << j << "> " << ports.first;
+                    _nodedata.at(i).subnodemap.insert(std::pair<std::string, int>(ports.first, j));
+                    j++;
+                }
+                file << "\"];" << "\n";
+                _nodeMap.insert(std::pair<std::string, int >(instance.first, i));
+                i++;
+            }
+
+        }
+        i = 0;
+        int j = 0;
+
+        for (auto instance: model->getModuleInstanceMap()) {
+            if (instance.second->getStructure()->isStructural()) {
+                file << "subgraph cluster" << j << " {" << "\n";
+                file << "label = \""<< instance.first << "\";" << "\n";
+                j++;
+                for (auto hiermods: instance.second->getStructure()->getInstanceMap()) {
+                    if (!model->getModules().find(hiermods.first.second)->second->isStructural()) {
+                        int number = 0;
+                        for (auto elem: _nodedata) {
+                            if (elem.nodename == hiermods.first.first) {
+                                number = elem.nodenumber;
+                                continue;
+                            }
+                        }
+                        file << "\"node" << number << "\";" << "\n";
+                    }
+                }
+                if (instance.second->getName() != "TopInstance") {
+                    std::cout << instance.second->getName();
+                    file << "}\n";
+                }
+            }
+        }
+        file << "}\n";
+        /*while (j > 0) {
+            file << "}\n";//End Subgraph
+            j--;
+        }*/
+
+        //make connections
+        for (auto instance: model->getModuleInstanceMap()) {
+
+            for (auto channel: instance.second->getChannelMap()) {
+                file << "\"node";
+                for (auto elem: _nodedata) {
+                    if (channel.second->getFromInstance()->getName() == elem.nodename) {
+                        file << elem.nodenumber << "\"";
+                        for (auto elem2: elem.subnodemap) {
+                            if (elem2.first == channel.second->getFromPort()->getName()) {
+                                file << ":f" << elem2.second << " -> ";
+                            }
+                        }
+                    }
+                }
+                for (const auto& elem: _nodedata) {
+                    if (channel.second->getToInstance()->getName() == elem.nodename) {
+                        file << "\"node" << elem.nodenumber << "\"";
+                        for (const auto& elem2: elem.subnodemap) {
+                            if (elem2.first == channel.second->getToPort()->getName()) {
+                                file << ":f" << elem2.second;
+                            }
+                        }
+                    }
+                }
+                file << "[label=\"" << channel.first << "\"];" << "\n";
+            }
+        }
+        file << "}\n"; //End Graph
+        file.close();
+    }
 }
-
-
-/*
-
-
-    myfile << "Writing this to a file.\n";
-    myfile.close();
-
-}
-digraph D {
-
-        A [shape=diamond]
-        B [shape=box]
-        C [shape=circle]
-
-        A -> B [style=dashed, color=grey]
-        A -> C [color="black:invis:black"]
-        A -> D [penwidth=5, arrowhead=none]
-
-}
-
-}
-}
- */
