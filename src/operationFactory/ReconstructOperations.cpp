@@ -605,10 +605,6 @@ namespace SCAM {
         node.getCondition()->accept(*this);
         auto cond = this->newExpr;
 
-        if(*node.getCondition() == BoolValue(true)){
-            std::cout << "YES" << std::endl;
-        }
-
         node.getTrueExpr()->accept(*this);
         auto trueExpr = this->newExpr;
         node.getFalseExpr()->accept(*this);

@@ -31,13 +31,10 @@ public:
     blocking_out<int> data_to_bus;
     blocking_out<bool> ack_out;
 
-
     //Communication with outside
     shared_out<int> data_out;
     shared_in<int> data_in;
     shared_in<int> device_id_in;
-
-
 
     status_t status;
     bus_input_t bus_input;

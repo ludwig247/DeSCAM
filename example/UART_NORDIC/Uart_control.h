@@ -204,8 +204,10 @@ void Uart_control::fsm()
         events_out_msg.ncts = ((ENABLE_MASK(enable) != 0) && (HWFC_MASK(config) != 0) && cts_in_valid) ? cts_in_msg == CTS_DEACTIVATED : false;
         //events_out_msg.ncts  = event_triggered_ncts(cts_in_valid, cts_in_msg, HWFC_MASK(config) != 0);
 
-        if (HWFC_MASK(config) == 0 || events_out_msg.cts)   cts_internal = CTS_ACTIVATED;
-        else if (events_out_msg.ncts)                       cts_internal = CTS_DEACTIVATED;
+//        if (HWFC_MASK(config) == 0 || events_out_msg.cts)   cts_internal = CTS_ACTIVATED;
+//        else if (events_out_msg.ncts)                       cts_internal = CTS_DEACTIVATED;
+        cts_internal = HWFC_MASK(config) == 0 || events_out_msg.cts ? CTS_ACTIVATED :  cts_internal;
+        cts_internal = events_out_msg.ncts ? CTS_DEACTIVATED : cts_internal;
 
         // TASKS
         tasks.start_rx = tasks.start_rx || (tasks_in_valid && tasks_in_msg.start_rx);
@@ -278,7 +280,7 @@ void Uart_control::fsm()
             events_out_msg.rxd_ready    ||
             events_out_msg.txd_ready    ||
             events_out_msg.rx_timeout   ||
-            events_out_msg.error) 
+            events_out_msg.error)
         {
             events_out->master_write(events_out_msg);
         }

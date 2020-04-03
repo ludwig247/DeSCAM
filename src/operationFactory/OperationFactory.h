@@ -64,6 +64,7 @@ namespace SCAM {
         void checkStates();
         void optimizeConditions();
         void optimizeAssignments();
+        void optimizeTernary();
         void optimizeOperations();
     };
 

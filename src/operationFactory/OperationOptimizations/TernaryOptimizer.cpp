@@ -197,25 +197,28 @@ void SCAM::TernaryOptimizer::visit(struct DataSignalOperand &node) {
 
 void SCAM::TernaryOptimizer::visit(SCAM::FunctionOperand &node) {
     //TODO
-    std::cout << "-W-" << node << " not optmized" << std::endl;
+    std::cout << "-W- " << node << " not optmized" << std::endl;
     for (auto &&param : node.getParamValueMap()) {
         param.second->accept(*this);
     }
+    this->expr = &node;
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::ArrayExpr &node) {
     //TODO
-    std::cout << "-W-" << node << " not optmized" << std::endl;
+    std::cout << "-W- " << node << " not optmized" << std::endl;
     for (auto select: node.getValueMap()) {
         select.second->accept(*this);
     }
+    this->expr = &node;
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::CompoundExpr &node) {
-    std::cout << "-W-" << node << " not optmized" << std::endl;
+    std::cout << "-W- " << node << " not optmized" << std::endl;
     for (auto select: node.getValueMap()) {
         select.second->accept(*this);
     }
+    this->expr = &node;
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::ParamOperand &node) {
@@ -223,8 +226,9 @@ void SCAM::TernaryOptimizer::visit(SCAM::ParamOperand &node) {
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::Return &node) {
-    std::cout << "-W-" << node << " not optmized" << std::endl;
+    std::cout << "-W- " << node << " not optmized" << std::endl;
     node.getReturnValue()->accept(*this);
+    this->stmt = &node;
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::Notify &node) {
