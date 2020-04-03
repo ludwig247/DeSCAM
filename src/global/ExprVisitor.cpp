@@ -135,7 +135,6 @@ void SCAM::ExprVisitor::visit(SCAM::ArrayOperand &node) {
     this->usedArrayOperands.insert(&node);
 }
 
-
 void SCAM::ExprVisitor::visit(struct Read &node) {
     throw std::runtime_error("ExprVisitor::Read not implemented");
 }

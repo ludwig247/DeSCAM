@@ -2,17 +2,52 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
-#define TASK_MASK(x)        (x & 1)
-#define ERROR_MASK(x)       (x & 0xF)
-#define ENABLE_MASK(x)      (x & 1)
-#define CONFIG_MASK(x)      (x & 0x1F)
-#define PARITY_MASK(x)      (x & 0xE)
-#define STOP_MASK(x)        (x & 0x1)
-#define HWFC_MASK(x)        (x & 0x10)
-#define ODD_PARITY_MASK(x)  (x & 0x100)
+//#define TASK_MASK(x)        (x & 1)
+//#define ERROR_MASK(x)       (x & 0xF)
+//#define ENABLE_MASK(x)      (x & 1)
+//#define CONFIG_MASK(x)      (x & 0x1F)
+//#define PARITY_MASK(x)      (x & 0xE)
+//#define STOP_MASK(x)        (x & 0x1)
+//#define HWFC_MASK(x)        (x & 0x10)
+//#define ODD_PARITY_MASK(x)  (x & 0x100)
+//#define BOOL(x) ((x & 1) != 0)
 
-#define BOOL(x) ((x & 1) != 0)
 
+unsigned int TASK_MASK(unsigned x){
+    return (x & 1);
+}
+
+unsigned int ERROR_MASK(unsigned x){
+    return (x & 0xF);
+}
+
+unsigned int ENABLE_MASK(unsigned x){
+    return (x & 1);
+}
+
+unsigned int CONFIG_MASK(unsigned x){
+    return (x & 0x1F);
+}
+
+unsigned int PARITY_MASK(unsigned x){
+    return  (x & 0xE);
+}
+
+unsigned int STOP_MASK(unsigned x) {
+    return (x & 0x1);
+}
+
+unsigned int HWFC_MASK(unsigned x){
+    return  (x & 0x10);
+}
+
+unsigned int ODD_PARITY_MASK(unsigned x){
+    return  (x & 0x100);
+}
+
+bool BOOL(unsigned x){
+    return ((x & 1) != 0);
+}
 
 SC_MODULE(Uart_control) {
     slave_in<bus_req_t>     bus_in;
@@ -204,8 +239,10 @@ void Uart_control::fsm()
         events_out_msg.ncts = ((ENABLE_MASK(enable) != 0) && (HWFC_MASK(config) != 0) && cts_in_valid) ? cts_in_msg == CTS_DEACTIVATED : false;
         //events_out_msg.ncts  = event_triggered_ncts(cts_in_valid, cts_in_msg, HWFC_MASK(config) != 0);
 
-        if (HWFC_MASK(config) == 0 || events_out_msg.cts)   cts_internal = CTS_ACTIVATED;
-        else if (events_out_msg.ncts)                       cts_internal = CTS_DEACTIVATED;
+//        if (HWFC_MASK(config) == 0 || events_out_msg.cts)   cts_internal = CTS_ACTIVATED;
+//        else if (events_out_msg.ncts)                       cts_internal = CTS_DEACTIVATED;
+        cts_internal = HWFC_MASK(config) == 0 || events_out_msg.cts ? CTS_ACTIVATED :  cts_internal;
+        cts_internal = events_out_msg.ncts ? CTS_DEACTIVATED : cts_internal;
 
         // TASKS
         tasks.start_rx = tasks.start_rx || (tasks_in_valid && tasks_in_msg.start_rx);
@@ -278,7 +315,7 @@ void Uart_control::fsm()
             events_out_msg.rxd_ready    ||
             events_out_msg.txd_ready    ||
             events_out_msg.rx_timeout   ||
-            events_out_msg.error) 
+            events_out_msg.error)
         {
             events_out->master_write(events_out_msg);
         }

@@ -266,7 +266,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 z3::expr rhs = z3_expr_intern.arg(1);
                 return new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper), translate_intern(rhs));
             } else {
-                std::cout << z3_expr_intern << std::endl;
+                //std::cout << z3_expr_intern << std::endl;
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
         } else if (bvBitwiseOperatorMap.find(oper) != bvBitwiseOperatorMap.end()) {
@@ -275,7 +275,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 z3::expr rhs = z3_expr_intern.arg(1);
                 return new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper), translate_intern(rhs));
             } else {
-                std::cout << z3_expr_intern << std::endl;
+                //std::cout << z3_expr_intern << std::endl;
                 throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
         } else if (bvRelationalOperatorMap.find(oper) != bvRelationalOperatorMap.end()) {
