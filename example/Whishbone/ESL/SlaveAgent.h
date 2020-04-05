@@ -5,10 +5,10 @@
 #ifndef PROJECT_SLAVEAGENT_H
 #define PROJECT_SLAVEAGENT_H
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
-#include "../../../example/Whishbone/ESL/env/Compound_Bus.h"
+#include "../../Interfaces/Interfaces.h"
+#include "env/Compound_Bus.h"
 //#include "../../SingleMasterMultiSlave/ESL/Compound.h"
-#include "/import/lab/users/hesselberg/Simon_repo/DeSCAM/tests/Print_ITL_Tests/TestCases/Types.h"
+#include "../../../tests/Print_ITL_Tests/TestCases/to_delete/Types.h"
 
 
 

@@ -1,22 +1,31 @@
 #include "systemc.h"
-#include "../MasterAgent.h"
-#include "../SlaveAgent.h"
-#include "../Interconnect.h"
+//#include "../MasterAgent.h"
+//#include "../SlaveAgent.h"
+//#include "../Interconnect.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
+#include "../to_delete/MasterAgent_old.h"
+#include "../to_delete/SlaveAgent_old.h"
+#include "../to_delete/Interconnect_old.h"
 
 
 //using namespace std;
 
 int sc_main(int, char **) {
 
-    MasterAgent masterAgent("masterAgent");
-    SlaveAgent slaveAgent0("slaveAgent0");
-    SlaveAgent slaveAgent1("slaveAgent1");
-    SlaveAgent slaveAgent2("slaveAgent2");
-    SlaveAgent slaveAgent3("slaveAgent3");
-    Interconnect interconnect("interconnect");
+//    MasterAgent masterAgent("masterAgent");
+//    SlaveAgent slaveAgent0("slaveAgent0");
+//    SlaveAgent slaveAgent1("slaveAgent1");
+//    SlaveAgent slaveAgent2("slaveAgent2");
+//    SlaveAgent slaveAgent3("slaveAgent3");
+//    Interconnect interconnect("interconnect");
 
+    MasterAgent_old masterAgent("masterAgent");
+    SlaveAgent_old slaveAgent0("slaveAgent0");
+    SlaveAgent_old slaveAgent1("slaveAgent1");
+    SlaveAgent_old slaveAgent2("slaveAgent2");
+    SlaveAgent_old slaveAgent3("slaveAgent3");
+    Interconnect_old interconnect("interconnect");
 
 
 

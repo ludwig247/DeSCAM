@@ -9,13 +9,19 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces/)
 
-include_directories(Interfaces)
 add_subdirectory(env)
+include_directories(to_delete)
 get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
-FILE(GLOB R_SRC *.cpp *.hpp *.h)
-list(APPEND R_SRC ${ENV_SRC})
+#FILE(GLOB R_SRC *.cpp *.hpp *.h)
+#list(APPEND R_SRC ${ENV_SRC})
 
-add_executable(Whisbone ${R_SRC}
+
+add_executable(Whisbone ${ENV_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
-        MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
+        to_delete/MasterAgent_old.h to_delete/SlaveAgent_old.h to_delete/Interconnect_old.h env/MasterDummy.h env/SlaveDummy.h)
+
+#add_executable(Whisbone ${R_SRC}
+#        ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
+#        MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
+
 target_link_libraries(Whisbone systemc)

@@ -1,4 +1,4 @@
-digraph ISA_new {  graph [rankdir=TD];
+digraph ISA {  graph [rankdir=TD];
 state_0[ label = "------"];
 state_1[ label = "section = run"];
 state_2[ label = "aluOp1 = 0"];

@@ -5,7 +5,7 @@
 #include "systemc.h"
 
 //#include "../../SingleMasterMultiSlave/ESL/Compound.h" - several tests run only when this header is not specified in bus.h
-#include "/import/lab/users/hesselberg/Simon_repo/DeSCAM/tests/Print_ITL_Tests/TestCases/Types.h"
+#include "../../../tests/Print_ITL_Tests/TestCases/to_delete/Types.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H

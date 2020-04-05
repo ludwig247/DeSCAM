@@ -4,10 +4,11 @@
 
 #ifndef PROJECT_SLAVEAGENT_H
 #define PROJECT_SLAVEAGENT_H
+
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
-#include "env/Compound_Bus.h"
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../Interfaces/Interfaces.h"
+#include "../env/Compound_Bus.h"
+#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
 
 
 

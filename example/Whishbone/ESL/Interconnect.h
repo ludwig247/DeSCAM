@@ -7,8 +7,8 @@
 
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
-#include "../../../example/Whishbone/ESL/env/Compound_Bus.h"
+#include "../../Interfaces/Interfaces.h"
+#include "env/Compound_Bus.h"
 
 
 struct Interconnect : public sc_module {

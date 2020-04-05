@@ -19,7 +19,7 @@ int sc_main(int, char **) {
     SlaveDummy slaveDummy2("slaveDummy2");
     SlaveDummy slaveDummy3("slaveDummy3");
 
-    Bus_new bus("bus");
+    Bus bus("bus");
 
     Blocking<bus_req_t> MasterToBus("MasterToBus");
     masterDummy.bus_req(MasterToBus);
