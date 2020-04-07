@@ -148,8 +148,6 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             }
         }
 
-
-
         //Check for variables, dataSignal or synchSignals
         if (module == nullptr) {
             throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, module must be set for such conversion");
