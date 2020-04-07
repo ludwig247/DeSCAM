@@ -66,6 +66,12 @@ namespace SCAM {
         void optimizeAssignments();
         void optimizeTernary();
         void optimizeOperations();
+
+        bool isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr) const;
+
+        bool isTrivialTrue(const std::vector<Expr *> &assumptionList, Expr *expr) const;
+
+        void simplifyTernary(std::vector<Expr *> assumptionList, Expr *expr);
     };
 
 }

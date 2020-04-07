@@ -58,7 +58,6 @@ bool SCAM::ModelFactory::fire() {
     //Modules
     this->addModules(tu);
 
-
     //Remove unused things from the model
     this->removeUnused();
 
@@ -420,8 +419,8 @@ void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
         if (!f) {
             std::cout << "----------Fire(fail)" << std::endl;
             return;
-        } else {
             postFire();
+        } else {
         }
     }
 }

@@ -123,78 +123,18 @@ namespace SCAM {
     }
 
     void OperationFactory::optimizeAssignments() {
-
         for (auto op : operations) {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
             op->setCommitmentsList(assignmentOptimizer2.getNewAssignmentsList());
         }
-    }
 
-    void OperationFactory::optimizeOperations() {
-        SCAM::OptimizeOperations2 oOperations(this->operations, module);
-        this->varMap = oOperations.getNewVarMap();
-    }
-
-    void OperationFactory::optimizeTernary() {
         for (auto op:operations) {
-            auto conditionList = op->getAssumptionsList();
-            //FIXME: this is the weiredest thing ever ... I cant use a range based loop without getting an exception ... why?
-            for (int i = 0; i < op->getCommitmentsList().size(); i++) {
-                auto commitment = op->getCommitmentsList().at(i);
-                if (ExprVisitor::isTernary(commitment->getRhs())) {
-                    //Idea: get all compare operations.
-                    auto compareSet = ExprVisitor::getUsedTernaryOperators(commitment->getRhs());
-                    for (auto comp: compareSet) {
-                        bool trivialFalse = false;
-                        bool trivialTrue = false;
-                        auto cList = conditionList;
-                        cList.push_back(comp->getCondition());
-                        {
-                            z3::context context;
-                            z3::solver solver(context);
-                            ExprTranslator translator(&context);
-                            //Idea: check for satisfiability of assumptions_of_operation & assumption_of_ternary
-                            //If unsat -> always false
-                            //Translate each expression with the ExprtTranslator and add to solver
-                            for (auto condition: conditionList) {
-                                solver.add(translator.translate(condition));
-                            }
-                            solver.add(translator.translate(comp->getCondition()));
-                            // Check for SAT if unsat -> erase path
-                            if ((solver.check() == z3::unsat)) {
-                                comp->setTrivialFalse();
-                                trivialFalse = true;
-                            }
-                        }
-                        {
-                            z3::context context;
-                            z3::solver solver(context);
-                            ExprTranslator translator(&context);
-
-                            //Idea: check for satisfiability of not(assumptions_of_operation -> assumption_of_ternary)
-                            //If no model exist, the the condition of ternary is always true (IPC idea)
-                            z3::expr expr(context);
-                            expr = context.bool_val(true);
-                            for (auto condition: conditionList) {
-                                expr = expr && translator.translate(condition);
-                            }
-                            expr = !expr || translator.translate(comp->getCondition());
-                            solver.add(!expr);
-
-                            // Check for SAT if unsat -> erase path
-                            if ((solver.check() == z3::unsat)) {
-                                comp->setTrivialTrue();
-                                trivialTrue = true;
-                            }
-                        }
-                        assert(!(trivialTrue && trivialFalse) && "Ternary can't be trivial true and trivial false at the same time");
-                    }
-                }
+            for(int i=0;i< op->getCommitmentList().size();i++){
+                Assignment * commitment = op->getCommitmentList().at(i);
+                //Simplify all ternary expressions
+                simplifyTernary(op->getAssumptionsList(),commitment->getRhs());
+                //Optmize all assignment containing a ternary with trivial true/false
             }
-        }
-
-        //Optmize assignments with trival true/false ternary
-        for (auto op : operations) {
             std::vector<Assignment *> newCommList;
             for (auto stmt: op->getCommitmentList()) {
                 TernaryOptimizer ternaryOptimizer(stmt);
@@ -204,88 +144,104 @@ namespace SCAM {
             }
             op->setCommitmentsList(newCommList);
         }
+    }
 
-        for (auto op : operations) {
-            std::vector<Expr *> newAssumptionList;
-            for (auto stmt: op->getAssumptionsList()) {
-                TernaryOptimizer ternaryOptimizer(stmt);
-
-                if (ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean()) {
-                    newAssumptionList.push_back(ternaryOptimizer.getExpr());
-                } else throw std::runtime_error("Assumption has to be boolean");
-            }
-            op->setAssumptionsList(newAssumptionList);
-        }
-
-        for (auto op : operations) {
-            for (int i = 0; i < op->getAssumptionsList().size(); i++) {
-                auto assumption = op->getAssumptionsList().at(i);
-                if (ExprVisitor::isTernary(assumption)) {
-                    //Idea: get all compare operations.
-                    auto compareSet = ExprVisitor::getUsedTernaryOperators(assumption);
-                    for (auto comp: compareSet) {
-                        bool trivialFalse = false;
-                        bool trivialTrue = false;
-                        auto cList = op->getAssumptionsList();
-                        cList.push_back(comp->getCondition());
-                        {
-                            z3::context context;
-                            z3::solver solver(context);
-                            ExprTranslator translator(&context);
-                            //Idea: check for satisfiability of assumptions_of_operation & assumption_of_ternary
-                            //If unsat -> always false
-                            //Translate each expression with the ExprtTranslator and add to solver
-                            for (auto condition: op->getAssumptionsList()) {
-                                solver.add(translator.translate(condition));
-                            }
-                            solver.add(translator.translate(comp->getCondition()));
-                            // Check for SAT if unsat -> erase path
-                            if ((solver.check() == z3::unsat)) {
-                                comp->setTrivialFalse();
-                                trivialFalse = true;
-                            }
-                        }
-                        {
-                            z3::context context;
-                            z3::solver solver(context);
-                            ExprTranslator translator(&context);
-
-                            //Idea: check for satisfiability of not(assumptions_of_operation -> assumption_of_ternary)
-                            //If no model exist, the the condition of ternary is always true (IPC idea)
-                            z3::expr expr(context);
-                            expr = context.bool_val(true);
-                            for (auto condition: op->getAssumptionsList()) {
-                                expr = expr && translator.translate(condition);
-                            }
-                            expr = !expr || translator.translate(comp->getCondition());
-                            solver.add(!expr);
-
-                            // Check for SAT if unsat -> erase path
-                            if ((solver.check() == z3::unsat)) {
-                                comp->setTrivialTrue();
-                                trivialTrue = true;
-                            }
-                        }
-                        assert(!(trivialTrue && trivialFalse) && "Ternary can't be trivial true and trivial false at the same time");
-                    }
+    void OperationFactory::optimizeOperations() {
+        SCAM::OptimizeOperations2 oOperations(this->operations, module);
+        this->varMap = oOperations.getNewVarMap();
+    }
+    //! Simplifies the condition of an ternary based on a list of assumptions
+    void OperationFactory::simplifyTernary(std::vector<Expr*> assumptionList, Expr* expr){
+        if (ExprVisitor::isTernary(expr)) {
+            //Get all ternary operators from that statement
+            auto compareSet = ExprVisitor::getUsedTernaryOperators(expr);
+            for (auto comp: compareSet) {
+                if (isTrivialFalse(assumptionList, comp->getCondition())) {
+                    comp->setTrivialFalse();
+                    continue;
+                }
+                if (isTrivialTrue(assumptionList, comp->getCondition())) {
+                    comp->setTrivialTrue();
                 }
             }
         }
+    }
 
-        for (auto op : operations) {
-            std::vector<Expr *> newAssumptionList;
-            for (auto stmt: op->getAssumptionsList()) {
-                ConditionOptimizer2 conditionOptimizer2({stmt},module);
-                if(!conditionOptimizer2.getNewConditionList().empty()){
-                    auto expr = conditionOptimizer2.getNewConditionList().back();
-                    if(!(*expr == BoolValue((true)))){
-                        newAssumptionList.push_back(expr);
+    void OperationFactory::optimizeTernary() {
+            for (auto op : operations) {
+                for (int i = 0; i < op->getAssumptionsList().size(); i++) {
+                    auto assumption = op->getAssumptionsList().at(i);
+                    if (ExprVisitor::isTernary(assumption)) {
+                        simplifyTernary(op->getAssumptionsList(), assumption);
                     }
                 }
+
+                std::vector<Expr *> newAssumptionList;
+                for (auto stmt: op->getAssumptionsList()) {
+                    TernaryOptimizer ternaryOptimizer(stmt);
+                    if (ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean()) {
+                        newAssumptionList.push_back(ternaryOptimizer.getExpr());
+                    } else throw std::runtime_error("Assumption has to be boolean");
+                }
+                op->setAssumptionsList(newAssumptionList);
+
+                newAssumptionList.clear();
+                for (auto stmt: op->getAssumptionsList()) {
+                    ConditionOptimizer2 conditionOptimizer2({stmt}, module);
+                    if (!conditionOptimizer2.getNewConditionList().empty()) {
+                        auto expr = conditionOptimizer2.getNewConditionList().back();
+                        if (!(*expr == BoolValue((true)))) {
+                            newAssumptionList.push_back(expr);
+                        }
+                    }
+                }
+                op->setAssumptionsList(newAssumptionList);
             }
-            op->setAssumptionsList(newAssumptionList);
+    }
+
+    /***
+     *  Idea: check for satisfiability of not(assumptions_of_operation -> assumption_of_ternary)
+        If no model exist, the the condition of ternary is always true (IPC idea)
+     * @param assumptionList
+     * @param expr
+     * @return returns if a statement is true or not
+     */
+    bool OperationFactory::isTrivialTrue(const std::vector<Expr *> &assumptionList, Expr *expr) const {
+        z3::context context;
+        z3::solver solver(context);
+        ExprTranslator translator(&context);
+
+        z3::expr z3_expr(context);
+        z3_expr = context.bool_val(true);
+        for (auto condition: assumptionList) {
+            z3_expr = z3_expr && translator.translate(condition);
         }
+        z3_expr = !z3_expr || translator.translate(expr);
+        solver.add(!z3_expr);
 
+        // Check for SAT if unsat -> erase path
+        if ((solver.check() == z3::unsat)) {
+            return true;
+        }
+        return false;
+    }
 
+    bool OperationFactory::isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr) const {
+        z3::context context;
+        z3::solver solver(context);
+        ExprTranslator translator(&context);
+        //Idea: check for satisfiability of assumptions_of_operation & assumption_of_ternary
+        //If unsat -> always false
+        //Translate each expression with the ExprtTranslator and add to solver
+        for (auto condition: assumptionList) {
+            solver.add(translator.translate(condition));
+        }
+        solver.add(translator.translate(expr));
+        // Check for SAT if unsat -> erase path
+        if ((solver.check() == z3::unsat)) {
+            //expr->setTrivialFalse();
+            return true;
+        }
+        return false;
     }
 }
