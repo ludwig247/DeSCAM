@@ -17,13 +17,13 @@ jobs:
       - name: Build System Generation
         run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       - name: Build SYSTEMC
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
-      - name: Build GTEST
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j4
-      - name: Build Z3
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
-      - name: Build LLVM/CLANG
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
+      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
+      #- name: Build GTEST
+      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j4
+      #- name: Build Z3
+      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
+      #- name: Build LLVM/CLANG
+      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
       - name: Build DESCAM
         run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j4
       - name: Build Tests
