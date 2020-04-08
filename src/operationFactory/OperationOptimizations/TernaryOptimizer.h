@@ -15,8 +15,9 @@
 namespace SCAM{
 class TernaryOptimizer: public RecursiveVisitor {
 public:
-    explicit TernaryOptimizer(Stmt * stmt);
+    TernaryOptimizer() = delete;
     TernaryOptimizer(Stmt * stmt,std::vector<Expr*> assumptionList, Module * module);
+    TernaryOptimizer(Stmt * stmt, Module * module);
 
     Stmt *getStmt() const;
 

@@ -166,7 +166,11 @@ namespace SCAM {
             }
             std::vector<Assignment *> newCommList;
             for (auto stmt: op->getCommitmentList()) {
-                TernaryOptimizer ternaryOptimizer(stmt);
+                if(op->getId() == 7){
+                    std::cout << *stmt << std::endl;
+                }
+
+                TernaryOptimizer ternaryOptimizer(stmt,op->getAssumptionsList(),this->module);
                 if (NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt())) {
                     newCommList.push_back(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt()));
                 } else throw std::runtime_error("Commitment has to be a statement");
@@ -187,7 +191,7 @@ namespace SCAM {
 
             std::vector<Expr *> newAssumptionList;
             for (auto stmt: op->getAssumptionsList()) {
-                TernaryOptimizer ternaryOptimizer(stmt);
+                TernaryOptimizer ternaryOptimizer(stmt,{},this->module);
                 if (ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean()) {
                     newAssumptionList.push_back(ternaryOptimizer.getExpr());
                 } else throw std::runtime_error("Assumption has to be boolean");
