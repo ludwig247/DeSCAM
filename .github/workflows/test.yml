@@ -25,7 +25,7 @@ jobs:
       #- name: Build LLVM/CLANG
       #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
       - name: Build DESCAM
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j4
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j4
       - name: Build Tests
         run: |
           $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
