@@ -127,7 +127,8 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
-add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM DESCAM)
+add_dependencies(DESCAM [LLVM])
+#add_dependencies(DESCAM SYSTEMC GTEST Z3 LLVM)
 # TODO: cpack generates installer
 #include(InstallRequiredSystemLibraries)
 #set(CPACK_PACKAGE_CONTACT "Kilgore Trout")
