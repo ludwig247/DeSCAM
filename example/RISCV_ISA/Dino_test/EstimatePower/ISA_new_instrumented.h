@@ -8,14 +8,14 @@
 #include "systemc.h"
 //#include "Interfaces.h"
 #include "../../Interfaces/Interfaces.h"
-#include "CPU_Interfaces.h"
+#include "../../ESL/CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"
 #include "../../RISCV_commons/Memory_Interfaces.h"
 
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 1
+#define SCAM 0
 
 
 class ISA_new : public sc_module {
@@ -23,6 +23,10 @@ public:
     //Constructor
 unsigned int operations[15];
 unsigned int originState;
+ void operationsCounter()  { 
+for (int i = 0; i < 15; i++)
+std::cout << "Operation " << i << ": " << operations[i] << std::endl;
+}
     SC_HAS_PROCESS(ISA_new);
 
     ISA_new(sc_module_name name) :
@@ -97,11 +101,90 @@ unsigned int originState;
 void ISA_new::run() {
 
 /*State 0*/
-originState = 0;
+operations[0]++;
     nextphase = Phases::fetch_PH;
     while (true) {
         phase = nextphase;
         // fetch next instruc   tion
+if (originState == 6)
+if ((phase == fetch_PH))
+operations[14]++;
+if (originState == 4)
+if ((phase == fetch_PH))
+operations[12]++;
+if (originState == 2)
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if (not((getEncType(encodedInstr) == ENC_S)))
+if (not((getEncType(encodedInstr) == ENC_U)))
+if (not((getEncType(encodedInstr) == ENC_J)))
+if (not((getEncType(encodedInstr) == ENC_I_I)))
+if (not((getEncType(encodedInstr) == ENC_I_L)))
+if (not((getEncType(encodedInstr) == ENC_I_J)))
+if ((phase == fetch_PH))
+operations[10]++;
+if (originState == 2)
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if (not((getEncType(encodedInstr) == ENC_S)))
+if (not((getEncType(encodedInstr) == ENC_U)))
+if (not((getEncType(encodedInstr) == ENC_J)))
+if (not((getEncType(encodedInstr) == ENC_I_I)))
+if (not((getEncType(encodedInstr) == ENC_I_L)))
+if ((getEncType(encodedInstr) == ENC_I_J))
+if ((phase == fetch_PH))
+operations[9]++;
+if (originState == 2)
+if (not((phase == fetch_PH)))
+if ((phase == execute_PH))
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if (not((getEncType(encodedInstr) == ENC_S)))
+if (not((getEncType(encodedInstr) == ENC_U)))
+if (not((getEncType(encodedInstr) == ENC_J)))
+if (not((getEncType(encodedInstr) == ENC_I_I)))
+if ((getEncType(encodedInstr) == ENC_I_L))
+operations[8]++;
+if (originState == 2)
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if (not((getEncType(encodedInstr) == ENC_S)))
+if (not((getEncType(encodedInstr) == ENC_U)))
+if (not((getEncType(encodedInstr) == ENC_J)))
+if ((getEncType(encodedInstr) == ENC_I_I))
+if ((phase == fetch_PH))
+operations[7]++;
+if (originState == 2)
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if (not((getEncType(encodedInstr) == ENC_S)))
+if (not((getEncType(encodedInstr) == ENC_U)))
+if ((getEncType(encodedInstr) == ENC_J))
+if ((phase == fetch_PH))
+operations[6]++;
+if (originState == 2)
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if (not((getEncType(encodedInstr) == ENC_S)))
+if ((getEncType(encodedInstr) == ENC_U))
+if ((phase == fetch_PH))
+operations[5]++;
+if (originState == 2)
+if (not((phase == fetch_PH)))
+if ((phase == execute_PH))
+if (not((getEncType(encodedInstr) == ENC_R)))
+if (not((getEncType(encodedInstr) == ENC_B)))
+if ((getEncType(encodedInstr) == ENC_S))
+operations[4]++;
+if (originState == 2)
+if (not((getEncType(encodedInstr) == ENC_R)))
+if ((getEncType(encodedInstr) == ENC_B))
+if ((phase == fetch_PH))
+operations[3]++;
+if (originState == 2)
+if ((getEncType(encodedInstr) == ENC_R))
+if ((phase == fetch_PH))
+operations[2]++;
         if (phase == Phases::fetch_PH) {
 
             // Set up memory access
@@ -110,60 +193,6 @@ originState = 0;
             memoryAccess.addrIn = pcReg;
             memoryAccess.dataIn = 0;    // not relevant
 
-if (originState == 6)
-operations[14]++;
-if (originState == 4)
-operations[12]++;
-if (originState == 2)
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_J)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_L)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[10]++;
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_J))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_L)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[9]++;
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[7]++;
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[6]++;
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[5]++;
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[3]++;
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R))
-operations[2]++;
-if (originState == 0)
-operations[0]++;
 /*State 1*/            toMemoryPort->write(memoryAccess); //Send request to memory
 originState = 1;
 if (originState == 1)
@@ -258,17 +287,12 @@ originState = 2;
                 memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for stores
                 memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
 
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[4]++;
 /*State 3*/                toMemoryPort->write(memoryAccess); // Request store
 originState = 3;
-
-                // Store done
 if (originState == 3)
 operations[11]++;
+
+                // Store done
 /*State 4*/                fromMemoryPort->read(fromMemoryData); //Fixme: Why do we need this read? For store a write should be sufficient
 originState = 4;
 
@@ -355,21 +379,12 @@ originState = 4;
                 regfileWrite.dst = getRdAddr(encodedInstr);
 
                 // Request load
-if (originState == 2)
-if((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_L))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_I_I)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_J)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_U)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_S)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_B)))
-if(not((getEncType(fromMemoryPort_sig[loadedData]) == ENC_R)))
-operations[8]++;
 /*State 5*/                toMemoryPort->write(memoryAccess);
 originState = 5;
-
-                // Load done
 if (originState == 5)
 operations[13]++;
+
+                // Load done
 /*State 6*/                fromMemoryPort->read(fromMemoryData);
 originState = 6;
 

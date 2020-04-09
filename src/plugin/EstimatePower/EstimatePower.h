@@ -54,4 +54,10 @@ private:
 
     void mapStates2Lines(FSM &node);
 
+    std::string lhs(std::string condition);
+
+    std::string rhs(std::string condition);
+
+    bool isPositive (std::string condition);
+
 };

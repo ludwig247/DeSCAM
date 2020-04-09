@@ -19,7 +19,8 @@
  * ##################
  * ADD YOUR CORE IMPLEMENTATION HERE
  */
-#include "../../RISCV_Pipelined/ESL/Core.h"
+#include "../../RISCV_ISA/Dino_test/EstimatePower/Core_new.h"
+//#include "../../RISCV_Pipelined/ESL/Core.h"
 //#include "../../RISCV_OLD/ESL/Core.h"
 //#include "../../RISCV_ISA/ESL/Core.h"
 //#include "../../RISCV_MS/ESL/Core.h"
@@ -703,6 +704,8 @@ void Core_test::perform_test() {
 
     log_file.close(); // close log_file
     hex_file.close(); // close hex_file
+
+    CO.isa.operationsCounter();
 };
 
 

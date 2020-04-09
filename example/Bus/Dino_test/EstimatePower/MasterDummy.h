@@ -34,10 +34,10 @@ public:
     void fsm() {
         while (true) {
 
-            if(cnt == 5){
+            if(cnt == 10000000){
                 std::cout << "Simulated " << cnt << " bus cycles" << std::endl;
                 sc_stop();
-                cnt = 5;
+                cnt = 10000000;
             }else{
                 ++cnt;
             }

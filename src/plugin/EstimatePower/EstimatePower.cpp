@@ -67,6 +67,8 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
         if (line.find("SC_HAS_PROCESS(") != std::string::npos)  {
             ss += ("unsigned int operations[" + std::to_string(operationsCounter) + "];\n");
             ss += ("unsigned int originState;\n");
+            ss += (   " void operationsCounter()  { \nfor (int i = 0; i < " + std::to_string(operationsCounter) +
+                    "; i++)\nstd::cout << \"Operation \" << i << \": \" << operations[i] << std::endl;\n}\n");
         }
         startPosition = line.find("SC_THREAD(");
         if (startPosition != std::string::npos) {
@@ -102,41 +104,54 @@ void EstimatePower::insertOperationLines(std::vector <Operation *> &operationsLi
 
 }
 
-void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
-    std::size_t endPosition;
+/*void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
+    std::size_t startPosition, endPosition;
     std::string number;
     std::string statementString;
-    std::string line;
+    std::string line, condition;
     State* currentState;
-  //  for (auto stateLine : stateLines)
+    std::vector <std::string> currentConditions;
+  //  for (auto stateLine : stateLines)*/
      //   processBody.at(stateLine.first - processPosition - 2).insert(0, "/*State " + std::to_string(stateLine.second->getStateId()) + "*/");
-    for (int i = 0; i < processBody.size(); i++)   {
-        line = processBody.at(i);
-        if (line.find("/*State ") != std::string::npos)  {
-            endPosition = line.find("*/");
-            number = line.substr(8, endPosition - 8);
-            currentState = node.getStateMap().at(std::stoi(number));
-            if (processBody.at(i + 1) != "originState = " + std::to_string(currentState->getStateId()) + ";")
-                processBody.insert(processBody.begin() + i + 1, "originState = " + std::to_string(currentState->getStateId()) + ";");
-            for (auto operation : currentState->getIncomingOperationsList())  {
-                if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
-                    processBody.insert(processBody.begin() + i, "operations[" + std::to_string(operation->getId()) + "]++;");
-                    for (auto statement : operation->getStatementsList())  {
-                        statementString = PrintStmt::toString(statement);
-                        if (statementString.find(".sync") == std::string::npos)//  {
-                            if (statementString.find("if") != std::string::npos && statementString.find("(") != std::string::npos && statementString.find(")") != std::string::npos)
-                                processBody.insert(processBody.begin() + i, statementString);
-                        //}
-                    }
-                    processBody.insert(processBody.begin() + i, "if (originState == " + std::to_string(operation->getState()->getStateId()) + ")");
-                    operationsCounted.at(operation) = true;
-
-                }
-            }
-        }
-    }
-
-}
+//    for (int i = 0; i < processBody.size(); i++)   {
+//        line = processBody.at(i);
+//        if (line.find("/*State ") != std::string::npos)  {
+//            endPosition = line.find("*/");
+//            number = line.substr(8, endPosition - 8);
+//            currentState = node.getStateMap().at(std::stoi(number));
+//            for (auto operation : currentState->getOutgoingOperationsList())  {
+//                if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
+//                    processBody.insert(processBody.begin() + i + 1, "operations[" + std::to_string(operation->getId()) + "]++;");
+//                    for (auto statement : operation->getStatementsList())  {
+//                        statementString = PrintStmt::toString(statement);
+//                        if (statementString.find(".sync") == std::string::npos)//  {
+//                            if (statementString.find("if") != std::string::npos && statementString.find("(") != std::string::npos && statementString.find(")") != std::string::npos)  {
+//                                for (int j = 0; j < currentConditions.size(); j++)  {
+//                                    condition = currentConditions.at(j);
+//                                    if (isPositive(condition))  {
+//                                        if (lhs(currentConditions.at(j)) == lhs(statementString))
+//                                            currentConditions.erase(currentConditions.begin() + j--);
+//                                    }
+//                                    else
+//                                        if (lhs(currentConditions.at(j)) == lhs(statementString) && rhs(currentConditions.at(j)) == rhs(statementString))
+//                                            currentConditions.erase(currentConditions.begin() + j--);
+//                                }
+//
+//                                currentConditions.push_back(statementString);
+//                            }
+//                    }
+//                    for (auto statement : currentConditions)
+//                        processBody.insert(processBody.begin() + i + 1, statement);
+//                    operationsCounted.at(operation) = true;
+//                    processBody.insert(processBody.begin() + i + 1, "if (originState == " + std::to_string(operation->getState()->getStateId()) + ")");
+//                }
+//            }
+//            if (processBody.at(i + 1) != "originState = " + std::to_string(currentState->getStateId()) + ";")
+//                processBody.insert(processBody.begin() + i + 1, "originState = " + std::to_string(currentState->getStateId()) + ";");
+//        }
+//    }
+//
+//}
 
 void EstimatePower::debug(Module &node) {
     std::cout << "Module: " << node.getName() << std::endl;
@@ -179,4 +194,117 @@ void EstimatePower::mapStates2Lines(FSM &node) {
     for (auto state : node.getStateMap())
         stateLines.insert(std::pair<int, State*> (whichLine(*state.second), state.second));
 }
+
+std::string EstimatePower::lhs(std::string condition) {
+    std::size_t startPosition, length;
+    startPosition = condition.find("(");
+    if (isPositive(condition)) startPosition += 2;
+    else startPosition += 6;
+    length = condition.substr(startPosition).find(" ");
+    std::string lhs = condition.substr(startPosition, length);
+    return lhs;
+}
+
+std::string EstimatePower::rhs(std::string condition) {
+    std::size_t startPosition, length;
+    startPosition = condition.find("==");
+    if (startPosition == std::string::npos)  {
+        startPosition = condition.find("!=");
+        if (startPosition == std::string::npos)  {
+            startPosition = condition.find("<");
+            if (startPosition == std::string::npos)  {
+                startPosition = condition.find(">");
+                if (startPosition == std::string::npos)  {
+                    return "";
+                }
+            }
+        }
+    }
+    startPosition = condition.substr(startPosition).find(" ") + 1 + startPosition;
+    length = condition.substr(startPosition).find(")");
+    std::string rhs = condition.substr(startPosition, length);
+    return rhs;
+}
+
+bool EstimatePower::isPositive(std::string condition) {
+    if (condition.find("(not(") == std::string::npos)
+        return true;
+    return false;
+}
+
+void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
+    int startState, currentLine = -1, conditionLine;
+    std::string statementString, condition;
+    std::vector <std::string> currentConditions;
+
+    for (auto state : node.getStateMap())  {
+        for (int i = 0; i < processBody.size(); i++)  {
+            if (processBody.at(i).find("/*State " + std::to_string(state.second->getStateId())) != std::string::npos)  {
+                startState = i;
+                break;
+            }
+        }
+        if (state.second->isInit())  {
+            for (auto operation : state.second->getOutgoingOperationsList())
+                if (!operationsCounted.at(operation))
+                    processBody.insert(processBody.begin() + startState + 1, "operations[0]++;");
+        } else  {
+            processBody.insert(processBody.begin() + startState + 1, "originState = " + std::to_string(state.first) + ";");
+            for (auto operation : state.second->getOutgoingOperationsList())  {
+                conditionLine = startState;
+                for (auto statement : operation->getStatementsList())  {
+                    statementString = PrintStmt::toString(statement);
+                    if (currentLine == -1)
+                        currentLine = startState;
+                    if (statementString.find(".sync") == std::string::npos)  {
+                        if (statementString.find("if (") == std::string::npos)  {
+                            for (int i = startState; i < processBody.size(); i++)  {
+                                if (processBody.at(i).find(statementString) != std::string::npos)  {
+                                    currentLine = i;
+                                    break;
+                                } else currentLine = -1;
+                            }
+                            if (currentLine == -1) {
+                                for (int i = 0; i < startState; i++) {
+                                    if (processBody.at(i).find(statementString) != std::string::npos) {
+                                        currentLine = i;
+                                        break;
+                                    } else currentLine = -1;
+                                }
+                            }
+                            if (currentLine == -1)
+                                currentLine = startState;
+                        }  else {
+                            for (int j = 0; j < currentConditions.size(); j++)  {
+                                condition = currentConditions.at(j);
+                                if (isPositive(condition))  {
+                                    if (lhs(condition) == lhs(statementString))
+                                        currentConditions.erase(currentConditions.begin() + j--);
+                                } else if (lhs(condition) == lhs(statementString) && rhs(condition) == rhs(statementString))
+                                    currentConditions.erase(currentConditions.begin() + j--);
+                            }
+                            currentConditions.push_back(statementString);
+                            conditionLine = currentLine;
+                        }
+                    }
+                }
+                if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
+                    processBody.insert(processBody.begin() + conditionLine + 2, "operations[" + std::to_string(operation->getId()) + "]++;");
+                    operationsCounted.at(operation) = true;
+                    for (int i = currentConditions.size() - 1; i >= 0; i--)
+                        processBody.insert(processBody.begin() + conditionLine + 2, currentConditions.at(i));
+                    currentConditions.clear();
+                    processBody.insert(processBody.begin() + conditionLine + 2, "if (originState == " + std::to_string(operation->getState()->getStateId()) + ")");
+                }
+            }
+
+
+        }
+    }
+}
+
+
+
+
+
 
