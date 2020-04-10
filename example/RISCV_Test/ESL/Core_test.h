@@ -705,7 +705,7 @@ void Core_test::perform_test() {
     log_file.close(); // close log_file
     hex_file.close(); // close hex_file
 
-    CO.isa.operationsCounter();
+//    CO.isa.operationsCounter();
 };
 
 

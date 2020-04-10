@@ -34,13 +34,10 @@ private:
 
     std::map <Operation *, bool> operationsCounted;
 
-    std::map <unsigned int, Operation *> operationsMap;
 
     unsigned int operationsCounter;
 
     std::vector <std::string> processBody;
-
-    void insertOperationLines(std::vector <Operation *> &operationsList, int line);
 
     void debug(Module &node);
 

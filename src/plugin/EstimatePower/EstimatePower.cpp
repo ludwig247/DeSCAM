@@ -100,59 +100,6 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
     return ss;
 }
 
-void EstimatePower::insertOperationLines(std::vector <Operation *> &operationsList, int line) {
-
-}
-
-/*void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
-    std::size_t startPosition, endPosition;
-    std::string number;
-    std::string statementString;
-    std::string line, condition;
-    State* currentState;
-    std::vector <std::string> currentConditions;
-  //  for (auto stateLine : stateLines)*/
-     //   processBody.at(stateLine.first - processPosition - 2).insert(0, "/*State " + std::to_string(stateLine.second->getStateId()) + "*/");
-//    for (int i = 0; i < processBody.size(); i++)   {
-//        line = processBody.at(i);
-//        if (line.find("/*State ") != std::string::npos)  {
-//            endPosition = line.find("*/");
-//            number = line.substr(8, endPosition - 8);
-//            currentState = node.getStateMap().at(std::stoi(number));
-//            for (auto operation : currentState->getOutgoingOperationsList())  {
-//                if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
-//                    processBody.insert(processBody.begin() + i + 1, "operations[" + std::to_string(operation->getId()) + "]++;");
-//                    for (auto statement : operation->getStatementsList())  {
-//                        statementString = PrintStmt::toString(statement);
-//                        if (statementString.find(".sync") == std::string::npos)//  {
-//                            if (statementString.find("if") != std::string::npos && statementString.find("(") != std::string::npos && statementString.find(")") != std::string::npos)  {
-//                                for (int j = 0; j < currentConditions.size(); j++)  {
-//                                    condition = currentConditions.at(j);
-//                                    if (isPositive(condition))  {
-//                                        if (lhs(currentConditions.at(j)) == lhs(statementString))
-//                                            currentConditions.erase(currentConditions.begin() + j--);
-//                                    }
-//                                    else
-//                                        if (lhs(currentConditions.at(j)) == lhs(statementString) && rhs(currentConditions.at(j)) == rhs(statementString))
-//                                            currentConditions.erase(currentConditions.begin() + j--);
-//                                }
-//
-//                                currentConditions.push_back(statementString);
-//                            }
-//                    }
-//                    for (auto statement : currentConditions)
-//                        processBody.insert(processBody.begin() + i + 1, statement);
-//                    operationsCounted.at(operation) = true;
-//                    processBody.insert(processBody.begin() + i + 1, "if (originState == " + std::to_string(operation->getState()->getStateId()) + ")");
-//                }
-//            }
-//            if (processBody.at(i + 1) != "originState = " + std::to_string(currentState->getStateId()) + ";")
-//                processBody.insert(processBody.begin() + i + 1, "originState = " + std::to_string(currentState->getStateId()) + ";");
-//        }
-//    }
-//
-//}
-
 void EstimatePower::debug(Module &node) {
     std::cout << "Module: " << node.getName() << std::endl;
    // int i = 0;
