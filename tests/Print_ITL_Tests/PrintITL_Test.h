@@ -18,7 +18,7 @@ static std::vector<SCAM::Module *> parameter() {
 
     std::vector<const char *> commandLineArugmentsVector;
 
-    //Binaray
+    //Binary
     std::string bin = std::string(SCAM_HOME"/bin/SCAM ");
     commandLineArugmentsVector.push_back(bin.c_str());
 

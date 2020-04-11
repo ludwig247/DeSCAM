@@ -8,7 +8,7 @@
 int main(int argc, char **argv) {
     std::vector<const char *> commandLineArugmentsVector;
 
-    //Binaray
+    //Binary
     std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
     commandLineArugmentsVector.push_back(bin.c_str());
 
