@@ -2,16 +2,16 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
-// #define TASK_MASK(x)        (x & 1)
+// #define TASK_MASK(x)        ((x & 1) != 0)
 // #define ERROR_MASK(x)       (x & 0xF)
 // #define ENABLE_MASK(x)      (x & 1)
 // #define CONFIG_MASK(x)      (x & 0x1F)
-// #define PARITY_MASK(x)      (x & 0xE)
-// #define STOP_MASK(x)        (x & 0x1)
-// #define HWFC_MASK(x)        (x & 0x10)
-// #define ODD_PARITY_MASK(x)  (x & 0x100)
+// #define PARITY(x)      ((x & 0xE) != 0)
+// #define STOP(x)        ((x & 0x1) != 0)
+// #define HWFC(x)        ((x & 0x10) != 0)
+// #define ODD_PARITY(x)  ((x & 0x100) != 0)
 
-//#define BOOL(x) ((x & 1) != 0)
+// #define ENABLE(x) ((x & 1) != 0)
 
 
 SC_MODULE(Uart_control) {
@@ -66,11 +66,14 @@ SC_MODULE(Uart_control) {
     bool tx_events_valid;
     bool rx_events_valid;
 
+    // Tmp registers
+    unsigned int error_src_tmp;
+    unsigned int bus_data_tmp;
+
     // Visible registers
     unsigned int error_src;
     unsigned int enable;
     unsigned int frame_config;
-    unsigned int data_tmp;
     tasks_t      tasks;
     bool         cts_internal;
     bool         rts_internal;
@@ -124,7 +127,7 @@ SC_MODULE(Uart_control) {
         return (enable & 1) != 0;
     }
 
-    bool TASK_MASK(unsigned int task)   const
+    bool TASK_MASK(unsigned int task) const
     {
         return (task & 1) != 0;
     }
@@ -138,7 +141,7 @@ SC_MODULE(Uart_control) {
 
     unsigned int CONFIG_MASK(unsigned int frame_config) const {return (frame_config & 0x1F);}
 
-    bool PARITY     (unsigned int parity) const {return (parity & 0xE) != 0;}
+    bool PARITY(unsigned int parity) const {return (parity & 0xE) != 0;}
     bool STOP(unsigned int stop_bit) const {return (stop_bit & 0x1) != 0;}
 
     bool HWFC(unsigned int hwfc) const {return (hwfc & 0x10) != 0;}
@@ -181,7 +184,7 @@ void Uart_control::fsm()
         bus_in_msg.addr = 0;
         bus_in_msg.data = 0;
         bus_in_msg.trans_type = READ;
-        bus_out_msg.data = 0;
+        //bus_out_msg.data = 0;
         bus_out_msg.valid = false;
         tasks_in_msg.start_rx = false;
         tasks_in_msg.stop_rx = false;
@@ -225,14 +228,8 @@ void Uart_control::fsm()
 
         bus_wr = bus_in_valid && bus_in_msg.trans_type == WRITE;
         bus_rd = bus_in_valid && bus_in_msg.trans_type == READ;
-        bus_out_msg.valid = bus_rd || bus_wr;
-
-
-        // BUS READ
-        data_tmp = bus_out_msg.data;
-        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ERROR_SRC) ? error_src    : data_tmp;
-        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ENABLE)    ? enable       : data_tmp;
-        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_CONFIG)    ? frame_config : data_tmp;
+        //bus_out_msg.valid = bus_rd || bus_wr;
+        bus_out_msg.valid = bus_in_valid;
 
         // Task suspend is not included in PS for nRF53 UART
         //tasks_internal.suspend  = is_task_bus(bus_in_msg.addr, bus_in_msg.data, ADDR_tasks_SUSPEND);
@@ -241,10 +238,15 @@ void Uart_control::fsm()
         tasks.stop_rx  = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_STOP_RX))  ? TASK_MASK(bus_in_msg.data) : false;
         tasks.start_tx = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_START_TX)) ? TASK_MASK(bus_in_msg.data) : false;
         tasks.stop_tx  = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_STOP_TX))  ? TASK_MASK(bus_in_msg.data) : false;
-        error_src      = (bus_wr && (bus_in_msg.addr == ADDR_ERROR_SRC))      ? ERROR_MASK(~bus_in_msg.data & error_src) : error_src;
-        enable         = (bus_wr && (bus_in_msg.addr == ADDR_ENABLE))         ? ENABLE_MASK(bus_in_msg.data)    : enable;
-        frame_config   = (bus_wr && (bus_in_msg.addr == ADDR_CONFIG))         ? CONFIG_MASK(bus_in_msg.data)   :frame_config;
+        //error_src      = (bus_wr && (bus_in_msg.addr == ADDR_ERROR_SRC))      ? ERROR_MASK(~bus_in_msg.data & error_src) : error_src;
+        //enable         = (bus_wr && (bus_in_msg.addr == ADDR_ENABLE))         ? ENABLE_MASK(bus_in_msg.data)             : enable;
+        //frame_config   = (bus_wr && (bus_in_msg.addr == ADDR_CONFIG))         ? CONFIG_MASK(bus_in_msg.data)             :frame_config;
 
+
+        // BUS READ
+        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ERROR_SRC) ? error_src    : bus_out_msg.data;
+        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ENABLE)    ? enable       : bus_out_msg.data;
+        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_CONFIG)    ? frame_config : bus_out_msg.data;
 
         // EVENTS
         events_out_msg.txd_ready   = (ENABLE(enable) && tx_events_valid) ? tx_events_msg.done             : false;
@@ -295,33 +297,42 @@ void Uart_control::fsm()
 
         // Update ERROR_SRC register in case of errors.
         // New errors have priority over clearance
-        error_src = (ENABLE(enable) && rx_events_valid) ? (error_src | rx_events_msg.error_src) : error_src;
+        
 
-        config_msg.parity        = PARITY(frame_config);
-        config_msg.two_stop_bits = STOP(frame_config);
-        config_msg.odd_parity    = ODD_PARITY(frame_config);
+
 #ifdef SIM
         //if (config_msg.parity) debug_print(CONTROL, "Parity true!");
 #endif
 
         // Consider moving back here
-        // if (HWFC(frame_config) && rx_active_out_msg && (rts_internal == RTS_DEACTIVATED))
-        // {
-        //     rts_internal = RTS_ACTIVATED;
-        //     rts_out->master_write(rts_internal);
-        // }
-        // else if (HWFC(frame_config) && !rx_active_out_msg && (rts_internal == RTS_ACTIVATED))
-        // {
-        //     rts_internal = RTS_DEACTIVATED;
-        //     rts_out->master_write(rts_internal);
-        // }
+        if (HWFC(frame_config) && rx_active_out_msg && (rts_internal == RTS_DEACTIVATED))
+        {
+            rts_internal = RTS_ACTIVATED;
+            rts_out->master_write(rts_internal);
+        }
+        else if (HWFC(frame_config) && !rx_active_out_msg && (rts_internal == RTS_ACTIVATED))
+        {
+            rts_internal = RTS_DEACTIVATED;
+            rts_out->master_write(rts_internal);
+        }
 
-        if (events_out_msg.cts          ||
-            events_out_msg.ncts         ||
-            events_out_msg.rxd_ready    ||
-            events_out_msg.txd_ready    ||
-            events_out_msg.rx_timeout   ||
-            events_out_msg.error) 
+        error_src_tmp  = (bus_wr && (bus_in_msg.addr == ADDR_ERROR_SRC)) ? ERROR_MASK(~bus_in_msg.data & error_src) : error_src;
+        error_src      = (ENABLE(enable) && rx_events_valid)             ? (error_src_tmp | rx_events_msg.error_src): error_src_tmp;
+        enable         = (bus_wr && (bus_in_msg.addr == ADDR_ENABLE))    ? ENABLE_MASK(bus_in_msg.data)             : enable;
+        frame_config   = (bus_wr && (bus_in_msg.addr == ADDR_CONFIG))    ? CONFIG_MASK(bus_in_msg.data)             :frame_config;
+
+#ifdef SIM
+        if (bus_wr && (bus_in_msg.addr == ADDR_ENABLE)) debug_print(CONTROL, "Write to ENABLE register");
+        if (bus_wr) std::cout << "Enable register is " << enable << std::endl;
+        if (bus_rd && (bus_in_msg.addr == ADDR_ENABLE)) debug_print(CONTROL, "Read from ENABLE register");
+        if (bus_rd) std::cout << "Enable register is " << enable << ", data_out is " << bus_out_msg.data << std::endl;
+#endif
+
+        config_msg.parity        = PARITY(frame_config);
+        config_msg.two_stop_bits = STOP(frame_config);
+        config_msg.odd_parity    = ODD_PARITY(frame_config);
+
+        if (cts_in_valid || rx_events_valid || tx_events_valid)
         {
             events_out->master_write(events_out_msg);
         }

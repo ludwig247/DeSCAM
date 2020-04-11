@@ -12,7 +12,9 @@ add_library(global SHARED ErrorMsg.cpp
         NodePeekVisitor.cpp
         StmtNodeAlloc.cpp
         SimplifyVisitor.cpp
-        ModelGlobal.cpp RecursiveVisitor.cpp RecursiveVisitor.h)
+        ModelGlobal.cpp
+        RecursiveVisitor.cpp
+        Completeness.cpp)
 
 
 

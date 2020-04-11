@@ -21,6 +21,7 @@
 #include <thread>
 #include <CreatePropertySuite.h>
 #include <OperationOptimizations/TernaryOptimizer.h>
+#include <Completeness.h>
 
 namespace SCAM {
     OperationFactory::OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module *module) :
@@ -55,6 +56,9 @@ namespace SCAM {
         this->optimizeTernary();
         std::cout << "Reduce operations:" << std::endl;
         this->optimizeOperations();
+        std::cout << "Valid Operations: " << std::endl;
+        this->findValidOperations();
+        std::cout << "\tValid: " << this->operations.size() << std::endl;
         std::cout << "Generating PropertySuite:" << std::endl;
         std::map<int, State *> stateMap;
         for (auto state: this->statesMap) {
@@ -70,7 +74,6 @@ namespace SCAM {
         this->statesMap = ctest.getStatesMap();
         this->rawOperations = ctest.getOperations();
     }
-
     void OperationFactory::createOperations() {
         if (this->module->isSlave()) {
             SCAM::CreateOperationsSlave cOperations(this->rawOperations, this->statesMap, this->module);
@@ -166,10 +169,6 @@ namespace SCAM {
             }
             std::vector<Assignment *> newCommList;
             for (auto stmt: op->getCommitmentList()) {
-                if(op->getId() == 7){
-                    std::cout << *stmt << std::endl;
-                }
-
                 TernaryOptimizer ternaryOptimizer(stmt,op->getAssumptionsList(),this->module);
                 if (NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt())) {
                     newCommList.push_back(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt()));
@@ -182,6 +181,7 @@ namespace SCAM {
         /// Assumptions
         /////////////////////////////
         for (auto op : operations) {
+
             for (int i = 0; i < op->getAssumptionsList().size(); i++) {
                 auto assumption = op->getAssumptionsList().at(i);
                 if (ExprVisitor::isTernary(assumption)) {
@@ -191,7 +191,8 @@ namespace SCAM {
 
             std::vector<Expr *> newAssumptionList;
             for (auto stmt: op->getAssumptionsList()) {
-                TernaryOptimizer ternaryOptimizer(stmt,{},this->module);
+
+                TernaryOptimizer ternaryOptimizer(stmt,this->module);
                 if (ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean()) {
                     newAssumptionList.push_back(ternaryOptimizer.getExpr());
                 } else throw std::runtime_error("Assumption has to be boolean");
@@ -210,6 +211,10 @@ namespace SCAM {
             }
             op->setAssumptionsList(newAssumptionList);
         }
+
+        Completeness::checkCaseSplit(operations, module);
+
+
     }
 
 }

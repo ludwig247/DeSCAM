@@ -21,11 +21,10 @@
 #include <OperationFactory.h>
 #include "TernaryOptimizer.h"
 
-SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, SCAM::Module *module):
-    module(module){
+SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, SCAM::Module *module) :
+        module(module) {
     stmt->accept(*this);
 }
-
 
 
 void SCAM::TernaryOptimizer::visit(struct VariableOperand &node) {
@@ -76,11 +75,13 @@ void SCAM::TernaryOptimizer::visit(struct UnaryExpr &node) {
 
     if ((*node.getExpr() == *unaryExpr)) {
         this->expr = &node;
-    }else if(isTrue(unaryExpr) || isFalse(unaryExpr)){
-        SCAM::ConditionOptimizer2 conditionOptimizer2({new UnaryExpr(node.getOperation(),unaryExpr)},this->module);
-        if(conditionOptimizer2.getNewConditionList().empty()){
+    } else if (isTrue(unaryExpr) || isFalse(unaryExpr)) {
+        SCAM::ConditionOptimizer2 conditionOptimizer2({new UnaryExpr(node.getOperation(), unaryExpr)}, this->module);
+        if (conditionOptimizer2.getNewConditionList().empty()) {
             this->expr = new BoolValue(true);
-        }else this->expr = conditionOptimizer2.getNewConditionList().back();
+        } else if (conditionOptimizer2.getNewConditionList().size() == 1) this->expr = conditionOptimizer2.getNewConditionList().back();
+        else this->expr = new UnaryExpr(node.getOperation(), unaryExpr);
+
     } else {
         this->expr = new UnaryExpr(node.getOperation(), unaryExpr);
     }
@@ -111,7 +112,6 @@ void SCAM::TernaryOptimizer::visit(struct Branch &node) {
 }
 
 void SCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
-
     node.getRhs()->accept(*this);
     auto rhs = this->expr;
 
@@ -123,35 +123,33 @@ void SCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
     } else {
         this->expr = new Arithmetic(lhs, node.getOperation(), rhs);
     }
-
 }
 
 void SCAM::TernaryOptimizer::visit(struct Logical &node) {
-    node.getRhs()->accept(*this);
-    auto rhs = this->expr;
-
     node.getLhs()->accept(*this);
     auto lhs = this->expr;
 
+    node.getRhs()->accept(*this);
+    auto rhs = this->expr;
 
-
-    if(isTrue(rhs) || isTrue(lhs) || isFalse(rhs) || isFalse(lhs)){
-        SCAM::ConditionOptimizer2 conditionOptimizer2({new Logical(rhs,node.getOperation(),lhs)},this->module);
-        if(conditionOptimizer2.getNewConditionList().empty()){
-            this->expr = new BoolValue(true);
-        }else this->expr = conditionOptimizer2.getNewConditionList().back();
-    }
-    else if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
-        SCAM::ConditionOptimizer2 conditionOptimizer2({&node},this->module);
-        if(conditionOptimizer2.getNewConditionList().empty()){
-            this->expr = new BoolValue(true);
-        }else this->expr = conditionOptimizer2.getNewConditionList().back();
+    if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
+        this->expr = &node;
     } else {
-        SCAM::ConditionOptimizer2 conditionOptimizer2({&node},this->module);
-        if(conditionOptimizer2.getNewConditionList().empty()){
-            this->expr = new BoolValue(true);
-        }else this->expr = conditionOptimizer2.getNewConditionList().back();
         this->expr = new Logical(lhs, node.getOperation(), rhs);
+    }
+    SCAM::ConditionOptimizer2 conditionOptimizer2({this->expr}, this->module);
+    if (conditionOptimizer2.getNewConditionList().empty()) {
+        this->expr = new BoolValue(true);
+    } else if (conditionOptimizer2.getNewConditionList().size() == 1) {
+        this->expr = conditionOptimizer2.getNewConditionList().back();
+    } else {
+        auto ele1 = conditionOptimizer2.getNewConditionList().at(0);
+        auto ele2 = conditionOptimizer2.getNewConditionList().at(1);
+        this->expr = new Logical(ele1, "and", ele2);
+        for (int i = 2; i < conditionOptimizer2.getNewConditionList().size(); i++) {
+            auto element = conditionOptimizer2.getNewConditionList().at(i);
+            this->expr = new Logical(this->expr, "and", element);
+        }
     }
 }
 
@@ -300,6 +298,7 @@ void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
     node.getCondition()->accept(*this);
     auto condExpr = this->expr;
 
+
     if (*condExpr == BoolValue(true)) {
         this->expr = trueExpr;
     } else if (*condExpr == BoolValue(false)) {
@@ -319,9 +318,9 @@ SCAM::Expr *SCAM::TernaryOptimizer::getExpr() const {
     return expr;
 }
 
-SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, std::vector<Expr *> assumptionList, Module * module) :
-    module(module),
-    assumptionList(assumptionList) {
+SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, std::vector<Expr *> assumptionList, Module *module) :
+        module(module),
+        assumptionList(assumptionList) {
     stmt->accept(*this);
 }
 
@@ -352,7 +351,7 @@ bool SCAM::TernaryOptimizer::isTrivialTrue(const std::vector<Expr *> &assumption
     return false;
 }
 
-bool SCAM::TernaryOptimizer::isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr)  {
+bool SCAM::TernaryOptimizer::isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr) {
     z3::context context;
     z3::solver solver(context);
     ExprTranslator translator(&context);

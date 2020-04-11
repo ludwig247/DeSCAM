@@ -96,7 +96,7 @@ private:
 
     virtual void visit(struct TimePointOperand &node);
 
-    virtual void visit(struct Ternary &node);
+    virtual void visit(struct Ternary &node) override ;
 
     Expr *  expr = nullptr;
     Stmt * stmt = nullptr;
