@@ -212,7 +212,7 @@ namespace SCAM {
             op->setAssumptionsList(newAssumptionList);
         }
 
-        Completeness::checkCaseSplit(operations, module);
+        //Completeness::checkCaseSplit(operations, module);
 
 
     }
