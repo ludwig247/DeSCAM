@@ -255,8 +255,10 @@ void Uart_control::fsm()
         events_out_msg.error       = (ENABLE(enable) && rx_events_valid) ? (rx_events_msg.error_src != 0) : false;
 
         // TODO: Move cts to another file? Will be located in another clock/power domain
+
         events_out_msg.cts  = (ENABLE(enable) && HWFC(frame_config) && cts_in_valid) ? cts_in_msg == CTS_ACTIVATED   : false;
         events_out_msg.ncts = (ENABLE(enable) && HWFC(frame_config) && cts_in_valid) ? cts_in_msg == CTS_DEACTIVATED : false;
+
 
         cts_internal = (!HWFC(frame_config) || events_out_msg.cts)  ? CTS_ACTIVATED   : cts_internal;
         cts_internal = ( HWFC(frame_config) && events_out_msg.ncts) ? CTS_DEACTIVATED : cts_internal;
@@ -299,11 +301,9 @@ void Uart_control::fsm()
         // New errors have priority over clearance
         
 
-
 #ifdef SIM
         //if (config_msg.parity) debug_print(CONTROL, "Parity true!");
 #endif
-
         // Consider moving back here
         if (HWFC(frame_config) && rx_active_out_msg && (rts_internal == RTS_DEACTIVATED))
         {
