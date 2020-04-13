@@ -318,11 +318,9 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     SCAM::State::state_cnt = 0;
     SCAM::Operation::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
-    if(!optOptionsSet.empty()){
-        throw std::runtime_error("Error: Optmizer disabled in current version. Please remove all optimization flags");
-    }
 
     if (!optOptionsSet.empty()) {
+        std::cout << "Warning: Optimizer not in a working state. Please use carfully!" << std::endl;
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
