@@ -42,8 +42,8 @@ end Bus1;
 
 architecture Bus_arch of Bus1 is
 signal section: Bus_SECTIONS;
-			 signal req_signal:bus_req_t;
-			 signal resp_signal:bus_resp_t;
+			signal req_signal:bus_req_t;
+			signal resp_signal:bus_resp_t;
 			signal  slave_out0_notify_tmp:std_logic;
 			signal  slave_out1_notify_tmp:std_logic;
 			signal  slave_out2_notify_tmp:std_logic;

@@ -148,8 +148,6 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             }
         }
 
-
-
         //Check for variables, dataSignal or synchSignals
         if (module == nullptr) {
             throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, module must be set for such conversion");
@@ -663,7 +661,8 @@ void SCAM::ExprTranslator::visit(SCAM::DataSignalOperand &node) {
 void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
     //a new variable (int_const or bool_const) is created each time an operand is found
     //this is ok, since z3 automatically sees them as the same operand as long as it has the same name
-    auto name = (node.getOperandName() + "_function_" + std::to_string(functionOperandMap.size()));
+    //auto name = (node.getOperandName() + "_function_" + std::to_string(functionOperandMap.size()));
+    auto name = (node.getOperandName() + "_function");
     if (node.getDataType()->isBuiltInType()) {
         if (node.getDataType() == DataTypes::getDataType("int")) {
             if (bitvector_flag) z3_expr = context->bv_const(name.c_str(), 32);
