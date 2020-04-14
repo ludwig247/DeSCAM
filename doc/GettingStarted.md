@@ -1,7 +1,4 @@
-# DeSCAM
-![](https://github.com/ludwig247/DeSCAM/workflows/DESCAM-BUILD/badge.svg)
-
-# Getting started with Property-Driven Development (PDD)
+# Getting started with PDD
 
 1) Installing the tool 
     * Use a linux of your choice 
@@ -27,8 +24,6 @@
     
 
     
-
-
-
-
-
+    
+        
+       

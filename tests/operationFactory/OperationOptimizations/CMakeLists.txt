@@ -20,8 +20,8 @@ set(GLOBAL_FILES
         ${CMAKE_SOURCE_DIR}/src/global/RecursiveVisitor.cpp)
 
 add_executable(TernaryOptimizerTest ${SOURCE_FILES} ${GLOBAL_FILES} t_TernaryOptimizer.cpp
-        /home/tobias/DeSCAM/src/operationFactory/OperationOptimizations/TernaryOptimizer.cpp
-        /home/tobias/DeSCAM/src/operationFactory/OperationOptimizations/ConditionOptimizer2.cpp)
+        ${CMAKE_SOURCE_DIR}/src/operationFactory/OperationOptimizations/TernaryOptimizer.cpp
+        ${CMAKE_SOURCE_DIR}/src/operationFactory/OperationOptimizations/ConditionOptimizer2.cpp)
 target_link_libraries(TernaryOptimizerTest z3)
 target_link_libraries(TernaryOptimizerTest Stmts)
 target_link_libraries(TernaryOptimizerTest Model)
