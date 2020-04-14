@@ -54,11 +54,11 @@ bool SCAM::ModelFactory::fire() {
     ModelGlobal::setModel(model);
 
     //Global variables
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
     this->addGlobalConstants(tu);
 
     //Modules
     this->addModules(tu);
-
 
     //Remove unused things from the model
     this->removeUnused();
@@ -100,12 +100,16 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         auto module = new Module(scparModule.first);
         model->addModule(module);
         //Members
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
         this->addVariables(module, scparModule.second);
         //Ports
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
         this->addPorts(module, scparModule.second);
         //Combinational Functions
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
         this->addFunctions(module, scparModule.second);
         //Processe
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
         this->addBehavior(module, scparModule.second);
         //this->addCommunicationFSM(module);
     }
@@ -202,7 +206,6 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
-
     }
     //Output ports
     for (auto &port: findPorts.getOutPortMap()) {
@@ -296,7 +299,10 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     }
 
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
-    //TODO if errors found terminate
+    if(Logger::isTerminate()) {
+        Logger::log();
+        std::terminate();
+    };
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
@@ -317,8 +323,6 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         PropertyFactory propertyFactory(module);
         module->setPropertySuite(propertyFactory.getPropertySuite());
     }
-
-
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module

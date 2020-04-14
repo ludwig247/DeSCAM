@@ -16,7 +16,7 @@ void SCAM::FileSink::print(std::string formattedOutput) {
     }
     //If directory doesn't exist, make it
     if (status != 0) {
-        int dirError = mkdir(this->outputDirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        mkdir(this->outputDirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
     //Getting the current time for naming the logs file
     time_t now = time(0);

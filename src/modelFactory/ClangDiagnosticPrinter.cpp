@@ -93,7 +93,7 @@ void ClangDiagnosticPrinter::addDiagnosticsToLogger(std::string diagnostics) {
 
             SCAM::StmtLocationInfo stmtInfo(stmt, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
             //Add loggerMsg to the logger
-            SCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType);
+            SCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType,SCAM::Logger::getCurrentProcessedLocation());
             SCAM::Logger::addMsg(loggerMsg);
         }
     }

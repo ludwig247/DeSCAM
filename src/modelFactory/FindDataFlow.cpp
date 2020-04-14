@@ -958,7 +958,7 @@ SCAM::StmtLocationInfo SCAM::FindDataFlow::getStmtInfo(clang::Stmt *clangStmt) {
 bool SCAM::FindDataFlow::exitVisitor(const std::string &msg, const SCAM::StmtLocationInfo &stmtInfo) {
     this->stmt = nullptr;
     //Add loggerMsg to the logger
-    SCAM::LoggerMsg loggerMsg(msg, stmtInfo, LoggerMsg::SeverityLevel::Error, LoggerMsg::ViolationType::SystemC_PPA_compliance);
+    SCAM::LoggerMsg loggerMsg(msg, stmtInfo, LoggerMsg::SeverityLevel::Error, LoggerMsg::ViolationType::SystemC_PPA_compliance,Logger::getCurrentProcessedLocation());
     SCAM::Logger::addMsg(loggerMsg);
     return false;
 }

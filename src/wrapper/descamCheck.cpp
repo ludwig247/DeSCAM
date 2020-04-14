@@ -25,12 +25,12 @@ const std::string getFileName(std::string fileDir) {
     return filename;
 }
 */
-
 int descamCheck(int argc, const char *argv[]) {
     //Process commandline data
     CommandLineProcess cml = CommandLineProcess(argc, argv);
     //initialize logger
     SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
+    SCAM::Logger::setFilteringOptions({LoggingFilter::FilterOptions::showAllMsgs});
     SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
     //Create model
     SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true);

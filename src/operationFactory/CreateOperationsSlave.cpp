@@ -96,7 +96,7 @@ namespace SCAM {
                     auto elseNode = new CfgNode();
                     if (Read *readStmt = dynamic_cast<Read *>(node->getStmt())) {
                         if(readStmt->getStatusOperand() != nullptr) {
-                            elseNode->setStmt(new Assignment(readStmt->getStatusOperand(),readStmt->getPort()->getSynchSignal()));
+                            elseNode->setStmt(new Assignment(readStmt->getStatusOperand(),readStmt->getPort()->getSynchSignal(),readStmt->getStmtInfo()));
                         }
                     } else throw std::runtime_error("Could not dynamically cast a Read statement");
 
@@ -219,7 +219,7 @@ namespace SCAM {
         if (this->condition)
             this->statementsList.push_back(&node);
         else
-            this->statementsList.push_back(new If(new UnaryExpr("not", node.getConditionStmt())));
+            this->statementsList.push_back(new If(new UnaryExpr("not", node.getConditionStmt(),node.getStmtInfo()),node.getStmtInfo()));
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::Read &node) {

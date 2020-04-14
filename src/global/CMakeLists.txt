@@ -14,4 +14,4 @@ add_library(global SHARED
         StmtNodeAlloc.cpp
         SimplifyVisitor.cpp
         GlobalUtilities.cpp
-        ${LoggerSrc})
+        ${LoggerSrc} Logger/LoggingFilter.h)

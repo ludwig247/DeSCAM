@@ -43,7 +43,7 @@ void SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions forma
 
 
 void SCAM::Logger::log() {
-    auto msgsVector = Logger::getInstance().msgsVector;
+    auto msgsVector = LoggingFilter::applyFilters(Logger::getInstance().msgsVector, Logger::getInstance().filterOptions);
     auto sinkVector = Logger::getInstance().sinksVector;
     if (!sinkVector.empty() && !msgsVector.empty()) {
         auto formattedOutput = SCAM::TextFormatter::formatMessages(msgsVector, Logger::getInstance().formatOptions);
@@ -51,4 +51,16 @@ void SCAM::Logger::log() {
             if (auto sink = sinkPtr->get()) sink->print(formattedOutput);
         }
     }
+}
+
+void SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation currentProcessedLocation) {
+    Logger::getInstance().currentProcessedLocation = currentProcessedLocation;
+}
+
+SCAM::LoggerMsg::ProcessedLocation SCAM::Logger::getCurrentProcessedLocation() {
+    return Logger::getInstance().currentProcessedLocation;
+}
+
+void SCAM::Logger::setFilteringOptions(std::initializer_list<LoggingFilter::FilterOptions> filterOptions) {
+    Logger::getInstance().filterOptions = filterOptions;
 }

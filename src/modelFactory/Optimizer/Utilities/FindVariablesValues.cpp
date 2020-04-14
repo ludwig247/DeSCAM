@@ -31,7 +31,12 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
                                     "unexpected rhs of an assignment to a compound or array expression");
                         }
                     }
-                    addValToVariableValuesMap(varOp->getVariable(), assignment->getRhs());
+                    if(auto ternaryExpr = dynamic_cast<SCAM::Ternary *>(assignment->getRhs())){
+                        addValToVariableValuesMap(varOp->getVariable(), ternaryExpr->getTrueExpr());
+                        addValToVariableValuesMap(varOp->getVariable(), ternaryExpr->getFalseExpr());
+                    }else {
+                        addValToVariableValuesMap(varOp->getVariable(), assignment->getRhs());
+                    }
                 }
             }
         }

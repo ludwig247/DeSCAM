@@ -1,11 +1,12 @@
 #include "LoggerMsg.h"
 
 
-SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo& stmtInfo, SeverityLevel severityLevel, ViolationType violationType) {
+SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo& stmtInfo, SeverityLevel severityLevel, ViolationType violationType, ProcessedLocation violationLocation) {
     setMessage(message);
     setStmtInfo(stmtInfo);
     setSeverityLevel(severityLevel);
     setViolationType(violationType);
+    setProcessedLocation(violationLocation);
 }
 
 const std::string &SCAM::LoggerMsg::getMessage() {
@@ -30,12 +31,16 @@ std::string SCAM::LoggerMsg::getSeverityLevel() {
 std::string SCAM::LoggerMsg::getViolationType() {
     switch (this->violationType) {
         case ViolationType::Syntax :
-            return "Syntax Error";
+            return "Syntax";
         case ViolationType::SystemC_PPA_compliance :
             return "SystemC PPA Compliance";
         case ViolationType::NA :
             return "NA";
     }
+}
+
+SCAM::LoggerMsg::ProcessedLocation SCAM::LoggerMsg::getProcessedLocation() {
+ return this->processedLocation;
 }
 
 
@@ -53,5 +58,9 @@ void SCAM::LoggerMsg::setSeverityLevel(SCAM::LoggerMsg::SeverityLevel severityLe
 
 void SCAM::LoggerMsg::setStmtInfo(const SCAM::StmtLocationInfo &stmtInfo) {
     this->stmtInfo = stmtInfo;
+}
+
+void SCAM::LoggerMsg::setProcessedLocation(SCAM::LoggerMsg::ProcessedLocation location) {
+    this->processedLocation = location;
 }
 

@@ -178,7 +178,7 @@ namespace SCAM {
         if (this->condition)
             this->statementsList.push_back(&node);
         else
-            this->statementsList.push_back(new If(new UnaryExpr("not", node.getConditionStmt())));
+            this->statementsList.push_back(new If(new UnaryExpr("not", node.getConditionStmt(),node.getStmtInfo()),node.getStmtInfo()));
     }
 
     void SCAM::CreateOperations::visit(SCAM::Read &node) {
@@ -194,7 +194,7 @@ namespace SCAM {
                     this->statementsList.push_back(&node);
                 } else {
                     if(node.getStatusOperand() != nullptr)
-                        this->statementsList.push_back(new Assignment(node.getStatusOperand(), this->newExpr));
+                        this->statementsList.push_back(new Assignment(node.getStatusOperand(), this->newExpr,node.getStmtInfo()));
                 }
             }
             /// normal Read
@@ -215,7 +215,7 @@ namespace SCAM {
                 node.getPort()->getSynchSignal()->accept(*this);
                 /// the status of the try_write should be assigned to the successful flag
                 if( node.isNonBlockingAccess() && (node.getStatusOperand() != nullptr) )
-                    this->statementsList.push_back(new Assignment(node.getStatusOperand(), this->newExpr));
+                    this->statementsList.push_back(new Assignment(node.getStatusOperand(), this->newExpr,node.getStmtInfo()));
             } else
                 this->newExpr = nullptr;
 
@@ -230,9 +230,9 @@ namespace SCAM {
     void SCAM::CreateOperations::visit(SCAM::SyncSignal &node) {
         if(this->firstStatement) {
             if(this->waitOp || this->notSyncOp) {
-                this->statementsList.push_back(new If(new UnaryExpr("not", &node)));
+                this->statementsList.push_back(new If(new UnaryExpr("not", &node,node.getStmtInfo()),node.getStmtInfo()));
             } else {
-                this->statementsList.push_back(new If(&node));
+                this->statementsList.push_back(new If(&node,node.getStmtInfo()));
             }
             this->newExpr = &node;
         } else {
@@ -243,7 +243,7 @@ namespace SCAM {
     void SCAM::CreateOperations::visit(SCAM::Assignment &node) {
         node.getRhs()->accept(*this);
         if(this->newExpr != nullptr)
-            this->statementsList.push_back(new Assignment(node.getLhs(), this->newExpr));
+            this->statementsList.push_back(new Assignment(node.getLhs(), this->newExpr,node.getStmtInfo()));
     }
 
     void SCAM::CreateOperations::visit(SCAM::VariableOperand &node) {

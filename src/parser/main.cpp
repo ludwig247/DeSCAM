@@ -20,6 +20,8 @@ int main(int argc, const char **argv) {
 //initialize logger
     SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>());
     SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
+//    SCAM::Logger::setFilteringOptions({LoggingFilter::FilterOptions::showAllMsgs});
+    SCAM::Logger::setFilteringOptions({LoggingFilter::FilterOptions::showAllMsgs});
     //Create model
     SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile());
     // write log messages to all sinks

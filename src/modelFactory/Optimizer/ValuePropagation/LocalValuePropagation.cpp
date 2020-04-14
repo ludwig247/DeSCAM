@@ -92,7 +92,7 @@ void SCAM::LocalValuePropagation::visit(struct Assignment &node) {
     if (dynamic_cast<SCAM::VariableOperand *>(node.getLhs())) {
         node.getRhs()->accept(*this);
         if (this->newExpr != nullptr && propagationValid) {
-            auto assignment = new Assignment(node.getLhs(), this->newExpr);
+            auto assignment = new Assignment(node.getLhs(), this->newExpr,node.getStmtInfo());
 #ifdef DEBUG_LOCAL_VARIABLE_PROPAGATION
             const std::string newAssignment = PrintStmt::toString(assignment);
             const std::string oldAssignment = PrintStmt::toString(&node);
@@ -116,13 +116,13 @@ void SCAM::LocalValuePropagation::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
     if (this->newExpr != nullptr) {
         if (node.getOperation() == "not") {
-            this->newExpr = new UnaryExpr("not", this->newExpr);
+            this->newExpr = new UnaryExpr("not", this->newExpr,node.getStmtInfo());
         } else if (node.getOperation() == "~") {
-            this->newExpr = new UnaryExpr("~", this->newExpr);
+            this->newExpr = new UnaryExpr("~", this->newExpr,node.getStmtInfo());
         } else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
-            } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1)),node.getStmtInfo();
+            } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
         } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
     }
 }
@@ -133,7 +133,7 @@ void SCAM::LocalValuePropagation::visit(struct If &node) {
         node.getConditionStmt()->accept(*this);
         if (this->newExpr != nullptr && propagationValid) {
             assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
-            auto ifStmt = new If(this->newExpr);
+            auto ifStmt = new If(this->newExpr,node.getStmtInfo());
 #ifdef DEBUG_LOCAL_VARIABLE_PROPAGATION
             const std::string newAssignment = PrintStmt::toString(ifStmt);
             const std::string oldAssignment = PrintStmt::toString(&node);
@@ -157,7 +157,7 @@ void SCAM::LocalValuePropagation::visit(struct Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr != nullptr && propagationValid) {
         auto writeStatement = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(),
-                                        node.getStatusOperand());
+                                        node.getStatusOperand(),node.getStmtInfo());
 #ifdef DEBUG_LOCAL_VARIABLE_PROPAGATION
         const std::string newAssignment = PrintStmt::toString(writeStatement);
         const std::string oldAssignment = PrintStmt::toString(&node);
@@ -189,7 +189,7 @@ void SCAM::LocalValuePropagation::visit(struct Arithmetic &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    this->newExpr = new Arithmetic(lhs, node.getOperation(), rhs);
+    this->newExpr = new Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
 }
 
 void SCAM::LocalValuePropagation::visit(struct Logical &node) {
@@ -205,7 +205,7 @@ void SCAM::LocalValuePropagation::visit(struct Logical &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    this->newExpr = new Logical(lhs, node.getOperation(), rhs);
+    this->newExpr = new Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
 }
 
 void SCAM::LocalValuePropagation::visit(struct Relational &node) {
@@ -222,7 +222,7 @@ void SCAM::LocalValuePropagation::visit(struct Relational &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    this->newExpr = new Relational(lhs, node.getOperation(), rhs);
+    this->newExpr = new Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
 }
 
 void SCAM::LocalValuePropagation::visit(struct Bitwise &node) {
@@ -239,14 +239,14 @@ void SCAM::LocalValuePropagation::visit(struct Bitwise &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    this->newExpr = new Bitwise(lhs, node.getOperation(), rhs);
+    this->newExpr = new Bitwise(lhs, node.getOperation(), rhs,node.getStmtInfo());
 }
 
 void SCAM::LocalValuePropagation::visit(struct Cast &node) {
     this->newExpr = nullptr;
     node.getSubExpr()->accept(*this);
     if (this->newExpr != nullptr) {
-        this->newExpr = new Cast(this->newExpr, node.getDataType());
+        this->newExpr = new Cast(this->newExpr, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -259,7 +259,7 @@ void SCAM::LocalValuePropagation::visit(struct FunctionOperand &node) {
             newParamValueMap.insert(std::make_pair(param.first, this->newExpr));
         } else { newParamValueMap.insert(std::make_pair(param.first, param.second)); }
     }
-    this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap);
+    this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap,node.getStmtInfo());
 }
 
 
@@ -267,7 +267,7 @@ void SCAM::LocalValuePropagation::visit(struct ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (this->newExpr != nullptr && !(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr,node.getStmtInfo());
     }
 }
 
@@ -280,7 +280,7 @@ void SCAM::LocalValuePropagation::visit(struct CompoundExpr &node) {
             valueMap.insert(std::make_pair(subVar.first, this->newExpr));
         } else { valueMap.insert(std::make_pair(subVar.first, subVar.second)); }
     }
-    this->newExpr = new CompoundExpr(valueMap, node.getDataType());
+    this->newExpr = new CompoundExpr(valueMap, node.getDataType(),node.getStmtInfo());
 }
 
 void SCAM::LocalValuePropagation::visit(SCAM::ArrayExpr &node) {
@@ -292,10 +292,24 @@ void SCAM::LocalValuePropagation::visit(SCAM::ArrayExpr &node) {
             valueMap.insert(std::make_pair(subVar.first, this->newExpr));
         } else { valueMap.insert(std::make_pair(subVar.first, subVar.second)); }
     }
-    this->newExpr = new ArrayExpr(valueMap, node.getDataType());
+    this->newExpr = new ArrayExpr(valueMap, node.getDataType(),node.getStmtInfo());
 }
 
 void SCAM::LocalValuePropagation::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+    this->newExpr = nullptr;
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    node.getCondition()->accept(*this);
+    if (this->newExpr) condition = this->newExpr;
+    this->newExpr = nullptr;
+    node.getTrueExpr()->accept(*this);
+    if (this->newExpr) trueExpr = this->newExpr;
+    this->newExpr = nullptr;
+    node.getFalseExpr()->accept(*this);
+    if (this->newExpr) falseExpr = this->newExpr;
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
 }
 

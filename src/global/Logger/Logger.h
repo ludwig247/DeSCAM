@@ -7,10 +7,13 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <memory>
 #include "LoggerMsg.h"
 #include "LoggerSink.h"
 #include "TextFormatter.h"
+#include "LoggingFilter.h"
+
 
 namespace SCAM {
 
@@ -19,6 +22,7 @@ namespace SCAM {
  */
     class Logger {
     public:
+
         static Logger &getInstance();
 
         static void setTerminate();
@@ -35,6 +39,12 @@ namespace SCAM {
 
         static void setTextFormatOptions(SCAM::TextFormatter::FormatOptions formatOptions);
 
+        static void setFilteringOptions(std::initializer_list<LoggingFilter::FilterOptions> filterOptions);
+
+        static void setCurrentProcessedLocation(LoggerMsg::ProcessedLocation currentProcessedLocation);
+
+        static LoggerMsg::ProcessedLocation getCurrentProcessedLocation();
+
         static void log();
 
         //DELETED
@@ -42,10 +52,10 @@ namespace SCAM {
         Logger &operator=(Logger const &) = delete; // assignment operator is private
     private:
         //CONSTRUCTOR
-        Logger() = default;;
+        Logger() = default;
 
         //Destructor
-        ~Logger() = default;;
+        ~Logger() = default;
 
         // a vector containing the logger messages
         std::vector<LoggerMsg> msgsVector{};
@@ -53,8 +63,13 @@ namespace SCAM {
         std::vector<std::shared_ptr<LoggerSink>> sinksVector{};
         //a flag indicating whether termination is necessary due to errors
         static bool terminate;
-        //logs messages formatter
+        //logging options set
+        std::unordered_set<LoggingFilter::FilterOptions> filterOptions;
+        //log messages formatter
         TextFormatter::FormatOptions formatOptions = TextFormatter::FormatOptions::JSON;
+        // a variable to track the violation location while processing a module
+        LoggerMsg::ProcessedLocation currentProcessedLocation = LoggerMsg::ProcessedLocation::Parsing;
+
     };
 }
 

@@ -42,13 +42,16 @@ namespace SCAM {
     }                                                                \
     CATCH_STMT_EXCEPTION(err.getStmtLocationInfo())
 
-#define CATCH_STMT_EXCEPTION(stmtLocationInfo)                      \
-   catch (StmtException& err) {                                      \
-    auto msg = std::string(err.what());                               \
+#define CATCH_STMT_EXCEPTION(stmtLocationInfo)                       \
+   catch (StmtException& err) {                                       \
+    auto msg = std::string(err.what());                                \
     auto sl = SCAM::LoggerMsg::SeverityLevel::Error;                    \
     auto vt = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
-    SCAM::LoggerMsg lmsg(msg,stmtLocationInfo,sl,vt);                     \
-    SCAM::Logger::addMsg(lmsg);                                            \
+    auto pl = SCAM::Logger::getCurrentProcessedLocation();                \
+    SCAM::LoggerMsg lmsg(msg,stmtLocationInfo,sl,vt,pl);                   \
+    SCAM::Logger::addMsg(lmsg);                                             \
+    if(pl == SCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
+    Logger::setTerminate();                                                   \
     }
 
 

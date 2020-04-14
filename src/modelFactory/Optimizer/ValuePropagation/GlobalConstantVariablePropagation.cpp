@@ -9,7 +9,7 @@ SCAM::GlobalConstantVariablePropagation::GlobalConstantVariablePropagation(const
                                                                            const std::map<std::string, Variable *> &globalVariableMap)
         : CFG(CFG), globalVariableMap(globalVariableMap) {
 
-    if (!this->CFG.empty()&& !this->globalVariableMap.empty()) {
+    if (!this->CFG.empty() && !this->globalVariableMap.empty()) {
         for (auto node : CFG) {
             if (auto stmt = node.second->getStmt()) {
                 this->currentNodeId = node.first;
@@ -49,7 +49,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Assignment &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->CFG.at(this->currentNodeId)->setStmt(new SCAM::Assignment(lhs, rhs));
+        this->CFG.at(this->currentNodeId)->setStmt(new SCAM::Assignment(lhs, rhs, node.getStmtInfo()));
     }
 }
 
@@ -63,9 +63,9 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::UnaryExpr &node) {
             this->newExpr = new UnaryExpr("~", this->newExpr);
         } else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1), node.getStmtInfo());
             } else {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1), node.getStmtInfo());
             }
         } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
     }
@@ -76,7 +76,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::While &node) {
     node.getConditionStmt()->accept(*this);
     if (this->newExpr) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
-        this->CFG.at(this->currentNodeId)->setStmt(new While(this->newExpr));
+        this->CFG.at(this->currentNodeId)->setStmt(new While(this->newExpr, node.getStmtInfo()));
     }
 }
 
@@ -85,7 +85,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::If &node) {
     node.getConditionStmt()->accept(*this);
     if (this->newExpr) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
-        this->CFG.at(this->currentNodeId)->setStmt(new While(this->newExpr));
+        this->CFG.at(this->currentNodeId)->setStmt(new If(this->newExpr, node.getStmtInfo()));
     }
 }
 
@@ -93,7 +93,8 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr) {
         this->CFG.at(this->currentNodeId)->setStmt(
-                new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand()));
+                new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand(),
+                          node.getStmtInfo()));
     }
 }
 
@@ -112,7 +113,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Arithmetic &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
@@ -131,7 +132,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Logical &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
@@ -150,7 +151,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Relational &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
@@ -169,7 +170,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Bitwise &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
@@ -177,7 +178,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Cast &node) {
     this->newExpr = nullptr;
     node.getSubExpr()->accept(*this);
     if (this->newExpr) {
-        this->newExpr = new Cast(this->newExpr, node.getDataType());
+        this->newExpr = new Cast(this->newExpr, node.getDataType(), node.getStmtInfo());
     }
 }
 
@@ -192,7 +193,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::FunctionOperand &node)
     }
     assert(node.getParamValueMap().size() == newParamValueMap.size());
     if (newParamValueMap != node.getParamValueMap()) {
-        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap);
+        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap, node.getStmtInfo());
     }
 }
 
@@ -200,7 +201,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr, node.getStmtInfo());
     }
 }
 
@@ -214,7 +215,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::CompoundExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (newValMap != node.getValueMap()) {
-        this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType());
+        this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType(), node.getStmtInfo());
     } else { this->newExpr = nullptr; }
 }
 
@@ -235,8 +236,20 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayExpr &node) {
 }
 
 void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Ternary &node) {
-
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
-
+    this->newExpr = nullptr;
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    node.getCondition()->accept(*this);
+    if (this->newExpr) condition = this->newExpr;
+    this->newExpr = nullptr;
+    node.getTrueExpr()->accept(*this);
+    if (this->newExpr) trueExpr = this->newExpr;
+    this->newExpr = nullptr;
+    node.getFalseExpr()->accept(*this);
+    if (this->newExpr) falseExpr = this->newExpr;
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
 }
 

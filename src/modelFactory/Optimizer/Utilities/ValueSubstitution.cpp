@@ -63,21 +63,21 @@ void SCAM::ValueSubstitution::visit(struct Assignment &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
 
     //Create new stmt
-    this->newStmt = new SCAM::Assignment(lhs, rhs);
+    this->newStmt = new SCAM::Assignment(lhs, rhs,node.getStmtInfo());
 }
 
 void SCAM::ValueSubstitution::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
     if (this->newExpr != nullptr) {
         if (node.getOperation() == "not") {
-            this->newExpr = new UnaryExpr("not", this->newExpr);
+            this->newExpr = new UnaryExpr("not", this->newExpr,node.getStmtInfo());
         }else if (node.getOperation() == "~") {
-            this->newExpr = new UnaryExpr("~", this->newExpr);
+            this->newExpr = new UnaryExpr("~", this->newExpr,node.getStmtInfo());
         } else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1),node.getStmtInfo());
             } else {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
             }
         } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
     }
@@ -87,7 +87,7 @@ void SCAM::ValueSubstitution::visit(struct While &node) {
     node.getConditionStmt()->accept(*this);
     if (this->newExpr != nullptr) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
-        this->newStmt = new While(this->newExpr);
+        this->newStmt = new While(this->newExpr,node.getStmtInfo());
     }
 }
 
@@ -95,14 +95,14 @@ void SCAM::ValueSubstitution::visit(struct If &node) {
     node.getConditionStmt()->accept(*this);
     if (this->newExpr != nullptr) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
-        this->newStmt = new If(this->newExpr);
+        this->newStmt = new If(this->newExpr,node.getStmtInfo());
     }
 }
 
 void SCAM::ValueSubstitution::visit(struct Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr != nullptr) {
-        this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand());
+        this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand(),node.getStmtInfo());
     }
 }
 
@@ -121,7 +121,7 @@ void SCAM::ValueSubstitution::visit(struct Arithmetic &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
     if (!(*rhs == *node.getRhs()) || !(*lhs == *node.getLhs())) {
         //Create new stmt
-        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -139,7 +139,7 @@ void SCAM::ValueSubstitution::visit(struct Logical &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
     if (!(*rhs == *node.getRhs()) || !(*lhs == *node.getLhs())) {
         //Create new stmt
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -157,7 +157,7 @@ void SCAM::ValueSubstitution::visit(struct Relational &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
     if (!(*rhs == *node.getRhs()) || !(*lhs == *node.getLhs())) {
         //Create new stmt
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -175,14 +175,14 @@ void SCAM::ValueSubstitution::visit(struct Bitwise &node) {
     if (this->newExpr != nullptr) { rhs = this->newExpr; }
     if (!(*rhs == *node.getRhs()) || !(*lhs == *node.getLhs())) {
         //Create new stmt
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
 void SCAM::ValueSubstitution::visit(struct Cast &node) {
     node.getSubExpr()->accept(*this);
     if (this->newExpr != nullptr) {
-        this->newExpr = new Cast(this->newExpr, node.getDataType());
+        this->newExpr = new Cast(this->newExpr, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -207,7 +207,7 @@ void SCAM::ValueSubstitution::visit(struct FunctionOperand &node) {
         }
     }
     if (newParamValueMap != node.getParamValueMap()) {
-        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap);
+        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap,node.getStmtInfo());
         this->newStmt = this->newExpr;
     }
 }
@@ -215,7 +215,7 @@ void SCAM::ValueSubstitution::visit(struct FunctionOperand &node) {
 void SCAM::ValueSubstitution::visit(struct ArrayOperand &node) {
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr,node.getStmtInfo());
     } else this->newExpr = &node;
 }
 
@@ -229,7 +229,7 @@ void SCAM::ValueSubstitution::visit(struct CompoundExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (newValMap != node.getValueMap()) {
-        this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType());
+        this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -242,7 +242,7 @@ void SCAM::ValueSubstitution::visit(struct ParamOperand &node) {
 void SCAM::ValueSubstitution::visit(struct Return &node) {
     node.getReturnValue()->accept(*this);
     if (newExpr != nullptr) {
-        this->newStmt = new Return(this->newExpr);
+        this->newStmt = new Return(this->newExpr,node.getStmtInfo());
     }
 }
 
@@ -258,14 +258,28 @@ void SCAM::ValueSubstitution::visit(SCAM::ArrayExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (valueMapChanged) {
-        this->newExpr = new SCAM::ArrayExpr(newValMap, node.getDataType());
+        this->newExpr = new SCAM::ArrayExpr(newValMap, node.getDataType(),node.getStmtInfo());
     }else{
         this->newExpr = nullptr;
     }
 }
 
 void SCAM::ValueSubstitution::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+    this->newExpr = nullptr;
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    node.getCondition()->accept(*this);
+    if (this->newExpr) condition = this->newExpr;
+    this->newExpr = nullptr;
+    node.getTrueExpr()->accept(*this);
+    if (this->newExpr) trueExpr = this->newExpr;
+    this->newExpr = nullptr;
+    node.getFalseExpr()->accept(*this);
+    if (this->newExpr) falseExpr = this->newExpr;
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
 }
 
 
