@@ -65,10 +65,10 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
         if (insideProcess)
             processBody.push_back(line);
         if (line.find("SC_HAS_PROCESS(") != std::string::npos)  {
-            ss += ("unsigned int operations[" + std::to_string(operationsCounter) + "];\n");
+          //  ss += ("unsigned int operations[" + std::to_string(operationsCounter) + "];\n");
             ss += ("unsigned int originState;\n");
-            ss += (   " void operationsCounter()  { \nfor (int i = 0; i < " + std::to_string(operationsCounter) +
-                    "; i++)\nstd::cout << \"Operation \" << i << \": \" << operations[i] << std::endl;\n}\n");
+          //  ss += (   " void operationsCounter()  { \nfor (int i = 0; i < " + std::to_string(operationsCounter) +
+              //      "; i++)\nstd::cout << \"Operation \" << i << \": \" << operations[i] << std::endl;\n}\n");
         }
         startPosition = line.find("SC_THREAD(");
         if (startPosition != std::string::npos) {
@@ -88,6 +88,7 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
                     insideProcess = true;
                     bracketTarget = bracketCounter;
                     processPosition = lineCounter;
+                    ss += ("PowerEstimator::getInstance().initializeOperations(name(), " + std::to_string(operationsCounter) + ");" + "\n");
                 }
             }
         }
@@ -194,7 +195,7 @@ void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition)
         if (state.second->isInit())  {
             for (auto operation : state.second->getOutgoingOperationsList())
                 if (!operationsCounted.at(operation))
-                    processBody.insert(processBody.begin() + startState + 1, "operations[0]++;");
+                    processBody.insert(processBody.begin() + startState + 1, "PowerEstimator::getInstance().countOperation(name(), 0);");
         } else  {
             processBody.insert(processBody.begin() + startState + 1, "originState = " + std::to_string(state.first) + ";");
             for (auto operation : state.second->getOutgoingOperationsList())  {
@@ -236,7 +237,7 @@ void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition)
                     }
                 }
                 if (!operationsCounted.at(operation) && operation->getState() != operation->getNextState())  {
-                    processBody.insert(processBody.begin() + conditionLine + 2, "operations[" + std::to_string(operation->getId()) + "]++;");
+                    processBody.insert(processBody.begin() + conditionLine + 2, "PowerEstimator::getInstance().countOperation(name(), " + std::to_string(operation->getId()) + ");");
                     operationsCounted.at(operation) = true;
                     for (int i = currentConditions.size() - 1; i >= 0; i--)
                         processBody.insert(processBody.begin() + conditionLine + 2, currentConditions.at(i));

@@ -11,9 +11,7 @@
 #include "../../ESL/CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"
 #include "../../RISCV_commons/Memory_Interfaces.h"
-#include "../../RISCV_Test_ELF/powerEstimator/PowerEstimator.h"
-
-
+#include "../../../RISCV_Test/powerEstimator/PowerEstimator.h"
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
@@ -23,7 +21,13 @@
 class ISA_new : public sc_module {
 public:
     //Constructor
+unsigned int operations[15];
 unsigned int originState;
+/* void operationsCounter()  {
+for (int i = 0; i < 15; i++)
+std::cout << "Operation " << i << ": " << operations[i] << std::endl;
+}*/
+PowerEstimator &estimator = PowerEstimator::getInstance();
     SC_HAS_PROCESS(ISA_new);
 
     ISA_new(sc_module_name name) :
@@ -96,20 +100,20 @@ unsigned int originState;
 
 
 void ISA_new::run() {
-PowerEstimator::getInstance().initializeOperations(name(), 15);
-
+    estimator.enterHierarchy(name());
+    estimator.initializeOperations(name(), 15);
 /*State 0*/
-PowerEstimator::getInstance().countOperation(name(), 0);
+operations[0]++;
     nextphase = Phases::fetch_PH;
     while (true) {
         phase = nextphase;
         // fetch next instruc   tion
 if (originState == 6)
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 14);
+operations[14]++;
 if (originState == 4)
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 12);
+operations[12]++;
 if (originState == 2)
 if (not((getEncType(encodedInstr) == ENC_R)))
 if (not((getEncType(encodedInstr) == ENC_B)))
@@ -120,7 +124,7 @@ if (not((getEncType(encodedInstr) == ENC_I_I)))
 if (not((getEncType(encodedInstr) == ENC_I_L)))
 if (not((getEncType(encodedInstr) == ENC_I_J)))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 10);
+operations[10]++;
 if (originState == 2)
 if (not((getEncType(encodedInstr) == ENC_R)))
 if (not((getEncType(encodedInstr) == ENC_B)))
@@ -131,7 +135,7 @@ if (not((getEncType(encodedInstr) == ENC_I_I)))
 if (not((getEncType(encodedInstr) == ENC_I_L)))
 if ((getEncType(encodedInstr) == ENC_I_J))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 9);
+operations[9]++;
 if (originState == 2)
 if (not((phase == fetch_PH)))
 if ((phase == execute_PH))
@@ -142,7 +146,7 @@ if (not((getEncType(encodedInstr) == ENC_U)))
 if (not((getEncType(encodedInstr) == ENC_J)))
 if (not((getEncType(encodedInstr) == ENC_I_I)))
 if ((getEncType(encodedInstr) == ENC_I_L))
-PowerEstimator::getInstance().countOperation(name(), 8);
+operations[8]++;
 if (originState == 2)
 if (not((getEncType(encodedInstr) == ENC_R)))
 if (not((getEncType(encodedInstr) == ENC_B)))
@@ -151,7 +155,7 @@ if (not((getEncType(encodedInstr) == ENC_U)))
 if (not((getEncType(encodedInstr) == ENC_J)))
 if ((getEncType(encodedInstr) == ENC_I_I))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 7);
+operations[7]++;
 if (originState == 2)
 if (not((getEncType(encodedInstr) == ENC_R)))
 if (not((getEncType(encodedInstr) == ENC_B)))
@@ -159,30 +163,30 @@ if (not((getEncType(encodedInstr) == ENC_S)))
 if (not((getEncType(encodedInstr) == ENC_U)))
 if ((getEncType(encodedInstr) == ENC_J))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 6);
+operations[6]++;
 if (originState == 2)
 if (not((getEncType(encodedInstr) == ENC_R)))
 if (not((getEncType(encodedInstr) == ENC_B)))
 if (not((getEncType(encodedInstr) == ENC_S)))
 if ((getEncType(encodedInstr) == ENC_U))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 5);
+operations[5]++;
 if (originState == 2)
 if (not((phase == fetch_PH)))
 if ((phase == execute_PH))
 if (not((getEncType(encodedInstr) == ENC_R)))
 if (not((getEncType(encodedInstr) == ENC_B)))
 if ((getEncType(encodedInstr) == ENC_S))
-PowerEstimator::getInstance().countOperation(name(), 4);
+operations[4]++;
 if (originState == 2)
 if (not((getEncType(encodedInstr) == ENC_R)))
 if ((getEncType(encodedInstr) == ENC_B))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 3);
+operations[3]++;
 if (originState == 2)
 if ((getEncType(encodedInstr) == ENC_R))
 if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 2);
+operations[2]++;
         if (phase == Phases::fetch_PH) {
 
             // Set up memory access
@@ -194,7 +198,7 @@ PowerEstimator::getInstance().countOperation(name(), 2);
 /*State 1*/            toMemoryPort->write(memoryAccess); //Send request to memory
 originState = 1;
 if (originState == 1)
-PowerEstimator::getInstance().countOperation(name(), 1);
+operations[1]++;
 /*State 2*/            fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
 originState = 2;
 
@@ -288,7 +292,7 @@ originState = 2;
 /*State 3*/                toMemoryPort->write(memoryAccess); // Request store
 originState = 3;
 if (originState == 3)
-PowerEstimator::getInstance().countOperation(name(), 11);
+operations[11]++;
 
                 // Store done
 /*State 4*/                fromMemoryPort->read(fromMemoryData); //Fixme: Why do we need this read? For store a write should be sufficient
@@ -380,7 +384,7 @@ originState = 4;
 /*State 5*/                toMemoryPort->write(memoryAccess);
 originState = 5;
 if (originState == 5)
-PowerEstimator::getInstance().countOperation(name(), 13);
+operations[13]++;
 
                 // Load done
 /*State 6*/                fromMemoryPort->read(fromMemoryData);

@@ -12,7 +12,7 @@ include_directories(${CMAKE_SOURCE_DIR}/example/RISCV_commons)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 # add executables
-add_executable(RISCV_regression_test sc_main_test.cpp Core_test.h Memory.h TLM/TLM_bridge.h TLM/Memory_tlm.h ../powerEstimator/PowerEstimator.h ../powerEstimator/PowerEstimator.cpp)
+add_executable(RISCV_regression_test sc_main_test.cpp Core_test.h Memory.h TLM/TLM_bridge.h TLM/Memory_tlm.h ../../RISCV_Test_ELF/powerEstimator/PowerEstimator.h ../../RISCV_Test_ELF/powerEstimator/PowerEstimator.cpp)
 
 # link libraries
 target_link_libraries(RISCV_regression_test systemc)

@@ -30,6 +30,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this d
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG/new)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/src/parser)
 include_directories(${CMAKE_SOURCE_DIR}/tests/)
+include_directories(${CMAKE_SOURCE_DIR}/example/RISCV_Test_ELF/powerEstimator)
 
 add_subdirectory(src)
 add_subdirectory(example)

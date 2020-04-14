@@ -1,9 +1,9 @@
 #-----------------------------------------------------------
 # This section hold the configurations of the toolchain used for compiling
 #-----------------------------------------------------------
-#RISCV_XLEN ?= 32
-#RISCV_LIB  ?= elf
-#RISCV ?= /opt/riscv32i
+RISCV_XLEN ?= 32
+RISCV_LIB  ?= elf
+RISCV ?= /opt/riscv32i
 #RISCV ?= /import/public/Linux/riscv
 CCPATH	= $(RISCV)
 TARGET=$(CCPATH)/bin/riscv${RISCV_XLEN}-unknown-${RISCV_LIB}

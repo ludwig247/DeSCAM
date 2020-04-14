@@ -748,6 +748,9 @@ void Core_test::perform_test() {
     }
 
     cout << "Tests for test case: '" << test_case << "':" << " [PASSED]" << endl;
+
+    PowerEstimator::getInstance().displayResults(CO.isa.name(), test_case);
+
 }
 
 
