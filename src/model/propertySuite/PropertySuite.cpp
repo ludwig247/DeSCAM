@@ -39,47 +39,47 @@ namespace SCAM {
     // ------------------------------------------------------------------------------
 
 
-    void PropertySuite::addSyncSignal(PropertyMacro *ss) {
+    void PropertySuite::addSyncSignal(std::shared_ptr<PropertyMacro>ss) {
         this->syncSignals.push_back(ss);
     }
 
-    void PropertySuite::addNotifySignal(PropertyMacro *ss) {
+    void PropertySuite::addNotifySignal(std::shared_ptr<PropertyMacro>ss) {
         this->notifySignals.push_back(ss);
     }
 
-    void PropertySuite::addDpSignal(PropertyMacro *dp) {
+    void PropertySuite::addDpSignal(std::shared_ptr<PropertyMacro>dp) {
         this->dpSignals.push_back(dp);
     }
 
-    void PropertySuite::addVisibleRegister(PropertyMacro *reg) {
+    void PropertySuite::addVisibleRegister(std::shared_ptr<PropertyMacro>reg) {
         this->visibleRegisters.push_back(reg);
     }
 
-    void PropertySuite::addState(PropertyMacro *state) {
+    void PropertySuite::addState(std::shared_ptr<PropertyMacro>state) {
         this->states.push_back(state);
     }
 
-    const std::vector<PropertyMacro *> &PropertySuite::getSyncSignals() const {
+    const std::vector<std::shared_ptr<PropertyMacro>> &PropertySuite::getSyncSignals() const {
         return syncSignals;
     }
 
-    const std::vector<PropertyMacro *> &PropertySuite::getNotifySignals() const {
+    const std::vector<std::shared_ptr<PropertyMacro>> &PropertySuite::getNotifySignals() const {
         return notifySignals;
     }
 
-    const std::vector<PropertyMacro *> &PropertySuite::getDpSignals() const {
+    const std::vector<std::shared_ptr<PropertyMacro>> &PropertySuite::getDpSignals() const {
         return dpSignals;
     }
 
-    const std::vector<PropertyMacro *> &PropertySuite::getVisibleRegisters() const {
+    const std::vector<std::shared_ptr<PropertyMacro>> &PropertySuite::getVisibleRegisters() const {
         return visibleRegisters;
     }
 
-    const std::vector<PropertyMacro *> &PropertySuite::getStates() const {
+    const std::vector<std::shared_ptr<PropertyMacro>> &PropertySuite::getStates() const {
         return states;
     }
 
-    PropertyMacro * PropertySuite::findSignal(const std::string &signalName) const {
+    std::shared_ptr<PropertyMacro> PropertySuite::findSignal(const std::string &signalName) const {
 
         for (auto syncSignal : syncSignals) {
             if (syncSignal->getName() == signalName) {
@@ -119,7 +119,7 @@ namespace SCAM {
         throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + signalName);
     }
 
-    PropertyMacro * PropertySuite::findSignal(const std::string &parentName, const std::string &subVarName) const {
+    std::shared_ptr<PropertyMacro> PropertySuite::findSignal(const std::string &parentName, const std::string &subVarName) const {
         for (auto dpSignal : dpSignals) {
             if (dpSignal->isSubVar()) {
                 if ((dpSignal->getParentName() == parentName) && (dpSignal->getSubVarName() == subVarName)) {
@@ -138,7 +138,7 @@ namespace SCAM {
         throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + parentName + "." + subVarName);
     }
 
-    PropertyMacro * PropertySuite::findSignal(Variable * var) const {
+    std::shared_ptr<PropertyMacro> PropertySuite::findSignal(Variable * var) const {
 
         for (auto visibleRegister : visibleRegisters) {
             if (var == visibleRegister->getVariable()) {
@@ -166,15 +166,15 @@ namespace SCAM {
     //                            Constraint-Functions
     // ------------------------------------------------------------------------------
 
-    PropertyConstraint * PropertySuite::createConstraint(const std::string &name) {
-        return (*constraints.insert(constraints.end(), new PropertyConstraint(name)));
+    std::shared_ptr<PropertyConstraint> PropertySuite::createConstraint(const std::string &name) {
+        return (*constraints.insert(constraints.end(), std::make_shared<PropertyConstraint>(name)));
     }
 
-    PropertyConstraint * PropertySuite::createConstraint(const std::string &name, Stmt *expr) {
-        return (*constraints.insert(constraints.end(), new PropertyConstraint(name, expr)));
+    std::shared_ptr<PropertyConstraint> PropertySuite::createConstraint(const std::string &name, Stmt *expr) {
+        return (*constraints.insert(constraints.end(), std::make_shared<PropertyConstraint>(name, expr)));
     }
 
-    PropertyConstraint * PropertySuite::getConstraint(const std::string &constraintName) const {
+    std::shared_ptr<PropertyConstraint> PropertySuite::getConstraint(const std::string &constraintName) const {
         for (auto constraint : constraints) {
             if (constraint->getName() == constraintName) {
                 return constraint;
@@ -185,7 +185,7 @@ namespace SCAM {
 
     }
 
-    const std::vector<PropertyConstraint *> &PropertySuite::getConstraints() const {
+    const std::vector<std::shared_ptr<PropertyConstraint>> &PropertySuite::getConstraints() const {
         return constraints;
     }
 
@@ -193,11 +193,11 @@ namespace SCAM {
     //                               ResetProperty
     // ------------------------------------------------------------------------------
 
-    Property *PropertySuite::getResetProperty() const {
+    std::shared_ptr<Property> PropertySuite::getResetProperty() const {
         return resetProperty;
     }
 
-    void PropertySuite::setResetProperty(Property *newResetProperty) {
+    void PropertySuite::setResetProperty(std::shared_ptr<Property> newResetProperty) {
         this->resetProperty = newResetProperty;
     }
 
@@ -205,12 +205,12 @@ namespace SCAM {
     //                              Properties
     // ------------------------------------------------------------------------------
 
-    void PropertySuite::addProperty(Property *property) {
+    void PropertySuite::addProperty(std::shared_ptr<Property> property) {
         this->propertyList.push_back(property);
-        std::sort(propertyList.begin(), propertyList.end(), [](Property* a, Property* b){return a->getName() < b->getName();});
+        std::sort(propertyList.begin(), propertyList.end(), [](std::shared_ptr<Property> a, std::shared_ptr<Property> b){return a->getName() < b->getName();});
     }
 
-    const std::vector<Property*> &PropertySuite::getProperties() const {
+    const std::vector<std::shared_ptr<Property>> &PropertySuite::getProperties() const {
         return propertyList;
     }
 

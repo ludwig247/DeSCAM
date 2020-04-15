@@ -6,7 +6,7 @@
 #define PROJECT_ABSTRACTPROPERTY_H
 
 #include <string>
-
+#include <memory>
 #include "TemporalExpr.h"
 #include "PropertyMacro.h"
 #include "PropertyConstraint.h"
@@ -33,8 +33,8 @@ namespace SCAM {
         const std::string &getName() const;
 
         // Constraints
-        void addConstraint(PropertyConstraint * constraint);
-        const std::vector<PropertyConstraint *> &getConstraints() const;
+        void addConstraint(std::shared_ptr<PropertyConstraint> constraint);
+        const std::vector<std::shared_ptr<PropertyConstraint>> &getConstraints() const;
 
         // Time Points
         void addTimePoint(Timepoint* timePoint, Expr* expr);
@@ -43,8 +43,8 @@ namespace SCAM {
         const std::vector<std::pair<Timepoint *, Expr *>> &getTimePointsOrdered() const;
 
         // Freeze Signals
-        void addFreezeSignal(PropertyMacro* freezeSignal, Timepoint* timePoint);
-        const std::map<PropertyMacro *, Timepoint *,pointer_comparator<PropertyMacro*>> &getFreezeSignals() const;
+        void addFreezeSignal(std::shared_ptr<PropertyMacro> freezeSignal, Timepoint* timePoint);
+        const std::map<std::shared_ptr<PropertyMacro> , Timepoint *,pointer_comparator<std::shared_ptr<PropertyMacro>>> &getFreezeSignals() const;
 
         // Assumptions
         void addAssumption(TemporalExpr* assumption);
@@ -56,20 +56,20 @@ namespace SCAM {
 
         const Operation * getOperation() const;
 
+    protected:
 
+        std::vector<const SCAM::Operation *> operationList; //! Contains a reference to the abstract operations
 
     private:
 
         const std::string name;
 
-        std::vector<const SCAM::Operation *> operationList; //! Contains a reference to the abstract operations
-
-        std::vector<PropertyConstraint*> constraints;
+        std::vector<std::shared_ptr<PropertyConstraint>> constraints;
 
         std::map<Timepoint*, Expr*> timePoints;
         std::vector<std::pair<Timepoint*, Expr*>> timePointsOrdered;
 
-        std::map<PropertyMacro*, Timepoint*,pointer_comparator<PropertyMacro*>> freezeSignals;
+        std::map<std::shared_ptr<PropertyMacro>, Timepoint*,pointer_comparator<std::shared_ptr<PropertyMacro>>> freezeSignals;
 
         std::vector<TemporalExpr*> assumptionList;
 

@@ -8,6 +8,7 @@
 #include <vector>
 #include <PropertySuite.h>
 #include <Behavior/CfgNode.h>
+#include <memory>
 
 #include "Port.h"
 #include "Variable.h"
@@ -52,9 +53,9 @@ namespace SCAM {
         void accept(AbstractVisitor &visitor);
 
         // PropertySuite
-        PropertySuite *getPropertySuite() const;
+        std::shared_ptr<PropertySuite> getPropertySuite() const;
 
-        void setPropertySuite(PropertySuite *propertySuite);
+        void setPropertySuite(std::shared_ptr<PropertySuite> propertySuite);
 
         std::map<int, SCAM::CfgNode *> getCFG() const;
 
@@ -74,7 +75,7 @@ namespace SCAM {
         std::map<int, SCAM::CfgNode *> cfg;
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
 
-        PropertySuite *propertySuite;
+        std::shared_ptr<PropertySuite> propertySuite;
     };
 }
 

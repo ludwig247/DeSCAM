@@ -13,7 +13,8 @@ namespace SCAM {
     public:
         Ternary() = delete;
 
-        Ternary(Expr * condition, Expr *trueExpr, Expr *falseExpr, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Ternary(Expr *condition, Expr *trueExpr, Expr *falseExpr,
+                StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         ~Ternary() = default;
 
@@ -23,9 +24,8 @@ namespace SCAM {
 
         Expr *getFalseExpr() const;
 
-        void setTrivialTrue();
-        void setTrivialFalse();
-
+        void setTrivialTrue(); //! Sets the condition to true (used during optimization)
+        void setTrivialFalse(); //! Sets the condition to false (used during optimization)
 
         void accept(StmtAbstractVisitor &visitor) override;
 

@@ -309,7 +309,9 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     SCAM::State::state_cnt = 0;
     SCAM::Operation::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
+
     if (!optOptionsSet.empty()) {
+        std::cout << "Warning: Optimizer not in a working state. Please use carfully!" << std::endl;
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
         //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
@@ -406,8 +408,8 @@ void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
         if (!f) {
             std::cout << "----------Fire(fail)" << std::endl;
             return;
-        } else {
             postFire();
+        } else {
         }
     }
 }
@@ -625,8 +627,3 @@ void SCAM::ModelFactory::removeUnused() {
         }
     }
 }
-
-
-
-
-

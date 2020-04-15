@@ -1,6 +1,6 @@
 add_subdirectory(tinyxml)
 
-file(GLOB LoggerSrc "Logger/*.cpp")
+file(GLOB LoggerSrc "Logger/*.cpp" "Logger/LoggingFilter.h")
 
 add_library(global SHARED
         DataTypes.cpp
@@ -14,4 +14,7 @@ add_library(global SHARED
         StmtNodeAlloc.cpp
         SimplifyVisitor.cpp
         GlobalUtilities.cpp
-        ${LoggerSrc} Logger/LoggingFilter.h)
+        RecursiveVisitor.cpp
+        Completeness.cpp
+        ${LoggerSrc}
+        )

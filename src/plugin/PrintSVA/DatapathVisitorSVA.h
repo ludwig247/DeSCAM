@@ -46,6 +46,8 @@ namespace SCAM {
 
         virtual void visit(class CompoundValue &node);
 
+        virtual void visit(class Ternary &node);
+
         bool resize_flag = false;
     };
 

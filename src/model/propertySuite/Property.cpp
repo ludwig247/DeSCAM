@@ -38,11 +38,11 @@ namespace SCAM {
     //                           Constraint-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addConstraint(PropertyConstraint * constraint){
+    void Property::addConstraint(std::shared_ptr<PropertyConstraint> constraint){
         this->constraints.push_back(constraint);
     }
 
-    const std::vector<PropertyConstraint *> &Property::getConstraints() const {
+    const std::vector<std::shared_ptr<PropertyConstraint>> &Property::getConstraints() const {
         return constraints;
     }
 
@@ -63,11 +63,11 @@ namespace SCAM {
     //                            Freeze-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addFreezeSignal(SCAM::PropertyMacro *freezeSignal, Timepoint* timePoint) {
+    void Property::addFreezeSignal(std::shared_ptr<SCAM::PropertyMacro> freezeSignal, Timepoint* timePoint) {
         this->freezeSignals.insert(std::make_pair(freezeSignal, timePoint));
     }
 
-    const std::map<PropertyMacro *, Timepoint *,pointer_comparator<PropertyMacro*>> &Property::getFreezeSignals() const {
+    const std::map<std::shared_ptr<PropertyMacro> , Timepoint *,pointer_comparator<std::shared_ptr<PropertyMacro>>> &Property::getFreezeSignals() const {
         return freezeSignals;
     }
 
@@ -106,5 +106,4 @@ namespace SCAM {
     const std::vector<std::pair<Timepoint *, Expr *>> &Property::getTimePointsOrdered() const {
         return timePointsOrdered;
     }
-
 }

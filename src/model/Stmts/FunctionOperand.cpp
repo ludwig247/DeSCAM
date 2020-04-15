@@ -59,3 +59,7 @@ bool SCAM::FunctionOperand::operator==(const SCAM::Stmt &other) const {
     if (thisPtr->function != otherPtr->function) return false;
     return (thisPtr->paramValueMap == otherPtr->paramValueMap);
 }
+
+void SCAM::FunctionOperand::setParamValueMap(const std::map<std::string, SCAM::Expr *> &paramValueMap) {
+    FunctionOperand::paramValueMap = paramValueMap;
+}

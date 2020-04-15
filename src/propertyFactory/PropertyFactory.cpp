@@ -9,7 +9,7 @@ SCAM::PropertyFactory::PropertyFactory(const Module *module) {
 
     assert(module != nullptr);
     // Generate PropertySuite
-    this->propertySuite = new PropertySuite(module->getName());
+    this->propertySuite = std::make_shared<PropertySuite>(module->getName());
 
     //Ports
     SCAM::CreatePropertySuite::addNotifySignals(module, propertySuite);
@@ -41,6 +41,6 @@ SCAM::PropertyFactory::PropertyFactory(const Module *module) {
     SCAM::CreatePropertySuite::addWait(module, propertySuite);
 }
 
-SCAM::PropertySuite *SCAM::PropertyFactory::getPropertySuite() const {
+std::shared_ptr<SCAM::PropertySuite> SCAM::PropertyFactory::getPropertySuite() const {
     return propertySuite;
 }

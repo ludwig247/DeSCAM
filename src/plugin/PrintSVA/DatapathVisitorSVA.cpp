@@ -175,3 +175,13 @@ std::string SCAM::DatapathVisitorSVA::toString(SCAM::Stmt *stmt, unsigned int in
     DatapathVisitorSVA printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
+
+void SCAM::DatapathVisitorSVA::visit(SCAM::Ternary &node) {
+    this->ss << "(";
+    node.getCondition()->accept(*this);
+    this->ss << "?";
+    node.getTrueExpr()->accept(*this);
+    this->ss << ":";
+    node.getFalseExpr()->accept(*this);
+    this->ss << ")";
+}

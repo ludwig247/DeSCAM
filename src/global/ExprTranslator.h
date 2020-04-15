@@ -29,7 +29,7 @@ namespace SCAM {
 
         void reset();
 
-        void visit(class Ternary &node) override;
+
 
     private:
         ExprTranslator();
@@ -72,6 +72,8 @@ namespace SCAM {
         void visit(SCAM::FunctionOperand &node);
 
         void visit(SCAM::ArrayOperand &node);
+
+        void visit(class Ternary &node) override;
 
         //unsupported expressions all communication stuff, these are functions
         // can be treated as functions (which in z3 is not an expression)
