@@ -129,7 +129,9 @@ add_subdirectory(doc)
 
 #add_dependencies(Stmts SYSTEMC GTEST Z3 LLVM)
 #add_dependencies(parser SYSTEMC GTEST Z3 LLVM)
-add_dependencies(DESCAM SYSTEMC GTEST Z3 LLVM)
+#add_dependencies(DESCAM SYSTEMC GTEST Z3 LLVM parser)
+#add_custom_target(SCAM DEPENDS DESCAM)
+
 # TODO: cpack generates installer
 #include(InstallRequiredSystemLibraries)
 #set(CPACK_PACKAGE_CONTACT "Kilgore Trout")
