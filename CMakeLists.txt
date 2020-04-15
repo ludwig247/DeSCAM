@@ -130,7 +130,10 @@ add_subdirectory(doc)
 #add_dependencies(Stmts SYSTEMC GTEST Z3 LLVM)
 #add_dependencies(parser SYSTEMC GTEST Z3 LLVM)
 #add_dependencies(DESCAM SYSTEMC GTEST Z3 LLVM parser)
-#add_custom_target(SCAM DEPENDS DESCAM)
+add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
+add_custom_command(TARGET SCAM
+                   POST_BUILD
+                   COMMAND cmake --build ${CMAKE_SOURCE_DIR}/build/ --target DESCAM -- -j 4)
 
 # TODO: cpack generates installer
 #include(InstallRequiredSystemLibraries)
