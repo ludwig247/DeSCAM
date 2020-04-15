@@ -127,9 +127,7 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
-#add_dependencies(Stmts SYSTEMC GTEST Z3 LLVM)
-#add_dependencies(parser SYSTEMC GTEST Z3 LLVM)
-#add_dependencies(DESCAM SYSTEMC GTEST Z3 LLVM parser)
+
 add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
 add_custom_command(TARGET SCAM
                    POST_BUILD
