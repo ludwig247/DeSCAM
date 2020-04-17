@@ -35,15 +35,17 @@ add_plugin(EstimatePower; "Provide an accurate power estimation on system level"
 #add_plugin(PrintTemplate; "Example for a plugin")
 
 
+#add_plugin(PrintVHDL; "Print VHDL template")
+add_plugin(PrintHLS; "Print C++ Files, VHDL Wrapper and scripts for Vivado High Level Synthesis")
+
 #add_plugin(PrintMonitor; "fill out")
 
 #UNDER MAINTANANCE
-#add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
+add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
 
 
 
 #NOT WORKING ANYMORE
-#add_plugin(PrintVHDL; "Print VHDL template")
 #add_plugin(PrintAML; "Structure and FSM in AML")
 #add_plugin(PrintXML; "Dumps the structure of each module as XML")
 #add_plugin(PrintModulesCheckers; "Create a project to check equivalency between generate module and original one" ; PrintSystemC)
@@ -52,24 +54,28 @@ add_plugin(EstimatePower; "Provide an accurate power estimation on system level"
 #Add new options by calling:
 add_plugin_option(PrintITL; adjustmacros; "Adjusts macros to automatically fit them to the generated RTL")
 add_plugin_option(PrintITL; pipelined; "Extends the properties in order to deal with pipelining more easily")
+add_plugin_option(PrintITL; hls-sco; "Adjusts macros for hls allowing only single cycle operations")
+add_plugin_option(PrintITL; hls-mco; "Adjusts macros for hls allowing multi cycle operations")
 
 #add_plugin_option(PrintCFGDot; explicit; "Extends the CFG of every module by showing the hidden statements behind communication statements")
 
 add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
-#
-#
-#add_optimize_option(all; "Enable all optimizations")
-#add_optimize_option(gvp; "Propagate the value of constant global variables")
-#add_optimize_option(lvp; "Propagate locally constant values")
-#add_optimize_option(gcp; "Propagate globally constant values")
-#add_optimize_option(rda; "Remove dead assignments")
-#add_optimize_option(are; "Analyze reachability of CFG paths")
-#add_optimize_option(fun; "Optimize functions")
-#add_optimize_option(sim; "Simplify expressions")
-#add_optimize_option(ros; "Reduce operators strength")
-#add_optimize_option(arb; "Analyze range and bitwidth")
-#add_optimize_option(mrc; "Merge redundant conditions")
+
+add_plugin_option(PrintHLS; sco; "[Single Cycle Operations] Generates HLS file allowing only single cycle operations")
+add_plugin_option(PrintHLS; mco; "[Multi Cycle Operations] Generates HLS file allowing multi cycle operations")
+
+add_optimize_option(all; "Enable all optimizations")
+add_optimize_option(gvp; "Propagate the value of constant global variables")
+add_optimize_option(lvp; "Propagate locally constant values")
+add_optimize_option(gcp; "Propagate globally constant values")
+add_optimize_option(rda; "Remove dead assignments")
+add_optimize_option(are; "Analyze reachability of CFG paths")
+add_optimize_option(fun; "Optimize functions")
+add_optimize_option(sim; "Simplify expressions")
+add_optimize_option(ros; "Reduce operators strength")
+add_optimize_option(arb; "Analyze range and bitwidth")
+add_optimize_option(mrc; "Merge redundant conditions")
 
 
 #Please don't change the code below.
@@ -84,7 +90,7 @@ foreach (plugin_lib ${PLUGIN_NAMES})
 endforeach ()
 
 # First we add the executable that generates the table
-add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp )
+add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp EstimatePower/EstimatePower.h)
 set_target_properties(MakeStyles PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON

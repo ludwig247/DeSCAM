@@ -6,7 +6,7 @@
 #include <AbstractVisitor.h>
 #include "../model/FSM.h"
 #include "../model/Behavior/State.h"
-#include <regex>
+
 
 #ifndef DESCAM_ESTIMATEPOWER_H
 #define DESCAM_ESTIMATEPOWER_H
@@ -15,6 +15,7 @@
 
 
 class EstimatePower : public PluginFactory {
+
 public:
     EstimatePower() = default;
 

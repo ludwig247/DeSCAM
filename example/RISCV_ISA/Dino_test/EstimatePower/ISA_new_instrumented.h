@@ -8,16 +8,14 @@
 #include "systemc.h"
 //#include "Interfaces.h"
 #include "../../Interfaces/Interfaces.h"
-#include "../../ESL/CPU_Interfaces.h"
+#include "CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"
 #include "../../RISCV_commons/Memory_Interfaces.h"
-#include "../../RISCV_Test_ELF/powerEstimator/PowerEstimator.h"
-
 
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 0
+#define SCAM 1
 
 
 class ISA_new : public sc_module {
@@ -819,6 +817,5 @@ unsigned int ISA_new::getEncUALUresult(unsigned int encodedInstr, unsigned int p
         return getALUresult(ALU_ADD, pcReg, getImmediate(encodedInstr));
     }
 }
-
 
 #endif //RISCV_ISA_H_

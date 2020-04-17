@@ -724,5 +724,4 @@ unsigned int ISA_new::getEncUALUresult(unsigned int encodedInstr, unsigned int p
     }
 }
 
-
 #endif //RISCV_ISA_H_
