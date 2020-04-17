@@ -26,7 +26,9 @@ PROG_ASM = \
            store.s \
            test_1.s \
            test_2.s \
-           test_3.s 
+           test_3.s \
+	   highPower.s \
+	   lowPower.s
 
 #
 # Define all object files.
