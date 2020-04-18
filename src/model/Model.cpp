@@ -85,4 +85,59 @@ namespace SCAM {
         return globalFunctionMap;
     }
 
+    ModuleInstance* Model::findInstance(std::string name, int level) {
+        std::vector<ModuleInstance*> queue;
+        queue.push_back(topInstance);
+        if (level == 0) {return topInstance; }
+        while(!queue.empty()) {
+            for (auto children: queue.front()->getSubmoduleInstances()) {
+                if (children.second->getLevel() == level && children.second->getName() == name) {
+                    return children.second;
+                }
+                if (children.second->getStructure()->isStructural()) {
+                    queue.push_back(children.second);
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        return nullptr;
+    }
+
+    ModuleInstance* Model::findInstance(int id) {
+        std::vector<ModuleInstance*> queue;
+        queue.push_back(topInstance);
+        if (id == 0) {return topInstance; }
+        while(!queue.empty()) {
+            for (auto children: queue.front()->getSubmoduleInstances()) {
+                if (children.second->getID() == id) {
+                    return children.second;
+                }
+                if (children.second->getStructure()->isStructural()) {
+                    queue.push_back(children.second);
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        return nullptr;
+    }
+
+    std::vector<ModuleInstance*> Model::getInstancesAtLevel(int level) {
+        std::vector<ModuleInstance*> queue;
+        std::vector<ModuleInstance*> InstancesAtLevel;
+        queue.push_back(topInstance);
+        if (level == 0) {return queue; }
+        while(!queue.empty()) {
+            for (auto children: queue.front()->getSubmoduleInstances()) {
+                if (children.second->getLevel() == level) {
+                    InstancesAtLevel.push_back(children.second);
+                }
+                if (children.second->getStructure()->isStructural()) {
+                    queue.push_back(children.second);
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        return InstancesAtLevel;
+    }
+
 }

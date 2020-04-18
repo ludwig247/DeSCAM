@@ -31,7 +31,7 @@ public:
         SC_THREAD(fsm);
     }
 
-    double SIMULATION_LIMIT = 1000;
+    int SIMULATION_LIMIT = 1000;
 
     void fsm() {
         while (true) {

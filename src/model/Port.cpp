@@ -21,6 +21,7 @@ namespace SCAM {
             _interface(_interface),
             TypeInterface(datatype),
             notify(new Notify(this)),
+            channel(nullptr),
             AbstractNode(name) {
         assert(_interface != nullptr);
         assert(datatype != nullptr);
@@ -53,5 +54,12 @@ namespace SCAM {
         return notify;
     }
 
+    Channel *Port::getChannel() const {
+        return channel;
+    }
+
+    void Port::setChannel(Channel * setchannel) {
+        channel = setchannel;
+    }
 
 }

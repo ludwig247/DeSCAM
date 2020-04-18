@@ -31,15 +31,15 @@ public:
         SC_THREAD(fsm);
     }
 
-    double SIMULATION_LIMIT = 1000;
+    //int SIMULATION_LIMIT = 1000;
 
     void fsm() {
         while (true) {
-            if(cnt == SIMULATION_LIMIT){
-                std::cout << "Simulated " << cnt << " bus cycles" << std::endl;
+            if(cnt == 1000){
+                //std::cout << "Simulated " << cnt << " bus cycles" << std::endl;
                 sc_stop();
             }else{
-                std::cout << cnt/SIMULATION_LIMIT*100 << "%" << std::endl;
+                //std::cout << cnt/SIMULATION_LIMIT*100 << "%" << std::endl;
             }
             cnt++;
             req.data = cnt;
@@ -48,7 +48,7 @@ public:
                 case 8: req.addr = 16; break;
                 case 16: req.addr = 25; break;
                 case 25: req.addr = 0; break;
-                default: assert(true);
+                //default: assert(true);
             }
 
             if(req.trans_type == SINGLE_READ) req.trans_type = SINGLE_WRITE;

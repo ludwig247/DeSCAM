@@ -58,7 +58,7 @@ struct Interconnect : public sc_module {
 
             section = nextsection;
             if (section == IDLE) {
-               important_state
+                insert_state();
                 //std::cout << this->name() << " - IDLE" << std::endl;
                 master_input->get(from_master);
                 if (from_master.cyc == true && from_master.stb == true) {
@@ -97,7 +97,7 @@ struct Interconnect : public sc_module {
                 from_master.cyc = false;
                 from_master.stb = false;
                 from_master.we = false;
-                important_state
+                insert_state();
                 //std::cout << this->name() << "- TRANSMITTING" << std::endl;
                 if (slave_number == 0) {
                     slave_in0->get(to_master);
@@ -134,7 +134,7 @@ struct Interconnect : public sc_module {
                 master_output->set(to_master);
 
                 //Wait until master has read the signals
-                important_state
+                insert_state();
                 master_input->get(from_master);
                 if (from_master.cyc == false && from_master.stb == false) {
                     //std::cout << this->name() << " - DONE " << std::endl;
@@ -144,12 +144,10 @@ struct Interconnect : public sc_module {
                     master_output->set(to_master);
                     nextsection = IDLE;
                 }
-
             }
 
         }
     }
 };
-
 
 #endif //PROJECT_INTERCONNECT_H

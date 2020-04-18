@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include "FindVariables.h"
-#include "FindNewDatatype.h"
 
 
 SCAM::FindVariables::FindVariables(clang::CXXRecordDecl* recordDecl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap):
@@ -46,7 +45,11 @@ bool SCAM::FindVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
 
 
     } else if (fieldDecl->getType()->isEnumeralType()) {
-        if (fieldDecl->getName() == "section" || fieldDecl->getName() == "nextsection") return true;
+        if (fieldDecl->getName() == "section" || fieldDecl->getName() == "nextsection")  {
+            //TODO Why does this fix it?
+           // return true;
+        }
+
 
         const clang::EnumType *enumType = fieldDecl->getType()->getAs<clang::EnumType>();
         std::string typeName = enumType->getDecl()->getName().str();

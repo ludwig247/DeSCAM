@@ -50,16 +50,16 @@ struct MasterAgent : public sc_module {
         while (true) {
 
             section = nextsection;
-            if (section == IDLE) {
-//                std::cout << this->name() << " - IDLE" << std::endl;
+            /*if (section == IDLE) {
+//                std::cout << this->name() << " - IDLE" << std::endl;*/
                 this->master_to_agent->read(agent_to_bus_req);
 
-                if(agent_to_bus_req.trans_type == SINGLE_READ){
+                //if(agent_to_bus_req.trans_type == SINGLE_READ){
                     nextsection = READ;
-                }
-                else nextsection = WRITE;
-            }
-            if (section == READ) {
+                //}
+                //else nextsection = WRITE;
+           // }
+           // if (section == READ) {
 //                std::cout << this->name() << " - READ" << std::endl;
                 wb_out.addr = agent_to_bus_req.addr;
                 wb_out.data = 0;
@@ -68,7 +68,7 @@ struct MasterAgent : public sc_module {
                 wb_out.stb = true;
                 agent_to_bus->set(wb_out);
                 nextsection = WAITING;
-            }
+            /*}
             if (section == WRITE) {
 //                std::cout << this->name() << " - WRITE " << std::endl;
                 wb_out.addr = agent_to_bus_req.addr;
@@ -111,7 +111,7 @@ struct MasterAgent : public sc_module {
                     nextsection = IDLE;
                 }
 
-            }
+            }*/
 
         }
     }

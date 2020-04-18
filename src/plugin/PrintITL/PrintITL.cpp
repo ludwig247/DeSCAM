@@ -7,15 +7,21 @@
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     this->model = node;
+    std::cout << "Print Model" << std::endl;
     for (auto &module: node->getModules()) {
 
-        this->module = module.second;
+        std::cout << module.first << std::endl;
+        if(!module.second->isStructural()) {
 
-        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macros()));
-        pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
-        std::string funString = functions();
-        if (funString != "")
-            pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
+            this->module = module.second;
+
+            pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macros()));
+            pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
+            std::string funString = functions();
+            if (funString != "")
+                pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
+
+        }
     }
 
     if(!node->getGlobalFunctionMap().empty()){
@@ -26,7 +32,7 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 }
 
 std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
-
+    std::cout << "Print Module" << std::endl;
     this->module = node;
 
     pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macros() + operations()));

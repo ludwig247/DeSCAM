@@ -44,6 +44,10 @@ namespace SCAM {
 
         void addModuleInstance(ModuleInstance* modInstance);
 
+        ModuleInstance* findInstance(std::string name, int level);
+        ModuleInstance* findInstance(int id);
+        std::vector<ModuleInstance*> getInstancesAtLevel(int level);
+
     private:
         std::map<std::string, Module *> moduleMap; //! Contains the structural describtion of each _module
         std::map<std::string, Variable*> globalVariableMap; //! Contains variables that are used throughout the model

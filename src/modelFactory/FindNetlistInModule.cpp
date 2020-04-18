@@ -67,8 +67,9 @@ namespace SCAM {
             std::string channelName;
             std::string instanceName;
             std::string portName;
-
+            std::string hierChannelInstanceName;
             int i = 0;
+
             for (clang::Stmt::child_iterator it = ce->IgnoreImpCasts()->child_begin(), eit = ce->IgnoreImpCasts()->child_end();
                  it != eit; it++) {
 
@@ -87,10 +88,24 @@ namespace SCAM {
                     clang::MemberExpr *me = llvm::dyn_cast<clang::MemberExpr>(e->IgnoreImpCasts());
                     channelName = me->getMemberDecl()->getNameAsString();
 
-                    //! <<instance, port>, channelName>
-                    auto innerEntry = std::pair<std::string, std::string>(instanceName, portName);
-                    auto outerEntry = std::pair<std::pair<std::string, std::string>, std::string>(innerEntry, channelName);
-                    this->_channelConnectionMap.insert(outerEntry);
+
+                    clang::Stmt::child_iterator hierIt = me->child_begin();
+                    clang::Expr *hierExp = llvm::dyn_cast<clang::Expr>(*hierIt);
+                    clang::MemberExpr *hierME = llvm::dyn_cast<clang::MemberExpr>(hierExp->IgnoreImpCasts());
+
+                    if (hierME) {
+                        hierChannelInstanceName = hierME->getMemberDecl()->getNameAsString();
+                        auto leftEntry = std::pair<std::string, std::string>(instanceName, portName);
+                        auto rightEntry = std::pair<std::string, std::string>(channelName, hierChannelInstanceName);
+                        auto hierouterEntry = std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>(leftEntry,
+                                                                                                                                  rightEntry);
+                        this->_hierchannelConnectionMap.insert(hierouterEntry);
+                    } else {
+                        //! <<instance, port>, channelName>
+                        auto innerEntry = std::pair<std::string, std::string>(instanceName, portName);
+                        auto outerEntry = std::pair<std::pair<std::string, std::string>, std::string>(innerEntry, channelName);
+                        this->_channelConnectionMap.insert(outerEntry);
+                    }
                 }
                 i++;
             }
@@ -146,6 +161,10 @@ namespace SCAM {
         return this->_channelConnectionMap;
     }
 
+    std::map<std::pair<std::string,std::string>, std::pair<std::string,std::string>> FindNetlistInModule::gethierchannelConnectionMap() {
+        return this->_hierchannelConnectionMap;
+    }
+
     //DEBUG
     void FindNetlistInModule::printInstanceMap() {
         for (auto elem : this->getInstanceMap()) {
@@ -163,7 +182,16 @@ namespace SCAM {
         std::cout <<"===ChannelConnectionMap===" << std::endl;
         for (auto elem : this->getchannelConnectionMap()) {
             //<<instance, port>, channelName>
-            std::cout << elem.first.first << "." << elem.first.second << "<" << elem.second << ">"  << std::endl;
+            std::cout << elem.first.first << "." << elem.first.second << "(" << elem.second << ")"  << std::endl;
+        }
+    }
+
+    void FindNetlistInModule::printHierChannelConnectionMap() {
+        std::cout <<"===HierChannelConnectionMap===" << std::endl;
+        for (auto elem : this->gethierchannelConnectionMap()) {
+            //<<instance, port>, <channelName, channelparentinstance>>
+            std::cout << elem.first.first << "." << elem.first.second << "(" << elem.second.second << "." << elem.second.first << ")" << " Channel declared in: ";
+            std::cout << elem.second.second << std::endl;
         }
     }
 }

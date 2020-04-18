@@ -10,6 +10,7 @@
 #include "enums.h"
 #include "DataType.h"
 #include "TypeInterface.h"
+#include "Channel.h"
 
 namespace SCAM {
 
@@ -41,11 +42,17 @@ namespace SCAM {
 
         DataSignal *getDataSignal() const;
 
+        Channel *getChannel() const;
+
+        void setChannel(Channel * setchannel);
+
     private:
         Interface *_interface; //! Interface of this port
         SyncSignal *synchSignal;
         DataSignal *dataSignal;
         Notify *notify;
+        Channel* channel;
+
     };
 
 }

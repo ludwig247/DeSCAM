@@ -84,7 +84,8 @@ void PrintSystemC::visit(Model &node) {
 
     this->ss << "int sc_main(int, char **) {" << std::endl << std::endl;
     this->indent += this->indentSize;
-    for (auto &&item : node.getTopInstance()->getModuleInstances()) {
+    //TODO fix
+    for (auto &&item : node.getTopInstance()->getSubmoduleInstances()) {
         item.second->accept(*this);
     }
     this->ss << std::endl;

@@ -33,9 +33,11 @@ namespace SCAM {
         std::map<std::string, std::string> getInstanceMap();
         std::map<std::string, std::pair<std::string,std::string>> getChannelMap();
         std::map<std::pair<std::string,std::string>, std::string> getchannelConnectionMap();
+        std::map<std::pair<std::string,std::string>, std::pair<std::string,std::string>> gethierchannelConnectionMap();
         void printInstanceMap();
         void printChannelMap();
         void printChannelConnectionMap();
+        void printHierChannelConnectionMap();
 
 
     private:
@@ -43,6 +45,8 @@ namespace SCAM {
         std::map<std::string, std::string> _instanceMap; //! <instance_name, sc_module>
         std::map<std::string, std::pair<std::string,std::string>> _channelMap; //! <channelName<channelType, channelSignalType>>
         std::map<std::pair<std::string,std::string>, std::string> _channelConnectionMap; //! <<instance, port>, channelName>
+        std::map<std::pair<std::string,std::string>, std::pair<std::string,std::string>> _hierchannelConnectionMap; //! <<instance, port>, <channelName,channelparentinstance>>
+
         std::map<std::string, clang::CXXRecordDecl *> _moduleMap;
 
         std::vector<std::string> channelTemplates;
