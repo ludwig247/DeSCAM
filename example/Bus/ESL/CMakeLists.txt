@@ -15,7 +15,7 @@ get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 list(APPEND R_SRC ${ENV_SRC})
 
-add_executable(Bus ${R_SRC}
+add_executable(Bus_Simulation ${R_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
         env/MasterDummy.h env/SlaveDummy.h)
-target_link_libraries(Bus systemc)
+target_link_libraries(Bus_Simulation systemc)

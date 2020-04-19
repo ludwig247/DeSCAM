@@ -1,7 +1,6 @@
-
-
 cmake_minimum_required(VERSION 2.8)
-project(Framer_Simulation C CXX)
+#project(Framer_Simulation C CXX)
+project(Framer C CXX)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
 set (CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib   -rt -dl -tinfo -pthread -z")

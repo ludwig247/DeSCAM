@@ -1,5 +1,5 @@
 add_subdirectory(Bus)
-#add_subdirectory(Framer)
+add_subdirectory(Framer)
 #add_subdirectory(SingleMasterMultiSlave)
 add_subdirectory(FPI)
 #add_subdirectory(FIFO)
@@ -19,8 +19,8 @@ add_example(Bus; "What busses do")
 #add_example(FIFO;) #not working
 add_example(myFPI; "unsure" ;FPI)
 #add_example(I2C; "Print_ITL_Tests" )
-#add_example(Framer; "Print_ITL_Tests")
-#add_example(Paper; "Print_ITL_Tests")
+add_example(Framer; "Print_ITL_Tests")
+add_example(Paper; "Print_ITL_Tests")
 #add_example(RISCV_ISA)
 #add_example(Whishbone)
 
