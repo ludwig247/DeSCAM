@@ -123,7 +123,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Bitwise &node) {
 void SCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
     if (node.getOperation() == "not") {
         this->ss << "!";
-    } else if (node.getOperation() == "-") {
+    } else  {
         this->ss << node.getOperation();
     }
 
@@ -167,7 +167,6 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundValue &node) {
     useParenthesesFlag = true;
     for (auto iterator = node.getValues().begin(); iterator != node.getValues().end(); ++iterator) {
         (*iterator).second->accept(*this);
-
         if (iterator != (node.getValues().end()--)) this->ss << ",";
     }
 }
