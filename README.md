@@ -21,7 +21,7 @@
     `./DESCAM --file <path-to-root>/example/Bus/ESL/Bus_new.h --output <output-dir> -PrintSVA` <br>
     3) Open your property checker (e.g. onespin) and load the design and properties
     4) Start implementing by filling the macros/functions such the reset property holds
-    5) Continue implementing all operatin leaving the first important state after reset 
+    5) Continue implementing all operations leaving the first important state after reset 
     6) Continue until all operations hold on the designs 
 
     
