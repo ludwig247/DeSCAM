@@ -126,6 +126,7 @@ void SCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
     } else if (node.getOperation() == "-") {
         this->ss << node.getOperation();
     }
+
     this->ss << "(";
     node.getExpr()->accept(*this);
     this->ss << ")";
