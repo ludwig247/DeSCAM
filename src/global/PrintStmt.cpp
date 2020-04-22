@@ -363,16 +363,13 @@ void SCAM::PrintStmt::visit(TimePointOperand &node) {
 }
 
 void SCAM::PrintStmt::visit(SCAM::Ternary &node) {
-    try{
-        this->ss << "(";
-        node.getCondition()->accept(*this);
-        this->ss << ")?";
-        node.getTrueExpr()->accept(*this);
-        this->ss << ":";
-        node.getFalseExpr()->accept(*this);
-    }catch(std::exception e){
-        throw std::runtime_error("oh no");
 
-    }
+    this->ss << "(";
+    node.getCondition()->accept(*this);
+    this->ss << ")?";
+    node.getTrueExpr()->accept(*this);
+    this->ss << ":";
+    node.getFalseExpr()->accept(*this);
+
 
 }

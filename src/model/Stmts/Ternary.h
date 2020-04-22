@@ -12,25 +12,18 @@ namespace SCAM {
     class Ternary : public Expr {
     public:
         Ternary() = delete;
-
         Ternary(Expr * condition, Expr *trueExpr, Expr *falseExpr);
-
         ~Ternary() = default;
 
         Expr *getCondition() const;
-
         Expr *getTrueExpr() const;
-
         Expr *getFalseExpr() const;
 
-        void setTrivialTrue();
-        void setTrivialFalse();
-
+        void setTrivialTrue(); //! Sets the condition to true (used during optimization)
+        void setTrivialFalse(); //! Sets the condition to false (used during optimization)
 
         void accept(StmtAbstractVisitor &visitor) override;
-
         bool operator==(const Stmt &other) const override;
-
     private:
         Expr *condition;
         Expr *trueExpr;

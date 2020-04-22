@@ -216,10 +216,10 @@ freeze:
 assume:
 	at t: state_1;
 	at t: master_in_sync;
-	at t: not(((master_in_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_in_sig_addr))));
+	at t: not(((master_in_sig_addr >= resize(0,32)) and (master_in_sig_addr <= resize(7,32))));
+	at t: not(((master_in_sig_addr >= resize(8,32)) and (master_in_sig_addr <= resize(15,32))));
+	at t: not(((master_in_sig_addr >= resize(16,32)) and (master_in_sig_addr <= resize(23,32))));
+	at t: not(((master_in_sig_addr >= resize(24,32)) and (master_in_sig_addr <= resize(31,32))));
 	at t: (SINGLE_WRITE = master_in_sig_trans_type);
 prove:
 	at t_end: state_4;
@@ -365,10 +365,10 @@ assume:
 	at t: state_1;
 	at t: master_in_sync;
 	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: not(((master_in_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_in_sig_addr))));
+	at t: not(((master_in_sig_addr >= resize(0,32)) and (master_in_sig_addr <= resize(7,32))));
+	at t: not(((master_in_sig_addr >= resize(8,32)) and (master_in_sig_addr <= resize(15,32))));
+	at t: not(((master_in_sig_addr >= resize(16,32)) and (master_in_sig_addr <= resize(23,32))));
+	at t: not(((master_in_sig_addr >= resize(24,32)) and (master_in_sig_addr <= resize(31,32))));
 prove:
 	at t_end: state_4;
 	at t_end: master_out_sig_ack = resp_ack_at_t;

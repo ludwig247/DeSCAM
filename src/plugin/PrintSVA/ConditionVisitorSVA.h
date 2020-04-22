@@ -33,6 +33,7 @@ protected:
     virtual void visit(class ParamOperand &node);
     virtual void visit(class Timepoint &node);
     virtual void visit(class TimePointOperand &node);
+    virtual void visit(class Ternary &node);
 
     bool resize_flag=false;
 };

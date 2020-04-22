@@ -1,5 +1,4 @@
 
-
 add_subdirectory(Bus)
 #add_subdirectory(Framer)
 #add_subdirectory(SingleMasterMultiSlave)
@@ -21,7 +20,7 @@ add_example(FIFO; Print_ITL_Tests)
 add_example(FPI; Print_ITL_Tests)
 add_example(I2C; Print_ITL_Tests)
 add_example(Framer; Print_ITL_Tests)
-
+add_example(operation-pipeline;Print_ITL_Tests)
 
 # configure a header file to pass plugins and options of the CMake settings to the source code
 #configure_file (

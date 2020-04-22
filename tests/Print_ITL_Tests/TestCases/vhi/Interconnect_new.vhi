@@ -1189,10 +1189,10 @@ assume:
 	at t: state_3;
 	at t: master_input_sig_cyc;
 	at t: master_input_sig_stb;
-	at t: not(((master_input_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_input_sig_addr))));
-	at t: not(((master_input_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_input_sig_addr))));
-	at t: not(((master_input_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_input_sig_addr))));
-	at t: not(((master_input_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_input_sig_addr))));
+	at t: not(((master_input_sig_addr >= resize(0,32)) and (master_input_sig_addr <= resize(7,32))));
+	at t: not(((master_input_sig_addr >= resize(8,32)) and (master_input_sig_addr <= resize(15,32))));
+	at t: not(((master_input_sig_addr >= resize(16,32)) and (master_input_sig_addr <= resize(23,32))));
+	at t: not(((master_input_sig_addr >= resize(24,32)) and (master_input_sig_addr <= resize(31,32))));
 prove:
 	at t_end: state_2;
 	at t_end: from_master_addr = master_input_sig_addr_at_t;
