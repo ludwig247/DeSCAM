@@ -13,11 +13,8 @@ namespace SCAM {
     class Write : public Communication, public Stmt {
     public:
         Write(Port *portOperand, Expr *value, bool is_non_blocking_access = false, VariableOperand *status = nullptr);
-
         Expr *getValue() const;
-
         VariableOperand *getStatusOperand() const;
-
         bool hasStatusOperand() const;
 
         virtual void accept(StmtAbstractVisitor &visitor) override;

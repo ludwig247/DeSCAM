@@ -48,6 +48,8 @@ namespace SCAM {
         ReconstructOperations(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
         void sortOperation(SCAM::Operation *operation);
 
+        void simplifyTernary(SCAM::Operation * operation);
+
         static std::vector<SCAM::Expr *> extractConditions(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
         static Return * getReturnValue(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
         ~ReconstructOperations() = default;
@@ -127,7 +129,7 @@ namespace SCAM {
         SCAM::Expr *find_or_add_variable(const std::string& varName, SCAM::Expr *expr);
 
         void reset();
-        bool isStateVar;
+        bool isStateVar ;
         SCAM::Expr *newExpr;
 
         std::vector<Expr *> assumptionsList;
@@ -135,7 +137,7 @@ namespace SCAM {
 
         std::map<std::string, SCAM::State *> statesMap;
         std::vector<std::string> dpSignalsList;
-        SCAM::Module *module;
+        SCAM::Module *module = nullptr;
         Return *returnValue = nullptr;
 
         DataSignal *reconstructArrayVar(Operand *operand);

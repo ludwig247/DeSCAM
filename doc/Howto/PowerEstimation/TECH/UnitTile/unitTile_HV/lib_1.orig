@@ -1,0 +1,30 @@
+/*
+	M1 horizontal , M2 vertical, default via1 AVNT_via1_HV
+
+	Dec 02, 2004	. alignement on DK 2.0c
+	Aug 31, 2004	. fix minEdgelength for M1 : 0.09 instead of 0.1
+	Jun 14, 2004	. align layers on DK 1.0
+	May 25, 2004	. add minEdge coding
+	May 17, 2004	. default path = 0.10 for metal1
+	May 07, 2004	. stub threshold decrease by 0.001 (derogation DRM?)
+	May 06, 2004	. add layer definition from DK_cmos065lp_7m4x0y2z_50A.v0.3
+	Apr 29, 2004	. swicth to stubMode = 2
+	Apr 21, 2004	. align on DRM 0.08 draft
+	Apr 19, 2004	. add stubMode, stubSpacing
+	Apr 01, 2004	. add AVNT_via1_HH and VH
+	Mar 04, 2004	. pitch = 0.2 - add new syntax for via density for 2004.06
+	Jan 30, 2004	. pitch M5 = 0.21
+	Jan 20, 2004	. fixed min Area for M2,M3,M4,M5
+	Jan 19, 2004	. fix table for VIA1 42 instead of 2
+			. fixed width/spacing in VIA layer definition
+	Jan 16, 2004	. add AVNT_via1_HH and VH
+			. remove M2 for AVNT_via1_HH and VH
+	Jan 16, 2004	. update resistance values
+			. cut spacing = 0.1 for AVNT_via1
+			. non Fat code for double via1 for shape > 0.32
+			. changed contactCode number for AVNT_via1 (align with cmos090)
+	Jan 15, 2004	. add AVNT_via1_VV code 32
+	Jan 13, 2004	. pitch M6/M7 = 0.84
+	Jan 12, 2004	. initial version - pitch 0.21
+			. AVNT_via1 default M1 horizontal, M2 vertical
+*/

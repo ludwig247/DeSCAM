@@ -239,8 +239,11 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
 
     ss << "\t";
     if (temporalExpr->isAt()) {
-        ss << ConditionVisitorSVA::toString((temporalExpr->getTimepointList().at(0)));
-        ss << " ##0 ";
+        //TODO: instead of printing t+1 print t##1 create other visitor
+        if(NodePeekVisitor::nodePeekArithmetic(temporalExpr->getTimepointList().at(0))){
+            auto arith = NodePeekVisitor::nodePeekArithmetic(temporalExpr->getTimepointList().at(0));
+            ss << *arith->getLhs() << "##" << *arith->getRhs() << " ";
+        }else ss << ConditionVisitorSVA::toString((temporalExpr->getTimepointList().at(0))) << "##0 ";
     } else if (temporalExpr->isDuring()) {  //TODO: Think of a smoother way for during case
         ss << "during_o (";
         for (auto t : temporalExpr->getTimepointList()) {
@@ -257,7 +260,7 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
         }
         ss << ConditionVisitorSVA::toString(temporalExpr->getStatement()) << ")";
         return ss.str();
-    }
+    }else assert(false && "unreachable");
     if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
         Assignment * a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
         ss << ConditionVisitorSVA::toString(a->getLhs());
@@ -303,7 +306,7 @@ std::string PrintSVA::operations() {
                 ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
             }
             for (auto f : op->getFreezeSignals()) {
-                ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName() << "()) and\n";
+                ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
             }
         }
 

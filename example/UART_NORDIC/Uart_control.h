@@ -2,16 +2,16 @@
 #include "Interfaces.h"
 #include "Uart_types.h"
 
-#define TASK_MASK(x)        (x & 1)
-#define ERROR_MASK(x)       (x & 0xF)
-#define ENABLE_MASK(x)      (x & 1)
-#define CONFIG_MASK(x)      (x & 0x1F)
-#define PARITY_MASK(x)      (x & 0xE)
-#define STOP_MASK(x)        (x & 0x1)
-#define HWFC_MASK(x)        (x & 0x10)
-#define ODD_PARITY_MASK(x)  (x & 0x100)
+// #define TASK_MASK(x)        ((x & 1) != 0)
+// #define ERROR_MASK(x)       (x & 0xF)
+// #define ENABLE_MASK(x)      (x & 1)
+// #define CONFIG_MASK(x)      (x & 0x1F)
+// #define PARITY(x)      ((x & 0xE) != 0)
+// #define STOP(x)        ((x & 0x1) != 0)
+// #define HWFC(x)        ((x & 0x10) != 0)
+// #define ODD_PARITY(x)  ((x & 0x100) != 0)
 
-#define BOOL(x) ((x & 1) != 0)
+// #define ENABLE(x) ((x & 1) != 0)
 
 
 SC_MODULE(Uart_control) {
@@ -21,7 +21,7 @@ SC_MODULE(Uart_control) {
     master_out<events_t>    events_out;
 
     slave_in<bool> cts_in;
-    //master_out<bool> rts_out;
+    master_out<bool> rts_out;
     //slave_out<bool> hwfc_control_out;
 
     // TX control and config
@@ -32,7 +32,9 @@ SC_MODULE(Uart_control) {
 
     // RX control and config
     shared_out<bool>       rx_active_out;
-    shared_out<config_t>   rx_config_out;
+#ifdef SIM    
+    shared_out<config_t>   rx_config_out; 
+#endif
     // RX events
     slave_in<rx_events_t>  rx_events_in;
     
@@ -64,12 +66,17 @@ SC_MODULE(Uart_control) {
     bool tx_events_valid;
     bool rx_events_valid;
 
+    // Tmp registers
+    unsigned int error_src_tmp;
+    unsigned int bus_data_tmp;
+
     // Visible registers
     unsigned int error_src;
     unsigned int enable;
-    unsigned int config;
+    unsigned int frame_config;
     tasks_t      tasks;
     bool         cts_internal;
+    bool         rts_internal;
 
     //bool enabled;
 
@@ -80,7 +87,7 @@ SC_MODULE(Uart_control) {
 
 
     SC_CTOR(Uart_control) :
-            //rts(RTS_ACTIVATED),
+
             cts_in_msg(CTS_DEACTIVATED),
             cts_in_valid(false),
             bus_in_valid(false),
@@ -88,31 +95,58 @@ SC_MODULE(Uart_control) {
             error_src(0),
             enable(0),
             //enabled(0),
-            config(0),
+            frame_config(0),
 #ifdef SIM
             rx_active_prev(false),
             tx_active_prev(false),
 #endif
             cts_internal(CTS_DEACTIVATED),
+            rts_internal(RTS_ACTIVATED),
             bus_in("bus_in"),
             bus_out("bus_out"),
             tx_events_in("tx_events_in"),
             rx_events_in("rx_events_in"),
             tx_active_out("tx_active_out"),
             rx_active_out("rx_active_out"),
-            //tx_is_transmitting_in("tx_is_transmitting"),
-            //hwfc_control_out("hwfc_control_out"),
             tasks_in("tasks"),
             events_out("events"),
             tx_config_out("tx_config_out"),
+#ifdef SIM
             rx_config_out("rx_config_out"),
+#endif
             bus_wr(false),
             bus_rd(false),
-            cts_in("cts_in")//,
-            //rts_out("rts_out") 
+            cts_in("cts_in"),
+            rts_out("rts_out")
             {
         SC_THREAD(fsm);
     }
+
+    bool ENABLE(unsigned int enable) const
+    {
+        return (enable & 1) != 0;
+    }
+
+    bool TASK_MASK(unsigned int task) const
+    {
+        return (task & 1) != 0;
+    }
+
+    unsigned int ERROR_MASK(unsigned int error_src) const {return (error_src & 0xF);}
+
+    unsigned int ENABLE_MASK(unsigned int enable) const
+    {
+        return (enable & 1);
+    }
+
+    unsigned int CONFIG_MASK(unsigned int frame_config) const {return (frame_config & 0x1F);}
+
+    bool PARITY(unsigned int parity) const {return (parity & 0xE) != 0;}
+    bool STOP(unsigned int stop_bit) const {return (stop_bit & 0x1) != 0;}
+
+    bool HWFC(unsigned int hwfc) const {return (hwfc & 0x10) != 0;}
+
+    bool ODD_PARITY(unsigned int odd_parity) const {return (odd_parity & 0x100) != 0;}
 
     void fsm();
 private:
@@ -141,8 +175,32 @@ private:
 
 void Uart_control::fsm()
 {
+    rx_active_out_msg = false;
+    tx_active_out_msg = false;
+    tx_active_out->set(tx_active_out_msg);
+    rx_active_out->set(rx_active_out_msg);
     while (true) {
         insert_state("conceptual_state");
+        bus_in_msg.addr = 0;
+        bus_in_msg.data = 0;
+        bus_in_msg.trans_type = READ;
+        //bus_out_msg.data = 0;
+        bus_out_msg.valid = false;
+        tasks_in_msg.start_rx = false;
+        tasks_in_msg.stop_rx = false;
+        tasks_in_msg.start_tx = false;
+        tasks_in_msg.stop_tx = false;
+        cts_in_msg = CTS_ACTIVATED;
+        tx_events_msg.done = false;
+        rx_events_msg.error_src = 0;
+        rx_events_msg.ready = false;
+        rx_events_msg.timeout = false;
+        events_out_msg.cts = false;
+        events_out_msg.ncts = false;
+        events_out_msg.rxd_ready = false;
+        events_out_msg.txd_ready = false;
+        events_out_msg.error     = false;
+        events_out_msg.rx_timeout = false;
         /*
             * Changes:
             * 1) renaming of functions
@@ -170,42 +228,40 @@ void Uart_control::fsm()
 
         bus_wr = bus_in_valid && bus_in_msg.trans_type == WRITE;
         bus_rd = bus_in_valid && bus_in_msg.trans_type == READ;
-        bus_out_msg.valid = bus_rd;
+        //bus_out_msg.valid = bus_rd || bus_wr;
+        bus_out_msg.valid = bus_in_valid;
 
         // Task suspend is not included in PS for nRF53 UART
         //tasks_internal.suspend  = is_task_bus(bus_in_msg.addr, bus_in_msg.data, ADDR_tasks_SUSPEND);
         // BUS WRITE
-        tasks.start_rx = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_START_RX)) ? (TASK_MASK(bus_in_msg.data) != 0) : false;
-        tasks.stop_rx  = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_STOP_RX))  ? (TASK_MASK(bus_in_msg.data) != 0) : false;
-        tasks.start_tx = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_START_TX)) ? (TASK_MASK(bus_in_msg.data) != 0) : false;
-        tasks.stop_tx  = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_STOP_TX))  ? (TASK_MASK(bus_in_msg.data) != 0) : false;
-        error_src      = (bus_wr && (bus_in_msg.addr == ADDR_ERROR_SRC))      ? (ERROR_MASK(~bus_in_msg.data & error_src)) : error_src;
-        enable         = (bus_wr && (bus_in_msg.addr == ADDR_ENABLE))         ? (ENABLE_MASK(bus_in_msg.data))             : enable;
-        config         = (bus_wr && (bus_in_msg.addr == ADDR_CONFIG))         ? (CONFIG_MASK(bus_in_msg.data))             : config;
-        //enabled = ENABLE_MASK(enable) != 0;
+        tasks.start_rx = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_START_RX)) ? TASK_MASK(bus_in_msg.data) : false;
+        tasks.stop_rx  = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_STOP_RX))  ? TASK_MASK(bus_in_msg.data) : false;
+        tasks.start_tx = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_START_TX)) ? TASK_MASK(bus_in_msg.data) : false;
+        tasks.stop_tx  = (bus_wr && (bus_in_msg.addr == ADDR_TASKS_STOP_TX))  ? TASK_MASK(bus_in_msg.data) : false;
+        //error_src      = (bus_wr && (bus_in_msg.addr == ADDR_ERROR_SRC))      ? ERROR_MASK(~bus_in_msg.data & error_src) : error_src;
+        //enable         = (bus_wr && (bus_in_msg.addr == ADDR_ENABLE))         ? ENABLE_MASK(bus_in_msg.data)             : enable;
+        //frame_config   = (bus_wr && (bus_in_msg.addr == ADDR_CONFIG))         ? CONFIG_MASK(bus_in_msg.data)             :frame_config;
+
 
         // BUS READ
-        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ERROR_SRC) ? error_src : bus_out_msg.data;
-        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ENABLE)    ? enable    : bus_out_msg.data;
-        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_CONFIG)    ? config    : bus_out_msg.data;
+        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ERROR_SRC) ? error_src    : bus_out_msg.data;
+        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_ENABLE)    ? enable       : bus_out_msg.data;
+        bus_out_msg.data = (bus_rd && bus_in_msg.addr == ADDR_CONFIG)    ? frame_config : bus_out_msg.data;
 
         // EVENTS
-        events_out_msg.txd_ready   = ((ENABLE_MASK(enable) != 0) && tx_events_valid) ? tx_events_msg.done             : false;
-        events_out_msg.rxd_ready   = ((ENABLE_MASK(enable) != 0) && rx_events_valid) ? rx_events_msg.ready            : false;
-        events_out_msg.rx_timeout  = ((ENABLE_MASK(enable) != 0) && rx_events_valid) ? rx_events_msg.timeout          : false;
-        events_out_msg.error       = ((ENABLE_MASK(enable) != 0) && rx_events_valid) ? (rx_events_msg.error_src != 0) : false;
-        //events_out_msg.txd_ready  = update_event(tx_events_msg.done, tx_events_valid);
-        // events_out_msg.rxd_ready  = update_event(rx_events_msg.ready, rx_events_valid);
-        // events_out_msg.rx_timeout = update_event(rx_events_msg.timeout, rx_events_valid);
-        // events_out_msg.error      = update_event(rx_events_msg.error_src != 0, rx_events_valid);
-        // TODO: Move cts to another file? Will be located in another clock/power domain
-        //events_out_msg.cts   = event_triggered_cts(cts_in_valid, cts_in_msg, HWFC_MASK(config) != 0);
-        events_out_msg.cts  = ((ENABLE_MASK(enable) != 0) && (HWFC_MASK(config) != 0) && cts_in_valid) ? cts_in_msg == CTS_ACTIVATED   : false;
-        events_out_msg.ncts = ((ENABLE_MASK(enable) != 0) && (HWFC_MASK(config) != 0) && cts_in_valid) ? cts_in_msg == CTS_DEACTIVATED : false;
-        //events_out_msg.ncts  = event_triggered_ncts(cts_in_valid, cts_in_msg, HWFC_MASK(config) != 0);
+        events_out_msg.txd_ready   = (ENABLE(enable) && tx_events_valid) ? tx_events_msg.done             : false;
+        events_out_msg.rxd_ready   = (ENABLE(enable) && rx_events_valid) ? rx_events_msg.ready            : false;
+        events_out_msg.rx_timeout  = (ENABLE(enable) && rx_events_valid) ? rx_events_msg.timeout          : false;
+        events_out_msg.error       = (ENABLE(enable) && rx_events_valid) ? (rx_events_msg.error_src != 0) : false;
 
-        if (HWFC_MASK(config) == 0 || events_out_msg.cts)   cts_internal = CTS_ACTIVATED;
-        else if (events_out_msg.ncts)                       cts_internal = CTS_DEACTIVATED;
+        // TODO: Move cts to another file? Will be located in another clock/power domain
+
+        events_out_msg.cts  = (ENABLE(enable) && HWFC(frame_config) && cts_in_valid) ? cts_in_msg == CTS_ACTIVATED   : false;
+        events_out_msg.ncts = (ENABLE(enable) && HWFC(frame_config) && cts_in_valid) ? cts_in_msg == CTS_DEACTIVATED : false;
+
+
+        cts_internal = (!HWFC(frame_config) || events_out_msg.cts)  ? CTS_ACTIVATED   : cts_internal;
+        cts_internal = ( HWFC(frame_config) && events_out_msg.ncts) ? CTS_DEACTIVATED : cts_internal;
 
         // TASKS
         tasks.start_rx = tasks.start_rx || (tasks_in_valid && tasks_in_msg.start_rx);
@@ -222,12 +278,15 @@ void Uart_control::fsm()
         //                                   tasks.start_rx,
         //                                   tasks.stop_rx,
         //                                   ENABLE_MASK(enable) != 0);
-        tx_active_out_msg = BOOL(enable) && (tasks.start_tx || (tx_active_out_msg && !(tasks.stop_tx)));
+        tx_active_out_msg = ENABLE(enable) && (tasks.start_tx || (tx_active_out_msg && !(tasks.stop_tx)));
 
-        rx_active_out_msg = BOOL(enable) && (tasks.start_rx || (rx_active_out_msg && !(tasks.stop_rx)));
+        rx_active_out_msg = ENABLE(enable) && (tasks.start_rx || (rx_active_out_msg && !(tasks.stop_rx)));
 
 
 #ifdef SIM
+        //if (tasks.start_rx) debug_print(CONTROL, "Tasks_start_rx");
+        //if (tasks.stop_rx) debug_print(CONTROL, "Tasks_stop_rx");
+        //if (rx_active_out_msg) debug_print(CONTROL, "RX_ACTIVE_OUT_MSG high");
         if ((tx_active_out_msg != tx_active_prev) && tx_active_out_msg) debug_print(CONTROL, "TX status change! TX now ON");
         if ((tx_active_out_msg != tx_active_prev) && !tx_active_out_msg) debug_print(CONTROL, "TX status change! TX now OFF");
         if ((rx_active_out_msg != rx_active_prev) && rx_active_out_msg) debug_print(CONTROL, "RX status change! RX now ON");
@@ -236,49 +295,44 @@ void Uart_control::fsm()
         rx_active_prev = rx_active_out_msg;
 #endif
 
-        ctrl_to_hwfc_msg = rx_active_out_msg && (HWFC_MASK(config) != 0);
+        //ctrl_to_hwfc_msg = rx_active_out_msg && (HWFC_MASK(config) != 0);
 
         // Update ERROR_SRC register in case of errors.
         // New errors have priority over clearance
-        error_src = rx_events_valid ? error_src | rx_events_msg.error_src : error_src;
-        //if (rx_events_valid)
-        //{
-            //error_src = error_src | rx_events_msg.error_src;
-            // if (rx_to_ctrl_msg.error_overrun)      error_src = error_src | ERROR_OVERRUN_MASK;
-            // else if (rx_to_ctrl_msg.error_parity)  error_src = error_src | ERROR_PARITY_MASK;
-            // else if (rx_to_ctrl_msg.error_framing) error_src = error_src | ERROR_FRAMING_MASK;
-            // else if (rx_to_ctrl_msg.error_break)   error_src = error_src | ERROR_BREAK_MASK;
-            
-            //std::cout << "Control: register ERROR_SRC after update: " << error_src << std::endl;
-        //}
+        
 
-        config_msg.parity        = PARITY_MASK(config) != 0;
-        config_msg.two_stop_bits = STOP_MASK(config) != 0;
-        config_msg.odd_parity    = ODD_PARITY_MASK(config) != 0;
-
+#ifdef SIM
+        //if (config_msg.parity) debug_print(CONTROL, "Parity true!");
+#endif
         // Consider moving back here
-        // if (hwfc_enabled(registers.config))
-        // {
+        if (HWFC(frame_config) && rx_active_out_msg && (rts_internal == RTS_DEACTIVATED))
+        {
+            rts_internal = RTS_ACTIVATED;
+            rts_out->master_write(rts_internal);
+        }
+        else if (HWFC(frame_config) && !rx_active_out_msg && (rts_internal == RTS_ACTIVATED))
+        {
+            rts_internal = RTS_DEACTIVATED;
+            rts_out->master_write(rts_internal);
+        }
 
-        //     if (ctrl_to_rx_msg.active && rts == RTS_DEACTIVATED)
-        //     {
-        //         rts = RTS_ACTIVATED;
-        //         rts_out->master_write(rts);
-        //     }
-        //     else if (rts == RTS_ACTIVATED)
-        //     {
-        //         rts = RTS_DEACTIVATED;
-        //         rts_out->master_write(rts);
-        //     }
-            
-        // }
+        error_src_tmp  = (bus_wr && (bus_in_msg.addr == ADDR_ERROR_SRC)) ? ERROR_MASK(~bus_in_msg.data & error_src) : error_src;
+        error_src      = (ENABLE(enable) && rx_events_valid)             ? (error_src_tmp | rx_events_msg.error_src): error_src_tmp;
+        enable         = (bus_wr && (bus_in_msg.addr == ADDR_ENABLE))    ? ENABLE_MASK(bus_in_msg.data)             : enable;
+        frame_config   = (bus_wr && (bus_in_msg.addr == ADDR_CONFIG))    ? CONFIG_MASK(bus_in_msg.data)             :frame_config;
 
-        if (events_out_msg.cts          ||
-            events_out_msg.ncts         ||
-            events_out_msg.rxd_ready    ||
-            events_out_msg.txd_ready    ||
-            events_out_msg.rx_timeout   ||
-            events_out_msg.error) 
+#ifdef SIM
+        if (bus_wr && (bus_in_msg.addr == ADDR_ENABLE)) debug_print(CONTROL, "Write to ENABLE register");
+        if (bus_wr) std::cout << "Enable register is " << enable << std::endl;
+        if (bus_rd && (bus_in_msg.addr == ADDR_ENABLE)) debug_print(CONTROL, "Read from ENABLE register");
+        if (bus_rd) std::cout << "Enable register is " << enable << ", data_out is " << bus_out_msg.data << std::endl;
+#endif
+
+        config_msg.parity        = PARITY(frame_config);
+        config_msg.two_stop_bits = STOP(frame_config);
+        config_msg.odd_parity    = ODD_PARITY(frame_config);
+
+        if (cts_in_valid || rx_events_valid || tx_events_valid)
         {
             events_out->master_write(events_out_msg);
         }
@@ -287,7 +341,9 @@ void Uart_control::fsm()
         //hwfc_control_out->slave_write(ctrl_to_hwfc_msg);
         bus_out->slave_write(bus_out_msg);
         tx_config_out->set(config_msg);
+#ifdef SIM
         rx_config_out->set(config_msg);
+#endif
 
     }
 }
