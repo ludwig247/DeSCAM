@@ -21,6 +21,7 @@
 #include <OperationFactory.h>
 #include <z3.h>
 #include <PropertyFactory.h>
+#include <FatalError.h>
 
 
 //Constructor
@@ -299,10 +300,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     }
 
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
-    if(Logger::isTerminate()) {
-        Logger::log();
-        std::terminate();
-    };
+    TERMINATE_IF_FATAL
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;

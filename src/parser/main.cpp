@@ -9,6 +9,7 @@
 #include <ModelGlobal.h>
 #include <Logger/ConsoleSink.h>
 #include <Logger/FileSink.h>
+#include <FatalError.h>
 
 int main(int argc, const char **argv) {
     //Process commandline data
@@ -23,10 +24,9 @@ int main(int argc, const char **argv) {
 //    SCAM::Logger::setFilteringOptions({LoggingFilter::FilterOptions::showAllMsgs});
     SCAM::Logger::setFilteringOptions({LoggingFilter::FilterOptions::showAllMsgs});
     //Create model
-    SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile());
+    ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile()))
     // write log messages to all sinks
     SCAM::Logger::log();
-    if(SCAM::Logger::isTerminate()) return -1;
     //Printing options according to commandline styles chosen
     std::cout << "==================================================================" << std::endl;
     std::cout << "......................... Printing model ........................." << std::endl;

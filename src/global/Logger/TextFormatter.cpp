@@ -19,13 +19,13 @@ SCAM::TextFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages
 //        if (auto msgPtr = itr->get()) {
             auto stmtInfo = msgPtr->getStmtInfo();
             json << "\t{\n";
-            json << "\t\t" << "file: '" << stmtInfo.getFile() << "'\n";
-            json << "\t\t" << "statement: '" << stmtInfo.getStmt() << "'\n";
-            json << "\t\t" << "line: [[" << stmtInfo.getRowStartNumber() << " , " << stmtInfo.getRowEndNumber() << "], ["
-                 << stmtInfo.getColumnStartNumber() << " , " << stmtInfo.getColumnEndNumber() << "]]\n";
-            json << "\t\t" << "severity: '" << msgPtr->getSeverityLevel() << "'\n";
-            json << "\t\t" << "violation: '" << msgPtr->getViolationType() << "'\n";
-            json << "\t\t" << "message: '" << msgPtr->getMessage() << "'\n";
+            json << "\t\t" << R"("file": ")" << stmtInfo.getFile() << "\",\n";
+            json << "\t\t" << R"("statement": ")" << stmtInfo.getStmt() << "\",\n";
+            json << "\t\t" << R"("line": [[)" << stmtInfo.getRowStartNumber() << " , " << stmtInfo.getRowEndNumber() << "], ["
+                 << stmtInfo.getColumnStartNumber() << " , " << stmtInfo.getColumnEndNumber() << "]],\n";
+            json << "\t\t" << R"("severity": ")" << msgPtr->getSeverityLevel() << "\",\n";
+            json << "\t\t" << R"("violation": ")" << msgPtr->getViolationType() << "\",\n";
+            json << "\t\t" << R"("message": ")" << msgPtr->getMessage() << "\"\n";
             if (std::next(msgPtr, 1) == loggerMessages.end()) {
                 json << "\t}\n";
             } else {

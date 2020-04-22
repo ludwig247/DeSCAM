@@ -53,11 +53,5 @@ namespace SCAM {
     if(pl == SCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
     Logger::setTerminate();                                                   \
     }
-
-
-/** A macro that breaks execution at this point */
-#define TERMINATE(msg)                                         \
-        SCAM::StmtLocationInfo stmtLocationInfo("in function " + PRINT_FUNC,__FILE__,__LINE__,__LINE__,0,0) \
-    throw StmtException(msg,stmtLocationInfo);
 }
 #endif //DESCAM_STMTEXCEPTION_H

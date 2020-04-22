@@ -1,6 +1,6 @@
-import argparse, wrapper as pyModule
+import argparse, descamCheck as pyModule
 
-parser = argparse.ArgumentParser(prog="RUN DESCAM", description='Link input files to DESCAM.')
+parser = argparse.ArgumentParser(prog="DeSCAM Check", description='Checks SystemC-PPA files for compliance.')
 parser.add_argument("FILE", nargs='+', help='SystemC-PPA file dir')
 
 args = parser.parse_args()

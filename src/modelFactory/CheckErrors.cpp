@@ -7,12 +7,12 @@
 #include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
-#include <CreateRealCFG.h>
 #include "ModuleInstance.h"
 #include "FindDataFlow.h"
 #include "FindFunctions.h"
 #include "FindGlobal.h"
 #include <OperationFactory.h>
+#include <FatalError.h>
 
 //Constructor
 SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
@@ -28,7 +28,6 @@ SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
 }
 
 bool SCAM::CheckErrors::preFire() {
-
     return !SCAM::Logger::isTerminate();
 }
 
@@ -193,20 +192,7 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
     clang::CXXMethodDecl *methodDecl = process->second.first;
     //Create blockCFG for this process
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
-    //Print out error msgs
-   /* if (Logger::hasError()) {
-        std::cout << "" << std::endl;
-        std::cout << "======================" << std::endl;
-        std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
-        std::cout << "----------------------" << std::endl;
-        for (auto item: Logger::getInstance().getErrorList()) {
-            std::cout << "- " << item.statement << std::endl;
-            for (auto log: item.errorMsgs) {
-                std::cout << "\t" << log << std::endl;
-            }
-        }
-        Logger::clear();
-    } */
+    TERMINATE_IF_FATAL
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module
@@ -310,21 +296,7 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        /*if (Logger::hasError()) {
-            std::cout << "" << std::endl;
-            std::cout << "======================" << std::endl;
-            std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
-            std::cout << "----------------------" << std::endl;
-            for (auto item: Logger::getInstance().getErrorList()) {
-                std::cout << "- " << item.statement << std::endl;
-                for (auto log: item.errorMsgs) {
-                    std::cout << "\t" << log << std::endl;
-                }
-            }
-            Logger::clear();
-        }*/
     }
-
 }
 
 void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
@@ -358,11 +330,6 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
             FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
             func.second->setStmtList(functionFactory.getStmtList());
         } catch (std::runtime_error &e) {
-//            std::cout << e.what() << std::endl;
-//            for(auto statement:  Logger::getErrorList()){
-//                std::cout << statement.statement << std::endl;
-//            }
-           // Logger::clear();
             this->model->removeGlobalFunction(func.second);
         }
     }
