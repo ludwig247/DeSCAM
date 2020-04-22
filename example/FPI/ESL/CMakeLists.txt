@@ -15,8 +15,8 @@ add_subdirectory(env)
 get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 list(APPEND R_SRC ${ENV_SRC})
-add_executable(FPI ${R_SRC})
-target_link_libraries(FPI systemc)
+add_executable(FPI_Simulation ${R_SRC})
+target_link_libraries(FPI_Simulation systemc)
 
 #add_executable(FPI_Master ${R_SRC})
 

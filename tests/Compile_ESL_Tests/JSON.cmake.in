@@ -7,8 +7,9 @@ message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
 foreach(EXAMPLE_NAME ${EXAMPLE_NAMES})
     set(EXAMPLE_NAME "${EXAMPLE_NAME}_Simulation")
     execute_process(COMMAND ${CMAKE_COMMAND} --build ../../cmake-build-debug --target ${EXAMPLE_NAME} WORKING_DIRECTORY ${CURRENT_DIR} RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_FILE ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME})
-message(STATUS "RESULT = ${RESULT}, OUTPUT = ${OUTPUT}")
 message(STATUS "EXAMPLE_NAME = ${EXAMPLE_NAME}")
+message(STATUS "RESULT = ${RESULT}, OUTPUT = ${OUTPUT}")
+
 
     file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} WARNING_DE REGEX Warnung ENCODING UTF-8)
     file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} WARNING_ENG REGEX Warning ENCODING UTF-8)
@@ -23,13 +24,3 @@ message(STATUS "EXAMPLE_NAME = ${EXAMPLE_NAME}")
     configure_file(${CURRENT_DIR}/error.json.in
             ${CURRENT_DIR}/json_output_files/error_${EXAMPLE_NAME}.json @ONLY)
 endforeach()
-
-
-
-#set(THING "$ENV{THING}")
-#message(STATUS $ENV{THING})
-#if( DEFINED $ENV{THING})
-  #  message(STATUS "THING = $ENV{THING}")
- #   else()
-#        message(STATUS "THING = " ${THING})
-#endif()
