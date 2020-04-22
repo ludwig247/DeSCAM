@@ -16,7 +16,7 @@ get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
 #list(APPEND R_SRC ${ENV_SRC})
 
 
-add_executable(Whisbone ${ENV_SRC}
+add_executable(Whishbone_Simulation ${ENV_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
         to_delete/MasterAgent_old.h to_delete/SlaveAgent_old.h to_delete/Interconnect_old.h env/MasterDummy.h env/SlaveDummy.h)
 
@@ -24,4 +24,4 @@ add_executable(Whisbone ${ENV_SRC}
 #        ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
 #        MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
 
-target_link_libraries(Whisbone systemc)
+target_link_libraries(Whishbone_Simulation systemc)
