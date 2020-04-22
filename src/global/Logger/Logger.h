@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include <unordered_set>
+#include <set>
 #include <memory>
 #include "LoggerMsg.h"
 #include "LoggerSink.h"
@@ -39,7 +39,7 @@ namespace SCAM {
 
         static void setTextFormatOptions(SCAM::TextFormatter::FormatOptions formatOptions);
 
-        static void setFilteringOptions(std::initializer_list<LoggingFilter::FilterOptions> filterOptions);
+        static void setFilteringOptions(std::set<LoggingFilter::FilterOptions> filterOptions);
 
         static void setCurrentProcessedLocation(LoggerMsg::ProcessedLocation currentProcessedLocation);
 
@@ -64,7 +64,7 @@ namespace SCAM {
         //a flag indicating whether termination is necessary due to errors
         static bool terminate;
         //logging options set
-        std::unordered_set<LoggingFilter::FilterOptions> filterOptions;
+        std::set<LoggingFilter::FilterOptions> filterOptions;
         //log messages formatter
         TextFormatter::FormatOptions formatOptions = TextFormatter::FormatOptions::JSON;
         // a variable to track the violation location while processing a module

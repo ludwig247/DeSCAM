@@ -6,7 +6,7 @@
 #define DESCAM_LOGGINGFILTER_H
 
 #include <vector>
-#include <unordered_set>
+#include <set>
 #include "LoggerMsg.h"
 
 namespace SCAM {
@@ -25,7 +25,7 @@ namespace SCAM {
         };
 
         static std::vector<LoggerMsg> applyFilters(const std::vector<LoggerMsg> &msgsVector,
-                                                   const std::unordered_set<LoggingFilter::FilterOptions> &filterOptions) {
+                                                   const std::set<LoggingFilter::FilterOptions> &filterOptions) {
             if (filterOptions.empty() || filterOptions.find(FilterOptions::showAllMsgs) != filterOptions.end())
                 return msgsVector;
             else {

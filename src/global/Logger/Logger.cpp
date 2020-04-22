@@ -61,6 +61,6 @@ SCAM::LoggerMsg::ProcessedLocation SCAM::Logger::getCurrentProcessedLocation() {
     return Logger::getInstance().currentProcessedLocation;
 }
 
-void SCAM::Logger::setFilteringOptions(std::initializer_list<LoggingFilter::FilterOptions> filterOptions) {
+void SCAM::Logger::setFilteringOptions(std::set<LoggingFilter::FilterOptions> filterOptions) {
     Logger::getInstance().filterOptions = filterOptions;
 }
