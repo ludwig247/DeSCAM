@@ -1,2 +1,2 @@
-{"compile_output":{"test-suite":"@PROJECT@", "test_name":"@EXAMPLE_NAME@ ", "Success":"@SUCCESS@", "warnings":"@WARNING_DE@@WARNING_ENG@",
+{"compile_output":{"test-suite":"@PROJECT@", "test_name":"@EXAMPLE_NAME@ ", "Success":@SUCCESS@, "warnings":"@WARNING_DE@@WARNING_ENG@",
 "errors":"@ERROR@"}}
