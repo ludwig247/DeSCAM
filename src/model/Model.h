@@ -48,6 +48,9 @@ namespace SCAM {
         ModuleInstance* findInstance(int id);
         std::vector<ModuleInstance*> getInstancesAtLevel(int level);
 
+        void setMaxLevel(int lvl);
+        int getMaxLevel();
+
     private:
         std::map<std::string, Module *> moduleMap; //! Contains the structural describtion of each _module
         std::map<std::string, Variable*> globalVariableMap; //! Contains variables that are used throughout the model
@@ -55,6 +58,8 @@ namespace SCAM {
         std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains the structural describtion of each _module
 
         ModuleInstance *topInstance;
+
+        int _maxLevel;
 
     };
 }

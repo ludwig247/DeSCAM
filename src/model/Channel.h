@@ -49,8 +49,8 @@ namespace SCAM {
 
         void setType(std::string Type);
 
-
     private:
+
         Port *fromPort;
         Port *toPort;
         ModuleInstance *fromInstance;

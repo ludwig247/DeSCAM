@@ -38,6 +38,8 @@ int main(int argc, const char **argv) {
                 }
             } else {
                 std::map<std::string, std::string> pluginOutput;
+                style->getOptionMap();
+                SCAM::ModelGlobal::getModel()->getGlobalVariableMap();
                 pluginOutput = style->printModel(SCAM::ModelGlobal::getModel());
                 printFiles(*it, pluginOutput);
             }

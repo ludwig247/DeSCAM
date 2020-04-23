@@ -84,4 +84,5 @@ namespace SCAM {
     void Channel::setType(std::string Type) {
         this->type = Type;
     }
+
 }

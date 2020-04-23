@@ -20,7 +20,11 @@ add_library (modelFactory SHARED
         FindSections.cpp
         FindNewDatatype.cpp
         FindFunctions.cpp
-        FindGlobal.cpp FindGlobal.h FindStateName.cpp FindStateName.h FindInstancesInModule.cpp FindInstancesInModule.h DotExportInstances.cpp DotExportInstances.h FindChannels.cpp FindChannels.h FindNetlistInModule.cpp FindNetlistInModule.h SVGChannel.cpp SVGChannel.h SVGModuleInstance.cpp SVGModuleInstance.h SVGPort.cpp SVGPort.h InstanceQueue.cpp InstanceQueue.h)
+        FindGlobal.cpp
+		FindStateName.cpp
+		FindInstancesInModule.cpp
+		FindNetlistInModule.cpp
+		)
 
 target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)

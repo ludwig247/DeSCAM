@@ -19,9 +19,6 @@
 #include "../parser/CommandLineParameter.h"
 #include "FindInstancesInModule.h"
 #include "FindNetlistInModule.h"
-#include "FindChannels.h"
-#include "DotExportInstances.h"
-#include "InstanceQueue.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
 #include <z3.h>
@@ -80,13 +77,13 @@ bool SCAM::ModelFactory::fire() {
     return true;
 }
 
-//        /**
-//         * Create Module
-//
-//         * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
-//         * is executed by the module constructor method addModule using the reference to the
-//         * module declaration of the ast
-//        */
+/**
+ * Create Module
+
+ * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
+ * is executed by the module constructor method addModule using the reference to the
+ * module declaration of the ast
+*/
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
@@ -231,9 +228,6 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
                 std::string parentModuleName = instance->getStructure()->getName();
                 std::string parentInstanceName = instance->getName();
                 //! <instance_name, sc_module>
-                std::cout << "Instance: " << instance->getName() << std::endl;
-                netinMod.printChannelConnectionMap();
-                netinMod.printHierChannelConnectionMap();
                 for(auto children : netinMod.getInstanceMap()) {
 
                     Module *module = model->getModules().find(children.second)->second;
@@ -262,7 +256,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     //Instances and Channels have been created and are linked in a tree like structure
     //Now connect instances via the channels
 
-    int maxLevel = currentLevel;
+    model->setMaxLevel(currentLevel);
     while(currentLevel >= 0) {
         std::vector<ModuleInstance*> queue = model->getInstancesAtLevel(currentLevel);
         while (!queue.empty()) {
@@ -333,51 +327,6 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
         currentLevel--;
     }
-
-
-
-
-
-
-    std::vector<ModuleInstance*> print;
-    print.push_back(topInstance);
-
-    std::cout << "Instance: " << topInstance->getName();
-    std::cout << " at Level: " <<topInstance->getLevel() << " with ID: " << topInstance->getID() << std::endl;
-    for (auto chan: topInstance->getChannelMap()) {
-        std::cout << "##### " << chan.first << std::endl;
-        std::cout << "\t" << "connects: " << chan.second->getFromInstance()->getName() << "." << chan.second->getFromPort()->getName() << " with ";
-        std::cout << chan.second->getToInstance()->getName() << "." << chan.second->getToPort()->getName() << std::endl;
-    }
-    std::cout << std::endl;
-
-    while(!print.empty()) {
-        for (auto children: print.front()->getSubmoduleInstances()) {
-
-            std::cout << "Instance: " << children.first;
-            std::cout << " Parent Instance: " << children.second->getParentInstance()->getName() << " at Level: " << children.second->getLevel() << " with ID: " << children.second->getID() << std::endl;
-            for (auto chan: children.second->getChannelMap()) {
-                std::cout << "##### " << chan.first << std::endl;
-                std::cout << "\t" << "connects: " << chan.second->getFromInstance()->getName() << "." << chan.second->getFromPort()->getName() << " with ";
-                std::cout << chan.second->getToInstance()->getName() << "." << chan.second->getToPort()->getName() << std::endl;
-            }
-            std::cout << std::endl;
-
-            if (children.second->getStructure()->isStructural()) {
-                print.push_back(children.second);
-            }
-        }
-        print.erase(print.begin());
-    }
-
-
-
-    /*
-    DotExportInstances dotty;
-    //dotty.exportMain(model);
-    dotty.exportSVG(model);
-     */
-
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
@@ -539,7 +488,6 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
 void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl, const std::map<std::string, clang::CXXRecordDecl *>& ModuleMap) {
     //Find all Variables within the Module
     FindVariables findVariables(decl, ModuleMap);
-    //findVariables.printVariableMap();
 
     //Initial Values
     //FindInitalValues findInitalValues(decl, findVariables.getVariableMap(), module);

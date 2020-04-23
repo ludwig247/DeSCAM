@@ -140,4 +140,11 @@ namespace SCAM {
         return InstancesAtLevel;
     }
 
+    void Model::setMaxLevel(int lvl) {
+        _maxLevel = lvl;
+    }
+    int Model::getMaxLevel() {
+        return this->_maxLevel;
+    }
+
 }

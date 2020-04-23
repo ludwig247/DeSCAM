@@ -44,6 +44,7 @@ namespace SCAM {
         void setID(int id);
         void setChannelConnectionMap(std::map<std::pair<std::string,std::string>, std::string> channelConnectionMap);
         void setHierChannelConnectionMap(std::map<std::pair<std::string,std::string>, std::pair<std::string,std::string>> hierChannelConnectionMap);
+
         //GETTER
         Module *getStructure();
         Module *getParent();
@@ -52,6 +53,9 @@ namespace SCAM {
         int getID();
         std::map<std::pair<std::string,std::string>, std::pair<std::string,std::string>> getHierChannelConnectionMap();
         std::map<std::pair<std::string,std::string>, std::string> getChannelConnectionMap();
+
+
+
 
     private:
         Module *structure; //! Pointing to the structure of the model

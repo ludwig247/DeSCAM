@@ -47,6 +47,7 @@ namespace SCAM {
         void setChannel(Channel * setchannel);
 
     private:
+
         Interface *_interface; //! Interface of this port
         SyncSignal *synchSignal;
         DataSignal *dataSignal;
