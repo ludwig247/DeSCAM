@@ -24,9 +24,10 @@ const unsigned int ERROR_SRC_MASK         = 0xF;
 const unsigned int ADDR_ENABLE            = 0x500;
 
 const unsigned int ADDR_CONFIG            = 0x56C;
-const unsigned int CONFIG_STOP_MASK       = 0x1;
+const unsigned int CONFIG_STOP_MASK       = 0x10;
 const unsigned int CONFIG_PARITY_MASK     = 0xE;
-const unsigned int CONFIG_HWFC_MASK       = 0x10;
+const unsigned int CONFIG_HWFC_MASK       = 0x1;
+const unsigned int CONFIG_ODD_PARITY_MASK = 0x100;
 const unsigned int CONFIG_BIT_MASK        = 0x1F;
 
 
@@ -84,9 +85,10 @@ struct bus_resp_t
     bool         valid;
 };
 
-struct tx_control_out_t
+struct tx_control_t
 {
     bool active;
+    bool cts;
 };
 
 struct config_t

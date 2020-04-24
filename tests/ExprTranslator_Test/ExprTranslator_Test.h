@@ -433,7 +433,6 @@ TEST_F(ExprTranslator_Test, CompareOperatorNonTerminal) {
 
     ASSERT_EQ((*compare3), (*newExpr))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
 
-
     compare3 = new Ternary(new Relational(valTrue,">=", valFalse),valTrue,valFalse);
     expr = exprTranslator.translate(compare3);
     newExpr = exprTranslator.translate(expr, &module);
@@ -441,11 +440,25 @@ TEST_F(ExprTranslator_Test, CompareOperatorNonTerminal) {
     ASSERT_EQ((*valFalse), (*newExpr))  <<  PrintStmt::toString(valFalse)  << " != " << PrintStmt::toString(newExpr);
     ASSERT_TRUE(!((*valTrue) == (*newExpr)))  <<  PrintStmt::toString(valTrue)  << " != " << PrintStmt::toString(newExpr);
     ASSERT_TRUE(!((*compare3) == (*newExpr)))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
+}
 
 
-    //Continue here
+
+TEST_F(ExprTranslator_Test, CompareOperatorUnsigned) {
+    //If a stmt: cond ? val : var is translated and var is an unsigned integer, then this is unknown when the visitor visits val.
+    //Now we re-visit in case of different datatypes
+    auto valTrue =  new UnsignedValue(2);
+    auto variableOperand =  new VariableOperand(module.getVariable("unsigned_var"));
+
+    auto compare3 = new Ternary(new Relational(variableOperand,">=", valTrue),valTrue,variableOperand);
+    z3::expr expr = exprTranslator.translate(compare3);
+    exprTranslator.reset();
+    auto newExpr = exprTranslator.translate(expr, &module);
+
+    ASSERT_EQ((*compare3), (*newExpr))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
 
 }
+
 
 
 

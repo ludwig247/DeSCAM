@@ -301,9 +301,25 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
         } else if (oper == "if") {
             z3::expr simplifiedITE = z3_expr_intern.simplify();
             if(simplifiedITE.num_args()==3){
-                auto cond = translate_intern(z3_expr_intern.arg(0));
-                auto trueExpr= translate_intern(z3_expr_intern.arg(1));
-                auto falseExpr= translate_intern(z3_expr_intern.arg(2));
+                Expr * cond;
+                Expr * trueExpr;
+                Expr * falseExpr;
+                try{
+                cond = translate_intern(z3_expr_intern.arg(0));
+                }catch(std::exception){
+                    bool old_value = this->unsigned_flag;
+                    this->unsigned_flag = true;
+                    cond = translate_intern(z3_expr_intern.arg(0));
+                    this->unsigned_flag = old_value;
+                }
+                trueExpr= translate_intern(z3_expr_intern.arg(1));
+                falseExpr= translate_intern(z3_expr_intern.arg(2));
+                if(trueExpr->getDataType() != falseExpr->getDataType()){
+                    bool old_value = this->unsigned_flag;
+                    this->unsigned_flag = true;
+                    trueExpr= translate_intern(z3_expr_intern.arg(1));
+                    this->unsigned_flag = old_value;
+                }
                 return new Ternary(cond,trueExpr,falseExpr);
             }else if((simplifiedITE.num_args()==0)){
                 return translate_intern(simplifiedITE);
