@@ -28,7 +28,10 @@ PROG_ASM = \
            test_2.s \
            test_3.s \
 	   highPower.s \
-	   lowPower.s
+	   lowPower.s \
+	   highPower_loop.s \
+           lowPower_loop.s \
+	   switch.s
 
 #
 # Define all object files.

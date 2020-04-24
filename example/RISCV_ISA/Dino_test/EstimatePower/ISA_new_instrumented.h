@@ -8,9 +8,10 @@
 #include "systemc.h"
 //#include "Interfaces.h"
 #include "../../Interfaces/Interfaces.h"
-#include "CPU_Interfaces.h"
+#include "../../ESL/CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"
 #include "../../RISCV_commons/Memory_Interfaces.h"
+#include "PowerEstimator.h"
 
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description

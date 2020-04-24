@@ -1,0 +1,198 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -nets
+        -max_paths 1
+        -transition_time
+Design : CPU
+Version: N-2017.09-SP3
+Date   : Fri Apr 17 15:41:06 2020
+****************************************
+
+Operating Conditions: typical   Library: NangateOpenCellLibrary
+Wire Load Model Mode: top
+
+  Startpoint: fromMemoryPortxLOADEDDATAx(1)
+              (input port clocked by clk)
+  Endpoint: clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch
+            (negative level-sensitive latch clocked by clk)
+  Path Group: REGIN
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  CPU                5K_hvratio_1_1        NangateOpenCellLibrary
+
+Attributes:
+    d - dont_touch
+    u - dont_use
+   mo - map_only
+   so - size_only
+    i - ideal_net or ideal_network
+  inf - infeasible path
+
+  Point                                       Fanout     Trans      Incr       Path      Attributes
+  ---------------------------------------------------------------------------------------------------------
+  clock clk (rise edge)                                             0.00       0.00
+  clock network delay (ideal)                                       0.80       0.80
+  input external delay                                              5.00       5.80 r
+  fromMemoryPortxLOADEDDATAx(1) (in)                      0.00      0.00       5.80 r
+  fromMemoryPortxLOADEDDATAx(1) (net)           2                   0.00       5.80 r
+  U3784/ZN (NAND2_X1)                                     0.01      0.03       5.83 f
+  n3559 (net)                                   3                   0.00       5.83 f
+  U3785/ZN (NOR4_X1)                                      0.06      0.11       5.94 r
+  n3561 (net)                                   2                   0.00       5.94 r
+  U3802/ZN (NAND2_X1)                                     0.02      0.05       5.99 f
+  n7486 (net)                                   3                   0.00       5.99 f
+  U3803/ZN (NOR2_X1)                                      0.03      0.06       6.05 r
+  n7440 (net)                                   2                   0.00       6.05 r
+  U8045/ZN (NOR3_X1)                                      0.02      0.03       6.08 f
+  n7444 (net)                                   1                   0.00       6.08 f
+  U8046/ZN (NAND2_X1)                                     0.02      0.03       6.11 r
+  n7445 (net)                                   1                   0.00       6.11 r
+  U8047/ZN (NAND2_X1)                                     0.01      0.03       6.14 f
+  n7487 (net)                                   2                   0.00       6.14 f
+  U8048/ZN (NOR2_X1)                                      0.03      0.05       6.20 r
+  n7452 (net)                                   2                   0.00       6.20 r
+  U8049/ZN (NOR2_X1)                                      0.01      0.03       6.23 f
+  n7523 (net)                                   2                   0.00       6.23 f
+  U8145/ZN (NAND2_X1)                                     0.01      0.03       6.26 r
+  IF_ISAxN10935 (net)                           2                   0.00       6.26 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/EN (SNPS_CLOCK_GATE_HIGH_CPU_36)     0.00     6.26 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/net6514 (net)             0.00       6.26 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch/D (DLL_X1)     0.01     0.01     6.27 r
+  data arrival time                                                            6.27
+
+  clock clk (fall edge)                                            10.00      10.00
+  clock network delay (ideal)                                       0.80      10.80
+  clock uncertainty                                                -0.20      10.60
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch/GN (DLL_X1)         0.00      10.60 f
+  time borrowed from endpoint                                       0.00      10.60
+  data required time                                                          10.60
+  ---------------------------------------------------------------------------------------------------------
+  data required time                                                          10.60
+  data arrival time                                                           -6.27
+  ---------------------------------------------------------------------------------------------------------
+  slack (MET)                                                                  4.33
+
+  Time Borrowing Information
+  ------------------------------------------------------------------------
+  clk nominal pulse width                                          10.00   
+  library setup time                                               -0.31   
+  ------------------------------------------------------------------------
+  max time borrow                                                   9.69   
+  actual time borrow                                                0.00   
+  ------------------------------------------------------------------------
+
+
+  Startpoint: IF_ISAxsection_regx0x
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: fromMemoryPort_notify
+            (output port clocked by clk)
+  Path Group: REGOUT
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  CPU                5K_hvratio_1_1        NangateOpenCellLibrary
+
+Attributes:
+    d - dont_touch
+    u - dont_use
+   mo - map_only
+   so - size_only
+    i - ideal_net or ideal_network
+  inf - infeasible path
+
+  Point                        Fanout     Trans      Incr       Path      Attributes
+  ------------------------------------------------------------------------------------------
+  clock clk (rise edge)                              0.00       0.00
+  clock network delay (ideal)                        0.80       0.80
+  IF_ISAxsection_regx0x/CK (DFF_X1)        1.00      0.00       0.80 r
+  IF_ISAxsection_regx0x/Q (DFF_X1)         0.05      0.17       0.97 r
+  IF_ISAxsection(0) (net)       10                   0.00       0.97 r
+  fromMemoryPort_notify (out)              0.05      0.00       0.97 r
+  data arrival time                                             0.97
+
+  clock clk (rise edge)                             20.00      20.00
+  clock network delay (ideal)                        0.80      20.80
+  clock uncertainty                                 -0.20      20.60
+  output external delay                             -5.00      15.60
+  data required time                                           15.60
+  ------------------------------------------------------------------------------------------
+  data required time                                           15.60
+  data arrival time                                            -0.97
+  ------------------------------------------------------------------------------------------
+  slack (MET)                                                  14.63
+
+
+  Startpoint: IF_ISAxsection_regx0x
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch
+            (negative level-sensitive latch clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  CPU                5K_hvratio_1_1        NangateOpenCellLibrary
+
+Attributes:
+    d - dont_touch
+    u - dont_use
+   mo - map_only
+   so - size_only
+    i - ideal_net or ideal_network
+  inf - infeasible path
+
+  Point                                       Fanout     Trans      Incr       Path      Attributes
+  ---------------------------------------------------------------------------------------------------------
+  clock clk (rise edge)                                             0.00       0.00
+  clock network delay (ideal)                                       0.80       0.80
+  IF_ISAxsection_regx0x/CK (DFF_X1)                       1.00      0.00       0.80 r
+  IF_ISAxsection_regx0x/Q (DFF_X1)                        0.05      0.17       0.97 r
+  IF_ISAxsection(0) (net)                      10                   0.00       0.97 r
+  U6440/ZN (AND2_X1)                                      0.02      0.07       1.03 r
+  n7451 (net)                                   3                   0.00       1.03 r
+  U8042/ZN (NAND3_X1)                                     0.03      0.06       1.09 f
+  n7488 (net)                                   5                   0.00       1.09 f
+  U8044/ZN (INV_X1)                                       0.01      0.04       1.13 r
+  n7446 (net)                                   1                   0.00       1.13 r
+  U8047/ZN (NAND2_X1)                                     0.01      0.03       1.16 f
+  n7487 (net)                                   2                   0.00       1.16 f
+  U8048/ZN (NOR2_X1)                                      0.03      0.05       1.22 r
+  n7452 (net)                                   2                   0.00       1.22 r
+  U8049/ZN (NOR2_X1)                                      0.01      0.03       1.25 f
+  n7523 (net)                                   2                   0.00       1.25 f
+  U8145/ZN (NAND2_X1)                                     0.01      0.03       1.28 r
+  IF_ISAxN10935 (net)                           2                   0.00       1.28 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/EN (SNPS_CLOCK_GATE_HIGH_CPU_36)     0.00     1.28 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/net6514 (net)             0.00       1.28 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch/D (DLL_X1)     0.01     0.01     1.29 r
+  data arrival time                                                            1.29
+
+  clock clk (fall edge)                                            10.00      10.00
+  clock network delay (ideal)                                       0.80      10.80
+  clock uncertainty                                                -0.20      10.60
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch/GN (DLL_X1)         0.00      10.60 f
+  time borrowed from endpoint                                       0.00      10.60
+  data required time                                                          10.60
+  ---------------------------------------------------------------------------------------------------------
+  data required time                                                          10.60
+  data arrival time                                                           -1.29
+  ---------------------------------------------------------------------------------------------------------
+  slack (MET)                                                                  9.31
+
+  Time Borrowing Information
+  ------------------------------------------------------------------------
+  clk nominal pulse width                                          10.00   
+  library setup time                                               -0.31   
+  ------------------------------------------------------------------------
+  max time borrow                                                   9.69   
+  actual time borrow                                                0.00   
+  ------------------------------------------------------------------------
+
+
+1

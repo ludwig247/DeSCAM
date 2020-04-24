@@ -1,6 +1,6 @@
 
 # @author :	Dino Mehmedagić
-# @name   : 	highPower.s
+# @name   : 	lowPower.s
 # @purpose: 	Perform a lot of nops.
 # @notes  :	
 

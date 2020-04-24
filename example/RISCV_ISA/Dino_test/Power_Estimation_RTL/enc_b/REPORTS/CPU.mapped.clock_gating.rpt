@@ -1,0 +1,25 @@
+ 
+****************************************
+Report : clock_gating
+        -nosplit
+Design : CPU
+Version: N-2017.09-SP3
+Date   : Fri Apr 24 10:51:09 2020
+****************************************
+
+
+
+                             Clock Gating Summary
+          ------------------------------------------------------------
+          |    Number of Clock gating elements    |       37         |
+          |                                       |                  |
+          |    Number of Gated registers          |  1133 (99.91%)   |
+          |                                       |                  |
+          |    Number of Ungated registers        |     1 (0.09%)    |
+          |                                       |                  |
+          |    Total number of registers          |     1134         |
+          ------------------------------------------------------------
+
+
+
+1
