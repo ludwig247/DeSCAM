@@ -6,6 +6,7 @@
 #define PROJECT_PROPERTYSUITE_H
 
 #include <set>
+#include <memory>
 
 #include "FunctionMacro.h"
 #include "Property.h"
@@ -18,50 +19,70 @@
 
 namespace SCAM {
 
-    class PropertySuite  {
+    class PropertySuite {
 
     public:
 
         // Constructor
         explicit PropertySuite(std::string name);
-        PropertySuite(PropertySuite const&) = default;
+
+        PropertySuite(PropertySuite const &) = default;
 
         // Name
         const std::string &getName() const;
+
         void setName(const std::string &name);
 
         // Macros
-        void addSyncSignal(PropertyMacro* ss);
-        void addNotifySignal(PropertyMacro* ss);
-        void addDpSignal(PropertyMacro* dp);
-        void addVisibleRegister(PropertyMacro* reg);
-        void addState(PropertyMacro* state);
-        const std::vector<PropertyMacro *> &getSyncSignals() const;
-        const std::vector<PropertyMacro *> &getNotifySignals() const;
-        const std::vector<PropertyMacro *> &getDpSignals() const;
-        const std::vector<PropertyMacro *> &getVisibleRegisters() const;
-        const std::vector<PropertyMacro *> &getStates() const;
-        PropertyMacro * findSignal(const std::string &signalName) const;
-        PropertyMacro * findSignal(const std::string &parentlName, const std::string &subVarName) const;
-        PropertyMacro * findSignal(Variable * var) const;
+        void addSyncSignal(std::shared_ptr<PropertyMacro> ss);
+
+        void addNotifySignal(std::shared_ptr<PropertyMacro> ss);
+
+        void addDpSignal(std::shared_ptr<PropertyMacro> dp);
+
+        void addVisibleRegister(std::shared_ptr<PropertyMacro> reg);
+
+        void addState(std::shared_ptr<PropertyMacro> state);
+
+        const std::vector<std::shared_ptr<PropertyMacro>> &getSyncSignals() const;
+
+        const std::vector<std::shared_ptr<PropertyMacro>> &getNotifySignals() const;
+
+        const std::vector<std::shared_ptr<PropertyMacro>> &getDpSignals() const;
+
+        const std::vector<std::shared_ptr<PropertyMacro>> &getVisibleRegisters() const;
+
+        const std::vector<std::shared_ptr<PropertyMacro>> &getStates() const;
+
+        std::shared_ptr<PropertyMacro> findSignal(const std::string &signalName) const;
+
+        std::shared_ptr<PropertyMacro> findSignal(const std::string &parentlName, const std::string &subVarName) const;
+
+        std::shared_ptr<PropertyMacro> findSignal(Variable *var) const;
 
         // Functions
-        void addFunction(Function* function);
-        const std::vector<Function*> &getFunctions() const;
+        void addFunction(Function *function);
+
+        const std::vector<Function *> &getFunctions() const;
 
         // Constraints
-        PropertyConstraint * createConstraint(const std::string &name);
-        PropertyConstraint * createConstraint(const std::string &name, Stmt *expr);
-        PropertyConstraint * getConstraint(const std::string &constraintName) const;
-        const std::vector<PropertyConstraint *> &getConstraints() const;
+        std::shared_ptr<PropertyConstraint> createConstraint(const std::string &name);
+
+        std::shared_ptr<PropertyConstraint> createConstraint(const std::string &name, Stmt *expr);
+
+        std::shared_ptr<PropertyConstraint> getConstraint(const std::string &constraintName) const;
+
+        const std::vector<std::shared_ptr<PropertyConstraint>> &getConstraints() const;
 
         // ResetProperty
-        Property* getResetProperty() const;
-        void setResetProperty(Property* resetProperty);
+        std::shared_ptr<Property> getResetProperty() const;
+
+        void setResetProperty(std::shared_ptr<Property> resetProperty);
 
         // OperationProperties
-        void addProperty(Property* property);
-        const std::vector<Property*> &getProperties() const;
+        void addProperty(std::shared_ptr<Property> property);
+
+        const std::vector<std::shared_ptr<Property>> &getProperties() const;
 
         // StateMap
         //std::set<PropertyMacro*> getPredecessorStates(PropertyMacro* state);
@@ -73,20 +94,20 @@ namespace SCAM {
 
         std::string name;
 
-        Variable * resetSignal;
+        Variable *resetSignal;
 
-        std::vector<PropertyMacro*> syncSignals;
-        std::vector<PropertyMacro*> notifySignals;
-        std::vector<PropertyMacro*> dpSignals;
-        std::vector<PropertyMacro*> visibleRegisters;
-        std::vector<PropertyMacro*> states;
+        std::vector<std::shared_ptr<PropertyMacro>> syncSignals;
+        std::vector<std::shared_ptr<PropertyMacro>> notifySignals;
+        std::vector<std::shared_ptr<PropertyMacro>> dpSignals;
+        std::vector<std::shared_ptr<PropertyMacro>> visibleRegisters;
+        std::vector<std::shared_ptr<PropertyMacro>> states;
 
-        std::vector<Function*> functions;
+        std::vector<Function *> functions;
 
-        std::vector<PropertyConstraint*> constraints;
+        std::vector<std::shared_ptr<PropertyConstraint>> constraints;
 
-        Property* resetProperty;
-        std::vector<Property*> propertyList;
+        std::shared_ptr<Property> resetProperty;
+        std::vector<std::shared_ptr<Property>> propertyList;
 
         //std::map<PropertyMacro*, std::set<PropertyMacro*>> predecessorStates;
         //std::map<PropertyMacro*, std::set<PropertyMacro*>> successorStates;

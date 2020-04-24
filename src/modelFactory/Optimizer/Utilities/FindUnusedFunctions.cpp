@@ -15,11 +15,11 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBloc
                 stmt->accept(*this);
             }
         }
-        if(block.second->hasIf()){
+        if (block.second->hasIf()) {
             block.second->getTerminator()->accept(*this);
         }
     }
-    if(this->usedFunctionsSet.size()!=this->module->getFunctionMap().size()) {
+    if (this->usedFunctionsSet.size() != this->module->getFunctionMap().size()) {
         for (const auto &function : this->module->getFunctionMap()) {
             if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
                 this->unusedFunctionSet.insert(function.first);
@@ -33,14 +33,16 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBloc
         }
     }
 }
-SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode *> &CFG, SCAM::Module *module): module(module), nodeCFG(CFG)  {
+
+SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode *> &CFG, SCAM::Module *module)
+        : module(module), nodeCFG(CFG) {
 
     for (auto node : this->nodeCFG) {
-            if (auto stmt = node.second->getStmt()) {
-                stmt->accept(*this);
+        if (auto stmt = node.second->getStmt()) {
+            stmt->accept(*this);
         }
     }
-    if(this->usedFunctionsSet.size()!=this->module->getFunctionMap().size()) {
+    if (this->usedFunctionsSet.size() != this->module->getFunctionMap().size()) {
         for (const auto &function : this->module->getFunctionMap()) {
             if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
                 this->unusedFunctionSet.insert(function.first);
@@ -124,8 +126,9 @@ void SCAM::FindUnusedFunctions::visit(struct Return &node) {
 }
 
 void SCAM::FindUnusedFunctions::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
-
+    node.getCondition()->accept(*this);
+    node.getTrueExpr()->accept(*this);
+    node.getFalseExpr()->accept(*this);
 }
 
 

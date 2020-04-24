@@ -20,12 +20,12 @@
 
 namespace SCAM {
 
-    class OptUtilities {
+    class GlobalUtilities {
+
+        GlobalUtilities() = default;
+        ~GlobalUtilities() = default;
 
     public:
-        OptUtilities() = default;
-
-        ~OptUtilities() = default;
 
         static std::string printCFG(const std::map<int, SCAM::CfgBlock *> &CFG);
 
@@ -38,6 +38,10 @@ namespace SCAM {
         static int getRequiredBits(int value);
 
         static int getRequiredBits(unsigned int value);
+
+        static std::vector<std::string> stringSplit(const std::string& str,char delimiter);
+
+        static std::string removeIndentation(const std::string& str);
 
     };
 }

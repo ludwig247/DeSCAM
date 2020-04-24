@@ -35,7 +35,7 @@ SCAM::ParamValuePropagation::ParamValuePropagation(std::map<std::string, SCAM::E
             this->newExpr = nullptr;
             pair.first->getReturnValue()->accept(*this);
             if (this->newExpr) {
-                auto newReturn = new Return(this->newExpr);
+                auto newReturn = new Return(this->newExpr,pair.first->getStmtInfo());
                 tempList.emplace_back(newReturn, newExprVector);
 #ifdef DEBUG_PARAM_VALUE_PROPAGATION
                 std::cout << "new return = " << SCAM::PrintStmt::toString(this->newExpr) << std::endl;
@@ -92,7 +92,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::VariableOperand &node) {
             if (node.getVariable()->isSubVar() && (var->isCompoundType() || var->isArrayType())) {
                 for (auto subVar : var->getSubVarList()) {
                     if (node.getVariable()->getName() == subVar->getName()) {
-                        this->newExpr = new VariableOperand(subVar);
+                        this->newExpr = new VariableOperand(subVar,node.getStmtInfo());
                         return;
                     }
                 }
@@ -134,7 +134,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::Arithmetic &node) {
         return;
     }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -155,7 +155,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::Logical &node) {
         return;
     }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -176,7 +176,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::Relational &node) {
         return;
     }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -197,14 +197,14 @@ void SCAM::ParamValuePropagation::visit(SCAM::Bitwise &node) {
         return;
     }
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
+        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
 void SCAM::ParamValuePropagation::visit(SCAM::Cast &node) {
     node.getSubExpr()->accept(*this);
     if (this->newExpr) {
-        this->newExpr = new Cast(this->newExpr, node.getDataType());
+        this->newExpr = new Cast(this->newExpr, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -224,14 +224,14 @@ void SCAM::ParamValuePropagation::visit(SCAM::FunctionOperand &node) {
         } else { newParamValueMap.insert(std::make_pair(prm.first, prm.second)); }
     }
     if (newParamValueMap != node.getParamValueMap()) {
-        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap);
+        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap,node.getStmtInfo());
     }
 }
 
 void SCAM::ParamValuePropagation::visit(SCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
-        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr);
+        this->newExpr = new ArrayOperand(node.getArrayOperand(), this->newExpr,node.getStmtInfo());
     } else this->newExpr = nullptr;
 }
 
@@ -247,7 +247,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::CompoundExpr &node) {
         } else { newValueMap.insert(std::make_pair(prm.first, prm.second)); }
     }
     if (valueMapChanged) {
-        this->newExpr = new SCAM::CompoundExpr(newValueMap, node.getDataType());
+        this->newExpr = new SCAM::CompoundExpr(newValueMap, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -263,7 +263,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::ArrayExpr &node) {
         } else { newValueMap.insert(std::make_pair(prm.first, prm.second)); }
     }
     if (valueMapChanged) {
-        this->newExpr = new SCAM::ArrayExpr(newValueMap, node.getDataType());
+        this->newExpr = new SCAM::ArrayExpr(newValueMap, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -314,6 +314,20 @@ void SCAM::ParamValuePropagation::visit(SCAM::ParamOperand &node) {
 }
 
 void SCAM::ParamValuePropagation::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+    this->newExpr = nullptr;
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    node.getCondition()->accept(*this);
+    if (this->newExpr) condition = this->newExpr;
+    this->newExpr = nullptr;
+    node.getTrueExpr()->accept(*this);
+    if (this->newExpr) trueExpr = this->newExpr;
+    this->newExpr = nullptr;
+    node.getFalseExpr()->accept(*this);
+    if (this->newExpr) falseExpr = this->newExpr;
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
 }
 

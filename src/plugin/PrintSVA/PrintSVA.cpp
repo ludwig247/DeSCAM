@@ -178,7 +178,7 @@ std::string PrintSVA::dataTypes() {
 }
 
 std::string PrintSVA::signals() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "\n// SYNC AND NOTIFY SIGNALS (1-cycle macros) //\n";
@@ -200,7 +200,7 @@ std::string PrintSVA::signals() {
 }
 
 std::string PrintSVA::registers() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
@@ -216,7 +216,7 @@ std::string PrintSVA::registers() {
 }
 
 std::string PrintSVA::states() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// STATES //\n";
     for (auto state: ps->getStates()) {
@@ -271,7 +271,7 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
 }
 
 std::string PrintSVA::reset_operation() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
        << "\treset_sequence |=>\n";
@@ -290,7 +290,7 @@ std::string PrintSVA::reset_operation() {
 
 std::string PrintSVA::operations() {
 
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 

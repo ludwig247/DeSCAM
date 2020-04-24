@@ -6,13 +6,14 @@
 #define DESCAM_PROPERTYHELPER_H
 
 #include "Property.h"
+#include <memory>
 
 namespace SCAM { namespace HLSPlugin {
 
 class PropertyHelper : public Property {
 
 public:
-    explicit PropertyHelper(Property const& property);
+    explicit PropertyHelper(std::shared_ptr<Property> property);
 
     std::vector<Assignment *> getModifiedCommitmentList();
 

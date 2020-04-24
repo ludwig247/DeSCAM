@@ -16,7 +16,7 @@
 #include "Optimizer/Utilities/FindVariablesAndFunctionsInStatement.h"
 #include "Optimizer/Utilities/DetectCounterVariable.h"
 #include "Optimizer/Utilities/ValueSubstitution.h"
-#include "Optimizer/Utilities/OptUtilities.h"
+#include "GlobalUtilities.h"
 #include <algorithm>
 #include <utility>
 #include <ctgmath>

@@ -26,7 +26,7 @@ TEST_P(OperatorStrengthReduction_Test, reduce_operators_strength) {
                                 << "after operatorStrengthReduction, CFG of module " << module->getName()
                                 << " is empty\n";
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(operatorStrengthReduction.getCFG());
+    std::string CFG_str = SCAM::GlobalUtilities::printCFG(operatorStrengthReduction.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/OperatorStrengthReduction/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

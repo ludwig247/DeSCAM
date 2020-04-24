@@ -3,18 +3,22 @@
 //
 
 #include <NodePeekVisitor.h>
+
+#include <utility>
 #include "ArrayOperand.h"
 
-SCAM::ArrayOperand::ArrayOperand(Variable *arrayVar, SCAM::Expr *idx) :
+SCAM::ArrayOperand::ArrayOperand(Variable *arrayVar, SCAM::Expr *idx, StmtLocationInfo stmtLocationInfo) :
         idx(idx),
         operand(new VariableOperand(arrayVar)),
         Expr(arrayVar->getDataType()->getArrayType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-SCAM::ArrayOperand::ArrayOperand(SCAM::Operand *operand, SCAM::Expr *idx):
+SCAM::ArrayOperand::ArrayOperand(SCAM::Operand *operand, SCAM::Expr *idx, StmtLocationInfo stmtLocationInfo):
         idx(idx),
         operand(operand),
         Expr(operand->getDataType()->getArrayType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     assert(operand != nullptr);
     assert(idx != nullptr);
     assert(operand->getDataType()->isArrayType());

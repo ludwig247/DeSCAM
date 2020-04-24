@@ -3,11 +3,15 @@
 //
 
 #include <PrintStmt.h>
-#include "Expr.h"
 
-SCAM::Expr::Expr(const SCAM::DataType *dataType) :
+#include <utility>
+#include "Expr.h"
+#include "StmtException.h"
+
+SCAM::Expr::Expr(const SCAM::DataType *dataType, StmtLocationInfo stmtLocationInfo) :
         dataType(dataType) {
-    if (dataType == nullptr) throw std::runtime_error("DataType of EXPR is NULL");
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
+    if (dataType == nullptr) throw SCAM::StmtException("DataType of EXPR is NULL",this->stmtLocationInfo);
 }
 
 const SCAM::DataType *SCAM::Expr::getDataType() const {
@@ -22,3 +26,4 @@ std::ostream &SCAM::Expr::print(std::ostream &ostream) const {
     ostream << PrintStmt::toString(this);
     return ostream;
 }
+

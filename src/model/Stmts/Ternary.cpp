@@ -3,14 +3,16 @@
 //
 
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Ternary.h"
 
-SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *falseExpr):
+SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *falseExpr, StmtLocationInfo stmtLocationInfo):
     condition(condition),
     trueExpr(trueExpr),
     falseExpr(falseExpr),
     Expr(trueExpr->getDataType()){
-;
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if(condition == nullptr) throw std::runtime_error("Condition is null");
     if(trueExpr == nullptr) throw std::runtime_error("TrueExpr is null");
     if(falseExpr == nullptr) throw std::runtime_error("FalseExpr is null");

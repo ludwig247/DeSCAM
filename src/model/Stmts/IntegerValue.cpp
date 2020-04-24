@@ -3,11 +3,14 @@
 //
 
 #include "IntegerValue.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::IntegerValue::IntegerValue(int value) :
+SCAM::IntegerValue::IntegerValue(int value, StmtLocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("int")) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     assert(value >= -2147483648 && value <= 2147483647 && "Value is only allowed to be 32bit");
 
 }

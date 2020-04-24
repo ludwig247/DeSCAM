@@ -16,7 +16,7 @@ namespace SCAM {
      */
     class TimePointOperand : public Operand {
     public:
-        explicit TimePointOperand(Timepoint * timepoint);
+        explicit TimePointOperand(Timepoint * timepoint, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         Timepoint *getTimepoint() const;
 

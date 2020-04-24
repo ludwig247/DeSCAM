@@ -56,7 +56,7 @@ namespace SCAM {
                     if ( (*(it + 1))->getId() == ((*it)->getId() + 1) ) {
                         statement = if_statement;
                     } else {
-                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt()));
+                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt(),if_statement->getStmtInfo()),if_statement->getStmtInfo());
                     }
                 }
                 statementsList.push_back(statement);
@@ -91,7 +91,7 @@ namespace SCAM {
                     if ( (*(it + 1))->getId() == ((*it)->getId() + 1) ) {
                         statement = if_statement;
                     } else {
-                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt()));
+                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt(),if_statement->getStmtInfo()),if_statement->getStmtInfo());
                     }
                 }
                 statementsList.push_back(statement);

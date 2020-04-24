@@ -15,7 +15,7 @@ namespace SCAM {
     class Expr : public Stmt {
     public:
         Expr() = delete;
-        explicit Expr(const DataType *dataType);
+        explicit Expr(const DataType *dataType, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
         ~Expr() = default;
 
         const DataType *getDataType() const;

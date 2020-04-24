@@ -212,7 +212,7 @@ void HLS::registerVariables()
     }
 
     for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
-        auto resetValue = getResetValue(notifySignal);
+        auto resetValue = getResetValue(notifySignal.get());
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue.valid ? resetValue.value : "false") << ";\n";
     }

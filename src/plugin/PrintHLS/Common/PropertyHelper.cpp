@@ -8,8 +8,8 @@
 
 using namespace SCAM::HLSPlugin;
 
-PropertyHelper::PropertyHelper(const SCAM::Property& property) :
-    Property(property)
+PropertyHelper::PropertyHelper(std::shared_ptr<Property> property) :
+    Property(*property)
 {
 }
 

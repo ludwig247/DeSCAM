@@ -3,12 +3,14 @@
 //
 
 #include "SectionOperand.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::SectionOperand::SectionOperand(SCAM::Variable *sectionVariable) :
+SCAM::SectionOperand::SectionOperand(SCAM::Variable *sectionVariable, StmtLocationInfo stmtLocationInfo) :
         sectionVariable(sectionVariable),
         Expr(sectionVariable->getDataType()) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 std::string SCAM::SectionOperand::getName() {

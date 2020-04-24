@@ -133,5 +133,4 @@ void SCAM::DetectCounterVariable::visit(SCAM::Ternary &node) {
     node.getCondition()->accept(*this);
     node.getTrueExpr()->accept(*this);
     node.getFalseExpr()->accept(*this);
-
 }

@@ -13,7 +13,7 @@
 #include "ModelGlobal.h"
 #include "VariablesRangeAnalysis.h"
 #include "Optimizer/Utilities/FindVariablesValues.h"
-#include <Optimizer/Utilities/OptUtilities.h>
+#include <GlobalUtilities.h>
 #include <ctgmath>
 #include <utility>
 

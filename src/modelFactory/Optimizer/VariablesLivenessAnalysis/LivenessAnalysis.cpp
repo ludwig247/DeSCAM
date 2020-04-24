@@ -340,6 +340,12 @@ namespace SCAM {
         }
     }
 
+    void LivenessAnalysis::visit(class Ternary &node) {
+        node.getCondition()->accept(*this);
+        node.getTrueExpr()->accept(*this);
+        node.getFalseExpr()->accept(*this);
+    }
+
     void LivenessAnalysis::removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId) {
         auto cfgnode = this->CFG.at(nodeId);
         std::vector<bool> alreadyReplacedPred(this->CFG.at(nodeId)->getSuccessorList().size(), false);
@@ -382,10 +388,5 @@ namespace SCAM {
             predIdx++;
         }
         this->CFG.erase(nodeId);
-    }
-
-    void LivenessAnalysis::visit(class Ternary &node) {
-        throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
-
     }
 }

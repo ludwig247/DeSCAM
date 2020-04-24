@@ -8,7 +8,7 @@
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include <CreateRealCFG.h>
@@ -21,6 +21,7 @@
 #include <OperationFactory.h>
 #include <z3.h>
 #include <PropertyFactory.h>
+#include <FatalError.h>
 
 
 //Constructor
@@ -38,10 +39,11 @@ SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
 
 
 bool SCAM::ModelFactory::preFire() {
-    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
-        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
-    }
-    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
+//    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
+//        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
+//    }
+//    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
+    return !SCAM::Logger::isTerminate();
 }
 
 bool SCAM::ModelFactory::fire() {
@@ -53,6 +55,7 @@ bool SCAM::ModelFactory::fire() {
     ModelGlobal::setModel(model);
 
     //Global variables
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
     this->addGlobalConstants(tu);
 
     //Modules
@@ -98,12 +101,16 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         auto module = new Module(scparModule.first);
         model->addModule(module);
         //Members
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
         this->addVariables(module, scparModule.second);
         //Ports
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
         this->addPorts(module, scparModule.second);
         //Combinational Functions
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
         this->addFunctions(module, scparModule.second);
         //Processe
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
         this->addBehavior(module, scparModule.second);
         //this->addCommunicationFSM(module);
     }
@@ -200,7 +207,6 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
-
     }
     //Output ports
     for (auto &port: findPorts.getOutPortMap()) {
@@ -294,24 +300,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     }
 
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
-
-
-    //Print out error msgs
-    if (ErrorMsg::hasError()) {
-        std::cout << "" << std::endl;
-        std::cout << "======================" << std::endl;
-        std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
-        std::cout << "----------------------" << std::endl;
-        for (auto item: ErrorMsg::getInstance().getErrorList()) {
-
-            std::cout << "- " << item.statement << std::endl;
-            for (auto log: item.errorMsgs) {
-                std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
-
-            }
-        }
-        ErrorMsg::clear();
-    }
+    TERMINATE_IF_FATAL
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
 
     SCAM::CfgNode::node_cnt = 0;
@@ -334,8 +323,6 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
         PropertyFactory propertyFactory(module);
         module->setPropertySuite(propertyFactory.getPropertySuite());
     }
-
-
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module
@@ -381,7 +368,7 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
             module->addVariable(new Variable(variable.first, type));
         } else {
             auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
-            ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module);
+            ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
             //FindInitalValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
             //auto intitalValMap = findInitalValues.getVariableInitialMap();
             //Variable not initialized -> intialize with default value
@@ -409,9 +396,7 @@ bool SCAM::ModelFactory::postFire() {
 
 void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 // Pass 1: Find the necessary information.
-    bool pre = false;
-    pre = preFire();
-    if (!pre) {
+    if (!preFire()) {
         std::cout << "#################################" << std::endl;
         std::cout << "######## Syntax Errors ##########" << std::endl;
         std::cout << "#################################" << std::endl;
@@ -470,18 +455,19 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        if (ErrorMsg::hasError()) {
+        if (Logger::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
             std::cout << "----------------------" << std::endl;
-            for (auto item: ErrorMsg::getInstance().getErrorList()) {
+            /*            for (auto item: Logger::getInstance().getErrorList()) {
                 std::cout << "- " << item.statement << std::endl;
                 for (auto log: item.errorMsgs) {
-                    std::cout << "\t" << "-" << log.first << "- " << log.second << std::endl;
+                    std::cout << "\t" << "-" << log.first << "- " << log.second.first << std::endl;
                 }
             }
-            ErrorMsg::clear();
+            Logger::clear();
+            */
         }
     }
 
@@ -520,10 +506,10 @@ void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
             func.second->setStmtList(functionFactory.getStmtList());
         } catch (std::runtime_error &e) {
 //            std::cout << e.what() << std::endl;
-//            for(auto statement:  ErrorMsg::getErrorList()){
+//            for(auto statement:  Logger::getErrorList()){
 //                std::cout << statement.statement << std::endl;
 //            }
-            ErrorMsg::clear();
+//            Logger::clear();
             this->model->removeGlobalFunction(func.second);
         }
     }
@@ -639,8 +625,3 @@ void SCAM::ModelFactory::removeUnused() {
         }
     }
 }
-
-
-
-
-

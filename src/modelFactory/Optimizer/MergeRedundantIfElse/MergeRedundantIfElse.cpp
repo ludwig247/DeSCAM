@@ -22,6 +22,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
             this->currentIfID = node.first;
             this->currentElseIfID = node.first;
             bool hasElseIfOrElse = false;
+            if(node.second->getSuccessorList().size() < 2) continue;
             auto secondSucc = node.second->getSuccessorList()[1];
             if(!secondSucc){continue;}
             if (secondSucc->hasIf()) {
@@ -116,7 +117,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                             if (ifCondition && elseifcondition) {
                                 auto newCondition = new SCAM::If(
                                         new SCAM::Logical(ifCondition->getConditionStmt(), "or",
-                                                          elseifcondition->getConditionStmt()));
+                                                          elseifcondition->getConditionStmt(),ifCondition->getStmtInfo()),ifCondition->getStmtInfo());
                                 if (newCondition &&
                                     this->blockCFG.find(ifBlock->getBlockID()) != this->blockCFG.end()) {
                                     this->blockCFG.at(ifBlock->getBlockID())->setTerminator(newCondition);
@@ -160,7 +161,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                             if (elseIf1Condition && elseIf2condition) {
                                 auto newCondition = new SCAM::If(
                                         new SCAM::Logical(elseIf1Condition->getConditionStmt(), "or",
-                                                          elseIf2condition->getConditionStmt()));
+                                                          elseIf2condition->getConditionStmt(),elseIf1Condition->getStmtInfo()),elseIf1Condition->getStmtInfo());
                                 if (newCondition &&
                                     this->blockCFG.find(elseifBlock1->getBlockID()) != this->blockCFG.end()) {
                                     this->blockCFG.at(elseifBlock1->getBlockID())->setTerminator(newCondition);

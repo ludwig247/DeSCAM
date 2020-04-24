@@ -3,11 +3,14 @@
 //
 
 #include "UnsignedValue.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::UnsignedValue::UnsignedValue(unsigned int value) :
+SCAM::UnsignedValue::UnsignedValue(unsigned int value, StmtLocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("unsigned")) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     assert(value >= 0 && "Unsigned value only allowed for value >= 0");
     assert(value <= (4294967295) && "Unsigned value only allowed for value <= 2^32-1");
 }

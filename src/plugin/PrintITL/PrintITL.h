@@ -42,7 +42,7 @@ private:
 
     std::string printTemporalExpr(TemporalExpr* temporalExpr);
 
-    std::string printProperty(Property* property);
+    std::string printProperty(std::shared_ptr<Property> property);
 
     std::string macros();
     std::string macrosForHLS();

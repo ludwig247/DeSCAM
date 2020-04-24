@@ -13,7 +13,7 @@ namespace SCAM {
     public:
         Notify() = delete;
 
-        Notify(Port *port);
+        Notify(Port *port, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         virtual ~Notify() = default;
 

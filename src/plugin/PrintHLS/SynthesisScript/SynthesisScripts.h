@@ -17,14 +17,14 @@ namespace SCAM { namespace HLSPlugin { namespace Script {
             class SynthesisScripts {
 
             public:
-                SynthesisScripts(std::shared_ptr<OptimizerHLS>& opt, HLSOption hlsOption);
+                SynthesisScripts(std::shared_ptr<OptimizerHLS> opt, HLSOption hlsOption);
 
                 ~SynthesisScripts() = default;
 
                 std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName);
 
             private:
-                PropertySuite *propertySuite;
+                std::shared_ptr<PropertySuite> propertySuite;
                 SCAM::Module *currentModule;
                 std::string moduleName;
                 std::shared_ptr<OptimizerHLS> optimizer;

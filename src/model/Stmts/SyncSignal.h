@@ -12,7 +12,7 @@ namespace SCAM {
 
     class SyncSignal : public Expr {
     public:
-        SyncSignal(SCAM::Port *port);
+        SyncSignal(SCAM::Port *port, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         Port *getPort() const;
 

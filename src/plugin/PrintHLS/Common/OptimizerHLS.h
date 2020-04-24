@@ -22,7 +22,7 @@ namespace SCAM { namespace HLSPlugin {
     class OptimizerHLS {
 
     public:
-        OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper, Module* module);
+        OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module);
         ~OptimizerHLS() = default;
 
         bool hasOutputReg(DataSignal* dataSignal);

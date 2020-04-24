@@ -11,7 +11,7 @@
 #include "Optimizer/Utilities/FindCfgPaths.h"
 #include "PrintStmt.h"
 #include "Optimizer/Utilities/PropagateConstantValue.h"
-#include "Optimizer/Utilities/OptUtilities.h"
+#include "GlobalUtilities.h"
 
 #define DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
 

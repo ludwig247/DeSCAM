@@ -5,17 +5,19 @@
 #include <PrintStmt.h>
 #include "Cast.h"
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
-SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype) :
+SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype, StmtLocationInfo stmtLocationInfo) :
         Expr(toDatatype),
         expr(expr) {
-    if (expr == nullptr) throw std::runtime_error("Cast: expr is null!");
-    if (expr->getDataType() == toDatatype) throw std::runtime_error("No cast necessary -> same datatype. Remove static_cast");
+    this->stmtLocationInfo = stmtLocationInfo;
+    if (expr == nullptr) throw SCAM::StmtException("Cast: expr is null!",this->stmtLocationInfo);
+    if (expr->getDataType() == toDatatype) throw SCAM::StmtException("No cast necessary -> same datatype. Remove static_cast",this->stmtLocationInfo);
     if (!expr->getDataType()->isUnsigned() && !expr->getDataType()->isInteger()) {
-        throw std::runtime_error("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed");
+        throw SCAM::StmtException("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed",this->stmtLocationInfo);
     }
     if (!toDatatype->isUnsigned() && !toDatatype->isInteger()) {
-        throw std::runtime_error("Cast only to unsigned or int");
+        throw SCAM::StmtException("Cast only to unsigned or int",this->stmtLocationInfo);
     }
 }
 
@@ -38,8 +40,7 @@ bool SCAM::Cast::operator==(const Stmt &other) const {
     auto otherPtr = (const Cast *) &other;
     if (thisPtr->getDataType() != otherPtr->getDataType()) return false;
     if (thisPtr->expr == otherPtr->expr) return true;
-    if (*thisPtr->expr == *otherPtr->expr) return true;
-    return false;
+    return *thisPtr->expr == *otherPtr->expr;
 }
 
 

@@ -9,90 +9,90 @@
 
 #include "BoolValue.h"
 
-void SCAM::CreatePropertySuite::addNotifySignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addNotifySignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     for (auto port: module->getPorts()) {
         auto interface = port.second->getInterface();
         if (interface->isShared()) continue;
         if (interface->isMasterOut() || interface->isBlocking()) {
-            auto pm = new PropertyMacro(port.second->getNotify());
+            auto pm = std::make_shared<PropertyMacro>(port.second->getNotify());
             propertySuite->addNotifySignal(pm);
         }
     }
 
 }
 
-void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     for (auto port: module->getPorts()) {
         auto interface = port.second->getInterface();
         if (interface->isShared()) continue;
         if (!interface->isMaster() && !interface->isSlaveOut()) {
-            PropertyMacro *pm = new PropertyMacro(port.second->getSynchSignal());
+            auto pm = std::make_shared<PropertyMacro> (port.second->getSynchSignal());
             propertySuite->addSyncSignal(pm);
         }
     }
 }
 
-void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     // DP SIGNALS
     for (const auto &port: module->getPorts()) {
         if (port.second->getDataType()->isVoid()) continue;
         //Add port as datapath signal
-        auto pm = new PropertyMacro(port.second->getDataSignal());
+        auto pm = std::make_shared<PropertyMacro>(port.second->getDataSignal());
         propertySuite->addDpSignal(pm);
 
         if (port.second->getDataType()->isCompoundType() || port.second->getDataType()->isArrayType()) {
             //Add all subignals of the compound type
             for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
-                auto sub_macro = new PropertyMacro(port.second->getDataSignal()->getSubVar(subVar.first));
+                auto sub_macro = std::make_shared<PropertyMacro>(port.second->getDataSignal()->getSubVar(subVar.first));
                 propertySuite->addDpSignal(sub_macro);
             }
         }
     }
 }
 
-void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     for (const auto &var: module->getVariableMap()) {
         // Check for Array-Types
         if (var.second->isSubVar() && var.second->getParent()->isArrayType()) {
             // Check if Macro for parent already exists
             Variable *parent = var.second->getParent();
-            PropertyMacro *parentMacro;
+            std::shared_ptr<PropertyMacro> parentMacro;
             //TODO: remove try/Write
             try {
                 parentMacro = propertySuite->findSignal(parent);
             } catch (const std::runtime_error &e) {
                 // If not, add macro for parent
-                parentMacro = new PropertyMacro(parent);
+                parentMacro = std::make_shared<PropertyMacro>(parent);
                 propertySuite->addVisibleRegister(parentMacro);
             }
-            auto pm = new PropertyMacro(var.second);
+            auto pm = std::make_shared<PropertyMacro>(var.second);
             propertySuite->addVisibleRegister(pm);
 
         } else if (var.second->isSubVar()) {
-            auto pm = new PropertyMacro(var.second);
+            auto pm = std::make_shared<PropertyMacro> (var.second);
             propertySuite->addVisibleRegister(pm);
         } else {
-            auto pm = new PropertyMacro(var.second);
+            auto pm = std::make_shared<PropertyMacro> (var.second);
             propertySuite->addVisibleRegister(pm);
         }
     }
 
 }
 
-void SCAM::CreatePropertySuite::addStates(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addStates(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
 
     for (const auto &state: module->getFSM()->getStateMap()) {
         if (state.second->isInit()) continue;
         state.second->setName(state.second->getName());
         auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
-        auto pm = new PropertyMacro(stateVar);
+        auto pm = std::make_shared<PropertyMacro> (stateVar);
         pm->setExpression(new SCAM::BoolValue(true));
         propertySuite->addState(pm);
     }
 
 }
 
-void SCAM::CreatePropertySuite::addFunctions(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addFunctions(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     // FUNCTIONS
     for (const auto &function: module->getFunctionMap()) {
         propertySuite->addFunction(function.second);
@@ -100,18 +100,18 @@ void SCAM::CreatePropertySuite::addFunctions(const SCAM::Module *module, SCAM::P
 
 }
 
-void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addReset(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     for (const auto &state: module->getFSM()->getStateMap()) {
         if (!state.second->isInit()) continue;
         assert((state.second->getOutgoingOperationsList().size() == 1) && "Only one operation allowed to start from init");
-        propertySuite->setResetProperty(new Property("reset", *state.second->getOutgoingOperationsList().begin()));
+        propertySuite->setResetProperty(std::make_shared<Property>("reset", *state.second->getOutgoingOperationsList().begin()));
 
         for (auto operation : state.second->getOutgoingOperationsList()) {
 
             assert((operation->getState()->isInit()) && "Operation should be starting from init state");
             auto t_var = new Timepoint("t");
             auto t = new TimePointOperand(t_var);
-            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
+            std::shared_ptr<PropertyMacro> nextState = propertySuite->findSignal(operation->getNextState()->getName());
             auto nextStateExpr = new TemporalExpr(t, nextState->getOperand());
 
             propertySuite->getResetProperty()->addCommitment(nextStateExpr);
@@ -142,7 +142,7 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *pr
                 if (port.second->getInterface()->isSlaveOut()) continue;
                 if (port.second->getInterface()->isMasterIn()) continue;
 
-                PropertyMacro *signalMacro = propertySuite->findSignal(port.first + "_notify");
+                std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(port.first + "_notify");
                 if (usedPortsList.find(port.second) != usedPortsList.end()) {
                     auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(true)));
                     propertySuite->getResetProperty()->addCommitment(commitment);
@@ -157,7 +157,7 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *pr
 
 }
 
-void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addOperations(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
 
     for (const auto &state : module->getFSM()->getStateMap()) {
         if (state.second->isInit()) continue;
@@ -165,7 +165,7 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
             if (operation->IsWait()) continue;
 
             std::string operationName = operation->getState()->getName() + "_" + std::to_string(operation->getId());
-            auto newProperty = new Property(operationName, operation);
+            auto newProperty = std::make_shared<Property>(operationName, operation);
             newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
             auto t_var = new Timepoint("t");
@@ -194,16 +194,16 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
 
             // TODO: Does it make sense to check for sync signals (inputs)?
             for (auto sync: syncSignals) {
-                PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
+                std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
             for (auto var: variables) {
                 if (var->isConstant()) continue;
-                PropertyMacro *signalMacro = propertySuite->findSignal(var);
+                std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(var);
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
             for (auto dataSig: dataSignals) {
-                PropertyMacro *signalMacro;
+                std::shared_ptr<PropertyMacro> signalMacro;
                 if (dataSig->isSubVar()) {
                     signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
                 } else {
@@ -212,8 +212,8 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
 
-            PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
-            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
+            std::shared_ptr<PropertyMacro> startState = propertySuite->findSignal(operation->getState()->getName());
+            std::shared_ptr<PropertyMacro> nextState = propertySuite->findSignal(operation->getNextState()->getName());
             auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
             auto nextStateExpr = new TemporalExpr(t_end, nextState->getVariableOperand());
             newProperty->addAssumption(startStateExpr);
@@ -290,13 +290,13 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
 
 }
 
-void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addWait(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     for (const auto &state : module->getFSM()->getStateMap()) {
         if (state.second->isInit()) continue;
         for (auto operation : state.second->getOutgoingOperationsList()) {
             if (!operation->IsWait()) continue;
 
-            auto *newProperty = new Property("wait_" + operation->getState()->getName(), operation);
+            auto newProperty = std::make_shared<Property>("wait_" + operation->getState()->getName(), operation);
 
             auto t_var = new Timepoint("t");
             auto t = new TimePointOperand(t_var);
@@ -322,16 +322,16 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
             }
 
             for (auto sync: syncSignals) {
-                PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
+                std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
             for (auto var: variables) {
                 if (var->isConstant()) continue;
-                PropertyMacro *signalMacro = propertySuite->findSignal(var);
+                std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(var);
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
             for (auto dataSig: dataSignals) {
-                PropertyMacro *signalMacro;
+                std::shared_ptr<PropertyMacro> signalMacro;
                 if (dataSig->isSubVar()) {
                     signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
                 } else {
@@ -340,8 +340,8 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
                 newProperty->addFreezeSignal(signalMacro, t_var);
             }
 
-            PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
-            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
+            std::shared_ptr<PropertyMacro> startState = propertySuite->findSignal(operation->getState()->getName());
+            std::shared_ptr<PropertyMacro> nextState = propertySuite->findSignal(operation->getNextState()->getName());
             auto startStateExpr = new TemporalExpr(t, startState->getVariableOperand());
             auto nextStateExpr = new TemporalExpr(t_plus_1, nextState->getVariableOperand());
             newProperty->addAssumption(startStateExpr);
@@ -360,7 +360,7 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
                 if (pI->isMasterIn()) continue;
                 if (pI->isShared()) continue;
 
-                PropertyMacro *signalMacro = propertySuite->findSignal(port.first + "_notify");
+                std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(port.first + "_notify");
                 if ((pI->isBlocking() || pI->isMasterOut()) &&
                     port.second != operation->getNextState()->getCommunicationPort()) { //if NextState is a wait state it will have null_ptr as CommunicationPort
                     auto commitment = new Assignment(signalMacro->getNotifySignal(), new BoolValue(false));
@@ -377,7 +377,7 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
 
 }
 
-void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
+void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
     int cycle_cnt = 0;
     //Find cylces
     TrueOperation trueOperation(module);
@@ -386,7 +386,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 
     for (auto cycle: trueOperation.getCycleMap()) {
 
-        auto newProperty = new Property("cycle_" + std::to_string(cycle_cnt), cycle);
+        auto newProperty = std::make_shared<Property>("cycle_" + std::to_string(cycle_cnt), cycle);
         //===============================
         // Constraints
         //===============================
@@ -419,7 +419,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         //Find all freeze variables for this cycle
         trueOperation.findFreezeVars(cycle);
         for (auto sync: trueOperation.getSyncSignals()) {
-            PropertyMacro *signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
+            std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(sync->getPort()->getName() + "_sync");
             signalMacro->setExpression(sync);
             auto state = trueOperation.getSyncSignalTimepoints().at(sync);
             auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(), "t_" + state->getName());
@@ -430,7 +430,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 //                std::cout << "yes" << std::endl;
 //            }
             if (var->isConstant()) continue;
-            PropertyMacro *signalMacro = propertySuite->findSignal(var);
+            std::shared_ptr<PropertyMacro> signalMacro = propertySuite->findSignal(var);
             signalMacro->setExpression(new VariableOperand(var));
             auto state = trueOperation.getVariablesTimepoints().at(var);
             auto timepoint = CreatePropertySuite::findTimeExpr(newProperty->getTimePoints(), "t_" + state->getName());
@@ -438,7 +438,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
 
         }
         for (auto dataSig: trueOperation.getDataSignals()) {
-            PropertyMacro *signalMacro;
+            std::shared_ptr<PropertyMacro> signalMacro;
             if (dataSig->isSubVar()) {
                 signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
             } else {
@@ -456,7 +456,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
         // Assumptions
         //===============================
         for (auto operation: cycle) {
-            PropertyMacro *startState = propertySuite->findSignal(operation->getState()->getName());
+            std::shared_ptr<PropertyMacro> startState = propertySuite->findSignal(operation->getState()->getName());
             Timepoint *timepoint = findTimeExpr(newProperty->getTimePoints(), "t_" + operation->getState()->getName());
             auto timeExprOperand = new TimePointOperand(timepoint);
             newProperty->addAssumption(new TemporalExpr(timeExprOperand, startState->getVariableOperand()));
@@ -477,7 +477,7 @@ void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SC
             } else timepoint = findTimeExpr(newProperty->getTimePoints(), "t_end");
 
             auto timePointOperand = new TimePointOperand(timepoint);
-            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
+            std::shared_ptr<PropertyMacro> nextState = propertySuite->findSignal(operation->getNextState()->getName());
             newProperty->addCommitment(new TemporalExpr(timePointOperand, nextState->getVariableOperand()));
 
 

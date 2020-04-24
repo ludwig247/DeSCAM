@@ -3,11 +3,13 @@
 //
 
 #include "VariableOperand.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::VariableOperand::VariableOperand(Variable *variable) :
+SCAM::VariableOperand::VariableOperand(Variable *variable, StmtLocationInfo stmtLocationInfo) :
         variable(variable), Operand(variable->getDataType()) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 SCAM::Variable *SCAM::VariableOperand::getVariable() {

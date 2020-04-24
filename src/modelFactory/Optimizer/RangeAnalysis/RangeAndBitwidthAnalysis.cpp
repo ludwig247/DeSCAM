@@ -3,6 +3,7 @@
 //
 #include <Optimizer/Utilities/FindReadVariables.h>
 #include "RangeAndBitwidthAnalysis.h"
+
 /*   Idea:
  *   After initializing the bitwidthMap with their default values, e.g., (bool 1, int 32)
  *   The variableValuesMap is searched to detect counter variables and add them to the counterVariablesSet.
@@ -47,22 +48,22 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
 #endif
     SCAM::VariablesRangeAnalysis vra(this->CFG, this->variablesValuesMap, this->variablesThatHaveReadSet);
     auto deducedBitwidthMapFromVariableRangeAnalysis = vra.getVariableBitWidthMap();
-    for (const auto& variable : deducedBitwidthMapFromVariableRangeAnalysis) {
+    for (const auto &variable : deducedBitwidthMapFromVariableRangeAnalysis) {
         if (this->variableBitWidthMap.at(variable.first) > variable.second) {
             this->variableBitWidthMap.at(variable.first) = variable.second;
         }
     }
 
     //add ranges for compound and array type variables
-    for (const auto& variable : module->getVariableMap()) {
+    for (const auto &variable : module->getVariableMap()) {
         if (variable.second->isCompoundType()) {
             int bitwidth = 0;
             for (auto subVar : variable.second->getSubVarList()) {
                 bitwidth += this->variableBitWidthMap.at(subVar->getFullName());
             }
-            if(this->variableBitWidthMap.find(variable.first)==this->variableBitWidthMap.end()) {
+            if (this->variableBitWidthMap.find(variable.first) == this->variableBitWidthMap.end()) {
                 this->variableBitWidthMap.insert(std::make_pair(variable.first, bitwidth));
-            }else{
+            } else {
                 this->variableBitWidthMap.at(variable.first) = bitwidth;
             }
         } else if (variable.second->isArrayType()) {
@@ -73,16 +74,16 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
                 }
             }
             bitwidth = bitwidth * variable.second->getSubVarList().size();
-            if(this->variableBitWidthMap.find(variable.first)==this->variableBitWidthMap.end()) {
+            if (this->variableBitWidthMap.find(variable.first) == this->variableBitWidthMap.end()) {
                 this->variableBitWidthMap.insert(std::make_pair(variable.first, bitwidth));
-            }else{
+            } else {
                 this->variableBitWidthMap.at(variable.first) = bitwidth;
             }
         }
     }
     std::set<std::string> deletedVariables;
-    for(const auto& pair : this->variableBitWidthMap){
-        if(pair.second ==0){
+    for (const auto &pair : this->variableBitWidthMap) {
+        if (pair.second == 0) {
             deletedVariables.insert(pair.first);
         }
     }
@@ -100,13 +101,14 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
 
     //remove deleted variables from the bitwidth map
     std::map<std::string, int> newVariableBitWidthMap;
-    for(auto variable : this->variableBitWidthMap){
+    for (auto variable : this->variableBitWidthMap) {
         bool foundSubVar = false;
-        bool foundVar = this->variablesValuesMap.find(variable.first) != this->variablesValuesMap.end() || this->variablesThatHaveReadSet.find(variable.first)!=this->variablesThatHaveReadSet.end();
+        bool foundVar = this->variablesValuesMap.find(variable.first) != this->variablesValuesMap.end() ||
+                        this->variablesThatHaveReadSet.find(variable.first) != this->variablesThatHaveReadSet.end();
         auto varMap = this->module->getVariableMap();
-        if(varMap.find(variable.first)!=varMap.end()) {
+        if (varMap.find(variable.first) != varMap.end()) {
             auto var = this->module->getVariable(variable.first);
-            if(var->isCompoundType() || var->isArrayType()) {
+            if (var->isCompoundType() || var->isArrayType()) {
                 for (auto subVari: var->getSubVarList()) {
                     if (this->variablesValuesMap.find(subVari->getFullName()) != this->variablesValuesMap.end() ||
                         this->variablesThatHaveReadSet.find(subVari->getFullName()) !=
@@ -118,13 +120,15 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
                 if (foundVar || foundSubVar) {
                     newVariableBitWidthMap.insert(variable);
                     for (auto subVari: var->getSubVarList()) {
-                    if(this->variableBitWidthMap.find(subVari->getFullName())!=this->variableBitWidthMap.end()){
-                        newVariableBitWidthMap.insert(std::make_pair(subVari->getFullName(),this->variableBitWidthMap.at(subVari->getFullName())));
-                    }
+                        if (this->variableBitWidthMap.find(subVari->getFullName()) != this->variableBitWidthMap.end()) {
+                            newVariableBitWidthMap.insert(std::make_pair(subVari->getFullName(),
+                                                                         this->variableBitWidthMap.at(
+                                                                                 subVari->getFullName())));
+                        }
                     }
                 }
-            }else{
-                if(foundVar){
+            } else {
+                if (foundVar) {
                     newVariableBitWidthMap.insert(variable);
                 }
             }
@@ -195,7 +199,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::BoolValue &node) {
 }
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::EnumValue &node) {
-this->propagatedBitWidth = ceil(log2(node.getDataType()->getEnumValueMap().size()));
+    this->propagatedBitWidth = ceil(log2(node.getDataType()->getEnumValueMap().size()));
 }
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundValue &node) {
@@ -215,7 +219,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Write &node) {
 //    std::cout<< PrintStmt::toString(&node) << std::endl;
     node.getValue()->accept(*this);
     auto port = node.getPort();
-    if(this->propagatedBitWidth == 0) this->propagatedBitWidth = 1;
+    if (this->propagatedBitWidth == 0) this->propagatedBitWidth = 1;
     if (this->writePortBitWidthMap.find(port) != this->writePortBitWidthMap.end()) {
         if (this->writePortBitWidthMap.at(port) < this->propagatedBitWidth) {
             if ((node.getPort()->getDataType()->isUnsigned() ||
@@ -259,13 +263,13 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Arithmetic &node) {
             int lhsMaxVal = pow(lhsPropagatedValue - 1, 2) - 1;
             int rhsMaxVal = pow(rhsPropagatedValue - 1, 2) - 1;
             int rem = lhsMaxVal - (rhsMaxVal * (floor(lhsMaxVal / rhsMaxVal)));
-            int remWidth = SCAM::OptUtilities::getRequiredBits(rem);
+            int remWidth = SCAM::GlobalUtilities::getRequiredBits(rem);
             this->propagatedBitWidth = remWidth;
         } else if (node.getDataType()->getName() == "unsigned") {
             unsigned int lhsMaxVal = pow(lhsPropagatedValue, 2) - 1;
             unsigned int rhsMaxVal = pow(rhsPropagatedValue, 2) - 1;
             unsigned int rem = lhsMaxVal - (rhsMaxVal * (floor(lhsMaxVal / rhsMaxVal)));
-            int remWidth = SCAM::OptUtilities::getRequiredBits(rem);
+            int remWidth = SCAM::GlobalUtilities::getRequiredBits(rem);
             this->propagatedBitWidth = remWidth;
         }
     }
@@ -300,7 +304,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Bitwise &node) {
     } else if (node.getOperation() == ">>") {
         if (node.getDataType()->getName() == "unsigned") {
             this->propagatedBitWidth = lhsPropagatedValue - rhsPropagatedValue;
-        }else{
+        } else {
             this->propagatedBitWidth = 32;
         }
     } else if (node.getOperation() == "<<") {
@@ -315,7 +319,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Cast &node) {
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::FunctionOperand &node) {
     this->propagatedBitWidth = 0;
-    for (const auto& returnval : node.getFunction()->getReturnValueConditionList()) {
+    for (const auto &returnval : node.getFunction()->getReturnValueConditionList()) {
         int returnBitWidth = this->propagatedBitWidth;
         returnval.first->getReturnValue()->accept(*this);
         if (this->propagatedBitWidth < returnBitWidth) {
@@ -326,19 +330,19 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::FunctionOperand &node) {
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayOperand &node) {
     this->propagatedBitWidth = this->variableBitWidthMap.at(node.getArrayOperand()->getOperandName());
-    if(this->propagatedBitWidth != 0){
+    if (this->propagatedBitWidth != 0) {
         this->propagatedBitWidth = this->propagatedBitWidth / node.getArrayOperand()->getDataType()->getArraySize();
     }
 }
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundExpr &node) {
     int bitwidth = 0;
-    for (const auto& val : node.getValueMap()) {
+    for (const auto &val : node.getValueMap()) {
         val.second->accept(*this);
-        if(val.second->getDataType()->isInteger() || val.second->getDataType()->isUnsigned()){
-        if(this->propagatedBitWidth > 32){
-            this->propagatedBitWidth = 32;
-        }
+        if (val.second->getDataType()->isInteger() || val.second->getDataType()->isUnsigned()) {
+            if (this->propagatedBitWidth > 32) {
+                this->propagatedBitWidth = 32;
+            }
         }
         bitwidth += this->propagatedBitWidth;
     }
@@ -347,14 +351,14 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundExpr &node) {
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayExpr &node) {
     int bitwidth = 0;
-    for (const auto& val : node.getValueMap()) {
+    for (const auto &val : node.getValueMap()) {
         val.second->accept(*this);
-        if(val.second->getDataType()->isInteger() || val.second->getDataType()->isUnsigned()){
-            if(this->propagatedBitWidth > 32){
+        if (val.second->getDataType()->isInteger() || val.second->getDataType()->isUnsigned()) {
+            if (this->propagatedBitWidth > 32) {
                 this->propagatedBitWidth = 32;
             }
         }
-        if(this->propagatedBitWidth > bitwidth) {
+        if (this->propagatedBitWidth > bitwidth) {
             bitwidth = this->propagatedBitWidth;
         }
     }
@@ -363,7 +367,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayExpr &node) {
 
 void SCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
 
-    for (const auto& variable : module->getVariableMap()) {
+    for (const auto &variable : module->getVariableMap()) {
         this->nameFullNameMap.insert(std::make_pair(variable.second->getName(), variable.second->getFullName()));
         if (variable.second->getDataType()->isBoolean()) {
             this->variableBitWidthMap.insert(std::make_pair(variable.second->getFullName(), 1));
@@ -381,49 +385,54 @@ void SCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
                 this->variableBitWidthMap.insert(std::make_pair(variable.second->getFullName(), 32));
             }
         } else if (variable.second->isCompoundType() || variable.second->isArrayType()) {
-            int compoundBitwidth =0;
+            int compoundBitwidth = 0;
             for (auto subVar : variable.second->getSubVarList()) {
                 this->nameFullNameMap.insert(std::make_pair(subVar->getName(), subVar->getFullName()));
                 if (subVar->getDataType()->isBoolean()) {
                     this->variableBitWidthMap.insert(std::make_pair(subVar->getFullName(), 1));
-                    compoundBitwidth+=1;
+                    compoundBitwidth += 1;
                 } else if (subVar->isEnumType()) {
                     unsigned int enumBitwidth = ceil(log2(subVar->getDataType()->getEnumValueMap().size()));
                     this->variableBitWidthMap.insert(
                             std::make_pair(subVar->getFullName(), enumBitwidth));
-                    compoundBitwidth+=enumBitwidth;
+                    compoundBitwidth += enumBitwidth;
                 } else if (subVar->getDataType()->isInteger() ||
                            subVar->getDataType()->isUnsigned()) {
                     if (this->variablesThatHaveReadSet.find(variable.first) == this->variablesThatHaveReadSet.end() &&
                         this->variablesValuesMap.find(variable.first) == this->variablesValuesMap.end()) {
                         bool foundSubVar = false;
-                        for(auto subVari: variable.second->getSubVarList()){
-                            if(this->variablesValuesMap.find(subVari->getFullName())!=this->variablesValuesMap.end()){
-                            foundSubVar = true;
-                            break;
+                        for (auto subVari: variable.second->getSubVarList()) {
+                            if (this->variablesValuesMap.find(subVari->getFullName()) !=
+                                this->variablesValuesMap.end()) {
+                                foundSubVar = true;
+                                break;
                             }
                         }
-                        if(foundSubVar) {
+                        if (foundSubVar) {
                             this->variableBitWidthMap.insert(std::make_pair(subVar->getFullName(), 32));
-                            compoundBitwidth+=32;
-                        }else {
+                            compoundBitwidth += 32;
+                        } else {
                             this->variableBitWidthMap.insert(std::make_pair(subVar->getFullName(), 1));
-                            compoundBitwidth+=1;
+                            compoundBitwidth += 1;
                         }
                     } else {
                         this->variableBitWidthMap.insert(std::make_pair(subVar->getFullName(), 32));
-                        compoundBitwidth+=32;
+                        compoundBitwidth += 32;
                     }
                 }
             }
-            this->variableBitWidthMap.insert(std::make_pair(variable.second->getFullName(),compoundBitwidth));
+            this->variableBitWidthMap.insert(std::make_pair(variable.second->getFullName(), compoundBitwidth));
         }
     }
 }
 
 void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
-
+    node.getTrueExpr()->accept(*this);
+    int trueExprPropagatedValue = this->propagatedBitWidth;
+    node.getFalseExpr()->accept(*this);
+    int falseExprPropagatedValue = this->propagatedBitWidth;
+    this->propagatedBitWidth =
+            trueExprPropagatedValue > falseExprPropagatedValue ? trueExprPropagatedValue : falseExprPropagatedValue;
 }
 
 

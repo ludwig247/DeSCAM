@@ -17,7 +17,7 @@ namespace SCAM {
      */
     class SectionOperand : public SCAM::Expr {
     public:
-        SectionOperand(SCAM::Variable *sectionVariable);
+        SectionOperand(SCAM::Variable *sectionVariable, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         std::string getName();
 

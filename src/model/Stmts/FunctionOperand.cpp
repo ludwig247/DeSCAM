@@ -4,26 +4,29 @@
 
 #include <NodePeekVisitor.h>
 #include <PrintStmt.h>
-#include "FunctionOperand.h"
 
-SCAM::FunctionOperand::FunctionOperand(SCAM::Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap) :
+#include <utility>
+#include "FunctionOperand.h"
+#include "StmtException.h"
+
+SCAM::FunctionOperand::FunctionOperand(SCAM::Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap, StmtLocationInfo stmtLocationInfo) :
         paramValueMap(paramValueMap),
         function(function),
         Operand(function->getReturnType()) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (function == nullptr) {
-        throw std::runtime_error("Function is null");
+        throw SCAM::StmtException("Function is null",this->stmtLocationInfo);
     }
     for (auto &&param : paramValueMap) {
         const std::map<std::string, Parameter *> &funcParams = function->getParamMap();
         if (funcParams.find(param.first) == funcParams.end()) {
-            throw std::runtime_error("Param: " + param.first + " is not a parameter of function " + function->getName() + "()");
+            throw SCAM::StmtException("Param: " + param.first + " is not a parameter of function " + function->getName() + "()",this->stmtLocationInfo);
         } else {
             if (funcParams.find(param.first)->second->getDataType() != param.second->getDataType()) {
                 std::string error_message = "-E- Function: " + function->getName() +" Parameter have different datatypes:\n";
                 error_message += "Param names: " + param.first + " : " + PrintStmt::toString(param.second) + "\n";
                 error_message += "Param types: " + funcParams.find(param.first)->second->getDataType()->getName() + " : " + param.second->getDataType()->getName() + "\n";
-                throw std::runtime_error(error_message);
+                throw SCAM::StmtException(error_message,this->stmtLocationInfo);
             }
         }
 

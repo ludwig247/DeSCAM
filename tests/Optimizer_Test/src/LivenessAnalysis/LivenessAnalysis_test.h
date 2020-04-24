@@ -31,7 +31,7 @@ TEST_P(LivenessAnalysis_Test, deleting_dead_assignments) {
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(livenessAnalysis.getCFG());
+    std::string CFG_str = SCAM::GlobalUtilities::printCFG(livenessAnalysis.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/LivenessAnalysis/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

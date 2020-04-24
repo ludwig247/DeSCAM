@@ -171,11 +171,11 @@ namespace SCAM {
         return functionMap.find(name) != functionMap.end();
     }
 
-    PropertySuite *Module::getPropertySuite() const {
+    std::shared_ptr<PropertySuite> Module::getPropertySuite() const {
         return propertySuite;
     }
 
-    void Module::setPropertySuite(PropertySuite *propertySuite) {
+    void Module::setPropertySuite(std::shared_ptr<PropertySuite> propertySuite) {
         Module::propertySuite = propertySuite;
     }
 

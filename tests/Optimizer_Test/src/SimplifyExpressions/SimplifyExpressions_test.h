@@ -28,7 +28,7 @@ TEST_P(SimplifyExpressions_Test, simplify_expressions) {
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(simplifyCFGExpressions.getCFG());
+    std::string CFG_str = SCAM::GlobalUtilities::printCFG(simplifyCFGExpressions.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/SimplifyExpressions/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

@@ -30,7 +30,7 @@ TEST_P(FunctionOptimizer_Test, optimizing_functions) {
                                         << " is empty\n";
 
 
-            std::string CFG_str = SCAM::OptUtilities::printCFG(functionOptimizer.getCFG());
+            std::string CFG_str = SCAM::GlobalUtilities::printCFG(functionOptimizer.getCFG());
             std::string refFilePath =
                     SCAM_HOME"/tests/Optimizer_Test/src/FunctionOptimizer/ref_files/" + module.first +
                     "_out.txt";

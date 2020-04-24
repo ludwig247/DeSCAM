@@ -11,7 +11,7 @@
 namespace SCAM {
     class FunctionOperand : public Operand {
     public:
-        explicit FunctionOperand(Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap);
+        explicit FunctionOperand(Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
         FunctionOperand(FunctionOperand&) = delete;
         FunctionOperand() = delete;
         virtual ~FunctionOperand() = default;

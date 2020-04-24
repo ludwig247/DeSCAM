@@ -13,9 +13,9 @@ namespace SCAM {
  */
     class SectionValue : public ConstValue {
     public:
-        SectionValue(std::string value, const DataType *type);
+        SectionValue(std::string value, const DataType *type, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
-        SectionValue(const ConstValue *value);
+        SectionValue(const ConstValue *value, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         virtual void accept(StmtAbstractVisitor &visitor);
 

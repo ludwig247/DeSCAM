@@ -29,7 +29,7 @@ TEST_P(ReachabilityAnalysis_Test, deleting_unreachable_paths) {
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(reachabilityAnalysis.getCFG());
+    std::string CFG_str = SCAM::GlobalUtilities::printCFG(reachabilityAnalysis.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/ReachabilityAnalysis/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

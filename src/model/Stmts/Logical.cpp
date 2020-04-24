@@ -3,22 +3,26 @@
 //
 
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Logical.h"
 #include "NodePeekVisitor.h"
+#include "StmtException.h"
 
-SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs) :
+SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, StmtLocationInfo stmtLocationInfo) :
         lhs(lhs),
         rhs(rhs),
         operation(operation),
         Expr(lhs->getDataType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (lhs->getDataType() != rhs->getDataType()){
         std::string message = PrintStmt::toString(lhs) +":" + lhs->getDataType()->getName() + " " + operation + " " +  PrintStmt::toString(rhs) + ":" +  rhs->getDataType()->getName() + "\n";
-        throw std::runtime_error(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype");
+        throw SCAM::StmtException(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
     }
 
-    if (lhs->getDataType()->getName() != "bool") throw std::runtime_error("operands must be boolean");
+    if (lhs->getDataType()->getName() != "bool") throw SCAM::StmtException("operands must be boolean",this->stmtLocationInfo);
     if (!(operation == "and" || operation == "nand" || operation == "or" || operation == "nor" || operation == "xor" || operation == "xnor")) {
-        throw std::runtime_error("Logical: unsuported operator");
+        throw SCAM::StmtException("Logical: unsuported operator",this->stmtLocationInfo);
     }
 }
 

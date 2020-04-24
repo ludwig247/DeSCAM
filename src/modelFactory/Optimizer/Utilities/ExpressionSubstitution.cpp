@@ -13,10 +13,10 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Exp
     if (this->oldStmt) {
         stmt->accept(*this);
         if (*stmt == *this->newStmt) {
-            std::cout << "oldExpr " <<  PrintStmt::toString(this->oldExpr) << std::endl;
-            std::cout << "newExpr " <<  PrintStmt::toString(this->newExpr) << std::endl;
+            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
+            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
             std::cout << PrintStmt::toString(this->newStmt) << std::endl;
-        //    throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
+            //    throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
         }
     }
 }
@@ -30,10 +30,10 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Expr *expr, SCAM::Exp
     if (expr) {
         expr->accept(*this);
         if (*expr == *this->propagatedExpr) {
-            std::cout << "oldExpr " <<  PrintStmt::toString(this->oldExpr) << std::endl;
-            std::cout << "newExpr " <<  PrintStmt::toString(this->newExpr) << std::endl;
+            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
+            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
             std::cout << PrintStmt::toString(this->propagatedExpr) << std::endl;
-          //  throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
+            //  throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
         }
     }
 }
@@ -439,8 +439,40 @@ void SCAM::ExpressionSubstitution::visit(SCAM::ArrayExpr &node) {
 }
 
 void SCAM::ExpressionSubstitution::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Compare operator and -Optimize is not allwoed together");
-
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    if (*condition == *this->oldExpr) {
+        condition = this->newExpr;
+    } else {
+        this->propagatedExpr = condition;
+        condition->accept(*this);
+        if (!(*this->propagatedExpr == *condition)) {
+            condition = this->propagatedExpr;
+        }
+    }
+    if (*trueExpr == *this->oldExpr) {
+        trueExpr = this->newExpr;
+    } else {
+        this->propagatedExpr = trueExpr;
+        trueExpr->accept(*this);
+        if (!(*this->propagatedExpr == *trueExpr)) {
+            trueExpr = this->propagatedExpr;
+        }
+    }
+    if (*falseExpr == *this->oldExpr) {
+        falseExpr = this->newExpr;
+    } else {
+        this->propagatedExpr = falseExpr;
+        falseExpr->accept(*this);
+        if (!(*this->propagatedExpr == *falseExpr)) {
+            falseExpr = this->propagatedExpr;
+        }
+    }
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
+    else this->propagatedExpr = &node;
 }
 
 

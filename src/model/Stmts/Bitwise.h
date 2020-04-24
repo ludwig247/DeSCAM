@@ -11,7 +11,7 @@
 namespace SCAM {
     class Bitwise : public Expr {
     public:
-        Bitwise(Expr *lhs, std::string operation, Expr *rhs);
+        Bitwise(Expr *lhs, std::string operation, Expr *rhs, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
 
         //GETTER
         Expr *getRhs();

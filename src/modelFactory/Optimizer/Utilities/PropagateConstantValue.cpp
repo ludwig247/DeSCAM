@@ -11,7 +11,8 @@ namespace SCAM {
             const std::map<int, std::vector<SCAM::CfgNode *>> &allPathsToNodeMap,
             SCAM::Variable *var, int stmtId) :
             allPathsToNodeMap(allPathsToNodeMap),
-            variable(var), numLastAssignments(0), isVarRead(false), stmtId(stmtId), currentNodeId(0),lastAssignmentAlreadyStored(false) {
+            variable(var), numLastAssignments(0), isVarRead(false), stmtId(stmtId), currentNodeId(0),
+            lastAssignmentAlreadyStored(false) {
 
         for (const auto &pathPair: allPathsToNodeMap) {
             variableValueMap.clear();
@@ -136,7 +137,7 @@ namespace SCAM {
                 if (varOp->getVariable()->getParent() != nullptr) {
                     if (varOp->getVariable()->getParent()->getFullName() == this->variable->getFullName()) {
                         addOrSubstituteVariableValue(varOp->getVariable()->getName(), node.getRhs());
-                        if(!this->lastAssignmentAlreadyStored) {
+                        if (!this->lastAssignmentAlreadyStored) {
                             this->lastAssignmentId = this->currentNodeId;
                             this->lastAssignmentAlreadyStored = true;
                         }
@@ -230,7 +231,7 @@ namespace SCAM {
 
 
     void SCAM::PropagateConstantValue::visit(SCAM::Return &node) {
-        throw std::runtime_error("return not expected in the main blockCFG");
+        throw std::runtime_error("return not expected in the module CFG");
     }
 
     SCAM::Expr *PropagateConstantValue::getPropagatedValue() const {
@@ -246,7 +247,7 @@ namespace SCAM {
     }
 
     void PropagateConstantValue::checkIfRhsOfAssignmentIsAVarOp(SCAM::Expr *rhs) {
-        SCAM::FindVariablesAndFunctionsInStatement findVars(rhs,std::set<std::string>{});
+        SCAM::FindVariablesAndFunctionsInStatement findVars(rhs, std::set<std::string>{});
         if (!findVars.getVariablesInStmtSet().empty()) {// a new assignment to the variable from another variable
             this->wasRhsVarOp = true;
             std::set<int> assignmentsIds;
@@ -260,10 +261,5 @@ namespace SCAM {
             this->wasRhsVarOp = false;
             this->rhsVariableAssignmentsIds.clear();
         }
-    }
-
-    void PropagateConstantValue::visit(class Ternary &node) {
-        throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
-
     }
 }

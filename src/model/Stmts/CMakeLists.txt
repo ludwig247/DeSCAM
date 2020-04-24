@@ -39,4 +39,8 @@ add_library(Stmts SHARED
         Wait.cpp
         Peek.cpp
         ArrayExpr.cpp
-        TimePointOperand.cpp Ternary.cpp Ternary.h)
+        TimePointOperand.cpp
+        Ternary.cpp
+        StmtLocationInfo.cpp
+        StmtException.cpp)
+

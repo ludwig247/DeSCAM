@@ -3,19 +3,23 @@
 //
 
 #include <NodePeekVisitor.h>
+
+#include <utility>
 #include "CompoundExpr.h"
+#include "StmtException.h"
 
 
 namespace SCAM {
-    CompoundExpr::CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType) :
+    CompoundExpr::CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, StmtLocationInfo stmtLocationInfo) :
             valueMap(valueMap),
             Expr(dataType) {
-        if (!dataType->isCompoundType()) throw std::runtime_error(dataType->getName() + " is not a compound type");
+        this->stmtLocationInfo = std::move(stmtLocationInfo);
+        if (!dataType->isCompoundType()) throw SCAM::StmtException(dataType->getName() + " is not a compound type",this->stmtLocationInfo);
         for (auto subsig: dataType->getSubVarMap()) {
-            if (valueMap.find(subsig.first) == valueMap.end()) throw std::runtime_error(subsig.first + "is not in the value map");
+            if (valueMap.find(subsig.first) == valueMap.end()) throw SCAM::StmtException(subsig.first + "is not in the value map",this->stmtLocationInfo);
             if (valueMap.find(subsig.first) != valueMap.end()) {
                 if (valueMap.find(subsig.first)->second->getDataType() != subsig.second) {
-                    throw std::runtime_error(subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first);
+                    throw SCAM::StmtException(subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first,this->stmtLocationInfo);
                 }
             }
         }

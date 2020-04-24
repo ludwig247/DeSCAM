@@ -3,11 +3,14 @@
 //
 
 #include "Peek.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::Peek::Peek(SCAM::Port *port) :
+SCAM::Peek::Peek(SCAM::Port *port, StmtLocationInfo stmtLocationInfo) :
         Expr(DataTypes::getDataType("bool")),
         Communication(port, true) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 void SCAM::Peek::accept(SCAM::StmtAbstractVisitor &visitor) {

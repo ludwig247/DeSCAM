@@ -6,6 +6,7 @@
 #define DESCAM_PROPERTYFACTORY_H
 
 #include <Module.h>
+#include <memory>
 
 namespace SCAM{
 
@@ -15,10 +16,10 @@ public:
     explicit PropertyFactory(const Module *module);
     virtual ~PropertyFactory() = default;
 
-    PropertySuite *getPropertySuite() const;
+    std::shared_ptr<PropertySuite> getPropertySuite() const;
 
 private:
-    PropertySuite * propertySuite;
+    std::shared_ptr<PropertySuite> propertySuite;
 
 };
 

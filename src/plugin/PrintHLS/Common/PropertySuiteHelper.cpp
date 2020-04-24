@@ -15,12 +15,12 @@ PropertySuiteHelper::PropertySuiteHelper(PropertySuite const& propertySuite) :
     addWaitProperties();
 }
 
-std::vector<PropertyHelper *> PropertySuiteHelper::getWaitProperties() const
+std::vector<std::shared_ptr<PropertyHelper>> PropertySuiteHelper::getWaitProperties() const
 {
     return waitProperties;
 }
 
-std::vector<PropertyHelper *> PropertySuiteHelper::getOperationProperties() const
+std::vector<std::shared_ptr<PropertyHelper>> PropertySuiteHelper::getOperationProperties() const
 {
     return operationProperties;
 }
@@ -28,8 +28,7 @@ std::vector<PropertyHelper *> PropertySuiteHelper::getOperationProperties() cons
 void PropertySuiteHelper::addOperationProperties() {
     for (const auto& property : getProperties()) {
         if (!property->getOperation()->IsWait()) {
-            auto operationProperty = new PropertyHelper(*property);
-            operationProperties.push_back(operationProperty);
+            operationProperties.push_back(std::make_shared<PropertyHelper>(property));
         }
     }
 }
@@ -37,13 +36,12 @@ void PropertySuiteHelper::addOperationProperties() {
 void PropertySuiteHelper::addWaitProperties() {
     for (const auto& property : getProperties()) {
         if (property->getOperation()->IsWait()) {
-            auto waitProperty = new PropertyHelper(*property);
-            waitProperties.push_back(waitProperty);
+            waitProperties.push_back(std::make_shared<PropertyHelper>(property));
         }
     }
 }
 
-std::vector<SCAM::Assignment *> PropertySuiteHelper::getNotifyStatements(Property* property) const
+std::vector<SCAM::Assignment *> PropertySuiteHelper::getNotifyStatements(std::shared_ptr<Property> property) const
 {
     std::vector<SCAM::Assignment *> assignmentList;
     auto temporalExprs = property->getCommitmentList();

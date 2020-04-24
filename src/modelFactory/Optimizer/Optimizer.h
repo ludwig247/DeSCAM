@@ -26,7 +26,7 @@
 #include "Optimizer/FunctionsOptimizer/FunctionOptimizer.h"
 #include "Optimizer/OperatorStrengthReduction/OperatorStrengthReduction.h"
 #include "RangeAnalysis/RangeAndBitwidthAnalysis.h"
-#include "Optimizer/Utilities/OptUtilities.h"
+#include "GlobalUtilities.h"
 #include <utility>
 
 

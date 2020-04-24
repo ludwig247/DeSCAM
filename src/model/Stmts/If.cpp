@@ -3,10 +3,13 @@
 //
 
 #include "If.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::If::If(SCAM::Expr *conditionStmt) :
+SCAM::If::If(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo) :
         conditionStmt(conditionStmt) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 
 }
 

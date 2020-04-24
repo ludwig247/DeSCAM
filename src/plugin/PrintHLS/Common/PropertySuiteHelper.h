@@ -15,17 +15,17 @@ class PropertySuiteHelper : public PropertySuite {
 public:
     explicit PropertySuiteHelper(PropertySuite const& propertySuite);
 
-    std::vector<PropertyHelper *> getWaitProperties() const;
-    std::vector<PropertyHelper *> getOperationProperties() const;
-    std::vector<Assignment *> getNotifyStatements(Property *property) const;
+    std::vector<std::shared_ptr<PropertyHelper>> getWaitProperties() const;
+    std::vector<std::shared_ptr<PropertyHelper>> getOperationProperties() const;
+    std::vector<Assignment *> getNotifyStatements(std::shared_ptr<Property> property) const;
     std::vector<Assignment *> getResetStatements();
 
 private:
     void addWaitProperties();
     void addOperationProperties();
 
-    std::vector<PropertyHelper *> waitProperties = {};
-    std::vector<PropertyHelper *> operationProperties = {};
+    std::vector<std::shared_ptr<PropertyHelper>> waitProperties = {};
+    std::vector<std::shared_ptr<PropertyHelper>> operationProperties = {};
 };
 
 }}

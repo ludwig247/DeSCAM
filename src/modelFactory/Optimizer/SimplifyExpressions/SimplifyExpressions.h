@@ -12,7 +12,7 @@
 #include "Behavior/CfgNode.h"
 #include "ExprTranslator.h"
 #include <utility>
-#include <Optimizer/Utilities/OptUtilities.h>
+#include <GlobalUtilities.h>
 
 namespace SCAM {
 

@@ -6,23 +6,24 @@
 #define DESCAM_CREATEPROPERTYSUITE_H
 
 #include <Model.h>
+#include <memory>
 
 namespace SCAM{
     class CreatePropertySuite {
     public:
         CreatePropertySuite() = delete;
 
-        static void addNotifySignals(const Module * module,PropertySuite * propertySuite);
-        static void addSyncSignals(const Module * module,PropertySuite * propertySuite);
-        static void addDataSignals(const Module * module,PropertySuite * propertySuite);
-        static void addVisibleRegisters(const Module * module,PropertySuite * propertySuite);
-        static void addStates(const Module * module,PropertySuite * propertySuite);
-        static void addFunctions(const Module * module,PropertySuite * propertySuite);
-        static void addReset(const Module *module, PropertySuite *propertySuite);
-        static void addWait(const Module *module, PropertySuite *propertySuite);
-        static void addOperations(const Module *module, PropertySuite *propertySuite);
+        static void addNotifySignals(const Module * module, std::shared_ptr<PropertySuite>  propertySuite);
+        static void addSyncSignals(const Module * module,std::shared_ptr<PropertySuite>  propertySuite);
+        static void addDataSignals(const Module * module,std::shared_ptr<PropertySuite>  propertySuite);
+        static void addVisibleRegisters(const Module * module,std::shared_ptr<PropertySuite>  propertySuite);
+        static void addStates(const Module * module,std::shared_ptr<PropertySuite>  propertySuite);
+        static void addFunctions(const Module * module,std::shared_ptr<PropertySuite>  propertySuite);
+        static void addReset(const Module *module, std::shared_ptr<PropertySuite> propertySuite);
+        static void addWait(const Module *module, std::shared_ptr<PropertySuite> propertySuite);
+        static void addOperations(const Module *module, std::shared_ptr<PropertySuite> propertySuite);
 
-        static void addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite);
+        static void addTrueOperations(const SCAM::Module *module, std::shared_ptr<PropertySuite> propertySuite);
 
     private:
 

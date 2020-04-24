@@ -3,12 +3,15 @@
 //
 
 #include <DataTypes.h>
+
+#include <utility>
 #include "SyncSignal.h"
 #include "NodePeekVisitor.h"
 
-SCAM::SyncSignal::SyncSignal(SCAM::Port *port) :
+SCAM::SyncSignal::SyncSignal(SCAM::Port *port, StmtLocationInfo stmtLocationInfo) :
         port(port),
         Expr(DataTypes::getDataType("bool")) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
 void SCAM::SyncSignal::accept(SCAM::StmtAbstractVisitor &visitor) {
