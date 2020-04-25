@@ -26,6 +26,8 @@ namespace SCAM {
 
         virtual void visit(class Channel &node) = 0;
 
+        virtual void visit(class PortMapChannel &node) = 0;
+
         virtual void visit(class Interface &node) = 0;
 
         virtual void visit(class Variable &node) = 0;

@@ -123,3 +123,11 @@ void SCAM::ModuleInstance::setChannelConnectionMap(std::map<std::pair<std::strin
 void SCAM::ModuleInstance::setHierChannelConnectionMap(std::map<std::pair<std::string,std::string>, std::pair<std::string,std::string>> hierChannelConnectionMap) {
     this->_hierchannelConnectionMap = std::move(hierChannelConnectionMap);
 }
+
+void SCAM::ModuleInstance::addPortMapChannel(SCAM::PortMapChannel *channel) {
+    this->portMapChannelMap.insert(std::make_pair(channel->getName(), channel));
+}
+
+std::map<std::string, SCAM::PortMapChannel *> SCAM::ModuleInstance::getPortMapChannelMap() {
+    return this->portMapChannelMap;
+}

@@ -180,7 +180,7 @@ namespace SCAM {
         _instanceMap = instanceMap;
     }
 
-    std::map<std::pair<std::string, std::string>, std::string> Module::getInstanceMap() {
+    const std::map<std::pair<std::string, std::string>, std::string> Module::getInstanceMap() const {
         return _instanceMap;
     }
 

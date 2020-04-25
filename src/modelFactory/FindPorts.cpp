@@ -40,7 +40,9 @@ namespace SCAM {
      * sc_port<shared_in_if<TYPE> >
      */
 bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
+
         clang::QualType qualType = fieldDecl->getType();
+
         //Synch: find by name, doesn't have a parameter
         if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
                 qualType.getTypePtr())) {
@@ -76,10 +78,12 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
                 else if (portTemplates.at(0) == "shared_out") {
                     this->outSharedPortMap.insert(std::make_pair(fieldDecl->getNameAsString(), portTemplates.at(1)));
 
-                }
+                } //TODO: be able to distinguish between channel and port decl
                 else if (portTemplates.at(0) == "Shared") {
 
                 } else if (portTemplates.at(0) == "Blocking") {
+
+                } else if (portTemplates.at(0) == "MasterSlave") {
 
                 }else{
                     throw std::runtime_error("Unknown interface: " + portTemplates.at(0));

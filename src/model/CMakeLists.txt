@@ -14,7 +14,7 @@ set(AST_FILES
         Function.cpp
         Parameter.cpp
         VariableTemplate.cpp
-        Timepoint.cpp)
+        Timepoint.cpp PortMapChannel.cpp PortMapChannel.h)
 
 
 add_library(Model SHARED ${AST_FILES})

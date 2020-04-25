@@ -7,10 +7,8 @@
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     this->model = node;
-    std::cout << "Print Model" << std::endl;
     for (auto &module: node->getModules()) {
 
-        std::cout << module.first << std::endl;
         if(!module.second->isStructural()) {
 
             this->module = module.second;

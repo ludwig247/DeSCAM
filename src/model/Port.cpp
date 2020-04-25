@@ -62,4 +62,12 @@ namespace SCAM {
         channel = setchannel;
     }
 
+    void Port::setMapped(bool mapped) {
+        _mapped = mapped;
+    }
+
+    bool Port::getMapped() {
+        return this->_mapped;
+    }
+
 }

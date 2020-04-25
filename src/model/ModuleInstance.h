@@ -6,7 +6,7 @@
 #define SCAM_MODULINSTANCE_H
 
 #include "Channel.h"
-
+#include "PortMapChannel.h"
 
 namespace SCAM {
 
@@ -34,8 +34,11 @@ namespace SCAM {
 
         //Channel
         void addChannel(Channel *channel);
+        void addPortMapChannel(PortMapChannel *channel);
 
         std::map<std::string, Channel *> getChannelMap();
+
+        std::map<std::string, PortMapChannel *> getPortMapChannelMap();
 
         SCAM::Channel *getChannel(SCAM::Port *port); //! Returns the channel that belongs to the port
 
@@ -60,6 +63,7 @@ namespace SCAM {
     private:
         Module *structure; //! Pointing to the structure of the model
         std::map<std::string, SCAM::Channel *> channelMap; //! List of channels bound within this instance
+        std::map<std::string, SCAM::PortMapChannel *> portMapChannelMap; //! List of channels bound within this instance
         std::map<std::string, ModuleInstance *> submoduleInstanceMap; //! Contains all instances of sub-modules instantiated in this module
         std::map<SCAM::Port *, SCAM::Channel *> portChannelMap;
 

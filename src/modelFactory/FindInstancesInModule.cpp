@@ -22,8 +22,9 @@ namespace SCAM {
         std::string instanceName;
         std::string moduleName;
         std::string parentName;
-        //Check if field Decl ist StructureType
-        if ( fieldDecl->getType()->isStructureType()) {
+
+        //Check if field Decl ist StructureType or Class Type -> depends on the Module declaration
+        if ( fieldDecl->getType()->isStructureType() || fieldDecl->getType()->isClassType() ) {
             if (_moduleMap.find(fieldDecl->getType()->getAsCXXRecordDecl()->getName().str()) == _moduleMap.end() ) {
                 //StructType is not a Module
             }

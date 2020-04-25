@@ -27,6 +27,9 @@ private:
     std::map<SCAM::Channel*, unsigned> _xStartMap;
     std::map<SCAM::Channel*, unsigned> _xEndMap;
     std::map<SCAM::Channel*, unsigned> _ChannelYMap;
+    std::map<SCAM::PortMapChannel*, unsigned> _xStartPortMapMap;
+    std::map<SCAM::PortMapChannel*, unsigned> _xEndPortMapMap;
+    std::map<SCAM::PortMapChannel*, unsigned> _ChannelYPortMapMap;
     int _r;
     int _g;
     int _b;
@@ -45,6 +48,9 @@ private:
     unsigned getToPortX(SCAM::Channel* channel);
     unsigned getFromPortX(SCAM::Channel* channel);
 
+    unsigned getLowerPortX(SCAM::PortMapChannel* channel);
+    unsigned getHigherPortX(SCAM::PortMapChannel* channel);
+
     void setHeight(SCAM::ModuleInstance* instance, unsigned height);
     void setWidth(SCAM::ModuleInstance* instance, unsigned width);
     void setX(SCAM::ModuleInstance* instance, unsigned x);
@@ -52,6 +58,14 @@ private:
     void setY(SCAM::Channel* channel, unsigned y);
     void setXStart(SCAM::Channel* channel, unsigned x);
     void setXEnd(SCAM::Channel* channel, unsigned x);
+
+    void setY(SCAM::PortMapChannel* channel, unsigned y);
+    void setXStart(SCAM::PortMapChannel* channel, unsigned x);
+    void setXEnd(SCAM::PortMapChannel* channel, unsigned x);
+
+    unsigned getY(SCAM::PortMapChannel* channel);
+    unsigned getXStart(SCAM::PortMapChannel* channel);
+    unsigned getXEnd(SCAM::PortMapChannel* channel);
 
 };
 

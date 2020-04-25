@@ -46,6 +46,10 @@ namespace SCAM {
 
         void setChannel(Channel * setchannel);
 
+        void setMapped(bool mapped);
+
+        bool getMapped();
+
     private:
 
         Interface *_interface; //! Interface of this port
@@ -53,6 +57,7 @@ namespace SCAM {
         DataSignal *dataSignal;
         Notify *notify;
         Channel* channel;
+        bool _mapped;
 
     };
 

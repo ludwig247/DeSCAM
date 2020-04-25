@@ -87,12 +87,33 @@ bool SCAM::ModelFactory::fire() {
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
+
     //Fill the model with modules(structural describtion)
+    //First add Variables to create DataTypes that may be needed for ports later
     for (auto &scparModule: modules.getModuleMap()) {
-		
         //Module Name
         std::string name = scparModule.first;
 
+        //Module is on the unimportant module list -> skip
+        if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
+            this->unimportantModules.end()) {
+            //Skip this module
+            continue;
+        }
+        std::cout << "############################" << std::endl;
+        std::cout << "Module: " << name << std::endl;
+        std::cout << "############################" << std::endl;
+        auto module = new Module(scparModule.first);
+        module->addRecordDecl(scparModule.second);
+        model->addModule(module);
+        //Members
+        this->addVariables(module, scparModule.second, modules.getModuleMap());
+    }
+
+    for (auto &scparModule: modules.getModuleMap()) {
+
+        //Module Name
+        std::string name = scparModule.first;
         //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
             this->unimportantModules.end()) {
@@ -106,20 +127,14 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
         FindInstancesInModules instances(scparModule.second, modules.getModuleMap());
 
-        //DataTypes::reset();//FIXME:	
-        auto module = new Module(scparModule.first);
-        module->addRecordDecl(scparModule.second);
-        model->addModule(module);
-        //Members
-        this->addVariables(module, scparModule.second, modules.getModuleMap());
-
-
+        //DataTypes::reset();//FIXME:
+        auto module = model->getModules().find(scparModule.first)->second;
         //Ports
-
+        this->addPorts(module, scparModule.second);
 
         if(instances.getInstanceMap().empty() ) {
             module->setStructural(false);
-            this->addPorts(module, scparModule.second);
+
             //Combinational Functions
             //this->addFunctions(module, scparModule.second, modules.getModuleMap());
             //Processe
@@ -174,9 +189,10 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     model->addModuleInstance(topInstance);
     topInstance->setLevel(0);
     topInstance->setID(0);
+    std::cout << "222" << std::endl;
     FindNetlist findNetlist(scmain.getSCMainFunctionDecl(), modules.getModuleMap());
     sc_main->addInstanceMap(findNetlist.getInstanceMap());
-
+    std::cout << "222" << std::endl;
     int currentLevel = 1;
     int id = 1;
 
@@ -212,7 +228,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     topInstance->setChannelConnectionMap(findNetlist.getchannelConnectionMap());
     topInstance->setHierChannelConnectionMap(findNetlist.gethierchannelConnectionMap());
 
-
+    std::cout << "216" << std::endl;
     //Add Instances Top->Down
     int goDeeper = 1;
     while (goDeeper) {
@@ -223,8 +239,10 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
             if (instance->getStructure()->isStructural()) {
                 goDeeper++;
-
                 FindNetlistInModule netinMod(instance->getStructure()->getRecordDecl() , modules.getModuleMap());
+                netinMod.printInstanceMap();
+                netinMod.printChannelConnectionMap();
+                netinMod.printHierChannelConnectionMap();
                 std::string parentModuleName = instance->getStructure()->getName();
                 std::string parentInstanceName = instance->getName();
                 //! <instance_name, sc_module>
@@ -240,19 +258,21 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
                     instance->addSubmoduleInstance(modInstance);
                 }
                 for (auto channel: netinMod.getChannelMap()) {
-
+                    //create new channels and add them to the instance
                     std::string channelName = channel.first;
                     auto newchannel = new Channel(channelName);
                     newchannel->setType(channel.second.first);
                     newchannel->setParentInstance(instance);
                     instance->addChannel(newchannel);
                 }
+                //safe connections for later when all channels are instantiated
                 instance->setChannelConnectionMap(netinMod.getchannelConnectionMap());
                 instance->setHierChannelConnectionMap(netinMod.gethierchannelConnectionMap());
             }
         }
         currentLevel++;
     }
+    std::cout << "258" << std::endl;
     //Instances and Channels have been created and are linked in a tree like structure
     //Now connect instances via the channels
 
@@ -265,30 +285,78 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
                 //! <<instance, port>, channelName>
                 //Search instance in model ( instanceName = channel.first.first)
                 std::string instanceName = channel.first.first;
+
                 ModuleInstance *instance;
                 instance = queue.front()->getSubmoduleInstances().find(channel.first.first)->second;
 
                 if (!instance) { throw std::runtime_error("ModelFactory::addInstances Instance for Channelconnection not found"); }
 
                 std::string channelName = channel.second;
-                //receive current channel
-                Channel *currentChannel = queue.front()->getChannelMap().find(channelName)->second;
-                //Add port to channel
-                //Search search port in instance.module ( portName = channel.first.second )
-                std::string portName = channel.first.second;
-                Port *port = instance->getStructure()->getPorts().find(portName)->second;
+                //If channel is no port
+                if (queue.front()->getStructure()->getPorts().find(channelName) == queue.front()->getStructure()->getPorts().end()) {
+                    //receive current channel
+                    Channel *currentChannel = queue.front()->getChannelMap().find(channelName)->second;
 
-                port->setChannel(currentChannel);
-                //Differ between in/output port
-                std::string direction = port->getInterface()->getDirection();
-                //Bind Port to Channel
-                if (direction == "in") {
-                    currentChannel->setToPort(port);
-                    currentChannel->setToInstance(instance);
-                } else if (direction == "out") {
-                    currentChannel->setFromPort(port);
-                    currentChannel->setFromInstance(instance);
-                } else { throw std::runtime_error("Interface direction not supported"); }
+                    if (currentChannel->getName() != channelName) { throw std::runtime_error("ModelFactory::addInstances Channel for Channelconnection not found"); }
+                    //Add port to channel
+                    //Search search port in instance.module ( portName = channel.first.second )
+                    std::string portName = channel.first.second;
+                    Port *port = instance->getStructure()->getPorts().find(portName)->second;
+                    std::cout << port->getName() << std::endl;
+                    if (port->getName() != portName) { throw std::runtime_error("ModelFactory::addInstances Port for Channelconnection not found");}
+
+                    port->setChannel(currentChannel);
+                    //Differ between in/output port
+                    std::string direction = port->getInterface()->getDirection();
+                    //Bind Port to Channel
+                    if (direction == "in") {
+                        currentChannel->setToPort(port);
+                        currentChannel->setToInstance(instance);
+                    } else if (direction == "out") {
+                        currentChannel->setFromPort(port);
+                        currentChannel->setFromInstance(instance);
+                    } else { throw std::runtime_error("Interface direction not supported"); }
+                    //Port Mapping
+                } else {
+                    std::cout << channel.first.first << " " << channel.first.second << " " << channel.second << std::endl;
+                    //! channel.first.first instance name
+                    //! channel.first.second portname
+                    //! channel.second portname in parent instance
+                    std::string instanceName = channel.first.first;
+
+                    ModuleInstance *instance;
+                    instance = queue.front()->getSubmoduleInstances().find(channel.first.first)->second;
+
+                    if (!instance) { throw std::runtime_error("ModelFactory::addInstances Instance for Channelconnection not found"); }
+
+                    //Create and add new PortMapChannel
+                    std::string channelName = channel.second + "_channel";
+                    auto newchannel = new PortMapChannel(channelName);
+                    newchannel->setParentInstance(queue.front());
+                    queue.front()->addPortMapChannel(newchannel);
+                    //Get Lower Port
+                    std::string lowerportName = channel.first.second;
+                    Port *lowerport = instance->getStructure()->getPorts().find(lowerportName)->second;
+                    if (lowerport->getName() != lowerportName) { throw std::runtime_error("ModelFactory::addInstances Port for Channelconnection not found");}
+                    //Get Higher Port
+                    std::string higherportName = channel.second;
+
+                    Port *higherport = queue.front()->getStructure()->getPorts().find(higherportName)->second;
+                    if (higherport->getName() != higherportName) { throw std::runtime_error("ModelFactory::addInstances Port for Channelconnection not found");}
+
+                    std::cout << higherport->getName() << std::endl;
+                    if (higherport->getInterface()->getDirection() != lowerport->getInterface()->getDirection()) {
+                        throw std::runtime_error("ModelFactory::addInstances illegal PortMap");
+                    }
+                    lowerport->setMapped(true);
+                    higherport->setMapped(true);
+
+                    newchannel->setHigherPort(higherport);
+                    newchannel->setLowerPort(lowerport);
+                    newchannel->setHigherInstance(queue.front());
+                    newchannel->setLowerInstance(instance);
+
+                }
             }
             for(auto channel : queue.front()->getHierChannelConnectionMap()) {
                 //! <<instance, port>, <channelName,channelparentinstance>>
@@ -327,6 +395,24 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
         currentLevel--;
     }
+    std::cout << "334" << std::endl;
+
+    while(currentLevel >= 0) {
+        std::vector<ModuleInstance*> queue = model->getInstancesAtLevel(currentLevel);
+        while (!queue.empty()) {
+            auto module = queue.front()->getStructure();
+            if (module->isStructural()) {
+                PropertyFactory propertyFactory(module);
+                module->setPropertySuite(propertyFactory.getPropertySuite());
+
+            }
+            queue.erase(queue.begin());
+        }
+
+        currentLevel--;
+    }
+
+
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
@@ -335,7 +421,6 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
     //Right now, we are not interested about the direction of the port.
     SCAM::FindPorts findPorts(decl, this->_context);
-
 
     //Add Ports -> requires Name, Interface and DataType
     //RendezVouz

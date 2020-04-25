@@ -53,6 +53,7 @@ namespace SCAM {
             newType->addArray(DataTypes::getDataType(type), size);
 
         } else throw std::runtime_error("Can't analyze datatypes");
+
         //DataTypes::addDataType(newType);
         return newType;
     }

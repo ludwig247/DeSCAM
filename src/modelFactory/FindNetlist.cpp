@@ -35,9 +35,40 @@ namespace SCAM {
 
             channelTemplates.clear();
 
-            if (qualType->isStructureType()) {
+            if (qualType->isStructureType() || qualType->isClassType()) {
                 if (_moduleMap.find(varDecl->getType()->getAsCXXRecordDecl()->getName().str()) == _moduleMap.end() ) {
-                    throw std::runtime_error("Structuretype other than a Module initialized");
+                    //StructType is not a Module and can't be a variable because the module is structural
+                    //So it has to be a channel
+                    //TODO Catch variables and ports;
+                    if (qualType->isStructureType()) {
+                        return true;
+                    }
+                    if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
+                            qualType.getTypePtr())) {
+
+                        //Get name of the template class
+                        std::string templateName;
+                        llvm::raw_string_ostream templateNameStream(templateName);
+                        //Dump name into stream
+                        templateClass->getTemplateName().dump(templateNameStream);
+                        //Get string from stream and add to vector
+                        //TODO beautify
+                        if (templateNameStream.str() == "blocking_in" || templateNameStream.str() == "blocking_out" || templateNameStream.str() == "shared_out") {
+                            return true;
+                        }
+                    }
+
+                    this->recursiveTemplateVisitor(qualType);
+
+                    channelName = varDecl->getName().str();
+                    channelType = channelTemplates.at(0);
+                    channelSignal = channelTemplates.at(1);
+
+                    auto innerEntry = std::pair<std::string, std::string>(channelType, channelSignal);
+                    auto outerEntry = std::pair<std::string, std::pair<std::string, std::string>>(channelName, innerEntry);
+                    this->_channelMap.insert(outerEntry);
+                    //throw std::runtime_error("Structuretype other than a Module initialized");
+
                 } else {
                     instanceName = varDecl->getName().str();
                     moduleName = varDecl->getType()->getAsCXXRecordDecl()->getNameAsString();

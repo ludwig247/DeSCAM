@@ -366,6 +366,10 @@ void PrintSystemC::visit(SCAM::DataSignal &node) {
     throw std::runtime_error("NEVER GO HERE");
 }
 
+void PrintSystemC::visit(SCAM::PortMapChannel &node) {
+    throw std::runtime_error("NEVER GO HERE");
+}
+
 void PrintSystemC::visit(Interface &node) {
     this->ss << "print of Interface is not supported: " << node.getName() << std::endl;
 }

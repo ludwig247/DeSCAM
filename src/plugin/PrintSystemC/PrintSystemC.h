@@ -40,6 +40,7 @@ private:
 
     void visit(DataSignal &node); //not used
     void visit(Channel &node);
+    void visit(PortMapChannel &node);//not used
 
     void visit(Interface &node); //not used
     void visit(Variable &node);

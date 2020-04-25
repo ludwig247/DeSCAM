@@ -9,7 +9,7 @@
 #define standardwidth 100
 #define spacingleft 10
 #define spacingup 10
-#define spacingport 100
+#define spacingport 150
 #define spacingmodule 50
 #define spacingchannel 20
 #define fontsize 10
@@ -43,7 +43,6 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
         }
         iterate.erase(iterate.begin());
     }
-
     //Start from the bottom of the tree to be able to react to dependencies
     //Set  width and height
     int currentLevel = model->getMaxLevel();
@@ -52,13 +51,14 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
         while (!queue.empty()) {
             ModuleInstance* instance = queue.front();
             //increase width for each port
-            increaseWidth(instance, spacingport* instance->getStructure()->getPorts().size());
+            unsigned portwidth = spacingport* instance->getStructure()->getPorts().size();
+            unsigned childwidth = 0;
             //if it is an instance of a structural module increase width by size + spacing
             //increase height by channels
             if (instance->getStructure()->isStructural()) {
                 int maxheight = standardheight;
                 for(auto subinst: instance->getSubmoduleInstances()) {
-                    increaseWidth(instance, getWidth(subinst.second) + spacingmodule);
+                    childwidth += getWidth(subinst.second) + spacingmodule;
                     if (maxheight < getHeight(subinst.second)) {
                         //maxheight = subinst.second->getHeight();
                         maxheight = getHeight(subinst.second);
@@ -66,10 +66,14 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
                 }
                 //increase height by channels
                 unsigned channelnumber = instance->getChannelMap().size();
+                unsigned portmapchannels = instance->getPortMapChannelMap().size();
                 increaseHeight(instance, channelnumber * spacingchannel);
+                increaseHeight(instance, portmapchannels * spacingchannel);
                 increaseHeight(instance, maxheight + spacinghorizontal);
                 //increase height by "biggest" submodule
             }
+            unsigned width = (childwidth > portwidth) ? childwidth : portwidth;
+            increaseWidth(instance, width);
             queue.erase(queue.begin());
         }
         currentLevel--;
@@ -81,13 +85,12 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
 
             ModuleInstance *instance = queue.front();
             unsigned parentY = getY(instance->getParentInstance());
-            unsigned parentChannelLevel = instance->getParentInstance()->getChannelMap().size() * spacingchannel;
+            unsigned parentChannelLevel = instance->getParentInstance()->getChannelMap().size() * spacingchannel + instance->getParentInstance()->getPortMapChannelMap().size() * spacingchannel;
             //at the beginning set Y positions under the channelheight of the parent
             setY(instance, parentY + parentChannelLevel + 5 * spacingup);
             queue.erase(queue.begin());
         }
     }
-
     //adapt Y Positions
     for (int i = 1; i <= model->getMaxLevel(); i++) {
         std::vector<ModuleInstance *> queue = model->getInstancesAtLevel(i);
@@ -95,20 +98,23 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
             ModuleInstance *instance = queue.front();
             for (auto ports: instance->getStructure()->getPorts()) {
                 //See if a port depends on channels outside of the parent instance and lower the position
-                auto channel = ports.second->getChannel();
-                auto channelparent = channel->getParentInstance();
+                if (! ports.second->getMapped()) {
+                    auto channel = ports.second->getChannel();
 
-                if (getY(channelparent) + channelparent->getChannelMap().size()*spacingchannel > getY(instance)) {
-                    for (auto y: instance->getInstanceSiblings(instance)) {
-                        for (auto children: y->getSubmoduleInstances()) {
-                            setY(instance, getY(children.second));
-                            for (auto siblings: instance->getInstanceSiblings(instance)) {
-                                //Bring all siblings exept for the channelparent to the same level
-                                if (siblings->getName() != channelparent->getName()) {
-                                    setY(siblings, getY(children.second));
+                    auto channelparent = channel->getParentInstance();
+
+                    if (getY(channelparent) + channelparent->getChannelMap().size()*spacingchannel > getY(instance)) {
+                        for (auto y: instance->getInstanceSiblings(instance)) {
+                            for (auto children: y->getSubmoduleInstances()) {
+                                setY(instance, getY(children.second));
+                                for (auto siblings: instance->getInstanceSiblings(instance)) {
+                                    //Bring all siblings exept for the channelparent to the same level
+                                    if (siblings->getName() != channelparent->getName()) {
+                                        setY(siblings, getY(children.second));
+                                    }
                                 }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
@@ -116,12 +122,12 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
             queue.erase(queue.begin());
         }
     }
-
     svg::Dimensions dimensions(getWidth(topInstance), getHeight(topInstance));
     svg::Document doc("Plugin.svg", svg::Layout(dimensions, svg::Layout::TopLeft));
 
     std::vector<ModuleInstance *> queue;
     queue.push_back(topInstance);
+
 
     doc << svg::Rectangle(svg::Point(0, 0), getWidth(topInstance), getHeight(topInstance), svg::Fill(svg::Color::Silver), svg::Stroke(2, svg::Color(r(0), g(0), b(0))));
     doc << svg::Text(svg::Point(spacingleft, spacingup), topInstance->getName() , svg::Color::Black, svg::Font(fontsize, "Verdana"));
@@ -154,6 +160,8 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
         }
         queue.erase(queue.begin());
     }
+
+
     //iterate over instances and draw channels
     queue.push_back(topInstance);
     while (!queue.empty()) {
@@ -196,6 +204,55 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
                 doc << svg::Text(svg::Point(i, getY(channel)), channel->getName() , svg::Color::Black, svg::Font(fontsize, "Verdana"));
             }
         }
+        //Draw PortMap Channels
+        for(auto channels: instance->getPortMapChannelMap()) {
+            channelY += spacingchannel;
+            auto channel = channels.second;
+            setY(channel, channelY);
+
+            unsigned toportx = getHigherPortX(channel);
+            unsigned fromportx = getLowerPortX(channel);
+
+            setXStart(channel, toportx);
+            setXEnd(channel, fromportx);
+            if (channel->getLowerPort()->getInterface()->getDirection() == "in") {
+                //Draw triangle to indicate port direction IN
+                doc << (svg::Polygon(svg::Color::Black, svg::Stroke(.5, svg::Color::Black))
+                        << svg::Point(toportx, getY(channel->getHigherInstance()))
+                        << svg::Point(toportx + trianglesize, getY(channel->getHigherInstance()) - trianglesize )
+                        << svg::Point(toportx - trianglesize, getY(channel->getHigherInstance()) - trianglesize ));
+
+                doc << (svg::Polygon(svg::Color::Black, svg::Stroke(.5, svg::Color::Black))
+                        << svg::Point(fromportx, getY(channel->getLowerInstance()))
+                        << svg::Point(fromportx + trianglesize, getY(channel->getLowerInstance()) - trianglesize )
+                        << svg::Point(fromportx - trianglesize, getY(channel->getLowerInstance()) - trianglesize ));
+            } else if (channel->getLowerPort()->getInterface()->getDirection() == "out") {
+                //Draw triangle to indicate port direction OUT
+                doc << (svg::Polygon(svg::Color::Black, svg::Stroke(.5, svg::Color::Black))
+                        << svg::Point(fromportx, getY(channel->getLowerInstance())  - trianglesize)
+                        << svg::Point(fromportx + trianglesize, getY(channel->getLowerInstance()) )
+                        << svg::Point(fromportx - trianglesize, getY(channel->getLowerInstance())));
+
+                doc << (svg::Polygon(svg::Color::Black, svg::Stroke(.5, svg::Color::Black))
+                        << svg::Point(toportx, getY(channel->getHigherInstance())  - trianglesize)
+                        << svg::Point(toportx + trianglesize, getY(channel->getHigherInstance()) )
+                        << svg::Point(toportx - trianglesize, getY(channel->getHigherInstance())));
+            }
+
+            doc << svg::Line(svg::Point(getXStart(channel) , getY(channel) ), svg::Point(getXEnd(channel) , getY(channel)) , svg::Stroke(1, svg::Color::Blue));
+
+            doc << svg::Line(svg::Point( toportx , getY(channel->getHigherInstance()) ), svg::Point( toportx , getY(channel)) , svg::Stroke(1, svg::Color::Blue));
+            doc << svg::Line(svg::Point( fromportx , getY(channel->getLowerInstance()) ), svg::Point(fromportx , getY(channel)) , svg::Stroke(1, svg::Color::Blue));
+
+            //select smaller value for start and larger value for end
+            unsigned start = (toportx < fromportx) ? toportx : fromportx;
+            unsigned end = (toportx > fromportx) ? toportx : fromportx;
+
+            for (unsigned i = start; i < end- channel->getName().length()*10; i+= 6*spacingport) {
+                doc << svg::Text(svg::Point(i, getY(channel)), channel->getName() , svg::Color::Black, svg::Font(fontsize, "Verdana"));
+            }
+        }
+
 
         for (auto children: queue.front()->getSubmoduleInstances()) {
             queue.push_back(children.second);
@@ -203,6 +260,8 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
 
         queue.erase(queue.begin());
     }
+
+
 
     doc.save();
     pluginOutput.insert(std::make_pair("PrintSVG.txt", "Output saved to svg file - Plugin.svg"));
@@ -315,4 +374,58 @@ unsigned PrintSVG::getFromPortX(SCAM::Channel* channel) {
         x += spacingport;
     }
     return x;
+}
+
+unsigned PrintSVG::getHigherPortX(SCAM::PortMapChannel* channel) {
+    unsigned x = getX(channel->getHigherInstance()) + standardwidth;
+
+    for(auto ports: channel->getHigherInstance()->getStructure()->getPorts()) {
+        if (ports.first == channel->getHigherPort()->getName()) {
+            break;
+        }
+        x += spacingport;
+    }
+    return x;
+}
+
+unsigned PrintSVG::getLowerPortX(SCAM::PortMapChannel* channel) {
+    unsigned x = getX(channel->getLowerInstance()) + standardwidth;
+
+    for(auto ports: channel->getLowerInstance()->getStructure()->getPorts()) {
+        if (ports.first == channel->getLowerPort()->getName()) {
+            break;
+        }
+        x += spacingport;
+    }
+    return x;
+}
+
+void PrintSVG::setY(SCAM::PortMapChannel* channel, unsigned y) {
+    if (_ChannelYPortMapMap.find(channel) != _ChannelYPortMapMap.end()) {
+        _ChannelYPortMapMap.erase(_ChannelYPortMapMap.find(channel));
+    }
+    _ChannelYPortMapMap.insert(std::make_pair(channel, y));
+}
+
+void PrintSVG::setXStart(SCAM::PortMapChannel* channel, unsigned x) {
+    if (_xStartPortMapMap.find(channel) != _xStartPortMapMap.end()) {
+        _xStartPortMapMap.erase(_xStartPortMapMap.find(channel));
+    }
+    _xStartPortMapMap.insert(std::make_pair(channel, x));
+}
+void PrintSVG::setXEnd(SCAM::PortMapChannel* channel, unsigned x) {
+    if (_xEndPortMapMap.find(channel) != _xEndPortMapMap.end()) {
+        _xEndPortMapMap.erase(_xEndPortMapMap.find(channel));
+    }
+    _xEndPortMapMap.insert(std::make_pair(channel, x));
+}
+
+unsigned PrintSVG::getY(SCAM::PortMapChannel* channel) {
+    return this->_ChannelYPortMapMap.find(channel)->second;
+}
+unsigned PrintSVG::getXStart(SCAM::PortMapChannel* channel) {
+    return this->_xStartPortMapMap.find(channel)->second;
+}
+unsigned PrintSVG::getXEnd(SCAM::PortMapChannel* channel) {
+    return this->_xEndPortMapMap.find(channel)->second;
 }

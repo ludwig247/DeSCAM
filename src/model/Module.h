@@ -54,7 +54,7 @@ namespace SCAM {
         bool isStructural();
         void setStructural(bool isStructural);
         void addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap);
-        std::map<std::pair<std::string, std::string>, std::string> getInstanceMap();
+        const std::map<std::pair<std::string, std::string>, std::string> getInstanceMap() const;
         clang::CXXRecordDecl * getRecordDecl();
         void addRecordDecl(clang::CXXRecordDecl *recordDecl);
         //Accept

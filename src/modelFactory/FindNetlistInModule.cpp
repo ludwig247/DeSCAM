@@ -27,9 +27,8 @@ namespace SCAM {
     }*/
 
     bool FindNetlistInModule::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
+
         if (_pass == 1) {
-
-
             //Instances of Modules inside Modules are found as a fieldDecl of a Struct Type
             std::string instanceName;
             std::string moduleName;
@@ -39,11 +38,32 @@ namespace SCAM {
             //Check if field Decl ist StructureType
             clang::QualType qualType = fieldDecl->getType();
             channelTemplates.clear();
-            this->recursiveTemplateVisitor(qualType);
+
 
             if (_moduleMap.find(fieldDecl->getType()->getAsCXXRecordDecl()->getName().str()) == _moduleMap.end() ) {
                 //StructType is not a Module and can't be a variable because the module is structural
                 //So it has to be a channel
+                //TODO Catch variables and ports;
+                if (qualType->isStructureType()) {
+                    return true;
+                }
+                if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
+                        qualType.getTypePtr())) {
+
+                    //Get name of the template class
+                    std::string templateName;
+                    llvm::raw_string_ostream templateNameStream(templateName);
+                    //Dump name into stream
+                    templateClass->getTemplateName().dump(templateNameStream);
+                    //Get string from stream and add to vector
+                    //TODO beautify
+                    if (templateNameStream.str() == "blocking_in" || templateNameStream.str() == "blocking_out" || templateNameStream.str() == "shared_out") {
+                        return true;
+                    }
+                }
+
+                this->recursiveTemplateVisitor(qualType);
+
                 channelName = fieldDecl->getName().str();
                 channelType = channelTemplates.at(0);
                 channelSignal = channelTemplates.at(1);
@@ -140,7 +160,7 @@ namespace SCAM {
                 }
             }
         }
-            //Type of port int, bool, struct ...
+       //Type of port int, bool, struct ...
         if (qualType.isCanonical()) {
             this->channelTemplates.push_back(FindNewDatatype::getTypeName(qualType));
         }
