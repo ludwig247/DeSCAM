@@ -13,6 +13,7 @@
 #include "FindGlobal.h"
 #include <OperationFactory.h>
 #include <FatalError.h>
+#include <CreateRealCFG.h>
 
 //Constructor
 SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
@@ -193,6 +194,11 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
     //Create blockCFG for this process
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
     TERMINATE_IF_FATAL
+    SCAM::CfgNode::node_cnt = 0;
+    SCAM::State::state_cnt = 0;
+    SCAM::Operation::operations_cnt = 0;
+    SCAM::CreateRealCFG stmtCFG(cfgFactory.getControlFlowMap());
+    module->setCFG(stmtCFG.getCFG());
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module

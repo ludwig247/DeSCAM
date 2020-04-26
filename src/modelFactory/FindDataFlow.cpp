@@ -103,8 +103,9 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_MulAssign ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_DivAssign ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_RemAssign) {
+            std::string arith_operator = operationName.substr(0,1);
             ASSERT_STMT(this->stmt = new Assignment(this->lhsExpr,
-                                                    new Arithmetic(this->lhsExpr, operationName, this->rhsExpr,
+                                                    new Arithmetic(this->lhsExpr, arith_operator, this->rhsExpr,
                                                                    binaryOpLocationInfo), binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shl) {
             //Special case ... shiftings depends on LHS Datatype

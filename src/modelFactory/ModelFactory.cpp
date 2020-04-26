@@ -302,16 +302,13 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
     TERMINATE_IF_FATAL
     if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
-
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State::state_cnt = 0;
     SCAM::Operation::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
 
     if (!optOptionsSet.empty()) {
-        std::cout << "Warning: Optimizer not in a working state. Please use carfully!" << std::endl;
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
-        //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
         SCAM::OperationFactory operationFactory(opt.getCFG(), module);
         PropertyFactory propertyFactory(module);
@@ -455,20 +452,6 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        if (Logger::hasError()) {
-            std::cout << "" << std::endl;
-            std::cout << "======================" << std::endl;
-            std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
-            std::cout << "----------------------" << std::endl;
-            /*            for (auto item: Logger::getInstance().getErrorList()) {
-                std::cout << "- " << item.statement << std::endl;
-                for (auto log: item.errorMsgs) {
-                    std::cout << "\t" << "-" << log.first << "- " << log.second.first << std::endl;
-                }
-            }
-            Logger::clear();
-            */
-        }
     }
 
 }
