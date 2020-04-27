@@ -1,26 +1,41 @@
 set(EXAMPLE_NAMES "@EXAMPLE_NAMES@")
 set(CURRENT_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
 set(PROJECT "@PROJECT_NAME@")
-message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
+set(OUTPUT_FROM_EACH "")
 
 
 foreach(EXAMPLE_NAME ${EXAMPLE_NAMES})
     set(EXAMPLE_NAME "${EXAMPLE_NAME}_Simulation")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build ../../cmake-build-debug --target ${EXAMPLE_NAME} WORKING_DIRECTORY ${CURRENT_DIR} RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_FILE ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME})
-message(STATUS "EXAMPLE_NAME = ${EXAMPLE_NAME}")
-message(STATUS "RESULT = ${RESULT}, OUTPUT = ${OUTPUT}")
+    execute_process(COMMAND ${CMAKE_COMMAND} --build ../../cmake-build-debug --target ${EXAMPLE_NAME}  WORKING_DIRECTORY ${CURRENT_DIR} RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_FILE ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME})
+#message(STATUS "EXAMPLE_NAME = ${EXAMPLE_NAME}")
+#message(STATUS "RESULT = ${RESULT}, OUTPUT = ${OUTPUT}")
 
 
   #  file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} WARNING_DE REGEX Warnung ENCODING UTF-8)
  #   file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} WARNING_ENG REGEX Warning ENCODING UTF-8)
     file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} ERROR ENCODING UTF-8)
+    string(REPLACE "," "" ERROR "${ERROR}")
+    string(REPLACE "\"" "\\\"" ERROR "${ERROR}")
+    string(REPLACE ";" "\",
+    \"" ERROR "${ERROR}")
 
     if(RESULT EQUAL 0)
-     set(SUCCESS "TRUE")
+     set(SUCCESS "true")
     else()
-     set(SUCCESS "FALSE")
+     set(SUCCESS "false")
     endif()
 
+list(APPEND OUTPUT_FROM_EACH "
+   {
+    \"test-suite\":\"${PROJECT}\",
+    \"test_name\":\"${EXAMPLE_NAME}\",
+    \"Success\":${SUCCESS},
+    \"errors\":[
+    \"${ERROR}\"
+    ]}")
+
+    string(REPLACE ";" "," OUTPUT_FROM_EACH "${OUTPUT_FROM_EACH}")
     configure_file(${CURRENT_DIR}/error.json.in
-            ${CURRENT_DIR}/json_output_files/error_${EXAMPLE_NAME}.json @ONLY)
+            ${CURRENT_DIR}/json_output_files/error_compilation.json @ONLY)
+
 endforeach()

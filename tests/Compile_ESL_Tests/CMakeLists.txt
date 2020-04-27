@@ -13,10 +13,10 @@ add_custom_target(Compile_ESL_Test_Run ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURC
 #add_custom_command(TARGET Compile_ESL_Test_Run POST_BUILD COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake )
 
 get_directory_property(EXAMPLE_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/example/ DEFINITION EXAMPLE_NAMES_LIST)
-foreach(EXAMPLE_NAME ${EXAMPLE_NAMES})
-    set(EXAMPLE_NAME "${EXAMPLE_NAME}_Simulation")
-    set(INCLUDE_NAMES "${INCLUDE_NAMES}${EXAMPLE_NAME}\n")
-endforeach()
+#foreach(EXAMPLE_NAME ${EXAMPLE_NAMES})
+#    set(EXAMPLE_NAME "${EXAMPLE_NAME}_Simulation")
+#    set(INCLUDE_NAMES "${INCLUDE_NAMES}${EXAMPLE_NAME}\n")
+#endforeach()
 
 configure_file (
         "${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake.in"
