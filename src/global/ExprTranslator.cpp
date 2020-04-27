@@ -677,8 +677,16 @@ void SCAM::ExprTranslator::visit(SCAM::DataSignalOperand &node) {
 void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
     //a new variable (int_const or bool_const) is created each time an operand is found
     //this is ok, since z3 automatically sees them as the same operand as long as it has the same name
-    //auto name = (node.getOperandName() + "_function_" + std::to_string(functionOperandMap.size()));
-    auto name = (node.getOperandName() + "_function");
+
+    auto name = PrintStmt::toString(&node);
+    //Does function already exist?
+
+   // auto name = (node.getOperandName() + "_function");
+//    if(this->functionOperandMap.find(name) != this->functionOperandMap.end()){
+//
+//    }
+
+
     if (node.getDataType()->isBuiltInType()) {
         if (node.getDataType() == DataTypes::getDataType("int")) {
             if (bitvector_flag) z3_expr = context->bv_const(name.c_str(), 32);
@@ -691,6 +699,7 @@ void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
             unsigned_flag = true;
 
         } else throw std::runtime_error("Unknown datatype");
+        //TODO: fix case if there is already an entry?
         this->functionOperandMap.insert(std::make_pair(name, &node));
         return;
     }

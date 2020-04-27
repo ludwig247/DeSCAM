@@ -9,6 +9,7 @@ add_subdirectory(Bus)
 #add_subdirectory(I2C)
 #add_subdirectory(Comm_Test_newInterfaces)
 #add_subdirectory(operation-pipeline)
+add_subdirectory(UART_NORDIC)
 
 include(AddExample.cmake)
 
