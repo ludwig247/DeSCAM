@@ -5,6 +5,9 @@
 #include "HLS.h"
 #include "NodePeekVisitor.h"
 #include "PrintFunction.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 using namespace SCAM::HLSPlugin::HLS;
 
@@ -428,7 +431,7 @@ void HLS::visit(Function& node)
     }
     this->ss << ") {\n";
     if (node.getReturnValueConditionList().empty()) {
-        throw std::runtime_error("No return value for function "+node.getName());
+        TERMINATE("No return value for function "+node.getName());
     }
     auto numberOfBranches = node.getReturnValueConditionList().size();
     for (auto& returnValue : node.getReturnValueConditionList()) {

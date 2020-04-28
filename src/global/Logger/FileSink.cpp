@@ -1,5 +1,8 @@
 #include <iostream>
 #include "FileSink.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::FileSink::FileSink(std::string outputDirectory) : outputDirectory(std::move(outputDirectory)) {}
 
@@ -12,7 +15,7 @@ void SCAM::FileSink::print(std::string formattedOutput) {
     int status = stat(this->outputDirectory.c_str(), &st_buf);
     // if outputDirectory is not valid, abort
     if (status == 0 && !S_ISDIR (st_buf.st_mode)) {
-        throw std::runtime_error("The given output directory to the logger sink is not valid");
+        TERMINATE("The given output directory to the logger sink is not valid");
     }
     //If directory doesn't exist, make it
     if (status != 0) {

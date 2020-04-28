@@ -6,6 +6,9 @@
 #include <iostream>
 #include "FindNewDatatype.h"
 #include "FindVariables.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM {
 
@@ -41,9 +44,9 @@ namespace SCAM {
                 } else if (subVarDataType->isEnumType()) {
                     if (FindNewDatatype::isGlobal(var.second)) {
                         DataTypes::addDataType(subVarDataType);
-                    } else throw std::runtime_error("Local enum types in compound not supported");
+                    } else TERMINATE("Local enum types in compound not supported");
                     newType->addSubVar(var.first, subVarDataType);
-                } else throw std::runtime_error("Only built-in and enum type allowed for compound");
+                } else TERMINATE("Only built-in and enum type allowed for compound");
             }
         } else if (type->isConstantArrayType()) {
             newType = new SCAM::DataType(typeName);
@@ -52,7 +55,7 @@ namespace SCAM {
             std::string type = FindNewDatatype::getTypeName(constantArrayType->getElementType());
             newType->addArray(DataTypes::getDataType(type), size);
 
-        } else throw std::runtime_error("Can't analyze datatypes");
+        } else TERMINATE("Can't analyze datatypes");
         //DataTypes::addDataType(newType);
         return newType;
     }
@@ -63,7 +66,7 @@ namespace SCAM {
             if (typeName == "_Bool") return "bool";
             else if (typeName == "int") return "int";
             else if (typeName == "unsigned int") return "unsigned";
-            else throw std::runtime_error("Built-in type: " + typeName + " is not allowed!");
+            else TERMINATE("Built-in type: " + typeName + " is not allowed!");
         } else if (type->isEnumeralType()) {
             const clang::EnumType *enumType = type->getAs<clang::EnumType>();
             return enumType->getDecl()->getName();
@@ -74,7 +77,7 @@ namespace SCAM {
             std::string name = FindNewDatatype::getTypeName(constantArrayType->getElementType());
             std::string size = std::to_string(constantArrayType->getSize().getSExtValue());
             return name + "_" + size;
-        } else throw std::runtime_error("Can't analyze datatype");
+        } else TERMINATE("Can't analyze datatype");
     }
 
     bool FindNewDatatype::isGlobal(const clang::QualType &type) {
@@ -90,6 +93,6 @@ namespace SCAM {
             return isGlobal(constantArrayType->getElementType());
         } else if (type->isBuiltinType()) {
             return true;
-        } else throw std::runtime_error("Can't analyze datatypes");
+        } else TERMINATE("Can't analyze datatypes");
     }
 }

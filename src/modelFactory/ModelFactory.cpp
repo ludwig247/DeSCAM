@@ -37,12 +37,7 @@ SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
     this->unimportantModules.push_back("Testbench");//! Not important for the abstract model:
 }
 
-
 bool SCAM::ModelFactory::preFire() {
-//    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
-//        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
-//    }
-//    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
     return !SCAM::Logger::isTerminate();
 }
 
@@ -55,7 +50,6 @@ bool SCAM::ModelFactory::fire() {
     ModelGlobal::setModel(model);
 
     //Global variables
-    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
     this->addGlobalConstants(tu);
 
     //Modules
@@ -70,13 +64,13 @@ bool SCAM::ModelFactory::fire() {
     return true;
 }
 
-//        /**
-//         * Create Module
-//
-//         * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
-//         * is executed by the module constructor method addModule using the reference to the
-//         * module declaration of the ast
-//        */
+/**
+ * Create Module
+
+ * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
+ * is executed by the module constructor method addModule using the reference to the
+ * module declaration of the ast
+*/
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
@@ -143,7 +137,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 //        //Search for pointer in modul map
         Module *module = model->getModules().find(instance.second)->second;
 //        //In case module is not found -> error!
-        if (!module) { throw std::runtime_error("ModelFactory::addInstances module not found"); }
+        if (!module) { TERMINATE("ModelFactory::addInstances module not found"); }
 //        //Add instance to model
         topInstance->addModuleInstance(new ModuleInstance(instance.first, module));
     }
@@ -182,7 +176,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         } else if (direction == "out") {
             currentChannel->setFromPort(port);
             currentChannel->setFromInstance(instance);
-        } else { throw std::runtime_error("Interface direction not supported"); }
+        } else { TERMINATE("Interface direction not supported"); }
         //Add instance to channel
 
     }
@@ -202,7 +196,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getInPortMap()) {
         Interface *interface = new Interface("blocking", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -212,7 +206,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getOutPortMap()) {
         Interface *interface = new Interface("blocking", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -224,7 +218,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getMasterInPortMap()) {
         Interface *interface = new Interface("master", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -235,7 +229,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getMasterOutPortMap()) {
         Interface *interface = new Interface("master", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -246,7 +240,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getSlaveInPortMap()) {
         Interface *interface = new Interface("slave", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -256,7 +250,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Output ports
     for (auto &port: findPorts.getSlaveOutPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("slave", "out");
@@ -269,7 +263,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Input ports
     for (auto &port: findPorts.getInSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "in");
@@ -280,7 +274,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Output ports
     for (auto &port: findPorts.getOutSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "out");
@@ -295,13 +289,13 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     //Find the process describing the behavior
     SCAM::FindProcess findProcess(decl);
     clang::CXXMethodDecl *methodDecl;
-    if(findProcess.isValidProcess()){
+    if (findProcess.isValidProcess()) {
         methodDecl = findProcess.getProcess();
     }
 
-    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
-    TERMINATE_IF_FATAL
-    if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
+    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
+    TERMINATE_IF_ERROR
+    if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State::state_cnt = 0;
     SCAM::Operation::operations_cnt = 0;
@@ -378,7 +372,7 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
                     initialValue = new UnsignedValue(0);
                 } else if (type->isEnumType()) {
                     initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
-                } else throw std::runtime_error("No initialValue for type " + type->getName());
+                } else TERMINATE("No initialValue for type " + type->getName());
             }
             module->addVariable(new Variable(variable.first, type, initialValue));
         }
@@ -394,9 +388,6 @@ bool SCAM::ModelFactory::postFire() {
 void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 // Pass 1: Find the necessary information.
     if (!preFire()) {
-        std::cout << "#################################" << std::endl;
-        std::cout << "######## Syntax Errors ##########" << std::endl;
-        std::cout << "#################################" << std::endl;
         return;
     } else {
         bool f = fire();
@@ -432,7 +423,7 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
         auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
         if (paramList.size() != paramTypeList.size())
-            throw std::runtime_error("Parameter: # of names and types not equal");
+            TERMINATE("Parameter: # of names and types not equal");
         for (int i = 0; i < paramList.size(); i++) {
             auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
             paramMap.insert(std::make_pair(paramList.at(i), param));
@@ -457,6 +448,8 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
 }
 
 void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
+
     //Find all global functions and variables
     FindGlobal findGlobal(pDecl, _ci);
 
@@ -525,7 +518,7 @@ void SCAM::ModelFactory::removeUnused() {
             for (auto usedVar: ExprVisitor::getUsedVariables(retValCond.first->getReturnValue())) {
                 if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
             }
-            for(auto cond: retValCond.second){
+            for (auto cond: retValCond.second) {
                 for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
                     if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                         removeGlobalFunctions.at(usedFunc) = false;
@@ -568,7 +561,7 @@ void SCAM::ModelFactory::removeUnused() {
                 }
             }
             //Check functions:
-            for(auto func: module.second->getFunctionMap()){
+            for (auto func: module.second->getFunctionMap()) {
                 for (auto retValCond  : func.second->getReturnValueConditionList()) {
                     for (auto usedFunc: ExprVisitor::getUsedFunction(retValCond.first->getReturnValue())) {
                         if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
@@ -578,7 +571,7 @@ void SCAM::ModelFactory::removeUnused() {
                     for (auto usedVar: ExprVisitor::getUsedVariables(retValCond.first->getReturnValue())) {
                         if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
                     }
-                    for(auto cond: retValCond.second){
+                    for (auto cond: retValCond.second) {
                         for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
                             if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                                 removeGlobalFunctions.at(usedFunc) = false;

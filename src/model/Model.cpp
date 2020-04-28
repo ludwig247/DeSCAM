@@ -5,6 +5,9 @@
 
 #include <DataTypes.h>
 #include "Model.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 namespace SCAM {
@@ -41,7 +44,7 @@ namespace SCAM {
 
     void Model::addTopInstance(ModuleInstance *instance) {
         if (this->topInstance != nullptr) {
-            throw std::runtime_error("model::addTopInstance: instance already set, resetting is not possbile");
+            TERMINATE("model::addTopInstance: instance already set, resetting is not possbile");
         }
         this->topInstance = instance;
     }
@@ -55,7 +58,7 @@ namespace SCAM {
     }
 
     void Model::addGlobalVariable(Variable *variable) {
-        if(variable == nullptr) throw std::runtime_error("Passing nullptr to var");
+        if(variable == nullptr) TERMINATE("Passing nullptr to var");
         this->globalVariableMap.insert(std::make_pair(variable->getName(),variable));
     }
 
@@ -72,7 +75,7 @@ namespace SCAM {
     }
 
     void Model::addGlobalFunction(Function * function) {
-        if(function == nullptr) throw std::runtime_error("Passing nullptr as functino");
+        if(function == nullptr) TERMINATE("Passing nullptr as functino");
         this->globalFunctionMap.insert(std::make_pair(function->getName(),function));
     }
 

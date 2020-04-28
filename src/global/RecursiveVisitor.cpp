@@ -4,6 +4,9 @@
 
 #include <stdexcept>
 #include "RecursiveVisitor.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 void SCAM::RecursiveVisitor::visit(struct VariableOperand &node) {
     //LEAF NODE
@@ -51,11 +54,11 @@ void SCAM::RecursiveVisitor::visit(struct If &node) {
 }
 
 void SCAM::RecursiveVisitor::visit(struct SectionOperand &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::RecursiveVisitor::visit(struct SectionValue &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::RecursiveVisitor::visit(struct ITE &node) {

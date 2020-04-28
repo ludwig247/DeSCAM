@@ -3,18 +3,21 @@
 //
 
 #include "Function.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::Function::Function(std::string name, SCAM::DataType *returnType, const std::map<std::string, Parameter *> &paramMap) :
         returnType(returnType),
         paramMap(paramMap),
         AbstractNode(name) {
     if (returnType->isCompoundType()) {
-        throw std::runtime_error(" Function " + name + "() unallowed return type: " + returnType->getName() + " only built-in types allowed");
+        TERMINATE(" Function " + name + "() unallowed return type: " + returnType->getName() + " only built-in types allowed");
     }
 
     for (auto &&param : paramMap) {
         if (param.second == nullptr) {
-            throw std::runtime_error("Parameter " + param.first + " is not initialized");
+            TERMINATE("Parameter " + param.first + " is not initialized");
         }
     }
 }

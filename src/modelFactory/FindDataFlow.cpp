@@ -481,7 +481,7 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
         } else if (auto parent = dynamic_cast<SCAM::FunctionOperand *>(findParentOfSubVar.getExpr())) {
             if (functionMap.find(parent->getOperandName()) != functionMap.end()) {
                 //Assign value
-                throw std::runtime_error("Dont remove ... if never flags ... remove!");
+                TERMINATE("Dont remove ... if never flags ... remove!");
             } else
                 return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
         } else if (auto parent = dynamic_cast<SCAM::ParamOperand *>(findParentOfSubVar.getExpr())) {
@@ -836,7 +836,7 @@ bool SCAM::FindDataFlow::VisitImplicitCastExpr(clang::ImplicitCastExpr *implicit
 }
 
 void SCAM::FindDataFlow::switchPassExpr(SCAM::Expr *expr) {
-    if (expr == nullptr) throw std::runtime_error(" Can't pass a nullptr");
+    if (expr == nullptr) TERMINATE(" Can't pass a nullptr");
 //    std::cout << PrintStmt::toString(expr) << std::endl;
     switch (this->pass) {
         case 0:
@@ -849,7 +849,7 @@ void SCAM::FindDataFlow::switchPassExpr(SCAM::Expr *expr) {
             this->rhsExpr = expr;
             break;
         default:
-            throw std::runtime_error("Pass is out of range");
+            TERMINATE("Pass is out of range");
     }
 }
 
@@ -924,7 +924,7 @@ bool SCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arra
                  * Because a varialbe myArray[index] does not represent a varialbe that is referencable. It depends on the concrete evaluation of [index].
                  * After value propgation it could be possible to translate it back to a conecrete array select, if the value evaluates to be constant.
                  */
-                //throw std::runtime_error("Not implemented");
+                //TERMINATE("Not implemented");
                 return false;
             }
         } else return exitVisitor("Stmt is null", arraySubExprLocationInfo);

@@ -8,6 +8,8 @@
 #include <fstream>
 #include <functional>
 #include "FindOperations.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
 //#define DEBUG_FINDOPERATIONS
@@ -72,7 +74,7 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
 //            std::cout << "ID[" << pathNode->getId() << "] - ";
         std::cout << "\n";
     }
-//    throw std::runtime_error(" YOOOOOO ");
+//    TERMINATE(" YOOOOOO ");
 #endif
 }
 
@@ -93,7 +95,7 @@ void SCAM::FindOperations::checkSanity() {
     }
 
     if(foundBlocking && foundSlaves) {
-        throw std::runtime_error("Module " + this->module->getName() + ": not permitted combination of Blocking and Slave communications");
+        TERMINATE("Module " + this->module->getName() + ": not permitted combination of Blocking and Slave communications");
     }
     this->slaveModule = foundSlaves;
 }
@@ -169,7 +171,7 @@ void SCAM::FindOperations::processCFG() {
                 this->checkForSlaves();// might affect this->new_important_state
                     this->checkForMasters();// might affect this->new_important_state
                     if (this->new_important_state)
-                        throw std::runtime_error("Invalid Coloring: masters can't be colored in a slave module!\n");
+                        TERMINATE("Invalid Coloring: masters can't be colored in a slave module!\n");
             } else
                 this->checkForMasters();// might affect this->new_important_state
         }
@@ -331,7 +333,7 @@ void SCAM::FindOperations::processSpurious(std::vector<SCAM::CfgNode *> spurious
     fileStream.close();
     for (auto node: spuriousPath)
         std::cout << node->printShort();
-    throw std::runtime_error("Invalid Path: A Path without any important statement\n"
+    TERMINATE("Invalid Path: A Path without any important statement\n"
                              "\t\t\tCheck bin/" + this->module->getName() + "_Spurious.dot for more details");
 }
 
@@ -564,5 +566,5 @@ std::string SCAM::FindOperations::printCFG_Spurious(std::vector<SCAM::CfgNode *>
     fileStream.close();
     for (auto sNode: spuriousPath)
         std::cout << sNode->printShort();
-    throw std::runtime_error("Invalid Path: Check bin/" + this->module->getName() + "_Spurious.dot for more details");
+    TERMINATE("Invalid Path: Check bin/" + this->module->getName() + "_Spurious.dot for more details");
 }

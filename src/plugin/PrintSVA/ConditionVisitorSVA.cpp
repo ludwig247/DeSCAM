@@ -3,6 +3,8 @@
 //
 
 #include "ConditionVisitorSVA.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
 void SCAM::ConditionVisitorSVA::visit(SCAM::VariableOperand &node) {
@@ -70,7 +72,7 @@ void SCAM::ConditionVisitorSVA::visit(SCAM::Bitwise &node) {
             this->ss << " | ";
         } else if (node.getOperation() == "^") {
             this->ss << " ^ ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
@@ -89,7 +91,7 @@ void SCAM::ConditionVisitorSVA::visit(SCAM::Cast &node) {
         this->ss << "unsigned'(32'(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed'(32'(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << "))";
 }

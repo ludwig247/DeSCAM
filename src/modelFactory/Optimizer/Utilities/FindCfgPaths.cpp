@@ -4,6 +4,9 @@
 
 #include "FindCfgPaths.h"
 #include "Optimizer/Debug.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM {
 
@@ -121,7 +124,7 @@ namespace SCAM {
                 }
                 if (Path->getPath().empty() || Path->getPath().back()->getId() == 0) { break; }
             } else {
-                throw std::runtime_error("Last node in the path can't be a null pointer");
+                TERMINATE("Last node in the path can't be a null pointer");
             }
         }
     }

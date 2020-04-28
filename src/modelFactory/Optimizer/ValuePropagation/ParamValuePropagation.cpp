@@ -114,7 +114,7 @@ void SCAM::ParamValuePropagation::visit(SCAM::UnaryExpr &node) {
             if (node.getExpr()->getDataType()->isUnsigned()) {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
             } else { this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1)); }
-        } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation());
     }
 }
 

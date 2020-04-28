@@ -172,7 +172,7 @@ namespace SCAM {
                 TernaryOptimizer ternaryOptimizer(stmt,op->getAssumptionsList(),this->module);
                 if (NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt())) {
                     newCommList.push_back(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt()));
-                } else throw std::runtime_error("Commitment has to be a statement");
+                } else TERMINATE("Commitment has to be a statement");
             }
             op->setCommitmentsList(newCommList);
         }
@@ -195,7 +195,7 @@ namespace SCAM {
                 TernaryOptimizer ternaryOptimizer(stmt,this->module);
                 if (ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean()) {
                     newAssumptionList.push_back(ternaryOptimizer.getExpr());
-                } else throw std::runtime_error("Assumption has to be boolean");
+                } else TERMINATE("Assumption has to be boolean");
             }
             op->setAssumptionsList(newAssumptionList);
 

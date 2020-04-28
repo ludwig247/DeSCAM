@@ -88,7 +88,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getInPortMap()) {
         Interface *interface = new Interface("blocking", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -99,7 +99,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getOutPortMap()) {
         Interface *interface = new Interface("blocking", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -111,7 +111,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getMasterInPortMap()) {
         Interface *interface = new Interface("master", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -122,7 +122,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getMasterOutPortMap()) {
         Interface *interface = new Interface("master", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -133,7 +133,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getSlaveInPortMap()) {
         Interface *interface = new Interface("slave", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
@@ -143,7 +143,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     //Output ports
     for (auto &port: findPorts.getSlaveOutPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("slave", "out");
@@ -156,7 +156,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     //Input ports
     for (auto &port: findPorts.getInSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "in");
@@ -167,7 +167,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     //Output ports
     for (auto &port: findPorts.getOutSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "out");
@@ -180,20 +180,20 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
 void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *decl) {
     //Find the process describing the behavior
     SCAM::FindProcess findProcess(decl);
-    if (findProcess.getProcessMap().size() != 1) throw std::runtime_error("Module need exactly 1 process!");
+    if (findProcess.getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
     //Check Proces Type
     auto process = findProcess.getProcessMap().begin();
     //Process name
     std::string processName = process->first;
     if (process->second.second != SCAM::PROCESS_TYPE::THREAD) {
-        throw std::runtime_error(processName + ":Only THREAD allowed as process type");
+        TERMINATE(processName + ":Only THREAD allowed as process type");
     }
 
     //Process declarationinde
     clang::CXXMethodDecl *methodDecl = process->second.first;
     //Create blockCFG for this process
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
-    TERMINATE_IF_FATAL
+    TERMINATE_IF_ERROR
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State::state_cnt = 0;
     SCAM::Operation::operations_cnt = 0;
@@ -245,7 +245,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
                     initialValue = new UnsignedValue(0);
                 } else if (type->isEnumType()) {
                     initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
-                } else throw std::runtime_error("No initialValue for type " + type->getName());
+                } else TERMINATE("No initialValue for type " + type->getName());
             }
             module->addVariable(new Variable(variable.first, type, initialValue));
         }
@@ -282,7 +282,7 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
         auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
         if (paramList.size() != paramTypeList.size())
-            throw std::runtime_error("Parameter: # of names and types not equal");
+            TERMINATE("Parameter: # of names and types not equal");
         for (int i = 0; i < paramList.size(); i++) {
             auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
             paramMap.insert(std::make_pair(paramList.at(i), param));

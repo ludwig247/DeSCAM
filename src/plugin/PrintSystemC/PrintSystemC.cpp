@@ -246,7 +246,7 @@ void PrintSystemC::visit(Channel &node) {
     else if (node.getFromPort()->getInterface()->isShared())
         this->ss << "Shared";
     else
-        throw std::runtime_error("UNKNOWN CHANNEL TYPE");
+        TERMINATE("UNKNOWN CHANNEL TYPE");
 
     this->ss << "<"
              << node.getFromPort()->getDataType()->getName() // should I check if (FromPort<datatype> == ToPort<datatype>) ??
@@ -271,7 +271,7 @@ void PrintSystemC::visit(Variable &node) {
      * */
 
     if (!node.isCompoundType() && node.getInitialValue() == nullptr)
-        throw std::runtime_error("Variable " + node.getName() + " does not have an initial value");
+        TERMINATE("Variable " + node.getName() + " does not have an initial value");
 
     printSpace(this->indent);
     this->ss << node.getDataType()->getName() << " " << node.getName();
@@ -364,7 +364,7 @@ void PrintSystemC::visit(DataType &node) {
 }
 
 void PrintSystemC::visit(SCAM::DataSignal &node) {
-    throw std::runtime_error("NEVER GO HERE");
+    TERMINATE("NEVER GO HERE");
 }
 
 void PrintSystemC::visit(Interface &node) {

@@ -6,7 +6,8 @@
 #include <Logger/Logger.h>
 #include <GlobalUtilities.h>
 #include "CreateInitSection2.h"
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include "CFGFactory.h"
 #include "FindDataFlow.h"
 
@@ -193,7 +194,7 @@ namespace SCAM {
                 if (*succ_it_true != nullptr && *succ_it_false == nullptr) {
                     CfgBlock *cfgNode = this->createCFGNode(block, parent);
                     traverseBlocks(*succ_it_true, cfgNode);
-                } else throw std::runtime_error("Only 1 while(true) for thread-loop allowed! No other while stmts");
+                } else TERMINATE("Only 1 while(true) for thread-loop allowed! No other while stmts");
 
             }
                 //Case 2: Branching with complex if: e.g. (a&&b) -> terminator that is not an ifStmtClass
@@ -224,7 +225,7 @@ namespace SCAM {
                                    falseStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
                             if (this->exprContainedInIf(block, trueSucc)) traverseBlocks(trueSucc, cfgNode);
                             else traverseBlocks(falseSucc, cfgNode);
-                        } else throw std::runtime_error("Missed case here");
+                        } else TERMINATE("Missed case here");
                     }
                         // If one of the succesors is null visit the otherone
                     else if (trueSucc->getTerminator().getStmt() != nullptr &&
@@ -243,10 +244,10 @@ namespace SCAM {
                             std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
                             trueSucc->dump(clangCFG, {}, true);
                         }
-                        //throw std::runtime_error(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
+                        //TERMINATE(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
                     }
 
-                } else throw std::runtime_error("Succ true or false == null");
+                } else TERMINATE("Succ true or false == null");
             }
                 //Case 3: Regular block with terminator if: e.g. (a&&b) -> terminator that is not an ifStmtClass
                 //Is dealt with two blocks, only visit successor that contains the if
@@ -349,7 +350,7 @@ namespace SCAM {
                     succ = currentBlock->getSuccessorList()[1];
                 } else {
                     std::cout << currentBlock->print() << std::endl;
-                    throw std::runtime_error("Empty block with 2 successors, that can't be deleted");
+                    TERMINATE("Empty block with 2 successors, that can't be deleted");
                 }
                 //Replace currentBlock as succesor in predecessors with new successor
                 for (auto pred: currentBlock->getPredecessorList()) {

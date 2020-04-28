@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include "FindSections.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
 SCAM::FindSections::FindSections(clang::CXXRecordDecl *recordDecl):
@@ -25,7 +27,7 @@ bool SCAM::FindSections::VisitEnumDecl(clang::EnumDecl *enumDecl) {
             clang::EnumConstantDecl* enumConstantDecl = *bit;
             std::string name = enumConstantDecl->getNameAsString();
             if(name == "init"){
-                throw std::runtime_error("Init is a reserved Keyword, please use a differnt name for this section");
+                TERMINATE("Init is a reserved Keyword, please use a differnt name for this section");
             }
             this->sectionList.push_back(name);
         }

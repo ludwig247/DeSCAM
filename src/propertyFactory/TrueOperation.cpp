@@ -6,6 +6,9 @@
 #include <ExprVisitor.h>
 #include "TrueOperation.h"
 #include <algorithm>
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::TrueOperation::TrueOperation(SCAM::Module const *module) :
 //stateMap(module->getFSM()->getStateMap()),
@@ -32,7 +35,7 @@ void SCAM::TrueOperation::setRightHook() {
 
 void SCAM::TrueOperation::findCylces(State *current, State *start, const std::vector<const Operation *> &opList) {
     this->loop_detection++;
-    if (this->loop_detection == 0xFFFF - 1) throw std::runtime_error(" loop "); //TODO: show trace of loop
+    if (this->loop_detection == 0xFFFF - 1) TERMINATE(" loop "); //TODO: show trace of loop
     for (auto operation: current->getOutgoingOperationsList()) {
         if (operation->IsWait()) continue;
         auto newOpList = opList;

@@ -7,7 +7,8 @@
 
 #include <vector>
 #include <sstream>
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include "CommandLineParameter.h"
 
 CommandLineParameter::CommandLineParameter() {
@@ -43,7 +44,7 @@ std::map<std::string, bool> &CommandLineParameter::getOptionMap(std::string plug
 void CommandLineParameter::setPluginParameter(std::string parameter, bool value) {
     if (CommandLineParameter::getInstance().plugin_Map.find(parameter) != CommandLineParameter::getInstance().plugin_Map.end()) {
         CommandLineParameter::getInstance().plugin_Map[parameter] = value;
-    } else throw std::runtime_error("Unknown PlugIn: " + parameter);
+    } else TERMINATE("Unknown PlugIn: " + parameter);
 }
 
 void CommandLineParameter::setPluginOptionParameter(std::string pluginName, std::string parameter, bool value) {
@@ -51,7 +52,7 @@ void CommandLineParameter::setPluginOptionParameter(std::string pluginName, std:
         std::map<std::string, bool> t = CommandLineParameter::getInstance().pluginOptions_Map[pluginName];
         if (t.find(parameter) != t.end())
             CommandLineParameter::getInstance().pluginOptions_Map[pluginName][parameter] = value;
-    } else throw std::runtime_error("Unknown Plugin: " + pluginName + " or Option: " + parameter);
+    } else TERMINATE("Unknown Plugin: " + pluginName + " or Option: " + parameter);
 }
 
 void CommandLineParameter::setOptimizeOptionsSet(const std::set<std::string> &optimizeOptionsSet) {

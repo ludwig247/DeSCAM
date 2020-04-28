@@ -5,6 +5,9 @@
 #include "Channel.h"
 #include "Port.h"
 #include "ModuleInstance.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM {
 
@@ -33,7 +36,7 @@ namespace SCAM {
     }
 
     void Channel::setFromPort(Port *port) {
-        if (!port) throw std::runtime_error("setFromPort: Port is null");
+        if (!port) TERMINATE("setFromPort: Port is null");
         if (this->fromPort != nullptr) {
             throw "Channel::setFromPort(Port *port): port already set";
         }
@@ -42,7 +45,7 @@ namespace SCAM {
     }
 
     void Channel::setToPort(Port *port) {
-        if (!port) throw std::runtime_error("setToPort: Port is null");
+        if (!port) TERMINATE("setToPort: Port is null");
         if (this->toPort != nullptr) {
             throw "Channel::setToPort(Port *port): port already set";
         }

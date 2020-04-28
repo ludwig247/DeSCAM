@@ -637,7 +637,7 @@ void PrintModulesCheckers::visit(Variable &node) {
      * */
 
     if (!node.isCompoundType() && node.getInitialValue() == nullptr)
-        throw std::runtime_error("Variable " + node.getName() + " does not have an initial value");
+        TERMINATE("Variable " + node.getName() + " does not have an initial value");
 
     printSpace(this->indent);
     this->ss << node.getDataType()->getName() << " " << node.getName();

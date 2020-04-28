@@ -6,6 +6,9 @@
 #include "FindVariablesValues.h"
 #include "Optimizer/Debug.h"
 #include "FindVariablesAndFunctionsInStatement.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode *> &CFG,
                                                const std::set<std::string>& readVariablesSet) : readVariablesSet(
@@ -27,7 +30,7 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
                         } else if (auto arrayExpression = dynamic_cast<SCAM::ArrayExpr *>(assignment->getRhs())) {
                             addSubVariablesToValuesMap(varOp,arrayExpression->getValueMap());
                         } else {
-                            throw std::runtime_error(
+                            TERMINATE(
                                     "unexpected rhs of an assignment to a compound or array expression");
                         }
                     }

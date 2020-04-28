@@ -7,6 +7,9 @@
 #include <NodePeekVisitor.h>
 #include "ExprVisitor.h"
 #include <regex>
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 //#define DEBUG_PROCESSOPERATIONS
 SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) :
@@ -93,7 +96,7 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
         std::cout << PrintStmt::toString(stmt) << "\n";
     }
     std::cout << "\n\n******************************\n\n";
-//        throw std::runtime_error(" STOP YOOO ");
+//        TERMINATE(" STOP YOOO ");
 #endif
 
 }
@@ -143,7 +146,7 @@ namespace SCAM {
                 selectList.insert(std::make_pair(subVar->getName(), this->find_or_add_variable(subVar->getFullName(), subVarOp)));
             }
             this->newExpr = new ArrayExpr(selectList, node.getDataType(),node.getStmtInfo());
-            //throw std::runtime_error("HELLO");
+            //TERMINATE("HELLO");
         } else {
             this->newExpr = find_or_add_variable(node.getOperandName(), &node);
         }
@@ -170,11 +173,11 @@ namespace SCAM {
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::PortOperand &node) {
-        throw std::runtime_error("ReconstructOperations::PortOperand: Not allowed ");
+        TERMINATE("ReconstructOperations::PortOperand: Not allowed ");
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::TimePointOperand &node) {
-        throw std::runtime_error("ReconstructOperations::TimeExprOperand: Not allowed ");
+        TERMINATE("ReconstructOperations::TimeExprOperand: Not allowed ");
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Assignment &node) {
@@ -200,7 +203,7 @@ namespace SCAM {
                     auto subVar = new VariableOperand(variableOperand->getVariable()->getSubVar(sub.first),node.getLhs()->getStmtInfo());
                     this->variableAssignmentMap.at(subvar_name) = find_or_add_variable(subVar->getOperandName(), subVar);
                 } else {
-                    throw std::runtime_error("ReconstructOperations::Assignment: Unsure3");
+                    TERMINATE("ReconstructOperations::Assignment: Unsure3");
                 }
             }
         } else if (node.getLhs()->getDataType()->isArrayType()) {
@@ -215,7 +218,7 @@ namespace SCAM {
                     auto val = find_or_add_variable(subVar->getOperandName(), subVar);
                     this->variableAssignmentMap.at(subvar_name) = val;
                 } else {
-                    throw std::runtime_error("ReconstructOperations::Assignment: Unsure2");
+                    TERMINATE("ReconstructOperations::Assignment: Unsure2");
                 }
             }
         } else {
@@ -238,7 +241,7 @@ namespace SCAM {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1),node.getStmtInfo());
             } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
 
-        } else throw std::runtime_error("ReconstructOperations::UnaryExpr: Unknown unary operator " + node.getOperation());
+        } else TERMINATE("ReconstructOperations::UnaryExpr: Unknown unary operator " + node.getOperation());
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::While &node) {
@@ -290,7 +293,7 @@ namespace SCAM {
             if (this->newExpr->getDataType()->isCompoundType() || this->newExpr->getDataType()->isArrayType()) {
                 if (auto compoundExpr = NodePeekVisitor::nodePeekCompoundExpr(this->newExpr)) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
-                        //throw std::runtime_error(" asdad ");
+                        //TERMINATE(" asdad ");
                         auto value = compoundExpr->getValueMap().at(subSig->getName());
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = value;
@@ -326,11 +329,11 @@ namespace SCAM {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(subSig->getName());
                     }
-                } else  throw std::runtime_error("ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
+                } else  TERMINATE("ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
             } else if (this->newExpr->getDataType()->isArrayType()) {
                 if (auto arrayExpr = NodePeekVisitor::nodePeekArrayExpr((this->newExpr))) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
-                        //throw std::runtime_error(" asdad ");
+                        //TERMINATE(" asdad ");
                         auto value = arrayExpr->getValueMap().at(subSig->getName());
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = value;
@@ -340,7 +343,7 @@ namespace SCAM {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(subSig->getName());
                     }
-                } else throw std::runtime_error("ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
+                } else TERMINATE("ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
             } else {
                 find_or_add_variable(node.getPort()->getDataSignal()->getName(), new DataSignalOperand(node.getPort()->getDataSignal(),node.getStmtInfo()));
                 this->variableAssignmentMap[node.getPort()->getDataSignal()->getName()] = this->newExpr;// this is the correct assignment, right?
@@ -363,7 +366,7 @@ namespace SCAM {
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::ITE &node) {
-        throw std::runtime_error("ReconstructOperations::ITE: ITE not allowed");
+        TERMINATE("ReconstructOperations::ITE: ITE not allowed");
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Arithmetic &node) {
@@ -459,10 +462,10 @@ namespace SCAM {
                         newParamMap.insert(std::make_pair(newParam->getName(), newParam));
                         newParamValueMap.insert(std::make_pair(newParam->getName(), subVar.second));
                     }
-                } else throw std::runtime_error("NOT IMPLEMENTED");
+                } else TERMINATE("NOT IMPLEMENTED");
 
             } else if (param.second->getDataType()->isArrayType()) {
-                throw std::runtime_error("NOT IMPLEMENTED");
+                TERMINATE("NOT IMPLEMENTED");
             } else {
                 SCAM::Parameter *newParam = new SCAM::Parameter(param.first, (SCAM::DataType *) param.second->getDataType());
                 newParamMap.insert(std::make_pair(newParam->getName(), newParam));
@@ -518,13 +521,13 @@ namespace SCAM {
 
     void SCAM::ReconstructOperations::visit(SCAM::Return &node) {
         node.getReturnValue()->accept(*this);
-        if (this->returnValue != nullptr) throw std::runtime_error("Current path has two return values");
+        if (this->returnValue != nullptr) TERMINATE("Current path has two return values");
         this->returnValue = new Return(this->newExpr,node.getStmtInfo());
 
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Notify &node) {
-        throw std::runtime_error("ReconstructOperations::Notify: Not implemented");
+        TERMINATE("ReconstructOperations::Notify: Not implemented");
     }
 
     DataSignal *ReconstructOperations::reconstructArrayVar(Operand *operand) {

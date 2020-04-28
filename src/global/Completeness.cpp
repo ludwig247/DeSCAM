@@ -6,6 +6,9 @@
 #include <OperationOptimizations/ConditionOptimizer2.h>
 #include "Completeness.h"
 #include "ExprTranslator.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 /**
  * 1) builds an smt with a conjunction of each assumption of each operation

@@ -5,6 +5,9 @@
 
 #include <assert.h>
 #include "PrintStmt.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 void SCAM::PrintStmt::visit(VariableOperand &node) {
@@ -14,7 +17,7 @@ void SCAM::PrintStmt::visit(VariableOperand &node) {
             this->ss << node.getVariable()->getParent()->getName() << "." << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "[" << node.getVariable()->getName() << "]";
-        } else throw std::runtime_error("Unknown Type for SubVar");
+        } else TERMINATE("Unknown Type for SubVar");
     } else {
         this->ss << node.getVariable()->getName();
     }
@@ -151,7 +154,7 @@ void SCAM::PrintStmt::visit(Read &node) {
     } else if (node.isShared()) {
         this->ss << ".get(";
         node.getVariableOperand()->accept(*this);
-    } else throw std::runtime_error("Unknown interface: " + node.getPort()->getInterface()->getName());
+    } else TERMINATE("Unknown interface: " + node.getPort()->getInterface()->getName());
     this->ss << ")";
 }
 
@@ -179,7 +182,7 @@ void SCAM::PrintStmt::visit(Write &node) {
     } else if (node.isShared()) {
         this->ss << ".set(";
         node.getValue()->accept(*this);
-    } else throw std::runtime_error("Unknown interface: " + node.getPort()->getInterface()->getName());
+    } else TERMINATE("Unknown interface: " + node.getPort()->getInterface()->getName());
     this->ss << ")";
 }
 

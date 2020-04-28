@@ -68,7 +68,7 @@ std::string PrintTrueOperation::functions() {
         ss << ") : " << convertDataType(function.second->getReturnType()->getName()) << " :=\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto branchNum = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";
@@ -818,7 +818,7 @@ std::string PrintTrueOperation::pipelined() {
 
 void PrintTrueOperation::findCylces(State *current, State *start, const std::vector<Operation *> &opList) {
     save++;
-    if(save == 0xFFFF-1) throw std::runtime_error(" loop ");
+    if(save == 0xFFFF-1) TERMINATE(" loop ");
     for (auto operation: current->getOutgoingOperationsList()) {
         if(operation->IsWait()) continue;
         auto newOpList = opList;
@@ -870,7 +870,7 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation *> &cycle) {
         }
         //Stream freeze variables to stringstream
 
-        //throw std::runtime_error("done");
+        //TERMINATE("done");
 
         auto state_name = op->getState()->getName();
         std::string tp = "_at_t_" + state_name;

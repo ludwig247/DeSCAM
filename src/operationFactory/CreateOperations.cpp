@@ -8,6 +8,9 @@
 #include "OperationMiscellaneous/FindCommunication2.h"
 #include "ReconstructOperations.h"
 #include <regex>
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 //#define DEBUG_CREATEOPERATIONS
 
@@ -83,7 +86,7 @@ namespace SCAM {
             }
             std::cout << "\n\n******************************\n\n";
         }
-        throw std::runtime_error(" STOP YOOO ");
+        TERMINATE(" STOP YOOO ");
 #endif
     }
 
@@ -107,7 +110,7 @@ namespace SCAM {
         } else {
             auto state = this->statesMap.find((*node)->getName());
             if (state == this->statesMap.end())
-                throw std::runtime_error("CreateOperations: Operation starts from unknown state!");
+                TERMINATE("CreateOperations: Operation starts from unknown state!");
             operation->setState(state->second);
             state->second->addOutgoingOperation(operation);
         }
@@ -117,14 +120,14 @@ namespace SCAM {
             /// node still refer to rawOperation.begin()
             auto state = this->statesMap.find((*node)->getName());
             if (state == this->statesMap.end())
-                throw std::runtime_error("CreateOperations: Operation starts from unknown state!");
+                TERMINATE("CreateOperations: Operation starts from unknown state!");
             operation->setNextState(state->second);
             state->second->addIncomingOperation(operation);
         } else {
             node = rawOperation.end() - 1;
             auto state = this->statesMap.find((*node)->getName());
             if (state == this->statesMap.end())
-                throw std::runtime_error(" Operation ends in unknown state!");
+                TERMINATE(" Operation ends in unknown state!");
             operation->setNextState(state->second);
             state->second->addIncomingOperation(operation);
         }
@@ -138,7 +141,7 @@ namespace SCAM {
         /// for wait operations, only first statement matters
         if(this->waitOp) {
             if ((*node)->getStmt() == nullptr)
-                throw std::runtime_error("CreateOperations: waitOp starts with null statement!");
+                TERMINATE("CreateOperations: waitOp starts with null statement!");
             this->firstStatement = true;
             (*node)->getStmt()->accept(*this);
             this->firstStatement = false;
@@ -236,7 +239,7 @@ namespace SCAM {
             }
             this->newExpr = &node;
         } else {
-            throw std::runtime_error("CreateOperations: Not allowed ");
+            TERMINATE("CreateOperations: Not allowed ");
         }
     }
 
@@ -271,11 +274,11 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperations::visit(SCAM::PortOperand &node) {
-        throw std::runtime_error("CreateOperations: Not allowed ");
+        TERMINATE("CreateOperations: Not allowed ");
     }
 
     void SCAM::CreateOperations::visit(SCAM::TimePointOperand &node) {
-        throw std::runtime_error("CreateOperations: Not allowed ");
+        TERMINATE("CreateOperations: Not allowed ");
     }
 
     void SCAM::CreateOperations::visit(SCAM::UnaryExpr &node) {
@@ -294,7 +297,7 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperations::visit(SCAM::ITE &node) {
-        throw std::runtime_error("CreateOperations: Not allowed ");
+        TERMINATE("CreateOperations: Not allowed ");
     }
 
     void SCAM::CreateOperations::visit(SCAM::Arithmetic &node) {
@@ -342,11 +345,11 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperations::visit(SCAM::Return &node) {
-        throw std::runtime_error("CreateOperations: Not allowed ");
+        TERMINATE("CreateOperations: Not allowed ");
     }
 
     void SCAM::CreateOperations::visit(SCAM::Notify &node) {
-        throw std::runtime_error("CreateOperations: Not allowed ");
+        TERMINATE("CreateOperations: Not allowed ");
     }
 
     void SCAM::CreateOperations::visit(class ArrayExpr &node) {
@@ -354,7 +357,7 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperations::visit(SCAM::Wait &node) {
-        //throw std::runtime_error("CreateOperations: Not allowed ");
+        //TERMINATE("CreateOperations: Not allowed ");
     }
 
     void SCAM::CreateOperations::visit(SCAM::Peek &node) {

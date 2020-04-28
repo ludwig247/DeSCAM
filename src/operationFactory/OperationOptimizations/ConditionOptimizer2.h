@@ -8,6 +8,9 @@
 #include <ExprTranslator.h>
 #include <vector>
 #include "Behavior/Operation.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM{
     /*!

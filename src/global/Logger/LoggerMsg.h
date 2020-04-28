@@ -15,7 +15,7 @@ namespace SCAM {
     class LoggerMsg {
     public:
         enum class SeverityLevel {
-            Error, Warning, Info
+            Fatal, Error, Warning, Info
         };
 
         enum class ViolationType {

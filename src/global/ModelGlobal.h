@@ -11,6 +11,7 @@
 #include <PluginAction.h>
 #include <ModelFactory.h>
 #include "CheckErrors.h"
+#include "FatalError.h"
 
 
 namespace SCAM {
@@ -24,12 +25,12 @@ namespace SCAM {
     class ModelGlobal {
     public:
         static void setModel(Model *model){
-            if (model == nullptr) throw std::runtime_error("ModelGlobal: model is null");
+            if (model == nullptr) TERMINATE("ModelGlobal: model is null");
             ModelGlobal::getInstance().model = model;
         };
 
         static Model *getModel(){
-            if (ModelGlobal::getInstance().model == nullptr) throw std::runtime_error("ModelGlobal: model is null");
+            if (ModelGlobal::getInstance().model == nullptr) TERMINATE("ModelGlobal: model is null");
             return ModelGlobal::getInstance().model;
         };
 
@@ -40,9 +41,9 @@ namespace SCAM {
             std::string clang_dir = SCAM_HOME"/include/clang/3.4.2/include";
             std::string systemc_dir = SCAM_HOME"/include/";
             std::string scam_dir = SCAM_HOME"/";
-            if (clang_dir == "") throw std::runtime_error("Specfiy CLANG_DIR as environment variable");
-            if (systemc_dir == "") throw std::runtime_error("Specfiy SYSTEMC_DIR as environment variable");
-            if (scam_dir == "") throw std::runtime_error("Specfiy SCAM_DIR as environment variable");
+            if (clang_dir == "") TERMINATE("Specfiy CLANG_DIR as environment variable");
+            if (systemc_dir == "") TERMINATE("Specfiy SYSTEMC_DIR as environment variable");
+            if (scam_dir == "") TERMINATE("Specfiy SCAM_DIR as environment variable");
 
             //Binaray
             commandLineArugmentsVector.push_back(Binary.c_str());
@@ -77,7 +78,7 @@ namespace SCAM {
             if (argc >= 1) {
                 if(!isWrapper) PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
                 else PluginAction<SCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
-            } else throw std::runtime_error("Wrong use of DeSCAM");
+            } else TERMINATE("Wrong use of DeSCAM");
         };
 
 
@@ -88,9 +89,9 @@ namespace SCAM {
             std::string clang_dir = SCAM_HOME"/include/clang/3.4.2/include";
             std::string systemc_dir = SCAM_HOME"/include/";
             std::string scam_dir = SCAM_HOME"/";
-            if (clang_dir == "") throw std::runtime_error("Specfiy CLANG_DIR as environment variable");
-            if (systemc_dir == "") throw std::runtime_error("Specfiy SYSTEMC_DIR as environment variable");
-            if (scam_dir == "") throw std::runtime_error("Specfiy SCAM_DIR as environment variable");
+            if (clang_dir == "") TERMINATE("Specfiy CLANG_DIR as environment variable");
+            if (systemc_dir == "") TERMINATE("Specfiy SYSTEMC_DIR as environment variable");
+            if (scam_dir == "") TERMINATE("Specfiy SCAM_DIR as environment variable");
 
             //Binaray
             commandLineArugmentsVector.push_back(argv[0]);
@@ -124,7 +125,7 @@ namespace SCAM {
             }
             if (argc >= 1) {
                 PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
-            } else throw std::runtime_error("Wrong use of DeSCAM");
+            } else TERMINATE("Wrong use of DeSCAM");
         }
 
     private:

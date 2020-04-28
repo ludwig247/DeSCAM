@@ -3,6 +3,9 @@
 //
 
 #include "Utilities.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 using namespace SCAM::HLSPlugin::HLS;
 
@@ -47,7 +50,7 @@ std::string Utilities::typeToString(StmtType type) {
         case StmtType::UNKNOWN:
             return "unknown type";
         default:
-            throw std::runtime_error("Unknown statement!");
+            TERMINATE("Unknown statement!");
     }
 }
 
@@ -64,7 +67,7 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
         case SubTypeBitwise::RIGHT_SHIFT:
             return ">>";
         default:
-            throw std::runtime_error("unknown operation");
+            TERMINATE("unknown operation");
     }
 }
 

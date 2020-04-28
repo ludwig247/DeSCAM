@@ -8,6 +8,9 @@
 #include "OperationMiscellaneous/FindCommunication2.h"
 #include <regex>
 #include <NodePeekVisitor.h>
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 //#define DEBUG_CREATEOPERATIONS
 
@@ -60,7 +63,7 @@ namespace SCAM {
             }
             std::cout << "\n\n******************************\n\n";
         }
-//        throw std::runtime_error(" STOP YOOO ");
+//        TERMINATE(" STOP YOOO ");
 #endif
     }
 
@@ -98,7 +101,7 @@ namespace SCAM {
                         if(readStmt->getStatusOperand() != nullptr) {
                             elseNode->setStmt(new Assignment(readStmt->getStatusOperand(),readStmt->getPort()->getSynchSignal(),readStmt->getStmtInfo()));
                         }
-                    } else throw std::runtime_error("Could not dynamically cast a Read statement");
+                    } else TERMINATE("Could not dynamically cast a Read statement");
 
                     syncNode->addSuccessor(readNode);
                     syncNode->addSuccessor(elseNode);
@@ -168,7 +171,7 @@ namespace SCAM {
         } else {
             auto state = this->statesMap.find((*node)->getName());
             if (state == this->statesMap.end())
-                throw std::runtime_error("CreateOperationsSlave: Operation starts from unknown state!");
+                TERMINATE("CreateOperationsSlave: Operation starts from unknown state!");
             operation->setState(state->second);
             state->second->addOutgoingOperation(operation);
         }
@@ -177,7 +180,7 @@ namespace SCAM {
         node = rawOperation.end() - 1;
         auto state = this->statesMap.find((*node)->getName());
         if (state == this->statesMap.end())
-            throw std::runtime_error(" Operation ends in unknown state!");
+            TERMINATE(" Operation ends in unknown state!");
         operation->setNextState(state->second);
         state->second->addIncomingOperation(operation);
     }
@@ -225,14 +228,14 @@ namespace SCAM {
     void SCAM::CreateOperationsSlave::visit(SCAM::Read &node) {
         this->newExpr = nullptr;
         if(firstStatement || lastStatement)
-            throw std::runtime_error("CreateOperationsSlave::Read: can't have a communication as state in a slave module ");
+            TERMINATE("CreateOperationsSlave::Read: can't have a communication as state in a slave module ");
         this->statementsList.push_back(&node);
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::Write &node) {
         this->newExpr = nullptr;
         if(firstStatement || lastStatement)
-            throw std::runtime_error("CreateOperationsSlave::Write: can't have a communication as state in a slave module ");
+            TERMINATE("CreateOperationsSlave::Write: can't have a communication as state in a slave module ");
         this->statementsList.push_back(&node);
     }
 
@@ -271,11 +274,11 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::PortOperand &node) {
-        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+        TERMINATE("CreateOperationsSlave: Not allowed ");
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::TimePointOperand &node) {
-        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+        TERMINATE("CreateOperationsSlave: Not allowed ");
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::UnaryExpr &node) {
@@ -294,7 +297,7 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::ITE &node) {
-        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+        TERMINATE("CreateOperationsSlave: Not allowed ");
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::Arithmetic &node) {
@@ -343,11 +346,11 @@ namespace SCAM {
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::Return &node) {
-        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+        TERMINATE("CreateOperationsSlave: Not allowed ");
     }
 
     void SCAM::CreateOperationsSlave::visit(SCAM::Notify &node) {
-        throw std::runtime_error("CreateOperationsSlave: Not allowed ");
+        TERMINATE("CreateOperationsSlave: Not allowed ");
     }
 
     void CreateOperationsSlave::visit(class ArrayExpr &node) {

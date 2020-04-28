@@ -4,6 +4,9 @@
 
 #include <set>
 #include "ExprVisitor.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 SCAM::ExprVisitor::ExprVisitor(SCAM::Expr *expr) :
@@ -54,11 +57,11 @@ void SCAM::ExprVisitor::visit(SCAM::CompoundValue &node) {
 }
 
 void SCAM::ExprVisitor::visit(struct PortOperand &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct Assignment &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct UnaryExpr &node) {
@@ -67,27 +70,27 @@ void SCAM::ExprVisitor::visit(struct UnaryExpr &node) {
 }
 
 void SCAM::ExprVisitor::visit(struct While &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct If &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct SectionOperand &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct SectionValue &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct ITE &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct Branch &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct Arithmetic &node) {
@@ -136,19 +139,19 @@ void SCAM::ExprVisitor::visit(SCAM::ArrayOperand &node) {
 }
 
 void SCAM::ExprVisitor::visit(struct Read &node) {
-    throw std::runtime_error("ExprVisitor::Read not implemented");
+    TERMINATE("ExprVisitor::Read not implemented");
 }
 
 void SCAM::ExprVisitor::visit(SCAM::Wait &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::ExprVisitor::visit(SCAM::Peek &node) {
-    throw std::runtime_error("ExprVisitor::visit: Peek-not implemented");
+    TERMINATE("ExprVisitor::visit: Peek-not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct Write &node) {
-    throw std::runtime_error("ExprVisitor::Write: not implemented");
+    TERMINATE("ExprVisitor::Write: not implemented");
 }
 
 void SCAM::ExprVisitor::visit(struct SyncSignal &node) {
@@ -199,7 +202,7 @@ std::set<SCAM::Operand *> SCAM::ExprVisitor::getUsedOperands(SCAM::Expr *expr) {
 SCAM::Operand *SCAM::ExprVisitor::getOperand(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
     if (exprVisitor.usedOperands.size() != 1) {
-        throw std::runtime_error("Expr " + PrintStmt::toString(expr) + " has more/less variables then 1");
+        TERMINATE("Expr " + PrintStmt::toString(expr) + " has more/less variables then 1");
     };
     return *exprVisitor.usedOperands.begin();
 }

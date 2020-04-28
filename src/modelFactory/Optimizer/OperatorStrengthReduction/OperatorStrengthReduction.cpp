@@ -4,6 +4,9 @@
 
 #include "OperatorStrengthReduction.h"
 #include "Optimizer/Debug.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 /* The algorithm iterates over statements of the CFG looking for expensive arithmetic operations,
  * If found, the algorithm checks whether the lhs and/or rhs of the expression is ^2 number.
@@ -119,7 +122,7 @@ void SCAM::OperatorStrengthReduction::visit(struct UnaryExpr &node) {
             } else {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1), node.getStmtInfo());
             }
-        } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation());
     }
 }
 
@@ -160,7 +163,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
         this->newExpr = &node;
     }
     auto arithNode = dynamic_cast<SCAM::Arithmetic *> (this->newExpr);
-    if (arithNode == nullptr) { throw std::runtime_error("not arithmetic expression not expected!"); }
+    if (arithNode == nullptr) { TERMINATE("not arithmetic expression not expected!"); }
 
 
     if (arithNode->getOperation() == "*") {
@@ -307,7 +310,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 lhsVal = lhs->getValue();
                 auto rhs = NodePeekVisitor::nodePeekIntegerValue(arithNode->getRhs());
                 rhsVal = rhs->getValue();
-                if (rhsVal == 0) { throw std::runtime_error("division by zero detected"); }
+                if (rhsVal == 0) { TERMINATE("division by zero detected"); }
                 int result = lhsVal / rhsVal;
                 this->newExpr = new IntegerValue(result, node.getStmtInfo());
 
@@ -317,7 +320,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 lhsVal = lhs->getValue();
                 auto rhs = NodePeekVisitor::nodePeekUnsignedValue(arithNode->getRhs());
                 rhsVal = rhs->getValue();
-                if (rhsVal == 0) { throw std::runtime_error("division by zero detected"); }
+                if (rhsVal == 0) { TERMINATE("division by zero detected"); }
                 unsigned int result = lhsVal / rhsVal;
                 this->newExpr = new UnsignedValue(result, node.getStmtInfo());
             }
@@ -346,7 +349,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 unsigned int rhsVal;
                 rhsVal = rhs->getValue();
                 if (rhsVal == 0) {
-                    throw std::runtime_error("division by zero detected");
+                    TERMINATE("division by zero detected");
                 } else if (rhsVal == 1) {
                     hasReduction = true;
                     this->newExpr = arithNode->getLhs();
@@ -359,7 +362,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 int rhsVal;
                 rhsVal = rhs->getValue();
                 if (rhsVal == 0) {
-                    throw std::runtime_error("division by zero detected");
+                    TERMINATE("division by zero detected");
                 } else if (rhsVal == 1) {
                     hasReduction = true;
                     this->newExpr = arithNode->getLhs();
@@ -380,7 +383,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 lhsVal = lhs->getValue();
                 auto rhs = NodePeekVisitor::nodePeekIntegerValue(arithNode->getRhs());
                 rhsVal = rhs->getValue();
-                if (rhsVal == 0) { throw std::runtime_error("modulo by zero not allowed"); }
+                if (rhsVal == 0) { TERMINATE("modulo by zero not allowed"); }
                 int result = lhsVal % rhsVal;
                 this->newExpr = new IntegerValue(result, node.getStmtInfo());
 
@@ -390,7 +393,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 lhsVal = lhs->getValue();
                 auto rhs = NodePeekVisitor::nodePeekUnsignedValue(arithNode->getRhs());
                 rhsVal = rhs->getValue();
-                if (rhsVal == 0) { throw std::runtime_error("modulo by zero not allowed"); }
+                if (rhsVal == 0) { TERMINATE("modulo by zero not allowed"); }
                 unsigned int result = lhsVal % rhsVal;
                 this->newExpr = new UnsignedValue(result, node.getStmtInfo());
             }
@@ -419,7 +422,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 unsigned int rhsVal;
                 rhsVal = rhs->getValue();
                 if (rhsVal == 0) {
-                    throw std::runtime_error("modulo by zero not allowed");
+                    TERMINATE("modulo by zero not allowed");
                 } else if (rhsVal == 1) {
                     hasReduction = true;
                     unsigned int result = 0;
@@ -433,7 +436,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
                 int rhsVal;
                 rhsVal = rhs->getValue();
                 if (rhsVal == 0) {
-                    throw std::runtime_error("modulo by zero not allowed");
+                    TERMINATE("modulo by zero not allowed");
                 } else if (rhsVal == 1) {
                     hasReduction = true;
                     unsigned int result = 0;

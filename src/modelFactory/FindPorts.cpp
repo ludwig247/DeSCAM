@@ -2,6 +2,9 @@
 #include <clang/AST/PrettyPrinter.h>
 #include "FindPorts.h"
 #include "FindNewDatatype.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM {
     /*!
@@ -76,7 +79,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
                 else if (portTemplates.at(0) == "shared_out") {
                     this->outSharedPortMap.insert(std::make_pair(fieldDecl->getNameAsString(), portTemplates.at(1)));
                 }else{
-                    throw std::runtime_error("Unknown interface: " + portTemplates.at(0));
+                    TERMINATE("Unknown interface: " + portTemplates.at(0));
                 }
             }
         }
@@ -101,9 +104,9 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
                 if(templateArgument.getKind() ==  clang::TemplateArgument::ArgKind::Expression){
                     clang::Expr * expr = templateArgument.getAsExpr();
                     if (const clang::IntegerLiteral * value = llvm::dyn_cast<clang::IntegerLiteral>(expr)) {
-                        //if(this->portTemplates.at(0) != "sc_uint") throw std::runtime_error("Type: " + this->portTemplates.at(0) + " is not allowed");
+                        //if(this->portTemplates.at(0) != "sc_uint") TERMINATE("Type: " + this->portTemplates.at(0) + " is not allowed");
                         this->portTemplates.push_back(std::to_string(value->getValue().getSExtValue()));
-                    }else throw std::runtime_error("Expr is not an integer");
+                    }else TERMINATE("Expr is not an integer");
                 }else{
                     this->recursiveTemplateVisitor(templateArgument.getAsType());
                 }

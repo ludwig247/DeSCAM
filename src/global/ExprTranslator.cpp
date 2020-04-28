@@ -5,6 +5,7 @@
 
 #include "ExprTranslator.h"
 #include "ModelGlobal.h"
+#include "StmtException.h"
 
 
 //
@@ -76,12 +77,14 @@ z3::expr &SCAM::ExprTranslator::translate(SCAM::Expr *scam_expr) {
 
 SCAM::Expr *SCAM::ExprTranslator::translate(z3::expr &z3_expr, const SCAM::Module *module) {
     //datatype map must at least contain built-in types
-    if (datatypeMap.empty() || datatypeMap.find("int") == datatypeMap.end() || datatypeMap.find("bool") == datatypeMap.end()) {
-        throw std::runtime_error("ExprTranslator translation from z3 to SCAM requires a datatypeMap including the built-in types");
+    if (datatypeMap.empty() || datatypeMap.find("int") == datatypeMap.end() ||
+        datatypeMap.find("bool") == datatypeMap.end()) {
+        TERMINATE(
+                "ExprTranslator translation from z3 to SCAM requires a datatypeMap including the built-in types");
     }
 
     if (module == nullptr) {
-        throw std::runtime_error("Module passed to ExprTranslator is null");
+        TERMINATE("Module passed to ExprTranslator is null");
     }
 
     this->module = module; //allowed to be nullptr !
@@ -90,9 +93,10 @@ SCAM::Expr *SCAM::ExprTranslator::translate(z3::expr &z3_expr, const SCAM::Modul
     return this->translate_intern(z3_expr);
 }
 
-//is private, only enterered when the maps exists (and{throw std::runtime_error("ExprSCAMtoZ3 did not expect SyncSignal");} when at least "int" and "bool" is a datatype
+//is private, only enterered when the maps exists (and{TERMINATE("ExprSCAMtoZ3 did not expect SyncSignal");} when at least "int" and "bool" is a datatype
 SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_intern) {
 
+    SCAM::Expr *returnExpr = nullptr;
     //TERMINAL EXPRESSION
     if (z3_expr_intern.is_const()) {
         std::string symbolname = z3_expr_intern.decl().name().str();
@@ -101,29 +105,41 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
         if (symbolname == "Int") {
             if (this->unsigned_flag) {
                 unsigned int value = z3_expr_intern.get_numeral_int64();
-                if (value > 4294967295) throw std::runtime_error("Result of unsigned computation is > 2^32-1");
-                return new SCAM::UnsignedValue(value);
-            } else return new SCAM::IntegerValue(z3_expr_intern.get_numeral_int());
+                if (value > 4294967295) TERMINATE("Result of unsigned computation is > 2^32-1");
+                ASSERT_STMT(returnExpr = new SCAM::UnsignedValue(value))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
+            } else {
+                ASSERT_STMT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_int()))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
+            }
         };
 
         if (symbolname == "bv") {
             if (this->unsigned_flag) {
                 unsigned int value = z3_expr_intern.get_numeral_int64();
-                if (value > 4294967295) throw std::runtime_error("Result of unsigned computation is > 2^32-1");
-                return new SCAM::UnsignedValue(value);
+                if (value > 4294967295) TERMINATE("Result of unsigned computation is > 2^32-1");
+                ASSERT_STMT(returnExpr = new SCAM::UnsignedValue(value))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
                 //z3 doesn't translate a bitvector back into a signed integer, always interprets it unsigned
-                if (z3_expr_intern.get_numeral_uint() > 2147483647) return new SCAM::IntegerValue(z3_expr_intern.get_numeral_uint() - 4294967296);
-                else return new SCAM::IntegerValue(z3_expr_intern.get_numeral_int());
+                if (z3_expr_intern.get_numeral_uint() > 2147483647) {
+                    ASSERT_STMT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_uint() - 4294967296))
+                    CHECK_EXCEPTION_AND_RETURN(returnExpr)
+                } else {
+                    ASSERT_STMT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_int()))
+                    CHECK_EXCEPTION_AND_RETURN(returnExpr)
+                }
             }
         }
         //boolean value
         if (symbolname == "true") {
-            return new SCAM::BoolValue(true);
+            ASSERT_STMT(returnExpr = new SCAM::BoolValue(true))
+            CHECK_EXCEPTION_AND_RETURN(returnExpr)
 
         }
         if (symbolname == "false") {
-            return new SCAM::BoolValue(false);
+            ASSERT_STMT(returnExpr = new SCAM::BoolValue(false))
+            CHECK_EXCEPTION_AND_RETURN(returnExpr)
         }
 
         //enum value
@@ -131,7 +147,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             if (type.second->isEnumType()) {
                 for (auto &&enumValPair : type.second->getEnumValueMap()) {
                     if (enumValPair.first == symbolname) {
-                        return new SCAM::EnumValue(symbolname, type.second);
+                        ASSERT_STMT(returnExpr = new SCAM::EnumValue(symbolname, type.second))
+                        CHECK_EXCEPTION_AND_RETURN(returnExpr)
                     }
                 }
             }
@@ -141,7 +158,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 if (type.second->isEnumType()) {
                     for (auto &&enumValPair : type.second->getEnumValueMap()) {
                         if (enumValPair.first == symbolname) {
-                            return new SCAM::EnumValue(symbolname, type.second);
+                            ASSERT_STMT(returnExpr = new SCAM::EnumValue(symbolname, type.second))
+                            CHECK_EXCEPTION_AND_RETURN(returnExpr)
                         }
                     }
                 }
@@ -150,7 +168,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
 
         //Check for variables, dataSignal or synchSignals
         if (module == nullptr) {
-            throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, module must be set for such conversion");
+            TERMINATE(
+                    "ExprTranslator : translate z3::expr to SCAM::Expr, module must be set for such conversion");
         }
 
         //section operand
@@ -160,7 +179,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
 //        }
         //Variable operand
         if (module->isVariable(symbolname)) {
-            return new VariableOperand(module->getVariable(symbolname));
+            ASSERT_STMT(returnExpr = new VariableOperand(module->getVariable(symbolname)))
+            CHECK_EXCEPTION_AND_RETURN(returnExpr)
         }
 
 
@@ -174,31 +194,35 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 //Compound type port: multiple subsignals
                 for (auto subSig: port.second->getDataSignal()->getSubVarList()) {
                     if (symbolname == port.first + "_dataXYZ_" + subSig->getName()) {
-                        return new DataSignalOperand(subSig);
+                        ASSERT_STMT(returnExpr = new DataSignalOperand(subSig))
+                        CHECK_EXCEPTION_AND_RETURN(returnExpr)
                     }
                 }
             } else {
                 //Built-in type ports
                 if (symbolname == port.first + "_dataXYZ") {
                     this->unsigned_flag = port.second->getDataSignal()->getDataType()->isUnsigned();
-                    return new DataSignalOperand(port.second->getDataSignal());
+                    ASSERT_STMT(returnExpr = new DataSignalOperand(port.second->getDataSignal()))
+                    CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 }
             }
         }
 
-        if (functionOperandMap.find(symbolname) != functionOperandMap.end()) {
+        if (functionOperandMap.find(symbolname) != functionOperandMap.end())
             return functionOperandMap.find(symbolname)->second;
-        }
-        if (arrayMap.find(symbolname) != arrayMap.end()) {
+
+        if (arrayMap.find(symbolname) != arrayMap.end())
             return arrayMap.at(symbolname);
-        }
+
 
         auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
         if (globalVars.find(symbolname) != globalVars.end()) {
-            return new VariableOperand(globalVars.find(symbolname)->second);
+            ASSERT_STMT(returnExpr = new VariableOperand(globalVars.find(symbolname)->second))
+            CHECK_EXCEPTION_AND_RETURN(returnExpr)
         }
         //NOTHING found!
-        throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, missing variable for " + symbolname);
+        TERMINATE(
+                "ExprTranslator : translate z3::expr to SCAM::Expr, missing variable for " + symbolname);
     }
 
         //NON-TERMINAL EXPRESSION
@@ -209,72 +233,93 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 z3::expr lhs = z3_expr_intern.arg(0);
                 this->unsigned_flag = translate_intern(lhs)->getDataType()->isUnsigned();
                 z3::expr rhs = z3_expr_intern.arg(1);
-                return new SCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper), translate_intern(rhs));
-            } else throw std::runtime_error("Expecte 2 arguments for " + oper);
+                ASSERT_STMT(returnExpr = new SCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper),
+                                                              translate_intern(rhs)))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
+            } else TERMINATE("Expecte 2 arguments for " + oper);
         } else if (logicalOperatorMap.find(oper) != logicalOperatorMap.end()) {
             if (z3_expr_intern.num_args() < 2)
-                throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 or more arguments");
+                TERMINATE(
+                        "ExprTranslator : translate z3::expr to SCAM::Expr expected 2 or more arguments");
 
             z3::expr first = z3_expr_intern.arg(0);
             z3::expr second = z3_expr_intern.arg(1);
-            auto multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper), translate_intern(second));
+            SCAM::Logical *multiple = nullptr;
+            ASSERT_STMT(multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper),
+                                                     translate_intern(second)))
 
             for (unsigned int i = 2; i < z3_expr_intern.num_args(); ++i) {
                 z3::expr next = z3_expr_intern.arg(i);
-                multiple = new SCAM::Logical(multiple, logicalOperatorMap.at(oper), translate_intern(next));
+                ASSERT_STMT(multiple = new SCAM::Logical(multiple, logicalOperatorMap.at(oper), translate_intern(next)))
             }
-            return multiple;
+            CHECK_EXCEPTION_AND_RETURN(multiple)
         } else if (unaryOperatorMap.find(oper) != unaryOperatorMap.end()) {
             if (oper == "not") { // UNARY
                 if (z3_expr_intern.num_args() != 1)
-                    throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
+                    TERMINATE(
+                            "ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
                 z3::expr rhs = z3_expr_intern.arg(0);
-                return new SCAM::UnaryExpr("not", translate_intern(rhs));
+                ASSERT_STMT(returnExpr = new SCAM::UnaryExpr("not", translate_intern(rhs)))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else if (oper == "bvnot") { // UNARY
                 if (z3_expr_intern.num_args() != 1)
-                    throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
+                    TERMINATE(
+                            "ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
                 z3::expr rhs = z3_expr_intern.arg(0);
-                return new SCAM::UnaryExpr("~", translate_intern(rhs));
+                ASSERT_STMT(returnExpr = new SCAM::UnaryExpr("~", translate_intern(rhs)))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else if (oper == "-") { //NOTE: can be unary or binary, check num_arg
                 if (z3_expr_intern.num_args() == 2) {
                     z3::expr lhs = z3_expr_intern.arg(0);
                     z3::expr rhs = z3_expr_intern.arg(1);
-                    return new SCAM::Arithmetic(translate_intern(lhs), "-", translate_intern(rhs));
+                    ASSERT_STMT(returnExpr = new SCAM::Arithmetic(translate_intern(lhs), "-", translate_intern(rhs)))
+                    CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 } else if (z3_expr_intern.num_args() == 1) {
                     z3::expr rhs = z3_expr_intern.arg(0);
-                    return new SCAM::UnaryExpr("-", translate_intern(rhs));
-                } else throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator -, expected 1 or 2 arguments");
+                    ASSERT_STMT(returnExpr = new SCAM::UnaryExpr("-", translate_intern(rhs)))
+                    CHECK_EXCEPTION_AND_RETURN(returnExpr)
+                } else
+                    TERMINATE(
+                            "ExprTranslator : translate z3::expr to SCAM::Expr, operator -, expected 1 or 2 arguments");
 
-            } else throw std::runtime_error("ExprTranslator : unknown Unary: " + oper);
+            } else TERMINATE("ExprTranslator : unknown Unary: " + oper);
         } else if (arithOperatorMap.find(oper) != arithOperatorMap.end()) {
             if (z3_expr_intern.num_args() < 2)
-                throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, operator +, expected 2 or more arguments");
+                TERMINATE(
+                        "ExprTranslator : translate z3::expr to SCAM::Expr, operator +, expected 2 or more arguments");
             z3::expr first = z3_expr_intern.arg(0);
             z3::expr second = z3_expr_intern.arg(1);
 
-            SCAM::Arithmetic *multiple = new SCAM::Arithmetic(translate_intern(first), arithOperatorMap.at(oper), translate_intern(second));
+            SCAM::Arithmetic *multiple = nullptr;
+            ASSERT_STMT(multiple = new SCAM::Arithmetic(translate_intern(first), arithOperatorMap.at(oper),
+                                                        translate_intern(second)))
             for (unsigned int i = 2; i < z3_expr_intern.num_args(); ++i) {
                 z3::expr next = z3_expr_intern.arg(i);
-                multiple = new SCAM::Arithmetic(multiple, arithOperatorMap.at(oper), translate_intern(next));
+                ASSERT_STMT(
+                        multiple = new SCAM::Arithmetic(multiple, arithOperatorMap.at(oper), translate_intern(next)))
             }
-            return multiple;
+            CHECK_EXCEPTION_AND_RETURN(multiple)
         } else if (bvArithOperatorMap.find(oper) != bvArithOperatorMap.end()) {
             if (z3_expr_intern.num_args() == 2) {
                 z3::expr lhs = z3_expr_intern.arg(0);
                 z3::expr rhs = z3_expr_intern.arg(1);
-                return new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper), translate_intern(rhs));
+                ASSERT_STMT(returnExpr = new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper),
+                                                        translate_intern(rhs)))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
                 //std::cout << z3_expr_intern << std::endl;
-                throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
+                TERMINATE("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
         } else if (bvBitwiseOperatorMap.find(oper) != bvBitwiseOperatorMap.end()) {
             if (z3_expr_intern.num_args() == 2) {
                 z3::expr lhs = z3_expr_intern.arg(0);
                 z3::expr rhs = z3_expr_intern.arg(1);
-                return new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper), translate_intern(rhs));
+                ASSERT_STMT(returnExpr = new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper),
+                                                     translate_intern(rhs)))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
                 //std::cout << z3_expr_intern << std::endl;
-                throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
+                TERMINATE("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
             }
         } else if (bvRelationalOperatorMap.find(oper) != bvRelationalOperatorMap.end()) {
             if (z3_expr_intern.num_args() == 2) {
@@ -282,8 +327,11 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 z3::expr rhs = z3_expr_intern.arg(1);
                 if (oper == "bvule") this->unsigned_flag = true;
                 if (oper == "bvsle") this->unsigned_flag = false;
-                return new SCAM::Relational(translate_intern(lhs), bvRelationalOperatorMap.at(oper), translate_intern(rhs));
-            } else throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
+
+                ASSERT_STMT(returnExpr = new SCAM::Relational(translate_intern(lhs), bvRelationalOperatorMap.at(oper),
+                                                        translate_intern(rhs)))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
+            } else TERMINATE("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
         } else if (oper == "concat") {
 //            std::cout<<"EXprTranslator: concat\n";
             abort = true;
@@ -300,15 +348,16 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             return translate_intern(ret);
         } else if (oper == "if") {
             z3::expr simplifiedITE = z3_expr_intern.simplify();
-            if(simplifiedITE.num_args()==3){
+            if (simplifiedITE.num_args() == 3) {
                 auto cond = translate_intern(z3_expr_intern.arg(0));
-                auto trueExpr= translate_intern(z3_expr_intern.arg(1));
-                auto falseExpr= translate_intern(z3_expr_intern.arg(2));
-                return new Ternary(cond,trueExpr,falseExpr);
-            }else if((simplifiedITE.num_args()==0)){
+                auto trueExpr = translate_intern(z3_expr_intern.arg(1));
+                auto falseExpr = translate_intern(z3_expr_intern.arg(2));
+                ASSERT_STMT(returnExpr = new Ternary(cond, trueExpr, falseExpr))
+                CHECK_EXCEPTION_AND_RETURN(returnExpr)
+            } else if ((simplifiedITE.num_args() == 0)) {
                 return translate_intern(simplifiedITE);
             }
-        } else throw std::runtime_error("ExprTranslator : translate z3::expr to SCAM::Expr, unknown operator: " + oper);
+        } else TERMINATE("ExprTranslator : translate z3::expr to SCAM::Expr, unknown operator: " + oper);
     }
 }
 
@@ -317,7 +366,7 @@ z3::context *SCAM::ExprTranslator::getContext() {
 }
 
 z3::sort SCAM::ExprTranslator::find_or_add_sort(const SCAM::DataType *pType) {
-    if (!pType->isEnumType()) throw std::runtime_error(pType->getName() + " is not an enum type");
+    if (!pType->isEnumType()) TERMINATE(pType->getName() + " is not an enum type");
     if (this->enumTypeSortMap.find(pType) == this->enumTypeSortMap.end()) {
         //define a sort (z3 term for datatype) with the name of the enumType
         z3::func_decl_vector enum_consts(*context);
@@ -326,7 +375,8 @@ z3::sort SCAM::ExprTranslator::find_or_add_sort(const SCAM::DataType *pType) {
         for (auto &&item : pType->getEnumValueMap()) {
             enum_values[item.second] = item.first.c_str();
         }
-        z3::sort s = context->enumeration_sort(pType->getName().c_str(), pType->getEnumValueMap().size(), enum_values, enum_consts,
+        z3::sort s = context->enumeration_sort(pType->getName().c_str(), pType->getEnumValueMap().size(), enum_values,
+                                               enum_consts,
                                                enum_testers);
         this->enumTypeSortMap.insert(std::make_pair(pType, s));
         this->enumTypeValueMap.insert(std::make_pair(pType, enum_consts));
@@ -367,7 +417,7 @@ void SCAM::ExprTranslator::visit(SCAM::IntegerValue &node) {
 
 
 void SCAM::ExprTranslator::visit(SCAM::CompoundValue &node) {
-    throw std::runtime_error("NOT DONE YET");
+    TERMINATE("NOT DONE YET");
 
 }
 
@@ -410,7 +460,7 @@ void SCAM::ExprTranslator::visit(SCAM::VariableOperand &node) {
             else z3_expr = context->int_const(node.getOperandName().c_str());
             unsigned_flag = true;
             return;
-        } else throw std::runtime_error("Unknown datatype");
+        } else TERMINATE("Unknown datatype");
     }
     //enum, added as an integer, but with range limit representing its possible values
     if (node.getDataType()->isEnumType()) {
@@ -418,11 +468,8 @@ void SCAM::ExprTranslator::visit(SCAM::VariableOperand &node) {
         return;
     }
 
-
-
-
     //compound operands, should never appear since they are used only as lhs of assignments to communication calls
-    throw std::runtime_error("ExprTranslator VariableOperand: did not expect compound type operand");
+    TERMINATE("ExprTranslator VariableOperand: did not expect compound type operand");
 }
 
 void SCAM::ExprTranslator::visit(SCAM::SectionOperand &node) {
@@ -431,7 +478,7 @@ void SCAM::ExprTranslator::visit(SCAM::SectionOperand &node) {
         z3_expr = context->int_const("nextsection");
         return;
     }
-    throw std::runtime_error("ExprTranslator SectionOperand: a section operand must be of enum type");
+    TERMINATE("ExprTranslator SectionOperand: a section operand must be of enum type");
 }
 
 
@@ -451,7 +498,7 @@ void SCAM::ExprTranslator::visit(SCAM::UnaryExpr &node) {
         z3_expr = ~(rhs);
         return;
     }
-    throw std::runtime_error("ExprTranslator UnaryExpr: cannot be translated");
+    TERMINATE("ExprTranslator UnaryExpr: cannot be translated");
 }
 
 void SCAM::ExprTranslator::visit(SCAM::Arithmetic &node) {
@@ -490,7 +537,7 @@ void SCAM::ExprTranslator::visit(SCAM::Arithmetic &node) {
         }
         return;
     }
-    throw std::runtime_error("ExprTranslator Arithmetic: cannot be translated");
+    TERMINATE("ExprTranslator Arithmetic: cannot be translated");
 }
 
 void SCAM::ExprTranslator::visit(SCAM::Logical &node) {
@@ -522,7 +569,7 @@ void SCAM::ExprTranslator::visit(SCAM::Logical &node) {
         z3_expr = lhs == rhs;
         return;
     }
-    throw std::runtime_error("ExprTranslator Logical: cannot be translated");
+    TERMINATE("ExprTranslator Logical: cannot be translated");
 }
 
 
@@ -548,7 +595,7 @@ void SCAM::ExprTranslator::visit(SCAM::Bitwise &node) {
     } else if (node.getOperation() == "^") {
         z3_expr = lhs ^ rhs;
         return;
-    } else throw std::runtime_error("ExprTranslator Bitwise: cannot be translated");
+    } else TERMINATE("ExprTranslator Bitwise: cannot be translated");
 
 }
 
@@ -610,7 +657,7 @@ void SCAM::ExprTranslator::visit(SCAM::Relational &node) {
         return;
     }
 
-    throw std::runtime_error("ExprTranslator Relational: cannot be translated");
+    TERMINATE("ExprTranslator Relational: cannot be translated");
 }
 
 void SCAM::ExprTranslator::visit(SCAM::SyncSignal &node) {
@@ -625,7 +672,7 @@ void SCAM::ExprTranslator::visit(SCAM::SyncSignal &node) {
 
 void SCAM::ExprTranslator::visit(SCAM::DataSignalOperand &node) {
     if (node.getDataType()->isCompoundType())
-        throw std::runtime_error("ExprTranslator DataSignal: Signal is not allowed to be compound type");
+        TERMINATE("ExprTranslator DataSignal: Signal is not allowed to be compound type");
     std::string name = "";
     if (node.getDataSignal()->isSubVar()) {
         name = node.getDataSignal()->getPort()->getName() + "_dataXYZ_" + node.getDataSignal()->getName();
@@ -651,7 +698,7 @@ void SCAM::ExprTranslator::visit(SCAM::DataSignalOperand &node) {
         z3_expr = context->constant(name.c_str(), find_or_add_sort(node.getDataType()));
         return;
     } else {
-        throw std::runtime_error("Unsupported type: " + node.getDataType()->getName());
+        TERMINATE("Unsupported type: " + node.getDataType()->getName());
     }
     return;
 
@@ -674,7 +721,7 @@ void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
             else z3_expr = context->int_const(name.c_str());
             unsigned_flag = true;
 
-        } else throw std::runtime_error("Unknown datatype");
+        } else TERMINATE("Unknown datatype");
         this->functionOperandMap.insert(std::make_pair(name, &node));
         return;
     }
@@ -686,7 +733,7 @@ void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
     }
 
     //compound operands, should never appear since they are used only as lhs of assignments to communication calls
-    throw std::runtime_error("ExprTranslator VariableOperand: did not expect compound type operand");
+    TERMINATE("ExprTranslator VariableOperand: did not expect compound type operand");
 
 }
 
@@ -704,10 +751,10 @@ void SCAM::ExprTranslator::visit(struct ArrayOperand &node) {
             else z3_expr = context->int_const(name.c_str());
             unsigned_flag = true;
 
-        } else throw std::runtime_error("Unknown datatype");
+        } else TERMINATE("Unknown datatype");
         this->arrayMap.insert(std::make_pair(name, &node));
         return;
-    } else throw std::runtime_error("Unknown datatype");
+    } else TERMINATE("Unknown datatype");
 
 }
 
@@ -718,6 +765,6 @@ void SCAM::ExprTranslator::visit(SCAM::Ternary &node) {
     auto trueExpr = translate(node.getTrueExpr());
     auto falseExpr = translate(node.getFalseExpr());
 
-    z3_expr = z3::ite(condition,trueExpr,falseExpr);
+    z3_expr = z3::ite(condition, trueExpr, falseExpr);
 
 }
