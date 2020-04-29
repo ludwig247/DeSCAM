@@ -11,11 +11,10 @@
 
 namespace SCAM {
 
-    Channel::Channel(std::string name) :
+    Channel::Channel(std::string name, LocationInfo locationInfo) :
             fromPort(nullptr),
             toPort(nullptr),
-            AbstractNode(name) {
-
+            AbstractNode(name,locationInfo) {
     }
 
     Channel::~Channel() {

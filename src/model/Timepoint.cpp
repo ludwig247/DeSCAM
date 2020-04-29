@@ -4,11 +4,11 @@
 
 #include "Timepoint.h"
 
-SCAM::Timepoint::Timepoint(std::string name, DataType *type, ConstValue *initialValue, Timepoint *parent) :
+SCAM::Timepoint::Timepoint(std::string name, DataType *type, ConstValue *initialValue, Timepoint *parent, LocationInfo locationInfo) :
         VariableTemplate(name,
                 DataTypes::getDataType("unsigned"),
                          nullptr,
-                         nullptr) {
+                         nullptr,locationInfo) {
 
 }
 

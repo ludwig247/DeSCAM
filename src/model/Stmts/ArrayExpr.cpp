@@ -10,7 +10,7 @@
 #include <utility>
 
 SCAM::ArrayExpr::ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const SCAM::DataType *dataType,
-                           StmtLocationInfo stmtLocationInfo) :
+                           LocationInfo stmtLocationInfo) :
         valueMap(valueMap),
         Expr(dataType) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

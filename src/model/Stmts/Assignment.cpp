@@ -9,7 +9,7 @@
 #include "NodePeekVisitor.h"
 #include "StmtException.h"
 
-SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs, StmtLocationInfo stmtLocationInfo) :
+SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         rhs(rhs) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

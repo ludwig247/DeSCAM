@@ -20,9 +20,8 @@ SCAM::TextFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages
     for (auto msgPtr = loggerMessages.begin(); msgPtr != loggerMessages.end(); msgPtr++) {
         auto stmtInfo = msgPtr->getStmtInfo();
         json << "\t{\n";
-        if (stmtInfo.getFile() != "") {
+        if (stmtInfo.getFile() != "")
             json << "\t\t" << R"("file": ")" << stmtInfo.getFile() << "\",\n";
-        }
         if (stmtInfo.getStmt() != "")
             json << "\t\t" << R"("statement": ")" << stmtInfo.getStmt() << "\",\n";
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&

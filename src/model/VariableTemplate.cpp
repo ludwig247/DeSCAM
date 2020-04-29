@@ -13,11 +13,11 @@
 namespace SCAM {
 
     template<class T>
-    VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent) :
+    VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent, LocationInfo locationInfo) :
             subVar(parent != nullptr),
             parent(parent),
             initialValue(initialValue),
-            AbstractNode(name),
+            AbstractNode(name,locationInfo),
             TypeInterface(dataType) {
 
         //Build sub varialbes for complex types

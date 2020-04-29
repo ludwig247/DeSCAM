@@ -14,7 +14,7 @@ namespace SCAM {
      */
     class PortOperand : public SCAM::Operand {
     public:
-        PortOperand(Port *port, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        PortOperand(Port *port, LocationInfo stmtLocationInfo = LocationInfo());
 
         Port *getPort();
 

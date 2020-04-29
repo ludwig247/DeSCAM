@@ -12,7 +12,7 @@
 
 
 SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *falseExpr,
-                       StmtLocationInfo stmtLocationInfo) :
+                       LocationInfo stmtLocationInfo) :
         condition(condition),
         trueExpr(trueExpr),
         falseExpr(falseExpr),
@@ -27,7 +27,7 @@ SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *
                               PrintStmt::toString(falseExpr) + ":" + falseExpr->getDataType()->getName() + "\n";
         throw SCAM::StmtException(message + "Compare: TRUE(" + trueExpr->getDataType()->getName() + ") and FALSE(" +
                                    falseExpr->getDataType()->getName() +
-                                   ") are not of the same datatype", stmtLocationInfo);
+                                   ") are not of the same datatype", this->stmtLocationInfo);
     }
 
 }

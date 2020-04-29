@@ -1,7 +1,7 @@
 #include "LoggerMsg.h"
 
 
-SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo &stmtInfo,
+SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::LocationInfo &stmtInfo,
                            SeverityLevel severityLevel, ViolationType violationType,
                            ProcessedLocation violationLocation) {
     setMessage(message);
@@ -15,7 +15,7 @@ const std::string &SCAM::LoggerMsg::getMessage() {
     return this->message;
 }
 
-const SCAM::StmtLocationInfo &SCAM::LoggerMsg::getStmtInfo() {
+const SCAM::LocationInfo &SCAM::LoggerMsg::getStmtInfo() {
     return this->stmtInfo;
 }
 
@@ -60,7 +60,7 @@ void SCAM::LoggerMsg::setSeverityLevel(SCAM::LoggerMsg::SeverityLevel severityLe
     this->severityLevel = severityLevel;
 }
 
-void SCAM::LoggerMsg::setStmtInfo(const SCAM::StmtLocationInfo &stmtInfo) {
+void SCAM::LoggerMsg::setStmtInfo(const SCAM::LocationInfo &stmtInfo) {
     this->stmtInfo = stmtInfo;
 }
 

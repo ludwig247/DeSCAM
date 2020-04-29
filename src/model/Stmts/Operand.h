@@ -13,7 +13,7 @@ namespace SCAM {
      */
     class Operand : public SCAM::Expr {
     public:
-        Operand(const DataType *type, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Operand(const DataType *type, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual std::string getOperandName() const = 0;
 

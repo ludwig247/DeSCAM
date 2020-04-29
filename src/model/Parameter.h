@@ -15,7 +15,7 @@ namespace SCAM {
     public:
         Parameter() = delete;
 
-        Parameter(std::string name, DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr);
+        Parameter(std::string name, DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr, LocationInfo locationInfo = LocationInfo());
 
         virtual ~Parameter() = default;
 

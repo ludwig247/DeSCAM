@@ -11,7 +11,7 @@ namespace SCAM {
 
     class Cast : public Expr {
     public:
-        Cast(SCAM::Expr *, const DataType *toDatatype, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Cast(SCAM::Expr *, const DataType *toDatatype, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Cast();
 

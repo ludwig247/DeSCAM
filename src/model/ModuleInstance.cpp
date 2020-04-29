@@ -5,9 +5,9 @@
 #include "ModuleInstance.h"
 #include "Port.h"
 
-SCAM::ModuleInstance::ModuleInstance(std::string name, Module *structure) :
+SCAM::ModuleInstance::ModuleInstance(std::string name, Module *structure, LocationInfo locationInfo) :
         structure(structure),
-        AbstractNode(name) {
+        AbstractNode(name,locationInfo) {
 }
 
 SCAM::ModuleInstance::~ModuleInstance() {

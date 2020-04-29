@@ -10,7 +10,7 @@
 namespace SCAM {
     class Wait : public Stmt {
     public:
-        Wait(StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Wait(LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Wait() = default;
 

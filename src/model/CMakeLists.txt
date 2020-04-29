@@ -14,7 +14,9 @@ set(AST_FILES
         Function.cpp
         Parameter.cpp
         VariableTemplate.cpp
-        Timepoint.cpp)
+        Timepoint.cpp
+        LocationInfo.cpp
+        )
 
 
 add_library(Model SHARED ${AST_FILES})

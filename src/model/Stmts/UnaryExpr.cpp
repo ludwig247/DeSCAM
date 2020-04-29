@@ -9,7 +9,7 @@
 #include "StmtException.h"
 
 
-SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr, StmtLocationInfo stmtLocationInfo) :
+SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr, LocationInfo stmtLocationInfo) :
         expr(expr),
         operation(operation),
         Expr(expr->getDataType()) {

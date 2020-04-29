@@ -20,7 +20,7 @@ namespace SCAM {
     class Module : public AbstractNode {
     public:
         Module() = delete;
-        explicit  Module(std::string name);
+        explicit  Module(std::string name, LocationInfo locationInfo = LocationInfo());
         ~Module() = default;
 
         //Ports

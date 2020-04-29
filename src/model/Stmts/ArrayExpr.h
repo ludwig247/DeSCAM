@@ -14,7 +14,7 @@ namespace SCAM {
     class ArrayExpr : public Expr {
     public:
         ArrayExpr() = delete;
-        ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
         virtual ~ArrayExpr() = default;
 
 

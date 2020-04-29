@@ -12,7 +12,7 @@
 namespace SCAM {
     class DataSignalOperand : public Operand {
     public:
-        DataSignalOperand(DataSignal *dataSignal, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        DataSignalOperand(DataSignal *dataSignal, LocationInfo stmtLocationInfo = LocationInfo());
 
         DataSignal *getDataSignal() const;
 

@@ -146,3 +146,4 @@ std::string SCAM::GlobalUtilities::removeIndentation(const std::string &str) {
     return noIndentString;
 }
 
+

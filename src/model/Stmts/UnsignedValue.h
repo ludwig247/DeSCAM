@@ -11,7 +11,7 @@
 namespace SCAM {
     class UnsignedValue : public ConstValue {
     public:
-        UnsignedValue(unsigned int value, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        UnsignedValue(unsigned int value, LocationInfo stmtLocationInfo = LocationInfo());
 
         unsigned int getValue();
 

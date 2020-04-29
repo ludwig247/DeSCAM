@@ -19,7 +19,7 @@ int main(int argc, const char **argv) {
     std::cout << "......................... Creating model ........................." << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
     //initialize logger
-    SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
+    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>());
     SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
     SCAM::Logger::setFilteringOptions(
     std::set<LoggingFilter::FilterOptions>{LoggingFilter::FilterOptions::showAllMsgs});

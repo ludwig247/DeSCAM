@@ -20,7 +20,7 @@ namespace SCAM {
  */
     class Assignment : public SCAM::Stmt {
     public:
-        Assignment(Expr *lhs, Expr *rhs, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Assignment(Expr *lhs, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         Expr *getLhs();
 

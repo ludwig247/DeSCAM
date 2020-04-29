@@ -2,8 +2,8 @@
 // Created by ibrahim on 19.03.20.
 //
 
-#ifndef DESCAM_STMTLOCATIONINFO_H
-#define DESCAM_STMTLOCATIONINFO_H
+#ifndef DESCAM_LOCATIONINFO_H
+#define DESCAM_LOCATIONINFO_H
 
 #include <iostream>
 
@@ -13,13 +13,13 @@ namespace SCAM {
  * \brief holds basic statement information such as to which file it belongs and at what line row/column number it can be found in that file.
  */
 
-    class StmtLocationInfo {
+    class LocationInfo {
     public:
-        StmtLocationInfo() = default;
+        LocationInfo() = default;
 
-        StmtLocationInfo(const std::string &stmt, const std::string &file, int rowStartNumber, int rowEndNumber,
-                         int columnStartNumber,
-                         int columnEndNumber);
+        LocationInfo(const std::string &stmt, const std::string &file, int rowStartNumber, int rowEndNumber,
+                     int columnStartNumber,
+                     int columnEndNumber);
 
         const std::string &getFile();
 
@@ -56,4 +56,4 @@ namespace SCAM {
     };
 }
 
-#endif //DESCAM_STMTLOCATIONINFO_H
+#endif //DESCAM_LOCATIONINFO_H

@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::ITE::ITE(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo) : If(conditionStmt, std::move(stmtLocationInfo)) {
+SCAM::ITE::ITE(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) : If(conditionStmt, std::move(stmtLocationInfo)) {
 }
 
 void SCAM::ITE::addIfList(SCAM::Stmt *stmt) {

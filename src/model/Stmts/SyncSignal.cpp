@@ -8,7 +8,7 @@
 #include "SyncSignal.h"
 #include "NodePeekVisitor.h"
 
-SCAM::SyncSignal::SyncSignal(SCAM::Port *port, StmtLocationInfo stmtLocationInfo) :
+SCAM::SyncSignal::SyncSignal(SCAM::Port *port, LocationInfo stmtLocationInfo) :
         port(port),
         Expr(DataTypes::getDataType("bool")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

@@ -12,10 +12,10 @@
 
 namespace SCAM {
 
-    Module::Module(std::string name) :
+    Module::Module(std::string name, LocationInfo locationInfo) :
             fsm(new FSM(this)),
             propertySuite(nullptr),
-            AbstractNode(name) {
+            AbstractNode(name,locationInfo) {
 
     }
 

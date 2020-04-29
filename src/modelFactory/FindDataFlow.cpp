@@ -48,7 +48,7 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
     //Binary Expression is always TOP statement. In case of a substmt, new FindDataFlow object is neccesary
     if (pass == 0) {
         // Collecting statement location information from clang
-        auto binaryOpLocationInfo = getStmtInfo(binaryOperator);
+        auto binaryOpLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(binaryOperator,ci);
 
         //OperationName
         std::string operationName = binaryOperator->getOpcodeStr().str();
@@ -56,14 +56,14 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
         //LHS Operator
         auto lhs = binaryOperator->getLHS();
         FindDataFlow findLHS(lhs, this->module, ci, unsigned_flag);
-        auto lhsLocationInfo = getStmtInfo(lhs);
+        auto lhsLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(lhs,ci);
         this->lhsExpr = findLHS.getExpr();
         //RHS Operator
         if(this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
         auto rhs = binaryOperator->getRHS();
         FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
         this->rhsExpr = findRHS.getExpr();
-        auto rhsLocationInfo = getStmtInfo(rhs);
+        auto rhsLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(rhs,ci);
 
         //Are LHS and RHS Valid?
         if (this->rhsExpr == nullptr || this->lhsExpr == nullptr) {
@@ -138,7 +138,7 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
 }
 
 bool SCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator* conditionalOperator){
-    auto condOpLocationInfo = getStmtInfo(conditionalOperator);
+    auto condOpLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(conditionalOperator,ci);
     FindDataFlow findCond(conditionalOperator->getCond(), this->module,ci, false);
     auto condExpr = findCond.getExpr();
     FindDataFlow findTrue(conditionalOperator->getTrueExpr(), this->module,ci, unsigned_flag);
@@ -148,7 +148,9 @@ bool SCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator* co
     if(condExpr && trueExpr && falseExpr){
     //conditionalOperator->dumpColor();
     //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
-    this->expr = new Ternary(condExpr,trueExpr,falseExpr,condOpLocationInfo);
+        ASSERT_STMT(this->expr = new Ternary(condExpr,trueExpr,falseExpr,condOpLocationInfo))
+        if (StmtException::isExceptionHappened())
+            clearExpressions();
     }else return exitVisitor("Operator not correctly used!",condOpLocationInfo);
     return false;
 }
@@ -157,7 +159,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
     //Call: ->write(argument)
     if (pass == 0) {
         // Collecting statement location information from clang
-        auto memberCallLocationInfo = getStmtInfo(memberCallExpr);
+        auto memberCallLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr,ci);
         //Return value:
         std::string returnValue = memberCallExpr->getCallReturnType().getAsString();
         //Callee: E.g. x.foo() -> foo() is callee
@@ -172,7 +174,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
             //Assign name of the method
             methodString = memberExpr->getMemberDecl()->getNameAsString();
             //Get location info of the method
-            auto calleeLocationInfo = getStmtInfo(memberCallExpr->getCallee());
+            auto calleeLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr->getCallee(),ci);
             //Check whether method is supported, if not -> Bad Stmts
             if (std::find(supportedMethods.begin(), supportedMethods.end(), methodString) != supportedMethods.end()) {
 //                this->pass = 1;
@@ -218,7 +220,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
 
         if (this->lhsExpr != nullptr) {
             //Get location info of the member
-            auto membrLocationInfo = getStmtInfo(implicitObjArg);
+            auto membrLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitObjArg,ci);
             if (PortOperand *operand = dynamic_cast<PortOperand *>(this->lhsExpr)) {
                 //Lambda for finding the stateName
                 auto getStateName = [=]() -> std::string {
@@ -448,7 +450,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
 bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
 
     //Get location info of the member
-    auto membrLocationInfo = getStmtInfo(memberExpr);
+    auto membrLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberExpr,ci);
 
     //Name of memberfield
     std::string name = memberExpr->getMemberDecl()->getName();
@@ -538,7 +540,7 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
 
 bool SCAM::FindDataFlow::VisitIntegerLiteral(clang::IntegerLiteral *integerLiteral) {
 
-    auto valLocInfo = getStmtInfo(integerLiteral);
+    auto valLocInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(integerLiteral,ci);
     if (unsigned_flag) {
         unsigned int ret = (unsigned int) *integerLiteral->getValue().getRawData();
         //Assign value
@@ -566,7 +568,7 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
     std::string name = declRefExpr->getDecl()->getNameAsString();
 
     //Get location info of the varDecl
-    auto varDeclLocationInfo = getStmtInfo(declRefExpr);
+    auto varDeclLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(declRefExpr,ci);
 
     //Check for global variables
     auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
@@ -639,7 +641,7 @@ bool SCAM::FindDataFlow::VisitUnaryOperator(clang::UnaryOperator *unaryOperator)
     //Unary operator !var, var++ and var-- everything is going to result in a fault.
     if (pass == 0) {
         // Collecting statement location information from clang
-        auto unaryOpLocationInfo = getStmtInfo(unaryOperator);
+        auto unaryOpLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(unaryOperator,ci);
 
         //Opcode as string: ++,--,!
         std::string opcode = unaryOperator->getOpcodeStr(unaryOperator->getOpcode()).str();
@@ -688,7 +690,7 @@ bool SCAM::FindDataFlow::VisitUnaryOperator(clang::UnaryOperator *unaryOperator)
 bool SCAM::FindDataFlow::VisitWhileStmt(clang::WhileStmt *whileStmt) {
     if (pass == 0) {
         // Collecting statement location information from clang
-        auto whileLocationInfo = getStmtInfo(whileStmt);
+        auto whileLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(whileStmt,ci);
 
         FindDataFlow conditionStmt(whileStmt->getCond(), this->module, ci, false);
         ASSERT_STMT(this->stmt = new While(conditionStmt.getExpr(),whileLocationInfo))
@@ -700,7 +702,7 @@ bool SCAM::FindDataFlow::VisitWhileStmt(clang::WhileStmt *whileStmt) {
 bool SCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
     if (pass == 0) {
         // Collecting statement location information from clang
-        auto ifLocationInfo = getStmtInfo(ifStmt);
+        auto ifLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(ifStmt,ci);
 
         FindDataFlow conditionStmt(ifStmt->getCond(), this->module, ci, false);
         if (conditionStmt.getExpr() == nullptr)
@@ -714,7 +716,7 @@ bool SCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
 bool SCAM::FindDataFlow::VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *boolLiteralExpr) {
 
     // Collecting statement location information from clang
-    auto boolExprLocationInfo = getStmtInfo(boolLiteralExpr);
+    auto boolExprLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(boolLiteralExpr,ci);
     ASSERT_STMT(
     switch (pass) {
         case 0:
@@ -737,7 +739,7 @@ bool SCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *op
     if (pass == 0) {
 
         // Collecting statement location information from clang
-        auto opCallLocationInfo = getStmtInfo(operatorCallExpr);
+        auto opCallLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(operatorCallExpr,ci);
 
         //Find assignemnt of structs -> which is represented as an overloaded copy
         // ComplexType foo = port[ComplexType].read()
@@ -776,7 +778,7 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
     if (callee == nullptr || callee->isCXXClassMember()) return true;
 
     // Collecting statement location information from clang
-    auto callLocationInfo = getStmtInfo(callExpr);
+    auto callLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(callExpr,ci);
 
     std::string functionName = callee->getNameAsString();
     if (functionName == "insert_state") {
@@ -824,7 +826,7 @@ bool SCAM::FindDataFlow::VisitImplicitCastExpr(clang::ImplicitCastExpr *implicit
                                     implicitCastExpr->getType()->isUnsignedIntegerType());
         if (unsigendSearch.getExpr() == nullptr) {
             // Collecting statement location information from clang
-            auto castExprLocationInfo = getStmtInfo(implicitCastExpr);
+            auto castExprLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitCastExpr,ci);
             return exitVisitor("Unknown unsigned value", castExprLocationInfo);
         }
         switchPassExpr(unsigendSearch.getExpr());
@@ -859,7 +861,7 @@ SCAM::Expr *SCAM::FindDataFlow::getExpr() const {
 
 bool SCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *staticCastExpr) {
     // Collecting statement location information from clang
-    auto castExprLocationInfo = getStmtInfo(staticCastExpr);
+    auto castExprLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(staticCastExpr,ci);
 
     //FIXME: is the restirction to casting only variables necessary? Remove if hardware is designable
     if (staticCastExpr->getType()->isUnsignedIntegerType() &&
@@ -887,7 +889,7 @@ bool SCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *static
 bool SCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
     FindDataFlow returnExpr(returnStmt->getRetValue(), module, ci, false);
     // Collecting statement location information from clang
-    auto returnLocationInfo = getStmtInfo(returnStmt);
+    auto returnLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(returnStmt,ci);
     if (returnExpr.getExpr() == nullptr)
         return exitVisitor(" return value is null", returnLocationInfo);
     ASSERT_STMT(this->stmt = new SCAM::Return(returnExpr.getExpr(),returnLocationInfo))
@@ -902,7 +904,7 @@ bool SCAM::FindDataFlow::VisitCompoundStmt(clang::CompoundStmt *compoundStmt) {
 bool SCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) {
 
     // Collecting statement location information from clang
-    auto arraySubExprLocationInfo = getStmtInfo(arraySubscriptExpr->getLHS());
+    auto arraySubExprLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(arraySubscriptExpr->getLHS(),ci);
 
     FindDataFlow array(arraySubscriptExpr->getLHS(), module, ci, false);
 
@@ -935,28 +937,7 @@ SCAM::Stmt *SCAM::FindDataFlow::getStmt() {
     return this->stmt;
 }
 
-SCAM::StmtLocationInfo SCAM::FindDataFlow::getStmtInfo(clang::Stmt *clangStmt) {
-    // Getting stmt information from clang
-    std::string statement = clang::Lexer::getSourceText(
-            clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
-            ci.getSourceManager(), ci.getLangOpts()).str();
-    auto locStartVec = SCAM::GlobalUtilities::stringSplit(
-            clangStmt->getLocStart().printToString(ci.getSourceManager()), ':');
-    auto locEndVec = SCAM::GlobalUtilities::stringSplit(
-            clangStmt->getLocEnd().printToString(ci.getSourceManager()), ':');
-    auto fileDir = locStartVec[0];
-    auto rowStartNum = std::stoi(locStartVec[1]);
-    auto rowEndNum = std::stoi(locEndVec[1]);
-    auto colStartNum = std::stoi(locStartVec[2]);
-    auto colEndNum = std::stoi(locEndVec[2]);
-    if (colEndNum < colStartNum && rowStartNum == rowEndNum) colEndNum = colStartNum + 1;
-    if (rowEndNum < rowStartNum) rowEndNum = rowStartNum;
-    SCAM::StmtLocationInfo stmtInfo(statement, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
-    return stmtInfo;
-}
-
-
-bool SCAM::FindDataFlow::exitVisitor(const std::string &msg, const SCAM::StmtLocationInfo &stmtInfo) {
+bool SCAM::FindDataFlow::exitVisitor(const std::string &msg, const SCAM::LocationInfo &stmtInfo) {
     this->stmt = nullptr;
     //Add loggerMsg to the logger
     SCAM::LoggerMsg loggerMsg(msg, stmtInfo, LoggerMsg::SeverityLevel::Error, LoggerMsg::ViolationType::SystemC_PPA_compliance,Logger::getCurrentProcessedLocation());

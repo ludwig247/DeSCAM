@@ -10,7 +10,7 @@
 
 
 namespace SCAM {
-    CompoundExpr::CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, StmtLocationInfo stmtLocationInfo) :
+    CompoundExpr::CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, LocationInfo stmtLocationInfo) :
             valueMap(valueMap),
             Expr(dataType) {
         this->stmtLocationInfo = std::move(stmtLocationInfo);

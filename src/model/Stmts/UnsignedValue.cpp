@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::UnsignedValue::UnsignedValue(unsigned int value, StmtLocationInfo stmtLocationInfo) :
+SCAM::UnsignedValue::UnsignedValue(unsigned int value, LocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("unsigned")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

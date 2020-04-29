@@ -7,7 +7,7 @@
 #include "NodePeekVisitor.h"
 #include "StmtException.h"
 
-SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype, StmtLocationInfo stmtLocationInfo) :
+SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype, LocationInfo stmtLocationInfo) :
         Expr(toDatatype),
         expr(expr) {
     this->stmtLocationInfo = stmtLocationInfo;

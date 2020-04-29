@@ -10,7 +10,7 @@
 namespace SCAM {
     class Relational : public Expr {
     public:
-        Relational(Expr *lhs, std::string operation, Expr *rhs, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Relational(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs();

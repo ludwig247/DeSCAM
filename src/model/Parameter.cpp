@@ -13,7 +13,7 @@ void SCAM::Parameter::accept(SCAM::AbstractVisitor &visitor) {
 }
 
 SCAM::Parameter::Parameter(std::string name, SCAM::DataType *dataType, SCAM::ConstValue *initialValue,
-                           SCAM::VariableTemplate<SCAM::Parameter> *parent) : VariableTemplate(name, dataType, initialValue, parent) {
+                           SCAM::VariableTemplate<SCAM::Parameter> *parent, LocationInfo locationInfo) : VariableTemplate(name, dataType, initialValue, parent, locationInfo) {
 
 }
 

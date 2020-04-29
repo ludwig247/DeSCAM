@@ -13,7 +13,7 @@ namespace SCAM {
 
     class Arithmetic : public Expr {
     public:
-        Arithmetic(Expr *lhs, std::string operation, Expr *rhs, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Arithmetic(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs() const;

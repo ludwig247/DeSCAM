@@ -6,7 +6,7 @@
 #define DESCAM_ERRORMSG_H
 
 #include <string>
-#include <Stmts/StmtLocationInfo.h>
+#include <LocationInfo.h>
 
 namespace SCAM {
 /*!
@@ -28,12 +28,12 @@ namespace SCAM {
 
         LoggerMsg() = default;
 
-        LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo &stmtInfo, SeverityLevel severityLevel,
+        LoggerMsg(const std::string &message, const SCAM::LocationInfo &stmtInfo, SeverityLevel severityLevel,
                   ViolationType violationType, ProcessedLocation violationLocation);
 
         const std::string &getMessage();
 
-        const SCAM::StmtLocationInfo &getStmtInfo();
+        const SCAM::LocationInfo &getStmtInfo();
 
         std::string getSeverityLevel();
 
@@ -43,7 +43,7 @@ namespace SCAM {
 
         inline void setMessage(const std::string &message);
 
-        inline void setStmtInfo(const SCAM::StmtLocationInfo &stmtInfo);
+        inline void setStmtInfo(const SCAM::LocationInfo &stmtInfo);
 
         inline void setViolationType(ViolationType violationType);
 
@@ -53,7 +53,7 @@ namespace SCAM {
 
     protected:
         std::string message = "", statement = "";
-        SCAM::StmtLocationInfo stmtInfo;
+        SCAM::LocationInfo stmtInfo;
         ViolationType violationType = ViolationType::NA;
         SeverityLevel severityLevel = SeverityLevel::Info;
         ProcessedLocation processedLocation = ProcessedLocation::Behavior;

@@ -4,9 +4,9 @@
 #include "DataSignal.h"
 
 
-SCAM::DataSignal::DataSignal(std::string name, const SCAM::DataType *type, SCAM::ConstValue *initialValue, SCAM::DataSignal *parent, SCAM::Port *port) :
+SCAM::DataSignal::DataSignal(std::string name, const SCAM::DataType *type, SCAM::ConstValue *initialValue, SCAM::DataSignal *parent, SCAM::Port *port, LocationInfo locationInfo) :
         port(port),
-        VariableTemplate(name, type, initialValue, parent) {
+        VariableTemplate(name, type, initialValue, parent,locationInfo) {
     if (parent != nullptr) {
         this->port = parent->getPort();
     }

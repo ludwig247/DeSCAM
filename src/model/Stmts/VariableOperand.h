@@ -15,7 +15,7 @@ namespace SCAM {
      */
     class VariableOperand : public Operand {
     public:
-        VariableOperand(Variable *variable, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        VariableOperand(Variable *variable, LocationInfo stmtLocationInfo = LocationInfo());
 
         Variable *getVariable();
 

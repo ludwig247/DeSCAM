@@ -9,7 +9,7 @@
 #include "NodePeekVisitor.h"
 #include "StmtException.h"
 
-SCAM::CompoundValue::CompoundValue(const std::vector<ConstValue *> &values, const SCAM::DataType *dataType, StmtLocationInfo stmtLocationInfo) : ConstValue(dataType) {
+SCAM::CompoundValue::CompoundValue(const std::vector<ConstValue *> &values, const SCAM::DataType *dataType, LocationInfo stmtLocationInfo) : ConstValue(dataType) {
     this->stmtLocationInfo = stmtLocationInfo;
     assert(dataType != nullptr);
     if (!dataType->isCompoundType() && !dataType->isArrayType())throw SCAM::StmtException("Type " + dataType->getName() + "is not a compound type",this->stmtLocationInfo);

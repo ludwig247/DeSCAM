@@ -4,7 +4,7 @@
 
 #include "TimePointOperand.h"
 
-SCAM::TimePointOperand::TimePointOperand(Timepoint *timepoint, StmtLocationInfo stmtLocationInfo) :
+SCAM::TimePointOperand::TimePointOperand(Timepoint *timepoint, LocationInfo stmtLocationInfo) :
         timepoint(timepoint), Operand(timepoint->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 

@@ -17,8 +17,8 @@ namespace SCAM {
             topInstance(nullptr) {
     }
 
-    Model::Model(std::string name) :
-            AbstractNode(name),
+    Model::Model(std::string name,LocationInfo locationInfo) :
+            AbstractNode(name,locationInfo),
             topInstance(nullptr) {
     }
 

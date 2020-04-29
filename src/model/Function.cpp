@@ -7,10 +7,10 @@
 #include "Logger/Logger.h"
 
 
-SCAM::Function::Function(std::string name, SCAM::DataType *returnType, const std::map<std::string, Parameter *> &paramMap) :
+SCAM::Function::Function(std::string name, SCAM::DataType *returnType, const std::map<std::string, Parameter *> &paramMap, LocationInfo locationInfo) :
         returnType(returnType),
         paramMap(paramMap),
-        AbstractNode(name) {
+        AbstractNode(name,locationInfo) {
     if (returnType->isCompoundType()) {
         TERMINATE(" Function " + name + "() unallowed return type: " + returnType->getName() + " only built-in types allowed");
     }
@@ -61,6 +61,7 @@ SCAM::Function::Function(SCAM::Function *function) : AbstractNode(function->getN
     this->returnValueConditionList = function->getReturnValueConditionList();
     this->paramMap = function->getParamMap();
     this->returnType = function->getReturnType();
+    this->setLocationInfo(function->getLocationInfo());
 }
 
 

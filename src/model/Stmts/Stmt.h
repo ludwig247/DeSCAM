@@ -8,7 +8,7 @@
 #include "StmtAbstractVisitor.h"
 #include <iostream>
 #include <utility>
-#include "StmtLocationInfo.h"
+#include "LocationInfo.h"
 
 
 namespace SCAM {
@@ -41,12 +41,12 @@ namespace SCAM {
 
         virtual std::ostream &print(std::ostream &) const = 0;
 
-        const StmtLocationInfo& getStmtInfo() {return this->stmtLocationInfo;};
+        const LocationInfo& getStmtInfo(){return this->stmtLocationInfo;};
 
-        void setStmtInfo(StmtLocationInfo& info){ this->stmtLocationInfo = info;};
+        void setStmtInfo(LocationInfo& info){ this->stmtLocationInfo = info;};
 
     protected:
-        StmtLocationInfo stmtLocationInfo;
+        LocationInfo stmtLocationInfo;
     };
 
 }

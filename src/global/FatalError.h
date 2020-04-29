@@ -8,7 +8,7 @@
 
 #include <exception>
 #include <string>
-#include "StmtLocationInfo.h"
+#include "LocationInfo.h"
 
 namespace SCAM {
     /**
@@ -49,14 +49,14 @@ namespace SCAM {
 /** A macro that breaks execution at this point and adds a message to the logger */
     #define TERMINATE(msg)                                           \
     {                                                                 \
-    SCAM::StmtLocationInfo stmtLocationInfo("in function: " +           \
+    SCAM::LocationInfo stmtLocationInfo("in function: " +           \
     std::string(__FUNCTION__),std::string(__FILE__),__LINE__,__LINE__,0,0);                           \
     auto sl = SCAM::LoggerMsg::SeverityLevel::Fatal;                     \
     auto vt = SCAM::LoggerMsg::ViolationType::NA;                         \
     auto pl = SCAM::Logger::getCurrentProcessedLocation();                 \
     SCAM::LoggerMsg lmsg(msg,stmtLocationInfo,sl,vt,pl);                    \
     SCAM::Logger::addMsg(lmsg);                                              \
-    throw SCAM::FatalError();                                                 \
+    throw std::runtime_error(msg);                                                 \
     }
 }
 #endif //DESCAM_FATALERROR_H__func__

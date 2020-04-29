@@ -11,7 +11,7 @@
 namespace SCAM {
     class If : public Branch {
     public:
-        If(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        If(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         bool hasElseStmt();

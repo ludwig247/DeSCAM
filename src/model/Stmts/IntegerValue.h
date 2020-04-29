@@ -11,7 +11,7 @@ namespace SCAM {
     class
     IntegerValue : public ConstValue {
     public:
-        IntegerValue(int value, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        IntegerValue(int value, LocationInfo stmtLocationInfo = LocationInfo());
 
         int getValue();
 

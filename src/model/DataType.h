@@ -44,8 +44,8 @@ namespace SCAM {
 
     class DataType : public AbstractNode {
     public:
-        DataType(std::string name) :
-                AbstractNode(name) {};
+        DataType(std::string name, LocationInfo locationInfo = LocationInfo()) :
+                AbstractNode(name, locationInfo) {};
 
         //Adder
         void addSubVar(std::string subVarName, DataType *subVarType);

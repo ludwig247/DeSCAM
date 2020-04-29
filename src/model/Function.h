@@ -14,7 +14,7 @@
 namespace SCAM {
     class Function : public AbstractNode {
     public:
-        Function(std::string name, DataType *returnType, const std::map<std::string, Parameter *> &paramMap);
+        Function(std::string name, DataType *returnType, const std::map<std::string, Parameter *> &paramMap, LocationInfo = LocationInfo());
 
         Function(Function *function);
 

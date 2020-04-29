@@ -11,7 +11,7 @@
 
 namespace SCAM {
 
-    Read::Read(Port *port, VariableOperand *variable, bool is_non_blocking_access, VariableOperand *status, StmtLocationInfo stmtLocationInfo) :
+    Read::Read(Port *port, VariableOperand *variable, bool is_non_blocking_access, VariableOperand *status, LocationInfo stmtLocationInfo) :
             variable(variable),
             status(status),
             Communication(port, is_non_blocking_access) {
