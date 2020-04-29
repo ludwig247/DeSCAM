@@ -20,4 +20,4 @@ add_library(global SHARED
         RecursiveVisitor.cpp
         Completeness.cpp
         ${LoggerSrc}
-        FatalError.h)
+        FatalError.h GlobalUtilities.h)
