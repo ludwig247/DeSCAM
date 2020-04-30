@@ -39,5 +39,4 @@ macro (add_example)
         list(APPEND EXAMPLE_NAMES_LIST ${THIRD_ARG})
     endif ()
     list(APPEND EXAMPLE_H_LIST ${EXAMPLE_H})
-
 endmacro(add_example)

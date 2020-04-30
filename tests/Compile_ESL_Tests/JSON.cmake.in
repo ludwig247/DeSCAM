@@ -10,9 +10,6 @@ foreach(EXAMPLE_NAME ${EXAMPLE_NAMES})
 #message(STATUS "EXAMPLE_NAME = ${EXAMPLE_NAME}")
 #message(STATUS "RESULT = ${RESULT}, OUTPUT = ${OUTPUT}")
 
-
-  #  file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} WARNING_DE REGEX Warnung ENCODING UTF-8)
- #   file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} WARNING_ENG REGEX Warning ENCODING UTF-8)
     file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} ERROR ENCODING UTF-8)
     string(REPLACE "," "" ERROR "${ERROR}")
     string(REPLACE "\"" "\\\"" ERROR "${ERROR}")

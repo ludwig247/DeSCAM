@@ -12,6 +12,10 @@ include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces_new/)
 include_directories(Interfaces_new)
 
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
+add_subdirectory(env)
+get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
+list(APPEND R_SRC ${ENV_SRC})
+
 
 add_executable(Bus_2 ${R_SRC})
 target_link_libraries(Bus_2 systemc)
