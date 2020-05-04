@@ -22,6 +22,8 @@ namespace SCAM{
         static void addWait(const Module *module, PropertySuite *propertySuite);
         static void addOperations(const Module *module, PropertySuite *propertySuite);
 
+        static void addConnections(const Module *module, PropertySuite *propertySuite, Model *model);
+
         static void addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite);
 
     private:

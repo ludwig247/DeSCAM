@@ -24,6 +24,10 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
     _b = 0;
 
     ModuleInstance* topInstance = model->getTopInstance();
+    if (topInstance == nullptr) {
+        pluginOutput.insert(std::make_pair("PrintSVG.log", "Could not generate graphical representation -- TopInstance is missing"));
+        return pluginOutput;
+    }
     setX(topInstance, 0);
     setY(topInstance, 0);
     setHeight(topInstance, standardheight);
@@ -215,7 +219,7 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
 
             setXStart(channel, toportx);
             setXEnd(channel, fromportx);
-            if (channel->getLowerPort()->getInterface()->getDirection() == "in") {
+            /*if (channel->getLowerPort()->getInterface()->getDirection() == "in") {
                 //Draw triangle to indicate port direction IN
                 doc << (svg::Polygon(svg::Color::Black, svg::Stroke(.5, svg::Color::Black))
                         << svg::Point(toportx, getY(channel->getHigherInstance()))
@@ -237,7 +241,7 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
                         << svg::Point(toportx, getY(channel->getHigherInstance())  - trianglesize)
                         << svg::Point(toportx + trianglesize, getY(channel->getHigherInstance()) )
                         << svg::Point(toportx - trianglesize, getY(channel->getHigherInstance())));
-            }
+            }*/
 
             doc << svg::Line(svg::Point(getXStart(channel) , getY(channel) ), svg::Point(getXEnd(channel) , getY(channel)) , svg::Stroke(1, svg::Color::Blue));
 
@@ -264,7 +268,7 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
 
 
     doc.save();
-    pluginOutput.insert(std::make_pair("PrintSVG.txt", "Output saved to svg file - Plugin.svg"));
+    pluginOutput.insert(std::make_pair("PrintSVG.log", "Output saved to svg file - Plugin.svg"));
     return pluginOutput;
 
 }

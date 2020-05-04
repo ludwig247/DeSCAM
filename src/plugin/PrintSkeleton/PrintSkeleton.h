@@ -30,6 +30,7 @@ public:
 private:
     //std::stringstream ss;
     SCAM::Module *module;
+    SCAM::Model *model;
     enum {
         VHDL, SV
     } language;
@@ -61,7 +62,15 @@ private:
 
     void ports(std::stringstream &ss);
 
+    void ports(std::stringstream &ss, SCAM::Module* child);
+
     void registers(std::stringstream &ss);
+
+    void channels(std::stringstream &ss);
+
+    void components(std::stringstream &ss);
+
+    void instances(std::stringstream &ss);
 
     void resetLogic(std::stringstream &ss);
 

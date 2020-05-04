@@ -12,7 +12,8 @@ namespace SCAM{
 class PropertyFactory {
 public:
     PropertyFactory() = delete;
-    explicit PropertyFactory(const Module *module);
+    explicit PropertyFactory(Module *module);
+    explicit PropertyFactory(Module *module, Model* model);
     virtual ~PropertyFactory() = default;
 
     PropertySuite *getPropertySuite() const;

@@ -10,10 +10,12 @@
 
 std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
 
+    model = node;
     setLanguage();
     globalPackageName = node->getName();
 
     pluginOutput.insert(std::make_pair("globalTypes" + getFilenameExtention(), generateGlobalTypes()));
+    std::cout << "l.17" << std::endl;
     if (!node->getGlobalVariableMap().empty()) {
         pluginOutput.insert(std::make_pair("globalDefines" + getFilenameExtention(), generateGlobalDefs()));
     }
@@ -22,8 +24,9 @@ std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
     for (auto &module: node->getModules()) {
         this->module = module.second;
         localPackageName = module.first;
-
+        std::cout << "l.26" << std::endl;
         pluginOutput.insert(std::make_pair(module.first + "_types" + getFilenameExtention(), generateLocalTypes()));
+        std::cout << "l.28" << std::endl;
         std::stringstream result;
         try {
             result << generateHDLSkeleton();
@@ -167,17 +170,23 @@ std::string PrintSkeleton::generateHDLSkeleton() {
     }
 
     std::stringstream skeletonStream;
-
+    std::cout << "l.172" << std::endl;
     header(skeletonStream);
-
+    std::cout << "l.174" << std::endl;
     ports(skeletonStream);
-
+    std::cout << "l.176" << std::endl;
     registers(skeletonStream);
+    std::cout << "l.178" << std::endl;
+    //channels(skeletonStream);
 
+    //components(skeletonStream);
+
+    //instances(skeletonStream);
+    std::cout << "l.180" << std::endl;
     resetLogic(skeletonStream);
-
+    std::cout << "l.180" << std::endl;
     footer(skeletonStream);
-
+    std::cout << "l.182" << std::endl;
     return skeletonStream.str();
 
 }
@@ -367,7 +376,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
     int nonblockingIndentationLevel = 3;
 
-
+    std::cout << "l.372" << std::endl;
     for (auto variable: module->getVariableMap()) {
         if (variable.second->isArrayElement() && variable.second->getName() != "0") continue; //Skip all other array elements
         if (variable.second->getDataType()->isCompoundType()) {
@@ -458,22 +467,26 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
         }
 
     }
+    std::cout << "l.463" << std::endl;
     //Notify signals for ports
-    auto opList = module->getFSM()->getStateMap().at(0)->getOutgoingOperationsList();
-    assert(opList.size() == 1);
-    for (auto port: module->getPorts()) {
-        // interfaces without notify signals
-        if (port.second->getInterface()->isShared()) continue;
-        if (port.second->getInterface()->isMasterIn()) continue;
-        if (port.second->getInterface()->isSlaveIn()) continue;
-        if (port.second->getInterface()->isSlaveOut()) continue;
-        // interfaces with notify signals
-        if (opList.at(0)->getNextState()->getCommunicationPort() == port.second) {
-            insertNonblockingAssignment(ss, port.first + "_notify", booleanWrapper(true), nonblockingIndentationLevel);
-        } else {
-            insertNonblockingAssignment(ss, port.first + "_notify", booleanWrapper(false), nonblockingIndentationLevel);
+    if (! module->isStructural()) {
+        auto opList = module->getFSM()->getStateMap().at(0)->getOutgoingOperationsList();
+        assert(opList.size() == 1);
+        for (auto port: module->getPorts()) {
+            // interfaces without notify signals
+            if (port.second->getInterface()->isShared()) continue;
+            if (port.second->getInterface()->isMasterIn()) continue;
+            if (port.second->getInterface()->isSlaveIn()) continue;
+            if (port.second->getInterface()->isSlaveOut()) continue;
+            // interfaces with notify signals
+            if (opList.at(0)->getNextState()->getCommunicationPort() == port.second) {
+                insertNonblockingAssignment(ss, port.first + "_notify", booleanWrapper(true), nonblockingIndentationLevel);
+            } else {
+                insertNonblockingAssignment(ss, port.first + "_notify", booleanWrapper(false), nonblockingIndentationLevel);
+            }
         }
     }
+
     if (language == VHDL) {
         ss << "\t\telse\n";
     } else if (language == SV) {
@@ -644,3 +657,115 @@ std::string PrintSkeleton::generateGlobalDefs() {
 }
 
 
+void PrintSkeleton::components(std::stringstream &ss) {
+
+    if (!module->isStructural()) {
+        return;
+    }
+    for (auto inst: module->getInstanceMap()) {
+        SCAM::Module* child = model->getModules().find(inst.first.second)->second;
+        if (language == VHDL) {
+            ss << "\tcomponent " + inst.first.second + "\n";
+            ports(ss, child);
+            ss << "\tend component;\n\n";
+        }
+    }
+}
+
+void PrintSkeleton::ports(std::stringstream &ss, SCAM::Module* child) {
+
+    std::string syncNotifyType;
+    std::string clockResetType;
+    if (language == VHDL) {
+        syncNotifyType = "bool";
+        clockResetType = "std_logic";
+    } else if (language == SV) {
+        syncNotifyType = "logic";
+        clockResetType = "logic";
+    }
+
+    if (language == VHDL) {
+        ss << "\tport(\t\n";
+    } else if (language == SV) {
+        ss << "module " + child->getName() + " (\n";
+    }
+    ss << "\t";
+    insertPortVariable(ss, "clk", getDirectionWrapper("in"), clockResetType, false);
+    ss << "\t";
+    insertPortVariable(ss, "rst", getDirectionWrapper("in"), clockResetType, false);
+
+    for (auto port = child->getPorts().begin(); port != child->getPorts().end(); ++port) {
+        ss << "\t";
+        std::string name = port->first;
+        auto interface = port->second->getInterface();
+        std::string type = getDataTypeWrapper(port->second->getDataType());
+        std::string direction = getDirectionWrapper(interface->getDirection());
+
+        //Data signal
+        bool last = (port == --child->getPorts().end());
+
+        insertPortVariable(ss, name, direction, type,
+                           last && (interface->isShared() || interface->isSlaveOut() || interface->isMasterIn()));
+
+        //Synch signals
+        if (interface->isBlocking()) {
+            ss << "\t";
+            insertPortVariable(ss, name + "_sync", getDirectionWrapper("in"), syncNotifyType, false);
+            ss << "\t";
+            insertPortVariable(ss, name + "_notify", getDirectionWrapper("out"), syncNotifyType, last);
+        } else if (interface->isSlaveIn()) {
+            ss << "\t";
+            insertPortVariable(ss, name + "_sync", getDirectionWrapper("in"), syncNotifyType, last);
+        } else if (interface->isMasterOut()) {
+            ss << "\t";
+            insertPortVariable(ss, name + "_notify", getDirectionWrapper("out"), syncNotifyType, last);
+        }
+    }
+    if (language == VHDL) {
+        ss << "\t);\n";
+    } else if (language == SV) {
+        ss << "\t);\n\n";
+    }
+
+}
+
+void PrintSkeleton::channels(std::stringstream &ss) {
+    //At the moment VHDL only
+    int currentLevel = model->getMaxLevel();
+    while(currentLevel >= 0) {
+        std::vector<ModuleInstance*> queue = model->getInstancesAtLevel(currentLevel);
+        while (!queue.empty()) {
+            auto mod = queue.front()->getStructure();
+            auto inst = queue.front();
+            if (mod->getName() == module->getName()) {
+                for (auto channels: inst->getChannelMap()) {
+                    ss << "\tsignal " + channels.first+ ": " + channels.second->getToPort()->getDataType()->getName() + ";\n";
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        currentLevel--;
+    }
+    ss << "\n";
+}
+
+void PrintSkeleton::instances(std::stringstream &ss) {
+    //At the moment VHDL only
+
+    for (auto inst: module->getInstanceMap()) {
+        ss << "\t" + inst.first.first + ": " + inst.first.second + "\n";
+        ss << "\tport map(\n";
+        ss << "\t\tclk\t=>\tclk,\n";
+        ss << "\t\trst\t=>\trst,\n";
+        for (auto ports: model->getModules().find(inst.first.second)->second->getPorts()) {
+            if (ports.second->getMapped()) {
+                //TODO: add mapped
+                ss << "\t\t"+ ports.first + "\t=>\t" + "mapped" + ",\n";
+            } else {
+                ss << "\t\t"+ ports.first + "\t=>\t" + ports.second->getChannel()->getName() + ",\n";
+            }
+
+        }
+        ss << "\t);\n\n";
+    }
+}

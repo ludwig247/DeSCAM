@@ -377,6 +377,12 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
 
 }
 
+void CreatePropertySuite::addConnections(const Module *module, PropertySuite *propertySuite, Model* model) {
+    for (const auto &inst: module->getInstanceMap()) {
+
+    }
+}
+
 void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite) {
     int cycle_cnt = 0;
     //Find cylces
@@ -507,3 +513,5 @@ Timepoint *CreatePropertySuite::findTimeExpr(const std::map<Timepoint *, Expr *>
     }
     throw std::runtime_error(" Timexpr " + state_name + " not found");
 }
+
+
