@@ -16,20 +16,15 @@ namespace SCAM {
     class ExprTranslator : public StmtAbstractVisitor {
     public:
         explicit ExprTranslator(z3::context *context);
-
         virtual ~ExprTranslator() = default;
 
         Expr *translate(z3::expr &z3_expr, const SCAM::Module *module = nullptr);
-
         bool isAbort() const;
-
         z3::expr &translate(SCAM::Expr *scam_expr);
 
         z3::context *getContext();
 
         void reset();
-
-
 
     private:
         ExprTranslator();

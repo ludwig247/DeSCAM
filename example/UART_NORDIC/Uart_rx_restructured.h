@@ -7,7 +7,6 @@
 
 SC_MODULE(Uart_rx)
 {
-
     //blocking_out<unsigned int> data_out;
     shared_out<data_t> data_out;
     shared_in<bool> data_out_sync;
