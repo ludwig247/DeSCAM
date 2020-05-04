@@ -6,7 +6,8 @@
 #include <PrintITL/PrintITL.h>
 #include <TrueOperation.h>
 #include "CreatePropertySuite.h"
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include "BoolValue.h"
 
 void SCAM::CreatePropertySuite::addNotifySignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
@@ -505,5 +506,5 @@ Timepoint *CreatePropertySuite::findTimeExpr(const std::map<Timepoint *, Expr *>
     for (auto te: map) {
         if (te.first->getName() == state_name) return te.first;
     }
-    throw std::runtime_error(" Timexpr " + state_name + " not found");
+    TERMINATE(" Timexpr " + state_name + " not found");
 }

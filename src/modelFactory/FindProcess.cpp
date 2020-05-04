@@ -3,6 +3,9 @@
 //
 
 #include "FindProcess.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::FindProcess::FindProcess(clang::CXXRecordDecl* recordDecl):
         recordDecl(recordDecl),
@@ -128,13 +131,13 @@ bool SCAM::FindProcess::isValidProcess() const {
         auto process = (*this->processMap.begin());
         if(process.second.second == SCAM::PROCESS_TYPE::THREAD){
             return true;
-        }else throw std::runtime_error("Process: "+process.first+ " is not an SC_THREAD");
-    }else throw std::runtime_error(" Multiple proccess defined. Only one allowed");
+        }else TERMINATE("Process: "+process.first+ " is not an SC_THREAD");
+    }else TERMINATE(" Multiple proccess defined. Only one allowed");
 }
 
 
 clang::CXXMethodDecl* SCAM::FindProcess::getProcess() const {
     if(this->processMap.size() == 1){
         return this->processMap.begin()->second.first;
-    }else throw std::runtime_error(" Zero or >2 proccesses defined. Exactly one process is required");
+    }else TERMINATE(" Zero or >2 proccesses defined. Exactly one process is required");
 }

@@ -65,7 +65,7 @@ namespace SCAM {
                 this->ss << "->slave_write(";
             } else if (interface == "shared") {
                 this->ss << "->set(";
-            } else throw std::runtime_error("Unknown interface: " + node.getPort()->getInterface()->getName());
+            } else TERMINATE("Unknown interface: " + node.getPort()->getInterface()->getName());
             node.getVariableOperand()->accept(*this);
             if (node.hasStatusOperand()) {
                 this->ss << ",";
@@ -89,7 +89,7 @@ namespace SCAM {
                 this->ss << "->slave_write(";
             } else if (interface == "shared") {
                 this->ss << "->set(";
-            } else throw std::runtime_error("Unknown interface: " + node.getPort()->getInterface()->getName());
+            } else TERMINATE("Unknown interface: " + node.getPort()->getInterface()->getName());
             node.getValue()->accept(*this);
             if (node.hasStatusOperand()) {
                 this->ss << ",";

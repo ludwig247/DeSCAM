@@ -9,7 +9,7 @@
 #include "NodePeekVisitor.h"
 #include "StmtException.h"
 
-SCAM::Relational::Relational(Expr *lhs, std::string operation, Expr *rhs, StmtLocationInfo stmtLocationInfo) :
+SCAM::Relational::Relational(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         operation(operation),
         rhs(rhs),

@@ -2,6 +2,8 @@
 
 
 #include "FindPathsToReturn.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
 std::map<SCAM::Stmt *, SCAM::Stmt *> SCAM::FindPathsToReturn::trueMap;
@@ -68,7 +70,7 @@ void SCAM::FindPathsToReturn::visit(struct PortOperand &node) {
 }
 
 void SCAM::FindPathsToReturn::visit(class SCAM::Notify &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 
 }
 
@@ -234,12 +236,12 @@ void SCAM::FindPathsToReturn::visit(struct Write &node) {
 }
 
 void SCAM::FindPathsToReturn::visit(struct SyncSignal &node) {
-    throw std::runtime_error("FindPathsToReturn: SynchSignal not allowed here");
+    TERMINATE("FindPathsToReturn: SynchSignal not allowed here");
 
 }
 
 void SCAM::FindPathsToReturn::visit(struct DataSignalOperand &node) {
-    throw std::runtime_error("FindPathsToReturn: DataSignal not allowed here");
+    TERMINATE("FindPathsToReturn: DataSignal not allowed here");
 }
 
 void SCAM::FindPathsToReturn::visit(SCAM::ArrayOperand &node) {

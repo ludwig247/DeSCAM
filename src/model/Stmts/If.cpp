@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::If::If(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo) :
+SCAM::If::If(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) :
         conditionStmt(conditionStmt) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 

@@ -16,7 +16,7 @@ namespace SCAM {
  */
     class ITE : public If {
     public:
-        ITE(Expr *conditionStmt, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        ITE(Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         void addIfList(SCAM::Stmt *);
 

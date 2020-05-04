@@ -16,7 +16,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::VariableOperand &node) {
             this->ss << node.getVariable()->getParent()->getName() << "_signal_r." << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
-        } else throw std::runtime_error(" Unknown ");
+        } else TERMINATE(" Unknown ");
 
     } else {
         this->ss << node.getVariable()->getName() << "_signal_r";
@@ -130,7 +130,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Bitwise &node) {
             this->ss << " | ";
         } else if (node.getOperation() == "^") {
             this->ss << " ^ ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
         shiftLeftAmountFlag = false;
@@ -186,7 +186,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Cast &node) {
             this->ss << ".asSInt";
         }
         shiftAmountIntFlag = false;
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     this->ss << ")";
     //node.getSubExpr()->accept(*this);
     //this->ss << ")";

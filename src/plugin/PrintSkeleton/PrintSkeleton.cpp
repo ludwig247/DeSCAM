@@ -413,7 +413,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                             variable.first + "_signal",
                                             arrayDefaultValue,
                                             nonblockingIndentationLevel);
-            } else throw std::runtime_error("not implemented");
+            } else TERMINATE("not implemented");
 
 
         } else if (variable.second->isArrayElement() && variable.second->getName() == "0") {
@@ -429,7 +429,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                             variable.second->getParent()->getFullName() + "_signal",
                                             arrayDefaultValue,
                                             nonblockingIndentationLevel);
-            } else throw std::runtime_error("not implemented");
+            } else TERMINATE("not implemented");
 
         } else {
             std::string name = variable.first + "_signal";

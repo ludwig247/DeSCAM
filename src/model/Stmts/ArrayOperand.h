@@ -14,8 +14,8 @@ namespace SCAM {
     public:
         ArrayOperand() = delete;
 
-        ArrayOperand(Variable *arrayVar, Expr *idx, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
-        ArrayOperand(Operand * operand, Expr *idx, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        ArrayOperand(Variable *arrayVar, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
+        ArrayOperand(Operand * operand, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
 
 
         virtual ~ArrayOperand() = default;

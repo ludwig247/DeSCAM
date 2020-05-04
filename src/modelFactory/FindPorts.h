@@ -6,6 +6,7 @@
 #include <clang/AST/ASTContext.h>
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "enums.h"
+#include "LocationInfo.h"
 
 namespace SCAM {
 
@@ -16,7 +17,7 @@ namespace SCAM {
      */
     class FindPorts : public clang::RecursiveASTVisitor<FindPorts> {
     public:
-        FindPorts(clang::CXXRecordDecl *recordDecl,const clang::ASTContext& context);
+        FindPorts(clang::CXXRecordDecl *recordDecl,const clang::ASTContext& context, clang::CompilerInstance &ci);
         ~FindPorts();
         //Visitor
         virtual bool VisitFieldDecl(clang::FieldDecl* fieldDecl);
@@ -34,6 +35,8 @@ namespace SCAM {
         const std::map<std::string, std::string> &getSlaveInPortMap() const;
         const std::map<std::string, std::string> &getSlaveOutPortMap() const;
 
+        const std::map<std::string,SCAM::LocationInfo> &getLocationInfoMap() const;
+
     private:
         const clang::ASTContext& context;
         std::map<std::string,std::string > inPortMap; //! Map containing an entry for every rendezVouz in-port,type
@@ -44,8 +47,9 @@ namespace SCAM {
         std::map<std::string,std::string > slaveOutPortMap; //! Map containing an entry for every slave out-port,type
         std::map<std::string,std::string > inSharedPortMap; //! Map containing an entry for every shared  in-port,type
         std::map<std::string,std::string > outSharedPortMap; //! Map containing an entry for every shared out-port,type
+        std::map<std::string,SCAM::LocationInfo> portLocationInfoMap; //! Map containing an entry for every port and its location info
         int pass;
-
+        clang::CompilerInstance &ci;
         //Helper
         std::vector<std::string> portTemplates; //! sc_port<sc_fifo_in_if<_Bool> > Contains an entry for each Template used {sc_port,sc_fifo_in,_Bool}
         void recursiveTemplateVisitor(clang::QualType qualType);

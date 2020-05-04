@@ -6,6 +6,9 @@
 #include "FindEndNode.h"
 #include <algorithm>
 #include <assert.h>
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 /* !
@@ -59,9 +62,9 @@ void SCAM::FindEndNode::recursion(SCAM::CfgBlock *node) {
         } else {
             //HERE: two cases are possible
             //A function is analyzed then everything ends with the terminal node, which has an id == -1
-            //Or the behavorial description uses for example a std::throw std::runtime_error("
+            //Or the behavorial description uses for example a std::TERMINATE("
             if (node->getBlockID() == -1) this->endNode = node;
-            else throw std::runtime_error("Probably a std::exception, assert or unexpected return is used within the behavioral description!");
+            else TERMINATE("Probably a std::exception, assert or unexpected return is used within the behavioral description!");
         }
     }
 }

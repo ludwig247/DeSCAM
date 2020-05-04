@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::Notify::Notify(SCAM::Port *port, StmtLocationInfo stmtLocationInfo) :
+SCAM::Notify::Notify(SCAM::Port *port, LocationInfo stmtLocationInfo) :
         port(port),
         Expr(DataTypes::getDataType("bool")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

@@ -106,7 +106,7 @@ namespace SCAM {
             return new ArrayExpr(variableValueMap, variable->getDataType());
         } else if (variableValueMap.size() == 1) { //variable is not a compound variable or array
             if (variableValueMap.begin()->second->getDataType() != this->variable->getDataType()) {
-                throw std::runtime_error("propagated values and variable are of different datatypes");
+                TERMINATE("propagated values and variable are of different datatypes");
             }
             return variableValueMap.begin()->second;
         } else {
@@ -166,7 +166,7 @@ namespace SCAM {
     }
 
     void PropagateConstantValue::visit(SCAM::ITE &node) {
-        throw std::runtime_error("ITE not allowed");
+        TERMINATE("ITE not allowed");
 
     }
 
@@ -231,7 +231,7 @@ namespace SCAM {
 
 
     void SCAM::PropagateConstantValue::visit(SCAM::Return &node) {
-        throw std::runtime_error("return not expected in the module CFG");
+        TERMINATE("return not expected in the module CFG");
     }
 
     SCAM::Expr *PropagateConstantValue::getPropagatedValue() const {

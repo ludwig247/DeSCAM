@@ -3,6 +3,9 @@
 //
 
 #include "TimePointVisitor.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 void SCAM::TimePointVisitor::visit(SCAM::VariableOperand &node) {
 
@@ -11,7 +14,7 @@ void SCAM::TimePointVisitor::visit(SCAM::VariableOperand &node) {
             this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
-        } else throw std::runtime_error(" Unknown ");
+        } else TERMINATE(" Unknown ");
 
     } else {
         this->ss << node.getVariable()->getName();
@@ -92,7 +95,7 @@ void SCAM::TimePointVisitor::visit(SCAM::Bitwise &node) {
             this->ss << " or ";
         } else if (node.getOperation() == "^") {
             this->ss << " xor ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
@@ -111,7 +114,7 @@ void SCAM::TimePointVisitor::visit(SCAM::Cast &node) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }

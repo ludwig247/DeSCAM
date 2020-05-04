@@ -6,7 +6,7 @@
 #include "ParamOperand.h"
 
 
-SCAM::ParamOperand::ParamOperand(SCAM::Parameter *parameter, StmtLocationInfo stmtLocationInfo) :
+SCAM::ParamOperand::ParamOperand(SCAM::Parameter *parameter, LocationInfo stmtLocationInfo) :
         parameter(parameter),
         Operand(parameter->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

@@ -5,18 +5,19 @@
 #include "ArrayExpr.h"
 #include "StmtException.h"
 #include <NodePeekVisitor.h>
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include <utility>
 
 SCAM::ArrayExpr::ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const SCAM::DataType *dataType,
-                           StmtLocationInfo stmtLocationInfo) :
+                           LocationInfo stmtLocationInfo) :
         valueMap(valueMap),
         Expr(dataType) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
-    if (!dataType->isArrayType()) throw std::runtime_error(dataType->getName() + " is not a array type");
+    if (!dataType->isArrayType()) TERMINATE(dataType->getName() + " is not a array type");
     for (auto subsig: dataType->getSubVarMap()) {
         if (valueMap.find(subsig.first) == valueMap.end())
-            throw std::runtime_error(subsig.first + "is not in the value map");
+            TERMINATE(subsig.first + "is not in the value map");
         if (valueMap.find(subsig.first) != valueMap.end()) {
             if (valueMap.find(subsig.first)->second->getDataType() != subsig.second) {
                 throw StmtException(

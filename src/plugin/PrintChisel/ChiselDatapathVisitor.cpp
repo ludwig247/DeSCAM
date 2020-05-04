@@ -82,7 +82,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::Bitwise &node) {
             this->ss << " or ";
         } else if (node.getOperation() == "^") {
             this->ss << " xor ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
@@ -130,7 +130,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::Cast &node) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }

@@ -9,7 +9,7 @@
 #include "Return.h"
 #include "StmtException.h"
 
-SCAM::Return::Return(SCAM::Expr *returnValue, StmtLocationInfo stmtLocationInfo) :
+SCAM::Return::Return(SCAM::Expr *returnValue, LocationInfo stmtLocationInfo) :
         returnValue(returnValue) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (returnValue == nullptr) {

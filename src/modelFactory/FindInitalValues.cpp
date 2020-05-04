@@ -16,7 +16,7 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
     for (auto it = constructorDecl->getBody()->children().first; it != constructorDecl->getBody()->children().second; it++) {
         cnt++;
         if (cnt > 2)
-            throw std::runtime_error("The body of the constructor has to remain empty and is not analyzed."
+            TERMINATE("The body of the constructor has to remain empty and is not analyzed."
                                      "\n Please use a section to initialize your systems instead of the constructor body\n");
     }
     //Only one Constructor allowed
@@ -56,17 +56,17 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
                                 auto result = SCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
                                 if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
                                     this->initValue = valueT;
-                                } else throw std::runtime_error("All intializer are required to have a constant value");
+                                } else TERMINATE("All intializer are required to have a constant value");
 
                         } else std::cout << "-I- Default init value for variable " << varName << std::endl;
                     } catch (std::runtime_error error) {
                         std::string msg = "Error for initialization of variable " + varName + "\n";
-                        throw std::runtime_error(msg + error.what());
+                        TERMINATE(msg + error.what());
                     }
                 }
             }
         }
-    }else throw std::runtime_error("Only one constructor allowed");
+    }else TERMINATE("Only one constructor allowed");
 
     return false;
 }

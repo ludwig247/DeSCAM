@@ -67,7 +67,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::UnaryExpr &node) {
             } else {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1), node.getStmtInfo());
             }
-        } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation());
     }
 }
 

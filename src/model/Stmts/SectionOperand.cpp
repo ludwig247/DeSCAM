@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::SectionOperand::SectionOperand(SCAM::Variable *sectionVariable, StmtLocationInfo stmtLocationInfo) :
+SCAM::SectionOperand::SectionOperand(SCAM::Variable *sectionVariable, LocationInfo stmtLocationInfo) :
         sectionVariable(sectionVariable),
         Expr(sectionVariable->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

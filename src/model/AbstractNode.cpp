@@ -10,10 +10,8 @@ namespace SCAM {
 
     }
 
-    AbstractNode::AbstractNode(std::string name) : name(name) {
-
+    AbstractNode::AbstractNode(std::string name,LocationInfo locationInfo) : name(name), locationInfo(locationInfo) {
     }
-
 
     std::string AbstractNode::getName() const {
         return this->name;

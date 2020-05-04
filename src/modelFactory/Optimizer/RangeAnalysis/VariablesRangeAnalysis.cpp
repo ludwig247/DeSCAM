@@ -229,7 +229,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
                                 for (auto expr : substitutedExpressionSet) {
                                     if (expr != nullptr) {
                                         substitutedValuesSet.insert(expr);
-                                    } else { throw std::runtime_error("substitution error!"); }
+                                    } else { TERMINATE("substitution error!"); }
                                 }
                             } else {
                                 substitutedValuesSet.clear();
@@ -378,7 +378,7 @@ std::set<SCAM::Expr *> SCAM::VariablesRangeAnalysis::substituteVariablesWithValu
             SCAM::Expr *newExpression = valueSubstitution.substituteExpr(expression,
                                                                          currentVarName,
                                                                          *valptr);
-            if (newExpression == nullptr) { throw std::runtime_error("substitutionError!"); }
+            if (newExpression == nullptr) { TERMINATE("substitutionError!"); }
             currentValueIndex[CurrentVariable] += 1;
             if (CurrentVariable ==
                 (numberOfVariables - 1)) { //we currently have the last variable in the substitution map

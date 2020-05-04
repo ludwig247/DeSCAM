@@ -9,7 +9,7 @@
 #include "FunctionOperand.h"
 #include "StmtException.h"
 
-SCAM::FunctionOperand::FunctionOperand(SCAM::Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap, StmtLocationInfo stmtLocationInfo) :
+SCAM::FunctionOperand::FunctionOperand(SCAM::Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap, LocationInfo stmtLocationInfo) :
         paramValueMap(paramValueMap),
         function(function),
         Operand(function->getReturnType()) {

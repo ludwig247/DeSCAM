@@ -14,7 +14,7 @@ namespace SCAM {
         Ternary() = delete;
 
         Ternary(Expr *condition, Expr *trueExpr, Expr *falseExpr,
-                StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+                LocationInfo stmtLocationInfo = LocationInfo());
 
         ~Ternary() = default;
 

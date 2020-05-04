@@ -17,11 +17,11 @@ namespace SCAM {
     Port::~Port() {
     }
 
-    Port::Port(const std::string &name, Interface *_interface, SCAM::DataType *datatype) :
+    Port::Port(const std::string &name, Interface *_interface, SCAM::DataType *datatype, LocationInfo locationInfo) :
             _interface(_interface),
             TypeInterface(datatype),
             notify(new Notify(this)),
-            AbstractNode(name) {
+            AbstractNode(name,locationInfo) {
         assert(_interface != nullptr);
         assert(datatype != nullptr);
 

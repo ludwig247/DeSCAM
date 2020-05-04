@@ -15,7 +15,7 @@ public:
     void TearDown() override {};
 };
 
-INSTANTIATE_TEST_CASE_P(Basic, MergeRedundantConditions_Test, ::testing::ValuesIn(createModel(std::string(SCAM_HOME"/tests/Optimizer_Test/src/MergeRedundantConditions/test_files/Tests.h"),std::set<std::string>{"mrc"})));
+INSTANTIATE_TEST_CASE_P(Basic, MergeRedundantConditions_Test, ::testing::ValuesIn(createModel(std::string(SCAM_HOME"/tests/Optimizer_Test/src/MergeRedundantConditions/test_files/Tests.h"),std::set<std::string>{"mrc"},false)));
 
 TEST_P(MergeRedundantConditions_Test, merging_redundant_conditions) {
     if (auto model = GetParam()) {

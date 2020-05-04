@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::IntegerValue::IntegerValue(int value, StmtLocationInfo stmtLocationInfo) :
+SCAM::IntegerValue::IntegerValue(int value, LocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("int")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

@@ -88,27 +88,27 @@ void SCAM::TernaryOptimizer::visit(struct UnaryExpr &node) {
 }
 
 void SCAM::TernaryOptimizer::visit(struct While &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(struct If &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(struct SectionOperand &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(struct SectionValue &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(struct ITE &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(struct Branch &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
@@ -214,11 +214,11 @@ void SCAM::TernaryOptimizer::visit(SCAM::ArrayOperand &node) {
 
 
 void SCAM::TernaryOptimizer::visit(struct Read &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::Wait &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 void SCAM::TernaryOptimizer::visit(SCAM::Peek &node) {
@@ -226,7 +226,7 @@ void SCAM::TernaryOptimizer::visit(SCAM::Peek &node) {
 }
 
 void SCAM::TernaryOptimizer::visit(struct Write &node) {
-    throw std::runtime_error("not implemented");
+    TERMINATE("not implemented");
 }
 
 SCAM::Stmt *SCAM::TernaryOptimizer::getStmt() const {

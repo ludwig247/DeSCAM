@@ -3,6 +3,9 @@
 //
 
 #include "FindCommunication2.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 SCAM::FindCommunication2::FindCommunication2() :
@@ -66,7 +69,7 @@ SCAM::Communication * SCAM::FindCommunication2::getCommStmt() const {
 }
 
 SCAM::Port *SCAM::FindCommunication2::getPort() const {
-    if(!this->isCommunication()) throw std::runtime_error("Not a communication stmt! No port available");
+    if(!this->isCommunication()) TERMINATE("Not a communication stmt! No port available");
     return this->commStmt->getPort();
 }
 
@@ -129,7 +132,7 @@ void SCAM::FindCommunication2::visit(struct FunctionOperand &node) {
 void SCAM::FindCommunication2::visit(struct UnaryExpr &node) {
     FindCommunication2 conditionChecker;
     node.getExpr()->accept(conditionChecker);
-    if (conditionChecker.isCommunication()) throw std::runtime_error("Interfaces in unary operator not supported");
+    if (conditionChecker.isCommunication()) TERMINATE("Interfaces in unary operator not supported");
     waitComm = false;
     communication = false;
 }
@@ -142,7 +145,7 @@ void SCAM::FindCommunication2::visit(struct While &node) {
 void SCAM::FindCommunication2::visit(struct If &node) {
     FindCommunication2 conditionChecker;
     node.getConditionStmt()->accept(conditionChecker);
-    if (conditionChecker.isCommunication()) throw std::runtime_error("Interfaces in if condition not supported");
+    if (conditionChecker.isCommunication()) TERMINATE("Interfaces in if condition not supported");
     waitComm = false;
     communication = false;
 }
@@ -232,19 +235,19 @@ void SCAM::FindCommunication2::visit(SCAM::ArrayOperand &node) {
 }
 
 void SCAM::FindCommunication2::visit(SCAM::CompoundExpr &node) {
-    throw std::runtime_error(" Not implemented");
+    TERMINATE(" Not implemented");
 }
 
 void SCAM::FindCommunication2::visit(SCAM::ParamOperand &node) {
-    throw std::runtime_error(" Not implemented");
+    TERMINATE(" Not implemented");
 }
 
 void SCAM::FindCommunication2::visit(SCAM::Return &node) {
-    throw std::runtime_error(" Not implemented");
+    TERMINATE(" Not implemented");
 }
 
 void SCAM::FindCommunication2::visit(SCAM::Notify &node) {
-    throw std::runtime_error(" Not implemented");
+    TERMINATE(" Not implemented");
 }
 
 void SCAM::FindCommunication2::visit(SCAM::Wait &node) {

@@ -67,7 +67,7 @@ SCAM::ConstValue *aml_driver::reduzeToConstValue(SCAM::Expr *e) const {
     SCAM::ExprTranslator translator;
     z3::expr z3Expr = translator.translate(e);
     z3Expr = z3Expr.simplify();
-    if (!z3Expr.is_const()) throw std::runtime_error("aml_driver reduzeToConstValue: not a constant value");
+    if (!z3Expr.is_const()) TERMINATE("aml_driver reduzeToConstValue: not a constant value");
 
     if (e->isDataType("int")) {
         return (new SCAM::IntegerValue(z3Expr.get_numeral_int()));
@@ -76,7 +76,7 @@ SCAM::ConstValue *aml_driver::reduzeToConstValue(SCAM::Expr *e) const {
         s.add(!z3Expr);
         return (new SCAM::BoolValue((s.check() == z3::unsat)));
     }
-    throw std::runtime_error("aml_driver reduzeToConstValue: unsupported datatype");
+    TERMINATE("aml_driver reduzeToConstValue: unsupported datatype");
 }
 
 

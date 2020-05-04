@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::While::While(SCAM::Expr *conditionStmt, StmtLocationInfo stmtLocationInfo) :
+SCAM::While::While(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) :
         conditionStmt(conditionStmt) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }

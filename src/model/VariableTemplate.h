@@ -13,7 +13,7 @@ namespace SCAM {
     template<class T>
     class VariableTemplate : public TypeInterface, public AbstractNode {
     public:
-        explicit VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr);
+        explicit VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr, LocationInfo locationInfo = LocationInfo());
 
         virtual T *getParent() const final;
 

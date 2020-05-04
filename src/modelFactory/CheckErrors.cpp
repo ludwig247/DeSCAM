@@ -13,6 +13,7 @@
 #include "FindGlobal.h"
 #include <OperationFactory.h>
 #include <FatalError.h>
+#include <CreateRealCFG.h>
 
 //Constructor
 SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
@@ -40,7 +41,6 @@ bool SCAM::CheckErrors::fire() {
     ModelGlobal::setModel(model);
 
     //Global variables
-    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
     this->addGlobalConstants(tu);
 
     //Modules
@@ -51,58 +51,78 @@ bool SCAM::CheckErrors::fire() {
 }
 
 void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
+
     FindModules modules(decl);
 
-    //Fill the model with modules(structural description)
+    //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
-        //Module Name
         std::string name = scparModule.first;
+        auto moduleLocationInfo = SCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
+
+        //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
             this->unimportantModules.end()) {
+            //Skip this module
             continue;
         }
-//      std::cout << "Module: " << name << std::endl;
-        auto module = new Module(scparModule.first);
+        //DataTypes::reset();//FIXME:
+        auto module = new Module(scparModule.first, moduleLocationInfo);
         model->addModule(module);
         //Members
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
         this->addVariables(module, scparModule.second);
         //Ports
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
         this->addPorts(module, scparModule.second);
         //Combinational Functions
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
         this->addFunctions(module, scparModule.second);
-        //Process
+        //Processe
         Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
         this->addBehavior(module, scparModule.second);
+        //this->addCommunicationFSM(module);
     }
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
 void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *decl) {
-    SCAM::FindPorts findPorts(decl, this->_context);
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
+    //Parse ports from CXXRecordDecl
+    //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
+    //Right now, we are not interested about the direction of the port.
+
+    SCAM::FindPorts findPorts(decl, this->_context, _ci);
+    auto portsLocationMap = findPorts.getLocationInfoMap();
+    //Add Ports -> requires Name, Interface and DataType
     //RendezVouz
     //Input ports
     for (auto &port: findPorts.getInPortMap()) {
         Interface *interface = new Interface("blocking", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        Port *inPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            inPort = new Port(port.first, interface,
+                              DataTypes::getDataType(
+                                      port.second),
+                              portsLocationMap[port.first]);
+        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
-
     }
     //Output ports
     for (auto &port: findPorts.getOutPortMap()) {
         Interface *interface = new Interface("blocking", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Port *outPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            outPort = new Port(port.first, interface,
+                               DataTypes::getDataType(
+                                       port.second),
+                               portsLocationMap[port.first]);
+        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        module->addPort(outPort);
     }
 
     //AlwaysReady
@@ -110,10 +130,16 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getMasterInPortMap()) {
         Interface *interface = new Interface("master", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        Port *inPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            inPort = new Port(port.first, interface,
+                              DataTypes::getDataType(
+                                      port.second),
+                              portsLocationMap[port.first]);
+        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
 
     }
@@ -121,33 +147,51 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     for (auto &port: findPorts.getMasterOutPortMap()) {
         Interface *interface = new Interface("master", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Port *outPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            outPort = new Port(port.first, interface,
+                               DataTypes::getDataType(
+                                       port.second),
+                               portsLocationMap[port.first]);
+        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        module->addPort(outPort);
     }
 
     //Input ports
     for (auto &port: findPorts.getSlaveInPortMap()) {
         Interface *interface = new Interface("slave", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        Port *inPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            inPort = new Port(port.first, interface,
+                              DataTypes::getDataType(
+                                      port.second),
+                              portsLocationMap[port.first]);
+        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
 
     }
     //Output ports
     for (auto &port: findPorts.getSlaveOutPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("slave", "out");
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Port *outPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            outPort = new Port(port.first, interface,
+                               DataTypes::getDataType(
+                                       port.second),
+                               portsLocationMap[port.first]);
+        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        module->addPort(outPort);
     }
 
 
@@ -155,7 +199,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     //Input ports
     for (auto &port: findPorts.getInSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "in");
@@ -166,7 +210,7 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
     //Output ports
     for (auto &port: findPorts.getOutSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "out");
@@ -179,29 +223,47 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
 void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *decl) {
     //Find the process describing the behavior
     SCAM::FindProcess findProcess(decl);
-    if (findProcess.getProcessMap().size() != 1) throw std::runtime_error("Module need exactly 1 process!");
+    if (findProcess.getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
     //Check Proces Type
     auto process = findProcess.getProcessMap().begin();
     //Process name
     std::string processName = process->first;
     if (process->second.second != SCAM::PROCESS_TYPE::THREAD) {
-        throw std::runtime_error(processName + ":Only THREAD allowed as process type");
+        TERMINATE(processName + ":Only THREAD allowed as process type");
     }
 
     //Process declarationinde
     clang::CXXMethodDecl *methodDecl = process->second.first;
     //Create blockCFG for this process
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
-    TERMINATE_IF_FATAL
+    TERMINATE_IF_ERROR
+    SCAM::CfgNode::node_cnt = 0;
+    SCAM::State::state_cnt = 0;
+    SCAM::Operation::operations_cnt = 0;
+    SCAM::CreateRealCFG stmtCFG(cfgFactory.getControlFlowMap());
+    module->setCFG(stmtCFG.getCFG());
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module
 void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
     //Find all Variables within the Module
     FindVariables findVariables(decl);
+
+    //Initial Values
+    //FindInitalValues findInitalValues(decl, findVariables.getVariableMap(), module);
+
     //Add members to module
     for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
+        auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
+        auto varLocationInfo = SCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
+
+        /*
+         * Disinguish between local and global DataTypes.
+         * If a module declares a type within it's class, then it's a local datatype ... global otherwise
+         * This toggle is in place because of some legacy plugins not beeing aware of local/global types.
+         */
         DataType *type;
         std::string typeName = FindNewDatatype::getTypeName(variable.second);
         //Step 1: Check whether the DataType already exists? Set type accordingly
@@ -223,12 +285,13 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
         }
         //Compound: add a new variable compound.subVar as Variable
         if (type->isCompoundType()) {
-            module->addVariable(new Variable(variable.first, type));
+            module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo));
         } else if (type->isArrayType()) {
-            module->addVariable(new Variable(variable.first, type));
+            module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo));
         } else {
-            auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
             ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
+            //FindInitalValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
+            //auto intitalValMap = findInitalValues.getVariableInitialMap();
             //Variable not initialized -> intialize with default value
             if (initialValue == nullptr) {
                 if (type == DataTypes::getDataType("int")) {
@@ -239,9 +302,9 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
                     initialValue = new UnsignedValue(0);
                 } else if (type->isEnumType()) {
                     initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
-                } else throw std::runtime_error("No initialValue for type " + type->getName());
+                } else TERMINATE("No initialValue for type " + type->getName());
             }
-            module->addVariable(new Variable(variable.first, type, initialValue));
+            module->addVariable(new Variable(variable.first, type, initialValue, nullptr, varLocationInfo));
         }
     }
 }
@@ -251,13 +314,15 @@ bool SCAM::CheckErrors::postFire() {
 }
 
 void SCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
-    if(preFire() && fire()) postFire();
+    if (preFire() && fire()) postFire();
 }
 
 void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
     FindFunctions findFunction(decl);
     //Add datatypes for functions
-    for (auto func: findFunction.getFunctionMap()) {
+    auto functionsMap = findFunction.getFunctionMap();
+    for (auto func: functionsMap) {
         auto newType = FindNewDatatype::getDataType(func.second->getResultType());
         if (FindNewDatatype::isGlobal(func.second->getResultType())) {
             DataTypes::addDataType(newType);
@@ -275,13 +340,17 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         std::map<std::string, Parameter *> paramMap;
         auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
         auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
-        if (paramList.size() != paramTypeList.size())
-            throw std::runtime_error("Parameter: # of names and types not equal");
+        if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
         for (int i = 0; i < paramList.size(); i++) {
             auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
             paramMap.insert(std::make_pair(paramList.at(i), param));
         }
-        auto new_function = new Function(function.first, datatype, paramMap);
+        Function *new_function = nullptr;
+        //location Info
+        if (functionsMap.find(function.first) != functionsMap.end())
+            new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
+                    functionsMap[function.first], _ci));
+        else new_function = new Function(function.first, datatype, paramMap);
         module->addFunction(new_function);
     }
     //Add behavioral description of function to module
@@ -300,6 +369,8 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
 }
 
 void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
+
     //Find all global functions and variables
     FindGlobal findGlobal(pDecl, _ci);
 

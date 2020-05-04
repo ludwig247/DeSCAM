@@ -9,6 +9,9 @@
 #include <assert.h>
 #include <Stmts/UnsignedValue.h>
 #include "DataType.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 void SCAM::DataType::addSubVar(std::string subVarName, SCAM::DataType *subVarType) {
     assert(!this->isArrayType() && "Either Array or Compound");
@@ -32,7 +35,7 @@ const std::map<std::string, int> &SCAM::DataType::getEnumValueMap() const {
 }
 
 void SCAM::DataType::addEnumValue(std::string enumValue) {
-    if (this->isCompoundType()) throw std::runtime_error("DataType can either be enum or compound");
+    if (this->isCompoundType()) TERMINATE("DataType can either be enum or compound");
     this->enumValueMap.insert(std::make_pair(enumValue, this->enumValueMap.size()));
 
 }
@@ -73,7 +76,7 @@ SCAM::ConstValue *SCAM::DataType::getDefaultVal() const {
             else if (subVarType->isEnumType()) {
                 auto firstEnumVal = *(subVarType->getEnumValueMap().begin());
                 compoundValueList.push_back(new EnumValue(firstEnumVal.first, subVarType));
-            } else throw std::runtime_error("Unsupported type for compound: " + subVarType->getName());
+            } else TERMINATE("Unsupported type for compound: " + subVarType->getName());
         }
         initVal = new CompoundValue(compoundValueList, this);
 
@@ -84,7 +87,7 @@ SCAM::ConstValue *SCAM::DataType::getDefaultVal() const {
             compoundValueList.push_back(this->arrayType->getDefaultVal());
         }
         initVal = new CompoundValue(compoundValueList, this);
-    } else throw std::runtime_error("Unsupported datatype: " + this->getName());
+    } else TERMINATE("Unsupported datatype: " + this->getName());
     assert(initVal != nullptr);
     return initVal;
 }

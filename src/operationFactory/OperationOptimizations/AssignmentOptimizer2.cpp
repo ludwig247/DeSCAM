@@ -4,6 +4,9 @@
 
 #include <Assignment.h>
 #include "AssignmentOptimizer2.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::AssignmentOptimizer2::AssignmentOptimizer2(const std::vector<SCAM::Assignment *> &assignmentsList, SCAM::Module *module) :
         translator(ExprTranslator(&context)),
@@ -71,7 +74,7 @@ SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *ass
                 return assignment;
             }
             //Sanity check: in case some weired assignment is passed
-            if (result.operator[](0).as_expr().num_args() > 2) throw std::runtime_error("Invalid number of or exprs!");
+            if (result.operator[](0).as_expr().num_args() > 2) TERMINATE("Invalid number of or exprs!");
             //Only interested in the simplification of RHS
             //Retrive new RHS
             auto expr = result.operator[](0).as_expr().arg(1);
@@ -112,12 +115,12 @@ z3::expr SCAM::AssignmentOptimizer2::lhsToExpr(SCAM::Expr *expr, bool bitvector_
         else return context.int_const("result"); //TODO: is this correct?
     }
         //Case: Unknown
-    else throw std::runtime_error("Type " + expr->getDataType()->getName() + " is not supported for assignment");
+    else TERMINATE("Type " + expr->getDataType()->getName() + " is not supported for assignment");
 }
 
 SCAM::Assignment * SCAM::AssignmentOptimizer2::optimizeAssignment(SCAM::Assignment *assignment) {
     //Check for compound type:  no optimization here
-    if (assignment->getRhs() == nullptr) throw std::runtime_error("DataPathOpt: RHS of assign is null");
+    if (assignment->getRhs() == nullptr) {TERMINATE("DataPathOpt: RHS of assign is null")}
     else if (assignment->getRhs()->getDataType()->isCompoundType()) {
         return assignment;
     }

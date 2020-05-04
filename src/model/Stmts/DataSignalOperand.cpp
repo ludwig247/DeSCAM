@@ -9,7 +9,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::DataSignalOperand::DataSignalOperand(DataSignal *dataSignal, StmtLocationInfo stmtLocationInfo) :
+SCAM::DataSignalOperand::DataSignalOperand(DataSignal *dataSignal, LocationInfo stmtLocationInfo) :
         dataSignal(dataSignal), Operand(dataSignal->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 

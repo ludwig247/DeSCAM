@@ -11,7 +11,7 @@ namespace SCAM {
 
     class Logical : public Expr {
     public:
-        Logical(Expr *lhs, std::string operation, Expr *rhs, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        Logical(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs();

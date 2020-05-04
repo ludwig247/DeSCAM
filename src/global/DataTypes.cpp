@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include "DataTypes.h"
+#include "FatalError.h"
+#include <Logger/Logger.h>
 
 
 SCAM::DataTypes &SCAM::DataTypes::getInstance() {
@@ -18,7 +20,7 @@ const std::map<std::string, SCAM::DataType *> &SCAM::DataTypes::getDataTypeMap()
 
 SCAM::DataType *SCAM::DataTypes::getDataType(std::string name) {
     if (DataTypes::getInstance().dataTypeMap.find(name) == DataTypes::getInstance().dataTypeMap.end()) {
-        throw std::runtime_error("DataTypes.cpp: getDataType \"" + name + "\" is not a datatype");
+        TERMINATE("DataTypes.cpp: getDataType \"" + name + "\" is not a datatype");
     }
     return DataTypes::getInstance().dataTypeMap.at(name);
 }
@@ -69,15 +71,15 @@ SCAM::DataType *SCAM::DataTypes::getLocalDataType(std::string moduleName, std::s
         auto it = DataTypes::getInstance().localDataTypeMap.find(moduleName)->second.find(typeName);
         if (it != DataTypes::getInstance().localDataTypeMap.find(moduleName)->second.end()) {
             return it->second;
-        } else throw std::runtime_error("Unkown local type " + typeName + "for module " + moduleName);
-    } else throw std::runtime_error("Unknown module " + moduleName);
+        } else TERMINATE("Unkown local type " + typeName + "for module " + moduleName);
+    } else TERMINATE("Unknown module " + moduleName);
 }
 
 std::map<std::string, SCAM::DataType *> SCAM::DataTypes::getLocalDataTypes(std::string moduleName) {
     auto ldt = DataTypes::getInstance().localDataTypeMap;
     if (DataTypes::getInstance().localDataTypeMap.find(moduleName) != DataTypes::getInstance().localDataTypeMap.end()) {
         return DataTypes::getInstance().localDataTypeMap.find(moduleName)->second;
-    } else{//} throw std::runtime_error("Unknown module " + moduleName);
+    } else{//} TERMINATE("Unknown module " + moduleName);
          std::map<std::string, SCAM::DataType *> dummy = {};
          return dummy;
     }

@@ -5,6 +5,9 @@
 #include <PrintStmt.h>
 #include "ValueSubstitution.h"
 #include "NodePeekVisitor.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::ValueSubstitution::ValueSubstitution() : oldExpr(nullptr), newExpr(nullptr), varVal(nullptr), oldStmt(nullptr),
                                                newStmt(nullptr) {
@@ -79,7 +82,7 @@ void SCAM::ValueSubstitution::visit(struct UnaryExpr &node) {
             } else {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
             }
-        } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation());
     }
 }
 

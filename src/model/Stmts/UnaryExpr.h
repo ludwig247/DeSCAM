@@ -12,7 +12,7 @@
 namespace SCAM {
     class UnaryExpr : public SCAM::Expr {
     public:
-        UnaryExpr(std::string operation, Expr *stmt, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        UnaryExpr(std::string operation, Expr *stmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getExpr();

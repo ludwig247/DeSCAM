@@ -3,7 +3,8 @@
 //
 
 #include <tuple>
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include "SignalFactory.h"
 
 using namespace SCAM::HLSPlugin::VHDLWrapper;
@@ -184,7 +185,7 @@ std::string SignalFactory::styleToString(const Style& style)
     } else if (style == Style::DOT) {
         return ".";
     } else {
-        throw std::runtime_error("Unsupported Print Style!");
+        TERMINATE("Unsupported Print Style!");
     }
 }
 

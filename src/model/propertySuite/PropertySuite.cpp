@@ -3,7 +3,8 @@
 //
 
 #include <Stmts/Assignment.h>
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include <utility>
 #include <algorithm>
 #include "PropertySuite.h"
@@ -116,7 +117,7 @@ namespace SCAM {
             }
         }
 
-        throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + signalName);
+        TERMINATE("PropertySuite::findSignal has not found the given signal: " + signalName);
     }
 
     std::shared_ptr<PropertyMacro> PropertySuite::findSignal(const std::string &parentName, const std::string &subVarName) const {
@@ -135,7 +136,7 @@ namespace SCAM {
             }
         }
 
-        throw std::runtime_error("PropertySuite::findSignal has not found the given signal: " + parentName + "." + subVarName);
+        TERMINATE("PropertySuite::findSignal has not found the given signal: " + parentName + "." + subVarName);
     }
 
     std::shared_ptr<PropertyMacro> PropertySuite::findSignal(Variable * var) const {
@@ -146,7 +147,7 @@ namespace SCAM {
             }
         }
 
-        throw std::runtime_error("PropertySuite::findSignal has not found the given variable: " + var->getName());
+        TERMINATE("PropertySuite::findSignal has not found the given variable: " + var->getName());
 
     }
 
@@ -181,7 +182,7 @@ namespace SCAM {
             }
         }
 
-        throw std::runtime_error("PropertySuite::getConstraint has not found the given constraint: " + constraintName);
+        TERMINATE("PropertySuite::getConstraint has not found the given constraint: " + constraintName);
 
     }
 
@@ -221,7 +222,7 @@ namespace SCAM {
     std::set<PropertyMacro*> PropertySuite::getPredecessorStates(PropertyMacro* state) {
 
         if ( predecessorStates.find(state) == predecessorStates.end() ) {
-            throw std::runtime_error("No predecessor states found!");
+            TERMINATE("No predecessor states found!");
         } else {
             return predecessorStates[state];
         }
@@ -230,7 +231,7 @@ namespace SCAM {
     std::set<PropertyMacro*> PropertySuite::getSuccessorStates(PropertyMacro *state) {
 
         if ( successorStates.find(state) == successorStates.end() ) {
-            throw std::runtime_error("No successor states found!");
+            TERMINATE("No successor states found!");
         } else {
             return successorStates[state];
         }
@@ -240,7 +241,7 @@ namespace SCAM {
     std::set<AbstractProperty*> PropertySuite::getPredecessorProperties(PropertyMacro* state) {
 
         if ( predecessorProperties.find(state) == predecessorProperties.end() ) {
-            throw std::runtime_error("No predecessor states found!");
+            TERMINATE("No predecessor states found!");
         } else {
             return predecessorProperties[state];
         }
@@ -249,7 +250,7 @@ namespace SCAM {
     std::set<AbstractProperty*> PropertySuite::getSuccessorProperties(PropertyMacro *state) {
 
         if ( successorProperties.find(state) == successorProperties.end() ) {
-            throw std::runtime_error("No successor states found!");
+            TERMINATE("No successor states found!");
         } else {
             return successorProperties[state];
         }

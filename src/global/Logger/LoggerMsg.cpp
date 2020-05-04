@@ -1,7 +1,9 @@
 #include "LoggerMsg.h"
 
 
-SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::StmtLocationInfo& stmtInfo, SeverityLevel severityLevel, ViolationType violationType, ProcessedLocation violationLocation) {
+SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::LocationInfo &stmtInfo,
+                           SeverityLevel severityLevel, ViolationType violationType,
+                           ProcessedLocation violationLocation) {
     setMessage(message);
     setStmtInfo(stmtInfo);
     setSeverityLevel(severityLevel);
@@ -13,7 +15,7 @@ const std::string &SCAM::LoggerMsg::getMessage() {
     return this->message;
 }
 
-const SCAM::StmtLocationInfo &SCAM::LoggerMsg::getStmtInfo() {
+const SCAM::LocationInfo &SCAM::LoggerMsg::getStmtInfo() {
     return this->stmtInfo;
 }
 
@@ -25,6 +27,8 @@ std::string SCAM::LoggerMsg::getSeverityLevel() {
             return "Warning";
         case SeverityLevel::Error :
             return "Error";
+        case SeverityLevel::Fatal :
+            return "Fatal Error";
     }
 }
 
@@ -40,7 +44,7 @@ std::string SCAM::LoggerMsg::getViolationType() {
 }
 
 SCAM::LoggerMsg::ProcessedLocation SCAM::LoggerMsg::getProcessedLocation() {
- return this->processedLocation;
+    return this->processedLocation;
 }
 
 
@@ -56,7 +60,7 @@ void SCAM::LoggerMsg::setSeverityLevel(SCAM::LoggerMsg::SeverityLevel severityLe
     this->severityLevel = severityLevel;
 }
 
-void SCAM::LoggerMsg::setStmtInfo(const SCAM::StmtLocationInfo &stmtInfo) {
+void SCAM::LoggerMsg::setStmtInfo(const SCAM::LocationInfo &stmtInfo) {
     this->stmtInfo = stmtInfo;
 }
 

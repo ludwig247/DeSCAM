@@ -7,7 +7,7 @@
 
 #include <exception>
 #include <string>
-#include "StmtLocationInfo.h"
+#include "LocationInfo.h"
 
 namespace SCAM {
 
@@ -15,7 +15,7 @@ namespace SCAM {
     public:
 
         /** Creates the exception with a default message */
-        StmtException(std::string message, StmtLocationInfo stmtLocationInfo) noexcept;
+        StmtException(std::string message, LocationInfo stmtLocationInfo) noexcept;
 
         /** Destructs the exception */
         ~StmtException() noexcept override = default;;
@@ -24,14 +24,14 @@ namespace SCAM {
         const char *what() const noexcept override;
 
         /** Returns the location where the exception occurred */
-        StmtLocationInfo getStmtLocationInfo();
+        LocationInfo getStmtLocationInfo();
 
         /** Returns and resets a flag indicating whether exception has happened*/
         static bool isExceptionHappened();
 
     private:
         std::string message;
-        StmtLocationInfo stmtLocationInfo;
+        LocationInfo stmtLocationInfo;
         static bool exceptionHappened;
     };
 

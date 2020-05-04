@@ -5,6 +5,6 @@
 
 #include <utility>
 
-SCAM::Operand::Operand(const DataType *type, StmtLocationInfo stmtLocationInfo) : Expr(type) {
+SCAM::Operand::Operand(const DataType *type, LocationInfo stmtLocationInfo) : Expr(type) {
 this->stmtLocationInfo = std::move(stmtLocationInfo);
 }

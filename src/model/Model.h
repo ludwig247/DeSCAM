@@ -16,7 +16,7 @@ namespace SCAM {
     public:
         Model();
 
-        Model(std::string name);
+        Model(std::string name, LocationInfo locationInfo = LocationInfo());
 
         virtual ~Model();
 

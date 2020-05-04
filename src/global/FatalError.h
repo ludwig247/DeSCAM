@@ -8,7 +8,7 @@
 
 #include <exception>
 #include <string>
-#include "StmtLocationInfo.h"
+#include "LocationInfo.h"
 
 namespace SCAM {
     /**
@@ -25,23 +25,40 @@ namespace SCAM {
     };
 
 /** A macro wrapping try catch blocks for handling FatalError */
-#define ASSERT_MODEL_CREATION(x)                                    \
-    try {                                                          \
-    x;                                                              \
-    }                                                                \
+#define ASSERT_MODEL_CREATION(x)                                      \
+    try {                                                              \
+    x;                                                                  \
+        if(SCAM::Logger::isTerminate()) {                                \
+    SCAM::Logger::log();                                                  \
+    return -1;                                                             \
+    }                                                                       \
+    }                                                                        \
     CATCH_FATAL
 #define CATCH_FATAL                                                    \
-   catch (FatalError& err) {                                            \
+   catch (SCAM::FatalError& err) {                                      \
    SCAM::Logger::log();                                                  \
     return -1;                                                            \
     }
 
 /** A macro that throws a FatalError in case termination is necessary */
-#define TERMINATE_IF_FATAL                                              \
+#define TERMINATE_IF_ERROR                                              \
     if(Logger::isTerminate()) {                                          \
         throw SCAM::FatalError();                                         \
     }
+
+/** A macro that breaks execution at this point and adds a message to the logger */
+    #define TERMINATE(msg)                                           \
+    {                                                                 \
+    SCAM::LocationInfo stmtLocationInfo("in function: " +           \
+    std::string(__FUNCTION__),std::string(__FILE__),__LINE__,__LINE__,0,0);                           \
+    auto sl = SCAM::LoggerMsg::SeverityLevel::Fatal;                     \
+    auto vt = SCAM::LoggerMsg::ViolationType::NA;                         \
+    auto pl = SCAM::Logger::getCurrentProcessedLocation();                 \
+    SCAM::LoggerMsg lmsg(msg,stmtLocationInfo,sl,vt,pl);                    \
+    SCAM::Logger::addMsg(lmsg);                                              \
+    throw std::runtime_error(msg);                                                 \
+    }
 }
-#endif //DESCAM_FATALERROR_H
+#endif //DESCAM_FATALERROR_H__func__
 
 

@@ -3,6 +3,9 @@
 //
 #include "RenumberCFG.h"
 #include "Optimizer/Debug.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgBlock *> CFG) : blockCFG(std::move(CFG)) {
@@ -33,7 +36,7 @@ SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgBlock *> CFG) : blockCFG(s
             ifNodes.pop();
         } else if (areAllCFGNodesVisited(visitedNodesVector, this->blockCFG.size())) { break; }
         else {
-            throw std::runtime_error("unexpected behavior while renumbering blockCFG nodes!");
+            TERMINATE("unexpected behavior while renumbering blockCFG nodes!");
         }
     }
     for (auto node : this->newBlockCFG) {
@@ -67,7 +70,7 @@ SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgNode *> CFG) : nodeCFG(std
         } else if (areAllCFGNodesVisited(visitedNodesVector, this->nodeCFG.size())) { break; }
         else {
             for(auto node : this->nodeCFG){if (visitedNodesVector[node.first] == false){std::cout << "node" << node.first << " is not visited" << std::endl;  }}
-            throw std::runtime_error("unexpected behavior while renumbering blockCFG nodes!");
+            TERMINATE("unexpected behavior while renumbering blockCFG nodes!");
         }
     }
     for (auto node : this->newNodeCFG) {

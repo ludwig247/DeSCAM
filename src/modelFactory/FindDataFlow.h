@@ -55,7 +55,6 @@ namespace SCAM{
             bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr * arraySubscriptExpr);
             Expr *getExpr() const;
             SCAM::Stmt* getStmt();
-            SCAM::StmtLocationInfo getStmtInfo(clang::Stmt* stmt);
 
             static std::string functionName;
             static bool isFunction;
@@ -73,7 +72,7 @@ namespace SCAM{
             std::stringstream logStream; //! Contains every message that is generated during
 
             void switchPassExpr(Expr * stmt); //! Depending on the current value of pass assigns value to stmt(pass==0), lhs(1) or rhs(2)
-            bool exitVisitor(const std::string& msg, const SCAM::StmtLocationInfo& stmtInfo);
+            bool exitVisitor(const std::string& msg, const SCAM::LocationInfo& stmtInfo);
             void clearExpressions();
 
             bool unsigned_flag;

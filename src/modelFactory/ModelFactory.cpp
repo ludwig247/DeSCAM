@@ -33,16 +33,11 @@ SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
         model(nullptr) {
 
     //Unimportant modules
-    this->unimportantModules.push_back("sc_event_queue");//! Not important for the abstract model:
-    this->unimportantModules.push_back("Testbench");//! Not important for the abstract model:
+    this->unimportantModules.emplace_back("sc_event_queue");//! Not important for the abstract model:
+    this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
-
 bool SCAM::ModelFactory::preFire() {
-//    if (_context.getDiagnostics().getClient()->getNumWarnings() > 0) {
-//        std::cout << "Warnings: " << _context.getDiagnostics().getClient()->getNumWarnings() << std::endl;
-//    }
-//    return _context.getDiagnostics().getClient()->getNumErrors() <= 0;
     return !SCAM::Logger::isTerminate();
 }
 
@@ -55,7 +50,6 @@ bool SCAM::ModelFactory::fire() {
     ModelGlobal::setModel(model);
 
     //Global variables
-    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
     this->addGlobalConstants(tu);
 
     //Modules
@@ -70,13 +64,13 @@ bool SCAM::ModelFactory::fire() {
     return true;
 }
 
-//        /**
-//         * Create Module
-//
-//         * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
-//         * is executed by the module constructor method addModule using the reference to the
-//         * module declaration of the ast
-//        */
+/**
+ * Create Module
+
+ * Creation of all other elements(Ports,Sub-Modules,Signals, Interfaces ...)
+ * is executed by the module constructor method addModule using the reference to the
+ * module declaration of the ast
+*/
 void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
@@ -86,7 +80,7 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
 //        //Module Name
         std::string name = scparModule.first;
-
+        auto moduleLocationInfo = SCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
 
 //        //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
@@ -98,16 +92,13 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         std::cout << "Module: " << name << std::endl;
         std::cout << "############################" << std::endl;
         //DataTypes::reset();//FIXME:
-        auto module = new Module(scparModule.first);
+        auto module = new Module(scparModule.first, moduleLocationInfo);
         model->addModule(module);
         //Members
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
         this->addVariables(module, scparModule.second);
         //Ports
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
         this->addPorts(module, scparModule.second);
         //Combinational Functions
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
         this->addFunctions(module, scparModule.second);
         //Processe
         Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
@@ -143,7 +134,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 //        //Search for pointer in modul map
         Module *module = model->getModules().find(instance.second)->second;
 //        //In case module is not found -> error!
-        if (!module) { throw std::runtime_error("ModelFactory::addInstances module not found"); }
+        if (!module) {TERMINATE("ModelFactory::addInstances module not found"); }
 //        //Add instance to model
         topInstance->addModuleInstance(new ModuleInstance(instance.first, module));
     }
@@ -182,7 +173,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         } else if (direction == "out") {
             currentChannel->setFromPort(port);
             currentChannel->setFromInstance(instance);
-        } else { throw std::runtime_error("Interface direction not supported"); }
+        } else {TERMINATE("Interface direction not supported"); }
         //Add instance to channel
 
     }
@@ -190,33 +181,46 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
 void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
     //Parse ports from CXXRecordDecl
     //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
     //Right now, we are not interested about the direction of the port.
 
-    SCAM::FindPorts findPorts(decl, this->_context);
-
+    SCAM::FindPorts findPorts(decl, this->_context, _ci);
+    auto portsLocationMap = findPorts.getLocationInfoMap();
     //Add Ports -> requires Name, Interface and DataType
     //RendezVouz
     //Input ports
     for (auto &port: findPorts.getInPortMap()) {
         Interface *interface = new Interface("blocking", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        Port *inPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            inPort = new Port(port.first, interface,
+                              DataTypes::getDataType(
+                                      port.second),
+                              portsLocationMap[port.first]);
+        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
     }
     //Output ports
     for (auto &port: findPorts.getOutPortMap()) {
         Interface *interface = new Interface("blocking", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Port *outPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            outPort = new Port(port.first, interface,
+                               DataTypes::getDataType(
+                                       port.second),
+                               portsLocationMap[port.first]);
+        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        module->addPort(outPort);
     }
 
     //AlwaysReady
@@ -224,10 +228,16 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getMasterInPortMap()) {
         Interface *interface = new Interface("master", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        Port *inPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            inPort = new Port(port.first, interface,
+                              DataTypes::getDataType(
+                                      port.second),
+                              portsLocationMap[port.first]);
+        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
 
     }
@@ -235,33 +245,51 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     for (auto &port: findPorts.getMasterOutPortMap()) {
         Interface *interface = new Interface("master", "out");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Port *outPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            outPort = new Port(port.first, interface,
+                               DataTypes::getDataType(
+                                       port.second),
+                               portsLocationMap[port.first]);
+        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        module->addPort(outPort);
     }
 
     //Input ports
     for (auto &port: findPorts.getSlaveInPortMap()) {
         Interface *interface = new Interface("slave", "in");
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        Port *inPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            inPort = new Port(port.first, interface,
+                              DataTypes::getDataType(
+                                      port.second),
+                              portsLocationMap[port.first]);
+        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
         module->addPort(inPort);
 
     }
     //Output ports
     for (auto &port: findPorts.getSlaveOutPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("slave", "out");
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Port *outPort = nullptr;
+        if (portsLocationMap.find(port.first) != portsLocationMap.end())
+            outPort = new Port(port.first, interface,
+                               DataTypes::getDataType(
+                                       port.second),
+                               portsLocationMap[port.first]);
+        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+        module->addPort(outPort);
     }
 
 
@@ -269,7 +297,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Input ports
     for (auto &port: findPorts.getInSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "in");
@@ -280,7 +308,7 @@ void SCAM::ModelFactory::addPorts(SCAM::Module *module, clang::CXXRecordDecl *de
     //Output ports
     for (auto &port: findPorts.getOutSharedPortMap()) {
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
-            throw std::runtime_error(
+            TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Interface *interface = new Interface("shared", "out");
@@ -295,23 +323,20 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     //Find the process describing the behavior
     SCAM::FindProcess findProcess(decl);
     clang::CXXMethodDecl *methodDecl;
-    if(findProcess.isValidProcess()){
+    if (findProcess.isValidProcess()) {
         methodDecl = findProcess.getProcess();
     }
 
-    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module,true);
-    TERMINATE_IF_FATAL
-    if (cfgFactory.getControlFlowMap().empty()) throw std::runtime_error("CFG is empty!");
-
+    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
+    TERMINATE_IF_ERROR
+    if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State::state_cnt = 0;
     SCAM::Operation::operations_cnt = 0;
     auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
 
     if (!optOptionsSet.empty()) {
-        std::cout << "Warning: Optimizer not in a working state. Please use carfully!" << std::endl;
         SCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model, optOptionsSet);
-        //throw std::runtime_error(" Test ");
         module->setCFG(opt.getCFG());
         SCAM::OperationFactory operationFactory(opt.getCFG(), module);
         PropertyFactory propertyFactory(module);
@@ -327,6 +352,7 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
 
 //! Adds every Member of a sc_module to the SCAM::Module
 void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
     //Find all Variables within the Module
     FindVariables findVariables(decl);
 
@@ -336,6 +362,9 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
     //Add members to module
     for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
+        auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
+        auto varLocationInfo = SCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
+
         /*
          * Disinguish between local and global DataTypes.
          * If a module declares a type within it's class, then it's a local datatype ... global otherwise
@@ -360,14 +389,12 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
                 DataTypes::addLocalDataType(module->getName(), type);
             }
         }
-
         //Compound: add a new variable compound.subVar as Variable
         if (type->isCompoundType()) {
-            module->addVariable(new Variable(variable.first, type));
+            module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo));
         } else if (type->isArrayType()) {
-            module->addVariable(new Variable(variable.first, type));
+            module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo));
         } else {
-            auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
             ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
             //FindInitalValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
             //auto intitalValMap = findInitalValues.getVariableInitialMap();
@@ -381,13 +408,11 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
                     initialValue = new UnsignedValue(0);
                 } else if (type->isEnumType()) {
                     initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
-                } else throw std::runtime_error("No initialValue for type " + type->getName());
+                } else TERMINATE("No initialValue for type " + type->getName());
             }
-            module->addVariable(new Variable(variable.first, type, initialValue));
+            module->addVariable(new Variable(variable.first, type, initialValue, nullptr, varLocationInfo));
         }
     }
-
-
 }
 
 bool SCAM::ModelFactory::postFire() {
@@ -397,9 +422,6 @@ bool SCAM::ModelFactory::postFire() {
 void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 // Pass 1: Find the necessary information.
     if (!preFire()) {
-        std::cout << "#################################" << std::endl;
-        std::cout << "######## Syntax Errors ##########" << std::endl;
-        std::cout << "#################################" << std::endl;
         return;
     } else {
         bool f = fire();
@@ -413,10 +435,11 @@ void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 }
 
 void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
     FindFunctions findFunction(decl);
     //Add datatypes for functions
-
-    for (auto func: findFunction.getFunctionMap()) {
+    auto functionsMap = findFunction.getFunctionMap();
+    for (auto func: functionsMap) {
         auto newType = FindNewDatatype::getDataType(func.second->getResultType());
         if (FindNewDatatype::isGlobal(func.second->getResultType())) {
             DataTypes::addDataType(newType);
@@ -434,13 +457,17 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         std::map<std::string, Parameter *> paramMap;
         auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
         auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
-        if (paramList.size() != paramTypeList.size())
-            throw std::runtime_error("Parameter: # of names and types not equal");
+        if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
         for (int i = 0; i < paramList.size(); i++) {
             auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
             paramMap.insert(std::make_pair(paramList.at(i), param));
         }
-        auto new_function = new Function(function.first, datatype, paramMap);
+        Function *new_function = nullptr;
+        //location Info
+        if (functionsMap.find(function.first) != functionsMap.end())
+            new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
+                    functionsMap[function.first], _ci));
+        else new_function = new Function(function.first, datatype, paramMap);
         module->addFunction(new_function);
     }
     //Add behavioral description of function to module
@@ -455,25 +482,13 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl)
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        if (Logger::hasError()) {
-            std::cout << "" << std::endl;
-            std::cout << "======================" << std::endl;
-            std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
-            std::cout << "----------------------" << std::endl;
-            /*            for (auto item: Logger::getInstance().getErrorList()) {
-                std::cout << "- " << item.statement << std::endl;
-                for (auto log: item.errorMsgs) {
-                    std::cout << "\t" << "-" << log.first << "- " << log.second.first << std::endl;
-                }
-            }
-            Logger::clear();
-            */
-        }
     }
 
 }
 
 void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
+
     //Find all global functions and variables
     FindGlobal findGlobal(pDecl, _ci);
 
@@ -542,7 +557,7 @@ void SCAM::ModelFactory::removeUnused() {
             for (auto usedVar: ExprVisitor::getUsedVariables(retValCond.first->getReturnValue())) {
                 if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
             }
-            for(auto cond: retValCond.second){
+            for (auto cond: retValCond.second) {
                 for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
                     if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                         removeGlobalFunctions.at(usedFunc) = false;
@@ -585,7 +600,7 @@ void SCAM::ModelFactory::removeUnused() {
                 }
             }
             //Check functions:
-            for(auto func: module.second->getFunctionMap()){
+            for (auto func: module.second->getFunctionMap()) {
                 for (auto retValCond  : func.second->getReturnValueConditionList()) {
                     for (auto usedFunc: ExprVisitor::getUsedFunction(retValCond.first->getReturnValue())) {
                         if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
@@ -595,7 +610,7 @@ void SCAM::ModelFactory::removeUnused() {
                     for (auto usedVar: ExprVisitor::getUsedVariables(retValCond.first->getReturnValue())) {
                         if (usedVar->isConstant()) removeGlobalVars.at(usedVar) = false;
                     }
-                    for(auto cond: retValCond.second){
+                    for (auto cond: retValCond.second) {
                         for (auto usedFunc: ExprVisitor::getUsedFunction(cond)) {
                             if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
                                 removeGlobalFunctions.at(usedFunc) = false;

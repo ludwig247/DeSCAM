@@ -5,6 +5,8 @@
 #include <iostream>
 #include "FindInterface.h"
 #include "ModelFactory.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 //Constructor
 /*!
@@ -24,7 +26,7 @@ SCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateL
         _interface="sc_out";
     }
     else  if(portTemplateList.front() == "sc_port"){
-        if(portTemplateList.size() != 3) throw std::runtime_error("Too few or too many portTemplates Arguments");
+        if(portTemplateList.size() != 3) TERMINATE("Too few or too many portTemplates Arguments");
         if(portTemplateList.at(1) == "sc_fifo_in_if"){
             _direction="in";
             _interface="sc_fifo_in_if";

@@ -6,7 +6,7 @@
 #include "EnumValue.h"
 #include "NodePeekVisitor.h"
 
-SCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, StmtLocationInfo stmtLocationInfo) :
+SCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo) :
         enumValue(enumValue),
         ConstValue(enumType) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

@@ -4,6 +4,9 @@
 
 #include <iostream>
 #include "FindFunctions.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::FindFunctions::FindFunctions(clang::CXXRecordDecl *recordDecl) {
         TraverseDecl(recordDecl);
@@ -14,7 +17,7 @@ bool SCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
     if(methodDecl->isConst()){
         std::string name = methodDecl->getName().str();
 
-        if(methodDecl->getResultType()->isVoidType()) throw std::runtime_error("Method: " + name + " is type void! Void is not allowed");
+        if(methodDecl->getResultType()->isVoidType()) TERMINATE("Method: " + name + " is type void! Void is not allowed");
         this->functionMap.insert(std::make_pair(name,methodDecl));
 
         //Return type

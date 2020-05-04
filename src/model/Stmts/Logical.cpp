@@ -9,7 +9,7 @@
 #include "NodePeekVisitor.h"
 #include "StmtException.h"
 
-SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, StmtLocationInfo stmtLocationInfo) :
+SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         rhs(rhs),
         operation(operation),

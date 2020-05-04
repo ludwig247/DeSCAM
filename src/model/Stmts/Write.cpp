@@ -9,7 +9,7 @@
 
 namespace SCAM {
 
-    Write::Write(Port *portOperand, Expr *value, bool is_non_blocking_access, VariableOperand *status, StmtLocationInfo stmtLocationInfo) :
+    Write::Write(Port *portOperand, Expr *value, bool is_non_blocking_access, VariableOperand *status, LocationInfo stmtLocationInfo) :
             value(value),
             status(status),
             Communication(portOperand, is_non_blocking_access) {

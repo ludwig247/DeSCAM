@@ -3,6 +3,8 @@
 //
 
 #include "CommandLineProcess.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 // main object of this formatter is to adjust the spacing when help command is executed
 class MyFormatter : public CLI::Formatter {
@@ -156,13 +158,13 @@ namespace SCAM {
 
         //Manage Source File
         if (!isSourceFile(this->sourceFile))
-            throw std::runtime_error("Unknown Source File: " + this->sourceFile);
+            TERMINATE("Unknown Source File: " + this->sourceFile);
 
 
         //Manage Output Directory
         if (app->count("--output")) {
             if (!isDirectory(this->outputDirectory))
-                throw std::runtime_error("Unknown Output Directory: " + this->outputDirectory);
+            {TERMINATE("Unknown Output Directory: " + this->outputDirectory)}
             else
                 createOutputDirectory(this->outputDirectory);
         }

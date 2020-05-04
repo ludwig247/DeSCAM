@@ -3,7 +3,8 @@
 //
 
 #include "Property.h"
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include <utility>
 #include <Behavior/Operation.h>
 
@@ -98,7 +99,7 @@ namespace SCAM {
 
     const Operation *Property::getOperation() const {
         if(operationList.size() > 1){
-            throw std::runtime_error("Property is build from more then 1 operation. Please use getOperations()");
+            TERMINATE("Property is build from more then 1 operation. Please use getOperations()");
         }
         return operationList.front();
     }

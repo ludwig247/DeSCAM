@@ -22,7 +22,7 @@ namespace SCAM {
     public:
         Timepoint() = delete;
         Timepoint(Timepoint&) = delete;
-        explicit Timepoint(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, Timepoint *parent = nullptr);
+        explicit Timepoint(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, Timepoint *parent = nullptr,LocationInfo locationInfo = LocationInfo());
 
         //Visitor
         virtual void accept(AbstractVisitor &visitor);

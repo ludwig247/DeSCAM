@@ -6,13 +6,16 @@
 #include <cassert>
 #include "Module.h"
 #include "Model.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM {
 
-    Module::Module(std::string name) :
+    Module::Module(std::string name, LocationInfo locationInfo) :
             fsm(new FSM(this)),
             propertySuite(nullptr),
-            AbstractNode(name) {
+            AbstractNode(name,locationInfo) {
 
     }
 
@@ -26,7 +29,7 @@ namespace SCAM {
 
     Port *Module::getPort(const std::string &n) const {
         if (this->ports.find(n) == this->ports.end()) {
-            throw std::runtime_error("Module.cpp getPort called with \"" + n + "\", not a port name");
+            TERMINATE("Module.cpp getPort called with \"" + n + "\", not a port name");
         }
         return this->ports.find(n)->second;
     }
@@ -69,7 +72,7 @@ namespace SCAM {
                 Variable *parent = this->getVariable(parent_name);
                 return parent->getSubVar(child_name);
             } else {
-                throw std::runtime_error("Module.cpp getVariable called with \"" + n + "\", not a variable name");
+                TERMINATE("Module.cpp getVariable called with \"" + n + "\", not a variable name");
             }
         } else if (!isCompound && isArray) {
             std::string::size_type start = n.find('[');
@@ -81,14 +84,14 @@ namespace SCAM {
                 auto parent = this->getVariable(varName);
                 return parent->getSubVar(index);
             } else {
-                throw std::runtime_error("Module.cpp getVariable called with \"" + n + "\", not a variable name");
+                TERMINATE("Module.cpp getVariable called with \"" + n + "\", not a variable name");
             }
         } else {
             //n is a regular top level name
             if (this->variableMap.find(n) != this->variableMap.end()) {
                 return (this->variableMap.find(n)->second);
             } else {
-                throw std::runtime_error("Module.cpp getVariable called with \"" + n + "\", not a variable name");
+                TERMINATE("Module.cpp getVariable called with \"" + n + "\", not a variable name");
                 return nullptr;
             }
 
@@ -147,7 +150,7 @@ namespace SCAM {
         } else {
             if (this->variableMap.find(variable->getName()) != this->variableMap.end()) {
                 this->variableMap.erase(variable->getName());
-            } else throw std::runtime_error("Variable " + variable->getFullName() + " not part of module " + this->getName());
+            } else TERMINATE("Variable " + variable->getFullName() + " not part of module " + this->getName());
         }
 
     }
@@ -163,7 +166,7 @@ namespace SCAM {
 
     Function *Module::getFunction(std::string name) {
         if (functionMap.find(name) == functionMap.end()) {
-            throw std::runtime_error("Function " + name + " is not part of module " + this->getName());
+            TERMINATE("Function " + name + " is not part of module " + this->getName());
         } else return functionMap.find(name)->second;
     }
 

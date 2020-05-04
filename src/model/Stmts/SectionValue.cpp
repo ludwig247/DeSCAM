@@ -5,7 +5,7 @@
 #include "SectionValue.h"
 #include "NodePeekVisitor.h"
 
-SCAM::SectionValue::SectionValue(std::string value, const DataType *type, StmtLocationInfo stmtLocationInfo) :
+SCAM::SectionValue::SectionValue(std::string value, const DataType *type, LocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(type) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
@@ -24,7 +24,7 @@ std::string SCAM::SectionValue::getValueAsString() const {
     return this->value;
 }
 
-SCAM::SectionValue::SectionValue(const SCAM::ConstValue *constValue, StmtLocationInfo stmtLocationInfo) :
+SCAM::SectionValue::SectionValue(const SCAM::ConstValue *constValue, LocationInfo stmtLocationInfo) :
         value(constValue->getValueAsString()),
         ConstValue(constValue->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

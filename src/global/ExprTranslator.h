@@ -11,8 +11,11 @@
 #include "Stmts_all.h"
 #include <ExprVisitor.h>
 #include "PrintStmt.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 namespace SCAM {
+
     class ExprTranslator : public StmtAbstractVisitor {
     public:
         explicit ExprTranslator(z3::context *context);
@@ -78,34 +81,34 @@ namespace SCAM {
         //unsupported expressions all communication stuff, these are functions
         // can be treated as functions (which in z3 is not an expression)
         //fun fact: in z3 "1 + function" is an expression, but the function itself is not
-        void visit(class PortOperand &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect PortOperand"); }
+        void visit(class PortOperand &node) { TERMINATE("ExprSCAMtoZ3 did not expect PortOperand"); }
 
-        void visit(class Read &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Read"); }
+        void visit(class Read &node) { TERMINATE("ExprSCAMtoZ3 did not expect Read"); }
 
-        void visit(class Write &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Write"); } //returns nothing... so just ignore...
-        void visit(class Assignment &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Assignment"); } //add to solver (as operand == expr)
-        void visit(class ITE &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect ITE"); } //ITE operator exists in z3, figure out its use
-        void visit(class CompoundPortOperand &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect CompoundPortOperand"); }
+        void visit(class Write &node) { TERMINATE("ExprSCAMtoZ3 did not expect Write"); } //returns nothing... so just ignore...
+        void visit(class Assignment &node) { TERMINATE("ExprSCAMtoZ3 did not expect Assignment"); } //add to solver (as operand == expr)
+        void visit(class ITE &node) { TERMINATE("ExprSCAMtoZ3 did not expect ITE"); } //ITE operator exists in z3, figure out its use
+        void visit(class CompoundPortOperand &node) { TERMINATE("ExprSCAMtoZ3 did not expect CompoundPortOperand"); }
 
-        void visit(class While &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect While"); }
+        void visit(class While &node) { TERMINATE("ExprSCAMtoZ3 did not expect While"); }
 
-        void visit(class If &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect If"); }
+        void visit(class If &node) { TERMINATE("ExprSCAMtoZ3 did not expect If"); }
 
-        void visit(class Branch &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Branch"); }
+        void visit(class Branch &node) { TERMINATE("ExprSCAMtoZ3 did not expect Branch"); }
 
-        void visit(class CompoundExpr &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect CompoundExpr"); };
-        void visit(class ArrayExpr &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect ArrayExpr"); };
-        void visit(class ParamOperand &node) { throw std::runtime_error("ExprSCAMtoZ3 did not Paramoperand"); };
+        void visit(class CompoundExpr &node) { TERMINATE("ExprSCAMtoZ3 did not expect CompoundExpr"); };
+        void visit(class ArrayExpr &node) { TERMINATE("ExprSCAMtoZ3 did not expect ArrayExpr"); };
+        void visit(class ParamOperand &node) { TERMINATE("ExprSCAMtoZ3 did not Paramoperand"); };
 
-        void visit(class Return &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Return"); };
+        void visit(class Return &node) { TERMINATE("ExprSCAMtoZ3 did not expect Return"); };
 
-        void visit(class Notify &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Notify"); };
+        void visit(class Notify &node) { TERMINATE("ExprSCAMtoZ3 did not expect Notify"); };
 
-        void visit(class Wait &node) { throw std::runtime_error("ExprSCAMtoZ3 did not expect Wait"); };
+        void visit(class Wait &node) { TERMINATE("ExprSCAMtoZ3 did not expect Wait"); };
 
-        void visit(class Peek &node) override { throw std::runtime_error("ExprSCAMtoZ3 did not expect Peek"); };
+        void visit(class Peek &node) override { TERMINATE("ExprSCAMtoZ3 did not expect Peek"); };
 
-        void visit(class TimePointOperand &node) override { throw std::runtime_error("ExprSCAMtoZ3 did not expect TimeExprOperand"); };
+        void visit(class TimePointOperand &node) override { TERMINATE("ExprSCAMtoZ3 did not expect TimeExprOperand"); };
 
     private:
 
@@ -143,6 +146,10 @@ namespace SCAM {
 
     };
 
+/** A macro that terminates DeSCAM in case a StmtException occurs */
+#define CHECK_EXCEPTION_AND_RETURN(RETURN_VALUE)                        \
+    if(SCAM::StmtException::isExceptionHappened()) throw SCAM::FatalError(); \
+    else return RETURN_VALUE;
 }
 
 

@@ -10,7 +10,7 @@
 
 #include <ModelGlobal.h>
 #include <fstream>
-
+#include <FatalError.h>
 #include <PrintITL/PrintITL.h>
 
 
@@ -35,7 +35,10 @@ static std::vector<SCAM::Module *> parameter() {
 //    add optimizations
 //    std::set<std::string> optimizeOptions = {"all"};
 //    CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
-    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+    try{SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+    }catch(FatalError & e){
+
+    }
 
     std::vector<SCAM::Module *> result;
     for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {

@@ -5,6 +5,9 @@
 #include <iostream>
 #include "FindVariables.h"
 #include "FindNewDatatype.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 
 SCAM::FindVariables::FindVariables(clang::CXXRecordDecl* recordDecl):
@@ -25,7 +28,7 @@ bool SCAM::FindVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
             typeName = "unsigned";
         }else if(fieldDecl->getType()->isIntegerType()){
             typeName = "int";
-        }else throw std::runtime_error("unsupported type");
+        }else TERMINATE("unsupported type");
         this->memberMap.insert(std::make_pair(fieldDecl->getName(), fieldDecl));
         this->memberTypeMap.insert(std::make_pair(fieldDecl->getName(), typeName));
 

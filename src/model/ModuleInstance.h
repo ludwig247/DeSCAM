@@ -16,7 +16,7 @@ namespace SCAM {
 
     class ModuleInstance : public AbstractNode {
     public:
-        ModuleInstance(std::string name, Module *structure);
+        ModuleInstance(std::string name, Module *structure, LocationInfo locationInfo = LocationInfo());
 
         ModuleInstance();
 

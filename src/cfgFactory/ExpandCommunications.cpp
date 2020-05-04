@@ -299,7 +299,7 @@ namespace SCAM {
 //            std::cout  << n.second->print();
 //        }
 
-//        throw std::runtime_error(" YOOOOO ");
+//        TERMINATE(" YOOOOO ");
     }
 
     const std::map<int, CFGNode2 *> &ExpandCommunications::getCFG() const {

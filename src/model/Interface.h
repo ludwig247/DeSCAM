@@ -10,7 +10,7 @@
 namespace SCAM {
     class Interface : public AbstractNode {
     public:
-        Interface(std::string interfaceName, std::string direction);
+        Interface(std::string interfaceName, std::string direction, LocationInfo locationInfo = LocationInfo());
 
         virtual ~Interface();
 

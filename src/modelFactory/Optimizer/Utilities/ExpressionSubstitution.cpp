@@ -3,6 +3,9 @@
 //
 
 #include "ExpressionSubstitution.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Expr *oldExpr, SCAM::Expr *newExpr) {
     this->oldExpr = oldExpr;
@@ -16,7 +19,7 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Exp
             std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
             std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
             std::cout << PrintStmt::toString(this->newStmt) << std::endl;
-            //    throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
+            //    TERMINATE("substitutionError!, oldExpr was not found in stmt");
         }
     }
 }
@@ -33,7 +36,7 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Expr *expr, SCAM::Exp
             std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
             std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
             std::cout << PrintStmt::toString(this->propagatedExpr) << std::endl;
-            //  throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
+            //  TERMINATE("substitutionError!, oldExpr was not found in stmt");
         }
     }
 }
@@ -168,7 +171,7 @@ void SCAM::ExpressionSubstitution::visit(struct Read &node) {
     if (node.getVariableOperand() == this->oldExpr) {
         if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(this->newExpr)) {
             this->newStmt = new Read(node.getPort(), varOp, node.isNonBlockingAccess(), node.getStatusOperand());
-        } else { throw std::runtime_error("Expected a variable operand!"); }
+        } else { TERMINATE("Expected a variable operand!"); }
     } else {
         this->newStmt = &node;
     }

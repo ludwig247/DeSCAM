@@ -4,6 +4,9 @@
 
 #include "CfgUtilities.h"
 #include "FindEndNode.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 /**
  *
@@ -19,7 +22,7 @@ std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> SCAM::CfgUtilities::getStartEndMap(
             startEndMap.insert(std::make_pair(startNode, visitor.getEndNode()));
             //Start - End point of path
             if (visitor.getEndNode() == nullptr) {
-                throw std::runtime_error("No end-node found for ID[" + block.first);
+                TERMINATE("No end-node found for ID[" + block.first);
             }
         }
     }

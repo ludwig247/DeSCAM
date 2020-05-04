@@ -8,6 +8,7 @@
 #include "FindGlobal.h"
 #include "FindDataFlow.h"
 #include "FindNewDatatype.h"
+#include "FatalError.h"
 
 
 SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci) :
@@ -38,7 +39,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                             typeName = "unsigned";
                         } else if (varDecl->getType()->isIntegerType()) {
                             typeName = "int";
-                        } else throw std::runtime_error("unsupported type");
+                        } else TERMINATE("unsupported type")
 
                         std::string name = varDecl->getName().str();
                         std::string value = PrintStmt::toString(checkForExpr.getExpr());
@@ -50,7 +51,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                             if (type->isBooleanType()) descam_type = DataTypes::getDataType("bool");
                             else if (type->isUnsignedIntegerType()) descam_type = DataTypes::getDataType("unsigned");
                             else if (type->isIntegerType()) descam_type = DataTypes::getDataType("int");
-                            else throw std::runtime_error("Type: " + type.getAsString() + " for var " + name + " is not allowed");
+                            else TERMINATE("Type: " + type.getAsString() + " for var " + name + " is not allowed");
                         }
 
                         //Types have to be equivalent
@@ -64,7 +65,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                                 //std::cout << "Global variable: " << name << " with value " << PrintStmt::toString(checkForExpr.getExpr()) << " is not added as global var." << std::endl;
                                 //std::cout << "The reason is that the initialvalue has to be of constant and simple type without expressions of any kind" << std::endl;
                                 //FIXME move back to exception
-                                //throw std::runtime_error("Init value has to be const");
+                                //TERMINATE("Init value has to be const");
                             }
                         }
                     }
@@ -138,7 +139,7 @@ SCAM::DataType * SCAM::FindGlobal::getDataType(const clang::QualType& type) cons
         dataType = SCAM::DataTypes::getDataType("unsigned");
     }else if(type->isIntegerType()){
         dataType = SCAM::DataTypes::getDataType("int");
-    }else throw std::runtime_error("Type: "+type.getAsString() + "not allowed");
+    }else TERMINATE("Type: "+type.getAsString() + "not allowed");
     return dataType;
 }
 

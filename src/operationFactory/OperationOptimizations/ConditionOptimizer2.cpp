@@ -54,7 +54,7 @@ void SCAM::ConditionOptimizer2::applyTactics() {
 
     //Check weired behavior
     if (result_with.size() != 1 || result_without.size() != 1)
-        throw std::runtime_error("More than goal, only 1 expected");
+        TERMINATE("More than goal, only 1 expected");
 
     //Only one goal: use this goal
     z3::goal result_with_goal = result_with.operator[](0);
@@ -91,7 +91,7 @@ void SCAM::ConditionOptimizer2::applyTactics() {
                 std::cout << expr << std::endl;
                 std::cout << e.what() << std::endl;
                 std::cout << translator.isAbort() << std::endl;
-                if(!translator.isAbort()) throw std::runtime_error(e.what());
+                if(!translator.isAbort()) TERMINATE(e.what());
             }
 
         }

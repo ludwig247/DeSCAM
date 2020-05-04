@@ -3,6 +3,9 @@
 //
 
 #include "DatapathVisitorSVA.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 void SCAM::DatapathVisitorSVA::visit(SCAM::VariableOperand &node) {
     if (node.getVariable()->isSubVar()) {
@@ -114,7 +117,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Bitwise &node) {
             this->ss << " | ";
         } else if (node.getOperation() == "^") {
             this->ss << " ^ ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
@@ -149,7 +152,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Cast &node) {
         this->ss << "int unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "int signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }

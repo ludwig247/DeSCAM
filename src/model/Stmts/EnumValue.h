@@ -11,7 +11,7 @@
 namespace SCAM {
     class EnumValue : public ConstValue {
     public:
-        EnumValue(std::string enumValue, const DataType *enumType, StmtLocationInfo stmtLocationInfo = StmtLocationInfo());
+        EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         const std::string &getEnumValue() const;

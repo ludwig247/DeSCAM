@@ -11,10 +11,10 @@ SCAM::Interface::Interface() :
         AbstractNode("UNKNOWN") {
 }
 
-SCAM::Interface::Interface(std::string interfaceName, std::string direction) :
+SCAM::Interface::Interface(std::string interfaceName, std::string direction, LocationInfo locationInfo) :
         _direction(direction),
         _interface(interfaceName),
-        AbstractNode(interfaceName) {
+        AbstractNode(interfaceName,locationInfo) {
     assert(_direction == "in" || direction == "out");
     assert(_interface == "blocking" || _interface == "shared" || _interface == "master" || _interface == "slave");
 }

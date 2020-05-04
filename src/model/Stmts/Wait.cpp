@@ -8,7 +8,7 @@
 #include "Wait.h"
 #include "StmtException.h"
 
-SCAM::Wait::Wait(StmtLocationInfo stmtLocationInfo) {
+SCAM::Wait::Wait(LocationInfo stmtLocationInfo) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 

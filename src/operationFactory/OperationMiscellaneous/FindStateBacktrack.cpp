@@ -5,6 +5,9 @@
 #include "FindStateBacktrack.h"
 #include <regex>
 #include <PrintStmt.h>
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 //#define DEBUG_FINDSTATEASSUMPTIONS
 
@@ -89,7 +92,7 @@ SCAM::FindStateBacktrack::FindStateBacktrack(SCAM::CfgNode * state, SCAM::CfgNod
         }
         std::cout << "------------------------\n";
     }
-//    throw std::runtime_error(" YOOOOOO ");
+//    TERMINATE(" YOOOOOO ");
 #endif
 }
 
@@ -122,7 +125,7 @@ namespace SCAM {
 
     void SCAM::FindStateBacktrack::visit(SCAM::SyncSignal &node) {
         this->newExpr = &node;
-        throw std::runtime_error("FindStateBacktrack: Not allowed ");
+        TERMINATE("FindStateBacktrack: Not allowed ");
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::Peek &node) {
@@ -164,7 +167,7 @@ namespace SCAM {
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::PortOperand &node) {
-        throw std::runtime_error("FindStateBacktrack: Not allowed ");
+        TERMINATE("FindStateBacktrack: Not allowed ");
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::UnaryExpr &node) {
@@ -183,7 +186,7 @@ namespace SCAM {
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::ITE &node) {
-        throw std::runtime_error("FindStateBacktrack: Not allowed ");
+        TERMINATE("FindStateBacktrack: Not allowed ");
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::Arithmetic &node) {
@@ -227,11 +230,11 @@ namespace SCAM {
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::Return &node) {
-        throw std::runtime_error("FindStateBacktrack: Not allowed ");
+        TERMINATE("FindStateBacktrack: Not allowed ");
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::Notify &node) {
-        throw std::runtime_error("FindStateBacktrack: Not allowed ");
+        TERMINATE("FindStateBacktrack: Not allowed ");
     }
 
     void SCAM::FindStateBacktrack::visit(SCAM::Wait &node) {

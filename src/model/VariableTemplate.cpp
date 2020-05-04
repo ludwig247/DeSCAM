@@ -6,32 +6,35 @@
 #include "DataSignal.h"
 #include "Timepoint.h"
 #include "Parameter.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 namespace SCAM {
 
     template<class T>
-    VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent) :
+    VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent, LocationInfo locationInfo) :
             subVar(parent != nullptr),
             parent(parent),
             initialValue(initialValue),
-            AbstractNode(name),
+            AbstractNode(name,locationInfo),
             TypeInterface(dataType) {
 
         //Build sub varialbes for complex types
         if (this->isCompoundType()) {
-            if (this->isSubVar()) throw std::runtime_error("Variable Constructor, a compound sub-variable is not allowed");
-            //if (parent == nullptr) throw std::runtime_error("Parent is not supposed to be null");
+            if (this->isSubVar()) TERMINATE("Variable Constructor, a compound sub-variable is not allowed");
+            //if (parent == nullptr) TERMINATE("Parent is not supposed to be null");
             //create the subVariables (with default init values)
             for (auto &&subvar : dataType->getSubVarMap()) {
                 subVarList.push_back(new T(subvar.first, subvar.second, subvar.second->getDefaultVal(), (T *) (this)));
             }
         } else if (this->isArrayType()) {
-            if (this->isSubVar()) throw std::runtime_error("Variable Constructor, a array sub-variable is not allowed");
-            //if (parent == nullptr) throw std::runtime_error("Parent is not supposed to be null");
+            if (this->isSubVar()) TERMINATE("Variable Constructor, a array sub-variable is not allowed");
+            //if (parent == nullptr) TERMINATE("Parent is not supposed to be null");
             for (int i = 0; i < dataType->getArraySize(); ++i) {
                 subVarList.push_back(new T(std::to_string(i), this->getDataType()->getArrayType(), this->getDataType()->getArrayType()->getDefaultVal(), (T *) (this)));
             }
-        } else if (!this->isBuiltInType() && !this->isEnumType()) throw std::runtime_error("Unknown datatype: " + this->getName());
+        } else if (!this->isBuiltInType() && !this->isEnumType()) TERMINATE("Unknown datatype: " + this->getName());
 
         if (this->initialValue == nullptr) {
             this->initialValue = dataType->getDefaultVal();
@@ -42,7 +45,7 @@ namespace SCAM {
     template<class T>
     bool VariableTemplate<T>::hasSubVar(const std::string &n) const {
         if (!this->isCompoundType() && !this->isArrayType())
-            throw std::runtime_error("Variable hasSubVar, called for a non-compound/array variable");
+            TERMINATE("Variable hasSubVar, called for a non-compound/array variable");
         for (auto &&subvar : subVarList) {
             if (subvar->getName() == n) {
                 return true;
@@ -72,14 +75,14 @@ namespace SCAM {
 
     template<class T>
     T *VariableTemplate<T>::getSubVar(const std::string &n) const {
-        if (!this->isCompoundType() && !this->isArrayType()) throw std::runtime_error("Variable getSubVar, called for a non-compound variable");
+        if (!this->isCompoundType() && !this->isArrayType()) TERMINATE("Variable getSubVar, called for a non-compound variable");
 
         for (auto &&subvar : subVarList) {
             if (subvar->getName() == n) {
                 return (T *) subvar;
             }
         }
-        throw std::runtime_error("Variable getSubVar called with \"" + n + "\", not a sub-variable name");
+        TERMINATE("Variable getSubVar called with \"" + n + "\", not a sub-variable name");
     }
 
     template<class T>

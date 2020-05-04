@@ -8,6 +8,9 @@
 #include "Config.h"
 #include "ConditionVisitorSVA.h"
 #include "DatapathVisitorSVA.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     this->model = node;
@@ -127,7 +130,7 @@ std::string PrintSVA::functions() {
         ss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto j = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";
@@ -378,7 +381,7 @@ std::string PrintSVA::globalFunctions() {
         globss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto j = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             globss << "\t";

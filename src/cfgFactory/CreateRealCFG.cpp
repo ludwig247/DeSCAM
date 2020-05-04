@@ -91,7 +91,7 @@ SCAM::CreateRealCFG::CreateRealCFG(const std::map<int, SCAM::CfgBlock *> &contro
 //        std::cout << "BLOCK ID" << node.first << ": " << "ID:" << node.second << std::endl;
 //    }
 //
-//    throw std::runtime_error("STOP");
+//    TERMINATE("STOP");
 
 
 }

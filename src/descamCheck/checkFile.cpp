@@ -4,12 +4,12 @@
 
 
 #include <iostream>
-#include "CommandLineProcess.h"
-#include "PluginFactory.h"
-#include "ModelGlobal.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <FatalError.h>
+#include "CommandLineProcess.h"
+#include "CommandLineParameter.h"
+#include "ModelGlobal.h"
+#include "FatalError.h"
 #include "Logger/Logger.h"
 #include "Logger/ConsoleSink.h"
 
@@ -17,10 +17,10 @@ namespace py = pybind11;
 
 int checkFile(int argc, const char *argv[]) {
     //Process commandline data
-    CommandLineProcess cml = CommandLineProcess(argc, argv);
+    SCAM::CommandLineProcess cml = SCAM::CommandLineProcess(argc, argv);
     //initialize logger
     SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
-    SCAM::Logger::setFilteringOptions(std::set<LoggingFilter::FilterOptions>{LoggingFilter::FilterOptions::showAllMsgs});
+    SCAM::Logger::setFilteringOptions(std::set<SCAM::LoggingFilter::FilterOptions>{SCAM::LoggingFilter::FilterOptions::showAllMsgs});
     SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
     //Create model
     ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
