@@ -68,6 +68,7 @@ namespace SCAM {
 
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
+            //if(ExprVisitor::isTernary(condition)) return true; //TODO: remove
             solver.add(translator.translate(condition));
             solver.check();
         }
@@ -101,6 +102,7 @@ namespace SCAM {
 
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
+            //if(ExprVisitor::isTernary(condition)) continue; //TODO: remove
             solver.add(translator.translate(condition));
         }
         // Check for SAT if unsat -> erase path
@@ -110,4 +112,5 @@ namespace SCAM {
     const std::vector<SCAM::Operation*> SCAM::ValidOperations::getOperationsList() const {
         return this->operationsList;
     }
+
 }

@@ -123,9 +123,10 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Bitwise &node) {
 void SCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
     if (node.getOperation() == "not") {
         this->ss << "!";
-    } else if (node.getOperation() == "-") {
+    } else  {
         this->ss << node.getOperation();
     }
+
     this->ss << "(";
     node.getExpr()->accept(*this);
     this->ss << ")";
@@ -166,7 +167,6 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundValue &node) {
     useParenthesesFlag = true;
     for (auto iterator = node.getValues().begin(); iterator != node.getValues().end(); ++iterator) {
         (*iterator).second->accept(*this);
-
         if (iterator != (node.getValues().end()--)) this->ss << ",";
     }
 }
@@ -174,4 +174,14 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundValue &node) {
 std::string SCAM::DatapathVisitorSVA::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     DatapathVisitorSVA printer;
     return printer.createString(stmt, indentSize, indentOffset);
+}
+
+void SCAM::DatapathVisitorSVA::visit(SCAM::Ternary &node) {
+    this->ss << "(";
+    node.getCondition()->accept(*this);
+    this->ss << "?";
+    node.getTrueExpr()->accept(*this);
+    this->ss << ":";
+    node.getFalseExpr()->accept(*this);
+    this->ss << ")";
 }

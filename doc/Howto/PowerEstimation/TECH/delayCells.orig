@@ -1,0 +1,38 @@
+#######################
+### Delay cell list ###
+#######################
+
+# library suffix = <GP|LP><HVT|SVT|LVT>
+#
+# Delay cells -> should only be used to fix hold violations
+#   CLOCK65<library suffix>: *DLY*
+#   HDCLOCK65<library suffix> : *DLY*
+#
+# STM_techDelayCellList is used only by MainStream flow (MDDP specific)
+
+if { ![info exists env(ICCKITROOT)] } {
+set STM_techDelayCell ""
+foreach opcond {Worst Worst_10y Best Best_10y Nom NomLeak WorstPow bc_0.90V_m40C bc_0.90V_m40C_10y nom_0.80V_25C wc_0.70V_125C wc_0.70V_125C_10y bc_0.90V_125C bc_1.05V_105C bc_1.05V_125C bc_1.05V_m40C_10y bc_1.05V_m40C bc_1.10V_105C bc_1.10V_125C bc_1.10V_150C bc_1.10V_m40C_10y bc_1.10V_m40C bc_1.15V_105C bc_1.15V_125C bc_1.15V_m40C_10y bc_1.15V_m40C bc_1.25V_105C bc_1.25V_125C bc_1.25V_m40C_10y bc_1.25V_m40C bc_1.30V_105C bc_1.30V_125C bc_1.30V_150C bc_1.30V_m40C_10y bc_1.30V_m40C bc_1.35V_105C bc_1.35V_125C bc_1.35V_m40C_10y bc_1.35V_m40C nom_1.00V_25C nom_1.10V_25C nom_1.20V_25C nom_1.30V_25C wc_0.90V_105C_10y wc_0.90V_105C wc_0.90V_125C_10y wc_0.90V_125C wc_0.90V_150C_10y wc_0.90V_150C wc_0.95V_105C_10y wc_0.95V_105C wc_0.95V_125C_10y wc_0.95V_125C wc_1.00V_105C_10y wc_1.00V_105C wc_1.00V_125C_10y wc_1.00V_125C wc_1.05V_105C_10y wc_1.05V_105C wc_1.05V_125C_10y wc_1.05V_125C wc_1.10V_105C_10y wc_1.10V_105C wc_1.10V_125C_10y wc_1.10V_125C wc_1.10V_150C_10y wc_1.10V_150C wc_1.15V_105C_10y wc_1.15V_105C wc_1.15V_125C_10y wc_1.15V_125C wc_1.25V_105C_10y wc_1.25V_105C wc_1.25V_125C_10y wc_1.25V_125C} {
+    foreach purpose {GP LP} {
+        foreach process {HVT SVT LVT} {
+            set librarySuffix ${purpose}${process}
+            set STM_techDelayCell [concat $STM_techDelayCell [join "
+                CLOCK65${librarySuffix}_${opcond}.db:CLOCK65${librarySuffix}/*DLY*
+                HDCLOCK65${librarySuffix}_${opcond}.db:HDCLOCK65${librarySuffix}/*DLY*
+            "]]
+        }
+    }
+}}
+
+
+set STM_techDelayCellList ""
+    foreach purpose {GP LP} {
+        foreach process {HVT SVT LVT} {
+            set librarySuffix ${purpose}${process}
+            set STM_techDelayCellList [concat $STM_techDelayCellList [join "
+                CLOCK65${librarySuffix}/*DLY*
+                HDCLOCK65${librarySuffix}/*DLY*
+            "]]
+        }
+    }
+

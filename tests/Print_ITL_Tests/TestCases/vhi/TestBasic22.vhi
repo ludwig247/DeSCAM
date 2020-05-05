@@ -50,9 +50,6 @@ freeze:
 assume:
 	at t: state_1;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: (test2 > resize(10,32));
 prove:
 	at t_end: state_1;
@@ -77,9 +74,6 @@ freeze:
 assume:
 	at t: state_1;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: not((test2 > resize(10,32)));
 prove:
 	at t_end: state_2;
@@ -104,9 +98,6 @@ freeze:
 assume:
 	at t: state_2;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: (test2 > resize(10,32));
 prove:
 	at t_end: state_1;
@@ -131,9 +122,6 @@ freeze:
 assume:
 	at t: state_2;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: not((test2 > resize(10,32)));
 prove:
 	at t_end: state_2;

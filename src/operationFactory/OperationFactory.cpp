@@ -17,8 +17,11 @@
 #include "PropertySuite.h"
 #include "CreateOperationsSlave.h"
 #include "../parser/CommandLineParameter.h"
+#include "OperationOptimizations/TernaryOptimizer.h"
 #include <thread>
 #include <CreatePropertySuite.h>
+#include <OperationOptimizations/TernaryOptimizer.h>
+#include <Completeness.h>
 
 namespace SCAM {
     OperationFactory::OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module *module) :
@@ -49,8 +52,13 @@ namespace SCAM {
             std::cout << "Optimizing Assignments" << std::endl;
             this->optimizeAssignments();
         }
-        std::cout << "Optimization:" << std::endl;
+        std::cout << "Simplify Ternary Operations " << std::endl;
+        this->optimizeTernary();
+        std::cout << "Reduce operations:" << std::endl;
         this->optimizeOperations();
+        std::cout << "Valid Operations: " << std::endl;
+        this->findValidOperations();
+        std::cout << "\tValid: " << this->operations.size() << std::endl;
         std::cout << "Generating PropertySuite:" << std::endl;
         std::map<int, State *> stateMap;
         for (auto state: this->statesMap) {
@@ -66,7 +74,6 @@ namespace SCAM {
         this->statesMap = ctest.getStatesMap();
         this->rawOperations = ctest.getOperations();
     }
-
     void OperationFactory::createOperations() {
         if (this->module->isSlave()) {
             SCAM::CreateOperationsSlave cOperations(this->rawOperations, this->statesMap, this->module);
@@ -120,15 +127,95 @@ namespace SCAM {
     }
 
     void OperationFactory::optimizeAssignments() {
+
         for (auto op : operations) {
             AssignmentOptimizer2 assignmentOptimizer2(op->getCommitmentsList(), module);
             op->setCommitmentsList(assignmentOptimizer2.getNewAssignmentsList());
         }
+
     }
 
     void OperationFactory::optimizeOperations() {
         SCAM::OptimizeOperations2 oOperations(this->operations, module);
         this->varMap = oOperations.getNewVarMap();
+    }
+
+    //! Simplifies the condition of an ternary based on a list of assumptions
+    void OperationFactory::simplifyTernary(const std::vector<Expr *>& assumptionList, Expr *expr) {
+        if (ExprVisitor::isTernary(expr)) {
+            //Get all ternary operators from that statement
+            auto compareSet = ExprVisitor::getUsedTernaryOperators(expr);
+            for (auto comp: compareSet) {
+                if (TernaryOptimizer::isTrivialFalse(assumptionList, comp->getCondition())) {
+                    comp->setTrivialFalse();
+                    continue;
+                }
+                if (TernaryOptimizer::isTrivialTrue(assumptionList, comp->getCondition())) {
+                    comp->setTrivialTrue();
+                }
+            }
+        }
+    }
+
+    void OperationFactory::optimizeTernary() {
+        //////////////////////////////
+        /// Commitments
+        /////////////////////////////
+        for (auto op:operations) {
+            for (int i = 0; i < op->getCommitmentList().size(); i++) {
+                Assignment *commitment = op->getCommitmentList().at(i);
+                //Simplify all ternary expressions
+                simplifyTernary(op->getAssumptionsList(), commitment->getRhs());
+                //Optmize all assignment containing a ternary with trivial true/false
+            }
+            std::vector<Assignment *> newCommList;
+            for (auto stmt: op->getCommitmentList()) {
+                TernaryOptimizer ternaryOptimizer(stmt,op->getAssumptionsList(),this->module);
+                if (NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt())) {
+                    newCommList.push_back(NodePeekVisitor::nodePeekAssignment(ternaryOptimizer.getStmt()));
+                } else throw std::runtime_error("Commitment has to be a statement");
+            }
+            op->setCommitmentsList(newCommList);
+        }
+
+        //////////////////////////////
+        /// Assumptions
+        /////////////////////////////
+        for (auto op : operations) {
+
+            for (int i = 0; i < op->getAssumptionsList().size(); i++) {
+                auto assumption = op->getAssumptionsList().at(i);
+                if (ExprVisitor::isTernary(assumption)) {
+                    simplifyTernary(op->getAssumptionsList(), assumption);
+                }
+            }
+
+            std::vector<Expr *> newAssumptionList;
+            for (auto stmt: op->getAssumptionsList()) {
+
+                TernaryOptimizer ternaryOptimizer(stmt,this->module);
+                if (ternaryOptimizer.getExpr() != nullptr && ternaryOptimizer.getExpr()->getDataType()->isBoolean()) {
+                    newAssumptionList.push_back(ternaryOptimizer.getExpr());
+                } else throw std::runtime_error("Assumption has to be boolean");
+            }
+            op->setAssumptionsList(newAssumptionList);
+
+            newAssumptionList.clear();
+            for (auto stmt: op->getAssumptionsList()) {
+                ConditionOptimizer2 conditionOptimizer2({stmt}, module);
+                if (!conditionOptimizer2.getNewConditionList().empty()) {
+                    auto expr = conditionOptimizer2.getNewConditionList().back();
+                    if (!(*expr == BoolValue((true)))) {
+                        newAssumptionList.push_back(expr);
+                    }
+                }
+            }
+            op->setAssumptionsList(newAssumptionList);
+        }
+
+        //Completeness::checkCaseSplit(operations, module);
+
+
     }
 
 }

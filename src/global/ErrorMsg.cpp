@@ -14,8 +14,10 @@ std::vector<SCAM::ErrorMsg::Error> SCAM::ErrorMsg::getErrorList() {
 }
 
 void SCAM::ErrorMsg::addError(std::string msg, std::string astMsg, std::string file, std::string loc) {
+
     //Add new error to errorMsgs
     ErrorMsg::getInstance().errorList.emplace_back(msg, astMsg, file, loc, ErrorMsg::getInstance().errorMsgs);
+
     //Remove old errorMsg from the log
     ErrorMsg::getInstance().errorMsgs.clear();
 }

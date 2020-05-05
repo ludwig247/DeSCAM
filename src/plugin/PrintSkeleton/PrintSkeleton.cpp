@@ -619,7 +619,7 @@ std::string PrintSkeleton::getDataTypeWrapper(const SCAM::DataType *dataType) {
         if (dataType->isInteger()) {
             //if (variable.second->getDataType()->getName() == "unsigned" || variable.second->getDataType()->getName() == "signed") {
             //return "signed (31 downto 0)";
-            return "int";
+            return "signed(31 downto 0)";
         } else if (dataType->isUnsigned()) {
             return "unsigned (31 downto 0)";
         }
