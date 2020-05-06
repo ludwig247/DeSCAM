@@ -22,10 +22,11 @@ PROG_ASM = \
  	enc_r.s \
  	enc_b.s \
  	enc_s.s \
+	enc_u.s \
  	enc_j.s \
- 	enc_i_i.s \
  	enc_i_l.s \
- 	enc_i_j.s
+ 	enc_i_j.s \
+	baseline.s
 
 #
 # Define all object files.

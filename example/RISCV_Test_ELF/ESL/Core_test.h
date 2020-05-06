@@ -744,6 +744,8 @@ void Core_test::perform_test() {
     } else {
 
         cout << "Tests for test case: '" << test_case << "':" << " [DOES NOT EXIST]" << endl;
+        PowerEstimator::getInstance().displayResults(CO.isa.name(), test_case);
+
         return;
     }
 

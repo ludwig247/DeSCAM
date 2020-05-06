@@ -1,7 +1,7 @@
 
 # @author :	Dino Mehmedagić
 # @name   : 	enc_r.s
-# @purpose: 	Test for addition with an attempt to average out the power dependencz on data and the addi instructions
+# @purpose: 	Test for addition with an attempt to average out the power dependency on data and the addi instructions
 
 .globl _start
 _start:
@@ -145,10 +145,6 @@ _start:
 	add  x4,x4,x0        	# x4 = x0 + x0 = 0x00000000 
 	add  x5,x5,x1        	# x5 = x3 + x0 = 0xFFFFFFFF
 
-	nop
-	nop			# end of ID stage of the last instruction
-	nop			# end of EX stage of the last instruction
-	nop			# end of MEM stage of the last instruction
-	nop			# end of WB stage of the last instruction
+
 _end:
 	ebreak

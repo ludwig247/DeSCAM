@@ -29,8 +29,6 @@ PROG_ASM = \
            test_3.s \
 	   highPower.s \
 	   lowPower.s \
-	   highPower_loop.s \
-           lowPower_loop.s \
 	   switch.s
 
 #

@@ -81,10 +81,6 @@ _start:
 	sb x1,0(x0)		# mem[0x0] = 0xFF	
 	sb x0,8(x0)		# mem[0x8] = 0xFF
 
-	nop
-	nop			# end of ID stage of the last instruction
-	nop			# end of EX stage of the last instruction
-	nop			# end of MEM stage of the last instruction
-	nop			# end of WB stage of the last instruction
+
 _end:
 	ebreak

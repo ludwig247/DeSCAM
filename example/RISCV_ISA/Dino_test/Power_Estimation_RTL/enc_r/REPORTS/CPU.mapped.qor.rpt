@@ -4,7 +4,7 @@ Information: Updating design information... (UID-85)
 Report : qor
 Design : CPU
 Version: N-2017.09-SP3
-Date   : Thu Apr 23 17:33:32 2020
+Date   : Tue Apr 28 16:40:52 2020
 ****************************************
 
 
@@ -91,11 +91,11 @@ Date   : Thu Apr 23 17:33:32 2020
   Compile CPU Statistics
   -----------------------------------------
   Resource Sharing:                    0.00
-  Logic Optimization:                  0.16
-  Mapping Optimization:                1.55
+  Logic Optimization:                  0.19
+  Mapping Optimization:                1.80
   -----------------------------------------
-  Overall Compile Time:                6.53
-  Overall Compile Wall Clock Time:     7.43
+  Overall Compile Time:                7.63
+  Overall Compile Wall Clock Time:     8.59
 
   --------------------------------------------------------------------
 

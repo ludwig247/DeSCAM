@@ -8,7 +8,7 @@ Report : timing
         -transition_time
 Design : CPU
 Version: N-2017.09-SP3
-Date   : Thu Apr 23 17:33:32 2020
+Date   : Tue Apr 28 16:40:52 2020
 ****************************************
 
 Operating Conditions: typical   Library: NangateOpenCellLibrary
@@ -59,7 +59,7 @@ Attributes:
   U8149/ZN (NAND2_X1)                                     0.01      0.03       6.40 r
   IF_ISAxN10935 (net)                           2                   0.00       6.40 r
   clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/EN (SNPS_CLOCK_GATE_HIGH_CPU_36)     0.00     6.40 r
-  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/net216161 (net)           0.00       6.40 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/net379745 (net)           0.00       6.40 r
   clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch/D (DLL_X1)     0.01     0.01     6.41 r
   data arrival time                                                            6.41
 
@@ -167,7 +167,7 @@ Attributes:
   U8149/ZN (NAND2_X1)                                     0.01      0.03       1.28 r
   IF_ISAxN10935 (net)                           2                   0.00       1.28 r
   clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/EN (SNPS_CLOCK_GATE_HIGH_CPU_36)     0.00     1.28 r
-  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/net216161 (net)           0.00       1.28 r
+  clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/net379745 (net)           0.00       1.28 r
   clk_gate_IF_ISAxtoRegsPort_regxDSTDATAx/latch/D (DLL_X1)     0.01     0.01     1.29 r
   data arrival time                                                            1.29
 

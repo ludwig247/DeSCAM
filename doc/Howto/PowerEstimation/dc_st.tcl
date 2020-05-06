@@ -301,7 +301,7 @@ ungroup -all
 compile_ultra -gate_clock 
 
 ### ## <- Update (SAIF file path and instance name)
-read_saif -auto_map_names -input /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/Dino_test/Saif_files/enc_s.saif -instance_name cpu_tb/IF_CPU -verbose
+read_saif -auto_map_names -input /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/Dino_test/Saif_files/enc_i_i_hold50.saif -instance_name cpu_tb/IF_CPU -verbose
 #read_saif -auto_map_names -input SAIF/rtl_saif_backward_${DESIGN_NAME}.saif -instance_name tb_euclid_reset/DUT -verbose
 
 set_max_leakage_power 0
@@ -540,7 +540,7 @@ if {[shell_is_in_topographical_mode]} {
 # Use SAIF file for power analysis
 # read_saif -auto_map_names -input ${DESIGN_NAME}.saif -instance < DESIGN_INSTANCE > -verbose
 #  ## <- Update 
-read_saif -auto_map_names -input /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/Dino_test/Saif_files/enc_s.saif -instance_name cpu_tb/IF_CPU -verbose
+read_saif -auto_map_names -input /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/Dino_test/Saif_files/enc_i_i_hold50.saif -instance_name cpu_tb/IF_CPU -verbose
 #read_saif -auto_map_names -input SAIF/rtl_saif_backward_${DESIGN_NAME}.saif -instance_name tb_euclid_reset/DUT -verbose
 
 report_power -nosplit > ${REPORTS_DIR}/${DESIGN_NAME}.mapped.power.rpt

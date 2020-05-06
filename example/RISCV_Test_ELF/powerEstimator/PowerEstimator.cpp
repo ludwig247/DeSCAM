@@ -60,17 +60,34 @@ void PowerEstimator::displayResults(const std::string& moduleName) {
 
 void PowerEstimator::displayResults(const std::string &moduleName, const std::string &testName) {
     std::ofstream logFile;
-    unsigned int total = 0;
+    double total = 0;
+    const double R = 2045.679303890155;
+    const double B = 2039.979233442413;
+    const double S = 3997.215110772804;
+    const double U = 2051.223097038867;
+    const double J = 2071.77403060257;
+    const double I_I = 2181.599331151734;
+    const double I_L = 4062.646783599133;
+    const double I_J = 2066.009061328963;
+
     logFile.open("../../RISCV_ISA/Dino_test/Log_files/" + moduleName + "_" + testName + ".txt");
     logFile << "Operation:\tNumber:" << std::endl;
-    for (auto module : operations)  {
+    std::cout << "Operation:\tNumber:" << std::endl;
         int i = 0;
-        for (auto operation : module.second)  {
+        for (auto operation : operations.at(moduleName))  {
             logFile << i++ << "\t\t" << operation << std::endl;
+            std::cout << i++ << "\t\t" << operation << std::endl;
             total += operation;
         }
-    }
-    logFile << "TOTAL: \t\t" << total << std::endl;
+    logFile << "TOTAL: \t\t" << (int) (total + 0.5) << std::endl;
+   std::cout << "TOTAL: \t\t" << (int) (total + 0.5) << std::endl;
+
+    double power = R * (operations.at(moduleName).at(2) / total) + B * (operations.at(moduleName).at(3) / total) + S * (operations.at(moduleName).at(4) / total) +
+            U * (operations.at(moduleName).at(5) / total) + J * (operations.at(moduleName).at(6) / total) + I_I * (operations.at(moduleName).at(7) / total) +
+            I_L * (operations.at(moduleName).at(8) / total) + I_J * (operations.at(moduleName).at(9) / total);
+
+    logFile << "Estimated dynamic power consumption: " << power << "uW" << std::endl;
+    std::cout << "Estimated dynamic power consumption: " << power << "uW" << std::endl;
     logFile.close();
 }
 

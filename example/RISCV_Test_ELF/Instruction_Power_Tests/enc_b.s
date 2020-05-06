@@ -135,12 +135,6 @@ NEQ5:
 	beq x3,x0,DEBUG
 
 END:
-	nop
-	nop			# end of ID stage of the last instruction
-	nop			# end of EX stage of the last instruction
-	nop			# end of MEM stage of the last instruction
-	nop			# end of WB stage of the last instruction
-_end:
 	ebreak
 
 DEBUG:
