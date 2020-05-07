@@ -1,6 +1,6 @@
 
 #include "systemc.h"
-#include "Bus.h"
+#include "Switch.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
 #include "Interfaces/Interfaces.h"
@@ -19,7 +19,7 @@ int sc_main(int, char **) {
     SlaveDummy slaveDummy2("slaveDummy2");
     SlaveDummy slaveDummy3("slaveDummy3");
 
-    Bus bus("bus");
+    Switch bus("bus");
 
     Blocking<bus_req_t> MasterToBus("MasterToBus");
     masterDummy.bus_req(MasterToBus);

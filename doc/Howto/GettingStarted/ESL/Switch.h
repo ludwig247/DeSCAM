@@ -9,7 +9,7 @@
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
 
-struct Bus : public sc_module {
+struct Switch : public sc_module {
     //In-port
     blocking_in<bus_req_t> master_in;
     blocking_in<bus_resp_t> slave_in0;
@@ -29,9 +29,9 @@ struct Bus : public sc_module {
     bus_resp_t resp;
 
     //Constructor
-    SC_HAS_PROCESS(Bus);
+    SC_HAS_PROCESS(Switch);
 
-    Bus(sc_module_name name) :
+    Switch(sc_module_name name) :
             master_in("master_in"),
             master_out("master_out"),
             slave_out0("slave_out0"),
