@@ -9,6 +9,6 @@ set(CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib -rt -dl -tinfo -pthre
 include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
-FILE(GLOB R_SRC *.cpp *.hpp *.h)
+file(GLOB R_SRC *.cpp *.hpp *.h)
 add_executable(Interface_Blocking_o ${R_SRC})
 target_link_libraries(Interface_Blocking_o systemc)

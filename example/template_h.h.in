@@ -1,0 +1,6 @@
+#ifndef PROJECT_@FIRST_ARG@_H
+#define PROJECT_@FIRST_ARG@_H
+#include "../Interfaces/Interfaces.h"
+#include "systemc.h"
+
+#endif //PROJECT@FIRST_ARG@_H

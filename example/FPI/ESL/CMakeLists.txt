@@ -2,19 +2,20 @@ cmake_minimum_required(VERSION 2.8)
 project(FPI C CXX)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
-set (CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib   -rt -dl -tinfo -pthread -z")
-set(ENV_SRC ${ENV_SRC})
+set(CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib   -rt -dl -tinfo -pthread -z")
 
+
+#Define location systemc header&libs
 include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces/)
 
-add_subdirectory(env)
-#include_directories(Interfaces)
 
+add_subdirectory(env)
 get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
-FILE(GLOB R_SRC *.cpp *.hpp *.h)
+file(GLOB R_SRC *.cpp *.hpp *.h)
 list(APPEND R_SRC ${ENV_SRC})
+
 add_executable(FPI_Simulation ${R_SRC})
 target_link_libraries(FPI_Simulation systemc)
 
