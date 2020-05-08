@@ -44,7 +44,6 @@ void SCAM::PrintStmt::visit(BoolValue &node) {
 void SCAM::PrintStmt::visit(EnumValue &node) {
     useParenthesesFlag = true;
     this->ss << node.getEnumValue();
-
 }
 
 void SCAM::PrintStmt::visit(SCAM::CompoundValue &node) {
@@ -53,7 +52,7 @@ void SCAM::PrintStmt::visit(SCAM::CompoundValue &node) {
     for (auto iterator = node.getValues().begin(); iterator != node.getValues().end(); ++iterator) {
         (*iterator).second->accept(*this);
 
-        if (iterator != (node.getValues().end()--)) this->ss << ",";
+        if (std::next(iterator) != node.getValues().end()) this->ss << ", ";
     }
     this->ss << "}";
 }
@@ -361,4 +360,16 @@ void SCAM::PrintStmt::visit(SCAM::ArrayExpr &node) {
 
 void SCAM::PrintStmt::visit(TimePointOperand &node) {
     this->ss << node.getTimepoint()->getName();
+}
+
+void SCAM::PrintStmt::visit(SCAM::Ternary &node) {
+
+    this->ss << "(";
+    node.getCondition()->accept(*this);
+    this->ss << ")?";
+    node.getTrueExpr()->accept(*this);
+    this->ss << ":";
+    node.getFalseExpr()->accept(*this);
+
+
 }

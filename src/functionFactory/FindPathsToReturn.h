@@ -110,6 +110,7 @@ namespace SCAM {
         virtual void visit(class SCAM::ParamOperand &node);
         virtual void visit(class SCAM::Return &node);
         virtual void visit(class SCAM::Notify &node) ;
+        virtual void visit(class SCAM::Ternary &node) ;
 
     };
 

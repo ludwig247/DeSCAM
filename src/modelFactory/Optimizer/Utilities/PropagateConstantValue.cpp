@@ -261,4 +261,9 @@ namespace SCAM {
             this->rhsVariableAssignmentsIds.clear();
         }
     }
+
+    void PropagateConstantValue::visit(class Ternary &node) {
+        throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+    }
 }

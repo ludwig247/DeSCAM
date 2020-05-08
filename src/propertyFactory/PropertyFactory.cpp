@@ -29,8 +29,13 @@ SCAM::PropertyFactory::PropertyFactory(const Module *module) {
     SCAM::CreatePropertySuite::addReset(module, propertySuite);
 
     //OPERATION PROPERTIES
+
+    SCAM::CreatePropertySuite::addOperations(module, propertySuite);
+    //SCAM::CreatePropertySuite::addTrueOperations(module, propertySuite);
+
 //    SCAM::CreatePropertySuite::addOperations(module, propertySuite);
-    SCAM::CreatePropertySuite::addTrueOperations(module, propertySuite);
+//    SCAM::CreatePropertySuite::addTrueOperations(module, propertySuite);
+
 
     // WAIT PROPERTIES
     SCAM::CreatePropertySuite::addWait(module, propertySuite);

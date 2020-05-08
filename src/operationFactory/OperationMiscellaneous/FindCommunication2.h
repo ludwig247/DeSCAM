@@ -77,6 +77,8 @@ namespace SCAM {
         const std::string &getStateName() const;
         bool hasStateName() const;
 
+        void visit(class Ternary &node) override;
+
     private:
         bool waitComm;
         bool communication;

@@ -1,0 +1,25 @@
+New flow:
+	The core expects instructions in hex.
+	An example assembly file is found in /RISCV/Programs/fibonacci.s
+	An example file with hex instructions is found in /RISCV/Programs/fibonacci.hex
+	
+	To generate fibonacci.hex from fibonacci.s : cd into /RISCV/Programs and do:
+	$ python3 ../RISCV-RV32I-Assembler/src/rvi.py fibonacci.s --hex -o fibonacci.hex
+	(can also be called as ./create_hex.sh).
+
+Old flow:
+	This code expects file.bin to be compiled riscv64 executable, steps to build it are:
+
+	1)create dummy.S with following content:
+
+	  .global _start
+	  _start:
+	  ADDI x5,x0,18
+	  ADDI x6,x0,3
+	  ADD x7,x6,x5
+
+	2) riscv64-unknown-elf-gcc -static -fpic -fvisibility=hidden -nostdlib -nostartfiles -std=gnu99 -O0 dummy.S
+	3) riscv64-unknown-elf-objcopy -O binary a.out file.bin
+
+	Running ./assemble.sh combines 2) and 3)...
+

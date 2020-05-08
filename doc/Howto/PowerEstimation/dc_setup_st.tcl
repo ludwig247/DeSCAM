@@ -36,17 +36,17 @@ if {$synopsys_program_name == "dc_shell"}  {
 # set RTL_SRC_FILES_2 ""  ;# Enter the list of source RTL files if reading from RTL
 
 #set RTL_SRC_FILES   "/import/lab/users/deutschmann/SCAM/example/RISCV/RTL/SCAM_Model_types.vhd \  
-set RTL_SRC_FILES   "/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/types.vhd \
-		      /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/regs.vhd \
-		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/ISA.vhd \
-		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/CPU.vhd";# Enter the list of source RTL files if reading from RTL ## <- Update (Source files)
+#set RTL_SRC_FILES   "/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/types.vhd \
+#		      /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/regs.vhd \
+#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/ISA.vhd \
+#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_ISA/RTL/CPU.vhd";# Enter the list of source RTL files if reading from RTL ## <- Update (Source files)
 
-#set RTL_SRC_FILES   "/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/SCAM_Model_types.vhd \
-#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/ALU.vhd \
-#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/cpath.vhd \
-#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/Decoder.vhd \
-#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/regs.vhd \
-#		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/CPU.vhd";
+set RTL_SRC_FILES   "/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/SCAM_Model_types.vhd \
+		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/ALU.vhd \
+		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/cpath.vhd \
+		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/Decoder.vhd \
+		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/regs.vhd \
+		     /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Power/RTL/CPU.vhd";
 
 
 # set RTL_SRC_FILES    "/users/udupi/prop_master/instrumented.vhd";

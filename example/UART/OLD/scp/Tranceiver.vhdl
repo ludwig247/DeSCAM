@@ -10,7 +10,7 @@ port(
       --  rx_baud_trigger:        in std_logic;
      --   tx_baud_trigger:        in std_logic;
 	data_in:		in unsigned(0 downto 0);
-	data_out:		out unsigned(0 downto 0);
+	valid_out:		out unsigned(0 downto 0);
 	data_out_notify:	 out bool;
 	from_mem_if:		in CUtoME_IF;
 	from_mem_if_sync:	 in bool;
@@ -258,7 +258,7 @@ begin
                      rx_buffer_signal(10 downto 10) <= data_in;
                      rx_buffer_signal(9 downto 0) <= rx_buffer_signal(10 downto 1);
 
-             --     data_out <= tx_buffer_signal(0 downto 0);
+             --     valid_out <= tx_buffer_signal(0 downto 0);
               --    tx_buffer_signal(9 downto 0) <= tx_buffer_signal(10 downto 1);
                --    tx_buffer_signal(10 downto 10) <= to_unsigned(1,1);
 
@@ -307,13 +307,13 @@ begin
                   if(rst = '1') then
                      tx_buffer_signal<= to_unsigned(2047,11);
          --         elsif(((regs_signal.SR1 and to_unsigned(4,32)) /= to_unsigned(0,32)) and ((countones(regs_signal.TX(7 downto 0)) mod to_unsigned(2, 32)) /= to_unsigned(0,32))) then
-         --            data_out <= tx_buffer_signal(0 downto 0);
+         --            valid_out <= tx_buffer_signal(0 downto 0);
          --            tx_buffer_signal <= to_unsigned(3,2)  & regs_signal.TX(7 downto 0) & to_unsigned(0,1);
          --         elsif(((regs_signal.SR1 and to_unsigned(4,32)) /= to_unsigned(0,32)) and ((countones(regs_signal.TX(7 downto 0)) mod to_unsigned(2, 32)) = to_unsigned(0,32))) then
-         --            data_out <= tx_buffer_signal(0 downto 0);
+         --            valid_out <= tx_buffer_signal(0 downto 0);
          --            tx_buffer_signal <= to_unsigned(2,2)  & regs_signal.TX(7 downto 0) & to_unsigned(0,1);
                   else
-                     data_out <= tx_buffer_signal(0 downto 0);
+                     valid_out <= tx_buffer_signal(0 downto 0);
                    --  tx_buffer_signal(9 downto 0) <= tx_buffer_signal(10 downto 1);  
                    --  tx_buffer_signal(10 downto 10) <= to_unsigned(1,1);
                   end if;      

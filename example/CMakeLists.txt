@@ -9,6 +9,7 @@ add_subdirectory(Bus)
 #add_subdirectory(I2C)
 #add_subdirectory(Comm_Test_newInterfaces)
 add_subdirectory(RISCV_Test_ELF)
+add_subdirectory(RISCV_Power)
 #add_subdirectory(operation-pipeline)
 
 
