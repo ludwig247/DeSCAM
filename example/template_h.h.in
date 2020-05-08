@@ -3,4 +3,4 @@
 #include "../Interfaces/Interfaces.h"
 #include "systemc.h"
 
-#endif //PROJECT@FIRST_ARG@_H
+#endif //PROJECT_@FIRST_ARG@_H

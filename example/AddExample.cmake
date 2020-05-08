@@ -31,14 +31,13 @@ macro (add_example)
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/CMakeLists.txt "file(GLOB ENV_SRC *.cpp *.hpp *.h)")
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/CMakeLists.txt "add_subdirectory(ESL)")
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/sc_main.cpp "#include\"../${FIRST_ARG}.h\"")
-
-        #   file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt "add_subdirectory(${FIRST_ARG})\n")
+            file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt "add_subdirectory(${FIRST_ARG})\n")
+            configure_file ( #Creates new example header-file
+                "${CMAKE_CURRENT_SOURCE_DIR}/template_h.h.in"
+                "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/${FIRST_ARG}.h" @ONLY)
             configure_file ( #Creates CMakeLists for the ESL-folder
                 "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/CMakeLists.txt" @ONLY)
-configure_file ( #Creates new example header-file
-        "${CMAKE_CURRENT_SOURCE_DIR}/template_h.h.in"
-        "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/${FIRST_ARG}.h" @ONLY)
         endif()
         list(APPEND EXAMPLE_NAMES_LIST ${FIRST_ARG})
     elseif(${NUM_MACRO_ARG} EQUAL 3)
@@ -56,13 +55,16 @@ configure_file ( #Creates new example header-file
         else()
 #            message(FATAL_ERROR "Given example directory for example ${FIRST_ARG} does not exist")
             set(EXAMPLE_NAME "${THIRD_ARG}_Simulation")
-    message(STATUS "${EXAMPLE_NAME}")
             message(WARNING "Given example directory ${THIRD_ARG} does not exist, add_example() will create a new example directory tree")
             file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/RTL/properties)
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env/CMakeLists.txt "file(GLOB ENV_SRC *.cpp *.hpp *.h)")
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/CMakeLists.txt "add_subdirectory(ESL)")
-#            file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt "add_subdirectory(${THIRD_ARG})\n")
-            configure_file (
+            file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env/sc_main.cpp "#include\"../${THIRD_ARG}.h\"")
+            file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt "add_subdirectory(${THIRD_ARG})\n")
+            configure_file ( #Creates new example header-file
+                    "${CMAKE_CURRENT_SOURCE_DIR}/template_h.h.in"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/${THIRD_ARG}.h" @ONLY)
+            configure_file ( #Creates CMakeLists.txt for the ESL-folder
                     "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.in"
                     "${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/CMakeLists.txt" @ONLY)
         endif()
