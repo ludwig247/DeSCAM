@@ -5,9 +5,11 @@ add_subdirectory(Bus)
 #add_subdirectory(FPI)
 #add_subdirectory(FIFO)
 #add_subdirectory(tests)
-add_subdirectory(Whishbone)
+#add_subdirectory(Whishbone)
 #add_subdirectory(I2C)
 #add_subdirectory(Comm_Test_newInterfaces)
+#add_subdirectory(operation-pipeline)
+add_subdirectory(UART_NORDIC)
 
 include(AddExample.cmake)
 
@@ -28,13 +30,6 @@ add_example(operation-pipeline;Print_ITL_Tests)
 #        "${PROJECT_SOURCE_DIR}/tests/Print_ITL_Tests/TestCases/tests.h"
 #)
 
-
-
-
-
-
-
-#add_subdirectory(UART_NORDIC)
 
 
 

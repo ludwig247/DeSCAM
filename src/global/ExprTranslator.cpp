@@ -301,9 +301,25 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
         } else if (oper == "if") {
             z3::expr simplifiedITE = z3_expr_intern.simplify();
             if(simplifiedITE.num_args()==3){
-                auto cond = translate_intern(z3_expr_intern.arg(0));
-                auto trueExpr= translate_intern(z3_expr_intern.arg(1));
-                auto falseExpr= translate_intern(z3_expr_intern.arg(2));
+                Expr * cond;
+                Expr * trueExpr;
+                Expr * falseExpr;
+                try{
+                cond = translate_intern(z3_expr_intern.arg(0));
+                }catch(std::exception){
+                    bool old_value = this->unsigned_flag;
+                    this->unsigned_flag = true;
+                    cond = translate_intern(z3_expr_intern.arg(0));
+                    this->unsigned_flag = old_value;
+                }
+                trueExpr= translate_intern(z3_expr_intern.arg(1));
+                falseExpr= translate_intern(z3_expr_intern.arg(2));
+                if(trueExpr->getDataType() != falseExpr->getDataType()){
+                    bool old_value = this->unsigned_flag;
+                    this->unsigned_flag = true;
+                    trueExpr= translate_intern(z3_expr_intern.arg(1));
+                    this->unsigned_flag = old_value;
+                }
                 return new Ternary(cond,trueExpr,falseExpr);
             }else if((simplifiedITE.num_args()==0)){
                 return translate_intern(simplifiedITE);
@@ -661,8 +677,16 @@ void SCAM::ExprTranslator::visit(SCAM::DataSignalOperand &node) {
 void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
     //a new variable (int_const or bool_const) is created each time an operand is found
     //this is ok, since z3 automatically sees them as the same operand as long as it has the same name
-    //auto name = (node.getOperandName() + "_function_" + std::to_string(functionOperandMap.size()));
-    auto name = (node.getOperandName() + "_function");
+
+    auto name = PrintStmt::toString(&node);
+    //Does function already exist?
+
+   // auto name = (node.getOperandName() + "_function");
+//    if(this->functionOperandMap.find(name) != this->functionOperandMap.end()){
+//
+//    }
+
+
     if (node.getDataType()->isBuiltInType()) {
         if (node.getDataType() == DataTypes::getDataType("int")) {
             if (bitvector_flag) z3_expr = context->bv_const(name.c_str(), 32);
@@ -675,6 +699,7 @@ void SCAM::ExprTranslator::visit(struct FunctionOperand &node) {
             unsigned_flag = true;
 
         } else throw std::runtime_error("Unknown datatype");
+        //TODO: fix case if there is already an entry?
         this->functionOperandMap.insert(std::make_pair(name, &node));
         return;
     }

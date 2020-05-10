@@ -254,18 +254,21 @@ std::string PrintITL::macros() {
 
     ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
     for (auto sync: ps->getSyncSignals()) {
-        ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := end macro;" << std::endl;
+        ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := true end macro;" << std::endl;
     }
     for (auto notify: ps->getNotifySignals()) {
-        ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := end macro;" << std::endl;
+        ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := true end  macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
     ss << "-- DP SIGNALS --" << std::endl;
     for (auto dp: ps->getDpSignals()) {
+        if(dp->isCompoundType()) ss << "--";
         ss << "macro " ;
         ss << dp->getFullName("_");
-        ss << " : " << convertDataType(dp->getDataType()->getName()) << " := end macro;" << std::endl;
+        ss << " : " << convertDataType(dp->getDataType()->getName()) << " :=";
+        ss << ConditionVisitor::toString(dp->getDataType()->getDefaultVal());
+        ss <<" end macro;" << std::endl;
     }
     ss << std::endl << std::endl;
 
@@ -281,10 +284,13 @@ std::string PrintITL::macros() {
 
     ss << "-- VISIBLE REGISTERS --" << std::endl;
     for (auto vr: ps->getVisibleRegisters()) {
+        if(vr->isCompoundType()) ss << "--";
         bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
         if (!skip) {  //Dont print all the sub vars for an array
             ss << "macro " << vr->getFullName("_");
-           ss << " : " << convertDataType(vr->getDataType()->getName()) << " := end macro;" << std::endl;
+           ss << " : " << convertDataType(vr->getDataType()->getName()) << " :=";
+            ss << ConditionVisitor::toString(vr->getDataType()->getDefaultVal());
+           ss << " end macro;" << std::endl;
         }
     }
     ss << std::endl << std::endl;

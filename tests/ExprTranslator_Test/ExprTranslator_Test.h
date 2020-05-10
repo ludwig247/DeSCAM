@@ -51,7 +51,14 @@ protected:
         port= new Port("foo",&anInterface,compound);
         module.addPort(port);
 
+
+        // Functions
+        auto param = new Parameter("val",DataTypes::getDataType("unsigned"));
+        auto func = new Function("return_unsigned",DataTypes::getDataType("unsigned"),{std::make_pair("val",param)});
+        module.addFunction(func);
+
     }
+
 
     Module module;
 
@@ -433,7 +440,6 @@ TEST_F(ExprTranslator_Test, CompareOperatorNonTerminal) {
 
     ASSERT_EQ((*compare3), (*newExpr))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
 
-
     compare3 = new Ternary(new Relational(valTrue,">=", valFalse),valTrue,valFalse);
     expr = exprTranslator.translate(compare3);
     newExpr = exprTranslator.translate(expr, &module);
@@ -441,11 +447,47 @@ TEST_F(ExprTranslator_Test, CompareOperatorNonTerminal) {
     ASSERT_EQ((*valFalse), (*newExpr))  <<  PrintStmt::toString(valFalse)  << " != " << PrintStmt::toString(newExpr);
     ASSERT_TRUE(!((*valTrue) == (*newExpr)))  <<  PrintStmt::toString(valTrue)  << " != " << PrintStmt::toString(newExpr);
     ASSERT_TRUE(!((*compare3) == (*newExpr)))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
+}
 
 
-    //Continue here
+
+TEST_F(ExprTranslator_Test, CompareOperatorUnsigned) {
+    //If a stmt: cond ? val : var is translated and var is an unsigned integer, then this is unknown when the visitor visits val.
+    //Now we re-visit in case of different datatypes
+    auto valTrue =  new UnsignedValue(2);
+    auto variableOperand =  new VariableOperand(module.getVariable("unsigned_var"));
+
+    auto compare3 = new Ternary(new Relational(variableOperand,">=", valTrue),valTrue,variableOperand);
+    z3::expr expr = exprTranslator.translate(compare3);
+    exprTranslator.reset();
+    auto newExpr = exprTranslator.translate(expr, &module);
+
+    ASSERT_EQ((*compare3), (*newExpr))  <<  PrintStmt::toString(compare3)  << " != " << PrintStmt::toString(newExpr);
 
 }
+
+
+TEST_F(ExprTranslator_Test, FunctionCascading) {
+    // Let's assume that a function is already used in current context.
+    // Make sure that back translation works correctly
+    //Add  usage of a function to translator
+    auto uInt = new UnsignedValue(2);
+    auto funcOp_prev = new FunctionOperand(module.getFunction("return_unsigned"),{std::make_pair("val",uInt)});
+    z3::expr expr_prev = exprTranslator.translate(funcOp_prev);
+    auto newExpr_prev = exprTranslator.translate(expr_prev, &module);
+    ASSERT_EQ((*funcOp_prev), (*newExpr_prev))  <<  PrintStmt::toString(funcOp_prev)  << " != " << PrintStmt::toString(newExpr_prev);
+
+    //Add a second usage
+    auto variableOperand =  new VariableOperand(module.getVariable("unsigned_var"));
+    auto funcOp = new FunctionOperand(module.getFunction("return_unsigned"),{std::make_pair("val",variableOperand)});
+
+    z3::expr expr = exprTranslator.translate(funcOp);
+    auto newExpr = exprTranslator.translate(expr, &module);
+    ASSERT_EQ((*funcOp), (*newExpr))  <<  PrintStmt::toString(funcOp)  << " != " << PrintStmt::toString(newExpr);
+
+}
+
+
 
 
 
