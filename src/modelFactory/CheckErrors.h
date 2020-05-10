@@ -63,11 +63,11 @@ namespace SCAM {
 
         void addPorts(Module *module, clang::CXXRecordDecl *decl);
 
-        void addFunctions(Module *module, CXXRecordDecl *decl);
+        void addFunctions(Module *module, CXXRecordDecl *decl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap);
 
         void addBehavior(Module *module, clang::CXXRecordDecl *decl);
 
-        void addVariables(Module *module, clang::CXXRecordDecl *decl);
+        void addVariables(Module *module, clang::CXXRecordDecl *decl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap);
     };
 
 

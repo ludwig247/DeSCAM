@@ -12,6 +12,7 @@
 #include "FindDataFlow.h"
 #include "FindFunctions.h"
 #include "FindGlobal.h"
+#include "FindInstancesInModule.h"
 #include <OperationFactory.h>
 
 //Constructor
@@ -53,27 +54,61 @@ bool SCAM::CheckErrors::fire() {
 }
 
 void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
+
     FindModules modules(decl);
 
     //Fill the model with modules(structural description)
+    //First add Variables to create DataTypes that may be needed for ports later
     for (auto &scparModule: modules.getModuleMap()) {
         //Module Name
         std::string name = scparModule.first;
+
+        //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
             this->unimportantModules.end()) {
+            //Skip this module
             continue;
         }
-//      std::cout << "Module: " << name << std::endl;
+        std::cout << "############################" << std::endl;
+        std::cout << "Module: " << name << std::endl;
+        std::cout << "############################" << std::endl;
         auto module = new Module(scparModule.first);
+        module->addRecordDecl(scparModule.second);
         model->addModule(module);
         //Members
-        this->addVariables(module, scparModule.second);
+        this->addVariables(module, scparModule.second, modules.getModuleMap());
+    }
+    //second run through the modules, add ports instances, behavior and functions
+    for (auto &scparModule: modules.getModuleMap()) {
+
+        //Module Name
+        std::string name = scparModule.first;
+        //Module is on the unimportant module list -> skip
+        if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
+            this->unimportantModules.end()) {
+            //Skip this module
+            continue;
+        }
+
+        std::cout << "############################" << std::endl;
+        std::cout << "Module: " << name << std::endl;
+        std::cout << "############################" << std::endl;
+
+        FindInstancesInModules instances(scparModule.second, modules.getModuleMap());
+
+        //DataTypes::reset();//FIXME:
+        auto module = model->getModules().find(scparModule.first)->second;
         //Ports
         this->addPorts(module, scparModule.second);
-        //Combinational Functions
-        this->addFunctions(module, scparModule.second);
-        //Process
-        this->addBehavior(module, scparModule.second);
+
+        if(instances.getInstanceMap().empty() ) {
+            module->setStructural(false);
+            this->addFunctions(module, scparModule.second, modules.getModuleMap());
+            this->addBehavior(module, scparModule.second);
+        } else {
+            module->setStructural(true);
+            module->addInstanceMap(instances.getInstanceMap());
+        }
     }
 }
 
@@ -191,7 +226,7 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
     //Create blockCFG for this process
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
     //Print out error msgs
-   /* if (ErrorMsg::hasError()) {
+    if (ErrorMsg::hasError()) {
         std::cout << "" << std::endl;
         std::cout << "======================" << std::endl;
         std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
@@ -199,17 +234,17 @@ void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *
         for (auto item: ErrorMsg::getInstance().getErrorList()) {
             std::cout << "- " << item.statement << std::endl;
             for (auto log: item.errorMsgs) {
-                std::cout << "\t" << log << std::endl;
+                std::cout << "\t" << log.first << log.second << std::endl;
             }
         }
         ErrorMsg::clear();
-    } */
+    }
 }
 
 //! Adds every Member of a sc_module to the SCAM::Module
-void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap) {
     //Find all Variables within the Module
-/*    FindVariables findVariables(decl);
+    FindVariables findVariables(decl, ModuleMap);
     //Add members to module
     for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
@@ -225,7 +260,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
             type = DataTypes::getLocalDataType(module->getName(), typeName);
         } else {
             //Step2 : Add new datatype either as local or global datatype
-            type = FindNewDatatype::getDataType(variable.second);
+            type = FindNewDatatype::getDataType(variable.second, ModuleMap);
             if (FindNewDatatype::isGlobal(variable.second)) {
                 DataTypes::addDataType(type);
             } else {
@@ -254,7 +289,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
             }
             module->addVariable(new Variable(variable.first, type, initialValue));
         }
-    }*/
+    }
 }
 
 bool SCAM::CheckErrors::postFire() {
@@ -265,12 +300,12 @@ void SCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
     if(preFire() && fire()) postFire();
 }
 
-void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
-    /*
+void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap) {
+
     FindFunctions findFunction(decl);
     //Add datatypes for functions
     for (auto func: findFunction.getFunctionMap()) {
-        auto newType = FindNewDatatype::getDataType(func.second->getResultType());
+        auto newType = FindNewDatatype::getDataType(func.second->getResultType(), ModuleMap);
         if (FindNewDatatype::isGlobal(func.second->getResultType())) {
             DataTypes::addDataType(newType);
         } else DataTypes::addLocalDataType(module->getName(), newType);
@@ -308,8 +343,8 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         //Transfor blockCFG back to code
         FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
         module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
-        */
-        /*if (ErrorMsg::hasError()) {
+
+        if (ErrorMsg::hasError()) {
             std::cout << "" << std::endl;
             std::cout << "======================" << std::endl;
             std::cout << "Errors: Translation of Stmts for module " << module->getName() << std::endl;
@@ -317,12 +352,12 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
             for (auto item: ErrorMsg::getInstance().getErrorList()) {
                 std::cout << "- " << item.statement << std::endl;
                 for (auto log: item.errorMsgs) {
-                    std::cout << "\t" << log << std::endl;
+                    std::cout << "\t" << log.first << log.second << std::endl;
                 }
             }
             ErrorMsg::clear();
         }
-    }*/
+    }
 
 }
 

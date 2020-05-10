@@ -192,6 +192,9 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
             }
         }
         auto topmodule = model->getModules().find(highestModule)->second;
+        if (topmodule == nullptr) {
+            return;
+        }
         auto topInstance = new ModuleInstance(highestModule, topmodule);
         //add TopInstance from sc_main decl and start searching from there
         model->addTopInstance(topInstance);
