@@ -43,9 +43,3 @@ SCAM::Operand * SCAM::ArrayOperand::getArrayOperand() const {
 }
 
 
-
-//std::string SCAM::ArrayOperand::getOperandName() const {
-//    std::string name = this->arrayVar->getName()+"[" + "NOT_IMPLEMNETED" + "]";
-//    return name;
-//}
-//
