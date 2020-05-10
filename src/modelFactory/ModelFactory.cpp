@@ -192,7 +192,12 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
             }
         }
         auto topmodule = model->getModules().find(highestModule)->second;
-        if (topmodule == nullptr) {
+        if (!topmodule->isStructural()) {
+            std::cout << "" << std::endl;
+            std::cout << "======================" << std::endl;
+            std::cout << "Instances:" << std::endl;
+            std::cout << "----------------------" << std::endl;
+            std::cout << "-I- No hierarchy found skip this step" << std::endl;
             return;
         }
         auto topInstance = new ModuleInstance(highestModule, topmodule);
