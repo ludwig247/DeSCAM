@@ -31,15 +31,15 @@ public:
         SC_THREAD(fsm);
     }
 
-    //int SIMULATION_LIMIT = 1000;
+    int SIMULATION_LIMIT = 1000;
 
     void fsm() {
         while (true) {
             if(cnt == 1000){
-                //std::cout << "Simulated " << cnt << " bus cycles" << std::endl;
+                std::cout << "Simulated " << cnt << " bus cycles" << std::endl;
                 sc_stop();
             }else{
-                //std::cout << cnt/SIMULATION_LIMIT*100 << "%" << std::endl;
+                std::cout << (cnt/1000)/100 << "%" << std::endl;
             }
             cnt++;
             req.data = cnt;

@@ -53,7 +53,7 @@ struct MasterAgent : public sc_module {
             section = nextsection;
             if (section == IDLE) {
 //                std::cout << this->name() << " - IDLE" << std::endl;
-                this->master_to_agent->read(agent_to_bus_req);
+                this->master_to_agent->read(agent_to_bus_req, "idle_read");
 
                 if(agent_to_bus_req.trans_type == SINGLE_READ){
                     nextsection = READ;
@@ -82,7 +82,7 @@ struct MasterAgent : public sc_module {
             }
             if (section == WAITING) {
 //                std::cout << this->name() << " - WAIT " << std::endl;
-                insert_state();
+                insert_state("WAITING");
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == true){
                     agent_to_bus_resp.ack = OK;
@@ -105,10 +105,10 @@ struct MasterAgent : public sc_module {
             }
             if(section == DONE){
 //                std::cout << this->name() << " - DONE " << std::endl;
-                insert_state();
+                insert_state("DONE");
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == false){
-                    agent_to_master->write(agent_to_bus_resp);
+                    agent_to_master->write(agent_to_bus_resp, "done_write");
                     nextsection = IDLE;
                 }
 

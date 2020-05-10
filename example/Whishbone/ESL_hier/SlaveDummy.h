@@ -37,10 +37,10 @@ public:
     void fsm() {
         while (true) {
             //std::cout << this->name() << std::endl;
-            bus_req->read(req);
+            bus_req->read(req, "read");
             resp.data = req.data;
             resp.ack = OK;
-            bus_resp->write(resp);
+            bus_resp->write(resp, "write");
 
         }
     }
