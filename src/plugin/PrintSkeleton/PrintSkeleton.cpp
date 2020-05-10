@@ -15,7 +15,6 @@ std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
     globalPackageName = node->getName();
 
     pluginOutput.insert(std::make_pair("globalTypes" + getFilenameExtention(), generateGlobalTypes()));
-    std::cout << "l.17" << std::endl;
     if (!node->getGlobalVariableMap().empty()) {
         pluginOutput.insert(std::make_pair("globalDefines" + getFilenameExtention(), generateGlobalDefs()));
     }
@@ -24,9 +23,7 @@ std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
     for (auto &module: node->getModules()) {
         this->module = module.second;
         localPackageName = module.first;
-        std::cout << "l.26" << std::endl;
         pluginOutput.insert(std::make_pair(module.first + "_types" + getFilenameExtention(), generateLocalTypes()));
-        std::cout << "l.28" << std::endl;
         std::stringstream result;
         try {
             result << generateHDLSkeleton();
@@ -170,23 +167,17 @@ std::string PrintSkeleton::generateHDLSkeleton() {
     }
 
     std::stringstream skeletonStream;
-    std::cout << "l.172" << std::endl;
     header(skeletonStream);
-    std::cout << "l.174" << std::endl;
     ports(skeletonStream);
-    std::cout << "l.176" << std::endl;
     registers(skeletonStream);
-    std::cout << "l.178" << std::endl;
-    //channels(skeletonStream);
+    if(module->isStructural()) {
+        channels(skeletonStream);
+        components(skeletonStream);
+        instances(skeletonStream);
+    }
 
-    //components(skeletonStream);
-
-    //instances(skeletonStream);
-    std::cout << "l.180" << std::endl;
     resetLogic(skeletonStream);
-    std::cout << "l.180" << std::endl;
     footer(skeletonStream);
-    std::cout << "l.182" << std::endl;
     return skeletonStream.str();
 
 }
@@ -364,7 +355,9 @@ void PrintSkeleton::registers(std::stringstream &ss) {
 void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
     if (language == VHDL) {
-        ss << "\nbegin\n";
+        if(!module->isStructural()) {
+            ss << "\nbegin\n";
+        }
         ss << "\tprocess(clk)\n";
         ss << "\tbegin\n";
         ss << "\tif(clk='1' and clk'event) then\n";
@@ -376,7 +369,6 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
     int nonblockingIndentationLevel = 3;
 
-    std::cout << "l.372" << std::endl;
     for (auto variable: module->getVariableMap()) {
         if (variable.second->isArrayElement() && variable.second->getName() != "0") continue; //Skip all other array elements
         if (variable.second->getDataType()->isCompoundType()) {
@@ -467,7 +459,6 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
         }
 
     }
-    std::cout << "l.463" << std::endl;
     //Notify signals for ports
     if (! module->isStructural()) {
         auto opList = module->getFSM()->getStateMap().at(0)->getOutgoingOperationsList();
@@ -662,13 +653,18 @@ void PrintSkeleton::components(std::stringstream &ss) {
     if (!module->isStructural()) {
         return;
     }
+    std::map<std::string, bool> added;
     for (auto inst: module->getInstanceMap()) {
         SCAM::Module* child = model->getModules().find(inst.first.second)->second;
-        if (language == VHDL) {
-            ss << "\tcomponent " + inst.first.second + "\n";
-            ports(ss, child);
-            ss << "\tend component;\n\n";
+        if(added.find(child->getName()) == added.end()) {
+            if (language == VHDL) {
+                ss << "\tcomponent " + inst.first.second + "\n";
+                ports(ss, child);
+                ss << "\tend component;\n\n";
+            }
         }
+
+        added.insert(std::make_pair(child->getName(), true));
     }
 }
 
@@ -739,7 +735,14 @@ void PrintSkeleton::channels(std::stringstream &ss) {
             auto inst = queue.front();
             if (mod->getName() == module->getName()) {
                 for (auto channels: inst->getChannelMap()) {
-                    ss << "\tsignal " + channels.first+ ": " + channels.second->getToPort()->getDataType()->getName() + ";\n";
+                    std::string datatype;
+                    if(channels.second->getToPort() == nullptr) {
+                        datatype = channels.second->getFromPort()->getDataType()->getName();
+                    } else {
+                        datatype = channels.second->getToPort()->getDataType()->getName();
+                    }
+
+                    ss << "\tsignal " + channels.first+ ": " + datatype + ";\n";
                 }
             }
             queue.erase(queue.begin());
@@ -751,21 +754,59 @@ void PrintSkeleton::channels(std::stringstream &ss) {
 
 void PrintSkeleton::instances(std::stringstream &ss) {
     //At the moment VHDL only
-
+    ss << "begin\n";
     for (auto inst: module->getInstanceMap()) {
+        std::string syncNotifyType;
+        std::string clockResetType;
+        if (language == VHDL) {
+            syncNotifyType = "bool";
+            clockResetType = "std_logic";
+        } else if (language == SV) {
+            syncNotifyType = "logic";
+            clockResetType = "logic";
+        }
+        SCAM::Module* child = model->getModules().find(inst.first.second)->second;
         ss << "\t" + inst.first.first + ": " + inst.first.second + "\n";
         ss << "\tport map(\n";
         ss << "\t\tclk\t=>\tclk,\n";
         ss << "\t\trst\t=>\trst,\n";
-        for (auto ports: model->getModules().find(inst.first.second)->second->getPorts()) {
-            if (ports.second->getMapped()) {
-                //TODO: add mapped
-                ss << "\t\t"+ ports.first + "\t=>\t" + "mapped" + ",\n";
-            } else {
-                ss << "\t\t"+ ports.first + "\t=>\t" + ports.second->getChannel()->getName() + ",\n";
-            }
 
+        for (auto port = child->getPorts().begin(); port != child->getPorts().end(); ++port) {
+
+            std::string name = port->first;
+            auto interface = port->second->getInterface();
+
+            //Data signal
+            bool last = (port == --child->getPorts().end());
+            ss<<"\t\t" << name <<"\t=>\t" << "CONNECT";
+
+            if(!last) {
+                ss<< ",\n";
+                //Synch signals
+                if (interface->isBlocking()) {
+                    ss<<"\t\t" << name+"_sync" <<"\t=>\t" << "CONNECT"<< ",\n";;
+                    ss<<"\t\t" << name+"_notify" <<"\t=>\t" << "CONNECT"<< ",\n";
+                } else if (interface->isSlaveIn()) {
+                    ss<<"\t\t" << name+"_sync" <<"\t=>\t" << "CONNECT"<< ",\n";
+                } else if (interface->isMasterOut()) {
+                    ss<<"\t\t" << name+"_notify" <<"\t=>\t" << "CONNECT"<< ",\n";
+                }
+            } else if(last && interface->isShared()) {
+                ss<< "\n";
+            } else {
+                //Synch signals
+                ss<< ",\n";
+                if (interface->isBlocking()) {
+                    ss<<"\t\t" << name+"_sync" <<"\t=>\t" << "CONNECT"<< ",\n";
+                    ss<<"\t\t" << name+"_notify" <<"\t=>\t" << "CONNECT"<< "\n";
+                } else if (interface->isSlaveIn()) {
+                    ss<<"\t\t" << name+"_sync" <<"\t=>\t" << "CONNECT"<< "\n";
+                } else if (interface->isMasterOut()) {
+                    ss<<"\t\t" << name+"_notify" <<"\t=>\t" << "CONNECT"<< "\n";
+                }
+            }
         }
+
         ss << "\t);\n\n";
     }
 }
