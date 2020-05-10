@@ -17,13 +17,12 @@ The directory tree of the example should look like this:
 /example/"example_name"
 ├── ESL                     # Electronic System Level-files
 │   ├── env                 # All files regarding the environment for the example, including main.cpp
-│   ├── example_name.h      #
+│   ├── example_name.h      # SystemC-PPA
 │   └── CMakeLists.txt      #
 ├── RTL                     # VHDL/Verilog-files
 │   ├── properties          # Dir
 │   ├── testbench           # Dir
 │   └── CMakeLists.txt      # 
-├── AML                     # Abstract Model Level-files
 └── CMakeLists.txt
 ```
 * Organize the files regarding environment in a separate folder inside the ESL-folder
