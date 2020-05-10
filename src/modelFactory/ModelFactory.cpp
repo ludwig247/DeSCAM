@@ -26,8 +26,6 @@
 
 
 
-
-
 //Constructor
 SCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
         _sm(ci.getSourceManager()),
@@ -56,9 +54,7 @@ bool SCAM::ModelFactory::fire() {
     //SCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
-	
 
-	
     //Global variables
     this->addGlobalConstants(tu);
 
@@ -87,7 +83,7 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
 
-    //Fill the model with modules(structural describtion)
+    //Fill the model with modules(structural description)
     //First add Variables to create DataTypes that may be needed for ports later
     for (auto &scparModule: modules.getModuleMap()) {
         //Module Name
@@ -108,7 +104,7 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         //Members
         this->addVariables(module, scparModule.second, modules.getModuleMap());
     }
-
+    //second run through the modules, add ports instances, behavior and functions
     for (auto &scparModule: modules.getModuleMap()) {
 
         //Module Name
@@ -133,28 +129,12 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
         if(instances.getInstanceMap().empty() ) {
             module->setStructural(false);
-
-            //Combinational Functions
-
-            //Processe
-            if (module->getName() == "MasterDummy") {
-                continue;
-            }
             this->addFunctions(module, scparModule.second, modules.getModuleMap());
-            std::cout << "addBehavior" << std::endl;
             this->addBehavior(module, scparModule.second);
-        }
-        if(!instances.getInstanceMap().empty() ) {
+        } else {
             module->setStructural(true);
             module->addInstanceMap(instances.getInstanceMap());
         }
-
-
-
-
-        //Combinational Functions
-        //this->addFunctions(module, scparModule.second);
-        //Processe
 
         //this->addCommunicationFSM(module);
     }
@@ -171,8 +151,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
 
     FindSCMain scmain(tu);
-    //The top instance is the sc_main. It doesn't contain any ports
-    //Create empty dummy module for sc_main
+
     int currentLevel = 0;
     int id = 0;
 
@@ -192,9 +171,10 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         std::cout << "Instances:" << std::endl;
         std::cout << "----------------------" << std::endl;
         std::cout << "Continue search for hierarchical structure" << std::endl;
+        //If there is no main but a structure ->
         //! Find highest module to create Top Instance
         std::string highestModule = modules.getModuleMap().begin()->first;
-        for (auto mods: modules.getModuleMap()) {
+        for (const auto& mods: modules.getModuleMap()) {
             if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), mods.first) !=
                 this->unimportantModules.end()) {
                 //Skip this module
@@ -202,8 +182,8 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
             }
             FindInstancesInModules instances(mods.second, modules.getModuleMap());
             //! <<instance_name, sc_module>, parent>
-            if (instances.getInstanceMap().size() != 0) {
-                for (auto inst: instances.getInstanceMap()) {
+            if (!instances.getInstanceMap().empty()) {
+                for (const auto& inst: instances.getInstanceMap()) {
                     if (inst.first.second == highestModule) {
                         highestModule = inst.second;
                         continue;
@@ -243,7 +223,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
             //link new instance to parent instance
             parentInstance->addSubmoduleInstance(modInstance);
         }
-        for (auto channel: findNetinMod.getChannelMap()) {
+        for (const auto& channel: findNetinMod.getChannelMap()) {
 
             std::string channelName = channel.first;
             auto newchannel = new Channel(channelName);
@@ -253,7 +233,8 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         }
         topInstance->setChannelConnectionMap(findNetinMod.getchannelConnectionMap());
         topInstance->setHierChannelConnectionMap(findNetinMod.gethierchannelConnectionMap());
-
+    //The top instance is the sc_main. It doesn't contain any ports
+    //Create empty dummy module for sc_main
     } else if (scmain.isScMainFound()) {
 
         auto sc_main = new Module("sc_main");
@@ -266,6 +247,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         model->addModuleInstance(topInstance);
         topInstance->setLevel(0);
         topInstance->setID(0);
+        //Maybe FindNetlist and FindNetlistinModule can be merged but it didn't work yet
         FindNetlist findNetlist(scmain.getSCMainFunctionDecl(), modules.getModuleMap());
         sc_main->addInstanceMap(findNetlist.getInstanceMap());
         currentLevel = 1;
@@ -292,7 +274,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
             //link new instance to parent instance
             parentInstance->addSubmoduleInstance(modInstance);
         }
-        for (auto channel: findNetlist.getChannelMap()) {
+        for (const auto& channel: findNetlist.getChannelMap()) {
 
             std::string channelName = channel.first;
             auto newchannel = new Channel(channelName);
@@ -317,7 +299,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
                 std::string parentModuleName = instance->getStructure()->getName();
                 std::string parentInstanceName = instance->getName();
                 //! <instance_name, sc_module>
-                for(auto children : netinMod.getInstanceMap()) {
+                for(const auto& children : netinMod.getInstanceMap()) {
 
                     Module *module = model->getModules().find(children.second)->second;
                     if (!module) { throw std::runtime_error("ModelFactory::addInstances module not found"); }
@@ -328,7 +310,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
                     //link new instance to parent instance
                     instance->addSubmoduleInstance(modInstance);
                 }
-                for (auto channel: netinMod.getChannelMap()) {
+                for (const auto& channel: netinMod.getChannelMap()) {
                     //create new channels and add them to the instance
                     std::string channelName = channel.first;
                     auto newchannel = new Channel(channelName);
@@ -351,7 +333,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         std::vector<ModuleInstance*> queue = model->getInstancesAtLevel(currentLevel);
         while (!queue.empty()) {
 
-            for(auto channel : queue.front()->getChannelConnectionMap()) {
+            for(const auto& channel : queue.front()->getChannelConnectionMap()) {
                 //! <<instance, port>, channelName>
                 //Search instance in model ( instanceName = channel.first.first)
                 std::string instanceName = channel.first.first;
@@ -385,7 +367,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
                         currentChannel->setFromPort(port);
                         currentChannel->setFromInstance(instance);
                     } else { throw std::runtime_error("Interface direction not supported"); }
-                    //Port Mapping
+                //Port Mapping
                 } else {
                     //! channel.first.first instance name
                     //! channel.first.second portname
@@ -425,7 +407,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
                 }
             }
-            for(auto channel : queue.front()->getHierChannelConnectionMap()) {
+            for(const auto& channel : queue.front()->getHierChannelConnectionMap()) {
                 //! <<instance, port>, <channelName,channelparentinstance>>
                 //Search instance in model ( instanceName = channel.first.first)
                 std::string instanceName = channel.first.first;
@@ -789,17 +771,14 @@ void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl,
 void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
     //Find all global functions and variables
     FindGlobal findGlobal(pDecl, _ci);
-
     for (auto var: findGlobal.getVariableMap()) {
         this->model->addGlobalVariable(var.second);
     }
-
     //Add all global functions need in case of nested functions
     for (auto func: findGlobal.getFunctionMap()) {
         //Add the definition to the function map
         this->model->addGlobalFunction(func.second);
     }
-
 
     for (auto func: findGlobal.getFunctionMap()) {
         try {

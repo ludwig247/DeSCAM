@@ -42,7 +42,7 @@ namespace SCAM {
         }
         clang::LangOptions LO;
         LO.CPlusPlus = true;
-        clangCFG->dump(LO, true);
+        //clangCFG->dump(LO, true);
         this->translateToScamCFG();
     }
 

@@ -5,13 +5,14 @@
 #include "FindNetlistInModule.h"
 #include "FindNewDatatype.h"
 #include <iostream>
+#include <utility>
 
 namespace SCAM {
 
 //Constructor
     FindNetlistInModule::FindNetlistInModule(clang::CXXRecordDecl *recDecl, std::map<std::string, clang::CXXRecordDecl *> ModuleMap) :
             _pass(1) {
-        _moduleMap = ModuleMap;
+        _moduleMap = std::move(ModuleMap);
         TraverseDecl(recDecl);
         _pass = 2;
         TraverseDecl(recDecl);
@@ -20,11 +21,6 @@ namespace SCAM {
     FindNetlistInModule::~FindNetlistInModule() {
 
     }
-
-//Copy Constructor
-    /*FindNetlistInModule::FindNetlistInModule(const FindNetlistInModule &f) {
-        _pass = f._pass;
-    }*/
 
     bool FindNetlistInModule::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
 
@@ -35,49 +31,51 @@ namespace SCAM {
             std::string channelName;
             std::string channelType;
             std::string channelSignal;
-            //Check if field Decl ist StructureType
+            //Check if field Decl is StructureType
             clang::QualType qualType = fieldDecl->getType();
             channelTemplates.clear();
-
-
-            if (_moduleMap.find(fieldDecl->getType()->getAsCXXRecordDecl()->getName().str()) == _moduleMap.end() ) {
-                //StructType is not a Module and can't be a variable because the module is structural
-                //So it has to be a channel
-                //TODO Catch variables and ports;
-                if (qualType->isStructureType()) {
-                    return true;
-                }
-                if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
-                        qualType.getTypePtr())) {
-
-                    //Get name of the template class
-                    std::string templateName;
-                    llvm::raw_string_ostream templateNameStream(templateName);
-                    //Dump name into stream
-                    templateClass->getTemplateName().dump(templateNameStream);
-                    //Get string from stream and add to vector
-                    //TODO beautify
-                    if (templateNameStream.str() == "blocking_in" || templateNameStream.str() == "blocking_out" || templateNameStream.str() == "shared_out") {
+            //Modules can be Structure or Class Type
+            if(qualType->isStructureType() || qualType->isClassType()) {
+                //Search ModuleMap
+                if (_moduleMap.find(fieldDecl->getType()->getAsCXXRecordDecl()->getName().str()) == _moduleMap.end()) {
+                    //StructType is not a Module and can't be a variable because the module is structural
+                    //So it has to be a channel
+                    //Catch variables and ports;
+                    if (qualType->isStructureType()) {
                         return true;
                     }
+                    if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
+                            qualType.getTypePtr())) {
+
+                        //Get name of the template class
+                        std::string templateName;
+                        llvm::raw_string_ostream templateNameStream(templateName);
+                        //Dump name into stream
+                        templateClass->getTemplateName().dump(templateNameStream);
+                        //Get string from stream and add to vector
+                        //TODO beautify and complete
+                        if (templateNameStream.str() == "blocking_in" || templateNameStream.str() == "blocking_out" ||
+                            templateNameStream.str() == "shared_out") {
+                            return true;
+                        }
+                    }
+
+                    this->recursiveTemplateVisitor(qualType);
+
+                    channelName = fieldDecl->getName().str();
+                    channelType = channelTemplates.at(0);
+                    channelSignal = channelTemplates.at(1);
+
+                    auto innerEntry = std::pair<std::string, std::string>(channelType, channelSignal);
+                    auto outerEntry = std::pair<std::string, std::pair<std::string, std::string>>(channelName,
+                                                                                                  innerEntry);
+                    this->_channelMap.insert(outerEntry);
+                } else {
+                    instanceName = fieldDecl->getName().str();
+                    moduleName = fieldDecl->getType()->getAsCXXRecordDecl()->getName().str();
+                    this->_instanceMap.insert(std::make_pair(instanceName, moduleName));
                 }
-
-                this->recursiveTemplateVisitor(qualType);
-
-                channelName = fieldDecl->getName().str();
-                channelType = channelTemplates.at(0);
-                channelSignal = channelTemplates.at(1);
-
-                auto innerEntry = std::pair<std::string, std::string>(channelType, channelSignal);
-                auto outerEntry = std::pair<std::string, std::pair<std::string, std::string>>(channelName, innerEntry);
-                this->_channelMap.insert(outerEntry);
             }
-            else {
-                instanceName = fieldDecl->getName().str();
-                moduleName = fieldDecl->getType()->getAsCXXRecordDecl()->getName().str();
-                this->_instanceMap.insert(std::make_pair(instanceName,moduleName));
-            }
-
         }
         return true;
     }
