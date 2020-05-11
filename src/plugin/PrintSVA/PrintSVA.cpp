@@ -237,7 +237,7 @@ std::string PrintSVA::states() {
 std::string PrintSVA::reset_sequence() {
     std::stringstream ss;
     ss << "sequence reset_sequence;\n";
-    ss << "reset ##1 !reset;  \t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\n";
+    ss << "reset ##1 !reset ##1 !reset;  \t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\n";
     ss <<"endsequence\n\n";
     return ss.str();
 }
