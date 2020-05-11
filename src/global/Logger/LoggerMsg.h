@@ -33,7 +33,7 @@ namespace SCAM {
 
         const std::string &getMessage();
 
-        const SCAM::LocationInfo &getStmtInfo();
+        const SCAM::LocationInfo &getLocationInfo();
 
         std::string getSeverityLevel();
 
@@ -41,9 +41,11 @@ namespace SCAM {
 
         ProcessedLocation  getProcessedLocation();
 
+        std::string getProcessedLocationString();
+
         inline void setMessage(const std::string &message);
 
-        inline void setStmtInfo(const SCAM::LocationInfo &stmtInfo);
+        inline void setLocationInfo(const SCAM::LocationInfo &stmtInfo);
 
         inline void setViolationType(ViolationType violationType);
 
@@ -51,9 +53,11 @@ namespace SCAM {
 
         inline void setProcessedLocation(ProcessedLocation location);
 
+        bool operator==(const LoggerMsg &other) const;
+
     protected:
-        std::string message = "", statement = "";
-        SCAM::LocationInfo stmtInfo;
+        std::string message = "";
+        SCAM::LocationInfo locationInfo;
         ViolationType violationType = ViolationType::NA;
         SeverityLevel severityLevel = SeverityLevel::Info;
         ProcessedLocation processedLocation = ProcessedLocation::Behavior;

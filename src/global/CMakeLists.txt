@@ -3,7 +3,7 @@ add_compile_options(-D__STDC_LIMIT_MACROS)
 
 add_subdirectory(tinyxml)
 
-file(GLOB LoggerSrc "Logger/*.cpp" "Logger/LoggingFilter.h")
+file(GLOB LoggerSrc "Logger/*.cpp" "Logger/LoggerFilter.h")
 
 add_library(global SHARED
         DataTypes.cpp

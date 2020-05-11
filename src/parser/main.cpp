@@ -19,15 +19,17 @@ int main(int argc, const char **argv) {
     std::cout << "......................... Creating model ........................." << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
     //initialize logger
-    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>());
-    SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
+    SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
+    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
     SCAM::Logger::setFilteringOptions(
-    std::set<LoggingFilter::FilterOptions>{LoggingFilter::FilterOptions::showAllMsgs});
+            std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});
+    SCAM::Logger::setPrintDecorativeFrames();
     //Create model
     ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile()))
     // write log messages to all sinks
-    SCAM::Logger::log();
-
+    if (SCAM::Logger::hasFeedback()) {
+        SCAM::Logger::log();
+    }
     //Printing options according to commandline styles chosen
     if (cml.getActivePlugins().size() > 0) {
         std::cout << "==================================================================" << std::endl;

@@ -5,14 +5,20 @@
 #ifndef SCAM_ERRORMSG_H
 #define SCAM_ERRORMSG_H
 
+#define DEBUG_LOGGER
+
+
 #include <string>
 #include <vector>
 #include <set>
+#include <unordered_set>
+#include <unordered_map>
 #include <memory>
 #include "LoggerMsg.h"
 #include "LoggerSink.h"
-#include "TextFormatter.h"
-#include "LoggingFilter.h"
+#include "LoggerFormatter.h"
+#include "LoggerFilter.h"
+#include "Expr.h"
 
 
 namespace SCAM {
@@ -31,22 +37,32 @@ namespace SCAM {
 
         static void addMsg(LoggerMsg);
 
-        static bool hasError();
+        static bool hasFeedback();
 
         static void clear();
 
         static void addSink(std::shared_ptr<SCAM::LoggerSink> sink);
 
-        static void setTextFormatOptions(SCAM::TextFormatter::FormatOptions formatOptions);
+        static void setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions formatOptions);
 
-        static void setFilteringOptions(std::set<LoggingFilter::FilterOptions> filterOptions);
+        static void setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions);
 
         static void setCurrentProcessedLocation(LoggerMsg::ProcessedLocation currentProcessedLocation);
 
         static LoggerMsg::ProcessedLocation getCurrentProcessedLocation();
 
+        static void setPrintDecorativeFrames();
+
         static void log();
 
+        static void clearTempVector();
+        static void tagTempMsgs(std::string objName);
+        static void removeFromTempMap(std::string objName);
+
+#ifdef DEBUG_LOGGER
+        static const std::unordered_map<std::string, std::vector<LoggerMsg>>& getTempMsgsMap();
+        static const std::vector<SCAM::LoggerMsg> &getMsgsMap();
+#endif
         //DELETED
         Logger(Logger const &) = delete;             // copy constructor is private
         Logger &operator=(Logger const &) = delete; // assignment operator is private
@@ -57,19 +73,25 @@ namespace SCAM {
         //Destructor
         ~Logger() = default;
 
+        static void addTempMsgsToLogger();
+
         // a vector containing the logger messages
         std::vector<LoggerMsg> msgsVector{};
-        // a vector holding the logger sinks
+        // containing messages collected during the processing of global constants, of which only model relevant ones will be added to msgsVector before logging.
+        std::vector<LoggerMsg> tmpMsgsVec;
+        std::unordered_map<std::string, std::vector<LoggerMsg>> tempMsgsMap{};
+        // a vector holding the lsetogger sinks
         std::vector<std::shared_ptr<LoggerSink>> sinksVector{};
         //a flag indicating whether termination is necessary due to errors
         static bool terminate;
         //logging options set
-        std::set<LoggingFilter::FilterOptions> filterOptions;
+        std::set<LoggerFilter::FilterOptions> filterOptions;
         //log messages formatter
-        TextFormatter::FormatOptions formatOptions = TextFormatter::FormatOptions::JSON;
+        LoggerFormatter::FormatOptions formatOptions = LoggerFormatter::FormatOptions::JSON;
         // a variable to track the violation location while processing a module
         LoggerMsg::ProcessedLocation currentProcessedLocation = LoggerMsg::ProcessedLocation::Parsing;
-
+        // if set, the logger prints decorative frames around console messages
+        bool printDecorativeFrames = false;
     };
 }
 

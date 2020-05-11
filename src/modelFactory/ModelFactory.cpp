@@ -519,13 +519,10 @@ void SCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
             //Transfor blockCFG back to code
             FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
             func.second->setStmtList(functionFactory.getStmtList());
+            Logger::tagTempMsgs(func.first);
         } catch (std::runtime_error &e) {
-//            std::cout << e.what() << std::endl;
-//            for(auto statement:  Logger::getErrorList()){
-//                std::cout << statement.statement << std::endl;
-//            }
-//            Logger::clear();
             this->model->removeGlobalFunction(func.second);
+            Logger::clearTempVector();
         }
     }
 }
@@ -631,12 +628,12 @@ void SCAM::ModelFactory::removeUnused() {
             this->model->removeGlobalVariable(var.first);
         }
     }
-
     //Remove global functions
     std::map<Function *, bool> newGlobalFunc;
     for (auto func: removeGlobalFunctions) {
         if (func.second) {
             this->model->removeGlobalFunction(func.first);
+            Logger::removeFromTempMap(func.first->getName());
         }
     }
 }

@@ -20,8 +20,13 @@ int checkFile(int argc, const char *argv[]) {
     SCAM::CommandLineProcess cml = SCAM::CommandLineProcess(argc, argv);
     //initialize logger
     SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
-    SCAM::Logger::setFilteringOptions(std::set<SCAM::LoggingFilter::FilterOptions>{SCAM::LoggingFilter::FilterOptions::showAllMsgs});
-    SCAM::Logger::setTextFormatOptions(SCAM::TextFormatter::FormatOptions::JSON);
+    SCAM::Logger::setFilteringOptions(
+            std::set<SCAM::LoggerFilter::FilterOptions>{SCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,
+                                                        SCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,
+                                                        SCAM::LoggerFilter::FilterOptions::showPortsMsgs,
+                                                        SCAM::LoggerFilter::FilterOptions::showFunctionMsgs}
+    );
+    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
     //Create model
     ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
     // write log messages to all sinks

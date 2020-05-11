@@ -53,19 +53,32 @@ void SCAM::LocationInfo::setColumnEndNumber(int columnEndNumber) {
     this->columnEndNumber = columnEndNumber;
 }
 
-void SCAM::LocationInfo::setInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber, int columnStartNumber,
-                                 int columnEndNumber) {
-setStmt(stmt);
-setFile(fileDir);
-setRowStartNumber(rowStartNumber);
-setRowEndNumber(rowEndNumber);
-setColumnStartNumber(columnStartNumber);
-setColumnEndNumber(columnEndNumber);
+void
+SCAM::LocationInfo::setInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber,
+                            int columnStartNumber,
+                            int columnEndNumber) {
+    setStmt(stmt);
+    setFile(fileDir);
+    setRowStartNumber(rowStartNumber);
+    setRowEndNumber(rowEndNumber);
+    setColumnStartNumber(columnStartNumber);
+    setColumnEndNumber(columnEndNumber);
 }
 
-SCAM::LocationInfo::LocationInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber, int columnStartNumber,
+SCAM::LocationInfo::LocationInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber,
+                                 int rowEndNumber, int columnStartNumber,
                                  int columnEndNumber) {
-    setInfo(stmt, fileDir,rowStartNumber,rowEndNumber,columnStartNumber,columnEndNumber);
+    setInfo(stmt, fileDir, rowStartNumber, rowEndNumber, columnStartNumber, columnEndNumber);
+}
+
+bool SCAM::LocationInfo::operator==(const SCAM::LocationInfo &other) const {
+    if (this == &other) return true;
+    return this->fileDir == other.fileDir &&
+            this->stmt == other.stmt &&
+           this->rowStartNumber == other.rowStartNumber &&
+           this->rowEndNumber == other.rowEndNumber &&
+           this->columnStartNumber == other.columnStartNumber &&
+           this->columnEndNumber == other.columnEndNumber;
 }
 
 

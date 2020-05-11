@@ -3,8 +3,8 @@
 //
 
 
-#ifndef DESCAM_TEXTFORMATTER_H
-#define DESCAM_TEXTFORMATTER_H
+#ifndef DESCAM_LOGGERFORMATTER_H
+#define DESCAM_LOGGERFORMATTER_H
 
 #include <string>
 #include <vector>
@@ -16,18 +16,19 @@ namespace SCAM {
 /*!
  * \brief The base class for a logger sink to which all log messages are fed after being collected.
  */
-    class TextFormatter {
+    class LoggerFormatter {
     public:
         enum class FormatOptions{
-            JSON,
+            Normal, JSON,
         };
-        TextFormatter() = default;
+        LoggerFormatter() = default;
         static const std::string formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages, FormatOptions formatOptions = FormatOptions::JSON);
 
     private:
+        static std::string getMessages(std::vector<SCAM::LoggerMsg> loggerMessages);
         static std::string getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages);
     };
 }
 
 
-#endif //DESCAM_TEXTFORMATTER_H
+#endif //DESCAM_LOGGERFORMATTER_H

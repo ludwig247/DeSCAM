@@ -25,18 +25,18 @@ namespace SCAM {
     };
 
 /** A macro wrapping try catch blocks for handling FatalError */
-#define ASSERT_MODEL_CREATION(x)                                      \
-    try {                                                              \
-    x;                                                                  \
-        if(SCAM::Logger::isTerminate()) {                                \
-    SCAM::Logger::log();                                                  \
-    return -1;                                                             \
-    }                                                                       \
-    }                                                                        \
+#define ASSERT_MODEL_CREATION(x)                                    \
+    try {                                                            \
+    x;                                                                \
+        if(SCAM::Logger::isTerminate()) {                              \
+        SCAM::Logger::log();                                            \
+        return -1;                                                       \
+        }                                                                 \
+    }                                                                      \
     CATCH_FATAL
 #define CATCH_FATAL                                                    \
    catch (SCAM::FatalError& err) {                                      \
-   SCAM::Logger::log();                                                  \
+        SCAM::Logger::log();                                             \
     return -1;                                                            \
     }
 

@@ -5,7 +5,7 @@ SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::LocationInfo 
                            SeverityLevel severityLevel, ViolationType violationType,
                            ProcessedLocation violationLocation) {
     setMessage(message);
-    setStmtInfo(stmtInfo);
+    setLocationInfo(stmtInfo);
     setSeverityLevel(severityLevel);
     setViolationType(violationType);
     setProcessedLocation(violationLocation);
@@ -15,8 +15,8 @@ const std::string &SCAM::LoggerMsg::getMessage() {
     return this->message;
 }
 
-const SCAM::LocationInfo &SCAM::LoggerMsg::getStmtInfo() {
-    return this->stmtInfo;
+const SCAM::LocationInfo &SCAM::LoggerMsg::getLocationInfo() {
+    return this->locationInfo;
 }
 
 std::string SCAM::LoggerMsg::getSeverityLevel() {
@@ -60,11 +60,37 @@ void SCAM::LoggerMsg::setSeverityLevel(SCAM::LoggerMsg::SeverityLevel severityLe
     this->severityLevel = severityLevel;
 }
 
-void SCAM::LoggerMsg::setStmtInfo(const SCAM::LocationInfo &stmtInfo) {
-    this->stmtInfo = stmtInfo;
+void SCAM::LoggerMsg::setLocationInfo(const SCAM::LocationInfo &stmtInfo) {
+    this->locationInfo = stmtInfo;
 }
 
 void SCAM::LoggerMsg::setProcessedLocation(SCAM::LoggerMsg::ProcessedLocation location) {
     this->processedLocation = location;
+}
+
+std::string SCAM::LoggerMsg::getProcessedLocationString() {
+    switch (this->processedLocation) {
+        case ProcessedLocation::GlobalConstants :
+            return "while adding global constants";
+        case ProcessedLocation::Ports :
+            return "while adding module ports";
+        case ProcessedLocation::Variables :
+            return "while adding module variables";
+        case ProcessedLocation::Behavior :
+            return "while extracting module behavior";
+        case ProcessedLocation::Functions :
+            return "while adding module functions";
+        case ProcessedLocation::Parsing :
+            return "while parsing";
+    }
+}
+
+bool SCAM::LoggerMsg::operator==(const SCAM::LoggerMsg &other) const {
+    if (this == &other) return true;
+    return this->message == other.message &&
+           this->processedLocation == other.processedLocation &&
+           this->severityLevel == other.severityLevel &&
+           this->violationType == other.violationType &&
+           this->locationInfo == other.locationInfo;
 }
 

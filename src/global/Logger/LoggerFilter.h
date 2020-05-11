@@ -2,8 +2,8 @@
 // Created by mi-alkoudsi on 13.04.20.
 //
 
-#ifndef DESCAM_LOGGINGFILTER_H
-#define DESCAM_LOGGINGFILTER_H
+#ifndef DESCAM_LOGGERFILTER_H
+#define DESCAM_LOGGERFILTER_H
 
 #include <vector>
 #include <set>
@@ -11,7 +11,7 @@
 
 namespace SCAM {
 
-    class LoggingFilter {
+    class LoggerFilter {
     public:
         enum class FilterOptions : char {
             showAllMsgs,
@@ -25,7 +25,7 @@ namespace SCAM {
         };
 
         static std::vector<LoggerMsg> applyFilters(const std::vector<LoggerMsg> &msgsVector,
-                                                   const std::set<LoggingFilter::FilterOptions> &filterOptions) {
+                                                   const std::set<LoggerFilter::FilterOptions> &filterOptions) {
             if (filterOptions.empty() || filterOptions.find(FilterOptions::showAllMsgs) != filterOptions.end())
                 return msgsVector;
             else {
@@ -58,9 +58,9 @@ namespace SCAM {
         }
 
     private:
-        LoggingFilter() = default;
+        LoggerFilter() = default;
 
-        ~LoggingFilter() = default;
+        ~LoggerFilter() = default;
     };
 }
-#endif //DESCAM_LOGGINGFILTER_H
+#endif //DESCAM_LOGGERFILTER_H

@@ -82,7 +82,7 @@ SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *ass
             SCAM::Expr *newRHS = this->translator.translate(expr, module);
             if (this->translator.isAbort()) return assignment;
             //Create old RHS
-            return new Assignment(assignment->getLhs(), newRHS);
+            return new Assignment(assignment->getLhs(), newRHS,assignment->getStmtInfo());
         }catch(std::exception e){
             //TODO: should I do this?
             return assignment;

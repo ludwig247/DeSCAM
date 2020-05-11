@@ -22,13 +22,17 @@ namespace SCAM {
     public:
         FileSink() = default;
 
-        explicit FileSink(std::string outputDirectory);
+        explicit FileSink(std::string outputDirectory,bool useTimeStamping = true);
 
         void setOutputDirectory(std::string outputDirectory);
 
+        void setGeneratedFileType(const std::string& filetype);
+
         void print(std::string formattedOutput) override;
     private:
-        std::string outputDirectory = std::string(SCAM_HOME"/bin/LOGS");
+        std::string outputDirectory = std::string(SCAM_HOME"/bin/LOGS"),
+        generatedFileType = "txt";
+        bool useTimeStamping;
     };
 }
 

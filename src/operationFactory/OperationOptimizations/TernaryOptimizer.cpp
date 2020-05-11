@@ -65,7 +65,7 @@ void SCAM::TernaryOptimizer::visit(struct Assignment &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->stmt = &node;
     } else {
-        this->stmt = new Assignment(lhs, rhs);
+        this->stmt = new Assignment(lhs, rhs,node.getStmtInfo());
     }
 }
 
@@ -76,14 +76,14 @@ void SCAM::TernaryOptimizer::visit(struct UnaryExpr &node) {
     if ((*node.getExpr() == *unaryExpr)) {
         this->expr = &node;
     } else if (isTrue(unaryExpr) || isFalse(unaryExpr)) {
-        SCAM::ConditionOptimizer2 conditionOptimizer2({new UnaryExpr(node.getOperation(), unaryExpr)}, this->module);
+        SCAM::ConditionOptimizer2 conditionOptimizer2({new UnaryExpr(node.getOperation(), unaryExpr,node.getStmtInfo())}, this->module);
         if (conditionOptimizer2.getNewConditionList().empty()) {
             this->expr = new BoolValue(true);
         } else if (conditionOptimizer2.getNewConditionList().size() == 1) this->expr = conditionOptimizer2.getNewConditionList().back();
-        else this->expr = new UnaryExpr(node.getOperation(), unaryExpr);
+        else this->expr = new UnaryExpr(node.getOperation(), unaryExpr,node.getStmtInfo());
 
     } else {
-        this->expr = new UnaryExpr(node.getOperation(), unaryExpr);
+        this->expr = new UnaryExpr(node.getOperation(), unaryExpr,node.getStmtInfo());
     }
 }
 
@@ -121,7 +121,7 @@ void SCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Arithmetic(lhs, node.getOperation(), rhs);
+        this->expr = new Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -135,7 +135,7 @@ void SCAM::TernaryOptimizer::visit(struct Logical &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Logical(lhs, node.getOperation(), rhs);
+        this->expr = new Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
     SCAM::ConditionOptimizer2 conditionOptimizer2({this->expr}, this->module);
     if (conditionOptimizer2.getNewConditionList().empty()) {
@@ -145,10 +145,10 @@ void SCAM::TernaryOptimizer::visit(struct Logical &node) {
     } else {
         auto ele1 = conditionOptimizer2.getNewConditionList().at(0);
         auto ele2 = conditionOptimizer2.getNewConditionList().at(1);
-        this->expr = new Logical(ele1, "and", ele2);
+        this->expr = new Logical(ele1, "and", ele2,node.getStmtInfo());
         for (int i = 2; i < conditionOptimizer2.getNewConditionList().size(); i++) {
             auto element = conditionOptimizer2.getNewConditionList().at(i);
-            this->expr = new Logical(this->expr, "and", element);
+            this->expr = new Logical(this->expr, "and", element,node.getStmtInfo());
         }
     }
 }
@@ -171,7 +171,7 @@ void SCAM::TernaryOptimizer::visit(struct Relational &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Relational(lhs, node.getOperation(), rhs);
+        this->expr = new Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -186,7 +186,7 @@ void SCAM::TernaryOptimizer::visit(struct Bitwise &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Bitwise(lhs, node.getOperation(), rhs);
+        this->expr = new Bitwise(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
@@ -197,7 +197,7 @@ void SCAM::TernaryOptimizer::visit(struct Cast &node) {
     if ((*node.getSubExpr() == *unaryExpr)) {
         this->expr = &node;
     } else {
-        this->expr = new Cast(unaryExpr, node.getDataType());
+        this->expr = new Cast(unaryExpr, node.getDataType(),node.getStmtInfo());
     }
 }
 
@@ -208,7 +208,7 @@ void SCAM::TernaryOptimizer::visit(SCAM::ArrayOperand &node) {
     if ((*node.getIdx() == *idx)) {
         this->expr = &node;
     } else {
-        this->expr = new ArrayOperand(node.getArrayOperand(), idx);
+        this->expr = new ArrayOperand(node.getArrayOperand(), idx,node.getStmtInfo());
     }
 }
 
@@ -309,7 +309,7 @@ void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
         if (*node.getTrueExpr() == *trueExpr && *node.getFalseExpr() == *falseExpr && *node.getCondition() == *condExpr) {
             this->expr = &node;
         } else {
-            this->expr = new Ternary(condExpr, trueExpr, falseExpr);
+            this->expr = new Ternary(condExpr, trueExpr, falseExpr,node.getStmtInfo());
         }
     }
 }

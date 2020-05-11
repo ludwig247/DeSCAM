@@ -400,8 +400,10 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
             //Transfor blockCFG back to code
             FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
             func.second->setStmtList(functionFactory.getStmtList());
+            Logger::tagTempMsgs(func.first);
         } catch (std::runtime_error &e) {
             this->model->removeGlobalFunction(func.second);
+            Logger::clearTempVector();
         }
     }
 }
