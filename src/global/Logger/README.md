@@ -25,4 +25,3 @@ Takes the formatted textual output and decided how it is going to be stored or p
 
  ![LOGGER_UML](demo/LOGGER_UML_CD.png)
 
-
