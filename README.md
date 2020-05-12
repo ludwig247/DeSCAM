@@ -69,4 +69,10 @@
       If this combination is used, please set the following flags in OneSpin before loading the prpoerties. 
         * `set_itl_flavor vhi` 
         * `set_reset_sequence -high Switch/rst`
+    * SystemVerilog / SVA:
+      Error: <br>
+      `-E- Unsupported trigger for Property sva/inst/reset_a - must be a clock signal` <br>
+      Solution: add something to the clocked part of the process of the SystemVeriolog file, e.g.:
+      replace `// FILL OUT HERE` with `master_in_notify <= 1'b0;`. This enables correct clock detection. 
+   
  

@@ -237,7 +237,7 @@ std::string PrintSVA::states() {
 std::string PrintSVA::reset_sequence() {
     std::stringstream ss;
     ss << "sequence reset_sequence;\n";
-    ss << "reset ##1 !reset ##1 !reset;  \t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\n";
+    ss << "reset ##1 !reset;  \t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\n";
     ss <<"endsequence\n\n";
     return ss.str();
 }
@@ -287,7 +287,7 @@ std::string PrintSVA::reset_operation() {
     PropertySuite *ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
-       << "\treset_sequence |=>\n";
+       << "\treset_sequence |->\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
         ss << temporalExpr(commitment);
         if (commitment != ps->getResetProperty()->getCommitmentList().back())

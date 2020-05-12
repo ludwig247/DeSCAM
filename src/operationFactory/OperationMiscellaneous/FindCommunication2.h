@@ -12,7 +12,8 @@
 #include <PortOperand.h>
 #include <Stmts/Communication.h>
 #include "Stmts_all.h"
-
+FindCommuniction2  test;
+node.getStmt()->accept(test);
 
 namespace SCAM {
     class FindCommunication2 : public StmtAbstractVisitor {
