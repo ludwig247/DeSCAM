@@ -12,6 +12,9 @@ jobs:
     env:
       CMAKE_BIN: "cmake"
       PYTHON3: "python3"
+      SCAM_HOME: "$GITHUB_WORKSPACE/"
+      SYSTEMC_DIR: "$GITHUB_WORKSPACE/include/"
+      CLANG_DIR: "$GITHUB_WORKSPACE/include/clang/3.4.2/include"
     steps:
       - uses: actions/checkout@v1
       - name: Build System Generation
@@ -35,6 +38,8 @@ jobs:
           $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
           $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
       - name: Clean up
-        run: rm -rf $GITHUB_WORKSPACE/build
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/3rdParty
+          rm -rf $GITHUB_WORKSPACE/install/tmp
 
 
