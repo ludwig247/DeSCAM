@@ -39,6 +39,7 @@ export SCAM_DIR
 export SYSTEMC_DIR
 export CLANG_DIR
 
-exec ./root/DeSCAM/bin/DESCAM --file $1 --output $2 -PrintSkeleton
+#exec ./root/DeSCAM/bin/DESCAM --file $1 --output $2 -PrintSkeleton
+exec ./root/DeSCAM/bin/DESCAM "$@" 
 
 
