@@ -130,7 +130,7 @@ void SCAM::ModelFactory::addChannels(clang::TranslationUnitDecl *tu){
     //Find CXXRecordDecls
     FindChannels protocols(tu);
 
-    //Fill the model with modules(structural describtion)
+    //Fill the model with channels (structural describtion)
     for (auto &scparProtocol: protocols.getChannelMap()) {
 
         //Channel Name
@@ -145,7 +145,6 @@ void SCAM::ModelFactory::addChannels(clang::TranslationUnitDecl *tu){
 
             //Get the MethodDecls of the protocol's RecordDecl
             FindChannelMethods methods(scparProtocol.second);
-
             for (auto func: methods.getFunctionMap()) {
                 auto newType = FindNewDatatype::getDataType(func.second->getResultType());
                 if (FindNewDatatype::isGlobal(func.second->getResultType())) {
@@ -174,32 +173,32 @@ void SCAM::ModelFactory::addChannels(clang::TranslationUnitDecl *tu){
                 protocol->addFunction(new_function);
             }
 
-//            //Add behavioral description of function to module
-//            for (auto method: methods.getFunctionMap()) {
-//                //Create blockCFG for this process
-//                //Active searching only for functions
-//                FindDataFlow::functionName = method.first;
-//                FindDataFlow::isFunction = true;
-//                SCAM::CFGFactory cfgFactory(method.second, _ci, protocol, false);
-//                FindDataFlow::functionName = "";
-//                FindDataFlow::isFunction = false;
-//                //Transfor blockCFG back to code
-//                FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), protocol->getFunction(method.first), nullptr);
-//                protocol->getFunction(method.first)->setStmtList(functionFactory.getStmtList());
-//                if (ErrorMsg::hasError()) {
-//                    std::cout << "" << std::endl;
-//                    std::cout << "======================" << std::endl;
-//                    std::cout << "Errors: Translation of Stmts for module " << protocol->getName() << std::endl;
-//                    std::cout << "----------------------" << std::endl;
-//                    for (auto item: ErrorMsg::getInstance().getErrorList()) {
-//                        std::cout << "- " << item.msg << std::endl;
-//                        for (auto log: item.errorLog) {
-//                            std::cout << "\t" << log << std::endl;
-//                        }
-//                    }
-//                    ErrorMsg::clear();
-//                }
-//            }
+            //Add behavioral description of function to module
+            for (auto method: methods.getFunctionMap()) {
+                //Create blockCFG for this process
+                //Active searching only for functions
+                FindDataFlow::functionName = method.first;
+                FindDataFlow::isFunction = true;
+                SCAM::CFGFactory cfgFactory(method.second, _ci, protocol, false);
+                FindDataFlow::functionName = "";
+                FindDataFlow::isFunction = false;
+                //Transfor blockCFG back to code
+                FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), protocol->getFunction(method.first), nullptr);
+                protocol->getFunction(method.first)->setStmtList(functionFactory.getStmtList());
+                if (ErrorMsg::hasError()) {
+                    std::cout << "" << std::endl;
+                    std::cout << "======================" << std::endl;
+                    std::cout << "Errors: Translation of Stmts for module " << protocol->getName() << std::endl;
+                    std::cout << "----------------------" << std::endl;
+                    for (auto item: ErrorMsg::getInstance().getErrorList()) {
+                        std::cout << "- " << item.msg << std::endl;
+                        for (auto log: item.errorLog) {
+                            std::cout << "\t" << log << std::endl;
+                        }
+                    }
+                    ErrorMsg::clear();
+                }
+            }
         }
         else{
             continue;

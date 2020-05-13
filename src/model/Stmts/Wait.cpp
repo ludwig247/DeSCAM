@@ -9,6 +9,11 @@ SCAM::Wait::Wait() {
 
 }
 
+SCAM::Wait::Wait(std::string name){
+    Wait::stateName = name;
+}
+
+
 void SCAM::Wait::accept(SCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }

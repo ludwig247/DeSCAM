@@ -25,7 +25,6 @@ namespace SCAM {
                 ConstructorparamTypeList.push_back(this->clangToScamType(param->getType()));
             }
             this->ConstructorParamNameMap.insert(std::make_pair(name, ConstructorparamNameList));
-            this->ConstructorParamTypeMap.insert(std::make_pair(name, ConstructorparamTypeList));
         } else {
             this->functionMap.insert(std::make_pair(name,methodDecl));
 

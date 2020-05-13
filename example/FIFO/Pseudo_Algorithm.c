@@ -8,6 +8,7 @@ while (!states_to_check.empty())
     Property P with assumptions A and commitments C;
     //state variables
     add all state variables to A;
+
     //communication ports
     if (p.write) add producer_sync to A; add producer_notify to C;
     else add !producer_sync to A; add !producer_notify to C;

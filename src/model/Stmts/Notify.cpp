@@ -9,6 +9,10 @@ SCAM::Notify::Notify(SCAM::Port *port) :
         port(port),
         Expr(DataTypes::getDataType("bool")) {
 }
+SCAM::Notify::Notify(std::string name) :
+    eventname(name),
+    Expr(DataTypes::getDataType("bool")) {
+}
 
 SCAM::Port *SCAM::Notify::getPort() const {
     return port;

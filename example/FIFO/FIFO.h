@@ -21,7 +21,7 @@ public:
     void write(const T &val);
 
 private:
-    T *buffer;
+    T  * buffer;
     unsigned int fifo_size;
     enum states {
         EMPTY, FILLED, FULL

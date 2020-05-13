@@ -12,6 +12,8 @@ namespace SCAM {
     public:
         Wait();
 
+        Wait(std::string name);
+
         virtual ~Wait() = default;
 
         virtual void accept(StmtAbstractVisitor &visitor) override;

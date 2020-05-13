@@ -14,6 +14,7 @@ namespace SCAM {
         Notify() = delete;
 
         Notify(Port *port);
+        Notify(std::string name);
 
         virtual ~Notify() = default;
 
@@ -25,7 +26,7 @@ namespace SCAM {
 
     private:
         Port *port;
-
+        std::string eventname;
     };
 }
 

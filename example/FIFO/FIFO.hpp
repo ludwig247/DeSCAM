@@ -16,6 +16,7 @@ FIFO<T>::FIFO (const char *name, unsigned int size) :
     buffer = new T[size];
 }
 
+
 template<typename T>
 void FIFO<T>::read(T &out) {
     if (state == EMPTY) {

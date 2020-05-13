@@ -601,6 +601,7 @@ bool SCAM::FindDataFlow::VisitWhileStmt(clang::WhileStmt *whileStmt) {
 
 bool SCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
     if (pass == 0) {
+        ifStmt->getCond()->dumpColor();
         FindDataFlow conditionStmt(ifStmt->getCond(), this->module, false);
         if (conditionStmt.getExpr() == nullptr) return exitVisitor("Translation of condition failed)");
         this->stmt = new If(conditionStmt.getExpr());

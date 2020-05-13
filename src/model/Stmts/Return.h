@@ -11,6 +11,7 @@ namespace SCAM {
     class Return : public Stmt {
     public:
         explicit Return(Expr *returnValue);
+        Return(std::string function_name);
 
         virtual ~Return() = default;
 
@@ -28,6 +29,7 @@ namespace SCAM {
         Return() = default;
 
         Expr *returnValue;
+        std::string function_name;
     };
 }
 

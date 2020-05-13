@@ -1,3 +1,4 @@
+
 Variables:
 buffer: T *
 fifo_size: unsigned
@@ -6,7 +7,6 @@ reader_notify: class sc_core::sc_event
 state: states
 tail: int
 writer_notify: class sc_core::sc_event
-
 
 Functions:
 read:
