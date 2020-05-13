@@ -36,9 +36,10 @@ namespace SCAM {
         createModel(int argc, const std::string &Binary, const std::string &srcFile){
             std::vector<std::string> result;
             std::vector<const char *> commandLineArugmentsVector;
-            std::string clang_dir = SCAM_HOME"/include/clang/3.4.2/include";
-            std::string systemc_dir = SCAM_HOME"/include/";
-            std::string scam_dir = SCAM_HOME"/";
+	    //Analyzing Environmental Variables          -----Default Values for Reference
+            std::string clang_dir = getenv("CLANG_DIR");      //SCAM_HOME"/include/clang/3.4.2/include";
+            std::string systemc_dir = getenv("SYSTEMC_DIR");  //SCAM_HOME"/include/";
+            std::string scam_dir = getenv("SCAM_HOME");       //SCAM_HOME"/";
             if (clang_dir == "") throw std::runtime_error("Specfiy CLANG_DIR as environment variable");
             if (systemc_dir == "") throw std::runtime_error("Specfiy SYSTEMC_DIR as environment variable");
             if (scam_dir == "") throw std::runtime_error("Specfiy SCAM_DIR as environment variable");

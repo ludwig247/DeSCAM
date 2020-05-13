@@ -1,0 +1,44 @@
+#!/bin/sh
+
+echo "Executing DeSCAM..."
+echo $SCAM_DIR
+echo $SYSTEMC_DIR
+
+cd "$(dirname "$0")"
+SELF_DIR="$(dirname "$0")"
+SCAM_HOME="$SELF_DIR/root/DeSCAM"
+SCAM_DIR="$SELF_DIR/root/DeSCAM/"
+SYSTEMC_DIR="$SELF_DIR/root/DeSCAM/include/"
+CLANG_DIR="$SELF_DIR/root/DeSCAM/include/clang/3.4.2/include"
+LIBS_PATH="$SELF_DIR/root/DeSCAM/lib:$SELF_DIR/root/DeSCAM/include:$SELF_DIR/usr/lib:$SELF_DIR/root/DeSCAM/build"
+
+#All Internal Libraries
+LIBS_PATH=${LIBS_PATH}:$(find ./root/DeSCAM/build/src -type d | tr '\n' ':' | sed 's/:$//')
+
+if [ -z "$LD_LIBRARY_PATH" ]; then
+  LD_LIBRARY_PATH="$LIBS_PATH"
+else
+  LD_LIBRARY_PATH="$LIBS_PATH:$LD_LIBRARY_PATH"
+fi
+
+SC_HOME="$SELF_DIR/root/DeSCAM/include"
+
+if [ -z "$SYSTEMC_HOME" ]; then
+  SYSTEMC_HOME="$SC_HOME"
+else
+  SYSTEMC_HOME="$SYSTEMC_HOME:$SC_HOME"
+fi
+
+SYSTEMC_TARGET_ARCH=linux64
+
+export LD_LIBRARY_PATH
+export SYSTEMC_HOME
+export SYSTEMC_TARGET_ARCH
+export SCAM_HOME
+export SCAM_DIR
+export SYSTEMC_DIR
+export CLANG_DIR
+
+exec ./root/DeSCAM/bin/DESCAM --file $1 --output $2 -PrintSkeleton
+
+
