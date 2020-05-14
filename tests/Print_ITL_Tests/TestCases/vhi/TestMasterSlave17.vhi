@@ -2,18 +2,18 @@
 
 
 -- DP SIGNALS --
-macro s_out_1_sig : bus_req_t := end macro;
-macro s_out_1_sig_addr : signed := end macro;
-macro s_out_1_sig_data : signed := end macro;
-macro s_out_1_sig_trans_type : trans_t := end macro;
-macro s_out_2_sig : bus_req_t := end macro;
-macro s_out_2_sig_addr : signed := end macro;
-macro s_out_2_sig_data : signed := end macro;
-macro s_out_2_sig_trans_type : trans_t := end macro;
-macro s_out_3_sig : bus_req_t := end macro;
-macro s_out_3_sig_addr : signed := end macro;
-macro s_out_3_sig_data : signed := end macro;
-macro s_out_3_sig_trans_type : trans_t := end macro;
+--macro s_out_1_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro s_out_1_sig_addr : signed :=resize(0,32) end macro;
+macro s_out_1_sig_data : signed :=resize(0,32) end macro;
+macro s_out_1_sig_trans_type : trans_t :=SINGLE_READ end macro;
+--macro s_out_2_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro s_out_2_sig_addr : signed :=resize(0,32) end macro;
+macro s_out_2_sig_data : signed :=resize(0,32) end macro;
+macro s_out_2_sig_trans_type : trans_t :=SINGLE_READ end macro;
+--macro s_out_3_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro s_out_3_sig_addr : signed :=resize(0,32) end macro;
+macro s_out_3_sig_data : signed :=resize(0,32) end macro;
+macro s_out_3_sig_trans_type : trans_t :=SINGLE_READ end macro;
 
 
 -- CONSTRAINTS --
@@ -21,12 +21,12 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro data1_data : signed := end macro;
-macro data1_trans_type : trans_t := end macro;
-macro data2_data : signed := end macro;
-macro data2_trans_type : trans_t := end macro;
-macro data3_data : signed := end macro;
-macro data3_trans_type : trans_t := end macro;
+macro data1_data : signed :=resize(0,32) end macro;
+macro data1_trans_type : trans_t :=SINGLE_READ end macro;
+macro data2_data : signed :=resize(0,32) end macro;
+macro data2_trans_type : trans_t :=SINGLE_READ end macro;
+macro data3_data : signed :=resize(0,32) end macro;
+macro data3_trans_type : trans_t :=SINGLE_READ end macro;
 
 
 -- STATES --
