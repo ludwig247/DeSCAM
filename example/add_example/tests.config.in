@@ -13,6 +13,6 @@
 //#include "ModulesMasterSlave_new.h"
 //#include "ModuleArrays_new.h"
 //#include "ModulesGlobal.h"
-@INCLUDE_HEADER@
+
 
 #endif //PROJECT_EXAMPLEHEADERS_H

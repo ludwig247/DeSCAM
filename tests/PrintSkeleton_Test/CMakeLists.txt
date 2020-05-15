@@ -23,6 +23,6 @@ foreach(EXAMPLE_H_FILE ${EXAMPLE_H})
 endforeach()
 
 configure_file (
-        "${CMAKE_SOURCE_DIR}/example/tests.h.in"
+        "${CMAKE_SOURCE_DIR}/example/add_example/tests.h.in"
         "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/tests.h"
 )

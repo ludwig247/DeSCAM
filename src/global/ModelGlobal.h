@@ -64,6 +64,11 @@ namespace SCAM {
             commandLineArugmentsVector.push_back(systemc.c_str());
             std::string interfaces = std::string("-I" + scam_dir + "example/Interfaces/");
             commandLineArugmentsVector.push_back(interfaces.c_str());
+
+            for(int i =0; i< commandLineArugmentsVector.size(); i++){
+                std::cout<<"small step:"<< commandLineArugmentsVector[i]<<std::endl;
+            }
+
             //Parameters for clang: may not be changed
             std::vector<const char *> clangParameter = {"-std=c++11", "-x", "c++", "-w", "-c"};
             for (auto item: clangParameter) {
@@ -78,6 +83,11 @@ namespace SCAM {
                 if(!isWrapper) PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
                 else PluginAction<SCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
             } else throw std::runtime_error("Wrong use of DeSCAM");
+
+                commandLineArugmentsVector.clear();
+                SCAM::DataTypes::reset();
+
+
         };
 
 
