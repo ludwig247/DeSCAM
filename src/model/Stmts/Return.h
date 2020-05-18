@@ -17,6 +17,8 @@ namespace SCAM {
 
         Expr *getReturnValue() const;
 
+        std::string getFunctionName();
+
         void setReturnValue(Expr *returnValue);
 
         virtual void accept(StmtAbstractVisitor &visitor);

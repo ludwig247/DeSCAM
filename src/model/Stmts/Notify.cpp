@@ -17,6 +17,10 @@ SCAM::Notify::Notify(std::string name) :
 SCAM::Port *SCAM::Notify::getPort() const {
     return port;
 }
+std::string SCAM::Notify::getEventname(){
+    return eventname;
+}
+
 
 void SCAM::Notify::accept(SCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);

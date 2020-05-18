@@ -14,8 +14,8 @@ SCAM::Return::Return(SCAM::Expr *returnValue) :
     }
 
 }
-SCAM::Return::Return(std::string function_name){
-    function_name = function_name;
+SCAM::Return::Return(std::string func){
+    function_name = func;
 }
 
 void SCAM::Return::accept(SCAM::StmtAbstractVisitor &visitor) {
@@ -25,6 +25,9 @@ void SCAM::Return::accept(SCAM::StmtAbstractVisitor &visitor) {
 
 SCAM::Expr *SCAM::Return::getReturnValue() const {
     return returnValue;
+}
+std::string SCAM::Return::getFunctionName(){
+    return function_name;
 }
 
 void SCAM::Return::setReturnValue(SCAM::Expr *returnValue) {

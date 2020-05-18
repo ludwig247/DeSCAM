@@ -23,6 +23,7 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const;
 
         Port *getPort() const;
+        std::string getEventname();
 
     private:
         Port *port;
