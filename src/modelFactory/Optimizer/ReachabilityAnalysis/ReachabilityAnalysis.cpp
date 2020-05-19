@@ -110,10 +110,6 @@ namespace SCAM {
                                     toBeAssertedExpressions.push_back(newZ3Expr);
                                 }
                                 catch (z3::exception &e) {
-                                    std::cout << "\t\033[1;33mWarning\033[0m: "
-                                              << "Translation warning for: "
-                                              << PrintStmt::toString(scamExpr) << std::endl;
-                                    std::cout << "\t ->" << e << std::endl;
                                     toBeAssertedExpressions.clear();
                                     break;
                                 }
@@ -141,7 +137,7 @@ namespace SCAM {
                                     }
                                 }
                                 if (notfalse) {
-                                    printWarning(insideIf, false);
+                                    printWarning(this->CFG.at(currentNodeID)->getStmt(), false);
                                     unreachableNodes.insert(node.second->getSuccessorList()[1]->getId());
                                     node.second->removeSuccessor(node.second->getSuccessorList()[1]);
                                     this->ifNodesToBeDeleted.insert(node.second->getId());
@@ -156,7 +152,7 @@ namespace SCAM {
                                     }
                                 }
                                 if (nottrue) {
-                                    printWarning(insideIf, true);
+                                    printWarning(this->CFG.at(currentNodeID)->getStmt(), true);
                                     unreachableNodes.insert(node.second->getSuccessorList()[0]->getId());
                                     node.second->removeSuccessor(node.second->getSuccessorList()[0]);
                                     this->ifNodesToBeDeleted.insert(node.second->getId());
@@ -166,9 +162,6 @@ namespace SCAM {
                             z3::expr z3InsideIf(RA_z3Context);
                             try { z3InsideIf = RA_translator.translate(insideIf); }
                             catch (z3::exception& e) {
-                                std::cout << "\t\033[1;33mWarning\033[0m: " << "Translation warning for: "
-                                          << PrintStmt::toString(insideIf) << std::endl;
-                                std::cout << "\t ->" << e << std::endl;
                                 continue;
                             }
                             catch (std::runtime_error& e){
@@ -179,7 +172,7 @@ namespace SCAM {
                             RA_solver_f.add(!z3InsideIf);
                             if (RA_solver_f.check() == z3::sat || RA_solver_f.check() == z3::unknown) {
                             } else {
-                                printWarning(insideIf, false);
+                                printWarning(this->CFG.at(currentNodeID)->getStmt(), false);
                                 unreachableNodes.insert(node.second->getSuccessorList()[1]->getId());
                                 node.second->removeSuccessor(node.second->getSuccessorList()[1]);
                                 this->ifNodesToBeDeleted.insert(node.second->getId());
@@ -188,7 +181,7 @@ namespace SCAM {
                             RA_solver_t.add(z3InsideIf);
                             if (RA_solver_t.check() == z3::sat || RA_solver_t.check() == z3::unknown) {
                             } else {
-                                printWarning(insideIf, true);
+                                printWarning(this->CFG.at(currentNodeID)->getStmt(), true);
                                 unreachableNodes.insert(node.second->getSuccessorList()[0]->getId());
                                 node.second->removeSuccessor(node.second->getSuccessorList()[0]);
                                 this->ifNodesToBeDeleted.insert(node.second->getId());
@@ -430,11 +423,19 @@ namespace SCAM {
         return this->CFG;
     }
 
-    void ReachabilityAnalysis::printWarning(SCAM::Expr *insideIfExpression, bool cannotBe) {
+    void ReachabilityAnalysis::printWarning(SCAM::Stmt *IfStmt, bool cannotBe) {
         std::string trueOrFalse = cannotBe ? "true!" : "false!";
-        std::cout << "\t\033[1;33mWarning\033[0m: " << "The statement: \033[1;33m'if("
-                  << SCAM::PrintStmt::toString(insideIfExpression)
-                  << ")'\033[0m in Node" << currentNodeID << " cannot be " << trueOrFalse << std::endl;
+        std::stringstream message;
+        message << "The statement: '"
+                  << SCAM::PrintStmt::toString(IfStmt)
+                  << "' cannot be " << trueOrFalse;
+        auto msg = message.str();
+        auto locationInfo = IfStmt->getStmtInfo();
+        auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
+        auto vt = SCAM::LoggerMsg::ViolationType::NA;
+        auto pl = SCAM::Logger::getCurrentProcessedLocation();
+        SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+        SCAM::Logger::addMsg(lmsg);
     }
 
     //ReachabilityAnalysis for functions
@@ -489,10 +490,6 @@ namespace SCAM {
                                     toBeAssertedExpressions.push_back(newZ3Expr);
                                 }
                                 catch (z3::exception &e) {
-                                    std::cout << "\t\033[1;33mWarning\033[0m: "
-                                              << "Translation warning for: "
-                                              << PrintStmt::toString(scamExpr) << std::endl;
-                                    std::cout << "\t ->" << e << std::endl;
                                     toBeAssertedExpressions.clear();
                                     break;
                                 }

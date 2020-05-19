@@ -20,6 +20,7 @@ int main(int argc, const char **argv) {
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
     //initialize logger
     SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
+    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>());
     SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
     SCAM::Logger::setFilteringOptions(
             std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});

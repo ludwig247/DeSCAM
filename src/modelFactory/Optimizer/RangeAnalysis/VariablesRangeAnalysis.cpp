@@ -283,8 +283,6 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 
             }
             catch (z3::exception e) {
-                std::cout << "Translation warning for: " << PrintStmt::toString(val) << std::endl;
-                std::cout << "\t ->" << e << std::endl;
                 intValuesVector.clear();
                 unsignedValuesVector.clear();
                 break;
@@ -322,7 +320,13 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
                 }
             }
             if (canBeUnsigned) {
-                std::cout << "\t\033[1;94mHint:\033[0m Variable " << var.first << " can be unsigned!" << std::endl;
+               std::string msg = "Variable " + var.first + " can be unsigned!";
+                LocationInfo locationInfo;
+                auto sl = SCAM::LoggerMsg::SeverityLevel::Info;
+                auto vt = SCAM::LoggerMsg::ViolationType::NA;
+                auto pl = SCAM::Logger::getCurrentProcessedLocation();
+                SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+                SCAM::Logger::addMsg(lmsg);
             }
 
         } else if (!unsignedValuesVector.empty()) {

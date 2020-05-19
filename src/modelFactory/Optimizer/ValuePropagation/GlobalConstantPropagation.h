@@ -31,26 +31,26 @@ namespace SCAM {
      */
 
 
-    class GlobalConstantPropagation : public SCAM::StmtAbstractVisitor, FindCfgPaths {
+    class GlobalConstantPropagation : public StmtAbstractVisitor, FindCfgPaths {
 
     public:
         GlobalConstantPropagation() = delete;
 
-        GlobalConstantPropagation(const std::map<int, SCAM::CfgNode *> &CFG, const FindCfgPaths &findCfgPaths,
+        GlobalConstantPropagation(const std::map<int, CfgNode *> &CFG, const FindCfgPaths &findCfgPaths,
                                   std::set<std::string> variablesThatHaveReadSet);
 
         ~GlobalConstantPropagation() = default;
 
-        const std::map<int, SCAM::CfgNode *> &getCFG() const;
+        const std::map<int, CfgNode *> &getCFG() const;
 
     private:
         bool propagationValid;                                                  //indicates that there is a valid propagated value when it's true
         int currentNodeID;                                                      //refers to the node currently being processed
         Expr *newExpr;
-        std::map<int, SCAM::CfgNode *> CFG;
+        std::map<int, CfgNode *> CFG;
         std::set<std::string> variablesThatHaveReadSet;
         std::set<std::string> varAlreadyCheckedSet;                              // keeps the name for each variable so PropagateValue won't be called if variable already checked
-        std::map<std::string, SCAM::Expr *> varValMap;                           // keeps the value of a variable operand if already checked
+        std::map<std::string, Expr *> varValMap;                           // keeps the value of a variable operand if already checked
 
         //visitors
         void visit(struct VariableOperand &node) override;
@@ -99,7 +99,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

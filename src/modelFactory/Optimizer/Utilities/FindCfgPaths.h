@@ -64,7 +64,7 @@ namespace SCAM {
         std::map<int, std::vector<int>> nodeAndAllPathsReachingItMap;
         bool pathEmpty;
 
-        void removeBackwardsUntilIf(SCAM::CfgPath *Path);
+        void removeBackwardsUntilIf(CfgPath *Path);
 
     };
 }

@@ -89,9 +89,13 @@ SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *ass
         }
 
     }catch(z3::exception e){
-
-        std::cout << "Translation warning for: " << PrintStmt::toString(assignment) << std::endl;
-        std::cout << "\t ->" << e << std::endl;
+        std::string msg = "Translation warning for: " + PrintStmt::toString(assignment);
+        LocationInfo locationInfo = assignment->getStmtInfo();
+        auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
+        auto vt = SCAM::LoggerMsg::ViolationType::NA;
+        auto pl = SCAM::Logger::getCurrentProcessedLocation();
+        SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+        SCAM::Logger::addMsg(lmsg);
         return assignment;
     }
 }

@@ -33,21 +33,21 @@ namespace SCAM {
     public:
         RangeAndBitWidthAnalysis() = delete;
 
-        explicit RangeAndBitWidthAnalysis(SCAM::Module *module);
+        explicit RangeAndBitWidthAnalysis(Module *module);
 
         ~RangeAndBitWidthAnalysis() = default;
 
         const std::map<std::string, int> &getVariableBitWidthMap() const;
 
-        const std::map<SCAM::Port *, int> &getPortsBitWidthMap() const;
+        const std::map<Port *, int> &getPortsBitWidthMap() const;
 
     private:
-        SCAM::Module *module;
-        std::map<int, SCAM::CfgNode *> CFG;
+        Module *module;
+        std::map<int, CfgNode *> CFG;
         std::set<std::string> variablesThatHaveReadSet;
-        std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        std::map<std::string, std::set<Expr *>> variablesValuesMap;
         std::map<std::string, int> variableBitWidthMap;
-        std::map<SCAM::Port *, int> writePortBitWidthMap;
+        std::map<Port *, int> writePortBitWidthMap;
         std::map<std::string, std::string> nameFullNameMap;
         int propagatedBitWidth;
         void initializeBitWidthMap();
@@ -100,7 +100,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

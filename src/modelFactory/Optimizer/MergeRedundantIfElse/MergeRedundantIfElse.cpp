@@ -2,6 +2,8 @@
 // Created by M.I.Alkoudsi on 17.07.19.
 //
 
+#include <Logger/LoggerMsg.h>
+#include <Logger/Logger.h>
 #include "MergeRedundantIfElse.h"
 #include "Optimizer/Debug.h"
 
@@ -109,7 +111,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                                 elseIfBlock = this->blockCFG.at(-conditionTrueBranchPair.first);
                             }
                             if (toBeDeletedMap.find(elseIfBlock->getBlockID()) != toBeDeletedMap.end()) { continue; }
-                            printWarning("if", PrintStmt::toString(ifBlock->getTerminator()), "else if",
+                            printWarning("if", ifBlock->getTerminator(), "else if",
                                          PrintStmt::toString(elseIfBlock->getTerminator()));
 
                             auto ifCondition = dynamic_cast<SCAM::If *>(ifBlock->getTerminator());
@@ -133,7 +135,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                                 elseIfBlock = this->blockCFG.at(-conditionTrueBranchPair.first);
                             }
                             if (toBeDeletedMap.find(elseIfBlock->getBlockID()) != toBeDeletedMap.end()) { continue; }
-                            printWarning("else if", PrintStmt::toString(elseIfBlock->getTerminator()), "else",
+                            printWarning("else if", elseIfBlock->getTerminator(), "else",
                                          "");
                             this->toBeDeletedMap.insert(elseIfBlock->getBlockID());
 
@@ -145,7 +147,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                             } else {
                                 ifBlock = this->blockCFG.at(conditionTrueBranchPair.first);
                             }
-                            printWarning("if", PrintStmt::toString(ifBlock->getTerminator()), "else",
+                            printWarning("if", ifBlock->getTerminator(), "else",
                                          "");
                             this->toBeDeletedMap.insert(ifBlock->getBlockID());
                         } else if (conditionTrueBranchPair.first < 0 && (*pair).first < 0) {
@@ -154,7 +156,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                             elseIfBlock2 = this->blockCFG.at(-(*pair).first);
                             if (toBeDeletedMap.find(elseifBlock1->getBlockID()) != toBeDeletedMap.end() ||
                                 toBeDeletedMap.find(elseIfBlock2->getBlockID()) != toBeDeletedMap.end()) { continue; }
-                            printWarning("else if", PrintStmt::toString(elseifBlock1->getTerminator()), "else if",
+                            printWarning("else if", elseifBlock1->getTerminator(), "else if",
                                          PrintStmt::toString(elseIfBlock2->getTerminator()));
                             auto elseIf1Condition = dynamic_cast<SCAM::If *>(elseifBlock1->getTerminator());
                             auto elseIf2condition = dynamic_cast<SCAM::If *>(elseIfBlock2->getTerminator());
@@ -451,23 +453,31 @@ void SCAM::MergeRedundantIfElse::addStatementsInElseBranch(int &currentBlockId, 
 }
 
 void
-SCAM::MergeRedundantIfElse::printWarning(const std::string &firstCondType, const std::string &firstCond,
+SCAM::MergeRedundantIfElse::printWarning(const std::string &firstCondType, SCAM::Stmt* firstCond,
                                          const std::string &secondCondType,
                                          const std::string &secondCond) {
+
     std::stringstream warning;
-    warning << "\t\033[1;33mWarning\033[0m: found the same code in the following '" << firstCondType
+    warning << "Found the same code in the following '" << firstCondType
             << "' and related '" << secondCondType << "' branch:" << std::endl;
     if (firstCondType == "if") {
-        warning << firstCond << std::endl;
+        warning << PrintStmt::toString(firstCond) << std::endl;
+
     } else if (firstCondType == "else if") {
-        warning << "else " << firstCond << std::endl;
+        warning << "else " << PrintStmt::toString(firstCond) << std::endl;
     }
     if (secondCondType == "else if") {
         warning << "else " << secondCond << std::endl;
     }
     warning << "This might indicate a copy and paste or logic error. Therefore, the conditions are merged!"
             << std::endl;
-    std::cout << warning.str();
+    auto msg = warning.str();
+    LocationInfo locationInfo = firstCond->getStmtInfo();
+    auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
+    auto vt = SCAM::LoggerMsg::ViolationType::NA;
+    auto pl = SCAM::Logger::getCurrentProcessedLocation();
+    SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+    SCAM::Logger::addMsg(lmsg);
 }
 
 

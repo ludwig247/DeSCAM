@@ -16,9 +16,9 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Exp
     if (this->oldStmt) {
         stmt->accept(*this);
         if (*stmt == *this->newStmt) {
-            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
-            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
-            std::cout << PrintStmt::toString(this->newStmt) << std::endl;
+//            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
+//            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
+//            std::cout << PrintStmt::toString(this->newStmt) << std::endl;
             //    TERMINATE("substitutionError!, oldExpr was not found in stmt");
         }
     }
@@ -33,9 +33,9 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Expr *expr, SCAM::Exp
     if (expr) {
         expr->accept(*this);
         if (*expr == *this->propagatedExpr) {
-            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
-            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
-            std::cout << PrintStmt::toString(this->propagatedExpr) << std::endl;
+//            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
+//            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
+//            std::cout << PrintStmt::toString(this->propagatedExpr) << std::endl;
             //  TERMINATE("substitutionError!, oldExpr was not found in stmt");
         }
     }

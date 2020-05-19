@@ -32,9 +32,9 @@ namespace SCAM {
     public:
         RenumberCFG() = delete;
 
-        explicit RenumberCFG(std::map<int, SCAM::CfgBlock *> blockCFG);
+        explicit RenumberCFG(std::map<int, CfgBlock *> blockCFG);
 
-        explicit RenumberCFG(std::map<int, SCAM::CfgNode *> nodeCFG);
+        explicit RenumberCFG(std::map<int, CfgNode *> nodeCFG);
 
         ~RenumberCFG() = default;
 
@@ -43,10 +43,10 @@ namespace SCAM {
         const std::map<int, CfgNode *> &getNewNodeCFG() const;
 
     private:
-        std::map<int, SCAM::CfgBlock *> blockCFG;
-        std::map<int, SCAM::CfgBlock *> newBlockCFG;
-        std::map<int, SCAM::CfgNode *> nodeCFG;
-        std::map<int, SCAM::CfgNode *> newNodeCFG;
+        std::map<int, CfgBlock *> blockCFG;
+        std::map<int, CfgBlock *> newBlockCFG;
+        std::map<int, CfgNode *> nodeCFG;
+        std::map<int, CfgNode *> newNodeCFG;
 
         static bool areAllCFGNodesVisited(const std::vector<bool> &VistedNodesVector, int numCFGNodes);
 

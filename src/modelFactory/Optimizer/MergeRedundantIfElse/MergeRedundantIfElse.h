@@ -47,7 +47,7 @@ namespace SCAM {
     public:
         MergeRedundantIfElse() = delete;
 
-        explicit MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *> CFG);
+        explicit MergeRedundantIfElse(std::map<int, CfgBlock *> CFG);
 
         ~MergeRedundantIfElse() = default;
 
@@ -57,8 +57,8 @@ namespace SCAM {
         int currentIfID;
         int currentElseIfID;
         std::vector<int> checkedIfStmts;
-        std::map<int, SCAM::CfgBlock *> blockCFG;
-        std::map<int, std::vector<SCAM::Stmt *>> stmtsMap;
+        std::map<int, CfgBlock *> blockCFG;
+        std::map<int, std::vector<Stmt *>> stmtsMap;
         std::map<int, std::vector<int>> trueBranchBlocksMap;
         std::set<int> toBeDeletedMap;              //when true the bool indicates the else if, otherwise else and the int reflects the redundant if or else if
         std::map<int, int> ifAndItsElseMap;
@@ -69,10 +69,10 @@ namespace SCAM {
 
         void addStatementsInElseBranch(int &currentBlockId, bool isElseBranch);
 
-        void addNestedIfStatementsToStmtsMap(int &currentBlockID, std::vector<SCAM::Stmt *> &ifStmtList);
+        void addNestedIfStatementsToStmtsMap(int &currentBlockID, std::vector<Stmt *> &ifStmtList);
 
         static void
-        printWarning(const std::string &firstCondType, const std::string &firstCond, const std::string &secondCondType,
+        printWarning(const std::string &firstCondType, Stmt* firstCond, const std::string &secondCondType,
                      const std::string &secondCond);
     };
 

@@ -29,7 +29,7 @@ namespace SCAM {
         * \output:
         *      - SCAM::Stmt *newStmt;
         */
-        ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Expr *oldExpr, SCAM::Expr *newExpr);
+        ExpressionSubstitution(Stmt *stmt, Expr *oldExpr, Expr *newExpr);
 
         /***
         * \brief: Substitutes an expression inside an expression with another expression
@@ -43,23 +43,23 @@ namespace SCAM {
         * \output:
         *      - SCAM::Expr *modifiedExpr;
         */
-        ExpressionSubstitution(SCAM::Expr *expr, SCAM::Expr *oldExpr, SCAM::Expr *newExpr);
+        ExpressionSubstitution(Expr *expr, Expr *oldExpr, Expr *newExpr);
 
-        SCAM::Stmt *getNewStmt() const;
+        Stmt *getNewStmt() const;
 
-        SCAM::Stmt *getModifiedExpr() const;
+        Stmt *getModifiedExpr() const;
 
-        static SCAM::Stmt *substituteExpr(SCAM::Stmt *stmt, SCAM::Expr *oldExpr, SCAM::Expr *newExpr);
+        static Stmt *substituteExpr(Stmt *stmt, Expr *oldExpr, Expr *newExpr);
 
-        static SCAM::Expr *substituteExpr(SCAM::Expr *expr, SCAM::Expr *oldExpr, SCAM::Expr *newExpr);
+        static Expr *substituteExpr(Expr *expr, Expr *oldExpr, Expr *newExpr);
 
 
     private:
-        SCAM::Expr *oldExpr;
-        SCAM::Expr *newExpr;
-        SCAM::Stmt *newStmt;
-        SCAM::Stmt *oldStmt;
-        SCAM::Expr *propagatedExpr;
+        Expr *oldExpr;
+        Expr *newExpr;
+        Stmt *newStmt;
+        Stmt *oldStmt;
+        Expr *propagatedExpr;
 
         //visitors
         void visit(struct VariableOperand &node) override;
@@ -108,7 +108,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

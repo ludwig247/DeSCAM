@@ -25,18 +25,18 @@ namespace SCAM {
     public:
         FindUnusedFunctions() = delete;
 
-        FindUnusedFunctions(const std::map<int, SCAM::CfgBlock *> &CFG, SCAM::Module* module);
+        FindUnusedFunctions(const std::map<int, CfgBlock *> &CFG, Module* module);
 
-        FindUnusedFunctions(const std::map<int, SCAM::CfgNode *> &CFG, SCAM::Module* module);
+        FindUnusedFunctions(const std::map<int, CfgNode *> &CFG, Module* module);
 
         ~FindUnusedFunctions() = default;
 
     private:
-        std::map<int, SCAM::CfgBlock *> blockCFG;
-        std::map<int, SCAM::CfgNode *> nodeCFG;
-        SCAM::Module* module;
+        std::map<int, CfgBlock *> blockCFG;
+        std::map<int, CfgNode *> nodeCFG;
+        Module* module;
         std::set<std::string> usedFunctionsSet;
-        std::set<std::string> unusedFunctionSet;
+        std::map<std::string,Function*> unusedFunctionSet;
 
 
         //visitors
@@ -86,7 +86,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

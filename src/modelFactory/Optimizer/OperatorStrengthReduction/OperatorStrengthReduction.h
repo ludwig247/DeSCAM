@@ -40,13 +40,13 @@ namespace SCAM {
         explicit OperatorStrengthReduction(std::map<int, CfgNode *> CFG);
 
         explicit OperatorStrengthReduction(
-                std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList);
+                std::vector<std::pair<Return *, std::vector<Expr *>>> returnValueConditionList);
 
         ~OperatorStrengthReduction() = default;
 
         const std::map<int, CfgNode *> &getCFG() const;
 
-        const std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> &getReturnValueConditionList() const;
+        const std::vector<std::pair<Return *, std::vector<Expr *>>> &getReturnValueConditionList() const;
 
 
     private:
@@ -56,12 +56,12 @@ namespace SCAM {
         bool isCFGOptimizer;                                    //true when the constructor has blockCFG as an argument
         std::map<int, CfgNode *> CFG;
         bool hasReduction;
-        std::map<std::string, SCAM::Expr *> paramValMap;
-        std::pair<std::string, SCAM::Expr *> param;
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> tempList;
-        SCAM::Expr *newExpr;
-        SCAM::Stmt *newStmt{};
+        std::map<std::string, Expr *> paramValMap;
+        std::pair<std::string, Expr *> param;
+        std::vector<std::pair<Return *, std::vector<Expr *>>> returnValueConditionList;
+        std::vector<std::pair<Return *, std::vector<Expr *>>> tempList;
+        Expr *newExpr;
+        Stmt *newStmt{};
 
         //visitors
         void visit(struct VariableOperand &node) override {};
@@ -110,7 +110,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

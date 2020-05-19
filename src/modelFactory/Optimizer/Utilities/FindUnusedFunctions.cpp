@@ -2,6 +2,8 @@
 // Created by M.I.Alkoudsi on 29.08.19.
 //
 
+#include <Logger/LoggerMsg.h>
+#include <Logger/Logger.h>
 #include "FindUnusedFunctions.h"
 
 
@@ -22,14 +24,18 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBloc
     if (this->usedFunctionsSet.size() != this->module->getFunctionMap().size()) {
         for (const auto &function : this->module->getFunctionMap()) {
             if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
-                this->unusedFunctionSet.insert(function.first);
+                this->unusedFunctionSet.insert(function);
             }
         }
         for (const auto &function : this->unusedFunctionSet) {
-            std::cout << "\t\033[1;33mWarning\033[0m: " << "the function '" << function
-                      << "' was never used!, DeSCAM deletes it by default"
-                      << std::endl;
-            this->module->removeFunction(function);
+            std::string msg = "the function '" + function.first + "' was never used!";
+            LocationInfo locationInfo = function.second->getLocationInfo();
+            auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
+            auto vt = SCAM::LoggerMsg::ViolationType::NA;
+            auto pl = SCAM::Logger::getCurrentProcessedLocation();
+            SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+            SCAM::Logger::addMsg(lmsg);
+            this->module->removeFunction(function.first);
         }
     }
 }
@@ -45,11 +51,11 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode
     if (this->usedFunctionsSet.size() != this->module->getFunctionMap().size()) {
         for (const auto &function : this->module->getFunctionMap()) {
             if (this->usedFunctionsSet.find(function.first) == this->usedFunctionsSet.end()) {
-                this->unusedFunctionSet.insert(function.first);
+                this->unusedFunctionSet.insert(function);
             }
         }
         for (const auto &function : this->unusedFunctionSet) {
-            this->module->removeFunction(function);
+            this->module->removeFunction(function.first);
         }
     }
 }

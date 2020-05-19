@@ -32,7 +32,7 @@ namespace SCAM {
         static Logger &getInstance();
 
         static void setTerminate();
-
+        static void resetTerminate();
         static bool isTerminate();
 
         static void addMsg(LoggerMsg);

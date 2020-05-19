@@ -113,9 +113,15 @@ namespace SCAM {
     void OperationFactory::checkStates() {
         for (const auto &state : this->statesMap) {
             if (state.second->isInit()) continue;
-
-            if (state.second->getIncomingOperationsList().empty())
-                std::cout << "\t\033[1;33mWarning\033[0m: (" << state.first << ") is unreachable! consider removing it.\n";
+            if (state.second->getIncomingOperationsList().empty()) {
+                std::string msg = "the state (" + state.first + ") is unreachable! consider removing it.";
+                LocationInfo locationInfo;
+                auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
+                auto vt = SCAM::LoggerMsg::ViolationType::NA;
+                auto pl = SCAM::Logger::getCurrentProcessedLocation();
+                SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+                SCAM::Logger::addMsg(lmsg);
+            }
         }
     }
 

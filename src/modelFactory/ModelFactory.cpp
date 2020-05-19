@@ -326,9 +326,8 @@ void SCAM::ModelFactory::addBehavior(SCAM::Module *module, clang::CXXRecordDecl 
     if (findProcess.isValidProcess()) {
         methodDecl = findProcess.getProcess();
     }
-
     SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
-    TERMINATE_IF_ERROR
+    EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
     if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
     SCAM::CfgNode::node_cnt = 0;
     SCAM::State::state_cnt = 0;

@@ -7,12 +7,11 @@
 
 SCAM::Optimizer::Optimizer(std::map<int, SCAM::CfgBlock *> CFG, SCAM::Module *module,
                            SCAM::Model *model,
-                           const std::set <std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
-                                                                               module(module),
-                                                                               globalVariableMap(model->getGlobalVariableMap()),
-                                                                               optimizeOptionsSet(optimizeOptionsSet) {
-
-
+                           const std::set<std::string> &optimizeOptionsSet) : blockCFG(std::move(CFG)),
+                                                                              module(module),
+                                                                              globalVariableMap(
+                                                                                      model->getGlobalVariableMap()),
+                                                                              optimizeOptionsSet(optimizeOptionsSet) {
     if (this->optimizeOptionsSet.find("all") != this->optimizeOptionsSet.end() ||
         this->optimizeOptionsSet.find("mrc") != this->optimizeOptionsSet.end()) {
         SCAM::RemoveEmptyNodes rem(this->blockCFG);

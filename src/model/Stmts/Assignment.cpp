@@ -30,14 +30,12 @@ SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs, LocationInfo stmt
     }
 
     if (NodePeekVisitor::nodePeekArrayOperand(lhs)) {
-        std::string msg = "ERROR:\n";
-        msg += "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index\n";
+        std::string msg = "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
         throw SCAM::StmtException(msg,this->stmtLocationInfo);
     }
     if (NodePeekVisitor::isConstTypeNode(lhs)) {
-        std::string msg = "ERROR:\n";
-        msg += "LHS of assignemnt has to be a variable\n";
+        std::string msg = "LHS of assignemnt has to be a variable";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
         throw SCAM::StmtException(msg,this->stmtLocationInfo);
     }

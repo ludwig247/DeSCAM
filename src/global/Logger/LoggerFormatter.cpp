@@ -58,11 +58,11 @@ std::string SCAM::LoggerFormatter::getMessages(std::vector<SCAM::LoggerMsg> logg
             normal << "statement: " << stmtInfo.getStmt() << '\n';
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&
               stmtInfo.getColumnStartNumber() == 0 && stmtInfo.getColumnEndNumber() == 0))
-            normal << "Rows: " << stmtInfo.getRowStartNumber() << " -> "
+            normal << "rows: " << stmtInfo.getRowStartNumber() << " -> "
                    << (stmtInfo.getRowEndNumber() < stmtInfo.getRowStartNumber() ? stmtInfo.getRowStartNumber()
                                                                                  : stmtInfo.getRowEndNumber()) << '\n';
-        normal << "Columns: " << stmtInfo.getColumnStartNumber() << " -> " << stmtInfo.getColumnEndNumber() << '\n';
-        normal << "severity: " << msgPtr->getSeverityLevel() << "\",\n";
+        normal << "columns: " << stmtInfo.getColumnStartNumber() << " -> " << stmtInfo.getColumnEndNumber() << '\n';
+        normal << "severity: " << msgPtr->getSeverityLevel() << '\n';
         if (msgPtr->getViolationType() != "NA")
             normal << "violation: " << msgPtr->getViolationType() << '\n';
         if (msgPtr->getProcessedLocationString() != "")

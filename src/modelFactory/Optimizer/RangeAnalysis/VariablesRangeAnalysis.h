@@ -38,8 +38,8 @@ namespace SCAM {
     public:
         VariablesRangeAnalysis() = delete;
 
-        VariablesRangeAnalysis(const std::map<int, SCAM::CfgNode *>& CFG,
-                               const std::map<std::string, std::set<SCAM::Expr *>>& variablesValuesMap,
+        VariablesRangeAnalysis(const std::map<int, CfgNode *>& CFG,
+                               const std::map<std::string, std::set<Expr *>>& variablesValuesMap,
                                const std::set<std::string>& variablesThatHaveReadSet);
 
         ~VariablesRangeAnalysis() = default;
@@ -48,17 +48,17 @@ namespace SCAM {
 
     private:
         int currentNodeID{};
-        std::map<int, SCAM::CfgNode *> CFG;
+        std::map<int, CfgNode *> CFG;
         std::set<std::string> variablesThatHaveReadSet;
         std::set<std::string> difficultToAnalyzeVariablesSet;
-        std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        std::map<std::string, std::set<Expr *>> variablesValuesMap;
         std::set<std::string> toBeAnalysedCounterVariablesSet;
         std::map<std::string, std::set<std::string>> variablesThatAssignedCounterVariablesMap;
         std::map<std::string, std::string> variablesDataTypesMap;
         std::map<std::string, int> variableBitWidthMap;
 
-        std::set<SCAM::Expr *> substituteVariablesWithValues(SCAM::Expr *toBeSubstitutedExpr,
-                                                             const std::map<std::string, std::set<SCAM::Expr *>> &substitutionMap);
+        std::set<Expr *> substituteVariablesWithValues(Expr *toBeSubstitutedExpr,
+                                                             const std::map<std::string, std::set<Expr *>> &substitutionMap);
     };
 }
 

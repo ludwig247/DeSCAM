@@ -60,7 +60,7 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
 
                         } else std::cout << "-I- Default init value for variable " << varName << std::endl;
                     } catch (std::runtime_error error) {
-                        std::string msg = "Error for initialization of variable " + varName + "\n";
+                        std::string msg = "Error for initialization of variable " + varName;
                         TERMINATE(msg + error.what());
                     }
                 }

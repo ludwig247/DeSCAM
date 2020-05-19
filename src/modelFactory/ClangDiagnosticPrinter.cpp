@@ -38,7 +38,7 @@ void ClangDiagnosticPrinter::EndSourceFile() {
 void ClangDiagnosticPrinter::HandleDiagnostic(DiagnosticsEngine::Level Level,
                                               const Diagnostic &Info) {
 
-    if(Level >= DiagnosticsEngine::Error) SCAM::Logger::setTerminate();
+    if (Level >= DiagnosticsEngine::Error) SCAM::Logger::setTerminate();
 
     SmallString<100> outStr;
     Info.FormatDiagnostic(outStr);
@@ -78,22 +78,29 @@ void ClangDiagnosticPrinter::addDiagnosticsToLogger(std::string diagnostics) {
                     errorLineVec[2]), rowEndNum = rowStartNum, colEndNum = colStartNum;
             auto severityLevel = SCAM::LoggerMsg::SeverityLevel::Warning;
             auto violationType = SCAM::LoggerMsg::ViolationType::Syntax;
-            if (errorLineVec.size() == 8) { //  we currently have format 2,
+            if (errorLineVec.size() == 8 && !(errorLineVec[3].find("error") != std::string::npos ||
+                                              errorLineVec[3].find("note") != std::string::npos ||
+                                              errorLineVec[3].find("warning") !=
+                                              std::string::npos)) { //  we currently have format 2,
                 parsableSourceRangesOffset = 3;
-                colEndNum = stoi(errorLineVec[5]);
+                if (errorLineVec[5].size() < 4) colEndNum = stoi(errorLineVec[5]);
                 auto dashPosition = errorLineVec[4].find('-');
                 if (dashPosition != std::string::npos)
                     rowEndNum = stoi(errorLineVec[4].substr(dashPosition + 1));
-            }
+            } else if (errorLineVec.size() > 9) parsableSourceRangesOffset = 5;
             if (errorLineVec[3 + parsableSourceRangesOffset].find("error") != std::string::npos)
                 severityLevel = SCAM::LoggerMsg::SeverityLevel::Error;
+            else if (errorLineVec[3 + parsableSourceRangesOffset].find("note") != std::string::npos)
+                severityLevel = SCAM::LoggerMsg::SeverityLevel::Info;
 
-            std::string message = SCAM::GlobalUtilities::removeIndentation(
-                    errorLineVec[4 + parsableSourceRangesOffset]);
+            std::string message = "";
+            for (int i = 4 + parsableSourceRangesOffset; i < errorLineVec.size(); i++)
+                message += errorLineVec[i];
 
             SCAM::LocationInfo stmtInfo(stmt, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
             //Add loggerMsg to the logger
-            SCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType,SCAM::Logger::getCurrentProcessedLocation());
+            SCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType,
+                                      SCAM::Logger::getCurrentProcessedLocation());
             SCAM::Logger::addMsg(loggerMsg);
         }
     }

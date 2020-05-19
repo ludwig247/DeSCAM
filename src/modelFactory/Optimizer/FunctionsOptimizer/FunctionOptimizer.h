@@ -43,29 +43,29 @@ namespace SCAM {
         //Constructors and Destructor
         FunctionsOptimizer() = delete;
 
-        FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module, SCAM::Model *model ,
+        FunctionsOptimizer(std::map<int, CfgNode *> CFG, Module *module, Model *model ,
                            std::set<std::string> variablesThatHaveReadSet);
 
         ~FunctionsOptimizer() = default;
 
         //Setters and Getters
-        const std::map<int, SCAM::CfgNode *> &getCFG() const;
+        const std::map<int, CfgNode *> &getCFG() const;
 
     private:
-        SCAM::Model *model;
-        SCAM::Module *module;
-        std::map<int, SCAM::CfgNode *> CFG;
+        Model *model;
+        Module *module;
+        std::map<int, CfgNode *> CFG;
         std::map<std::string, Variable *> globalVariableMap;
         bool hasFunction;
-        SCAM::Stmt *newStmt;                                                     //used to propagate statements and the modified functionOperands
-        SCAM::Expr *newExpr;
-        std::map<std::string, std::set<SCAM::Expr *>> allVarValuesMap;          //Contains all possible values that all variable can take
+        Stmt *newStmt;                                                     //used to propagate statements and the modified functionOperands
+        Expr *newExpr;
+        std::map<std::string, std::set<Expr *>> allVarValuesMap;          //Contains all possible values that all variable can take
         std::set<std::string> variablesThatHaveReadSet;                         //All variables that can't be optimized due to interprocedural behaviour
         std::map<std::string, int> functionUseMap;                              //keeps the number of times a function is used in the blockCFG, for naming purposes
-        std::map<SCAM::FunctionOperand *, SCAM::Expr *> oldFuncOpOptimizedFuncPairsMap;   //Keeps a pointer to the optimized function to reuse an optimized function instead of creating a new one if paramter list is the same
+        std::map<FunctionOperand *, Expr *> oldFuncOpOptimizedFuncPairsMap;   //Keeps a pointer to the optimized function to reuse an optimized function instead of creating a new one if paramter list is the same
         std::string createFuncName(std::string funcOpName);
-        SCAM::Expr *
-        isAlreadyOptimizedFunction(std::string operandName, const std::map<std::string, SCAM::Expr *> &paramValueMap);
+        Expr *
+        isAlreadyOptimizedFunction(std::string operandName, const std::map<std::string, Expr *> &paramValueMap);
         static bool noOptimizationAchieved(const std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector1, std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector2);
         //visitors
         void visit(class VariableOperand &node) override {};
@@ -114,7 +114,7 @@ namespace SCAM {
 
         void visit(class Cast &node) override;
 
-        void visit(SCAM::FunctionOperand &node) override;
+        void visit(FunctionOperand &node) override;
 
         void visit(class ArrayOperand &node) override;
 

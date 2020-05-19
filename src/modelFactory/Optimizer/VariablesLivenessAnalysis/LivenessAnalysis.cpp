@@ -122,16 +122,9 @@ namespace SCAM {
                 }
             }
             for (auto pointlessIfStmtNodeId : pointlessIfStmtsNodeIdsVector) {
-
-                std::cout << "\t\033[1;33mWarning\033[0m: The statement: \033[1;33m'"
-                          << PrintStmt::toString(this->CFG.at(pointlessIfStmtNodeId)->getStmt())
-                          << "'\033[0m is pointless and has been deleted!" << std::endl;
                 removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(pointlessIfStmtNodeId);
             }
             for (auto deadAssignment : deadAssignmentSet) {
-                std::cout << "\t\033[1;33mWarning\033[0m: The statement: \033[1;33m'"
-                          << PrintStmt::toString(this->CFG.at(deadAssignment)->getStmt())
-                          << "'\033[0m is pointless and has been deleted!" << std::endl;
                 removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(deadAssignment);
             }
         }

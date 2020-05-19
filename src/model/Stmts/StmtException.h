@@ -43,7 +43,7 @@ namespace SCAM {
     CATCH_STMT_EXCEPTION()
 
 #define CATCH_STMT_EXCEPTION()                                       \
-   catch (StmtException& err) {                                       \
+   catch (SCAM::StmtException& err) {                                       \
     auto msg = std::string(err.what());                                \
     auto sl = SCAM::LoggerMsg::SeverityLevel::Error;                    \
     auto vt = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
@@ -51,7 +51,7 @@ namespace SCAM {
     SCAM::LoggerMsg lmsg(msg,err.getStmtLocationInfo(),sl,vt,pl);          \
     SCAM::Logger::addMsg(lmsg);                                             \
     if(pl == SCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
-    Logger::setTerminate();                                                   \
+    SCAM::Logger::setTerminate();                                             \
     }
 }
 #endif //DESCAM_STMTEXCEPTION_H

@@ -61,8 +61,8 @@ namespace SCAM {
     public:
         Optimizer() = delete;
 
-        Optimizer(std::map<int, SCAM::CfgBlock *> CFG,
-                  SCAM::Module *module, SCAM::Model *model , const std::set<std::string>& optimizeOptionsSet);
+        Optimizer(std::map<int, CfgBlock *> CFG,
+                  Module *module, Model *model , const std::set<std::string>& optimizeOptionsSet);
 
         ~Optimizer() = default;
 
@@ -70,16 +70,16 @@ namespace SCAM {
 
         const std::map<std::string, int> &getVariableBitWidthMap() const;
 
-        const std::map<SCAM::Port *, int> &getPortsBitWidthMap() const;
+        const std::map<Port *, int> &getPortsBitWidthMap() const;
 
     private:
-        std::map<int, SCAM::CfgBlock *> blockCFG;
-        std::map<int, SCAM::CfgNode *> nodeCFG;
-        SCAM::Module *module;
+        std::map<int, CfgBlock *> blockCFG;
+        std::map<int, CfgNode *> nodeCFG;
+        Module *module;
         std::map<std::string, Variable *> globalVariableMap;
         std::set<std::string> optimizeOptionsSet;
         std::map<std::string, int> variableBitWidthMap;
-        std::map<SCAM::Port *, int> portBitWidthMap;
+        std::map<Port *, int> portBitWidthMap;
     };
 }
 

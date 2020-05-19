@@ -1,4 +1,6 @@
 #include "Logger_test.h"
+#include "Stmts_all.h"
+#include "StmtException.h"
 
 TEST_F(Logger_test, LoggerMsg_SettersGetters) {
     std::string fileDir = "fileDir/file.txt",
@@ -30,6 +32,13 @@ TEST_F(Logger_test, Logger_add_clear_msgs) {
 
 TEST_F(Logger_test, Logger_text_format_JSON) {
     auto formatedString = SCAM::LoggerFormatter::formatMessages(msgsVector, SCAM::LoggerFormatter::FormatOptions::JSON);
+    std::string refContent;
+    GET_CONTENT_FROM_FILE("TextFormater.JSON", refContent)
+    ASSERT_EQ(refContent, formatedString) << "Text formatter with option JSON failed\n";
+}
+
+TEST_F(Logger_test, Logger_text_format_Normal) {
+    auto formatedString = SCAM::LoggerFormatter::formatMessages(msgsVector, SCAM::LoggerFormatter::FormatOptions::Normal);
     std::string refContent;
     GET_CONTENT_FROM_FILE("TextFormater.txt", refContent)
     ASSERT_EQ(refContent, formatedString) << "Text formatter with option JSON failed\n";
@@ -109,6 +118,7 @@ TEST_F(Logger_test, Logger_log_filter_out_global) {
                                                                        SCAM::LoggerFormatter::FormatOptions::JSON), logsFileContent;
     GET_CONTENT_FROM_FILE("LOGS.JSON", logsFileContent)
     ASSERT_EQ(logsFileContent, formatedOutput);
+    SCAM::Logger::clear();
 }
 
 
@@ -138,8 +148,53 @@ TEST_F(Logger_test, Logger_log_filter_out_global_2) {
                                                                        SCAM::LoggerFormatter::FormatOptions::JSON), logsFileContent;
     GET_CONTENT_FROM_FILE("LOGS.JSON", logsFileContent)
     ASSERT_EQ(logsFileContent, formatedOutput);
+    SCAM::Logger::clear();
 }
 
+
+TEST_F(Logger_test, Logger_terminate_flag) {
+    ASSERT_EQ(SCAM::Logger::isTerminate(), false) << "terminate flag was set initially\n";
+    SCAM::Logger::setTerminate();
+    ASSERT_EQ(SCAM::Logger::isTerminate(), true) << "failed to set terminate flag\n";
+    SCAM::Logger::resetTerminate();
+    ASSERT_EQ(SCAM::Logger::isTerminate(), false) << "failed to reset terminate flag\n";
+}
+
+TEST_F(Logger_test, Logger_stmt_exception_in_behavior) {
+    SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation::Behavior);
+    auto integerVal = new SCAM::IntegerValue(2);
+    auto unsignedVal = new SCAM::UnsignedValue(2);
+    ASSERT_THROW(new SCAM::Arithmetic(integerVal,"+",unsignedVal),SCAM::StmtException);
+    ASSERT_NO_THROW(ASSERT_STMT(new SCAM::Arithmetic(integerVal,"+",unsignedVal)));
+    ASSERT_EQ(SCAM::Logger::isTerminate(), true) << "Logger Terminate flag should be set after a stmt exception in behavior occurs\n";
+    ASSERT_EQ(SCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after StmtException and processedLocation is Behavior";
+    SCAM::Logger::resetTerminate();
+    SCAM::Logger::clear();
+}
+
+TEST_F(Logger_test, Logger_stmt_exception_in_functions) {
+    SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation::Functions);
+    auto integerVal = new SCAM::IntegerValue(2);
+    auto unsignedVal = new SCAM::UnsignedValue(2);
+    ASSERT_THROW(new SCAM::Arithmetic(integerVal,"+",unsignedVal),SCAM::StmtException);
+    ASSERT_NO_THROW(ASSERT_STMT(new SCAM::Arithmetic(integerVal,"+",unsignedVal)));
+    ASSERT_EQ(SCAM::Logger::isTerminate(), false) << "Logger Terminate flag was set after a stmt exception in functions!\n";
+    ASSERT_EQ(SCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after StmtException and processedLocation is Behavior";
+    SCAM::Logger::clear();
+}
+
+TEST_F(Logger_test, Logger_stmt_exception_during_global_constants) {
+    // we don't expect to terminate during the processing of global constants because errors here might originate from another unrelated file
+    SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation::GlobalConstants);
+    auto integerVal = new SCAM::IntegerValue(2);
+    auto unsignedVal = new SCAM::UnsignedValue(2);
+    ASSERT_NO_THROW(ASSERT_STMT(new SCAM::Arithmetic(integerVal,"+",unsignedVal)));
+    ASSERT_EQ(SCAM::Logger::isTerminate(), false) << "terminate flag was set during the processing of global constants\n";
+    // the error message now is added to TempVector of the logger, we tag it with a variable or function name
+    SCAM::Logger::tagTempMsgs("globalConstantVarOrFunc");
+    ASSERT_EQ(SCAM::Logger::getTempMsgsMap().at("globalConstantVarOrFunc").size(),1) << "Error message was not added to TempMsgsMap after StmtException and processedLocation is GlobalConstants";
+    SCAM::Logger::clear();
+}
 
 Logger_test::Logger_test() {
     {

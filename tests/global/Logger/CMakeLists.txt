@@ -1,4 +1,4 @@
-project(LoggerTest C CXX)
+project(Logger_Test C CXX)
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
 
@@ -18,8 +18,8 @@ set(GLOBAL_FILES
         ${LOGGER_SRC}
         )
 
-add_executable(LoggerTest ${SOURCE_FILES} ${GLOBAL_FILES} Logger_test.cpp)
-target_link_libraries(LoggerTest z3)
-target_link_libraries(LoggerTest Stmts)
-target_link_libraries(LoggerTest Model)
-target_link_libraries(LoggerTest ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a pthread)
+add_executable(Logger_Test ${SOURCE_FILES} ${GLOBAL_FILES} Logger_test.cpp)
+target_link_libraries(Logger_Test z3)
+target_link_libraries(Logger_Test Stmts)
+target_link_libraries(Logger_Test Model)
+target_link_libraries(Logger_Test ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a pthread)

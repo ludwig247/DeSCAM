@@ -29,25 +29,25 @@ namespace SCAM {
     public:
         SimplifyExpressions() = delete;
 
-        SimplifyExpressions(std::map<int, CfgNode *> CFG, SCAM::Module *module);
+        SimplifyExpressions(std::map<int, CfgNode *> CFG, Module *module);
 
-        SimplifyExpressions(std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList,
-                            SCAM::Module *module);
+        SimplifyExpressions(std::vector<std::pair<Return *, std::vector<Expr *>>> returnValueConditionList,
+                            Module *module);
 
         ~SimplifyExpressions() = default;
 
         const std::map<int, CfgNode *> &getCFG() const;
 
-        const std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> &getReturnValueConditionList() const;
+        const std::vector<std::pair<Return *, std::vector<Expr *>>> &getReturnValueConditionList() const;
 
     private:
         std::map<int, CfgNode *> CFG;
-        SCAM::Module *module;
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
-        SCAM::Expr *newExpr;
-        SCAM::Stmt *newStmt;
+        Module *module;
+        std::vector<std::pair<Return *, std::vector<Expr *>>> returnValueConditionList;
+        Expr *newExpr;
+        Stmt *newStmt;
 
-        void translateExpression(SCAM::Expr *);
+        void translateExpression(Expr *);
 
 
         //visitors
@@ -97,7 +97,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override{};
 
-        void visit(struct SCAM::FunctionOperand &node) override {};
+        void visit(struct FunctionOperand &node) override {};
 
         void visit(struct ArrayOperand &node) override {};
 

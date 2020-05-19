@@ -41,8 +41,13 @@ namespace SCAM {
     }
 
 /** A macro that throws a FatalError in case termination is necessary */
-#define TERMINATE_IF_ERROR                                              \
-    if(Logger::isTerminate()) {                                          \
+#define TERMINATE_IF_ERROR                                     \
+    if(Logger::isTerminate()) {                                         \
+        throw SCAM::FatalError();                                        \
+    }
+#define EXECUTE_TERMINATE_IF_ERROR(ExecuteBeforeTermination)          \
+    if(Logger::isTerminate()) {                                         \
+        ExecuteBeforeTermination;                                        \
         throw SCAM::FatalError();                                         \
     }
 

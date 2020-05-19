@@ -29,6 +29,10 @@ void SCAM::Logger::setTerminate() {
     terminate = true;
 }
 
+void SCAM::Logger::resetTerminate() {
+    terminate = false;
+}
+
 void SCAM::Logger::addMsg(LoggerMsg msg) {
     if (Logger::getInstance().currentProcessedLocation == LoggerMsg::ProcessedLocation::GlobalConstants) {
         auto tmpVec = Logger::getInstance().tmpMsgsVec;
@@ -133,5 +137,4 @@ const std::vector<SCAM::LoggerMsg> &SCAM::Logger::getMsgsMap() {
 void SCAM::Logger::setPrintDecorativeFrames() {
     Logger::getInstance().printDecorativeFrames = true;
 }
-
 #endif

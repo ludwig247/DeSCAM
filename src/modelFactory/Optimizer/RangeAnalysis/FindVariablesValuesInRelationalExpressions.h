@@ -27,19 +27,19 @@ namespace SCAM {
     public:
         FindVariablesValuesInRelationalExpressions() = delete;
 
-        explicit FindVariablesValuesInRelationalExpressions(const std::map<int, SCAM::CfgNode *> &CFG);
+        explicit FindVariablesValuesInRelationalExpressions(const std::map<int, CfgNode *> &CFG);
 
         ~FindVariablesValuesInRelationalExpressions() = default;
 
-        const std::map<std::string, std::set<SCAM::Expr *>> &getVariableValuesFromRelationalExpressionsMap() const;
+        const std::map<std::string, std::set<Expr *>> &getVariableValuesFromRelationalExpressionsMap() const;
 
         const std::set<std::string> &getDifficultToAnalyseVariablesSet() const;
 
     private:
-        void addValToVarValMap(std::string varName, SCAM::Expr *expr);
+        void addValToVarValMap(std::string varName, Expr *expr);
 
-        std::map<int, SCAM::CfgNode *> CFG;
-        std::map<std::string, std::set<SCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
+        std::map<int, CfgNode *> CFG;
+        std::map<std::string, std::set<Expr *>> variableValuesFromRelationalExpressionsMap;
         std::set<std::string> difficultToAnalyseVariablesSet;
 
         //visitors
@@ -91,7 +91,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override{};
 
