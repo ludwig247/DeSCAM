@@ -6,7 +6,7 @@
 
 #include <utility>
 #include "Wait.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Wait::Wait(LocationInfo stmtLocationInfo) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);

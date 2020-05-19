@@ -7,7 +7,7 @@
 #include <utility>
 #include "Bitwise.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Bitwise::Bitwise(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
@@ -16,11 +16,11 @@ SCAM::Bitwise::Bitwise(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, 
         Expr(lhs->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (operation != "<<" && operation != ">>" && operation != "&" && operation != "|" && operation != "^") {
-        throw SCAM::StmtException("Bitwise: " + operation + " not a bitwise op",this->stmtLocationInfo);
+        throw SCAM::DescamException("Bitwise: " + operation + " not a bitwise op",this->stmtLocationInfo);
     } else if (lhs->getDataType() != rhs->getDataType()) {
         std::string msg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs);
-        throw SCAM::StmtException(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
-    } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw SCAM::StmtException("operands must be numeric",this->stmtLocationInfo);
+        throw SCAM::DescamException(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
+    } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw SCAM::DescamException("operands must be numeric",this->stmtLocationInfo);
 
 }
 

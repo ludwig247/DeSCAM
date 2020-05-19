@@ -26,7 +26,7 @@
 #include "FindDataFlow.h"
 #include "FindStateName.h"
 
-#include "StmtException.h"
+#include "DescamException.h"
 
 bool SCAM::FindDataFlow::isFunction = false;
 std::string SCAM::FindDataFlow::functionName = "";
@@ -80,32 +80,32 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
 
         //Create new Element
         if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Assign) {
-            ASSERT_STMT(this->stmt = new Assignment(this->lhsExpr, this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->stmt = new Assignment(this->lhsExpr, this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LAnd) {
-            ASSERT_STMT(this->expr = new Logical(this->lhsExpr, "and", this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Logical(this->lhsExpr, "and", this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LOr) {
-            ASSERT_STMT(this->expr = new Logical(this->lhsExpr, "or", this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Logical(this->lhsExpr, "or", this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_EQ ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_NE ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_GE ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LE ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_GT ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LT) {
-            ASSERT_STMT(this->expr = new Relational(this->lhsExpr, operationName, this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Relational(this->lhsExpr, operationName, this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Add ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Div ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Rem ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Mul ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Sub) {
-            ASSERT_STMT(this->expr = new Arithmetic(this->lhsExpr, operationName, this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Arithmetic(this->lhsExpr, operationName, this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_AddAssign ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_SubAssign ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_MulAssign ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_DivAssign ||
                    binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_RemAssign) {
             std::string arith_operator = operationName.substr(0,1);
-            ASSERT_STMT(this->stmt = new Assignment(this->lhsExpr,
-                                                    new Arithmetic(this->lhsExpr, arith_operator, this->rhsExpr,
+            DESCAM_ASSERT(this->stmt = new Assignment(this->lhsExpr,
+                                                      new Arithmetic(this->lhsExpr, arith_operator, this->rhsExpr,
                                                                    binaryOpLocationInfo), binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shl) {
             //Special case ... shiftings depends on LHS Datatype
@@ -113,25 +113,25 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
                 FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, ci, true);
                 this->rhsExpr = findRHS2.getExpr();
             }
-            ASSERT_STMT(this->expr = new Bitwise(this->lhsExpr, "<<", this->rhsExpr, binaryOpLocationInfo));
+            DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "<<", this->rhsExpr, binaryOpLocationInfo));
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shr) {
             //Special case ... shiftings depends on LHS Datatype
             if (binaryOperator->getType()->isUnsignedIntegerType()) {
                 FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, ci, true);
                 this->rhsExpr = findRHS2.getExpr();
             }
-            ASSERT_STMT(this->expr = new Bitwise(this->lhsExpr, ">>", this->rhsExpr, binaryOpLocationInfo));
+            DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, ">>", this->rhsExpr, binaryOpLocationInfo));
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_And) {
-            ASSERT_STMT(this->expr = new Bitwise(this->lhsExpr, "&", this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "&", this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Or) {
-            ASSERT_STMT(this->expr = new Bitwise(this->lhsExpr, "|", this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "|", this->rhsExpr, binaryOpLocationInfo))
         } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Xor) {
-            ASSERT_STMT(this->expr = new Bitwise(this->lhsExpr, "^", this->rhsExpr, binaryOpLocationInfo))
+            DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "^", this->rhsExpr, binaryOpLocationInfo))
         } else {
             auto msg = "Operator " + operationName + " not defined";
             this->exitVisitor(msg, binaryOpLocationInfo);
         }
-        if (StmtException::isExceptionHappened()) clearExpressions();
+        if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
     }
     return true;
@@ -148,8 +148,8 @@ bool SCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator* co
     if(condExpr && trueExpr && falseExpr){
     //conditionalOperator->dumpColor();
     //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
-        ASSERT_STMT(this->expr = new Ternary(condExpr,trueExpr,falseExpr,condOpLocationInfo))
-        if (StmtException::isExceptionHappened())
+        DESCAM_ASSERT(this->expr = new Ternary(condExpr, trueExpr, falseExpr, condOpLocationInfo))
+        if (DescamException::isExceptionHappened())
             clearExpressions();
     }else return exitVisitor("Operator not correctly used!",condOpLocationInfo);
     return false;
@@ -183,9 +183,9 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     if (memberCallExpr->getNumArgs() == 2) {
                         SCAM::FindDataFlow firstArgument(memberCallExpr->getArg(0), this->module, ci, false);
                         SCAM::FindDataFlow secondArgument(memberCallExpr->getArg(1), this->module, ci, false);
-                        ASSERT_STMT(this->stmt = new Wait(
+                        DESCAM_ASSERT(this->stmt = new Wait(
                                 calleeLocationInfo)); //FIXME: don't know how to check for the arguments or if needed to begin with
-                        if (StmtException::isExceptionHappened()) clearExpressions();
+                        if (DescamException::isExceptionHappened()) clearExpressions();
                         return false;
                     } else
                         return exitVisitor("Only wait(0) is allowed", calleeLocationInfo);
@@ -203,9 +203,9 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     SCAM::Expr *paramExpr = findArgument.getExpr();
                     paramValueMap.insert(std::make_pair(paramName, paramExpr));
                 }
-                ASSERT_STMT(this->expr = new FunctionOperand(function, paramValueMap, calleeLocationInfo);
+                DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramValueMap, calleeLocationInfo);
                 this->stmt = this->expr)
-                if (StmtException::isExceptionHappened()) clearExpressions();
+                if (DescamException::isExceptionHappened()) clearExpressions();
                 return false;
             } else {
                 return exitVisitor(methodString + "() is not a supported method!", calleeLocationInfo);
@@ -247,17 +247,17 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 4 &&
                            "Wrong number of arguments arguments");
                     if (methodString == "peek" && memberCallExpr->getNumArgs() == 0) {
-                        ASSERT_STMT(this->expr = new Peek(operand->getPort(), memberCallLocationInfo))
+                        DESCAM_ASSERT(this->expr = new Peek(operand->getPort(), memberCallLocationInfo))
                     } else if (methodString == "poke" && memberCallExpr->getNumArgs() == 0) {
-                        ASSERT_STMT(this->expr = new Peek(operand->getPort(), memberCallLocationInfo))
+                        DESCAM_ASSERT(this->expr = new Peek(operand->getPort(), memberCallLocationInfo))
                     } else if (memberCallExpr->getNumArgs() > 0 && hasValidArgument(memberCallExpr->getArg((0)))) {
                         //Blocking read
                         if (methodString == "read") {
                             //add variable as parameter
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
                                     memberCallExpr->getArg((0))))) {
-                                ASSERT_STMT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
-                                                                 memberCallLocationInfo);
+                                DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
+                                                                   memberCallLocationInfo);
                                                     read->setStateName(getStateName());
                                                     this->stmt = read)
                             } else
@@ -268,8 +268,8 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                             //add variable as parameter
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
                                     memberCallExpr->getArg((0))))) {
-                                ASSERT_STMT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
-                                                                  memberCallLocationInfo))
+                                DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
+                                                                    memberCallLocationInfo))
                             } else
                                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                                    memberCallLocationInfo);
@@ -280,8 +280,8 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                 if (hasValidArgument(memberCallExpr->getArg(1))) {
                                     if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(
                                             memberCallExpr->getArg(1)))) {
-                                        ASSERT_STMT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
-                                                                         memberCallLocationInfo);
+                                        DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
+                                                                           memberCallLocationInfo);
                                                             read->setStateName(getStateName());
                                                             this->stmt = read)
                                     } else
@@ -293,7 +293,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                                    memberCallLocationInfo);
                         } else if (methodString == "write") {
-                            ASSERT_STMT(
+                            DESCAM_ASSERT(
                                     auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)),
                                                            false, nullptr, memberCallLocationInfo);
                                     write->setStateName(getStateName());
@@ -301,7 +301,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         }
                             //non Blocking write
                         else if (methodString == "try_write" && memberCallExpr->getNumArgs() == 1) {
-                            ASSERT_STMT(
+                            DESCAM_ASSERT(
                                     this->stmt = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)),
                                                            true, nullptr, memberCallLocationInfo))
                         }
@@ -310,9 +310,9 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                             if (hasValidArgument(memberCallExpr->getArg(1))) {
                                 if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(
                                         memberCallExpr->getArg(1)))) {
-                                    ASSERT_STMT(auto write = new Write(operand->getPort(),
-                                                                       getArgument(memberCallExpr->getArg(0)),
-                                                                       true, statusOp, memberCallLocationInfo);
+                                    DESCAM_ASSERT(auto write = new Write(operand->getPort(),
+                                                                         getArgument(memberCallExpr->getArg(0)),
+                                                                         true, statusOp, memberCallLocationInfo);
                                                         write->setStateName(getStateName());
                                                         this->stmt = write)
                                 } else
@@ -329,8 +329,8 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, ci, false);
                         if (findArgument.getExpr() != nullptr) {
                             if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument.getExpr())) {
-                                ASSERT_STMT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
-                                                                  memberCallLocationInfo))
+                                DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
+                                                                    memberCallLocationInfo))
                             } else
                                 return exitVisitor("Read argument is not a variable!", memberCallLocationInfo);
                         } else
@@ -339,7 +339,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         SCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, ci,
                                                         operand->getDataType()->isUnsigned());
                         if (findArgument.getExpr() != nullptr) {
-                            ASSERT_STMT(
+                            DESCAM_ASSERT(
                                     this->stmt = new Write(operand->getPort(), findArgument.getExpr(), true, nullptr,
                                                            memberCallLocationInfo))
                         } else
@@ -357,15 +357,15 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         if (methodString == "master_read") {
                             if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(
                                     memberCallExpr->getArg((0))))) {
-                                ASSERT_STMT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
-                                                                 memberCallLocationInfo);
+                                DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
+                                                                   memberCallLocationInfo);
                                                     this->stmt = read;
                                                     read->setStateName(getStateName()))
                             } else
                                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                                    memberCallLocationInfo);
                         } else if (methodString == "master_write") {
-                            ASSERT_STMT(
+                            DESCAM_ASSERT(
                                     auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg((0))),
                                                            false, nullptr, memberCallLocationInfo);
                                     write->setStateName(getStateName());
@@ -385,8 +385,8 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                         if (methodString == "slave_read" && memberCallExpr->getNumArgs() == 1) {
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
                                     memberCallExpr->getArg(0)))) {
-                                ASSERT_STMT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
-                                                                  memberCallLocationInfo))
+                                DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
+                                                                    memberCallLocationInfo))
                             } else
                                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                                    memberCallLocationInfo);
@@ -397,8 +397,8 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                 if (hasValidArgument(memberCallExpr->getArg(1))) {
                                     if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(
                                             memberCallExpr->getArg(1)))) {
-                                        ASSERT_STMT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
-                                                                         memberCallLocationInfo);
+                                        DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
+                                                                           memberCallLocationInfo);
                                                             read->setStateName(getStateName());
                                                             this->stmt = read)
                                     } else
@@ -410,7 +410,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                                    memberCallLocationInfo);
                         } else if (methodString == "slave_write") {
-                            ASSERT_STMT(
+                            DESCAM_ASSERT(
                                     auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)));
                                     this->stmt = write)
                         } else
@@ -427,7 +427,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
             }
         }
         //Object analyzed
-        if (StmtException::isExceptionHappened()) clearExpressions();
+        if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
     }
     //Here only if object is LHS or RHS
@@ -469,14 +469,14 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
         if (auto parent = dynamic_cast<SCAM::VariableOperand *>(findParentOfSubVar.getExpr())) {
             if (memberMap.find(parent->getOperandName()) != memberMap.end()) {
                 //Assign value
-                ASSERT_STMT(this->switchPassExpr(new VariableOperand(memberMap.at(parent->getOperandName())->getSubVar(name),membrLocationInfo)))
-                if (StmtException::isExceptionHappened()) clearExpressions();
+                DESCAM_ASSERT(this->switchPassExpr(new VariableOperand(memberMap.at(parent->getOperandName())->getSubVar(name), membrLocationInfo)))
+                if (DescamException::isExceptionHappened()) clearExpressions();
                 return false;
             } else if (globalVariableMap.find(parent->getOperandName()) != globalVariableMap.end()) {
                 //Assign value
-                ASSERT_STMT(this->switchPassExpr(
+                DESCAM_ASSERT(this->switchPassExpr(
                         new VariableOperand(globalVariableMap.at(parent->getOperandName())->getSubVar(name),membrLocationInfo)))
-                if (StmtException::isExceptionHappened()) clearExpressions();
+                if (DescamException::isExceptionHappened()) clearExpressions();
                 return false;
             } else
                 return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
@@ -491,8 +491,8 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
             if (paramMap.find(parent->getOperandName()) != paramMap.end()) {
                 //Assign value
                 auto param = parent->getParameter()->getSubVar(name);
-                ASSERT_STMT(this->switchPassExpr(new ParamOperand(param,membrLocationInfo)))
-                if (StmtException::isExceptionHappened()) clearExpressions();
+                DESCAM_ASSERT(this->switchPassExpr(new ParamOperand(param, membrLocationInfo)))
+                if (DescamException::isExceptionHappened()) clearExpressions();
                 return false;
             } else
                 return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
@@ -503,8 +503,8 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
     if (!memberMap.empty()) {
         if (memberMap.find(name) != memberMap.end()) {
             //Assign value
-            ASSERT_STMT(this->switchPassExpr(new VariableOperand(memberMap.at(name),membrLocationInfo)))
-            if (StmtException::isExceptionHappened()) clearExpressions();
+            DESCAM_ASSERT(this->switchPassExpr(new VariableOperand(memberMap.at(name), membrLocationInfo)))
+            if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
         }
     }
@@ -512,8 +512,8 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
     if (!globalVariableMap.empty()) {
         if (globalVariableMap.find(name) != globalVariableMap.end()) {
             //Assign value
-            ASSERT_STMT(this->switchPassExpr(new VariableOperand(globalVariableMap.at(name),membrLocationInfo)))
-            if (StmtException::isExceptionHappened()) clearExpressions();
+            DESCAM_ASSERT(this->switchPassExpr(new VariableOperand(globalVariableMap.at(name), membrLocationInfo)))
+            if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
         }
     }
@@ -522,8 +522,8 @@ bool SCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
     //Read/Write on Port
     if (portMap.find(name) != portMap.end()) {
         //Assign value
-        ASSERT_STMT(this->switchPassExpr(new PortOperand(portMap.find(name)->second,membrLocationInfo)))
-        if (StmtException::isExceptionHappened()) {clearExpressions(); return false;}
+        DESCAM_ASSERT(this->switchPassExpr(new PortOperand(portMap.find(name)->second, membrLocationInfo)))
+        if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
         return true;
     }
     //TODO: remove
@@ -544,17 +544,17 @@ bool SCAM::FindDataFlow::VisitIntegerLiteral(clang::IntegerLiteral *integerLiter
     if (unsigned_flag) {
         unsigned int ret = (unsigned int) *integerLiteral->getValue().getRawData();
         //Assign value
-        ASSERT_STMT(auto unsignedVal = new UnsignedValue(ret, valLocInfo);
+        DESCAM_ASSERT(auto unsignedVal = new UnsignedValue(ret, valLocInfo);
         unsignedVal->setStmtInfo(valLocInfo);
         this->switchPassExpr(unsignedVal))
     } else {
         int ret = (int) integerLiteral->getValue().getSExtValue();
         //Assign value
-        ASSERT_STMT(auto signedVal = new IntegerValue(ret, valLocInfo);
+        DESCAM_ASSERT(auto signedVal = new IntegerValue(ret, valLocInfo);
         signedVal->setStmtInfo(valLocInfo);
         this->switchPassExpr(signedVal))
     }
-    if (StmtException::isExceptionHappened()) clearExpressions();
+    if (DescamException::isExceptionHappened()) clearExpressions();
     return false;
 
 }
@@ -573,10 +573,10 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
     //Check for global variables
     auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
     if (!globalVars.empty() && globalVars.find(name) != globalVars.end()) {
-        ASSERT_STMT(auto variableOp = new VariableOperand((globalVars.find(name))->second,varDeclLocationInfo);
+        DESCAM_ASSERT(auto variableOp = new VariableOperand((globalVars.find(name))->second, varDeclLocationInfo);
         variableOp->setStmtInfo(varDeclLocationInfo);
         this->switchPassExpr(variableOp))
-        if (StmtException::isExceptionHappened()) clearExpressions();
+        if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
     }
 
@@ -587,16 +587,16 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
         std::string typeName = enumDecl->getType()->getAs<clang::EnumType>()->getDecl()->getName().str();
         std::string value = enumDecl->getName().str();
         if (DataTypes::isDataType(typeName)) {
-            ASSERT_STMT(auto enumVal = new EnumValue(value, DataTypes::getDataType(typeName),varDeclLocationInfo);
+            DESCAM_ASSERT(auto enumVal = new EnumValue(value, DataTypes::getDataType(typeName), varDeclLocationInfo);
             enumVal->setStmtInfo(varDeclLocationInfo);
             this->switchPassExpr(enumVal))
-            if (StmtException::isExceptionHappened()) clearExpressions();
+            if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
         } else if (DataTypes::isLocalDataType(typeName, module->getName())) {
-            ASSERT_STMT(auto enumVal = new EnumValue(value, DataTypes::getLocalDataType(module->getName(), typeName),varDeclLocationInfo);
+            DESCAM_ASSERT(auto enumVal = new EnumValue(value, DataTypes::getLocalDataType(module->getName(), typeName), varDeclLocationInfo);
             enumVal->setStmtInfo(varDeclLocationInfo);
             this->switchPassExpr(enumVal))
-            if (StmtException::isExceptionHappened()) clearExpressions();
+            if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
         }
 
@@ -609,10 +609,10 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
                 auto function = moduleFuncMap.find(FindDataFlow::functionName)->second;
                 auto paramMap = function->getParamMap();
                 if (paramMap.find(name) != paramMap.end()) {
-                    ASSERT_STMT(auto paramOp = new ParamOperand(paramMap.find(name)->second,varDeclLocationInfo);
+                    DESCAM_ASSERT(auto paramOp = new ParamOperand(paramMap.find(name)->second, varDeclLocationInfo);
                     paramOp->setStmtInfo(varDeclLocationInfo);
                     this->switchPassExpr(paramOp))
-                    if (StmtException::isExceptionHappened()) clearExpressions();
+                    if (DescamException::isExceptionHappened()) clearExpressions();
                     return false;
                 } else
                     exitVisitor("Unknown parameter " + name + " for function " + function->getName(),
@@ -621,10 +621,10 @@ bool SCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
                 auto function = globalFunctionMap.find(FindDataFlow::functionName)->second;
                 auto paramMap = function->getParamMap();
                 if (paramMap.find(name) != paramMap.end()) {
-                    ASSERT_STMT(auto paramOp = new ParamOperand(paramMap.find(name)->second,varDeclLocationInfo);
+                    DESCAM_ASSERT(auto paramOp = new ParamOperand(paramMap.find(name)->second, varDeclLocationInfo);
                     paramOp->setStmtInfo(varDeclLocationInfo);
                     this->switchPassExpr(paramOp))
-                    if (StmtException::isExceptionHappened()) clearExpressions();
+                    if (DescamException::isExceptionHappened()) clearExpressions();
                     return false;
                 } else
                     exitVisitor("Unknown parameter " + name + " for function " + function->getName(),
@@ -656,33 +656,33 @@ bool SCAM::FindDataFlow::VisitUnaryOperator(clang::UnaryOperator *unaryOperator)
         switch (unaryOperator->getOpcode()) {
             case clang::UnaryOperator::Opcode::UO_PreInc:
                 if (subExpr.getExpr()->getDataType()->isUnsigned()) {
-                    ASSERT_STMT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                new Arithmetic(subExpr.getExpr(), "+", new UnsignedValue(1),unaryOpLocationInfo),unaryOpLocationInfo))
+                    DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
+                                                              new Arithmetic(subExpr.getExpr(), "+", new UnsignedValue(1),unaryOpLocationInfo), unaryOpLocationInfo))
                 } else
-                    ASSERT_STMT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                new Arithmetic(subExpr.getExpr(), "+", new IntegerValue(1),unaryOpLocationInfo),unaryOpLocationInfo))
+                    DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
+                                                              new Arithmetic(subExpr.getExpr(), "+", new IntegerValue(1),unaryOpLocationInfo), unaryOpLocationInfo))
                 break;
             case clang::UnaryOperator::Opcode::UO_LNot:
-                ASSERT_STMT(this->expr = new UnaryExpr("not", subExpr.getExpr(),unaryOpLocationInfo))
+                DESCAM_ASSERT(this->expr = new UnaryExpr("not", subExpr.getExpr(), unaryOpLocationInfo))
                 break;
             case clang::UnaryOperator::Opcode::UO_PreDec:
                 if (subExpr.getExpr()->getDataType()->isUnsigned()) {
-                    ASSERT_STMT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                new Arithmetic(subExpr.getExpr(), "-", new UnsignedValue(1),unaryOpLocationInfo),unaryOpLocationInfo))
+                    DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
+                                                              new Arithmetic(subExpr.getExpr(), "-", new UnsignedValue(1),unaryOpLocationInfo), unaryOpLocationInfo))
                 } else
-                    ASSERT_STMT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                new Arithmetic(subExpr.getExpr(), "-", new IntegerValue(1),unaryOpLocationInfo),unaryOpLocationInfo))
+                    DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
+                                                              new Arithmetic(subExpr.getExpr(), "-", new IntegerValue(1),unaryOpLocationInfo), unaryOpLocationInfo))
                 break;
             case clang::UnaryOperator::Opcode::UO_Minus:
-                ASSERT_STMT(this->expr = new UnaryExpr("-", subExpr.getExpr(),unaryOpLocationInfo));
+                DESCAM_ASSERT(this->expr = new UnaryExpr("-", subExpr.getExpr(), unaryOpLocationInfo));
                 break;
             case clang::UnaryOperator::Opcode::UO_Not:
-                ASSERT_STMT(this->expr = new UnaryExpr("~", subExpr.getExpr(),unaryOpLocationInfo))
+                DESCAM_ASSERT(this->expr = new UnaryExpr("~", subExpr.getExpr(), unaryOpLocationInfo))
                 break;
             default:
                 return exitVisitor("Unkown/Unallowed unaray operator: " + opcode, unaryOpLocationInfo);
         }
-        if (StmtException::isExceptionHappened()) clearExpressions();
+        if (DescamException::isExceptionHappened()) clearExpressions();
     }
     return false;
 }
@@ -693,9 +693,9 @@ bool SCAM::FindDataFlow::VisitWhileStmt(clang::WhileStmt *whileStmt) {
         auto whileLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(whileStmt,ci);
 
         FindDataFlow conditionStmt(whileStmt->getCond(), this->module, ci, false);
-        ASSERT_STMT(this->stmt = new While(conditionStmt.getExpr(),whileLocationInfo))
+        DESCAM_ASSERT(this->stmt = new While(conditionStmt.getExpr(), whileLocationInfo))
     }
-    if (StmtException::isExceptionHappened()) clearExpressions();
+    if (DescamException::isExceptionHappened()) clearExpressions();
     return false;
 }
 
@@ -707,9 +707,9 @@ bool SCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
         FindDataFlow conditionStmt(ifStmt->getCond(), this->module, ci, false);
         if (conditionStmt.getExpr() == nullptr)
             return exitVisitor("Translation of condition failed)", ifLocationInfo);
-        ASSERT_STMT(this->stmt = new If(conditionStmt.getExpr(),ifLocationInfo))
+        DESCAM_ASSERT(this->stmt = new If(conditionStmt.getExpr(), ifLocationInfo))
     }
-    if (StmtException::isExceptionHappened()) clearExpressions();
+    if (DescamException::isExceptionHappened()) clearExpressions();
     return false;
 }
 
@@ -717,7 +717,7 @@ bool SCAM::FindDataFlow::VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *bool
 
     // Collecting statement location information from clang
     auto boolExprLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(boolLiteralExpr,ci);
-    ASSERT_STMT(
+    DESCAM_ASSERT(
     switch (pass) {
         case 0:
             this->expr = new BoolValue(boolLiteralExpr->getValue(),boolExprLocationInfo);
@@ -731,7 +731,7 @@ bool SCAM::FindDataFlow::VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *bool
             break;
     }
     )
-    if (StmtException::isExceptionHappened()) clearExpressions();
+    if (DescamException::isExceptionHappened()) clearExpressions();
 }
 
 
@@ -759,8 +759,8 @@ bool SCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *op
                     if (this->rhsExpr == nullptr) {
                         return exitVisitor("Unknown error: Stmts can't be processed(b)", opCallLocationInfo);
                     }
-                    ASSERT_STMT(this->stmt = new Assignment(this->lhsExpr, this->rhsExpr,opCallLocationInfo))
-                    if (StmtException::isExceptionHappened()) {clearExpressions(); return false;}
+                    DESCAM_ASSERT(this->stmt = new Assignment(this->lhsExpr, this->rhsExpr, opCallLocationInfo))
+                    if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
                 } else
                     return exitVisitor("Unknown error: Stmts can't be processed(c)", opCallLocationInfo);
 
@@ -783,15 +783,15 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
     std::string functionName = callee->getNameAsString();
     if (functionName == "insert_state") {
         if (callExpr->getNumArgs() == 0) {
-            ASSERT_STMT(this->stmt = new Wait(callLocationInfo))
-            if (StmtException::isExceptionHappened()) clearExpressions();
+            DESCAM_ASSERT(this->stmt = new Wait(callLocationInfo))
+            if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
         } else if (callExpr->getNumArgs() == 1) {
-            ASSERT_STMT(auto wait = new Wait(callLocationInfo);
+            DESCAM_ASSERT(auto wait = new Wait(callLocationInfo);
             FindStateName findStateName(callExpr->getArg(0));
             wait->setStateName(findStateName.getStateName());
             this->stmt = wait)
-            if (StmtException::isExceptionHappened()) clearExpressions();
+            if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
         } else {
             return exitVisitor("Unallowed number of param for important_state()", callLocationInfo);
@@ -810,9 +810,9 @@ bool SCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
             SCAM::Expr *paramExpr = findArgument.getExpr();
             paramExprMap.insert(std::make_pair(paramName, paramExpr));
         }
-        ASSERT_STMT(this->expr = new FunctionOperand(function, paramExprMap,callLocationInfo);
+        DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramExprMap, callLocationInfo);
         this->stmt = this->expr)
-        if (StmtException::isExceptionHappened()) {clearExpressions(); return false;}
+        if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
     } else {
         std::string funcName = callExpr->getDirectCallee()->getNameAsString();
         return exitVisitor(funcName + "() is not a valid function", callLocationInfo);
@@ -868,18 +868,18 @@ bool SCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *static
         staticCastExpr->getType().getAsString() == "unsigned int") {
         FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, ci, false);
         if (subExpr.getExpr() != nullptr) {
-            ASSERT_STMT(switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("unsigned"),castExprLocationInfo)))
+            DESCAM_ASSERT(switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("unsigned"), castExprLocationInfo)))
         } else
             return exitVisitor("static_cast: only variables are allowed as parameter", castExprLocationInfo);
-        if (StmtException::isExceptionHappened()) clearExpressions();
+        if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
     } else if (staticCastExpr->getType()->isIntegerType() && staticCastExpr->getType().getAsString() == "int") {
         FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, ci, false);
         if (subExpr.getExpr() != nullptr) {
-            ASSERT_STMT(switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("int"),castExprLocationInfo)))
+            DESCAM_ASSERT(switchPassExpr(new SCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("int"), castExprLocationInfo)))
         } else
             return exitVisitor("static_cast: only variables are allowed as parameter", castExprLocationInfo);
-        if (StmtException::isExceptionHappened()) clearExpressions();
+        if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
     } else
         return exitVisitor("static_cast: unallowed static cast", castExprLocationInfo);
@@ -892,8 +892,8 @@ bool SCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
     auto returnLocationInfo = SCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(returnStmt,ci);
     if (returnExpr.getExpr() == nullptr)
         return exitVisitor(" return value is null", returnLocationInfo);
-    ASSERT_STMT(this->stmt = new SCAM::Return(returnExpr.getExpr(),returnLocationInfo))
-    if (StmtException::isExceptionHappened()) clearExpressions();
+    DESCAM_ASSERT(this->stmt = new SCAM::Return(returnExpr.getExpr(), returnLocationInfo))
+    if (DescamException::isExceptionHappened()) clearExpressions();
     return false;
 }
 
@@ -912,14 +912,14 @@ bool SCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arra
         if (auto varOp = NodePeekVisitor::nodePeekVariableOperand(array.getExpr())) {
             FindDataFlow findIndex(arraySubscriptExpr->getIdx(), module, ci, false);
             if (auto index = NodePeekVisitor::nodePeekIntegerValue(findIndex.getExpr())) {
-                ASSERT_STMT(auto varOp2 = new SCAM::VariableOperand(varOp->getVariable()->getSubVar(index->getValueAsString()),arraySubExprLocationInfo);
+                DESCAM_ASSERT(auto varOp2 = new SCAM::VariableOperand(varOp->getVariable()->getSubVar(index->getValueAsString()), arraySubExprLocationInfo);
                 switchPassExpr(varOp2))
-                if (StmtException::isExceptionHappened()) clearExpressions();
+                if (DescamException::isExceptionHappened()) clearExpressions();
                 return false;
             } else {
-                ASSERT_STMT(auto arrOp = new ArrayOperand(varOp->getVariable(), findIndex.getExpr(),arraySubExprLocationInfo);
+                DESCAM_ASSERT(auto arrOp = new ArrayOperand(varOp->getVariable(), findIndex.getExpr(), arraySubExprLocationInfo);
                 switchPassExpr(arrOp))
-                if (StmtException::isExceptionHappened()) clearExpressions();
+                if (DescamException::isExceptionHappened()) clearExpressions();
                 //TODO: Implement function for arrays.
                 /*
                  * Implement a functions that allows to selct from array with an expression.

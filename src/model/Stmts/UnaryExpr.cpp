@@ -6,7 +6,7 @@
 
 #include <utility>
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 
 SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr, LocationInfo stmtLocationInfo) :
@@ -15,7 +15,7 @@ SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr, LocationInfo
         Expr(expr->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (!(operation == "not" || operation == "-"|| operation == "~") ) {
-        throw SCAM::StmtException("UnaryExpr: unsuported operator: " + operation,this->stmtLocationInfo);
+        throw SCAM::DescamException("UnaryExpr: unsuported operator: " + operation,this->stmtLocationInfo);
     }
 }
 

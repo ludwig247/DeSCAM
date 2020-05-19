@@ -7,7 +7,7 @@
 #include <utility>
 #include "Arithmetic.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
@@ -18,11 +18,11 @@ SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr 
         setStmtInfo(stmtLocationInfo);
         std::string errorMsg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs);
         errorMsg += " Arithmetic: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype";
-        throw StmtException(errorMsg,getStmtInfo());
+        throw DescamException(errorMsg,getStmtInfo());
     }
-    if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw StmtException("operands must be numeric",this->stmtLocationInfo);
+    if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw DescamException("operands must be numeric",this->stmtLocationInfo);
     if (!(operation == "+" || operation == "-" || operation == "*" || operation == "/" || operation == "%")) {
-        throw StmtException("Arithmetic: unsuported operator",getStmtInfo());
+        throw DescamException("Arithmetic: unsuported operator",getStmtInfo());
     }
 }
 

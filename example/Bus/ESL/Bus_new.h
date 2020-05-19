@@ -1,10 +1,10 @@
 //
 // Created by ludwig on 30.01.17.
 //
-#include "../../Interfaces/Interfaces.h"
-#include "systemc.h"
 
+#include "../../Interfaces/Interfaces.h"
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "systemc.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H

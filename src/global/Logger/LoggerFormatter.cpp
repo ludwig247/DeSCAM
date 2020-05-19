@@ -6,11 +6,11 @@
 
 const std::string
 SCAM::LoggerFormatter::formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages,
-                                      SCAM::LoggerFormatter::FormatOptions formatOptions) {
+                                      SCAM::LoggerFormatter::FormatOption formatOptions) {
     switch (formatOptions) {
-        case FormatOptions::JSON :
+        case FormatOption::JSON :
             return getMessagesJSON(loggerMessages);
-        case FormatOptions::Normal :
+        case FormatOption::TEXT :
             return getMessages(loggerMessages);
     }
 }
@@ -24,8 +24,8 @@ SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessag
         json << "\t{\n";
         if (stmtInfo.getFile() != "")
             json << "\t\t" << R"("file": ")" << stmtInfo.getFile() << "\",\n";
-        if (stmtInfo.getStmt() != "")
-            json << "\t\t" << R"("statement": ")" << stmtInfo.getStmt() << "\",\n";
+        if (stmtInfo.getObject() != "")
+            json << "\t\t" << R"("object": ")" << stmtInfo.getObject() << "\",\n";
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&
               stmtInfo.getColumnStartNumber() == 0 && stmtInfo.getColumnEndNumber() == 0))
             json << "\t\t" << R"("line": [[)" << stmtInfo.getRowStartNumber() << " , "
@@ -54,8 +54,8 @@ std::string SCAM::LoggerFormatter::getMessages(std::vector<SCAM::LoggerMsg> logg
         auto stmtInfo = msgPtr->getLocationInfo();
         if (stmtInfo.getFile() != "")
             normal << "file: " << stmtInfo.getFile() << '\n';
-        if (stmtInfo.getStmt() != "")
-            normal << "statement: " << stmtInfo.getStmt() << '\n';
+        if (stmtInfo.getObject() != "")
+            normal << "object: " << stmtInfo.getObject() << '\n';
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&
               stmtInfo.getColumnStartNumber() == 0 && stmtInfo.getColumnEndNumber() == 0))
             normal << "rows: " << stmtInfo.getRowStartNumber() << " -> "
@@ -68,7 +68,14 @@ std::string SCAM::LoggerFormatter::getMessages(std::vector<SCAM::LoggerMsg> logg
         if (msgPtr->getProcessedLocationString() != "")
             normal << "location: " << msgPtr->getProcessedLocationString() << '\n';
         normal << "message: " << msgPtr->getMessage() << '\n';
-        normal << '\n';
+        if(std::next(msgPtr, 1)!=loggerMessages.end()) normal << '\n';
     }
     return normal.str();
+}
+
+std::string SCAM::LoggerFormatter::getFormatFileType(SCAM::LoggerFormatter::FormatOption formatOption) {
+    switch (formatOption) {
+        case FormatOption::TEXT : return "txt";
+        case FormatOption::JSON : return "JSON";
+    }
 }

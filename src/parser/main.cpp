@@ -18,13 +18,20 @@ int main(int argc, const char **argv) {
     std::cout << "==================================================================" << std::endl;
     std::cout << "......................... Creating model ........................." << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
-    //initialize logger
-    SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
-    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>());
-    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
+
+    /* Initialize logger */
+    //setting sinks
+    std::shared_ptr<LoggerSink> consoleSink = std::make_shared<SCAM::ConsoleSink>();
+    consoleSink->setFormatOption(LoggerFormatter::FormatOption::TEXT);
+    SCAM::Logger::addSink(consoleSink);
+    std::shared_ptr<LoggerSink> fileSink = std::make_shared<SCAM::FileSink>();
+    fileSink->setFormatOption(LoggerFormatter::FormatOption::JSON);
+    SCAM::Logger::addSink(fileSink);
+    //setting filtering options
     SCAM::Logger::setFilteringOptions(
             std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});
     SCAM::Logger::setPrintDecorativeFrames();
+
     //Create model
     ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile()))
     // write log messages to all sinks

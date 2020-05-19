@@ -6,7 +6,7 @@
 
 #include <utility>
 #include "Ternary.h"
-#include "StmtException.h"
+#include "DescamException.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
@@ -25,7 +25,7 @@ SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *
     if (trueExpr->getDataType() != falseExpr->getDataType()) {
         std::string message = PrintStmt::toString(trueExpr) + ":" + trueExpr->getDataType()->getName() + ":" +
                               PrintStmt::toString(falseExpr) + ":" + falseExpr->getDataType()->getName() + "\n";
-        throw SCAM::StmtException(message + "Compare: TRUE(" + trueExpr->getDataType()->getName() + ") and FALSE(" +
+        throw SCAM::DescamException(message + "Compare: TRUE(" + trueExpr->getDataType()->getName() + ") and FALSE(" +
                                    falseExpr->getDataType()->getName() +
                                    ") are not of the same datatype", this->stmtLocationInfo);
     }

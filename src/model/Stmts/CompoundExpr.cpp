@@ -6,7 +6,7 @@
 
 #include <utility>
 #include "CompoundExpr.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 
 namespace SCAM {
@@ -14,12 +14,12 @@ namespace SCAM {
             valueMap(valueMap),
             Expr(dataType) {
         this->stmtLocationInfo = std::move(stmtLocationInfo);
-        if (!dataType->isCompoundType()) throw SCAM::StmtException(dataType->getName() + " is not a compound type",this->stmtLocationInfo);
+        if (!dataType->isCompoundType()) throw SCAM::DescamException(dataType->getName() + " is not a compound type",this->stmtLocationInfo);
         for (auto subsig: dataType->getSubVarMap()) {
-            if (valueMap.find(subsig.first) == valueMap.end()) throw SCAM::StmtException(subsig.first + "is not in the value map",this->stmtLocationInfo);
+            if (valueMap.find(subsig.first) == valueMap.end()) throw SCAM::DescamException(subsig.first + "is not in the value map",this->stmtLocationInfo);
             if (valueMap.find(subsig.first) != valueMap.end()) {
                 if (valueMap.find(subsig.first)->second->getDataType() != subsig.second) {
-                    throw SCAM::StmtException(subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first,this->stmtLocationInfo);
+                    throw SCAM::DescamException(subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first,this->stmtLocationInfo);
                 }
             }
         }

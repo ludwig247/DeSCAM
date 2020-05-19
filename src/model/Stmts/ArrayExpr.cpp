@@ -3,7 +3,7 @@
 //
 
 #include "ArrayExpr.h"
-#include "StmtException.h"
+#include "DescamException.h"
 #include <NodePeekVisitor.h>
 #include "FatalError.h"
 #include "Logger/Logger.h"
@@ -20,7 +20,7 @@ SCAM::ArrayExpr::ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const S
             TERMINATE(subsig.first + "is not in the value map");
         if (valueMap.find(subsig.first) != valueMap.end()) {
             if (valueMap.find(subsig.first)->second->getDataType() != subsig.second) {
-                throw StmtException(
+                throw DescamException(
                         subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first,
                         this->stmtLocationInfo);
             }

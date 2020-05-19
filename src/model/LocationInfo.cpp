@@ -25,12 +25,12 @@ int SCAM::LocationInfo::getColumnEndNumber() {
 }
 
 
-const std::string &SCAM::LocationInfo::getStmt() {
-    return this->stmt;
+const std::string &SCAM::LocationInfo::getObject() {
+    return this->object;
 }
 
-void SCAM::LocationInfo::setStmt(const std::string &stmt) {
-    this->stmt = stmt;
+void SCAM::LocationInfo::setObject(const std::string &object) {
+    this->object = object;
 }
 
 void SCAM::LocationInfo::setFile(const std::string &fileDir) {
@@ -54,10 +54,10 @@ void SCAM::LocationInfo::setColumnEndNumber(int columnEndNumber) {
 }
 
 void
-SCAM::LocationInfo::setInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber,
+SCAM::LocationInfo::setInfo(const std::string &object, const std::string &fileDir, int rowStartNumber, int rowEndNumber,
                             int columnStartNumber,
                             int columnEndNumber) {
-    setStmt(stmt);
+    setObject(object);
     setFile(fileDir);
     setRowStartNumber(rowStartNumber);
     setRowEndNumber(rowEndNumber);
@@ -65,16 +65,16 @@ SCAM::LocationInfo::setInfo(const std::string &stmt, const std::string &fileDir,
     setColumnEndNumber(columnEndNumber);
 }
 
-SCAM::LocationInfo::LocationInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber,
+SCAM::LocationInfo::LocationInfo(const std::string &object, const std::string &fileDir, int rowStartNumber,
                                  int rowEndNumber, int columnStartNumber,
                                  int columnEndNumber) {
-    setInfo(stmt, fileDir, rowStartNumber, rowEndNumber, columnStartNumber, columnEndNumber);
+    setInfo(object, fileDir, rowStartNumber, rowEndNumber, columnStartNumber, columnEndNumber);
 }
 
 bool SCAM::LocationInfo::operator==(const SCAM::LocationInfo &other) const {
     if (this == &other) return true;
     return this->fileDir == other.fileDir &&
-            this->stmt == other.stmt &&
+            this->object == other.object &&
            this->rowStartNumber == other.rowStartNumber &&
            this->rowEndNumber == other.rowEndNumber &&
            this->columnStartNumber == other.columnStartNumber &&

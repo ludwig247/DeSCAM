@@ -7,7 +7,7 @@
 #include <utility>
 #include "PrintStmt.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Relational::Relational(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
@@ -17,14 +17,14 @@ SCAM::Relational::Relational(Expr *lhs, std::string operation, Expr *rhs, Locati
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (lhs->getDataType() != rhs->getDataType()) {
         std::string message = PrintStmt::toString(lhs) +":" + lhs->getDataType()->getName() + " " + operation + " " +  PrintStmt::toString(rhs) + ":" +  rhs->getDataType()->getName() + "\n";
-        throw SCAM::StmtException(message + "Relational: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
+        throw SCAM::DescamException(message + "Relational: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
     }
     if (operation == "==" || operation == "!=" || operation == ">" || operation == ">=" || operation == "<" || operation == "<=") {
         if ((operation == ">" || operation == ">=" || operation == "<" || operation == "<=")) {
             if (lhs->getDataType() != DataTypes::getDataType("int") && lhs->getDataType() != DataTypes::getDataType("unsigned"))
-                throw SCAM::StmtException("Relational: operands must be numeric",this->stmtLocationInfo);
+                throw SCAM::DescamException("Relational: operands must be numeric",this->stmtLocationInfo);
         }
-    } else throw SCAM::StmtException("Relational: unsuported operator: " + operation,this->stmtLocationInfo);
+    } else throw SCAM::DescamException("Relational: unsuported operator: " + operation,this->stmtLocationInfo);
 }
 
 SCAM::Expr *SCAM::Relational::getRhs() {

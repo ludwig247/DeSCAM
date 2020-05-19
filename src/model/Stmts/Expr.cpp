@@ -6,12 +6,12 @@
 
 #include <utility>
 #include "Expr.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Expr::Expr(const SCAM::DataType *dataType, LocationInfo stmtLocationInfo) :
         dataType(dataType) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
-    if (dataType == nullptr) throw SCAM::StmtException("DataType of EXPR is NULL",this->stmtLocationInfo);
+    if (dataType == nullptr) throw SCAM::DescamException("DataType of EXPR is NULL",this->stmtLocationInfo);
 }
 
 const SCAM::DataType *SCAM::Expr::getDataType() const {

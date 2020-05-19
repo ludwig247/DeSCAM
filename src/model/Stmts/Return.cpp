@@ -7,13 +7,13 @@
 
 #include <utility>
 #include "Return.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Return::Return(SCAM::Expr *returnValue, LocationInfo stmtLocationInfo) :
         returnValue(returnValue) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (returnValue == nullptr) {
-        throw SCAM::StmtException(" Return value is null ",this->stmtLocationInfo);
+        throw SCAM::DescamException(" Return value is null ",this->stmtLocationInfo);
     }
 
 }

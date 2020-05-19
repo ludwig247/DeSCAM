@@ -43,8 +43,6 @@ namespace SCAM {
 
         static void addSink(std::shared_ptr<SCAM::LoggerSink> sink);
 
-        static void setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions formatOptions);
-
         static void setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions);
 
         static void setCurrentProcessedLocation(LoggerMsg::ProcessedLocation currentProcessedLocation);
@@ -86,8 +84,6 @@ namespace SCAM {
         static bool terminate;
         //logging options set
         std::set<LoggerFilter::FilterOptions> filterOptions;
-        //log messages formatter
-        LoggerFormatter::FormatOptions formatOptions = LoggerFormatter::FormatOptions::JSON;
         // a variable to track the violation location while processing a module
         LoggerMsg::ProcessedLocation currentProcessedLocation = LoggerMsg::ProcessedLocation::Parsing;
         // if set, the logger prints decorative frames around console messages

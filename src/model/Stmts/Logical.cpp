@@ -7,7 +7,7 @@
 #include <utility>
 #include "Logical.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
@@ -17,12 +17,12 @@ SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, 
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (lhs->getDataType() != rhs->getDataType()){
         std::string message = PrintStmt::toString(lhs) +":" + lhs->getDataType()->getName() + " " + operation + " " +  PrintStmt::toString(rhs) + ":" +  rhs->getDataType()->getName() + "\n";
-        throw SCAM::StmtException(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
+        throw SCAM::DescamException(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
     }
 
-    if (lhs->getDataType()->getName() != "bool") throw SCAM::StmtException("operands must be boolean",this->stmtLocationInfo);
+    if (lhs->getDataType()->getName() != "bool") throw SCAM::DescamException("operands must be boolean",this->stmtLocationInfo);
     if (!(operation == "and" || operation == "nand" || operation == "or" || operation == "nor" || operation == "xor" || operation == "xnor")) {
-        throw SCAM::StmtException("Logical: unsuported operator",this->stmtLocationInfo);
+        throw SCAM::DescamException("Logical: unsuported operator",this->stmtLocationInfo);
     }
 }
 

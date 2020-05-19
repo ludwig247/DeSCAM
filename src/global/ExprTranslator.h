@@ -146,9 +146,9 @@ namespace SCAM {
 
     };
 
-/** A macro that terminates DeSCAM in case a StmtException occurs */
+/** A macro that terminates DeSCAM in case a DescamException occurs */
 #define CHECK_EXCEPTION_AND_RETURN(RETURN_VALUE)                        \
-    if(SCAM::StmtException::isExceptionHappened()) throw SCAM::FatalError(); \
+    if(SCAM::DescamException::isExceptionHappened()) throw SCAM::FatalError(); \
     else return RETURN_VALUE;
 }
 

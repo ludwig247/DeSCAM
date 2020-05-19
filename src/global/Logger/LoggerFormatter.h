@@ -18,12 +18,12 @@ namespace SCAM {
  */
     class LoggerFormatter {
     public:
-        enum class FormatOptions{
-            Normal, JSON,
+        enum class FormatOption{
+            TEXT, JSON,
         };
         LoggerFormatter() = default;
-        static const std::string formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages, FormatOptions formatOptions = FormatOptions::JSON);
-
+        static const std::string formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages, FormatOption formatOption = FormatOption::JSON);
+        static std::string getFormatFileType(FormatOption formatOption);
     private:
         static std::string getMessages(std::vector<SCAM::LoggerMsg> loggerMessages);
         static std::string getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages);

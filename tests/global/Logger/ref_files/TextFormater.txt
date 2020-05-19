@@ -1,5 +1,5 @@
 file: fileDir/file1.h
-statement: statement1
+object: statement1
 rows: 1 -> 2
 columns: 3 -> 4
 severity: Info
@@ -7,7 +7,7 @@ location: while adding module functions
 message: message1
 
 file: fileDir/file2.h
-statement: statement2
+object: statement2
 rows: 1 -> 2
 columns: 3 -> 4
 severity: Error
@@ -16,7 +16,7 @@ location: while parsing
 message: message2
 
 file: fileDir/file3.h
-statement: statement3
+object: statement3
 rows: 1 -> 2
 columns: 3 -> 4
 severity: Warning
@@ -25,11 +25,10 @@ location: while extracting module behavior
 message: message3
 
 file: fileDir/file4.h
-statement: statement4
+object: statement4
 rows: 1 -> 2
 columns: 3 -> 4
 severity: Error
 violation: SystemC PPA Compliance
 location: while adding global constants
 message: message4
-

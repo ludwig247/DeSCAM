@@ -23,7 +23,7 @@ namespace SCAM {
 
         const std::string &getFile();
 
-        const std::string &getStmt();
+        const std::string &getObject();
 
         int getRowStartNumber();
 
@@ -39,7 +39,7 @@ namespace SCAM {
 
         inline void setFile(const std::string &file);
 
-        inline void setStmt(const std::string &stmt);
+        inline void setObject(const std::string &stmt);
 
         inline void setRowStartNumber(int rowStartNumber);
 
@@ -52,7 +52,7 @@ namespace SCAM {
         bool operator==(const LocationInfo &other) const;
 
     private:
-        std::string stmt = "", fileDir = "";
+        std::string object = "", fileDir = "";
         int rowStartNumber = 0, rowEndNumber = 0, columnStartNumber = 0, columnEndNumber = 0;
 
     };

@@ -18,15 +18,18 @@ namespace py = pybind11;
 int checkFile(int argc, const char *argv[]) {
     //Process commandline data
     SCAM::CommandLineProcess cml = SCAM::CommandLineProcess(argc, argv);
-    //initialize logger
-    SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
+    /* Initialize logger */
+    //setting sinks
+    std::shared_ptr<SCAM::LoggerSink> consoleSink = std::make_shared<SCAM::ConsoleSink>();
+    consoleSink->setFormatOption(SCAM::LoggerFormatter::FormatOption::JSON);
+    SCAM::Logger::addSink(consoleSink);
+    //setting filtering options
     SCAM::Logger::setFilteringOptions(
             std::set<SCAM::LoggerFilter::FilterOptions>{SCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,
                                                         SCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,
                                                         SCAM::LoggerFilter::FilterOptions::showPortsMsgs,
                                                         SCAM::LoggerFilter::FilterOptions::showFunctionMsgs}
     );
-    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
     //Create model
     ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
     // write log messages to all sinks

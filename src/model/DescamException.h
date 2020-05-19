@@ -2,8 +2,8 @@
 // Created by mi-alkoudsi on 31.03.20.
 //
 
-#ifndef DESCAM_STMTEXCEPTION_H
-#define DESCAM_STMTEXCEPTION_H
+#ifndef DESCAM_DESCAMEXCEPTION_H
+#define DESCAM_DESCAMEXCEPTION_H
 
 #include <exception>
 #include <string>
@@ -11,14 +11,14 @@
 
 namespace SCAM {
 
-    class StmtException : public std::exception {
+    class DescamException : public std::exception {
     public:
 
         /** Creates the exception with a default message */
-        StmtException(std::string message, LocationInfo stmtLocationInfo) noexcept;
+        DescamException(std::string message, LocationInfo stmtLocationInfo) noexcept;
 
         /** Destructs the exception */
-        ~StmtException() noexcept override = default;;
+        ~DescamException() noexcept override = default;;
 
         /** Returns the message describing the cause of the exception */
         const char *what() const noexcept override;
@@ -36,14 +36,14 @@ namespace SCAM {
     };
 
 /** A macro wrapping try catch blocks for handling StmtExceptions */
-#define ASSERT_STMT(x)                                            \
+#define DESCAM_ASSERT(x)                                          \
     try {                                                          \
     x;                                                              \
     }                                                                \
-    CATCH_STMT_EXCEPTION()
+    CATCH_DESCAM_EXCEPTION()
 
-#define CATCH_STMT_EXCEPTION()                                       \
-   catch (SCAM::StmtException& err) {                                       \
+#define CATCH_DESCAM_EXCEPTION()                                     \
+   catch (SCAM::DescamException& err) {                               \
     auto msg = std::string(err.what());                                \
     auto sl = SCAM::LoggerMsg::SeverityLevel::Error;                    \
     auto vt = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
@@ -54,4 +54,4 @@ namespace SCAM {
     SCAM::Logger::setTerminate();                                             \
     }
 }
-#endif //DESCAM_STMTEXCEPTION_H
+#endif //DESCAM_DESCAMEXCEPTION_H

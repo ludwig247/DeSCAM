@@ -5,19 +5,19 @@
 #include <PrintStmt.h>
 #include "Cast.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype, LocationInfo stmtLocationInfo) :
         Expr(toDatatype),
         expr(expr) {
     this->stmtLocationInfo = stmtLocationInfo;
-    if (expr == nullptr) throw SCAM::StmtException("Cast: expr is null!",this->stmtLocationInfo);
-    if (expr->getDataType() == toDatatype) throw SCAM::StmtException("No cast necessary -> same datatype. Remove static_cast",this->stmtLocationInfo);
+    if (expr == nullptr) throw SCAM::DescamException("Cast: expr is null!",this->stmtLocationInfo);
+    if (expr->getDataType() == toDatatype) throw SCAM::DescamException("No cast necessary -> same datatype. Remove static_cast",this->stmtLocationInfo);
     if (!expr->getDataType()->isUnsigned() && !expr->getDataType()->isInteger()) {
-        throw SCAM::StmtException("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed",this->stmtLocationInfo);
+        throw SCAM::DescamException("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed",this->stmtLocationInfo);
     }
     if (!toDatatype->isUnsigned() && !toDatatype->isInteger()) {
-        throw SCAM::StmtException("Cast only to unsigned or int",this->stmtLocationInfo);
+        throw SCAM::DescamException("Cast only to unsigned or int",this->stmtLocationInfo);
     }
 }
 

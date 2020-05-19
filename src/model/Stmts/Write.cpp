@@ -5,7 +5,7 @@
 #include <PrintStmt.h>
 #include "Write.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 namespace SCAM {
 
@@ -15,7 +15,7 @@ namespace SCAM {
             Communication(portOperand, is_non_blocking_access) {
         this->stmtLocationInfo = std::move(stmtLocationInfo);
         if (portOperand->getDataType() != value->getDataType()) {
-            throw SCAM::StmtException("Port " + portOperand->getName() + " and Value '" + PrintStmt::toString(value) + "' are not of the same datatype",this->stmtLocationInfo);
+            throw SCAM::DescamException("Port " + portOperand->getName() + " and Value '" + PrintStmt::toString(value) + "' are not of the same datatype",this->stmtLocationInfo);
         }
     }
 

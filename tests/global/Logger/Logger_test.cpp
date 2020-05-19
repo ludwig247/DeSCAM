@@ -1,6 +1,6 @@
 #include "Logger_test.h"
 #include "Stmts_all.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 TEST_F(Logger_test, LoggerMsg_SettersGetters) {
     std::string fileDir = "fileDir/file.txt",
@@ -14,7 +14,7 @@ TEST_F(Logger_test, LoggerMsg_SettersGetters) {
     auto locationInfo = msg.getLocationInfo();
     ASSERT_EQ(msg.getMessage(), message) << "LoggerMsg.getMessage() failed\n";
     ASSERT_EQ(locationInfo.getFile(), fileDir) << "LoggerMsg.getLocationInfo().getFile() failed\n";
-    ASSERT_EQ(locationInfo.getStmt(), statement) << "LoggerMsg.getLocationInfo().getStatement() failed\n";
+    ASSERT_EQ(locationInfo.getObject(), statement) << "LoggerMsg.getLocationInfo().getObject() failed\n";
     ASSERT_EQ(locationInfo.getRowStartNumber(), 1) << "LoggerMsg.getLocationInfo().getRowStartNumber() failed\n";
     ASSERT_EQ(locationInfo.getRowEndNumber(), 2) << "LoggerMsg.getLocationInfo().getRowEndNumber() failed\n";
     ASSERT_EQ(locationInfo.getColumnStartNumber(), 3) << "LoggerMsg.getLocationInfo().getColumnStartNumber() failed\n";
@@ -31,14 +31,14 @@ TEST_F(Logger_test, Logger_add_clear_msgs) {
 }
 
 TEST_F(Logger_test, Logger_text_format_JSON) {
-    auto formatedString = SCAM::LoggerFormatter::formatMessages(msgsVector, SCAM::LoggerFormatter::FormatOptions::JSON);
+    auto formatedString = SCAM::LoggerFormatter::formatMessages(msgsVector, SCAM::LoggerFormatter::FormatOption::JSON);
     std::string refContent;
     GET_CONTENT_FROM_FILE("TextFormater.JSON", refContent)
     ASSERT_EQ(refContent, formatedString) << "Text formatter with option JSON failed\n";
 }
 
 TEST_F(Logger_test, Logger_text_format_Normal) {
-    auto formatedString = SCAM::LoggerFormatter::formatMessages(msgsVector, SCAM::LoggerFormatter::FormatOptions::Normal);
+    auto formatedString = SCAM::LoggerFormatter::formatMessages(msgsVector, SCAM::LoggerFormatter::FormatOption::TEXT);
     std::string refContent;
     GET_CONTENT_FROM_FILE("TextFormater.txt", refContent)
     ASSERT_EQ(refContent, formatedString) << "Text formatter with option JSON failed\n";
@@ -100,8 +100,9 @@ TEST_F(Logger_test, Logger_msg_filter) {
 
 TEST_F(Logger_test, Logger_log_filter_out_global) {
     std::string logDir = SCAM_HOME"/tests/global/Logger/ref_files/";
-    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>(logDir, false));
-    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
+    auto fileSink = std::make_shared<SCAM::FileSink>(logDir, false);
+    fileSink->setFormatOption(SCAM::LoggerFormatter::FormatOption::JSON);
+    SCAM::Logger::addSink(fileSink);
     SCAM::Logger::setFilteringOptions(
             std::set<SCAM::LoggerFilter::FilterOptions>{SCAM::LoggerFilter::FilterOptions::showAllMsgs});
     for (auto msg : msgsVector) {
@@ -115,7 +116,7 @@ TEST_F(Logger_test, Logger_log_filter_out_global) {
     FilterOptionsSet_NoGlobalConstants(filterOptionsSet)
     auto filteredMessagesVector = SCAM::LoggerFilter::applyFilters(msgsVector, filterOptionsSet);
     std::string formatedOutput = SCAM::LoggerFormatter::formatMessages(filteredMessagesVector,
-                                                                       SCAM::LoggerFormatter::FormatOptions::JSON), logsFileContent;
+                                                                       SCAM::LoggerFormatter::FormatOption::JSON), logsFileContent;
     GET_CONTENT_FROM_FILE("LOGS.JSON", logsFileContent)
     ASSERT_EQ(logsFileContent, formatedOutput);
     SCAM::Logger::clear();
@@ -124,8 +125,9 @@ TEST_F(Logger_test, Logger_log_filter_out_global) {
 
 TEST_F(Logger_test, Logger_log_filter_out_global_2) {
     std::string logDir = SCAM_HOME"/tests/global/Logger/ref_files/";
-    SCAM::Logger::addSink(std::make_shared<SCAM::FileSink>(logDir, false));
-    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
+    auto fileSink = std::make_shared<SCAM::FileSink>(logDir, false);
+    fileSink->setFormatOption(SCAM::LoggerFormatter::FormatOption::JSON);
+    SCAM::Logger::addSink(fileSink);
     SCAM::Logger::setFilteringOptions(
             std::set<SCAM::LoggerFilter::FilterOptions>{SCAM::LoggerFilter::FilterOptions::showAllMsgs});
     for (auto msg : msgsVector) {
@@ -145,7 +147,7 @@ TEST_F(Logger_test, Logger_log_filter_out_global_2) {
     FilterOptionsSet_NoGlobalConstants(filterOptionsSet)
     auto filteredMessagesVector = SCAM::LoggerFilter::applyFilters(msgsVector, filterOptionsSet);
     std::string formatedOutput = SCAM::LoggerFormatter::formatMessages(filteredMessagesVector,
-                                                                       SCAM::LoggerFormatter::FormatOptions::JSON), logsFileContent;
+                                                                       SCAM::LoggerFormatter::FormatOption::JSON), logsFileContent;
     GET_CONTENT_FROM_FILE("LOGS.JSON", logsFileContent)
     ASSERT_EQ(logsFileContent, formatedOutput);
     SCAM::Logger::clear();
@@ -164,10 +166,10 @@ TEST_F(Logger_test, Logger_stmt_exception_in_behavior) {
     SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation::Behavior);
     auto integerVal = new SCAM::IntegerValue(2);
     auto unsignedVal = new SCAM::UnsignedValue(2);
-    ASSERT_THROW(new SCAM::Arithmetic(integerVal,"+",unsignedVal),SCAM::StmtException);
-    ASSERT_NO_THROW(ASSERT_STMT(new SCAM::Arithmetic(integerVal,"+",unsignedVal)));
+    ASSERT_THROW(new SCAM::Arithmetic(integerVal,"+",unsignedVal),SCAM::DescamException);
+    ASSERT_NO_THROW(DESCAM_ASSERT(new SCAM::Arithmetic(integerVal, "+", unsignedVal)));
     ASSERT_EQ(SCAM::Logger::isTerminate(), true) << "Logger Terminate flag should be set after a stmt exception in behavior occurs\n";
-    ASSERT_EQ(SCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after StmtException and processedLocation is Behavior";
+    ASSERT_EQ(SCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after DescamException and processedLocation is Behavior";
     SCAM::Logger::resetTerminate();
     SCAM::Logger::clear();
 }
@@ -176,10 +178,10 @@ TEST_F(Logger_test, Logger_stmt_exception_in_functions) {
     SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation::Functions);
     auto integerVal = new SCAM::IntegerValue(2);
     auto unsignedVal = new SCAM::UnsignedValue(2);
-    ASSERT_THROW(new SCAM::Arithmetic(integerVal,"+",unsignedVal),SCAM::StmtException);
-    ASSERT_NO_THROW(ASSERT_STMT(new SCAM::Arithmetic(integerVal,"+",unsignedVal)));
+    ASSERT_THROW(new SCAM::Arithmetic(integerVal,"+",unsignedVal),SCAM::DescamException);
+    ASSERT_NO_THROW(DESCAM_ASSERT(new SCAM::Arithmetic(integerVal, "+", unsignedVal)));
     ASSERT_EQ(SCAM::Logger::isTerminate(), false) << "Logger Terminate flag was set after a stmt exception in functions!\n";
-    ASSERT_EQ(SCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after StmtException and processedLocation is Behavior";
+    ASSERT_EQ(SCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after DescamException and processedLocation is Behavior";
     SCAM::Logger::clear();
 }
 
@@ -188,11 +190,11 @@ TEST_F(Logger_test, Logger_stmt_exception_during_global_constants) {
     SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation::GlobalConstants);
     auto integerVal = new SCAM::IntegerValue(2);
     auto unsignedVal = new SCAM::UnsignedValue(2);
-    ASSERT_NO_THROW(ASSERT_STMT(new SCAM::Arithmetic(integerVal,"+",unsignedVal)));
+    ASSERT_NO_THROW(DESCAM_ASSERT(new SCAM::Arithmetic(integerVal, "+", unsignedVal)));
     ASSERT_EQ(SCAM::Logger::isTerminate(), false) << "terminate flag was set during the processing of global constants\n";
     // the error message now is added to TempVector of the logger, we tag it with a variable or function name
     SCAM::Logger::tagTempMsgs("globalConstantVarOrFunc");
-    ASSERT_EQ(SCAM::Logger::getTempMsgsMap().at("globalConstantVarOrFunc").size(),1) << "Error message was not added to TempMsgsMap after StmtException and processedLocation is GlobalConstants";
+    ASSERT_EQ(SCAM::Logger::getTempMsgsMap().at("globalConstantVarOrFunc").size(),1) << "Error message was not added to TempMsgsMap after DescamException and processedLocation is GlobalConstants";
     SCAM::Logger::clear();
 }
 

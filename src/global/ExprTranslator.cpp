@@ -5,7 +5,7 @@
 
 #include "ExprTranslator.h"
 #include "ModelGlobal.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 
 //
@@ -106,10 +106,10 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             if (this->unsigned_flag) {
                 unsigned int value = z3_expr_intern.get_numeral_int64();
                 if (value > 4294967295) TERMINATE("Result of unsigned computation is > 2^32-1");
-                ASSERT_STMT(returnExpr = new SCAM::UnsignedValue(value))
+                DESCAM_ASSERT(returnExpr = new SCAM::UnsignedValue(value))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
-                ASSERT_STMT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_int()))
+                DESCAM_ASSERT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_int()))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             }
         };
@@ -118,27 +118,27 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             if (this->unsigned_flag) {
                 unsigned int value = z3_expr_intern.get_numeral_int64();
                 if (value > 4294967295) TERMINATE("Result of unsigned computation is > 2^32-1");
-                ASSERT_STMT(returnExpr = new SCAM::UnsignedValue(value))
+                DESCAM_ASSERT(returnExpr = new SCAM::UnsignedValue(value))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
                 //z3 doesn't translate a bitvector back into a signed integer, always interprets it unsigned
                 if (z3_expr_intern.get_numeral_uint() > 2147483647) {
-                    ASSERT_STMT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_uint() - 4294967296))
+                    DESCAM_ASSERT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_uint() - 4294967296))
                     CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 } else {
-                    ASSERT_STMT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_int()))
+                    DESCAM_ASSERT(returnExpr = new SCAM::IntegerValue(z3_expr_intern.get_numeral_int()))
                     CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 }
             }
         }
         //boolean value
         if (symbolname == "true") {
-            ASSERT_STMT(returnExpr = new SCAM::BoolValue(true))
+            DESCAM_ASSERT(returnExpr = new SCAM::BoolValue(true))
             CHECK_EXCEPTION_AND_RETURN(returnExpr)
 
         }
         if (symbolname == "false") {
-            ASSERT_STMT(returnExpr = new SCAM::BoolValue(false))
+            DESCAM_ASSERT(returnExpr = new SCAM::BoolValue(false))
             CHECK_EXCEPTION_AND_RETURN(returnExpr)
         }
 
@@ -147,7 +147,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             if (type.second->isEnumType()) {
                 for (auto &&enumValPair : type.second->getEnumValueMap()) {
                     if (enumValPair.first == symbolname) {
-                        ASSERT_STMT(returnExpr = new SCAM::EnumValue(symbolname, type.second))
+                        DESCAM_ASSERT(returnExpr = new SCAM::EnumValue(symbolname, type.second))
                         CHECK_EXCEPTION_AND_RETURN(returnExpr)
                     }
                 }
@@ -158,7 +158,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 if (type.second->isEnumType()) {
                     for (auto &&enumValPair : type.second->getEnumValueMap()) {
                         if (enumValPair.first == symbolname) {
-                            ASSERT_STMT(returnExpr = new SCAM::EnumValue(symbolname, type.second))
+                            DESCAM_ASSERT(returnExpr = new SCAM::EnumValue(symbolname, type.second))
                             CHECK_EXCEPTION_AND_RETURN(returnExpr)
                         }
                     }
@@ -179,7 +179,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
 //        }
         //Variable operand
         if (module->isVariable(symbolname)) {
-            ASSERT_STMT(returnExpr = new VariableOperand(module->getVariable(symbolname)))
+            DESCAM_ASSERT(returnExpr = new VariableOperand(module->getVariable(symbolname)))
             CHECK_EXCEPTION_AND_RETURN(returnExpr)
         }
 
@@ -194,7 +194,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 //Compound type port: multiple subsignals
                 for (auto subSig: port.second->getDataSignal()->getSubVarList()) {
                     if (symbolname == port.first + "_dataXYZ_" + subSig->getName()) {
-                        ASSERT_STMT(returnExpr = new DataSignalOperand(subSig))
+                        DESCAM_ASSERT(returnExpr = new DataSignalOperand(subSig))
                         CHECK_EXCEPTION_AND_RETURN(returnExpr)
                     }
                 }
@@ -202,7 +202,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 //Built-in type ports
                 if (symbolname == port.first + "_dataXYZ") {
                     this->unsigned_flag = port.second->getDataSignal()->getDataType()->isUnsigned();
-                    ASSERT_STMT(returnExpr = new DataSignalOperand(port.second->getDataSignal()))
+                    DESCAM_ASSERT(returnExpr = new DataSignalOperand(port.second->getDataSignal()))
                     CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 }
             }
@@ -217,7 +217,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
 
         auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
         if (globalVars.find(symbolname) != globalVars.end()) {
-            ASSERT_STMT(returnExpr = new VariableOperand(globalVars.find(symbolname)->second))
+            DESCAM_ASSERT(returnExpr = new VariableOperand(globalVars.find(symbolname)->second))
             CHECK_EXCEPTION_AND_RETURN(returnExpr)
         }
         //NOTHING found!
@@ -233,8 +233,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 z3::expr lhs = z3_expr_intern.arg(0);
                 this->unsigned_flag = translate_intern(lhs)->getDataType()->isUnsigned();
                 z3::expr rhs = z3_expr_intern.arg(1);
-                ASSERT_STMT(returnExpr = new SCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper),
-                                                              translate_intern(rhs)))
+                DESCAM_ASSERT(returnExpr = new SCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper),
+                                                                translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else TERMINATE("Expecte 2 arguments for " + oper);
         } else if (logicalOperatorMap.find(oper) != logicalOperatorMap.end()) {
@@ -245,12 +245,12 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             z3::expr first = z3_expr_intern.arg(0);
             z3::expr second = z3_expr_intern.arg(1);
             SCAM::Logical *multiple = nullptr;
-            ASSERT_STMT(multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper),
-                                                     translate_intern(second)))
+            DESCAM_ASSERT(multiple = new SCAM::Logical(translate_intern(first), logicalOperatorMap.at(oper),
+                                                       translate_intern(second)))
 
             for (unsigned int i = 2; i < z3_expr_intern.num_args(); ++i) {
                 z3::expr next = z3_expr_intern.arg(i);
-                ASSERT_STMT(multiple = new SCAM::Logical(multiple, logicalOperatorMap.at(oper), translate_intern(next)))
+                DESCAM_ASSERT(multiple = new SCAM::Logical(multiple, logicalOperatorMap.at(oper), translate_intern(next)))
             }
             CHECK_EXCEPTION_AND_RETURN(multiple)
         } else if (unaryOperatorMap.find(oper) != unaryOperatorMap.end()) {
@@ -259,24 +259,24 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                     TERMINATE(
                             "ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
                 z3::expr rhs = z3_expr_intern.arg(0);
-                ASSERT_STMT(returnExpr = new SCAM::UnaryExpr("not", translate_intern(rhs)))
+                DESCAM_ASSERT(returnExpr = new SCAM::UnaryExpr("not", translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else if (oper == "bvnot") { // UNARY
                 if (z3_expr_intern.num_args() != 1)
                     TERMINATE(
                             "ExprTranslator : translate z3::expr to SCAM::Expr, operator not, expected 1 argument");
                 z3::expr rhs = z3_expr_intern.arg(0);
-                ASSERT_STMT(returnExpr = new SCAM::UnaryExpr("~", translate_intern(rhs)))
+                DESCAM_ASSERT(returnExpr = new SCAM::UnaryExpr("~", translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else if (oper == "-") { //NOTE: can be unary or binary, check num_arg
                 if (z3_expr_intern.num_args() == 2) {
                     z3::expr lhs = z3_expr_intern.arg(0);
                     z3::expr rhs = z3_expr_intern.arg(1);
-                    ASSERT_STMT(returnExpr = new SCAM::Arithmetic(translate_intern(lhs), "-", translate_intern(rhs)))
+                    DESCAM_ASSERT(returnExpr = new SCAM::Arithmetic(translate_intern(lhs), "-", translate_intern(rhs)))
                     CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 } else if (z3_expr_intern.num_args() == 1) {
                     z3::expr rhs = z3_expr_intern.arg(0);
-                    ASSERT_STMT(returnExpr = new SCAM::UnaryExpr("-", translate_intern(rhs)))
+                    DESCAM_ASSERT(returnExpr = new SCAM::UnaryExpr("-", translate_intern(rhs)))
                     CHECK_EXCEPTION_AND_RETURN(returnExpr)
                 } else
                     TERMINATE(
@@ -291,11 +291,11 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             z3::expr second = z3_expr_intern.arg(1);
 
             SCAM::Arithmetic *multiple = nullptr;
-            ASSERT_STMT(multiple = new SCAM::Arithmetic(translate_intern(first), arithOperatorMap.at(oper),
-                                                        translate_intern(second)))
+            DESCAM_ASSERT(multiple = new SCAM::Arithmetic(translate_intern(first), arithOperatorMap.at(oper),
+                                                          translate_intern(second)))
             for (unsigned int i = 2; i < z3_expr_intern.num_args(); ++i) {
                 z3::expr next = z3_expr_intern.arg(i);
-                ASSERT_STMT(
+                DESCAM_ASSERT(
                         multiple = new SCAM::Arithmetic(multiple, arithOperatorMap.at(oper), translate_intern(next)))
             }
             CHECK_EXCEPTION_AND_RETURN(multiple)
@@ -303,8 +303,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             if (z3_expr_intern.num_args() == 2) {
                 z3::expr lhs = z3_expr_intern.arg(0);
                 z3::expr rhs = z3_expr_intern.arg(1);
-                ASSERT_STMT(returnExpr = new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper),
-                                                        translate_intern(rhs)))
+                DESCAM_ASSERT(returnExpr = new SCAM::Arithmetic(translate_intern(lhs), bvArithOperatorMap.at(oper),
+                                                                translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
                 //std::cout << z3_expr_intern << std::endl;
@@ -314,8 +314,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
             if (z3_expr_intern.num_args() == 2) {
                 z3::expr lhs = z3_expr_intern.arg(0);
                 z3::expr rhs = z3_expr_intern.arg(1);
-                ASSERT_STMT(returnExpr = new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper),
-                                                     translate_intern(rhs)))
+                DESCAM_ASSERT(returnExpr = new SCAM::Bitwise(translate_intern(lhs), bvBitwiseOperatorMap.at(oper),
+                                                             translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else {
                 //std::cout << z3_expr_intern << std::endl;
@@ -328,8 +328,8 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 if (oper == "bvule") this->unsigned_flag = true;
                 if (oper == "bvsle") this->unsigned_flag = false;
 
-                ASSERT_STMT(returnExpr = new SCAM::Relational(translate_intern(lhs), bvRelationalOperatorMap.at(oper),
-                                                        translate_intern(rhs)))
+                DESCAM_ASSERT(returnExpr = new SCAM::Relational(translate_intern(lhs), bvRelationalOperatorMap.at(oper),
+                                                                translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else TERMINATE("ExprTranslator : translate z3::expr to SCAM::Expr expected 2 arguments");
         } else if (oper == "concat") {
@@ -352,7 +352,7 @@ SCAM::Expr *SCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_inter
                 auto cond = translate_intern(z3_expr_intern.arg(0));
                 auto trueExpr = translate_intern(z3_expr_intern.arg(1));
                 auto falseExpr = translate_intern(z3_expr_intern.arg(2));
-                ASSERT_STMT(returnExpr = new Ternary(cond, trueExpr, falseExpr))
+                DESCAM_ASSERT(returnExpr = new Ternary(cond, trueExpr, falseExpr))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
             } else if ((simplifiedITE.num_args() == 0)) {
                 return translate_intern(simplifiedITE);

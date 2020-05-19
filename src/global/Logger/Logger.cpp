@@ -50,34 +50,25 @@ void SCAM::Logger::addSink(std::shared_ptr<SCAM::LoggerSink> sink) {
     Logger::getInstance().sinksVector.emplace_back(sink);
 }
 
-void SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions formatOptions) {
-    Logger::getInstance().formatOptions = formatOptions;
-}
-
-
 void SCAM::Logger::log() {
     addTempMsgsToLogger();
     auto msgsVector = LoggerFilter::applyFilters(Logger::getInstance().msgsVector,
                                                  Logger::getInstance().filterOptions);
     auto sinkVector = Logger::getInstance().sinksVector;
     if (!sinkVector.empty() && !msgsVector.empty()) {
-        auto formattedOutput = SCAM::LoggerFormatter::formatMessages(msgsVector, Logger::getInstance().formatOptions);
         for (auto sinkPtr = sinkVector.begin(); sinkPtr != sinkVector.end(); sinkPtr++) {
             if (auto sink = sinkPtr->get()) {
+                auto formattedOutput = SCAM::LoggerFormatter::formatMessages(msgsVector, sink->getFormatOtion());
                 if (auto fileSink = dynamic_cast<SCAM::FileSink *>(sink)) {
-                    if (Logger::getInstance().formatOptions == LoggerFormatter::FormatOptions::JSON) {
-                        fileSink->setGeneratedFileType("JSON");
+                    fileSink->setGeneratedFileType(SCAM::LoggerFormatter::getFormatFileType(sink->getFormatOtion()));
                         fileSink->print(formattedOutput);
-                    }
                 } else {
                     //console sink
                     if (Logger::getInstance().printDecorativeFrames)
                         std::cout
                                 << "\033[1;31m<---------------------------- Logger ------------------------------->\033[0m"
                                 << std::endl;
-
                     sink->print(formattedOutput);
-
                     if (Logger::getInstance().printDecorativeFrames)
                         std::cout
                                 << "\033[1;31m---------------------------------------------------------------------\033[0m"
