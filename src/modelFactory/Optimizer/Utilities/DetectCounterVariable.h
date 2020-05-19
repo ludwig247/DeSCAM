@@ -11,7 +11,7 @@
 #include "ExprVisitor.h"
 #include <utility>
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Checks if a variable assigns itself and whether its value increments, decrements or not known
@@ -19,7 +19,7 @@ namespace SCAM {
      * \author: mi-alkoudsi
      * \input:
      *      - std::string variableName;
-     *      - SCAM::Expr *expr;
+     *      - DESCAM::Expr *expr;
      * \output:
      *      - bool isCounterVariable;
      *      - bool isVariableIncrements;

@@ -6,7 +6,7 @@
 #include "PrintStmt.h"
 #include "PropertySuiteHelper.h"
 
-using namespace SCAM::HLSPlugin;
+using namespace DESCAM::HLSPlugin;
 
 PropertySuiteHelper::PropertySuiteHelper(PropertySuite const& propertySuite) :
     PropertySuite(propertySuite)
@@ -41,9 +41,9 @@ void PropertySuiteHelper::addWaitProperties() {
     }
 }
 
-std::vector<SCAM::Assignment *> PropertySuiteHelper::getNotifyStatements(std::shared_ptr<Property> property) const
+std::vector<DESCAM::Assignment *> PropertySuiteHelper::getNotifyStatements(std::shared_ptr<Property> property) const
 {
-    std::vector<SCAM::Assignment *> assignmentList;
+    std::vector<DESCAM::Assignment *> assignmentList;
     auto temporalExprs = property->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
         auto timePoint = PrintStmt::toString(temporalExpr->getTimepointList().back());
@@ -60,8 +60,8 @@ std::vector<SCAM::Assignment *> PropertySuiteHelper::getNotifyStatements(std::sh
     return assignmentList;
 }
 
-std::vector<SCAM::Assignment *> PropertySuiteHelper::getResetStatements() {
-    std::vector<SCAM::Assignment *> assignmentList;
+std::vector<DESCAM::Assignment *> PropertySuiteHelper::getResetStatements() {
+    std::vector<DESCAM::Assignment *> assignmentList;
     auto temporalExprs = getResetProperty()->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
         if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {

@@ -12,7 +12,7 @@
 #include "PrintBitOperations.h"
 #include "Utilities.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 PrintFunction::PrintFunction(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->createString(stmt, indentSize, indentOffset);
@@ -370,12 +370,12 @@ void PrintFunction::visit(UnaryExpr &node) {
     this->ss << ")";
 }
 
-void PrintFunction::visit(SCAM::SyncSignal& node)
+void PrintFunction::visit(DESCAM::SyncSignal& node)
 {
     this->ss << node.getPort()->getName() << "_sync";
 }
 
-void PrintFunction::visit(SCAM::ParamOperand& node)
+void PrintFunction::visit(DESCAM::ParamOperand& node)
 {
     if (arithmeticOp) {
         if (node.getDataType()->isInteger()) {

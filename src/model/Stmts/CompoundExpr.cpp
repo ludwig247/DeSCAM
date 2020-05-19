@@ -9,17 +9,17 @@
 #include "DescamException.h"
 
 
-namespace SCAM {
-    CompoundExpr::CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType, LocationInfo stmtLocationInfo) :
+namespace DESCAM {
+    CompoundExpr::CompoundExpr(std::map<std::string, DESCAM::Expr *> valueMap, const DataType *dataType, LocationInfo stmtLocationInfo) :
             valueMap(valueMap),
             Expr(dataType) {
         this->stmtLocationInfo = std::move(stmtLocationInfo);
-        if (!dataType->isCompoundType()) throw SCAM::DescamException(dataType->getName() + " is not a compound type",this->stmtLocationInfo);
+        if (!dataType->isCompoundType()) throw DESCAM::DescamException(dataType->getName() + " is not a compound type",this->stmtLocationInfo);
         for (auto subsig: dataType->getSubVarMap()) {
-            if (valueMap.find(subsig.first) == valueMap.end()) throw SCAM::DescamException(subsig.first + "is not in the value map",this->stmtLocationInfo);
+            if (valueMap.find(subsig.first) == valueMap.end()) throw DESCAM::DescamException(subsig.first + "is not in the value map",this->stmtLocationInfo);
             if (valueMap.find(subsig.first) != valueMap.end()) {
                 if (valueMap.find(subsig.first)->second->getDataType() != subsig.second) {
-                    throw SCAM::DescamException(subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first,this->stmtLocationInfo);
+                    throw DESCAM::DescamException(subsig.first + "has not the same datatype as " + valueMap.find(subsig.first)->first,this->stmtLocationInfo);
                 }
             }
         }

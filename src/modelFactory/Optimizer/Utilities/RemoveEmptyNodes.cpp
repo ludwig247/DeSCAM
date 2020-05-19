@@ -6,7 +6,7 @@
 
 
 
-SCAM::RemoveEmptyNodes::RemoveEmptyNodes(std::map<int, SCAM::CfgBlock *> CFG) : blockCFG(std::move(CFG)) {
+DESCAM::RemoveEmptyNodes::RemoveEmptyNodes(std::map<int, DESCAM::CfgBlock *> CFG) : blockCFG(std::move(CFG)) {
     for (auto node : this->blockCFG) {
         if (!node.second->hasTerminator() && node.second->getStmtList().empty()) {
             if (node.first == 0 || node.second->getPredecessorList().size() > 2) {
@@ -29,12 +29,12 @@ SCAM::RemoveEmptyNodes::RemoveEmptyNodes(std::map<int, SCAM::CfgBlock *> CFG) : 
 
 }
 
-const std::map<int, SCAM::CfgBlock *> &SCAM::RemoveEmptyNodes::getNewBlockCFG() const {
+const std::map<int, DESCAM::CfgBlock *> &DESCAM::RemoveEmptyNodes::getNewBlockCFG() const {
     return this->blockCFG;
 }
 
 
-void SCAM::RemoveEmptyNodes::removeNullStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId) {
+void DESCAM::RemoveEmptyNodes::removeNullStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId) {
     auto cfgBlock = this->blockCFG.at(nodeId);
     std::vector<bool> alreadyReplacedPredecessorInSuccessorIndicatorVector(
             this->blockCFG.at(nodeId)->getSuccessorList().size(), false);
@@ -60,8 +60,8 @@ void SCAM::RemoveEmptyNodes::removeNullStatementAndReplaceItInPredecessorsAndSuc
 }
 
 void
-SCAM::RemoveEmptyNodes::removeOrReplacePredecessorInSuccessor(SCAM::CfgBlock *cfgBlock, SCAM::CfgBlock *Predecessor,
-                                                              SCAM::CfgBlock *successor) {
+DESCAM::RemoveEmptyNodes::removeOrReplacePredecessorInSuccessor(DESCAM::CfgBlock *cfgBlock, DESCAM::CfgBlock *Predecessor,
+                                                              DESCAM::CfgBlock *successor) {
     bool predAlreadyInSuccPredList = false;
     for (auto predInSuc : successor->getPredecessorList()) {
         if (predInSuc == Predecessor) {
@@ -76,8 +76,8 @@ SCAM::RemoveEmptyNodes::removeOrReplacePredecessorInSuccessor(SCAM::CfgBlock *cf
 }
 
 void
-SCAM::RemoveEmptyNodes::removeOrReplaceSuccessorInPredecessor(SCAM::CfgBlock *cfgBlock, SCAM::CfgBlock *successor,
-                                                              SCAM::CfgBlock *Predecessor) {
+DESCAM::RemoveEmptyNodes::removeOrReplaceSuccessorInPredecessor(DESCAM::CfgBlock *cfgBlock, DESCAM::CfgBlock *successor,
+                                                              DESCAM::CfgBlock *Predecessor) {
     bool succAlreadyInPredSuccList = false;
     for (auto succInPred : Predecessor->getSuccessorList()) {
         if (succInPred == successor) {

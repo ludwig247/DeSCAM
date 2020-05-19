@@ -8,11 +8,11 @@
 #include "Logger/Logger.h"
 
 
-SCAM::FindFunctions::FindFunctions(clang::CXXRecordDecl *recordDecl) {
+DESCAM::FindFunctions::FindFunctions(clang::CXXRecordDecl *recordDecl) {
         TraverseDecl(recordDecl);
 }
 
-bool SCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
+bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
 
     if(methodDecl->isConst()){
         std::string name = methodDecl->getName().str();
@@ -40,11 +40,11 @@ bool SCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
 
 }
 
-const std::map<std::string, clang::CXXMethodDecl*> &SCAM::FindFunctions::getFunctionMap() const {
+const std::map<std::string, clang::CXXMethodDecl*> &DESCAM::FindFunctions::getFunctionMap() const {
     return functionMap;
 }
 
-std::string SCAM::FindFunctions::clangToScamType(clang::QualType qualType) {
+std::string DESCAM::FindFunctions::clangToScamType(clang::QualType qualType) {
     auto return_type = qualType.getAsString();
     if(qualType->isRecordType()){
         return_type = qualType->getAsCXXRecordDecl()->getName();
@@ -61,15 +61,15 @@ std::string SCAM::FindFunctions::clangToScamType(clang::QualType qualType) {
     return return_type;
 }
 
-const std::map<std::string, std::string> &SCAM::FindFunctions::getFunctionReturnTypeMap() const {
+const std::map<std::string, std::string> &DESCAM::FindFunctions::getFunctionReturnTypeMap() const {
     return functionReturnTypeMap;
 }
 
-const std::map<std::string, std::vector<std::string>> &SCAM::FindFunctions::getFunctionParamNameMap() const {
+const std::map<std::string, std::vector<std::string>> &DESCAM::FindFunctions::getFunctionParamNameMap() const {
     return functionParamNameMap;
 }
 
-const std::map<std::string, std::vector<std::string>> &SCAM::FindFunctions::getFunctionParamTypeMap() const {
+const std::map<std::string, std::vector<std::string>> &DESCAM::FindFunctions::getFunctionParamTypeMap() const {
     return functionParamTypeMap;
 }
 

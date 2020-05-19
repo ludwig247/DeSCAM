@@ -14,13 +14,13 @@
 #include "Optimizer/Utilities/DetectCounterVariable.h"
 #include <utility>
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Analyzes counter variable values margins
         * \author:mi-alkoudsi
         * \inputs:
         *       - std::set<std::string> counterVariablesSet;
-        *       - std::map<int, SCAM::CfgNode *> CFG;
+        *       - std::map<int, DESCAM::CfgNode *> CFG;
         * \outputs:
         *       - std::map<std::string, std::string> marginalValuesMap;
         */

@@ -21,7 +21,7 @@
 #include "Expr.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
 /*!
  * \brief A singelton that stores and reports logging messages during the creation of the SystemC PPA model
@@ -41,7 +41,7 @@ namespace SCAM {
 
         static void clear();
 
-        static void addSink(std::shared_ptr<SCAM::LoggerSink> sink);
+        static void addSink(std::shared_ptr<DESCAM::LoggerSink> sink);
 
         static void setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions);
 
@@ -59,7 +59,7 @@ namespace SCAM {
 
 #ifdef DEBUG_LOGGER
         static const std::unordered_map<std::string, std::vector<LoggerMsg>>& getTempMsgsMap();
-        static const std::vector<SCAM::LoggerMsg> &getMsgsMap();
+        static const std::vector<DESCAM::LoggerMsg> &getMsgsMap();
 #endif
         //DELETED
         Logger(Logger const &) = delete;             // copy constructor is private

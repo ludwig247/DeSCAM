@@ -11,7 +11,7 @@
 #include "Stmts_all.h"
 #include "StmtAbstractVisitor.h"
 
-namespace SCAM { namespace HLSPlugin {
+namespace DESCAM { namespace HLSPlugin {
 
     class PrintArrayStatements : public StmtAbstractVisitor {
     public:

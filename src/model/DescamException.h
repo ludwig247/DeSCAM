@@ -9,7 +9,7 @@
 #include <string>
 #include "LocationInfo.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class DescamException : public std::exception {
     public:
@@ -43,15 +43,15 @@ namespace SCAM {
     CATCH_DESCAM_EXCEPTION()
 
 #define CATCH_DESCAM_EXCEPTION()                                     \
-   catch (SCAM::DescamException& err) {                               \
+   catch (DESCAM::DescamException& err) {                               \
     auto msg = std::string(err.what());                                \
-    auto sl = SCAM::LoggerMsg::SeverityLevel::Error;                    \
-    auto vt = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
-    auto pl = SCAM::Logger::getCurrentProcessedLocation();                \
-    SCAM::LoggerMsg lmsg(msg,err.getStmtLocationInfo(),sl,vt,pl);          \
-    SCAM::Logger::addMsg(lmsg);                                             \
-    if(pl == SCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
-    SCAM::Logger::setTerminate();                                             \
+    auto sl = DESCAM::LoggerMsg::SeverityLevel::Error;                    \
+    auto vt = DESCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
+    auto pl = DESCAM::Logger::getCurrentProcessedLocation();                \
+    DESCAM::LoggerMsg lmsg(msg,err.getStmtLocationInfo(),sl,vt,pl);          \
+    DESCAM::Logger::addMsg(lmsg);                                             \
+    if(pl == DESCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
+    DESCAM::Logger::setTerminate();                                             \
     }
 }
 #endif //DESCAM_DESCAMEXCEPTION_H

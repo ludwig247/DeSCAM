@@ -12,13 +12,13 @@
 #include "PrintStmt.h"
 #include "Utilities.h"
 
-namespace SCAM { namespace HLSPlugin { namespace HLS {
+namespace DESCAM { namespace HLSPlugin { namespace HLS {
 
     class PrintStatement : public PrintStmt {
 
     public:
         PrintStatement(
-                SCAM::Stmt *stmt,
+                DESCAM::Stmt *stmt,
                 std::shared_ptr<OptimizerHLS>& optimizer,
                 HLSOption hlsOption,
                 unsigned int indentSize = 2,

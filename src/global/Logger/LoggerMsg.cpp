@@ -1,7 +1,7 @@
 #include "LoggerMsg.h"
 
 
-SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::LocationInfo &stmtInfo,
+DESCAM::LoggerMsg::LoggerMsg(const std::string &message, const DESCAM::LocationInfo &stmtInfo,
                            SeverityLevel severityLevel, ViolationType violationType,
                            ProcessedLocation violationLocation) {
     setMessage(message);
@@ -11,15 +11,15 @@ SCAM::LoggerMsg::LoggerMsg(const std::string &message, const SCAM::LocationInfo 
     setProcessedLocation(violationLocation);
 }
 
-const std::string &SCAM::LoggerMsg::getMessage() {
+const std::string &DESCAM::LoggerMsg::getMessage() {
     return this->message;
 }
 
-const SCAM::LocationInfo &SCAM::LoggerMsg::getLocationInfo() {
+const DESCAM::LocationInfo &DESCAM::LoggerMsg::getLocationInfo() {
     return this->locationInfo;
 }
 
-std::string SCAM::LoggerMsg::getSeverityLevel() {
+std::string DESCAM::LoggerMsg::getSeverityLevel() {
     switch (this->severityLevel) {
         case SeverityLevel::Info :
             return "Info";
@@ -32,7 +32,7 @@ std::string SCAM::LoggerMsg::getSeverityLevel() {
     }
 }
 
-std::string SCAM::LoggerMsg::getViolationType() {
+std::string DESCAM::LoggerMsg::getViolationType() {
     switch (this->violationType) {
         case ViolationType::Syntax :
             return "Syntax";
@@ -43,32 +43,32 @@ std::string SCAM::LoggerMsg::getViolationType() {
     }
 }
 
-SCAM::LoggerMsg::ProcessedLocation SCAM::LoggerMsg::getProcessedLocation() {
+DESCAM::LoggerMsg::ProcessedLocation DESCAM::LoggerMsg::getProcessedLocation() {
     return this->processedLocation;
 }
 
 
-void SCAM::LoggerMsg::setMessage(const std::string &message) {
+void DESCAM::LoggerMsg::setMessage(const std::string &message) {
     this->message = message;
 }
 
-void SCAM::LoggerMsg::setViolationType(SCAM::LoggerMsg::ViolationType violationType) {
+void DESCAM::LoggerMsg::setViolationType(DESCAM::LoggerMsg::ViolationType violationType) {
     this->violationType = violationType;
 }
 
-void SCAM::LoggerMsg::setSeverityLevel(SCAM::LoggerMsg::SeverityLevel severityLevel) {
+void DESCAM::LoggerMsg::setSeverityLevel(DESCAM::LoggerMsg::SeverityLevel severityLevel) {
     this->severityLevel = severityLevel;
 }
 
-void SCAM::LoggerMsg::setLocationInfo(const SCAM::LocationInfo &stmtInfo) {
+void DESCAM::LoggerMsg::setLocationInfo(const DESCAM::LocationInfo &stmtInfo) {
     this->locationInfo = stmtInfo;
 }
 
-void SCAM::LoggerMsg::setProcessedLocation(SCAM::LoggerMsg::ProcessedLocation location) {
+void DESCAM::LoggerMsg::setProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation location) {
     this->processedLocation = location;
 }
 
-std::string SCAM::LoggerMsg::getProcessedLocationString() {
+std::string DESCAM::LoggerMsg::getProcessedLocationString() {
     switch (this->processedLocation) {
         case ProcessedLocation::GlobalConstants :
             return "while adding global constants";
@@ -85,7 +85,7 @@ std::string SCAM::LoggerMsg::getProcessedLocationString() {
     }
 }
 
-bool SCAM::LoggerMsg::operator==(const SCAM::LoggerMsg &other) const {
+bool DESCAM::LoggerMsg::operator==(const DESCAM::LoggerMsg &other) const {
     if (this == &other) return true;
     return this->message == other.message &&
            this->processedLocation == other.processedLocation &&

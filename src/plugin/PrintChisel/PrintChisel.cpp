@@ -27,7 +27,7 @@ std::map<std::string, std::string> PrintChisel::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintChisel::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintChisel::printModule(DESCAM::Module *node) {
 
     this->module = node;
 

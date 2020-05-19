@@ -15,7 +15,7 @@
 
 #define DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
 
-namespace SCAM {
+namespace DESCAM {
    /***
    * \brief: Propagates the value of locally constant variables
    * \author:mi-alkoudsi

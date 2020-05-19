@@ -7,7 +7,7 @@
 
 #include "PrintStmt.h"
 
-namespace SCAM { namespace HLSPlugin { namespace HLS {
+namespace DESCAM { namespace HLSPlugin { namespace HLS {
 
 class PrintFunction : public PrintStmt {
 

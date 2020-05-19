@@ -9,40 +9,40 @@
 #include "NodePeekVisitor.h"
 #include "DescamException.h"
 
-SCAM::Bitwise::Bitwise(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
+DESCAM::Bitwise::Bitwise(DESCAM::Expr *lhs, std::string operation, DESCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         operation(operation),
         rhs(rhs),
         Expr(lhs->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (operation != "<<" && operation != ">>" && operation != "&" && operation != "|" && operation != "^") {
-        throw SCAM::DescamException("Bitwise: " + operation + " not a bitwise op",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Bitwise: " + operation + " not a bitwise op",this->stmtLocationInfo);
     } else if (lhs->getDataType() != rhs->getDataType()) {
         std::string msg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs);
-        throw SCAM::DescamException(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
-    } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw SCAM::DescamException("operands must be numeric",this->stmtLocationInfo);
+        throw DESCAM::DescamException(msg + "Bitwise: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
+    } else if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw DESCAM::DescamException("operands must be numeric",this->stmtLocationInfo);
 
 }
 
-SCAM::Expr *SCAM::Bitwise::getLhs() {
+DESCAM::Expr *DESCAM::Bitwise::getLhs() {
     return lhs;
 }
 
-SCAM::Expr *SCAM::Bitwise::getRhs() {
+DESCAM::Expr *DESCAM::Bitwise::getRhs() {
     return rhs;
 }
 
 
-std::string SCAM::Bitwise::getOperation() {
+std::string DESCAM::Bitwise::getOperation() {
     return operation;
 }
 
-void SCAM::Bitwise::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Bitwise::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-bool SCAM::Bitwise::operator==(const Stmt &other) const {
+bool DESCAM::Bitwise::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekBitwise(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Bitwise *) this;

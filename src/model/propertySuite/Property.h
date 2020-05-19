@@ -12,7 +12,7 @@
 #include "PropertyConstraint.h"
 #include "Behavior/Operation.h"
 
-namespace SCAM {
+namespace DESCAM {
     template< typename T >
     class pointer_comparator : public std::binary_function< T, T, bool >
     {
@@ -26,8 +26,8 @@ namespace SCAM {
 
         // Constructor
         Property() = delete;
-        explicit Property(std::string name, const SCAM::Operation *operation);
-        explicit Property(std::string name, std::vector<const SCAM::Operation *> operationList);
+        explicit Property(std::string name, const DESCAM::Operation *operation);
+        explicit Property(std::string name, std::vector<const DESCAM::Operation *> operationList);
 
         // Name
         const std::string &getName() const;
@@ -58,7 +58,7 @@ namespace SCAM {
 
     protected:
 
-        std::vector<const SCAM::Operation *> operationList; //! Contains a reference to the abstract operations
+        std::vector<const DESCAM::Operation *> operationList; //! Contains a reference to the abstract operations
 
     private:
 

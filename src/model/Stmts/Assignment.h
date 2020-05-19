@@ -12,13 +12,13 @@
 #include "Expr.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 /**
  * \brief Object, that represents an assignment
  *
  * Assignments can only be x = y with x either a member or a varDecl ...
  */
-    class Assignment : public SCAM::Stmt {
+    class Assignment : public DESCAM::Stmt {
     public:
         Assignment(Expr *lhs, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 

@@ -14,14 +14,14 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Replaces the use of a function inside an expression with its all possible return values and stores the result in a map
         * \author:mi-alkoudsi
         * \inputs:
-        *       - std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> variablesValuesMap;
         * \outputs:
-        *       - std::map<std::string, std::set<SCAM::Expr *>> newVariablesValuesMap;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> newVariablesValuesMap;
         * \details: Replaces every function inside values in the variablesValuesMap with their returned values.
         * If any of a function' x return values rx uses a function y, y is also substituted with its return values in rx.
         * This creates a number of return values that replace rx in function x inside the newVariableValuesMap.

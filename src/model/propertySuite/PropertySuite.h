@@ -17,7 +17,7 @@
 #include "VariableOperand.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class PropertySuite {
 

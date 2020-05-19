@@ -7,7 +7,7 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::IntegerValue::IntegerValue(int value, LocationInfo stmtLocationInfo) :
+DESCAM::IntegerValue::IntegerValue(int value, LocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("int")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
@@ -15,20 +15,20 @@ SCAM::IntegerValue::IntegerValue(int value, LocationInfo stmtLocationInfo) :
 
 }
 
-int SCAM::IntegerValue::getValue() {
+int DESCAM::IntegerValue::getValue() {
     return this->value;
 }
 
-void SCAM::IntegerValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::IntegerValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-std::string SCAM::IntegerValue::getValueAsString() const {
+std::string DESCAM::IntegerValue::getValueAsString() const {
     return std::to_string(value);
 }
 
-bool SCAM::IntegerValue::operator==(const Stmt &other) const {
+bool DESCAM::IntegerValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekIntegerValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (IntegerValue *) this;

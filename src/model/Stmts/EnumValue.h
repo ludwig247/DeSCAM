@@ -8,7 +8,7 @@
 #include <DataType.h>
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
     class EnumValue : public ConstValue {
     public:
         EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo = LocationInfo());

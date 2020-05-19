@@ -26,7 +26,7 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
-    std::map<std::string, std::string> printModule(SCAM::Module *node);
+    std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
     std::string print();
 
@@ -48,7 +48,7 @@ private:
     std::string macrosForHLS();
     std::string operations();
 
-    SCAM::Module *module = nullptr;
+    DESCAM::Module *module = nullptr;
     Model *model = nullptr;
 
     std::function<std::string()> macroFunction;

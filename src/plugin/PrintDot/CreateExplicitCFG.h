@@ -9,21 +9,21 @@
 #include <PropertyMacro.h>
 #include "Behavior/CfgNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class CreateExplicitCFG {
     public:
-        explicit CreateExplicitCFG(const std::map<int, SCAM::CfgNode *> &controlFlowMap, const std::vector<PropertyMacro *> &states);
+        explicit CreateExplicitCFG(const std::map<int, DESCAM::CfgNode *> &controlFlowMap, const std::vector<PropertyMacro *> &states);
 
         ~CreateExplicitCFG() = default;
 
         const std::map<int, CfgNode *> &getCfg() const;
 
-        const std::multimap<std::string, std::vector<SCAM::CfgNode *>> &getCommGroups() const;
+        const std::multimap<std::string, std::vector<DESCAM::CfgNode *>> &getCommGroups() const;
 
     private:
-        std::map<int, SCAM::CfgNode *> cfg;
-        std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
+        std::map<int, DESCAM::CfgNode *> cfg;
+        std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups;
     };
 
 }

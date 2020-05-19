@@ -10,7 +10,7 @@
 #include "EnumartePathsVisitor.h"
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief Class finds the endNode of the if-block
      *
@@ -29,16 +29,16 @@ namespace SCAM {
      */
     class FindEndNode {
     public:
-        FindEndNode(SCAM::CfgBlock *startNode);
+        FindEndNode(DESCAM::CfgBlock *startNode);
 
 
-        SCAM::CfgBlock *getEndNode();
+        DESCAM::CfgBlock *getEndNode();
 
-        void recursion(SCAM::CfgBlock *node); //! Finds the endNode for a while.
+        void recursion(DESCAM::CfgBlock *node); //! Finds the endNode for a while.
 
     private:
-        SCAM::CfgBlock *startNode; //! startNode of the if block
-        SCAM::CfgBlock *endNode; //! Merge nod eof the true and false path
+        DESCAM::CfgBlock *startNode; //! startNode of the if block
+        DESCAM::CfgBlock *endNode; //! Merge nod eof the true and false path
         std::set<int> pathNodes; //! Set of all nodes among the path
     };
 

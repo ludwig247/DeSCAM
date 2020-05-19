@@ -8,15 +8,15 @@
 #include "Branch.h"
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class If : public Branch {
     public:
-        If(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
+        If(DESCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         bool hasElseStmt();
 
-        SCAM::Expr *getConditionStmt() const;
+        DESCAM::Expr *getConditionStmt() const;
 
         //ACCEPT
         virtual void accept(StmtAbstractVisitor &visitor);

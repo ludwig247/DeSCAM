@@ -13,46 +13,46 @@
 #include "Logger/Logger.h"
 
 
-void SCAM::DataType::addSubVar(std::string subVarName, SCAM::DataType *subVarType) {
+void DESCAM::DataType::addSubVar(std::string subVarName, DESCAM::DataType *subVarType) {
     assert(!this->isArrayType() && "Either Array or Compound");
     this->subVarMap.insert(std::make_pair(subVarName, subVarType));
 }
 
-const bool SCAM::DataType::isCompoundType() const {
+const bool DESCAM::DataType::isCompoundType() const {
     return !this->subVarMap.empty() && !isArrayType();
 }
 
-void SCAM::DataType::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::DataType::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-const std::map<std::string, SCAM::DataType *> &SCAM::DataType::getSubVarMap() const {
+const std::map<std::string, DESCAM::DataType *> &DESCAM::DataType::getSubVarMap() const {
     return subVarMap;
 }
 
-const std::map<std::string, int> &SCAM::DataType::getEnumValueMap() const {
+const std::map<std::string, int> &DESCAM::DataType::getEnumValueMap() const {
     return enumValueMap;
 }
 
-void SCAM::DataType::addEnumValue(std::string enumValue) {
+void DESCAM::DataType::addEnumValue(std::string enumValue) {
     if (this->isCompoundType()) TERMINATE("DataType can either be enum or compound");
     this->enumValueMap.insert(std::make_pair(enumValue, this->enumValueMap.size()));
 
 }
 
-const bool SCAM::DataType::isEnumType() const {
+const bool DESCAM::DataType::isEnumType() const {
     return !this->enumValueMap.empty();
 }
 
-const bool SCAM::DataType::isBuiltInType() const {
+const bool DESCAM::DataType::isBuiltInType() const {
     return !(this->isEnumType() || this->isCompoundType());
 }
 
-const bool SCAM::DataType::isVoid() const {
+const bool DESCAM::DataType::isVoid() const {
     return this->getName() == "void";
 }
 
-SCAM::ConstValue *SCAM::DataType::getDefaultVal() const {
+DESCAM::ConstValue *DESCAM::DataType::getDefaultVal() const {
     ConstValue *initVal = nullptr;
     if (this->getName() == "int") initVal = new IntegerValue(0);
     else if (this->getName() == "bool") initVal = new BoolValue(false);
@@ -92,19 +92,19 @@ SCAM::ConstValue *SCAM::DataType::getDefaultVal() const {
     return initVal;
 }
 
-const bool SCAM::DataType::isUnsigned() const {
+const bool DESCAM::DataType::isUnsigned() const {
     return this->getName() == "unsigned";
 }
 
-const bool SCAM::DataType::isInteger() const {
+const bool DESCAM::DataType::isInteger() const {
     return this->getName() == "int";
 }
 
-const bool SCAM::DataType::isBoolean() const {
+const bool DESCAM::DataType::isBoolean() const {
     return (this->getName() == "bool");
 }
 
-void SCAM::DataType::addArray(DataType *arrayType, int arraySize) {
+void DESCAM::DataType::addArray(DataType *arrayType, int arraySize) {
     assert(arrayType->isBuiltInType() && "Arraytype only allowed for built-in tpyes");
     assert(!this->isCompoundType() && "Either Array or Compound");
     for (int i = 0; i < arraySize; ++i) {
@@ -115,15 +115,15 @@ void SCAM::DataType::addArray(DataType *arrayType, int arraySize) {
 
 }
 
-int SCAM::DataType::getArraySize() const {
+int DESCAM::DataType::getArraySize() const {
     return arraySize;
 }
 
-SCAM::DataType *SCAM::DataType::getArrayType() const {
+DESCAM::DataType *DESCAM::DataType::getArrayType() const {
     return arrayType;
 }
 
-const bool SCAM::DataType::isArrayType() const {
+const bool DESCAM::DataType::isArrayType() const {
     return this->arraySize != 0;
 }
 

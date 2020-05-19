@@ -14,7 +14,7 @@
 #include <utility>
 #include <PrintStmt.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
    * \brief: Detects redundant if, elseif , else statements and merges them together
@@ -22,7 +22,7 @@ namespace SCAM {
    * \author: mi-alkoudsi
    *
    * \input:
-   *      - std::map<int, SCAM::CfgBlock *> cfg;
+   *      - std::map<int, DESCAM::CfgBlock *> cfg;
    * \output:
    *      - std::map<int, CfgNode *> optimizedCFG;
    *

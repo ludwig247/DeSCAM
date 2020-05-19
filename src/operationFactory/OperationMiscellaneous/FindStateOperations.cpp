@@ -8,13 +8,13 @@
 
 //#define DEBUG_FINDSTATEOPERATIONS
 
-SCAM::FindStateOperations::FindStateOperations(std::map<int, SCAM::CfgNode *> cfg_arg, std::vector<SCAM::CfgNode *> importantStates_arg, SCAM::Module * module_arg, SCAM::CfgNode * whileNode_arg) :
+DESCAM::FindStateOperations::FindStateOperations(std::map<int, DESCAM::CfgNode *> cfg_arg, std::vector<DESCAM::CfgNode *> importantStates_arg, DESCAM::Module * module_arg, DESCAM::CfgNode * whileNode_arg) :
     cfg(std::move(cfg_arg)),
     importantStates(std::move(importantStates_arg)),
     module(module_arg),
     whileNode(whileNode_arg) {}
 
-std::size_t encodeArch(const std::vector<SCAM::CfgNode *> & arch) {
+std::size_t encodeArch(const std::vector<DESCAM::CfgNode *> & arch) {
 //    /// example
 //    std::size_t seed = arch.size();
 //    for(auto node : arch)
@@ -30,22 +30,22 @@ std::size_t encodeArch(const std::vector<SCAM::CfgNode *> & arch) {
     return (result + size);
 }
 
-bool SCAM::FindStateOperations::findOperations(SCAM::CfgNode * state) {
+bool DESCAM::FindStateOperations::findOperations(DESCAM::CfgNode * state) {
     this->stateOperations.clear();
     this->spuriousPath.clear();
 
-    std::vector<SCAM::CfgNode *> operationPath;
+    std::vector<DESCAM::CfgNode *> operationPath;
     operationPath.reserve(cfg.size());
     std::vector<std::size_t> operationArches;
     operationArches.reserve(cfg.size());
 
     int countWhile = 0;
     std::vector<int> whileIndex;
-    std::vector<SCAM::CfgNode *> stack;
+    std::vector<DESCAM::CfgNode *> stack;
     stack.reserve(cfg.size());
     std::vector<int> branchingNodesIndex;
     branchingNodesIndex.reserve(cfg.size());
-    SCAM::CfgNode *traverseNode = state;
+    DESCAM::CfgNode *traverseNode = state;
     stack.push_back(traverseNode);
 #ifdef DEBUG_FINDSTATEOPERATIONS
     std::cout << "----------New State: --------" << traverseNode->printShort();
@@ -61,7 +61,7 @@ bool SCAM::FindStateOperations::findOperations(SCAM::CfgNode * state) {
             countWhile++;
             /// fixed point
             if (countWhile > 1) {
-                std::vector<SCAM::CfgNode *> tempArch;
+                std::vector<DESCAM::CfgNode *> tempArch;
                 tempArch.assign(operationPath.begin()+whileIndex.back(), operationPath.end());
                 std::size_t lastArch = encodeArch(tempArch);
 #ifdef DEBUG_FINDSTATEOPERATIONS
@@ -129,7 +129,7 @@ bool SCAM::FindStateOperations::findOperations(SCAM::CfgNode * state) {
                 for (int i = traverseNode->getSuccessorList().size() - 1; i >= 0; i--) {
                     /// push successor to check reachability
                     operationPath.push_back(traverseNode->getSuccessorList()[i]);//necessary for reachability check
-                    if (SCAM::ValidOperations::isPathReachable(operationPath, module)) {
+                    if (DESCAM::ValidOperations::isPathReachable(operationPath, module)) {
                         stack.push_back(traverseNode->getSuccessorList()[i]);
                         branchingCount++;
                     }
@@ -152,11 +152,11 @@ bool SCAM::FindStateOperations::findOperations(SCAM::CfgNode * state) {
     return false;
 }
 
-const std::vector<SCAM::CfgNode *> &SCAM::FindStateOperations::getSpurious() {
+const std::vector<DESCAM::CfgNode *> &DESCAM::FindStateOperations::getSpurious() {
     return this->spuriousPath;
 }
 
 
-const std::vector<std::vector<SCAM::CfgNode *>> &SCAM::FindStateOperations::getStateOperations() {
+const std::vector<std::vector<DESCAM::CfgNode *>> &DESCAM::FindStateOperations::getStateOperations() {
     return this->stateOperations;
 }

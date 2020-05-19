@@ -7,7 +7,7 @@
 #include "Logger/Logger.h"
 #include "SignalFactory.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 static const std::set<std::tuple<std::string, std::string, std::string>> HANDSHAKING_PROTOCOL_SIGNALS = {
         std::make_tuple("start", "bool", "in"),

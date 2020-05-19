@@ -19,11 +19,11 @@ std::string PrintCFGDot::printDot(Module *module) {
     std::stringstream ss;
     ss << "digraph " << module->getName() << " {  graph [rankdir=TD];  " << std::endl;
 
-    std::map<int, SCAM::CfgNode *> cfg;
-    std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
+    std::map<int, DESCAM::CfgNode *> cfg;
+    std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups;
 
     if (getOptionMap()["explicit"]) {
-        SCAM::CreateExplicitCFG explicitCfg(module->getCFG(), module->getPropertySuite()->getStates());
+        DESCAM::CreateExplicitCFG explicitCfg(module->getCFG(), module->getPropertySuite()->getStates());
         cfg = explicitCfg.getCfg();
         commGroups = explicitCfg.getCommGroups();
     } else {
@@ -86,7 +86,7 @@ std::string PrintCFGDot::printDot(Module *module) {
     return ss.str();
 }
 
-std::string PrintCFGDot::printCFG_Spurious(std::map<int, SCAM::CfgNode *> cfg, std::vector<SCAM::CfgNode *> importantStates, std::vector<SCAM::CfgNode *> spuriousPath) {
+std::string PrintCFGDot::printCFG_Spurious(std::map<int, DESCAM::CfgNode *> cfg, std::vector<DESCAM::CfgNode *> importantStates, std::vector<DESCAM::CfgNode *> spuriousPath) {
     std::stringstream ss;
     ss << "digraph Spurious {  graph [rankdir=TD];  " << std::endl;
 

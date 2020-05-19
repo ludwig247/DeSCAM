@@ -4,7 +4,7 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
 
     /**
      * \brief Class checks, wheter a stmt is a member call.

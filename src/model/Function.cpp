@@ -7,7 +7,7 @@
 #include "Logger/Logger.h"
 
 
-SCAM::Function::Function(std::string name, SCAM::DataType *returnType, const std::map<std::string, Parameter *> &paramMap, LocationInfo locationInfo) :
+DESCAM::Function::Function(std::string name, DESCAM::DataType *returnType, const std::map<std::string, Parameter *> &paramMap, LocationInfo locationInfo) :
         returnType(returnType),
         paramMap(paramMap),
         AbstractNode(name,locationInfo) {
@@ -22,41 +22,41 @@ SCAM::Function::Function(std::string name, SCAM::DataType *returnType, const std
     }
 }
 
-SCAM::Function::~Function() {
+DESCAM::Function::~Function() {
 }
 
 
-SCAM::DataType *SCAM::Function::getReturnType() const {
+DESCAM::DataType *DESCAM::Function::getReturnType() const {
     return returnType;
 }
 
-void SCAM::Function::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::Function::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-const std::map<std::string, SCAM::Parameter *> &SCAM::Function::getParamMap() const {
+const std::map<std::string, DESCAM::Parameter *> &DESCAM::Function::getParamMap() const {
     return paramMap;
 }
 
-const std::vector<SCAM::Stmt *> &SCAM::Function::getStmtList() const {
+const std::vector<DESCAM::Stmt *> &DESCAM::Function::getStmtList() const {
     return stmtList;
 }
 
-void SCAM::Function::setStmtList(const std::vector<SCAM::Stmt *> &stmtList) {
+void DESCAM::Function::setStmtList(const std::vector<DESCAM::Stmt *> &stmtList) {
     Function::stmtList = stmtList;
 }
 
-const std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> &SCAM::Function::getReturnValueConditionList() const {
+const std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> &DESCAM::Function::getReturnValueConditionList() const {
     return returnValueConditionList;
 }
 
-void SCAM::Function::setReturnValueConditionList(
-        const std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> &returnValueConditionList) {
+void DESCAM::Function::setReturnValueConditionList(
+        const std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> &returnValueConditionList) {
     Function::returnValueConditionList = returnValueConditionList;
 }
 
-SCAM::Function::Function(SCAM::Function *function) : AbstractNode(function->getName()) {
+DESCAM::Function::Function(DESCAM::Function *function) : AbstractNode(function->getName()) {
     this->stmtList = function->getStmtList();
     this->returnValueConditionList = function->getReturnValueConditionList();
     this->paramMap = function->getParamMap();

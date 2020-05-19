@@ -7,7 +7,7 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief Class representing a state of FSM
  */

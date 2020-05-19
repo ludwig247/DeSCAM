@@ -13,14 +13,14 @@
 #include <Module.h>
 #include <utility>
 
-namespace SCAM {
+namespace DESCAM {
 
 /***
  * \brief: Finds Unused functions in the CFG, prompts a warning for each of them, then delete them from the module
  * \author:mi-lkoudsi
  */
 
-    class FindUnusedFunctions : public SCAM::StmtAbstractVisitor {
+    class FindUnusedFunctions : public DESCAM::StmtAbstractVisitor {
 
     public:
         FindUnusedFunctions() = delete;

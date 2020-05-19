@@ -10,7 +10,7 @@
 #include"ModelGlobal.h"
 #include "PrintStmt.h"
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * \brief: looks for dead assignments to variables and removes them from the control flow graph
      * \author: mi-alkoudsi

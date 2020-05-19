@@ -9,16 +9,16 @@
 #include "NodePeekVisitor.h"
 #include "DescamException.h"
 
-SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
+DESCAM::Assignment::Assignment(DESCAM::Expr *lhs, DESCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         rhs(rhs) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (lhs == nullptr && rhs != nullptr) {
-        throw SCAM::DescamException("Assignment: LHS is null",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Assignment: LHS is null",this->stmtLocationInfo);
     } else if (lhs != nullptr && rhs == nullptr) {
-        throw SCAM::DescamException("Assignment: RHS is null",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Assignment: RHS is null",this->stmtLocationInfo);
     } else if (lhs == nullptr && rhs == nullptr) {
-        throw SCAM::DescamException("Assignment: RHS && LHS is null",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Assignment: RHS && LHS is null",this->stmtLocationInfo);
     }
 
     if (lhs->getDataType() != rhs->getDataType()) {
@@ -26,34 +26,34 @@ SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs, LocationInfo stmt
         ss << "ERROR: " << lhs->getDataType()->getName() << " != " << rhs->getDataType()->getName();
         ss << " in assignment: " << PrintStmt::toString(lhs) << " = " << PrintStmt::toString(rhs) << std::endl;
         ss << "Assignment: differnt DataTypes not allowed!";
-        throw SCAM::DescamException(ss.str(),this->stmtLocationInfo);
+        throw DESCAM::DescamException(ss.str(),this->stmtLocationInfo);
     }
 
     if (NodePeekVisitor::nodePeekArrayOperand(lhs)) {
         std::string msg = "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
-        throw SCAM::DescamException(msg,this->stmtLocationInfo);
+        throw DESCAM::DescamException(msg,this->stmtLocationInfo);
     }
     if (NodePeekVisitor::isConstTypeNode(lhs)) {
         std::string msg = "LHS of assignemnt has to be a variable";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
-        throw SCAM::DescamException(msg,this->stmtLocationInfo);
+        throw DESCAM::DescamException(msg,this->stmtLocationInfo);
     }
 }
 
-SCAM::Expr *SCAM::Assignment::getLhs() {
+DESCAM::Expr *DESCAM::Assignment::getLhs() {
     return this->lhs;
 }
 
-SCAM::Expr *SCAM::Assignment::getRhs() {
+DESCAM::Expr *DESCAM::Assignment::getRhs() {
     return this->rhs;
 }
 
-void SCAM::Assignment::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Assignment::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::Assignment::operator==(const Stmt &other) const {
+bool DESCAM::Assignment::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekAssignment(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Assignment *) this;
@@ -68,7 +68,7 @@ bool SCAM::Assignment::operator==(const Stmt &other) const {
     return (*thisPtr->lhs == *otherPtr->lhs) && (*thisPtr->rhs == *otherPtr->rhs);
 }
 
-std::ostream &SCAM::Assignment::print(std::ostream &ostream) const {
+std::ostream &DESCAM::Assignment::print(std::ostream &ostream) const {
     ostream << PrintStmt::toString(this);
     return ostream;
 }

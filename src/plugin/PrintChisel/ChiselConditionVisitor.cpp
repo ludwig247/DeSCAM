@@ -4,12 +4,12 @@
 
 #include "ChiselConditionVisitor.h"
 
-std::string SCAM::ChiselConditionVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::ChiselConditionVisitor::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     ChiselConditionVisitor printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::VariableOperand &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::VariableOperand &node) {
 
     if (node.getVariable()->isSubVar()) {
         if (node.getVariable()->getParent()->isCompoundType()) {
@@ -23,11 +23,11 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::VariableOperand &node) {
     }
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::SyncSignal &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::SyncSignal &node) {
     this->ss << "io." << node.getPort()->getName() << "_sync";
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::UnaryExpr &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::UnaryExpr &node) {
     if (node.getOperation() == "not") {
         ss << "!";
     }
@@ -35,7 +35,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::UnaryExpr &node) {
     node.getExpr()->accept(*this);
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Logical &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Logical &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "and") {
@@ -47,7 +47,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Logical &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         if (node.getPort()->getInterface()->getDirection() == "in") {
             this->ss << "io." << node.getPort()->getName() << "." << node.getDataSignal()->getName();
@@ -59,7 +59,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::DataSignalOperand &node) {
     }
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Relational &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -73,7 +73,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Relational &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::EnumValue &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::EnumValue &node) {
     std::string str = node.getEnumValue();
     std::string::size_type i = str.find("_");
 
@@ -87,7 +87,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::EnumValue &node) {
 }
 
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Arithmetic &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "%") {
@@ -101,7 +101,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Arithmetic &node) {
 }
 
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Bitwise &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Bitwise &node) {
     if (node.getOperation() == "<<") {
         this->resize_flag = true;
         this->ss << "(";
@@ -137,7 +137,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Bitwise &node) {
     }
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::UnsignedValue &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::UnsignedValue &node) {
     //if(this->resize_flag){
     //FIXME: remove once concat is present?
     this->ss << node.getValueAsString();
@@ -153,7 +153,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::UnsignedValue &node) {
     //}else this->ss << node.getValue();
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::IntegerValue &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::IntegerValue &node) {
     //if(this->resize_flag){
     //FIXME: remove once concat is present?
     this->ss << node.getValueAsString();
@@ -166,7 +166,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::IntegerValue &node) {
     //}else this->ss << node.getValue();
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::BoolValue &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::BoolValue &node) {
     if (node.getValue()) {
         this->ss << "true.B";
     } else {
@@ -174,7 +174,7 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::BoolValue &node) {
     }
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Cast &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Cast &node) {
     this->ss << "(";
     node.getSubExpr()->accept(*this);
     if (node.getDataType()->isUnsigned()) {
@@ -192,11 +192,11 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::Cast &node) {
     //this->ss << ")";
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Return &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::ITE &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::ITE &node) {
     /*
      * if (print condition) {
      *   print stmts
@@ -237,19 +237,19 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::ITE &node) {
 
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Assignment &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Assignment &node) {
     PrintStmt::visit(node);
     this->ss << ";\n";
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::ArrayOperand &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::ArrayOperand &node) {
     this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "[";
     node.getIdx()->accept(*this);
     this->ss << "]";
 }
 
-void SCAM::ChiselConditionVisitor::visit(struct CompoundExpr &node) {
+void DESCAM::ChiselConditionVisitor::visit(struct CompoundExpr &node) {
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
         begin->second->accept(*this);
@@ -257,7 +257,7 @@ void SCAM::ChiselConditionVisitor::visit(struct CompoundExpr &node) {
     }
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::ParamOperand &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::ParamOperand &node) {
     auto param = node.getParameter();
     if (param->isSubVar()) {
         this->ss << param->getParent()->getName() << "_" << param->getName();
@@ -268,6 +268,6 @@ void SCAM::ChiselConditionVisitor::visit(SCAM::ParamOperand &node) {
     }
 }
 
-void SCAM::ChiselConditionVisitor::visit(SCAM::Notify &node) {
+void DESCAM::ChiselConditionVisitor::visit(DESCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify_r";
 }

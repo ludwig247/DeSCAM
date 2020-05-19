@@ -24,7 +24,7 @@
    */
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class GlobalUtilities {
 
@@ -34,11 +34,11 @@ namespace SCAM {
 
     public:
 
-        static std::string printCFG(const std::map<int, SCAM::CfgBlock *> &CFG);
+        static std::string printCFG(const std::map<int, DESCAM::CfgBlock *> &CFG);
 
-        static std::string printCFG(const std::map<int, SCAM::CfgNode *> &CFG);
+        static std::string printCFG(const std::map<int, DESCAM::CfgNode *> &CFG);
 
-        static int findWhileNodeId(const std::map<int, SCAM::CfgNode *> &CFG);
+        static int findWhileNodeId(const std::map<int, DESCAM::CfgNode *> &CFG);
 
         static bool isAbortTranslation(const z3::expr &expr);
 
@@ -51,14 +51,14 @@ namespace SCAM {
         static std::string removeIndentation(const std::string &str);
 
         template<class T>
-        static SCAM::LocationInfo getLocationInfo(T *clangDataStructure, clang::CompilerInstance &ci) {
+        static DESCAM::LocationInfo getLocationInfo(T *clangDataStructure, clang::CompilerInstance &ci) {
             // Getting location information from clang
             std::string statement = clang::Lexer::getSourceText(
                     clang::CharSourceRange::getTokenRange(clangDataStructure->getSourceRange()),
                     ci.getSourceManager(), ci.getLangOpts()).str();
-            auto locStartVec = SCAM::GlobalUtilities::stringSplit(
+            auto locStartVec = DESCAM::GlobalUtilities::stringSplit(
                     clangDataStructure->getLocStart().printToString(ci.getSourceManager()), ':');
-            auto locEndVec = SCAM::GlobalUtilities::stringSplit(
+            auto locEndVec = DESCAM::GlobalUtilities::stringSplit(
                     clangDataStructure->getLocEnd().printToString(ci.getSourceManager()), ':');
             auto fileDir = locStartVec[0];
             auto rowStartNum = std::stoi(locStartVec[1]);
@@ -67,7 +67,7 @@ namespace SCAM {
             auto colEndNum = std::stoi(locEndVec[2]);
             if (colEndNum < colStartNum && rowStartNum == rowEndNum) colEndNum = colStartNum;
             if (rowEndNum < rowStartNum) rowEndNum = rowStartNum;
-            SCAM::LocationInfo stmtInfo(statement, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
+            DESCAM::LocationInfo stmtInfo(statement, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
             return stmtInfo;
         }
     };

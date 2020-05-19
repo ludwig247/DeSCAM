@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class SimplifyExpressions_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class SimplifyExpressions_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -22,13 +22,13 @@ TEST_P(SimplifyExpressions_Test, simplify_expressions) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
 
-    SCAM::SimplifyExpressions simplifyCFGExpressions(module->getCFG(),module);
+    DESCAM::SimplifyExpressions simplifyCFGExpressions(module->getCFG(),module);
     ASSERT_FALSE(simplifyCFGExpressions.getCFG().empty())
                                 << "After simplifying expressions, CFG of module " << module->getName()
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::GlobalUtilities::printCFG(simplifyCFGExpressions.getCFG());
+    std::string CFG_str = DESCAM::GlobalUtilities::printCFG(simplifyCFGExpressions.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/SimplifyExpressions/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

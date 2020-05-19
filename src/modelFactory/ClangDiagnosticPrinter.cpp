@@ -38,7 +38,7 @@ void ClangDiagnosticPrinter::EndSourceFile() {
 void ClangDiagnosticPrinter::HandleDiagnostic(DiagnosticsEngine::Level Level,
                                               const Diagnostic &Info) {
 
-    if (Level >= DiagnosticsEngine::Error) SCAM::Logger::setTerminate();
+    if (Level >= DiagnosticsEngine::Error) DESCAM::Logger::setTerminate();
 
     SmallString<100> outStr;
     Info.FormatDiagnostic(outStr);
@@ -65,19 +65,19 @@ void ClangDiagnosticPrinter::addDiagnosticsToLogger(std::string diagnostics) {
      *               statement
      *                       ^
     */
-    auto diagnosticsVec = SCAM::GlobalUtilities::stringSplit(diagnostics, '\n');
+    auto diagnosticsVec = DESCAM::GlobalUtilities::stringSplit(diagnostics, '\n');
     for (auto line = diagnosticsVec.begin(); line != diagnosticsVec.end(); line++) {
-        auto errorLineVec = SCAM::GlobalUtilities::stringSplit(*line, ':');
+        auto errorLineVec = DESCAM::GlobalUtilities::stringSplit(*line, ':');
         if (errorLineVec.size() > 4) {
             int parsableSourceRangesOffset = 0;  // initially format 1, "without parsable source ranges"
             auto stmtPtr = std::next(line, 1);
             std::string stmt = "";
-            if (stmtPtr != diagnosticsVec.end()) stmt = SCAM::GlobalUtilities::removeIndentation(*stmtPtr);
+            if (stmtPtr != diagnosticsVec.end()) stmt = DESCAM::GlobalUtilities::removeIndentation(*stmtPtr);
             std::string fileDir = errorLineVec[0];
             int rowStartNum = stoi(errorLineVec[1]), colStartNum = stoi(
                     errorLineVec[2]), rowEndNum = rowStartNum, colEndNum = colStartNum;
-            auto severityLevel = SCAM::LoggerMsg::SeverityLevel::Warning;
-            auto violationType = SCAM::LoggerMsg::ViolationType::Syntax;
+            auto severityLevel = DESCAM::LoggerMsg::SeverityLevel::Warning;
+            auto violationType = DESCAM::LoggerMsg::ViolationType::Syntax;
             if (errorLineVec.size() == 8 && !(errorLineVec[3].find("error") != std::string::npos ||
                                               errorLineVec[3].find("note") != std::string::npos ||
                                               errorLineVec[3].find("warning") !=
@@ -89,19 +89,19 @@ void ClangDiagnosticPrinter::addDiagnosticsToLogger(std::string diagnostics) {
                     rowEndNum = stoi(errorLineVec[4].substr(dashPosition + 1));
             } else if (errorLineVec.size() > 9) parsableSourceRangesOffset = 5;
             if (errorLineVec[3 + parsableSourceRangesOffset].find("error") != std::string::npos)
-                severityLevel = SCAM::LoggerMsg::SeverityLevel::Error;
+                severityLevel = DESCAM::LoggerMsg::SeverityLevel::Error;
             else if (errorLineVec[3 + parsableSourceRangesOffset].find("note") != std::string::npos)
-                severityLevel = SCAM::LoggerMsg::SeverityLevel::Info;
+                severityLevel = DESCAM::LoggerMsg::SeverityLevel::Info;
 
             std::string message = "";
             for (int i = 4 + parsableSourceRangesOffset; i < errorLineVec.size(); i++)
                 message += errorLineVec[i];
 
-            SCAM::LocationInfo stmtInfo(stmt, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
+            DESCAM::LocationInfo stmtInfo(stmt, fileDir, rowStartNum, rowEndNum, colStartNum, colEndNum);
             //Add loggerMsg to the logger
-            SCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType,
-                                      SCAM::Logger::getCurrentProcessedLocation());
-            SCAM::Logger::addMsg(loggerMsg);
+            DESCAM::LoggerMsg loggerMsg(message, stmtInfo, severityLevel, violationType,
+                                      DESCAM::Logger::getCurrentProcessedLocation());
+            DESCAM::Logger::addMsg(loggerMsg);
         }
     }
 }

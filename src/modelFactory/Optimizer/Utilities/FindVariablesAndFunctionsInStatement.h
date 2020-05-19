@@ -13,7 +13,7 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
     * \brief: Finds the variables and functions used in a statement or an expression
     * \author:mi-alkoudsi

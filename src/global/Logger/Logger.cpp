@@ -4,36 +4,36 @@
 #include "FileSink.h"
 #include <algorithm>
 
-bool SCAM::Logger::terminate = false;
+bool DESCAM::Logger::terminate = false;
 
-SCAM::Logger &SCAM::Logger::getInstance() {
+DESCAM::Logger &DESCAM::Logger::getInstance() {
     static Logger instance;
     return instance;
 }
 
-bool SCAM::Logger::hasFeedback() {
+bool DESCAM::Logger::hasFeedback() {
     return !Logger::getInstance().msgsVector.empty();
 }
 
-void SCAM::Logger::clear() {
+void DESCAM::Logger::clear() {
     Logger::getInstance().msgsVector.clear();
     Logger::getInstance().tempMsgsMap.clear();
     Logger::getInstance().tmpMsgsVec.clear();
 }
 
-bool SCAM::Logger::isTerminate() {
+bool DESCAM::Logger::isTerminate() {
     return terminate;
 }
 
-void SCAM::Logger::setTerminate() {
+void DESCAM::Logger::setTerminate() {
     terminate = true;
 }
 
-void SCAM::Logger::resetTerminate() {
+void DESCAM::Logger::resetTerminate() {
     terminate = false;
 }
 
-void SCAM::Logger::addMsg(LoggerMsg msg) {
+void DESCAM::Logger::addMsg(LoggerMsg msg) {
     if (Logger::getInstance().currentProcessedLocation == LoggerMsg::ProcessedLocation::GlobalConstants) {
         auto tmpVec = Logger::getInstance().tmpMsgsVec;
         if (std::find(tmpVec.begin(), tmpVec.end(), msg) == tmpVec.end())
@@ -46,11 +46,11 @@ void SCAM::Logger::addMsg(LoggerMsg msg) {
 }
 
 
-void SCAM::Logger::addSink(std::shared_ptr<SCAM::LoggerSink> sink) {
+void DESCAM::Logger::addSink(std::shared_ptr<DESCAM::LoggerSink> sink) {
     Logger::getInstance().sinksVector.emplace_back(sink);
 }
 
-void SCAM::Logger::log() {
+void DESCAM::Logger::log() {
     addTempMsgsToLogger();
     auto msgsVector = LoggerFilter::applyFilters(Logger::getInstance().msgsVector,
                                                  Logger::getInstance().filterOptions);
@@ -58,9 +58,9 @@ void SCAM::Logger::log() {
     if (!sinkVector.empty() && !msgsVector.empty()) {
         for (auto sinkPtr = sinkVector.begin(); sinkPtr != sinkVector.end(); sinkPtr++) {
             if (auto sink = sinkPtr->get()) {
-                auto formattedOutput = SCAM::LoggerFormatter::formatMessages(msgsVector, sink->getFormatOtion());
-                if (auto fileSink = dynamic_cast<SCAM::FileSink *>(sink)) {
-                    fileSink->setGeneratedFileType(SCAM::LoggerFormatter::getFormatFileType(sink->getFormatOtion()));
+                auto formattedOutput = DESCAM::LoggerFormatter::formatMessages(msgsVector, sink->getFormatOtion());
+                if (auto fileSink = dynamic_cast<DESCAM::FileSink *>(sink)) {
+                    fileSink->setGeneratedFileType(DESCAM::LoggerFormatter::getFormatFileType(sink->getFormatOtion()));
                         fileSink->print(formattedOutput);
                 } else {
                     //console sink
@@ -79,19 +79,19 @@ void SCAM::Logger::log() {
     }
 }
 
-void SCAM::Logger::setCurrentProcessedLocation(SCAM::LoggerMsg::ProcessedLocation currentProcessedLocation) {
+void DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation currentProcessedLocation) {
     Logger::getInstance().currentProcessedLocation = currentProcessedLocation;
 }
 
-SCAM::LoggerMsg::ProcessedLocation SCAM::Logger::getCurrentProcessedLocation() {
+DESCAM::LoggerMsg::ProcessedLocation DESCAM::Logger::getCurrentProcessedLocation() {
     return Logger::getInstance().currentProcessedLocation;
 }
 
-void SCAM::Logger::setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions) {
+void DESCAM::Logger::setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions) {
     Logger::getInstance().filterOptions = filterOptions;
 }
 
-void SCAM::Logger::addTempMsgsToLogger() {
+void DESCAM::Logger::addTempMsgsToLogger() {
     for (const auto &pair :  Logger::getInstance().tempMsgsMap) {
         for (const auto &msg : pair.second) Logger::addMsg(msg);
     }
@@ -101,31 +101,31 @@ void SCAM::Logger::addTempMsgsToLogger() {
     Logger::getInstance().tmpMsgsVec.clear();
 }
 
-void SCAM::Logger::clearTempVector() {
+void DESCAM::Logger::clearTempVector() {
     Logger::getInstance().tmpMsgsVec.clear();
 }
 
-void SCAM::Logger::tagTempMsgs(std::string objName) {
+void DESCAM::Logger::tagTempMsgs(std::string objName) {
     Logger::getInstance().tempMsgsMap[objName] = Logger::getInstance().tmpMsgsVec;
     Logger::getInstance().tmpMsgsVec.clear();
 }
 
-void SCAM::Logger::removeFromTempMap(std::string objName) {
+void DESCAM::Logger::removeFromTempMap(std::string objName) {
     if (Logger::getInstance().tempMsgsMap.find(objName) != Logger::getInstance().tempMsgsMap.end())
         Logger::getInstance().tempMsgsMap.erase(objName);
 }
 
 #ifdef DEBUG_LOGGER
 
-const std::unordered_map<std::string, std::vector<SCAM::LoggerMsg>> &SCAM::Logger::getTempMsgsMap() {
+const std::unordered_map<std::string, std::vector<DESCAM::LoggerMsg>> &DESCAM::Logger::getTempMsgsMap() {
     return Logger::getInstance().tempMsgsMap;
 }
 
-const std::vector<SCAM::LoggerMsg> &SCAM::Logger::getMsgsMap() {
+const std::vector<DESCAM::LoggerMsg> &DESCAM::Logger::getMsgsMap() {
     return Logger::getInstance().msgsVector;
 }
 
-void SCAM::Logger::setPrintDecorativeFrames() {
+void DESCAM::Logger::setPrintDecorativeFrames() {
     Logger::getInstance().printDecorativeFrames = true;
 }
 #endif

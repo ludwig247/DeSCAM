@@ -14,7 +14,7 @@
 #include "Optimizer/Utilities/PropagateConstantValue.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Propagates the initial value of constant global variables

@@ -10,11 +10,11 @@
 #include "Communication.h"
 #include "PortOperand.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Peek : public Expr, public Communication {
     public:
-        explicit Peek(SCAM::Port *port, LocationInfo stmtLocationInfo = LocationInfo());
+        explicit Peek(DESCAM::Port *port, LocationInfo stmtLocationInfo = LocationInfo());
 
         void accept(StmtAbstractVisitor &visitor) override;
 

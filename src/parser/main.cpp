@@ -21,22 +21,22 @@ int main(int argc, const char **argv) {
 
     /* Initialize logger */
     //setting sinks
-    std::shared_ptr<LoggerSink> consoleSink = std::make_shared<SCAM::ConsoleSink>();
+    std::shared_ptr<LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
     consoleSink->setFormatOption(LoggerFormatter::FormatOption::TEXT);
-    SCAM::Logger::addSink(consoleSink);
-    std::shared_ptr<LoggerSink> fileSink = std::make_shared<SCAM::FileSink>();
+    DESCAM::Logger::addSink(consoleSink);
+    std::shared_ptr<LoggerSink> fileSink = std::make_shared<DESCAM::FileSink>();
     fileSink->setFormatOption(LoggerFormatter::FormatOption::JSON);
-    SCAM::Logger::addSink(fileSink);
+    DESCAM::Logger::addSink(fileSink);
     //setting filtering options
-    SCAM::Logger::setFilteringOptions(
+    DESCAM::Logger::setFilteringOptions(
             std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});
-    SCAM::Logger::setPrintDecorativeFrames();
+    DESCAM::Logger::setPrintDecorativeFrames();
 
     //Create model
-    ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile()))
+    ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile()))
     // write log messages to all sinks
-    if (SCAM::Logger::hasFeedback()) {
-        SCAM::Logger::log();
+    if (DESCAM::Logger::hasFeedback()) {
+        DESCAM::Logger::log();
     }
     //Printing options according to commandline styles chosen
     if (cml.getActivePlugins().size() > 0) {
@@ -53,14 +53,14 @@ int main(int argc, const char **argv) {
                 if (!cml.getOutputDirectory().empty()) {
                     if (createDirectory(*it, cml.getOutputDirectory())) {
                         std::map<std::string, std::string> pluginOutput;
-                        pluginOutput = style->printModel(SCAM::ModelGlobal::getModel());
+                        pluginOutput = style->printModel(DESCAM::ModelGlobal::getModel());
                         createFiles(*it, pluginOutput, cml.getOutputDirectory());
                     } else {
                         std::cout << "Couldn't create directory: " << cml.getOutputDirectory() << "/" << *it << "\n";
                     }
                 } else {
                     std::map<std::string, std::string> pluginOutput;
-                    pluginOutput = style->printModel(SCAM::ModelGlobal::getModel());
+                    pluginOutput = style->printModel(DESCAM::ModelGlobal::getModel());
                     printFiles(*it, pluginOutput);
                 }
             } else {

@@ -10,7 +10,7 @@
 #include <Module.h>
 #include "clang/AST/RecursiveASTVisitor.h"
 
-namespace SCAM{
+namespace DESCAM{
     class FindGlobal: public clang::RecursiveASTVisitor<FindGlobal> {
     public:
         explicit FindGlobal(clang::TranslationUnitDecl* decl, clang::CompilerInstance &ci);
@@ -26,9 +26,9 @@ namespace SCAM{
 
     private:
         clang::CompilerInstance & ci;
-        SCAM::DataType * getDataType(const clang::QualType& type) const;
+        DESCAM::DataType * getDataType(const clang::QualType& type) const;
         clang::TranslationUnitDecl* decl;
-        SCAM::Module module = Module("placeholder");
+        DESCAM::Module module = Module("placeholder");
         std::map<std::string,Variable*> variableMap;
         std::map<std::string,Function*> functionMap;
         std::map<std::string,const clang::FunctionDecl*> functionDeclMap;

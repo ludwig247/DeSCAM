@@ -16,19 +16,19 @@
 #include <cassert>
 #include "ExprVisitor.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 /**
  *  \brief check assignments of a specific variable through each path of all possible paths in the CFG
  *  \author:mi-alkoudsi
  *  \inputs:
- *    - std::map<int, std::vector<SCAM::CfgNode *>> allPathsToNodeMap;
- *    - SCAM::Variable *var;
+ *    - std::map<int, std::vector<DESCAM::CfgNode *>> allPathsToNodeMap;
+ *    - DESCAM::Variable *var;
  *    - int stmtId;
  *  \outputs:
- *    - SCAM::Expr *propagatedValue;
+ *    - DESCAM::Expr *propagatedValue;
  *    - int numLastAssignments;
- *    - std::map<int, SCAM::Expr *> lastAssignmentsMap;
+ *    - std::map<int, DESCAM::Expr *> lastAssignmentsMap;
  *  \details: On each Path, only the last assignment to the variable kept.
  *  if there was no read to the variable on any of the paths =>
  *  the result is map containing all last assignments, and if and only if they are all equal then propagation is valid

@@ -11,7 +11,7 @@
 #include "ConstValue.h"
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /** \brief Represents a time expression within a property
      *

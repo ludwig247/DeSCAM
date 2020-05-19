@@ -10,7 +10,7 @@
 #include "Stmt.h"
 #include <DataTypes.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class Expr : public Stmt {
     public:

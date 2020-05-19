@@ -7,12 +7,12 @@
 #include "Optimizer/Debug.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     z3::context RA_z3Context;
     z3::solver RA_solver_t(RA_z3Context);
     z3::solver RA_solver_f(RA_z3Context);
-    SCAM::ExprTranslator RA_translator(&RA_z3Context);
+    DESCAM::ExprTranslator RA_translator(&RA_z3Context);
 
     ReachabilityAnalysis::ReachabilityAnalysis(const std::map<int, CfgNode *> &CFG,
                                                std::set<std::string> variablesThatHaveReadSet) : CFG(
@@ -24,27 +24,27 @@ namespace SCAM {
 #endif
 
         //Finding all variable values
-        SCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
+        DESCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
         this->allVarValuesMap = valuesFinder.getVariableValuesMap();
 
         //Finding all possible paths from while to the sink node
-        whileNodeID = SCAM::GlobalUtilities::findWhileNodeId(this->CFG);
+        whileNodeID = DESCAM::GlobalUtilities::findWhileNodeId(this->CFG);
         FindCfgPaths pathsFromWhile(this->CFG, whileNodeID);
 
         //Analysis of if statements
         for (auto node : CFG) {
             auto statement = node.second->getStmt();
             if (statement != nullptr) {
-                if (auto ifStmt = dynamic_cast<SCAM::If *>(statement)) {
+                if (auto ifStmt = dynamic_cast<DESCAM::If *>(statement)) {
 #ifdef DEBUG_REACHABILITY_ANALYSIS
-//                    std::cout << "Checking statement: " << SCAM::PrintStmt::toString(statement)
+//                    std::cout << "Checking statement: " << DESCAM::PrintStmt::toString(statement)
 //                              << std::endl;
 #endif
                     currentNodeID = node.second->getId();
                     if (auto insideIf = ifStmt->getConditionStmt()) {
                         //if section operand don't check for now
-                        if (auto relationalstmt = dynamic_cast<SCAM::Relational *>(insideIf)) {
-                            if (dynamic_cast<SCAM::SectionOperand *>(relationalstmt->getLhs())) {
+                        if (auto relationalstmt = dynamic_cast<DESCAM::Relational *>(insideIf)) {
+                            if (dynamic_cast<DESCAM::SectionOperand *>(relationalstmt->getLhs())) {
                                 continue;
                             }
                         }
@@ -56,7 +56,7 @@ namespace SCAM {
                         RA_solver_t.reset();
                         this->assignmentsToIfValuesMap.clear();
                         this->substitutionMap.clear();
-                        SCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(insideIf,std::set<std::string>{});
+                        DESCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(insideIf,std::set<std::string>{});
                         if (findVariablesAndFunctionsInStatement.hasFunctions()) { continue; }
                         for (auto varOp : findVariablesAndFunctionsInStatement.getVarOpInStmtSet()) {
                             checkAndAddVariableToSubstitutionMap(varOp);
@@ -74,9 +74,9 @@ namespace SCAM {
                         if (!this->substitutionMap.empty()) {
                             auto firstSubstitutedSet = substituteVariablesInsideIfExpressionWithTheirValues(
                                     insideIf);
-                            std::vector<SCAM::Expr *> newSet;
+                            std::vector<DESCAM::Expr *> newSet;
                             for (auto se: firstSubstitutedSet) {
-                                SCAM::FindVariablesAndFunctionsInStatement fv(se,std::set<std::string>{});
+                                DESCAM::FindVariablesAndFunctionsInStatement fv(se,std::set<std::string>{});
                                 if (fv.hasFunctions() || fv.getVariablesInStmtSet().empty() ||
                                     (*fv.getVarOpInStmtSet().begin())->getDataType()->isEnumType() ||
                                     (*fv.getVarOpInStmtSet().begin())->getDataType()->isBoolean()) {
@@ -215,7 +215,7 @@ namespace SCAM {
 #endif
     }
 
-    void ReachabilityAnalysis::checkAndAddVariableToSubstitutionMap(SCAM::VariableOperand *varOp) {
+    void ReachabilityAnalysis::checkAndAddVariableToSubstitutionMap(DESCAM::VariableOperand *varOp) {
         auto varName = varOp->getVariable()->getFullName();
         if (this->variablesThatHaveReadSet.find(varName) ==
             this->variablesThatHaveReadSet.end()) {
@@ -229,7 +229,7 @@ namespace SCAM {
 #endif
                 if (propagator.getNumLastAssignments() != 0 &&
                     propagator.getNumLastAssignments() == this->pathsToIfMap.size()) {
-                    std::set<SCAM::Expr *> values;
+                    std::set<DESCAM::Expr *> values;
                     for (auto assignment : propagator.getLastAssignmentsMap()) {
                         values.insert(assignment.second);
                     }
@@ -238,8 +238,8 @@ namespace SCAM {
                     while (nodeId != whileNodeID) {
                         auto stmt = this->CFG.at(nodeId)->getStmt();
                         if (stmt != nullptr) {
-                            if (auto assignment = dynamic_cast<SCAM::Assignment *>(stmt)) {
-                                if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
+                            if (auto assignment = dynamic_cast<DESCAM::Assignment *>(stmt)) {
+                                if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
                                     if (varOp->getVariable()->getFullName() == varName) {
                                         values.insert(assignment->getRhs());
                                     }
@@ -250,7 +250,7 @@ namespace SCAM {
                     }
                     this->assignmentsToIfValuesMap.insert(std::make_pair(varName, values));
                 } else { // use all assignment values to the variable
-                    std::set<SCAM::Expr *> values;
+                    std::set<DESCAM::Expr *> values;
                     this->assignmentsToIfValuesMap.insert(std::make_pair(varName, values));
                 }
             }
@@ -261,15 +261,15 @@ namespace SCAM {
     }
 
 
-    std::vector<SCAM::Expr *>
-    ReachabilityAnalysis::substituteVariablesInsideIfExpressionWithTheirValues(SCAM::Expr *ExpressionInsideIf) {
+    std::vector<DESCAM::Expr *>
+    ReachabilityAnalysis::substituteVariablesInsideIfExpressionWithTheirValues(DESCAM::Expr *ExpressionInsideIf) {
         int numberOfVariables = this->substitutionMap.size();
         auto pairItr = this->substitutionMap.begin();
         int currentVariableIndicator = 0;
         std::vector<int> currentValueIndex(numberOfVariables, 0);
-        std::stack<SCAM::Expr *> expressionStack;
+        std::stack<DESCAM::Expr *> expressionStack;
         expressionStack.push(ExpressionInsideIf);
-        std::vector<SCAM::Expr *> toBeAssertedExpr;
+        std::vector<DESCAM::Expr *> toBeAssertedExpr;
         while (!expressionStack.empty()) {
             std::string currentVarName = (*pairItr).first;
             if (this->assignmentsToIfValuesMap.find(currentVarName) !=
@@ -278,8 +278,8 @@ namespace SCAM {
                 auto valptr = this->assignmentsToIfValuesMap.at(currentVarName).begin();
                 for (int i = 0; i < currentValueIndex[currentVariableIndicator]; i++) { valptr++; }
                 if (this->assignmentsToIfValuesMap.at(currentVarName).end() != valptr) {
-                    SCAM::Expr *expression = expressionStack.top();
-                    SCAM::Expr *newExpression = SCAM::ExpressionSubstitution::substituteExpr(expression,pairItr->second,*valptr);
+                    DESCAM::Expr *expression = expressionStack.top();
+                    DESCAM::Expr *newExpression = DESCAM::ExpressionSubstitution::substituteExpr(expression,pairItr->second,*valptr);
                     currentValueIndex[currentVariableIndicator] += 1;
                     if (currentVariableIndicator ==
                         numberOfVariables -
@@ -300,8 +300,8 @@ namespace SCAM {
                 auto valptr = this->allVarValuesMap.at(currentVarName).begin();
                 for (int i = 0; i < currentValueIndex[currentVariableIndicator]; i++) { valptr++; }
                 if (this->allVarValuesMap.at(currentVarName).end() != valptr) {
-                    SCAM::Expr *expression = expressionStack.top();
-                    SCAM::Expr *newExpression = SCAM::ExpressionSubstitution::substituteExpr(expression,pairItr->second,*valptr);
+                    DESCAM::Expr *expression = expressionStack.top();
+                    DESCAM::Expr *newExpression = DESCAM::ExpressionSubstitution::substituteExpr(expression,pairItr->second,*valptr);
                     currentValueIndex[currentVariableIndicator] += 1;
                     if (currentVariableIndicator ==
                         numberOfVariables -
@@ -423,25 +423,25 @@ namespace SCAM {
         return this->CFG;
     }
 
-    void ReachabilityAnalysis::printWarning(SCAM::Stmt *IfStmt, bool cannotBe) {
+    void ReachabilityAnalysis::printWarning(DESCAM::Stmt *IfStmt, bool cannotBe) {
         std::string trueOrFalse = cannotBe ? "true!" : "false!";
         std::stringstream message;
         message << "The statement: '"
-                  << SCAM::PrintStmt::toString(IfStmt)
+                  << DESCAM::PrintStmt::toString(IfStmt)
                   << "' cannot be " << trueOrFalse;
         auto msg = message.str();
         auto locationInfo = IfStmt->getStmtInfo();
-        auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
-        auto vt = SCAM::LoggerMsg::ViolationType::NA;
-        auto pl = SCAM::Logger::getCurrentProcessedLocation();
-        SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
-        SCAM::Logger::addMsg(lmsg);
+        auto sl = DESCAM::LoggerMsg::SeverityLevel::Warning;
+        auto vt = DESCAM::LoggerMsg::ViolationType::NA;
+        auto pl = DESCAM::Logger::getCurrentProcessedLocation();
+        DESCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+        DESCAM::Logger::addMsg(lmsg);
     }
 
     //ReachabilityAnalysis for functions
     ReachabilityAnalysis::ReachabilityAnalysis(
-            std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList,
-            std::map<std::string, std::set<SCAM::Expr *>> allVarValuesMap,
+            std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> returnValueConditionList,
+            std::map<std::string, std::set<DESCAM::Expr *>> allVarValuesMap,
             std::set<std::string> variablesThatHaveReadSet) : returnValueConditionList(std::move(
             returnValueConditionList)), z3Expr(RA_z3Context), RA_hasRead(false), variablesThatHaveReadSet(std::move(
             variablesThatHaveReadSet)), allVarValuesMap(std::move(allVarValuesMap)),whileNodeID(0), currentNodeID(0)  {
@@ -451,13 +451,13 @@ namespace SCAM {
                 if (condExpr) {
                     if (condExpr->getDataType() == DataTypes::getDataType("bool")) {
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
-//                std::cout << "Checking condExpr: " << SCAM::PrintStmt::toString(condExpr)
+//                std::cout << "Checking condExpr: " << DESCAM::PrintStmt::toString(condExpr)
 //                          << std::endl;
 #endif
                         RA_solver_t.reset();
                         this->substitutionMap.clear();
 
-                        SCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(condExpr,std::set<std::string>{});
+                        DESCAM::FindVariablesAndFunctionsInStatement findVariablesAndFunctionsInStatement(condExpr,std::set<std::string>{});
                         if (findVariablesAndFunctionsInStatement.hasFunctions()) { continue; }
                         for (const auto& varOp : findVariablesAndFunctionsInStatement.getVarOpInStmtSet()) {
                             auto varName = varOp->getVariable()->getFullName();
@@ -517,7 +517,7 @@ namespace SCAM {
                                 }
                                 if (nottrue) {
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
-                                std::cout << "Statment " << SCAM::PrintStmt::toString(condExpr)
+                                std::cout << "Statment " << DESCAM::PrintStmt::toString(condExpr)
                                           << " cannot be true"
                                           << std::endl;
 #endif
@@ -529,7 +529,7 @@ namespace SCAM {
                             if (RA_solver_t.check() == z3::sat || RA_solver_t.check() == z3::unknown) {
                             } else {
 #ifdef DEBUG_REACHABILITY_ANALYSIS_FUNCTIONS
-                            std::cout << "Statment " << SCAM::PrintStmt::toString(condExpr)
+                            std::cout << "Statment " << DESCAM::PrintStmt::toString(condExpr)
                                       << " cannot be true"
                                       << std::endl;
 #endif
@@ -554,7 +554,7 @@ namespace SCAM {
 
     }
 
-    std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>>
+    std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>>
     ReachabilityAnalysis::getReturnValueConditionList() const {
         return this->returnValueConditionList;
     }

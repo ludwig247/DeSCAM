@@ -14,7 +14,7 @@
 #include <Config.h>
 
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief A logger sink that outputs log messages to an output file.
  */

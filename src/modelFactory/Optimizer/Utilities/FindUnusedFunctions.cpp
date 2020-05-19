@@ -7,7 +7,7 @@
 #include "FindUnusedFunctions.h"
 
 
-SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBlock *> &CFG, SCAM::Module *module)
+DESCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, DESCAM::CfgBlock *> &CFG, DESCAM::Module *module)
         : module(module), blockCFG(CFG) {
 
     for (auto block : this->blockCFG) {
@@ -30,17 +30,17 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgBloc
         for (const auto &function : this->unusedFunctionSet) {
             std::string msg = "the function '" + function.first + "' was never used!";
             LocationInfo locationInfo = function.second->getLocationInfo();
-            auto sl = SCAM::LoggerMsg::SeverityLevel::Warning;
-            auto vt = SCAM::LoggerMsg::ViolationType::NA;
-            auto pl = SCAM::Logger::getCurrentProcessedLocation();
-            SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
-            SCAM::Logger::addMsg(lmsg);
+            auto sl = DESCAM::LoggerMsg::SeverityLevel::Warning;
+            auto vt = DESCAM::LoggerMsg::ViolationType::NA;
+            auto pl = DESCAM::Logger::getCurrentProcessedLocation();
+            DESCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+            DESCAM::Logger::addMsg(lmsg);
             this->module->removeFunction(function.first);
         }
     }
 }
 
-SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode *> &CFG, SCAM::Module *module)
+DESCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, DESCAM::CfgNode *> &CFG, DESCAM::Module *module)
         : module(module), nodeCFG(CFG) {
 
     for (auto node : this->nodeCFG) {
@@ -61,47 +61,47 @@ SCAM::FindUnusedFunctions::FindUnusedFunctions(const std::map<int, SCAM::CfgNode
 }
 
 
-void SCAM::FindUnusedFunctions::visit(struct Assignment &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Assignment &node) {
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct UnaryExpr &node) {
+void DESCAM::FindUnusedFunctions::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct If &node) {
+void DESCAM::FindUnusedFunctions::visit(struct If &node) {
     node.getConditionStmt()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Write &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Write &node) {
     node.getValue()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Arithmetic &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Arithmetic &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Logical &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Logical &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Relational &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Relational &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Bitwise &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Bitwise &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Cast &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Cast &node) {
     node.getSubExpr()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(SCAM::FunctionOperand &node) {
+void DESCAM::FindUnusedFunctions::visit(DESCAM::FunctionOperand &node) {
     this->usedFunctionsSet.insert(node.getFunction()->getName());
     for (auto param : node.getParamValueMap()) {
         param.second->accept(*this);
@@ -111,27 +111,27 @@ void SCAM::FindUnusedFunctions::visit(SCAM::FunctionOperand &node) {
     }
 }
 
-void SCAM::FindUnusedFunctions::visit(struct ArrayOperand &node) {
+void DESCAM::FindUnusedFunctions::visit(struct ArrayOperand &node) {
     node.getIdx()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(struct CompoundExpr &node) {
+void DESCAM::FindUnusedFunctions::visit(struct CompoundExpr &node) {
     for (auto subVar : node.getValueMap()) {
         subVar.second->accept(*this);
     }
 }
 
-void SCAM::FindUnusedFunctions::visit(SCAM::ArrayExpr &node) {
+void DESCAM::FindUnusedFunctions::visit(DESCAM::ArrayExpr &node) {
     for (auto subVar : node.getValueMap()) {
         subVar.second->accept(*this);
     }
 }
 
-void SCAM::FindUnusedFunctions::visit(struct Return &node) {
+void DESCAM::FindUnusedFunctions::visit(struct Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::FindUnusedFunctions::visit(SCAM::Ternary &node) {
+void DESCAM::FindUnusedFunctions::visit(DESCAM::Ternary &node) {
     node.getCondition()->accept(*this);
     node.getTrueExpr()->accept(*this);
     node.getFalseExpr()->accept(*this);

@@ -10,7 +10,7 @@
 #include "Logger/Logger.h"
 #include "BoolValue.h"
 
-void SCAM::CreatePropertySuite::addNotifySignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addNotifySignals(const DESCAM::Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     for (auto port: module->getPorts()) {
         auto interface = port.second->getInterface();
         if (interface->isShared()) continue;
@@ -22,7 +22,7 @@ void SCAM::CreatePropertySuite::addNotifySignals(const SCAM::Module *module, std
 
 }
 
-void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addSyncSignals(const DESCAM::Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     for (auto port: module->getPorts()) {
         auto interface = port.second->getInterface();
         if (interface->isShared()) continue;
@@ -33,7 +33,7 @@ void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, std::
     }
 }
 
-void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addDataSignals(const DESCAM::Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     // DP SIGNALS
     for (const auto &port: module->getPorts()) {
         if (port.second->getDataType()->isVoid()) continue;
@@ -51,7 +51,7 @@ void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, std::
     }
 }
 
-void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     for (const auto &var: module->getVariableMap()) {
         // Check for Array-Types
         if (var.second->isSubVar() && var.second->getParent()->isArrayType()) {
@@ -80,20 +80,20 @@ void SCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, std::s
 
 }
 
-void SCAM::CreatePropertySuite::addStates(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addStates(const DESCAM::Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
 
     for (const auto &state: module->getFSM()->getStateMap()) {
         if (state.second->isInit()) continue;
         state.second->setName(state.second->getName());
         auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
         auto pm = std::make_shared<PropertyMacro> (stateVar);
-        pm->setExpression(new SCAM::BoolValue(true));
+        pm->setExpression(new DESCAM::BoolValue(true));
         propertySuite->addState(pm);
     }
 
 }
 
-void SCAM::CreatePropertySuite::addFunctions(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addFunctions(const DESCAM::Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     // FUNCTIONS
     for (const auto &function: module->getFunctionMap()) {
         propertySuite->addFunction(function.second);
@@ -101,7 +101,7 @@ void SCAM::CreatePropertySuite::addFunctions(const SCAM::Module *module, std::sh
 
 }
 
-void SCAM::CreatePropertySuite::addReset(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addReset(const Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     for (const auto &state: module->getFSM()->getStateMap()) {
         if (!state.second->isInit()) continue;
         assert((state.second->getOutgoingOperationsList().size() == 1) && "Only one operation allowed to start from init");
@@ -158,7 +158,7 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, std::shared_ptr<S
 
 }
 
-void SCAM::CreatePropertySuite::addOperations(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addOperations(const Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
 
     for (const auto &state : module->getFSM()->getStateMap()) {
         if (state.second->isInit()) continue;
@@ -179,9 +179,9 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, std::shared_
 
 
             //FREEZE VARS
-            std::set<SCAM::SyncSignal *> syncSignals;
-            std::set<SCAM::Variable *> variables;
-            std::set<SCAM::DataSignal *> dataSignals;
+            std::set<DESCAM::SyncSignal *> syncSignals;
+            std::set<DESCAM::Variable *> variables;
+            std::set<DESCAM::DataSignal *> dataSignals;
             std::set<std::string> freezeVars;
             for (auto assignment : operation->getCommitmentsList()) {
                 //Find all objects that need to be freezed
@@ -291,7 +291,7 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, std::shared_
 
 }
 
-void SCAM::CreatePropertySuite::addWait(const Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addWait(const Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     for (const auto &state : module->getFSM()->getStateMap()) {
         if (state.second->isInit()) continue;
         for (auto operation : state.second->getOutgoingOperationsList()) {
@@ -307,9 +307,9 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, std::shared_ptr<SC
             newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
 
             //FREEZE VARS
-            std::set<SCAM::SyncSignal *> syncSignals;
-            std::set<SCAM::Variable *> variables;
-            std::set<SCAM::DataSignal *> dataSignals;
+            std::set<DESCAM::SyncSignal *> syncSignals;
+            std::set<DESCAM::Variable *> variables;
+            std::set<DESCAM::DataSignal *> dataSignals;
             std::set<std::string> freezeVars;
             std::map<std::string, std::string> freezeVarMap;
             for (auto assignment : operation->getCommitmentsList()) {
@@ -378,7 +378,7 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, std::shared_ptr<SC
 
 }
 
-void SCAM::CreatePropertySuite::addTrueOperations(const SCAM::Module *module, std::shared_ptr<SCAM::PropertySuite> propertySuite) {
+void DESCAM::CreatePropertySuite::addTrueOperations(const DESCAM::Module *module, std::shared_ptr<DESCAM::PropertySuite> propertySuite) {
     int cycle_cnt = 0;
     //Find cylces
     TrueOperation trueOperation(module);

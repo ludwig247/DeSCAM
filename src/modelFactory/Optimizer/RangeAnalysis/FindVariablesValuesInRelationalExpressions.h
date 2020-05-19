@@ -13,14 +13,14 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: collects the values compared to variables values in relational expressions of If statements
         * \author:mi-alkoudsi
         * \inputs:
-        *       - std::map<int, SCAM::CfgNode *> CFG;
+        *       - std::map<int, DESCAM::CfgNode *> CFG;
         * \outputs:
-        *       - std::map<std::string, std::set<SCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
         *       - std::set<std::string> difficultToAnalyseVariablesSet;
         */
     class FindVariablesValuesInRelationalExpressions : public StmtAbstractVisitor {

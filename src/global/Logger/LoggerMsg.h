@@ -8,7 +8,7 @@
 #include <string>
 #include <LocationInfo.h>
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief The base class for a logger message along with its relevant information such file, statement and line numbers
  */
@@ -28,12 +28,12 @@ namespace SCAM {
 
         LoggerMsg() = default;
 
-        LoggerMsg(const std::string &message, const SCAM::LocationInfo &stmtInfo, SeverityLevel severityLevel,
+        LoggerMsg(const std::string &message, const DESCAM::LocationInfo &stmtInfo, SeverityLevel severityLevel,
                   ViolationType violationType, ProcessedLocation violationLocation);
 
         const std::string &getMessage();
 
-        const SCAM::LocationInfo &getLocationInfo();
+        const DESCAM::LocationInfo &getLocationInfo();
 
         std::string getSeverityLevel();
 
@@ -45,7 +45,7 @@ namespace SCAM {
 
         inline void setMessage(const std::string &message);
 
-        inline void setLocationInfo(const SCAM::LocationInfo &stmtInfo);
+        inline void setLocationInfo(const DESCAM::LocationInfo &stmtInfo);
 
         inline void setViolationType(ViolationType violationType);
 
@@ -57,7 +57,7 @@ namespace SCAM {
 
     protected:
         std::string message = "";
-        SCAM::LocationInfo locationInfo;
+        DESCAM::LocationInfo locationInfo;
         ViolationType violationType = ViolationType::NA;
         SeverityLevel severityLevel = SeverityLevel::Info;
         ProcessedLocation processedLocation = ProcessedLocation::Behavior;

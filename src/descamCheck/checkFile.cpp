@@ -17,23 +17,23 @@ namespace py = pybind11;
 
 int checkFile(int argc, const char *argv[]) {
     //Process commandline data
-    SCAM::CommandLineProcess cml = SCAM::CommandLineProcess(argc, argv);
+    DESCAM::CommandLineProcess cml = DESCAM::CommandLineProcess(argc, argv);
     /* Initialize logger */
     //setting sinks
-    std::shared_ptr<SCAM::LoggerSink> consoleSink = std::make_shared<SCAM::ConsoleSink>();
-    consoleSink->setFormatOption(SCAM::LoggerFormatter::FormatOption::JSON);
-    SCAM::Logger::addSink(consoleSink);
+    std::shared_ptr<DESCAM::LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
+    consoleSink->setFormatOption(DESCAM::LoggerFormatter::FormatOption::JSON);
+    DESCAM::Logger::addSink(consoleSink);
     //setting filtering options
-    SCAM::Logger::setFilteringOptions(
-            std::set<SCAM::LoggerFilter::FilterOptions>{SCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,
-                                                        SCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,
-                                                        SCAM::LoggerFilter::FilterOptions::showPortsMsgs,
-                                                        SCAM::LoggerFilter::FilterOptions::showFunctionMsgs}
+    DESCAM::Logger::setFilteringOptions(
+            std::set<DESCAM::LoggerFilter::FilterOptions>{DESCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,
+                                                        DESCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,
+                                                        DESCAM::LoggerFilter::FilterOptions::showPortsMsgs,
+                                                        DESCAM::LoggerFilter::FilterOptions::showFunctionMsgs}
     );
     //Create model
-    ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
+    ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
     // write log messages to all sinks
-    SCAM::Logger::log();
+    DESCAM::Logger::log();
     return 0;
 }
 

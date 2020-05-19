@@ -9,12 +9,12 @@
 #include <Stmt.h>
 #include "Behavior/Operation.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 class OptimizeOperations2 {
 public:
     OptimizeOperations2() = delete;
-    OptimizeOperations2(const std::vector<SCAM::Operation*> &opList, SCAM::Module *module);
+    OptimizeOperations2(const std::vector<DESCAM::Operation*> &opList, DESCAM::Module *module);
     ~OptimizeOperations2() = default;
 
     //Getter

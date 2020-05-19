@@ -7,14 +7,14 @@
 #include <utility>
 #include "ArrayOperand.h"
 
-SCAM::ArrayOperand::ArrayOperand(Variable *arrayVar, SCAM::Expr *idx, LocationInfo stmtLocationInfo) :
+DESCAM::ArrayOperand::ArrayOperand(Variable *arrayVar, DESCAM::Expr *idx, LocationInfo stmtLocationInfo) :
         idx(idx),
         operand(new VariableOperand(arrayVar)),
         Expr(arrayVar->getDataType()->getArrayType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-SCAM::ArrayOperand::ArrayOperand(SCAM::Operand *operand, SCAM::Expr *idx, LocationInfo stmtLocationInfo):
+DESCAM::ArrayOperand::ArrayOperand(DESCAM::Operand *operand, DESCAM::Expr *idx, LocationInfo stmtLocationInfo):
         idx(idx),
         operand(operand),
         Expr(operand->getDataType()->getArrayType()) {
@@ -24,11 +24,11 @@ SCAM::ArrayOperand::ArrayOperand(SCAM::Operand *operand, SCAM::Expr *idx, Locati
     assert(operand->getDataType()->isArrayType());
 }
 
-void SCAM::ArrayOperand::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::ArrayOperand::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::ArrayOperand::operator==(const SCAM::Stmt &other) const {
+bool DESCAM::ArrayOperand::operator==(const DESCAM::Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekArrayOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (ArrayOperand *) this;
@@ -37,18 +37,18 @@ bool SCAM::ArrayOperand::operator==(const SCAM::Stmt &other) const {
     return (thisPtr->operand == otherPtr->operand);
 }
 
-SCAM::Expr *SCAM::ArrayOperand::getIdx() const {
+DESCAM::Expr *DESCAM::ArrayOperand::getIdx() const {
     return idx;
 }
 
 
-SCAM::Operand * SCAM::ArrayOperand::getArrayOperand() const {
+DESCAM::Operand * DESCAM::ArrayOperand::getArrayOperand() const {
     return operand;
 }
 
 
 
-//std::string SCAM::ArrayOperand::getOperandName() const {
+//std::string DESCAM::ArrayOperand::getOperandName() const {
 //    std::string name = this->arrayVar->getName()+"[" + "NOT_IMPLEMNETED" + "]";
 //    return name;
 //}

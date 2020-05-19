@@ -7,24 +7,24 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::VariableOperand::VariableOperand(Variable *variable, LocationInfo stmtLocationInfo) :
+DESCAM::VariableOperand::VariableOperand(Variable *variable, LocationInfo stmtLocationInfo) :
         variable(variable), Operand(variable->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-SCAM::Variable *SCAM::VariableOperand::getVariable() {
+DESCAM::Variable *DESCAM::VariableOperand::getVariable() {
     return this->variable;
 }
 
-void SCAM::VariableOperand::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::VariableOperand::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-std::string SCAM::VariableOperand::getOperandName() const {
+std::string DESCAM::VariableOperand::getOperandName() const {
     return this->variable->getFullName();
 }
 
-bool SCAM::VariableOperand::operator==(const Stmt &other) const {
+bool DESCAM::VariableOperand::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekVariableOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (VariableOperand *) this;

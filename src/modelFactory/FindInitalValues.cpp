@@ -10,7 +10,7 @@
 #include "FindNewDatatype.h"
 #include "FindDataFlow.h"
 
-bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
+bool DESCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
     //Check whether constructor body is empty
     int cnt = 0;
     for (auto it = constructorDecl->getBody()->children().first; it != constructorDecl->getBody()->children().second; it++) {
@@ -53,7 +53,7 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
                                 Variable place_holder_variable("foo",place_holder_type);
                                 VariableOperand variableOperand(&place_holder_variable);
                                 auto assignment = Assignment(&variableOperand, findDataFlow.getExpr());
-                                auto result = SCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
+                                auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
                                 if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
                                     this->initValue = valueT;
                                 } else TERMINATE("All intializer are required to have a constant value");
@@ -72,7 +72,7 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
 }
 
 
-SCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, SCAM::Module *module, clang::CompilerInstance& ci):
+DESCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, DESCAM::Module *module, clang::CompilerInstance& ci):
     module(module),
     fieldDecl(fieldDecl),
     initValue(nullptr),
@@ -82,7 +82,7 @@ SCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang
 
 }
 
-SCAM::ConstValue *SCAM::FindInitalValues::getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl *fieldDecl, SCAM::Module *module, clang::CompilerInstance& ci) {
+DESCAM::ConstValue *DESCAM::FindInitalValues::getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl *fieldDecl, DESCAM::Module *module, clang::CompilerInstance& ci) {
     FindInitalValues findInitalValues(recordDecl,fieldDecl,module,ci);
     return findInitalValues.initValue;
 }

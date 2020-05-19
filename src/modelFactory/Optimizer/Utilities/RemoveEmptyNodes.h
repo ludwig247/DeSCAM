@@ -15,7 +15,7 @@
 #include "RenumberCFG.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Removes nodes in the CfgBlock graph that have no statements and terminator

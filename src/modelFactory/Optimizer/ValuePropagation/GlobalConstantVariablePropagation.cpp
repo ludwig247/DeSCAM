@@ -5,7 +5,7 @@
 #include "GlobalConstantVariablePropagation.h"
 
 
-SCAM::GlobalConstantVariablePropagation::GlobalConstantVariablePropagation(const std::map<int, SCAM::CfgNode *> &CFG,
+DESCAM::GlobalConstantVariablePropagation::GlobalConstantVariablePropagation(const std::map<int, DESCAM::CfgNode *> &CFG,
                                                                            const std::map<std::string, Variable *> &globalVariableMap)
         : CFG(CFG), globalVariableMap(globalVariableMap) {
 
@@ -19,11 +19,11 @@ SCAM::GlobalConstantVariablePropagation::GlobalConstantVariablePropagation(const
     }
 }
 
-const std::map<int, SCAM::CfgNode *> &SCAM::GlobalConstantVariablePropagation::getCFG() const {
+const std::map<int, DESCAM::CfgNode *> &DESCAM::GlobalConstantVariablePropagation::getCFG() const {
     return this->CFG;
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::VariableOperand &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::VariableOperand &node) {
     auto var = node.getVariable();
     if (this->globalVariableMap.find(var->getName()) != this->globalVariableMap.end()) {
         if (var->isConstant()) {
@@ -34,7 +34,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::VariableOperand &node)
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Assignment &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Assignment &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -49,11 +49,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Assignment &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->CFG.at(this->currentNodeId)->setStmt(new SCAM::Assignment(lhs, rhs, node.getStmtInfo()));
+        this->CFG.at(this->currentNodeId)->setStmt(new DESCAM::Assignment(lhs, rhs, node.getStmtInfo()));
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::UnaryExpr &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::UnaryExpr &node) {
     this->newExpr = nullptr;
     node.getExpr()->accept(*this);
     if (this->newExpr) {
@@ -71,7 +71,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::UnaryExpr &node) {
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::While &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::While &node) {
     this->newExpr = nullptr;
     node.getConditionStmt()->accept(*this);
     if (this->newExpr) {
@@ -80,7 +80,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::While &node) {
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::If &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::If &node) {
     this->newExpr = nullptr;
     node.getConditionStmt()->accept(*this);
     if (this->newExpr) {
@@ -89,7 +89,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::If &node) {
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Write &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr) {
         this->CFG.at(this->currentNodeId)->setStmt(
@@ -98,7 +98,7 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Write &node) {
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Arithmetic &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Arithmetic &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -113,11 +113,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Arithmetic &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Arithmetic(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Logical &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Logical &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -132,11 +132,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Logical &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Logical(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Relational &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Relational &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -151,11 +151,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Relational &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Relational(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Bitwise &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Bitwise &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -170,11 +170,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Bitwise &node) {
 
     //Create new stmt
     if (!(*lhs == *node.getLhs()) || !(*rhs == *node.getRhs())) {
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Bitwise(lhs, node.getOperation(), rhs, node.getStmtInfo());
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Cast &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Cast &node) {
     this->newExpr = nullptr;
     node.getSubExpr()->accept(*this);
     if (this->newExpr) {
@@ -182,8 +182,8 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Cast &node) {
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::FunctionOperand &node) {
-    std::map<std::string, SCAM::Expr *> newParamValueMap;
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::FunctionOperand &node) {
+    std::map<std::string, DESCAM::Expr *> newParamValueMap;
     for (const auto &param : node.getParamValueMap()) {
         this->newExpr = nullptr;
         param.second->accept(*this);
@@ -193,11 +193,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::FunctionOperand &node)
     }
     assert(node.getParamValueMap().size() == newParamValueMap.size());
     if (newParamValueMap != node.getParamValueMap()) {
-        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap, node.getStmtInfo());
+        this->newExpr = new DESCAM::FunctionOperand(node.getFunction(), newParamValueMap, node.getStmtInfo());
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayOperand &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (!(*node.getIdx() == *this->newExpr)) {
@@ -205,8 +205,8 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayOperand &node) {
     }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::CompoundExpr &node) {
-    std::map<std::string, SCAM::Expr *> newValMap;
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::CompoundExpr &node) {
+    std::map<std::string, DESCAM::Expr *> newValMap;
     for (auto val : node.getValueMap()) {
         this->newExpr = nullptr;
         val.second->accept(*this);
@@ -215,12 +215,12 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::CompoundExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (newValMap != node.getValueMap()) {
-        this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType(), node.getStmtInfo());
+        this->newExpr = new DESCAM::CompoundExpr(newValMap, node.getDataType(), node.getStmtInfo());
     } else { this->newExpr = nullptr; }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayExpr &node) {
-    std::map<std::string, SCAM::Expr *> newValMap;
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::ArrayExpr &node) {
+    std::map<std::string, DESCAM::Expr *> newValMap;
     bool valueMapChanged = false;
     for (auto val : node.getValueMap()) {
         this->newExpr = nullptr;
@@ -231,11 +231,11 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (valueMapChanged) {
-        this->newExpr = new SCAM::ArrayExpr(newValMap, node.getDataType());
+        this->newExpr = new DESCAM::ArrayExpr(newValMap, node.getDataType());
     } else { this->newExpr = nullptr; }
 }
 
-void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Ternary &node) {
+void DESCAM::GlobalConstantVariablePropagation::visit(DESCAM::Ternary &node) {
     this->newExpr = nullptr;
     auto condition = node.getCondition();
     auto trueExpr = node.getTrueExpr();
@@ -250,6 +250,6 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Ternary &node) {
     if (this->newExpr) falseExpr = this->newExpr;
     if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
         !(*falseExpr == *node.getFalseExpr()))
-        this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
+        this->newExpr = new DESCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
 }
 

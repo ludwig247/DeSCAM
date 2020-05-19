@@ -15,7 +15,7 @@
 #include <CfgBlock.h>
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Give the nodes in the CFG sequential IDs.

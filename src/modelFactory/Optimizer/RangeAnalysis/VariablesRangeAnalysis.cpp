@@ -6,8 +6,8 @@
 #include "Optimizer/Debug.h"
 
 
-SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::CfgNode *>& CFG,
-                                                     const std::map<std::string, std::set<SCAM::Expr *>>& variablesValuesMap,
+DESCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, DESCAM::CfgNode *>& CFG,
+                                                     const std::map<std::string, std::set<DESCAM::Expr *>>& variablesValuesMap,
                                                      const std::set<std::string>& variablesThatHaveReadSet) : CFG(CFG),
                                                                                                               variablesValuesMap(
                                                                                                                       variablesValuesMap),
@@ -25,7 +25,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
     std::cout << std::endl;
 #endif
     //removing bool & enum vars, values with counters variables, and adding variables with counter values to the toBeAnalysedCounterVariablesSet
-    std::map<std::string, std::set<SCAM::Expr *>> integerAndUnsignedVariablesWithNoCounterValuesMap;
+    std::map<std::string, std::set<DESCAM::Expr *>> integerAndUnsignedVariablesWithNoCounterValuesMap;
     for (auto var : this->variablesValuesMap) {
         if ((*var.second.begin())->getDataType()->isBoolean() ||
             (*var.second.begin())->getDataType()->isEnumType()) { continue; }
@@ -34,14 +34,14 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
         } else if ((*var.second.begin())->getDataType()->isUnsigned()) {
             this->variablesDataTypesMap.insert(std::make_pair(var.first, "unsigned"));
         }
-        std::set<SCAM::Expr *> valuesSet;
+        std::set<DESCAM::Expr *> valuesSet;
         bool assignedByReadVar = false;
         for (auto val : var.second) {
-            SCAM::FindVariablesAndFunctionsInStatement fvf(val, this->variablesThatHaveReadSet);
+            DESCAM::FindVariablesAndFunctionsInStatement fvf(val, this->variablesThatHaveReadSet);
             if(fvf.hasReadVariable()){
                 assignedByReadVar = true;
             }
-            SCAM::DetectCounterVariable counterDetector(var.first, val);
+            DESCAM::DetectCounterVariable counterDetector(var.first, val);
             if (counterDetector.isCounterVariable()) {
                 this->toBeAnalysedCounterVariablesSet.insert(var.first);
             } else {
@@ -70,7 +70,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
     std::cout << std::endl;
 #endif
     //get values from relational expressions
-    SCAM::FindVariablesValuesInRelationalExpressions valuesFromRelationalExpr(this->CFG);
+    DESCAM::FindVariablesValuesInRelationalExpressions valuesFromRelationalExpr(this->CFG);
     for (auto varName : valuesFromRelationalExpr.getDifficultToAnalyseVariablesSet()) {
         this->difficultToAnalyzeVariablesSet.insert(varName);
     }
@@ -108,7 +108,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 #endif
 
     //get values from functionsReturnsSubstition
-    SCAM::SubstituteFunctionsWithReturnValues functionsReturnsSubstitution(this->variablesValuesMap);
+    DESCAM::SubstituteFunctionsWithReturnValues functionsReturnsSubstitution(this->variablesValuesMap);
     for (auto varName : functionsReturnsSubstitution.getVariablesWithRecrusiveFunctions()) {
         this->difficultToAnalyzeVariablesSet.insert(varName);
     }
@@ -134,7 +134,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 #endif
 
     //analyze counter variables and add those that take the whole range of int/unsigned to difficultToAnalyzeVariableSet
-    SCAM::AnalyzeCounterVariables counterVariablesAnalysis(this->toBeAnalysedCounterVariablesSet, this->CFG);
+    DESCAM::AnalyzeCounterVariables counterVariablesAnalysis(this->toBeAnalysedCounterVariablesSet, this->CFG);
     for (auto var : counterVariablesAnalysis.getMarginalValuesMap()) {
         if (var.second != "Limited") {
             if (this->difficultToAnalyzeVariablesSet.find(var.first) ==
@@ -159,7 +159,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 
     if (!this->difficultToAnalyzeVariablesSet.empty()) {
         //remove difficult to analyze variables
-        std::map<std::string, std::set<SCAM::Expr *>> variableValuesMapWithoutDifficultToAnalyzeVariables;
+        std::map<std::string, std::set<DESCAM::Expr *>> variableValuesMapWithoutDifficultToAnalyzeVariables;
         for (auto pair : this->variablesValuesMap) {
             if (this->difficultToAnalyzeVariablesSet.find(pair.first) != this->difficultToAnalyzeVariablesSet.end() ||
                 this->variablesThatHaveReadSet.find(pair.first) != this->variablesThatHaveReadSet.end()) { continue; }
@@ -183,11 +183,11 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 
     //substitute all variables in variablesValuesMap with all their values
     while (bool MoreSubstitutionNeeded = true) {
-        std::map<std::string, std::set<SCAM::Expr *>> substitutedVariableValuesMap;
+        std::map<std::string, std::set<DESCAM::Expr *>> substitutedVariableValuesMap;
         for (auto pair : this->variablesValuesMap) {
-            std::set<SCAM::Expr *> substitutedValuesSet;
+            std::set<DESCAM::Expr *> substitutedValuesSet;
             for (auto variableValue : pair.second) {
-                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(variableValue,this->variablesThatHaveReadSet);
+                DESCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(variableValue,this->variablesThatHaveReadSet);
                 if (variablesInStmtFinder.hasFunctions()) {
                     substitutedValuesSet.clear();
                     break;
@@ -196,7 +196,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
                 if (variablesInValue.empty()) {
                     substitutedValuesSet.insert(variableValue);
                 } else {
-                    std::map<std::string, std::set<SCAM::Expr *>> substitutionMap;
+                    std::map<std::string, std::set<DESCAM::Expr *>> substitutionMap;
                     bool noReadOrDifficultVariables = true;
                     for (auto variable : variablesInValue) {
                         if (this->difficultToAnalyzeVariablesSet.find(variable) !=
@@ -266,7 +266,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
         for (auto val : var.second) {
             try {
                 z3::context contxt;
-                SCAM::ExprTranslator translator(&contxt);
+                DESCAM::ExprTranslator translator(&contxt);
                 z3::expr z3Expr(contxt);
                 z3Expr = translator.translate(val);
 //              std::cout << "before simplification z3Expr is" << z3Expr << std::endl;
@@ -310,7 +310,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
                 this->variableBitWidthMap.insert(std::make_pair(var.first, 2));
             } else {
                 if (largestValue < 0) { largestValue *= -1; }
-                this->variableBitWidthMap.insert(std::make_pair(var.first, SCAM::GlobalUtilities::getRequiredBits(largestValue) + 1));
+                this->variableBitWidthMap.insert(std::make_pair(var.first, DESCAM::GlobalUtilities::getRequiredBits(largestValue) + 1));
             }
             bool canBeUnsigned = true;
             for (auto val : intValuesVector) {
@@ -322,11 +322,11 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
             if (canBeUnsigned) {
                std::string msg = "Variable " + var.first + " can be unsigned!";
                 LocationInfo locationInfo;
-                auto sl = SCAM::LoggerMsg::SeverityLevel::Info;
-                auto vt = SCAM::LoggerMsg::ViolationType::NA;
-                auto pl = SCAM::Logger::getCurrentProcessedLocation();
-                SCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
-                SCAM::Logger::addMsg(lmsg);
+                auto sl = DESCAM::LoggerMsg::SeverityLevel::Info;
+                auto vt = DESCAM::LoggerMsg::ViolationType::NA;
+                auto pl = DESCAM::Logger::getCurrentProcessedLocation();
+                DESCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+                DESCAM::Logger::addMsg(lmsg);
             }
 
         } else if (!unsignedValuesVector.empty()) {
@@ -345,7 +345,7 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
             if (largestValue == 0) {
                 this->variableBitWidthMap.insert(std::make_pair(var.first, 1));
             } else {
-                this->variableBitWidthMap.insert(std::make_pair(var.first, SCAM::GlobalUtilities::getRequiredBits(largestValue)));
+                this->variableBitWidthMap.insert(std::make_pair(var.first, DESCAM::GlobalUtilities::getRequiredBits(largestValue)));
             }
         }
     }
@@ -358,18 +358,18 @@ SCAM::VariablesRangeAnalysis::VariablesRangeAnalysis(const std::map<int, SCAM::C
 
 }
 
-const std::map<std::string, int> &SCAM::VariablesRangeAnalysis::getVariableBitWidthMap() const {
+const std::map<std::string, int> &DESCAM::VariablesRangeAnalysis::getVariableBitWidthMap() const {
     return this->variableBitWidthMap;
 }
 
-std::set<SCAM::Expr *> SCAM::VariablesRangeAnalysis::substituteVariablesWithValues(SCAM::Expr *toBeSubstitutedExpr,
-                                                                                   const std::map<std::string, std::set<SCAM::Expr *>> &substitutionMap) {
-    std::set<SCAM::Expr *> substitutedValuesVector;
+std::set<DESCAM::Expr *> DESCAM::VariablesRangeAnalysis::substituteVariablesWithValues(DESCAM::Expr *toBeSubstitutedExpr,
+                                                                                   const std::map<std::string, std::set<DESCAM::Expr *>> &substitutionMap) {
+    std::set<DESCAM::Expr *> substitutedValuesVector;
     int numberOfVariables = substitutionMap.size();
     auto pairItr = substitutionMap.begin();
     int CurrentVariable = 0;
     std::vector<int> currentValueIndex(numberOfVariables, 0);
-    std::stack<SCAM::Expr *> valueStack;
+    std::stack<DESCAM::Expr *> valueStack;
     valueStack.push(toBeSubstitutedExpr);
 
     while (!valueStack.empty()) {
@@ -377,9 +377,9 @@ std::set<SCAM::Expr *> SCAM::VariablesRangeAnalysis::substituteVariablesWithValu
         auto valptr = substitutionMap.at(currentVarName).begin();
         for (int i = 0; i < currentValueIndex[CurrentVariable]; i++) { valptr++; }
         if (valptr != substitutionMap.at(currentVarName).end()) {
-            SCAM::Expr *expression = valueStack.top();
-            SCAM::ValueSubstitution valueSubstitution;
-            SCAM::Expr *newExpression = valueSubstitution.substituteExpr(expression,
+            DESCAM::Expr *expression = valueStack.top();
+            DESCAM::ValueSubstitution valueSubstitution;
+            DESCAM::Expr *newExpression = valueSubstitution.substituteExpr(expression,
                                                                          currentVarName,
                                                                          *valptr);
             if (newExpression == nullptr) { TERMINATE("substitutionError!"); }

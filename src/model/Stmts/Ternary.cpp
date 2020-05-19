@@ -11,7 +11,7 @@
 #include "Logger/Logger.h"
 
 
-SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *falseExpr,
+DESCAM::Ternary::Ternary(DESCAM::Expr *condition, DESCAM::Expr *trueExpr, DESCAM::Expr *falseExpr,
                        LocationInfo stmtLocationInfo) :
         condition(condition),
         trueExpr(trueExpr),
@@ -25,18 +25,18 @@ SCAM::Ternary::Ternary(SCAM::Expr *condition, SCAM::Expr *trueExpr, SCAM::Expr *
     if (trueExpr->getDataType() != falseExpr->getDataType()) {
         std::string message = PrintStmt::toString(trueExpr) + ":" + trueExpr->getDataType()->getName() + ":" +
                               PrintStmt::toString(falseExpr) + ":" + falseExpr->getDataType()->getName() + "\n";
-        throw SCAM::DescamException(message + "Compare: TRUE(" + trueExpr->getDataType()->getName() + ") and FALSE(" +
+        throw DESCAM::DescamException(message + "Compare: TRUE(" + trueExpr->getDataType()->getName() + ") and FALSE(" +
                                    falseExpr->getDataType()->getName() +
                                    ") are not of the same datatype", this->stmtLocationInfo);
     }
 
 }
 
-void SCAM::Ternary::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Ternary::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::Ternary::operator==(const SCAM::Stmt &other) const {
+bool DESCAM::Ternary::operator==(const DESCAM::Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekTernary(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Ternary *) this;
@@ -52,24 +52,24 @@ bool SCAM::Ternary::operator==(const SCAM::Stmt &other) const {
     return conditions && trueExprs && falseExprs;
 }
 
-SCAM::Expr *SCAM::Ternary::getCondition() const {
+DESCAM::Expr *DESCAM::Ternary::getCondition() const {
     return condition;
 }
 
-SCAM::Expr *SCAM::Ternary::getTrueExpr() const {
+DESCAM::Expr *DESCAM::Ternary::getTrueExpr() const {
     return trueExpr;
 }
 
-SCAM::Expr *SCAM::Ternary::getFalseExpr() const {
+DESCAM::Expr *DESCAM::Ternary::getFalseExpr() const {
     return falseExpr;
 }
 
-void SCAM::Ternary::setTrivialTrue() {
+void DESCAM::Ternary::setTrivialTrue() {
     this->condition = new BoolValue(true);
 
 }
 
-void SCAM::Ternary::setTrivialFalse() {
+void DESCAM::Ternary::setTrivialFalse() {
     this->condition = new BoolValue(false);
 
 }

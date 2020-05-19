@@ -23,13 +23,13 @@
 #include <stack>
 #include <set>
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Finds the ranges of unsigned and integer variables, which are not assigned by read operations
         * \author:mi-alkoudsi
         * \inputs:
-        *       - std::map<int, SCAM::CfgNode *> CFG;
-        *       - std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        *       - std::map<int, DESCAM::CfgNode *> CFG;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> variablesValuesMap;
         *       - std::set<std::string>& variablesThatHaveReadSet;
         * \outputs:
         *       - std::map<std::string, int> variablesBitwidthMap

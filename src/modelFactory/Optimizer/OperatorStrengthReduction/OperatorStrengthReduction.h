@@ -16,7 +16,7 @@
 #include "PrintStmt.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
       * \brief: Transforms heavy operations such as multiplications,divisions into simpler operations such as shifts and additions, if possible.

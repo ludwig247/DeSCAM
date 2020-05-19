@@ -16,7 +16,7 @@
 #include "Function.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     class Module : public AbstractNode {
     public:
         Module() = delete;
@@ -57,11 +57,11 @@ namespace SCAM {
 
         void setPropertySuite(std::shared_ptr<PropertySuite> propertySuite);
 
-        std::map<int, SCAM::CfgNode *> getCFG() const;
+        std::map<int, DESCAM::CfgNode *> getCFG() const;
 
-        std::multimap<std::string, std::vector<SCAM::CfgNode *>> getcommGroups() const; //TODO: delete
-        void setCFG(std::map<int, SCAM::CfgNode *> cfg);
-        void setCFG(std::map<int, SCAM::CfgNode *> cfg, std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups);
+        std::multimap<std::string, std::vector<DESCAM::CfgNode *>> getcommGroups() const; //TODO: delete
+        void setCFG(std::map<int, DESCAM::CfgNode *> cfg);
+        void setCFG(std::map<int, DESCAM::CfgNode *> cfg, std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups);
 
 
     private:
@@ -72,8 +72,8 @@ namespace SCAM {
 
         FSM *fsm;
 
-        std::map<int, SCAM::CfgNode *> cfg;
-        std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
+        std::map<int, DESCAM::CfgNode *> cfg;
+        std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups;
 
         std::shared_ptr<PropertySuite> propertySuite;
     };

@@ -14,7 +14,7 @@
 #include <utility>
 #include <GlobalUtilities.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
     * \brief: Simplifies expressions in the CFG or Functions using the Z3++ Solver.

@@ -12,9 +12,9 @@
  * Otherwise, make all paths to the statement and call propagateConstantValue
  * If propagation is valid, update varValMap and the statement
  * */
-namespace SCAM {
+namespace DESCAM {
 
-    GlobalConstantPropagation::GlobalConstantPropagation(const std::map<int, SCAM::CfgNode *> &CFG,
+    GlobalConstantPropagation::GlobalConstantPropagation(const std::map<int, DESCAM::CfgNode *> &CFG,
                                                          const FindCfgPaths &findCfgPaths,
                                                          std::set<std::string> variablesThatHaveReadSet) : CFG(
             CFG), propagationValid(false), variablesThatHaveReadSet(std::move(variablesThatHaveReadSet)) {
@@ -43,7 +43,7 @@ namespace SCAM {
     }
 
 
-    const std::map<int, SCAM::CfgNode *> &GlobalConstantPropagation::getCFG() const {
+    const std::map<int, DESCAM::CfgNode *> &GlobalConstantPropagation::getCFG() const {
         return this->CFG;
     }
 
@@ -78,7 +78,7 @@ namespace SCAM {
 
     void GlobalConstantPropagation::visit(class Assignment &node) {
         // if the lhs is a variableoperand check if there is a use of a variable in the rhs
-        auto lhs = dynamic_cast<SCAM::VariableOperand *>(node.getLhs());
+        auto lhs = dynamic_cast<DESCAM::VariableOperand *>(node.getLhs());
         if (lhs != nullptr) {
             node.getRhs()->accept(*this);
             if (this->newExpr != nullptr && propagationValid) {
@@ -243,8 +243,8 @@ namespace SCAM {
         } else { this->newExpr = &node; }
     }
 
-    void GlobalConstantPropagation::visit(struct SCAM::FunctionOperand &node) {
-        std::map<std::string, SCAM::Expr *> newParamValueMap;
+    void GlobalConstantPropagation::visit(struct DESCAM::FunctionOperand &node) {
+        std::map<std::string, DESCAM::Expr *> newParamValueMap;
         for (auto param : node.getParamValueMap()) {
             this->newExpr = nullptr;
             param.second->accept(*this);
@@ -254,7 +254,7 @@ namespace SCAM {
                 newParamValueMap.insert(std::make_pair(param.first, param.second));
             }
         }
-        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap,node.getStmtInfo());
+        this->newExpr = new DESCAM::FunctionOperand(node.getFunction(), newParamValueMap,node.getStmtInfo());
     }
 
     void GlobalConstantPropagation::visit(struct ArrayOperand &node) {
@@ -266,7 +266,7 @@ namespace SCAM {
     }
 
     void GlobalConstantPropagation::visit(class CompoundExpr &node) {
-        std::map<std::string, SCAM::Expr *> valueMap;
+        std::map<std::string, DESCAM::Expr *> valueMap;
         for (auto subVar : node.getValueMap()) {
             this->newExpr = nullptr;
             subVar.second->accept(*this);
@@ -278,7 +278,7 @@ namespace SCAM {
     }
 
     void GlobalConstantPropagation::visit(class ArrayExpr &node) {
-        std::map<std::string, SCAM::Expr *> valueMap;
+        std::map<std::string, DESCAM::Expr *> valueMap;
         for (auto subVar : node.getValueMap()) {
             this->newExpr = nullptr;
             subVar.second->accept(*this);
@@ -304,6 +304,6 @@ namespace SCAM {
         if (this->newExpr) falseExpr = this->newExpr;
         if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
             !(*falseExpr == *node.getFalseExpr()))
-            this->newExpr = new SCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
+            this->newExpr = new DESCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
     }
 }

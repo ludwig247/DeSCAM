@@ -6,7 +6,7 @@
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor

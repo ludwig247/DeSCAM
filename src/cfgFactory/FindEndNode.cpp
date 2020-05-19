@@ -25,14 +25,14 @@
  * (2) Return
  */
 
-SCAM::FindEndNode::FindEndNode(SCAM::CfgBlock *startNode) :
+DESCAM::FindEndNode::FindEndNode(DESCAM::CfgBlock *startNode) :
         startNode(startNode),
         endNode(startNode) {
 
     assert(startNode != nullptr);
     assert(startNode->hasTerminator());
     //Either starteNode is a while(true) with 1 successor or an if two successors ...
-    assert((startNode->getSuccessorList().size() == 1 && dynamic_cast<SCAM::While *>(startNode->getTerminator()) != nullptr) ||
+    assert((startNode->getSuccessorList().size() == 1 && dynamic_cast<DESCAM::While *>(startNode->getTerminator()) != nullptr) ||
            startNode->getSuccessorList().size() == 2);
 
     //CASE: While of thread
@@ -52,7 +52,7 @@ SCAM::FindEndNode::FindEndNode(SCAM::CfgBlock *startNode) :
     }
 }
 
-void SCAM::FindEndNode::recursion(SCAM::CfgBlock *node) {
+void DESCAM::FindEndNode::recursion(DESCAM::CfgBlock *node) {
     if (!pathNodes.insert(node->getBlockID()).second) {
         this->endNode = node;
         return;
@@ -69,7 +69,7 @@ void SCAM::FindEndNode::recursion(SCAM::CfgBlock *node) {
     }
 }
 
-SCAM::CfgBlock *SCAM::FindEndNode::getEndNode() {
+DESCAM::CfgBlock *DESCAM::FindEndNode::getEndNode() {
     return this->endNode;
 }
 

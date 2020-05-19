@@ -23,7 +23,7 @@ public:
     void SetUp() override{};
     void TearDown() override{};
 protected:
-    std::vector<SCAM::LoggerMsg> msgsVector;
+    std::vector<DESCAM::LoggerMsg> msgsVector;
 
 };
 
@@ -37,12 +37,12 @@ refFile.close();
 
 
 #define FilterOptionsSet_NoGlobalConstants(filterOptionsSet) \
- std::set<SCAM::LoggerFilter::FilterOptions> filterOptionsSet{ \
-SCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,\
-SCAM::LoggerFilter::FilterOptions::showFunctionMsgs,\
-SCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,\
-SCAM::LoggerFilter::FilterOptions::showPortsMsgs,\
-SCAM::LoggerFilter::FilterOptions::showVariableMsgs\
+ std::set<DESCAM::LoggerFilter::FilterOptions> filterOptionsSet{ \
+DESCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,\
+DESCAM::LoggerFilter::FilterOptions::showFunctionMsgs,\
+DESCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,\
+DESCAM::LoggerFilter::FilterOptions::showPortsMsgs,\
+DESCAM::LoggerFilter::FilterOptions::showVariableMsgs\
 };
 
 

@@ -7,33 +7,33 @@
 #include "NodePeekVisitor.h"
 #include "DescamException.h"
 
-SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype, LocationInfo stmtLocationInfo) :
+DESCAM::Cast::Cast(DESCAM::Expr *expr, const DESCAM::DataType *toDatatype, LocationInfo stmtLocationInfo) :
         Expr(toDatatype),
         expr(expr) {
     this->stmtLocationInfo = stmtLocationInfo;
-    if (expr == nullptr) throw SCAM::DescamException("Cast: expr is null!",this->stmtLocationInfo);
-    if (expr->getDataType() == toDatatype) throw SCAM::DescamException("No cast necessary -> same datatype. Remove static_cast",this->stmtLocationInfo);
+    if (expr == nullptr) throw DESCAM::DescamException("Cast: expr is null!",this->stmtLocationInfo);
+    if (expr->getDataType() == toDatatype) throw DESCAM::DescamException("No cast necessary -> same datatype. Remove static_cast",this->stmtLocationInfo);
     if (!expr->getDataType()->isUnsigned() && !expr->getDataType()->isInteger()) {
-        throw SCAM::DescamException("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed",this->stmtLocationInfo);
     }
     if (!toDatatype->isUnsigned() && !toDatatype->isInteger()) {
-        throw SCAM::DescamException("Cast only to unsigned or int",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Cast only to unsigned or int",this->stmtLocationInfo);
     }
 }
 
-SCAM::Cast::~Cast() {
+DESCAM::Cast::~Cast() {
 
 }
 
-void SCAM::Cast::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Cast::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-SCAM::Expr *SCAM::Cast::getSubExpr() const {
+DESCAM::Expr *DESCAM::Cast::getSubExpr() const {
     return expr;
 }
 
-bool SCAM::Cast::operator==(const Stmt &other) const {
+bool DESCAM::Cast::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekCast(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Cast *) this;

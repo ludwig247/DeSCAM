@@ -5,7 +5,7 @@
 #ifndef SCAM_STMTABSTRACTVISITOR_H
 #define SCAM_STMTABSTRACTVISITOR_H
 
-namespace SCAM {
+namespace DESCAM {
 
     class StmtAbstractVisitor {
     public:

@@ -17,7 +17,7 @@
 #include "Optimizer/OperatorStrengthReduction/OperatorStrengthReduction.h"
 #include "Optimizer/Utilities/FindVariablesValues.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Performs optimizations on functions inside the control flow graph(CFG)
@@ -25,8 +25,8 @@ namespace SCAM {
      * \author: mi-alkoudsi
      *
      * \input:
-     *      - std::map<int, SCAM::CfgNode *> cfg;
-     *      - SCAM::Module * module;
+     *      - std::map<int, DESCAM::CfgNode *> cfg;
+     *      - DESCAM::Module * module;
      *      - std::set<std::string> variablesThatHaveReadSet;
      * \output:
      *      - std::map<int, CfgNode *> optimizedCFG;

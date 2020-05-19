@@ -14,7 +14,7 @@
 #include "Stmts_all.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     class FindCommunication2 : public StmtAbstractVisitor {
 
 
@@ -35,8 +35,8 @@ namespace SCAM {
         Communication * getCommStmt() const;
         Port * getPort() const;
         Stmt * getStmt() const; //! Returns the stmt that contains the communication
-        SCAM::Expr * getWriteValue() const;
-        SCAM::VariableOperand * getReadVariable() const;
+        DESCAM::Expr * getWriteValue() const;
+        DESCAM::VariableOperand * getReadVariable() const;
 
     private:
         void visit(struct VariableOperand &node) override;
@@ -83,10 +83,10 @@ namespace SCAM {
         bool waitComm;
         bool communication;
         bool non_blocking_access;
-        SCAM::Communication * commStmt;
-        SCAM::Stmt * stmt;
-        SCAM::Expr * writeValue; //! Value that is written on the port
-        SCAM::VariableOperand * readVariable;
+        DESCAM::Communication * commStmt;
+        DESCAM::Stmt * stmt;
+        DESCAM::Expr * writeValue; //! Value that is written on the port
+        DESCAM::VariableOperand * readVariable;
         std::string stateName = "";
     };
 }

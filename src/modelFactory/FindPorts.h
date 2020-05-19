@@ -8,7 +8,7 @@
 #include "enums.h"
 #include "LocationInfo.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /**
      * \brief: Finds all ports of a given Module
@@ -35,7 +35,7 @@ namespace SCAM {
         const std::map<std::string, std::string> &getSlaveInPortMap() const;
         const std::map<std::string, std::string> &getSlaveOutPortMap() const;
 
-        const std::map<std::string,SCAM::LocationInfo> &getLocationInfoMap() const;
+        const std::map<std::string,DESCAM::LocationInfo> &getLocationInfoMap() const;
 
     private:
         const clang::ASTContext& context;
@@ -47,7 +47,7 @@ namespace SCAM {
         std::map<std::string,std::string > slaveOutPortMap; //! Map containing an entry for every slave out-port,type
         std::map<std::string,std::string > inSharedPortMap; //! Map containing an entry for every shared  in-port,type
         std::map<std::string,std::string > outSharedPortMap; //! Map containing an entry for every shared out-port,type
-        std::map<std::string,SCAM::LocationInfo> portLocationInfoMap; //! Map containing an entry for every port and its location info
+        std::map<std::string,DESCAM::LocationInfo> portLocationInfoMap; //! Map containing an entry for every port and its location info
         int pass;
         clang::CompilerInstance &ci;
         //Helper

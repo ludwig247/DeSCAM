@@ -7,7 +7,7 @@
 
 #include "Stmt.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Wait : public Stmt {
     public:
         Wait(LocationInfo stmtLocationInfo = LocationInfo());

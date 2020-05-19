@@ -9,7 +9,7 @@
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
-namespace SCAM {
+namespace DESCAM {
     template<class T>
     VariableTemplate<T>::VariableTemplate(std::string name, const DataType *dataType, ConstValue *initialValue, VariableTemplate *parent, LocationInfo locationInfo) :
             subVar(parent != nullptr),

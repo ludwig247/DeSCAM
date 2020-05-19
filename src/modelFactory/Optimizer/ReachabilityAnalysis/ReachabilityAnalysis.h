@@ -18,7 +18,7 @@
 #include <utility>
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
     * \brief: Finds vacuous paths inside the CFG or function and correctly removes them

@@ -13,8 +13,8 @@
  * @param cfgMap
  * @return Return value represetns a map that stores for each if the node where all paths merge again
  */
-std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> SCAM::CfgUtilities::getStartEndMap(const std::map<int, SCAM::CfgBlock *> &cfgMap) {
-    std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> startEndMap;
+std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> DESCAM::CfgUtilities::getStartEndMap(const std::map<int, DESCAM::CfgBlock *> &cfgMap) {
+    std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> startEndMap;
     for (auto block: cfgMap) {
         auto startNode = block.second;
         if (startNode->hasTerminator() && startNode->getSuccessorList().size() >= 1) {
@@ -35,8 +35,8 @@ std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> SCAM::CfgUtilities::getStartEndMap(
  * @param startEndMap
  * @return computes all visited nodes among each path between start/end node
  */
-std::map<SCAM::CfgBlock *, std::set<int>> SCAM::CfgUtilities::getPathNodes(const std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap) {
-    std::map<SCAM::CfgBlock *, std::set<int>> pathNodeMap;
+std::map<DESCAM::CfgBlock *, std::set<int>> DESCAM::CfgUtilities::getPathNodes(const std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap) {
+    std::map<DESCAM::CfgBlock *, std::set<int>> pathNodeMap;
     for (auto nodePair: startEndMap) {
         EnumartePathsVisitor enumartePathsVisitor(nodePair.first, nodePair.second);
         pathNodeMap.insert(std::make_pair(nodePair.first, enumartePathsVisitor.getNodeList()));
@@ -49,9 +49,9 @@ std::map<SCAM::CfgBlock *, std::set<int>> SCAM::CfgUtilities::getPathNodes(const
  * @param cfgMap
  * @return Adds a terminal node(ID=-1) for functions that is reached after the return is called
  */
-std::map<int, SCAM::CfgBlock *> SCAM::CfgUtilities::addTerminalNodeForFunctions(const std::map<int, SCAM::CfgBlock *> &cfgMap) {
+std::map<int, DESCAM::CfgBlock *> DESCAM::CfgUtilities::addTerminalNodeForFunctions(const std::map<int, DESCAM::CfgBlock *> &cfgMap) {
 
-    std::map<int, SCAM::CfgBlock *> newCfgMap;
+    std::map<int, DESCAM::CfgBlock *> newCfgMap;
     newCfgMap.insert(cfgMap.begin(), cfgMap.end());
     CfgBlock *terminalNode = new CfgBlock(-1, -1);
     for (auto node: cfgMap) {

@@ -7,7 +7,7 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Return : public Stmt {
     public:
         explicit Return(Expr *returnValue, LocationInfo stmtLocationInfo = LocationInfo());

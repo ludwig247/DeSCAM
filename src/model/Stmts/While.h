@@ -7,13 +7,13 @@
 
 #include "Branch.h"
 
-namespace SCAM {
+namespace DESCAM {
     class While : public Branch {
     public:
-        While(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
+        While(DESCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
-        SCAM::Expr *getConditionStmt() const;
+        DESCAM::Expr *getConditionStmt() const;
 
         //ACCEPT
         virtual void accept(StmtAbstractVisitor &visitor);
@@ -21,7 +21,7 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const;
 
     private:
-        SCAM::Expr *conditionStmt;
+        DESCAM::Expr *conditionStmt;
     };
 
 }

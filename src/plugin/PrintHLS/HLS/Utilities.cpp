@@ -7,7 +7,7 @@
 #include "Logger/Logger.h"
 
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace DESCAM::HLSPlugin::HLS;
 
 std::string Utilities::convertDataType(const std::string& type) {
     if (type == "int") {
@@ -71,7 +71,7 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
     }
 }
 
-SCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
+DESCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
     if (name == "&") {
         return SubTypeBitwise::BITWISE_AND;
     } else if (name == "|") {

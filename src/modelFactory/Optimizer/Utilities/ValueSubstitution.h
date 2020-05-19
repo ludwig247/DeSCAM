@@ -13,7 +13,7 @@
 #include <set>
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
 
     class ValueSubstitution : public StmtAbstractVisitor {
 
@@ -26,11 +26,11 @@ namespace SCAM {
         * \author: mi-alkoudsi
         *
         * \input:
-        *      - SCAM::Expr *oldExpr;
+        *      - DESCAM::Expr *oldExpr;
         *      - std::string *varName;
-        *      - SCAM::Expr *varVal;
+        *      - DESCAM::Expr *varVal;
         * \output:
-        *      - SCAM::Expr *newExpr;
+        *      - DESCAM::Expr *newExpr;
         */
         Expr *substituteExpr(Expr *oldExpr, std::string varName, Expr *varVal);
 
@@ -40,11 +40,11 @@ namespace SCAM {
         * \author: mi-alkoudsi
         *
         * \input:
-        *      - SCAM::Stmt *oldStmt;
+        *      - DESCAM::Stmt *oldStmt;
         *      - std::string *varName;
-        *      - SCAM::Expr *varVal;
+        *      - DESCAM::Expr *varVal;
         * \output:
-        *      - SCAM::Stmt *newStmt;
+        *      - DESCAM::Stmt *newStmt;
         */
         Stmt *substituteStmt(Stmt *oldStmt, std::string varName, Expr *varVal);
 

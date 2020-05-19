@@ -8,7 +8,7 @@
 #include "Operand.h"
 #include "Variable.h"
 
-namespace SCAM {
+namespace DESCAM {
     /**
      * \brief Points to a MemberVariable of the class
      *

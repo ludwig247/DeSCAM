@@ -6,15 +6,15 @@
 #include "CreateExplicitCFG.h"
 #include "../../operationFactory/OperationMiscellaneous/FindCommunication2.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    CreateExplicitCFG::CreateExplicitCFG(const std::map<int, SCAM::CfgNode *> &controlFlowMap, const std::vector<PropertyMacro *> &states) {
+    CreateExplicitCFG::CreateExplicitCFG(const std::map<int, DESCAM::CfgNode *> &controlFlowMap, const std::vector<PropertyMacro *> &states) {
         for (auto node : controlFlowMap) {
             if (node.second->getStmt() == nullptr) {
                 this->cfg.insert(std::make_pair(node.second->getId(), node.second));
             } else {
                 //FIXME: translating Blocking communication resembles Master communication. for now
-                SCAM::FindCommunication2 findComm;
+                DESCAM::FindCommunication2 findComm;
                 node.second->getStmt()->accept(findComm);
                 if (findComm.isWrite() && (findComm.isBlockingInterface() && !findComm.isNonBlockingAccess())) { //FIXME: in future, isNonBlockingAccess() is not needed
 //                if(findComm.isWrite() &&
@@ -40,7 +40,7 @@ namespace SCAM {
                      *          goto writeComm
                      *
                      */
-                    std::vector<SCAM::CfgNode *> commGroup;
+                    std::vector<DESCAM::CfgNode *> commGroup;
 //                    auto writeNode = new CfgNode(findComm.getCommStmt());
                     auto varOp = new VariableOperand(new Variable(findComm.getPort()->getDataSignal()->getName(), findComm.getPort()->getDataSignal()->getDataType()));
                     auto writeNode = new CfgNode(new Assignment(varOp, findComm.getWriteValue()));
@@ -118,7 +118,7 @@ namespace SCAM {
                      *      readerPort->read(val)
                      *
                      */
-                    std::vector<SCAM::CfgNode *> commGroup;
+                    std::vector<DESCAM::CfgNode *> commGroup;
                     auto notifyNode = new CfgNode(new Assignment(findComm.getPort()->getNotify(), new BoolValue(true)));
                     notifyNode->replaceId(node.second->getId());
                     auto waitNode = new CfgNode(new Wait());
@@ -183,7 +183,7 @@ namespace SCAM {
 
                     if (it != states.end()) {
                         if (findComm.isWrite()) {
-                            std::vector<SCAM::CfgNode *> commGroup;
+                            std::vector<DESCAM::CfgNode *> commGroup;
                             auto varOp = new VariableOperand(new Variable(findComm.getPort()->getDataSignal()->getName(), findComm.getPort()->getDataSignal()->getDataType()));
                             auto writeNode = new CfgNode(new Assignment(varOp, findComm.getWriteValue()));
                             auto notifyNode = new CfgNode(new Assignment(findComm.getPort()->getNotify(), new BoolValue(true)));
@@ -215,7 +215,7 @@ namespace SCAM {
                             commGroup.push_back(waitNode);
                             this->commGroups.insert(std::make_pair(PrintStmt::toString(node.second->getStmt()), commGroup));
                         } else {
-                            std::vector<SCAM::CfgNode *> commGroup;
+                            std::vector<DESCAM::CfgNode *> commGroup;
                             auto waitNode = new CfgNode(new Wait());
                             waitNode->replaceId(node.second->getId());
                             auto varOp = new VariableOperand(new Variable(findComm.getPort()->getDataSignal()->getName(), findComm.getPort()->getDataSignal()->getDataType()));
@@ -255,7 +255,7 @@ namespace SCAM {
         return this->cfg;
     }
 
-    const std::multimap<std::string, std::vector<SCAM::CfgNode *>> &CreateExplicitCFG::getCommGroups() const {
+    const std::multimap<std::string, std::vector<DESCAM::CfgNode *>> &CreateExplicitCFG::getCommGroups() const {
         return this->commGroups;
     }
 

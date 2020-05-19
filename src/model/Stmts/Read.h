@@ -9,7 +9,7 @@
 #include "VariableOperand.h"
 #include "Communication.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 
     class Read : public Stmt, public Communication {

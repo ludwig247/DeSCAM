@@ -17,16 +17,16 @@
 #include "PrintStmt.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
    /***
    * \brief: Propagates parameters values from the parameter list to their use inside the body of the function
    * \author:mi-alkoudsi
    * \inputs:
-   *       - std::map<std::string, SCAM::Expr *> paramValMap;
-   *       - std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
+   *       - std::map<std::string, DESCAM::Expr *> paramValMap;
+   *       - std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> returnValueConditionList;
    * \outputs:
-   *       - std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> optimizedReturnValueConditionList;
+   *       - std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> optimizedReturnValueConditionList;
    */
 
     class ParamValuePropagation : public StmtAbstractVisitor {

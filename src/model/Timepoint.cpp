@@ -4,7 +4,7 @@
 
 #include "Timepoint.h"
 
-SCAM::Timepoint::Timepoint(std::string name, DataType *type, ConstValue *initialValue, Timepoint *parent, LocationInfo locationInfo) :
+DESCAM::Timepoint::Timepoint(std::string name, DataType *type, ConstValue *initialValue, Timepoint *parent, LocationInfo locationInfo) :
         VariableTemplate(name,
                 DataTypes::getDataType("unsigned"),
                          nullptr,
@@ -12,6 +12,6 @@ SCAM::Timepoint::Timepoint(std::string name, DataType *type, ConstValue *initial
 
 }
 
-void SCAM::Timepoint::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::Timepoint::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 }

@@ -9,7 +9,7 @@
 #include <string>
 #include "LoggerFormatter.h"
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief The base class for a logger sink to which all log messages are fed after being collected.
  */

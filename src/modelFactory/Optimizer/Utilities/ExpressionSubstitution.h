@@ -12,7 +12,7 @@
 #include "ExprVisitor.h"
 #include "Behavior/CfgNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class ExpressionSubstitution : public StmtAbstractVisitor {
 
@@ -23,11 +23,11 @@ namespace SCAM {
         * \author: mi-alkoudsi
         *
         * \input:
-        *      - SCAM::Stmt *stmt;
-        *      - SCAM::Expr *oldExpr;
-        *      - SCAM::Expr *newExpr;
+        *      - DESCAM::Stmt *stmt;
+        *      - DESCAM::Expr *oldExpr;
+        *      - DESCAM::Expr *newExpr;
         * \output:
-        *      - SCAM::Stmt *newStmt;
+        *      - DESCAM::Stmt *newStmt;
         */
         ExpressionSubstitution(Stmt *stmt, Expr *oldExpr, Expr *newExpr);
 
@@ -37,11 +37,11 @@ namespace SCAM {
         * \author: mi-alkoudsi
         *
         * \input:
-        *      - SCAM::Expr *Expr;
-        *      - SCAM::Expr *oldExpr;
-        *      - SCAM::Expr *newExpr;
+        *      - DESCAM::Expr *Expr;
+        *      - DESCAM::Expr *oldExpr;
+        *      - DESCAM::Expr *newExpr;
         * \output:
-        *      - SCAM::Expr *modifiedExpr;
+        *      - DESCAM::Expr *modifiedExpr;
         */
         ExpressionSubstitution(Expr *expr, Expr *oldExpr, Expr *newExpr);
 

@@ -6,27 +6,27 @@
 #include "EnumValue.h"
 #include "NodePeekVisitor.h"
 
-SCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo) :
+DESCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo) :
         enumValue(enumValue),
         ConstValue(enumType) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     assert(enumType != nullptr);
 }
 
-const std::string &SCAM::EnumValue::getEnumValue() const {
+const std::string &DESCAM::EnumValue::getEnumValue() const {
     return enumValue;
 }
 
-void SCAM::EnumValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::EnumValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-std::string SCAM::EnumValue::getValueAsString() const {
+std::string DESCAM::EnumValue::getValueAsString() const {
     return this->enumValue;
 }
 
-bool SCAM::EnumValue::operator==(const Stmt &other) const {
+bool DESCAM::EnumValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekEnumValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (EnumValue *) this;

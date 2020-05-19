@@ -8,7 +8,7 @@
 #include "Logger/Logger.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     /*!
     * \brief Methods that checks wheter a subString is contained in a given String
      */
@@ -84,7 +84,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
                 }else{
                     TERMINATE("Unknown interface: " + portTemplates.at(0));
                 }
-                this->portLocationInfoMap.insert(std::make_pair(fieldDecl->getNameAsString(),SCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl,ci)));
+                this->portLocationInfoMap.insert(std::make_pair(fieldDecl->getNameAsString(),DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl,ci)));
             }
         }
         return true;
@@ -157,7 +157,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
         return masterOutPortMap;
     }
 
-    const std::map<std::string, SCAM::LocationInfo> &FindPorts::getLocationInfoMap() const {
+    const std::map<std::string, DESCAM::LocationInfo> &FindPorts::getLocationInfoMap() const {
         return this->portLocationInfoMap;
     }
 

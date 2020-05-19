@@ -11,7 +11,7 @@
 #include "DataType.h"
 #include "TypeInterface.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Module;
 

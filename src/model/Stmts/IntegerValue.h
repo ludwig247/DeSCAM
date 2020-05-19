@@ -7,7 +7,7 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
     class
     IntegerValue : public ConstValue {
     public:

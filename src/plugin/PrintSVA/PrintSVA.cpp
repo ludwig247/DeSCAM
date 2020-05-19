@@ -28,7 +28,7 @@ std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintSVA::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintSVA::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -181,7 +181,7 @@ std::string PrintSVA::dataTypes() {
 }
 
 std::string PrintSVA::signals() {
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "\n// SYNC AND NOTIFY SIGNALS (1-cycle macros) //\n";
@@ -203,7 +203,7 @@ std::string PrintSVA::signals() {
 }
 
 std::string PrintSVA::registers() {
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
@@ -219,7 +219,7 @@ std::string PrintSVA::registers() {
 }
 
 std::string PrintSVA::states() {
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// STATES //\n";
     for (auto state: ps->getStates()) {
@@ -274,7 +274,7 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
 }
 
 std::string PrintSVA::reset_operation() {
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
        << "\treset_sequence |=>\n";
@@ -293,7 +293,7 @@ std::string PrintSVA::reset_operation() {
 
 std::string PrintSVA::operations() {
 
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 

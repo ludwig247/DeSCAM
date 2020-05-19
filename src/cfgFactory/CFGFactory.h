@@ -18,11 +18,11 @@
 #include "Module.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * @brief: Constructs a general purpose CFG from a clang-cfg
      *
-     * The extracted CFG already contains SCAM stmts instead of clang::stmts
+     * The extracted CFG already contains DESCAM stmts instead of clang::stmts
      */
     class CFGFactory {
     public:
@@ -40,16 +40,16 @@ namespace SCAM {
         bool exprContainedInIf(clang::CFGBlock *inner, clang::CFGBlock *outer);
 
         std::vector<clang::Stmt *> getCleanStmtList(clang::CFGBlock *block); //! Returns a list without nested stmts
-        CfgBlock *createCFGNode(clang::CFGBlock *block, SCAM::CfgBlock *parent); //! Iterates over each statement of a block
+        CfgBlock *createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *parent); //! Iterates over each statement of a block
         void traverseBlocks(clang::CFGBlock *block, CfgBlock *parent); //! Traveres each block of the CFG
         void cleanEmptyBlocks(); //! Removes blocks from the susCFG that don't contain stmts or conditions
 
-        SCAM::Stmt *getScamStmt(clang::Stmt *clangStmt); //Return the respective SCAM::Stmts for a clang clang::Stmts
+        DESCAM::Stmt *getScamStmt(clang::Stmt *clangStmt); //Return the respective DESCAM::Stmts for a clang clang::Stmts
         //Members
         clang::CXXMethodDecl *methodDecl;
         clang::CFG *clangCFG;
         clang::CompilerInstance &ci;
-        SCAM::Module *module;
+        DESCAM::Module *module;
         bool sourceModule;
 
         //Map

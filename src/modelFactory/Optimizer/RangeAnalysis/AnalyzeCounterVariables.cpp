@@ -19,15 +19,15 @@
  *  x value is limited by the value 9
  */
 
-SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> counterVariablesSet,
-                                                       std::map<int, SCAM::CfgNode *> CFG) : CFG(std::move(CFG)),
+DESCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> counterVariablesSet,
+                                                       std::map<int, DESCAM::CfgNode *> CFG) : CFG(std::move(CFG)),
                                                                                                        counterVariablesSet(std::move(
                                                                                                                counterVariablesSet)) {
     for (auto node : this->CFG) {
         if (auto stmt = node.second->getStmt()) {
-            if (auto ifStmt = dynamic_cast<SCAM::If *>(stmt)) {
+            if (auto ifStmt = dynamic_cast<DESCAM::If *>(stmt)) {
                 this->counterVariablesInIfStmt.clear();
-                SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(ifStmt, std::set<std::string>{});
+                DESCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(ifStmt, std::set<std::string>{});
                 for (auto variable : variablesInStmtFinder.getVariablesInStmtSet()) {
                     if (this->counterVariablesSet.find(variable) != this->counterVariablesSet.end()) {
                         counterVariablesInIfStmt.insert(variable);
@@ -39,10 +39,10 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                 std::set<std::string> nestedIfWithCounterFound;
                 while (trueBranchNode != elseNodeId) {
                     if (auto stmtInTrueBranch = this->CFG.at(trueBranchNode)->getStmt()) {
-                        if (auto assignment = dynamic_cast<SCAM::Assignment *>(stmtInTrueBranch)) {
-                            if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
+                        if (auto assignment = dynamic_cast<DESCAM::Assignment *>(stmtInTrueBranch)) {
+                            if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
                                 std::string counterVariable = varOp->getVariable()->getFullName();
-                                SCAM::DetectCounterVariable counterDetector(counterVariable, assignment->getRhs());
+                                DESCAM::DetectCounterVariable counterDetector(counterVariable, assignment->getRhs());
                                 if (counterDetector.isCounterVariable()) {
                                     if (counterDetector.isIncrementKnown()) {
                                         this->counterVariableIncrements = counterDetector.isVariableIncrements();
@@ -81,9 +81,9 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                                     }
                                 }
                             }
-                        } else if (auto nestedIfStmt = dynamic_cast<SCAM::If *> (stmtInTrueBranch)) {
+                        } else if (auto nestedIfStmt = dynamic_cast<DESCAM::If *> (stmtInTrueBranch)) {
 
-                            SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt,std::set<std::string>{});
+                            DESCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt,std::set<std::string>{});
                             for (auto variable : variablesInStmtFinder.getVariablesInStmtSet()) {
                                 if (this->counterVariablesSet.find(variable) != this->counterVariablesSet.end()) {
                                     counterVariablesInIfStmt.insert(variable);
@@ -96,14 +96,14 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                                 int nestedElseNodeId = this->CFG.at(trueBranchNode)->getSuccessorList()[1]->getId();
                                 while (nestedTrueBranchNode != nestedElseNodeId) {
                                     if (auto stmtInTrueBranch = this->CFG.at(nestedTrueBranchNode)->getStmt()) {
-                                        if (auto assignment = dynamic_cast<SCAM::Assignment *>(stmtInTrueBranch)) {
-                                            if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
+                                        if (auto assignment = dynamic_cast<DESCAM::Assignment *>(stmtInTrueBranch)) {
+                                            if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
                                                 auto varName = varOp->getVariable()->getFullName();
                                                 if (counterIncrementAssignmentFound.find(varName) !=
                                                     counterIncrementAssignmentFound.end()) {
                                                     if (this->counterVariablesSet.find(varName) !=
                                                         this->counterVariablesSet.end()) {
-                                                        SCAM::DetectCounterVariable counterDetector(varName,
+                                                        DESCAM::DetectCounterVariable counterDetector(varName,
                                                                                                     assignment->getRhs());
                                                         if (!counterDetector.isCounterVariable()) { //assignment is not a countertype e.g. x=x+1;
                                                             this->marginValue = MarginValue::limited;
@@ -130,17 +130,17 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                 }
             } else {
                 auto parentNode = node.second->getPredecessorList()[0];
-                if (dynamic_cast<SCAM::If *> (parentNode->getStmt())) {
+                if (dynamic_cast<DESCAM::If *> (parentNode->getStmt())) {
                     if (node.second->getId() == parentNode->getSuccessorList()[1]->getId()) { //current node is else
                         int nodeINElseBranchId = node.second->getSuccessorList()[0]->getId();
                         std::set<std::string> counterIncrementAssignmentFound;
                         std::set<std::string> nestedIfWithCounterFound;
                         while (nodeINElseBranchId < this->CFG.at(nodeINElseBranchId)->getSuccessorList()[0]->getId()) {
                             if (auto stmtInTrueBranch = this->CFG.at(nodeINElseBranchId)->getStmt()) {
-                                if (auto assignment = dynamic_cast<SCAM::Assignment *>(stmtInTrueBranch)) {
-                                    if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
+                                if (auto assignment = dynamic_cast<DESCAM::Assignment *>(stmtInTrueBranch)) {
+                                    if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
                                         std::string counterVariable = varOp->getVariable()->getFullName();
-                                        SCAM::DetectCounterVariable counterDetector(counterVariable, assignment->getRhs());
+                                        DESCAM::DetectCounterVariable counterDetector(counterVariable, assignment->getRhs());
                                         if (counterDetector.isCounterVariable() && counterDetector.isIncrementKnown()) {
                                             if (nestedIfWithCounterFound.find(counterVariable) ==
                                                 nestedIfWithCounterFound.end()) {
@@ -148,9 +148,9 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                                             }
                                         }
                                     }
-                                } else if (auto nestedIfStmt = dynamic_cast<SCAM::If *> (stmtInTrueBranch)) {
+                                } else if (auto nestedIfStmt = dynamic_cast<DESCAM::If *> (stmtInTrueBranch)) {
 
-                                    SCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt,std::set<std::string>{});
+                                    DESCAM::FindVariablesAndFunctionsInStatement variablesInStmtFinder(nestedIfStmt,std::set<std::string>{});
                                     for (auto var : variablesInStmtFinder.getVariablesInStmtSet()) {
                                         if (this->counterVariablesSet.find(var) !=
                                             this->counterVariablesSet.end()) {
@@ -165,14 +165,14 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
                                                 nodeINElseBranchId)->getSuccessorList()[1]->getId();
                                         while (nestedTrueBranchNode != nestedElseNodeId) {
                                             if (auto stmtInElseBranch = this->CFG.at(nestedTrueBranchNode)->getStmt()) {
-                                                if (auto assignment = dynamic_cast<SCAM::Assignment *>(stmtInElseBranch)) {
-                                                    if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
+                                                if (auto assignment = dynamic_cast<DESCAM::Assignment *>(stmtInElseBranch)) {
+                                                    if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
                                                         auto varName = varOp->getVariable()->getFullName();
                                                         if (counterIncrementAssignmentFound.find(varName) !=
                                                             counterIncrementAssignmentFound.end()) {
                                                             if (this->counterVariablesSet.find(varName) !=
                                                                 this->counterVariablesSet.end()) {
-                                                                SCAM::DetectCounterVariable counterDetector(varName,
+                                                                DESCAM::DetectCounterVariable counterDetector(varName,
                                                                                                             assignment->getRhs());
                                                                 if (!counterDetector.isCounterVariable()) { //assignment is not a countertype e.g. x=x+1;
                                                                     this->marginValue = MarginValue::limited;
@@ -207,19 +207,19 @@ SCAM::AnalyzeCounterVariables::AnalyzeCounterVariables(std::set<std::string> cou
     }
 }
 
-const std::map<std::string, std::string> &SCAM::AnalyzeCounterVariables::getMarginalValuesMap() {
+const std::map<std::string, std::string> &DESCAM::AnalyzeCounterVariables::getMarginalValuesMap() {
     return this->marginalValuesMap;
 }
 
-void SCAM::AnalyzeCounterVariables::visit(SCAM::UnaryExpr &node) {
+void DESCAM::AnalyzeCounterVariables::visit(DESCAM::UnaryExpr &node) {
     this->hardToAnalyzeCounterVariable = true;
 }
 
-void SCAM::AnalyzeCounterVariables::visit(SCAM::If &node) {
+void DESCAM::AnalyzeCounterVariables::visit(DESCAM::If &node) {
     node.getConditionStmt()->accept(*this);
 }
 
-void SCAM::AnalyzeCounterVariables::visit(SCAM::Logical &node) {
+void DESCAM::AnalyzeCounterVariables::visit(DESCAM::Logical &node) {
     if (node.getOperation() == "&&") {
         node.getLhs()->accept(*this);
         if (marginValue != MarginValue::limited && !this->hardToAnalyzeCounterVariable) {
@@ -235,7 +235,7 @@ void SCAM::AnalyzeCounterVariables::visit(SCAM::Logical &node) {
     }
 }
 
-void SCAM::AnalyzeCounterVariables::visit(SCAM::Relational &node) {
+void DESCAM::AnalyzeCounterVariables::visit(DESCAM::Relational &node) {
     auto operation = node.getOperation();
     bool counterOnLhs = false;
     this->hardToAnalyzeCounterVariable = false;
@@ -335,7 +335,7 @@ void SCAM::AnalyzeCounterVariables::visit(SCAM::Relational &node) {
     }
 }
 
-void SCAM::AnalyzeCounterVariables::addToMarginalValuesMap(std::string varName) {
+void DESCAM::AnalyzeCounterVariables::addToMarginalValuesMap(std::string varName) {
     if (this->marginalValuesMap.find(varName) != this->marginalValuesMap.end()) {
         if (this->marginalValuesMap.at(varName) == "HardToAnalyze") {
             return;
@@ -358,7 +358,7 @@ void SCAM::AnalyzeCounterVariables::addToMarginalValuesMap(std::string varName) 
     }
 }
 
-void SCAM::AnalyzeCounterVariables::visit(SCAM::Ternary &node) {
+void DESCAM::AnalyzeCounterVariables::visit(DESCAM::Ternary &node) {
     this->hardToAnalyzeCounterVariable = true;
 }
 

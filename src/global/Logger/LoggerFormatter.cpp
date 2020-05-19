@@ -5,8 +5,8 @@
 
 
 const std::string
-SCAM::LoggerFormatter::formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages,
-                                      SCAM::LoggerFormatter::FormatOption formatOptions) {
+DESCAM::LoggerFormatter::formatMessages(std::vector<DESCAM::LoggerMsg> loggerMessages,
+                                      DESCAM::LoggerFormatter::FormatOption formatOptions) {
     switch (formatOptions) {
         case FormatOption::JSON :
             return getMessagesJSON(loggerMessages);
@@ -16,7 +16,7 @@ SCAM::LoggerFormatter::formatMessages(std::vector<SCAM::LoggerMsg> loggerMessage
 }
 
 std::string
-SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages) {
+DESCAM::LoggerFormatter::getMessagesJSON(std::vector<DESCAM::LoggerMsg> loggerMessages) {
     std::stringstream json;
     json << "[\n";
     for (auto msgPtr = loggerMessages.begin(); msgPtr != loggerMessages.end(); msgPtr++) {
@@ -48,7 +48,7 @@ SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessag
     return json.str();
 }
 
-std::string SCAM::LoggerFormatter::getMessages(std::vector<SCAM::LoggerMsg> loggerMessages) {
+std::string DESCAM::LoggerFormatter::getMessages(std::vector<DESCAM::LoggerMsg> loggerMessages) {
     std::stringstream normal;
     for (auto msgPtr = loggerMessages.begin(); msgPtr != loggerMessages.end(); msgPtr++) {
         auto stmtInfo = msgPtr->getLocationInfo();
@@ -73,7 +73,7 @@ std::string SCAM::LoggerFormatter::getMessages(std::vector<SCAM::LoggerMsg> logg
     return normal.str();
 }
 
-std::string SCAM::LoggerFormatter::getFormatFileType(SCAM::LoggerFormatter::FormatOption formatOption) {
+std::string DESCAM::LoggerFormatter::getFormatFileType(DESCAM::LoggerFormatter::FormatOption formatOption) {
     switch (formatOption) {
         case FormatOption::TEXT : return "txt";
         case FormatOption::JSON : return "JSON";

@@ -12,7 +12,7 @@
 #include "LoggerMsg.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief The base class for a logger sink to which all log messages are fed after being collected.
  */
@@ -22,11 +22,11 @@ namespace SCAM {
             TEXT, JSON,
         };
         LoggerFormatter() = default;
-        static const std::string formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages, FormatOption formatOption = FormatOption::JSON);
+        static const std::string formatMessages(std::vector<DESCAM::LoggerMsg> loggerMessages, FormatOption formatOption = FormatOption::JSON);
         static std::string getFormatFileType(FormatOption formatOption);
     private:
-        static std::string getMessages(std::vector<SCAM::LoggerMsg> loggerMessages);
-        static std::string getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages);
+        static std::string getMessages(std::vector<DESCAM::LoggerMsg> loggerMessages);
+        static std::string getMessagesJSON(std::vector<DESCAM::LoggerMsg> loggerMessages);
     };
 }
 

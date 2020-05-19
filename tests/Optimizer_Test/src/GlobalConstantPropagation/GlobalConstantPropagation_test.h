@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class GlobalConstantPropagation_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class GlobalConstantPropagation_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -21,15 +21,15 @@ INSTANTIATE_TEST_CASE_P(Basic, GlobalConstantPropagation_Test, ::testing::Values
 TEST_P(GlobalConstantPropagation_Test, propagate_globally_constant_values) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
-    SCAM::FindReadVariables findReadVariables(module->getCFG());
-    SCAM::FindCfgPaths findCfgPaths(module->getCFG(),0);
-    SCAM::GlobalConstantPropagation globalConstantPropagation(module->getCFG(),findCfgPaths,findReadVariables.getReadVariablesSet());
+    DESCAM::FindReadVariables findReadVariables(module->getCFG());
+    DESCAM::FindCfgPaths findCfgPaths(module->getCFG(),0);
+    DESCAM::GlobalConstantPropagation globalConstantPropagation(module->getCFG(),findCfgPaths,findReadVariables.getReadVariablesSet());
     ASSERT_FALSE(globalConstantPropagation.getCFG().empty())
                                 << "After global constant propagation, CFG of module " << module->getName()
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::GlobalUtilities::printCFG(globalConstantPropagation.getCFG());
+    std::string CFG_str = DESCAM::GlobalUtilities::printCFG(globalConstantPropagation.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/GlobalConstantPropagation/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

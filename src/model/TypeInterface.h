@@ -7,7 +7,7 @@
 
 #include "DataType.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class TypeInterface {
     protected:

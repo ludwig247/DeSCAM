@@ -16,7 +16,7 @@
 #include <CreateRealCFG.h>
 
 //Constructor
-SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
+DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
         _sm(ci.getSourceManager()),
         _ci(ci),
         _context(ci.getASTContext()),
@@ -28,15 +28,15 @@ SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
     this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
-bool SCAM::CheckErrors::preFire() {
-    return !SCAM::Logger::isTerminate();
+bool DESCAM::CheckErrors::preFire() {
+    return !DESCAM::Logger::isTerminate();
 }
 
-bool SCAM::CheckErrors::fire() {
+bool DESCAM::CheckErrors::fire() {
     //Translation Unit
     TranslationUnitDecl *tu = _context.getTranslationUnitDecl();
 
-    //SCAM model
+    //DESCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
 
@@ -50,14 +50,14 @@ bool SCAM::CheckErrors::fire() {
     return true;
 }
 
-void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
+void DESCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
 
     //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
         std::string name = scparModule.first;
-        auto moduleLocationInfo = SCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
+        auto moduleLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
 
         //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
@@ -82,13 +82,13 @@ void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
-void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
     //Parse ports from CXXRecordDecl
     //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
     //Right now, we are not interested about the direction of the port.
 
-    SCAM::FindPorts findPorts(decl, this->_context, _ci);
+    DESCAM::FindPorts findPorts(decl, this->_context, _ci);
     auto portsLocationMap = findPorts.getLocationInfoMap();
     //Add Ports -> requires Name, Interface and DataType
     //RendezVouz
@@ -220,32 +220,32 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
 }
 
 //! Adds processes to the model
-void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
     //Find the process describing the behavior
-    SCAM::FindProcess findProcess(decl);
+    DESCAM::FindProcess findProcess(decl);
     if (findProcess.getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
     //Check Proces Type
     auto process = findProcess.getProcessMap().begin();
     //Process name
     std::string processName = process->first;
-    if (process->second.second != SCAM::PROCESS_TYPE::THREAD) {
+    if (process->second.second != DESCAM::PROCESS_TYPE::THREAD) {
         TERMINATE(processName + ":Only THREAD allowed as process type");
     }
 
     //Process declarationinde
     clang::CXXMethodDecl *methodDecl = process->second.first;
     //Create blockCFG for this process
-    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
+    DESCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
     TERMINATE_IF_ERROR
-    SCAM::CfgNode::node_cnt = 0;
-    SCAM::State::state_cnt = 0;
-    SCAM::Operation::operations_cnt = 0;
-    SCAM::CreateRealCFG stmtCFG(cfgFactory.getControlFlowMap());
+    DESCAM::CfgNode::node_cnt = 0;
+    DESCAM::State::state_cnt = 0;
+    DESCAM::Operation::operations_cnt = 0;
+    DESCAM::CreateRealCFG stmtCFG(cfgFactory.getControlFlowMap());
     module->setCFG(stmtCFG.getCFG());
 }
 
-//! Adds every Member of a sc_module to the SCAM::Module
-void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+//! Adds every Member of a sc_module to the DESCAM::Module
+void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
     //Find all Variables within the Module
     FindVariables findVariables(decl);
@@ -257,7 +257,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
     for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
         auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
-        auto varLocationInfo = SCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
+        auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
 
         /*
          * Disinguish between local and global DataTypes.
@@ -309,15 +309,15 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
     }
 }
 
-bool SCAM::CheckErrors::postFire() {
+bool DESCAM::CheckErrors::postFire() {
     return 0;
 }
 
-void SCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
+void DESCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
     if (preFire() && fire()) postFire();
 }
 
-void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
+void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
     FindFunctions findFunction(decl);
     //Add datatypes for functions
@@ -359,7 +359,7 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
         //Active searching only for functions
         FindDataFlow::functionName = function.first;
         FindDataFlow::isFunction = true;
-        SCAM::CFGFactory cfgFactory(function.second, _ci, module);
+        DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
         FindDataFlow::functionName = "";
         FindDataFlow::isFunction = false;
         //Transfor blockCFG back to code
@@ -368,7 +368,7 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
     }
 }
 
-void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
+void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
     //Find all global functions and variables
@@ -394,7 +394,7 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
             FindDataFlow::functionName = func.first;
             FindDataFlow::isFunction = true;
             auto module = Module("placeholder");
-            SCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci, &module);
+            DESCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci, &module);
             FindDataFlow::functionName = "";
             FindDataFlow::isFunction = false;
             //Transfor blockCFG back to code

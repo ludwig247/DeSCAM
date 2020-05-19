@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class LivenessAnalysis_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class LivenessAnalysis_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -21,17 +21,17 @@ INSTANTIATE_TEST_CASE_P(Basic, LivenessAnalysis_Test, ::testing::ValuesIn(create
 TEST_P(LivenessAnalysis_Test, deleting_dead_assignments) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
-    SCAM::FindReadVariables findReadVariables(module->getCFG());
-    SCAM::FindCfgPaths findCfgPaths(module->getCFG(),0);
-    SCAM::LocalValuePropagation localValuePropagation(module->getCFG());
-    SCAM::GlobalConstantPropagation globalConstantPropagation(localValuePropagation.getCFG(),findCfgPaths,findReadVariables.getReadVariablesSet());
-    SCAM::LivenessAnalysis livenessAnalysis(globalConstantPropagation.getCFG(),module->getVariableMap());
+    DESCAM::FindReadVariables findReadVariables(module->getCFG());
+    DESCAM::FindCfgPaths findCfgPaths(module->getCFG(),0);
+    DESCAM::LocalValuePropagation localValuePropagation(module->getCFG());
+    DESCAM::GlobalConstantPropagation globalConstantPropagation(localValuePropagation.getCFG(),findCfgPaths,findReadVariables.getReadVariablesSet());
+    DESCAM::LivenessAnalysis livenessAnalysis(globalConstantPropagation.getCFG(),module->getVariableMap());
     ASSERT_FALSE(livenessAnalysis.getCFG().empty())
                                 << "After liveness analysis, CFG of module " << module->getName()
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::GlobalUtilities::printCFG(livenessAnalysis.getCFG());
+    std::string CFG_str = DESCAM::GlobalUtilities::printCFG(livenessAnalysis.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/LivenessAnalysis/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

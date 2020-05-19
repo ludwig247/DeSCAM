@@ -6,19 +6,19 @@
 #include "ConditionOptimizer2.h"
 
 
-SCAM::ConditionOptimizer2::ConditionOptimizer2() :
+DESCAM::ConditionOptimizer2::ConditionOptimizer2() :
         module(nullptr),
         translator(ExprTranslator(&context)),
         goal(z3::goal(context)) {
     assert(false && "Default constructor of ConditionOptimizer should not be called");
 }
 
-SCAM::ConditionOptimizer2::ConditionOptimizer2(const std::vector<SCAM::Expr *> &conditionList, SCAM::Module *module) :
+DESCAM::ConditionOptimizer2::ConditionOptimizer2(const std::vector<DESCAM::Expr *> &conditionList, DESCAM::Module *module) :
         module(module),
         translator(ExprTranslator(&context)),
         goal(context) {
 
-    //Translate SCAM::Stmts* to z3:expr and add to goal
+    //Translate DESCAM::Stmts* to z3:expr and add to goal
     for (auto condition: conditionList) {
         this->goal.add(this->translator.translate(condition));
 
@@ -38,11 +38,11 @@ SCAM::ConditionOptimizer2::ConditionOptimizer2(const std::vector<SCAM::Expr *> &
 //    std::cout << "\n/*/*/*/*/*/*/*/*/*/*\n\n";
 }
 
-std::vector<SCAM::Expr *> SCAM::ConditionOptimizer2::getNewConditionList() {
+std::vector<DESCAM::Expr *> DESCAM::ConditionOptimizer2::getNewConditionList() {
     return this->newConditionList;
 }
 
-void SCAM::ConditionOptimizer2::applyTactics() {
+void DESCAM::ConditionOptimizer2::applyTactics() {
     //Context parameters
     this->context.set(":pp-min-alias-size", 1000000);
     this->context.set(":pp-max-depth", 1000000);
@@ -98,7 +98,7 @@ void SCAM::ConditionOptimizer2::applyTactics() {
     }
 }
 
-z3::apply_result SCAM::ConditionOptimizer2::runTacticWithEq2Ineq() {
+z3::apply_result DESCAM::ConditionOptimizer2::runTacticWithEq2Ineq() {
     z3::params params(this->context);
     //params.set("arith_lhs", true);
     params.set("eq2ineq", true);
@@ -114,7 +114,7 @@ z3::apply_result SCAM::ConditionOptimizer2::runTacticWithEq2Ineq() {
 }
 
 
-z3::apply_result SCAM::ConditionOptimizer2::runTacticWithOutEq2Ineq() {
+z3::apply_result DESCAM::ConditionOptimizer2::runTacticWithOutEq2Ineq() {
 
     z3::params params(this->context);
     //params.set("arith_lhs", true);

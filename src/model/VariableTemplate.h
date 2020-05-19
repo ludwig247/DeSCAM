@@ -9,7 +9,7 @@
 #include "ConstValue.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     template<class T>
     class VariableTemplate : public TypeInterface, public AbstractNode {
     public:
@@ -38,7 +38,7 @@ namespace SCAM {
         std::vector<VariableTemplate *> subVarList;
         bool subVar; //! True, if this is a subVar
         VariableTemplate *parent; //! If this is a subVar; parent points to the variable contining this
-        SCAM::ConstValue *initialValue;
+        DESCAM::ConstValue *initialValue;
         bool constant = false;
 
     };

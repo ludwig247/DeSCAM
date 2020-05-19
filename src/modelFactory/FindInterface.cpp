@@ -12,7 +12,7 @@
 /*!
  * \brief portTemplateList = { sc_port, sc_fifo_in, bool } extract port describition from list
  */
-SCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateList):
+DESCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateList):
         blocking(false){
     _direction="unkown";
     _interface="unkown";
@@ -45,17 +45,17 @@ SCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateL
 }
 
 //Destructor
-SCAM::FindInterface::~FindInterface() {
+DESCAM::FindInterface::~FindInterface() {
 }
 
 
 //GETTER
 //TODO: Add error in case of wrong statement
-std::string SCAM::FindInterface::getDirection() {
+std::string DESCAM::FindInterface::getDirection() {
     return _direction;
 }
 
-std::string SCAM::FindInterface::getInterface() {
+std::string DESCAM::FindInterface::getInterface() {
     return _interface;
 }
 

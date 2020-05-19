@@ -30,20 +30,20 @@
 #include <utility>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * \brief: Performs optimizations on the control flow graph(CFG)
      *
      * \author: mi-alkoudsi
      *
      * \input:
-     *      - std::map<int, SCAM::CfgNode *> cfg;
-     *      - SCAM::Module * module;
+     *      - std::map<int, DESCAM::CfgNode *> cfg;
+     *      - DESCAM::Module * module;
      *      - std::set<std::string> optimizeOptionsSet;
      * \output:
      *      - std::map<int, CfgNode *> optimizedCFG;
      *      - std::map<std::string, int> deducedVariablesBitwidth;
-     *      - std::map<SCAM::Port *, int> deducedOutputPortsBitwidth;
+     *      - std::map<DESCAM::Port *, int> deducedOutputPortsBitwidth;
      *
      * \details: Performs some or all of the following optimizations depending on the given optimization options
      * Merge redundant conditions

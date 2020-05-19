@@ -9,7 +9,7 @@
 #include "Logger/Logger.h"
 #include <utility>
 
-SCAM::ArrayExpr::ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const SCAM::DataType *dataType,
+DESCAM::ArrayExpr::ArrayExpr(std::map<std::string, DESCAM::Expr *> valueMap, const DESCAM::DataType *dataType,
                            LocationInfo stmtLocationInfo) :
         valueMap(valueMap),
         Expr(dataType) {
@@ -28,11 +28,11 @@ SCAM::ArrayExpr::ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const S
     }
 }
 
-void SCAM::ArrayExpr::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::ArrayExpr::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::ArrayExpr::operator==(const SCAM::Stmt &other) const {
+bool DESCAM::ArrayExpr::operator==(const DESCAM::Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekArrayExpr(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (ArrayExpr *) this;
@@ -41,7 +41,7 @@ bool SCAM::ArrayExpr::operator==(const SCAM::Stmt &other) const {
     return (thisPtr->valueMap == otherPtr->valueMap);
 }
 
-const std::map<std::string, SCAM::Expr *> &SCAM::ArrayExpr::getValueMap() const {
+const std::map<std::string, DESCAM::Expr *> &DESCAM::ArrayExpr::getValueMap() const {
     return valueMap;
 }
 

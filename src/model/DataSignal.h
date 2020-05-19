@@ -8,14 +8,14 @@
 #include <Port.h>
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 
     class DataSignal : public VariableTemplate<DataSignal> {
     public:
         DataSignal()= delete;
         DataSignal(DataSignal&) = delete;
-        DataSignal(std::string name, const DataType *type, ConstValue *initialValue = nullptr, DataSignal *parent = nullptr, SCAM::Port *port = nullptr, LocationInfo locationInfo = LocationInfo());
+        DataSignal(std::string name, const DataType *type, ConstValue *initialValue = nullptr, DataSignal *parent = nullptr, DESCAM::Port *port = nullptr, LocationInfo locationInfo = LocationInfo());
 
         Port *getPort() const;
 

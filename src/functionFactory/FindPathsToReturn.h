@@ -11,7 +11,7 @@
 #include <PrintStmt.h>
 #include <Stmts_all.h>
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief Find all paths within in a section
      *
@@ -64,19 +64,19 @@ namespace SCAM {
         virtual ~FindPathsToReturn();
 
         explicit FindPathsToReturn(const std::vector<Stmt *> & stmtList);
-        std::vector<SCAM::Path*> getPathList();
+        std::vector<DESCAM::Path*> getPathList();
 
         void visit(class ArrayExpr &node) override;
 
     private:
 
-        static std::map<SCAM::Stmt*,SCAM::Stmt*> trueMap; //! <condition, if-stmt> Contains an entry for each if
-        static std::map<SCAM::Stmt*,SCAM::Stmt*> falseMap; //! <condition, if-stmt> Contains an entry for each if
-        void appendStmtToPaths(SCAM::Stmt *stmt); //! Appends the current stmt to each of the paths
-        std::vector<SCAM::Path*> pathList;
+        static std::map<DESCAM::Stmt*,DESCAM::Stmt*> trueMap; //! <condition, if-stmt> Contains an entry for each if
+        static std::map<DESCAM::Stmt*,DESCAM::Stmt*> falseMap; //! <condition, if-stmt> Contains an entry for each if
+        void appendStmtToPaths(DESCAM::Stmt *stmt); //! Appends the current stmt to each of the paths
+        std::vector<DESCAM::Path*> pathList;
 
-        SCAM::Stmt* find_or_add_true(Expr *conditionStmt); //! Either looks up the if-stmt for the condition or creates a new one
-        SCAM::Stmt* find_or_add_false(Expr *conditionStmt); //! Either looks up the if-stmt for the condition or creates a new one
+        DESCAM::Stmt* find_or_add_true(Expr *conditionStmt); //! Either looks up the if-stmt for the condition or creates a new one
+        DESCAM::Stmt* find_or_add_false(Expr *conditionStmt); //! Either looks up the if-stmt for the condition or creates a new one
 
         virtual void visit(struct VariableOperand &node) override;
         virtual void visit(struct TimePointOperand &node) override;
@@ -92,7 +92,7 @@ namespace SCAM {
         virtual void visit(struct If &node) override;
         virtual void visit(struct Read &node) override;
         virtual void visit(struct Wait &node) override;
-        virtual void visit(class SCAM::Peek &node) override ;
+        virtual void visit(class DESCAM::Peek &node) override ;
         virtual void visit(struct Write &node) override;
         virtual void visit(struct SectionOperand &node) override;
         virtual void visit(class SectionValue &node) override;
@@ -104,13 +104,13 @@ namespace SCAM {
         virtual void visit(struct SyncSignal &node) override;
         virtual void visit(struct DataSignalOperand &node) override;
         virtual void visit(struct Cast &node) override;
-        virtual void visit(class SCAM::FunctionOperand &node);
+        virtual void visit(class DESCAM::FunctionOperand &node);
         virtual void visit(class CompoundExpr &node);
-        virtual void visit(class SCAM::ArrayOperand &node);
-        virtual void visit(class SCAM::ParamOperand &node);
-        virtual void visit(class SCAM::Return &node);
-        virtual void visit(class SCAM::Notify &node) ;
-        virtual void visit(class SCAM::Ternary &node) ;
+        virtual void visit(class DESCAM::ArrayOperand &node);
+        virtual void visit(class DESCAM::ParamOperand &node);
+        virtual void visit(class DESCAM::Return &node);
+        virtual void visit(class DESCAM::Notify &node) ;
+        virtual void visit(class DESCAM::Ternary &node) ;
 
     };
 

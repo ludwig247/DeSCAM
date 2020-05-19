@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-namespace SCAM {
+namespace DESCAM {
 
 /**
  * \brief holds basic statement information such as to which file it belongs and at what line row/column number it can be found in that file.

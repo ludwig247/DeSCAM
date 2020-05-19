@@ -7,7 +7,7 @@
 #include "NodePeekVisitor.h"
 #include "DescamException.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     Write::Write(Port *portOperand, Expr *value, bool is_non_blocking_access, VariableOperand *status, LocationInfo stmtLocationInfo) :
             value(value),
@@ -15,7 +15,7 @@ namespace SCAM {
             Communication(portOperand, is_non_blocking_access) {
         this->stmtLocationInfo = std::move(stmtLocationInfo);
         if (portOperand->getDataType() != value->getDataType()) {
-            throw SCAM::DescamException("Port " + portOperand->getName() + " and Value '" + PrintStmt::toString(value) + "' are not of the same datatype",this->stmtLocationInfo);
+            throw DESCAM::DescamException("Port " + portOperand->getName() + " and Value '" + PrintStmt::toString(value) + "' are not of the same datatype",this->stmtLocationInfo);
         }
     }
 

@@ -8,10 +8,10 @@
 #include "Optimizer/Debug.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
-    LivenessAnalysis::LivenessAnalysis(std::map<int, SCAM::CfgNode *> CFG,
-                                       const std::map<std::string, SCAM::Variable *> &ModuleVariables) :
+    LivenessAnalysis::LivenessAnalysis(std::map<int, DESCAM::CfgNode *> CFG,
+                                       const std::map<std::string, DESCAM::Variable *> &ModuleVariables) :
             CFG(std::move(CFG)), deadNodeDetected(false) {
         this->moduleVariablesMap.clear();
         initLA(ModuleVariables);
@@ -80,7 +80,7 @@ namespace SCAM {
                 continue;
             }
             for (auto nodeId : element.second) {
-                if(dynamic_cast<SCAM::Read*>(this->CFG.at(nodeId)->getStmt())){continue;}
+                if(dynamic_cast<DESCAM::Read*>(this->CFG.at(nodeId)->getStmt())){continue;}
                 if (this->assignmentsToCompoundsVarsMap.find(nodeId) == this->assignmentsToCompoundsVarsMap.end()) {
                     if (!this->stmtInfoMap.at(element.first).at(nodeId).second) {
                         if (this->CFG.find(nodeId) != this->CFG.end()) {
@@ -115,7 +115,7 @@ namespace SCAM {
         if (this->deadNodeDetected) {
             std::vector<int> pointlessIfStmtsNodeIdsVector;
             for (auto node : this->CFG) {
-                if (dynamic_cast<SCAM::If *>(node.second->getStmt())) {
+                if (dynamic_cast<DESCAM::If *>(node.second->getStmt())) {
                     if (node.second->getSuccessorList().size() != 2) {
                         pointlessIfStmtsNodeIdsVector.push_back(node.first);
                     }
@@ -134,7 +134,7 @@ namespace SCAM {
 #endif
     }
 
-    void LivenessAnalysis::initLA(const std::map<std::string, SCAM::Variable *> &ModuleVariables) {
+    void LivenessAnalysis::initLA(const std::map<std::string, DESCAM::Variable *> &ModuleVariables) {
         for (auto var : ModuleVariables) {
             this->moduleVariablesMap.insert(std::make_pair(var.second->getFullName(), var.second));
             if (var.second->isCompoundType() || var.second->isArrayType()) {
@@ -221,7 +221,7 @@ namespace SCAM {
 
     void LivenessAnalysis::visit(class Assignment &node) {
         // if the lhs of the assignment is a variableoperand set it inittialy to not used then check if there is a use of a variable in the rhs
-        if (auto lhs = dynamic_cast<SCAM::VariableOperand *>(node.getLhs())) {
+        if (auto lhs = dynamic_cast<DESCAM::VariableOperand *>(node.getLhs())) {
             if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
                 this->variablesInStmtMap.at(this->currentNodeID).insert(lhs->getVariable()->getFullName());
             } else {
@@ -300,7 +300,7 @@ namespace SCAM {
         node.getSubExpr()->accept(*this);
     }
 
-    void LivenessAnalysis::visit(struct SCAM::FunctionOperand &node) {
+    void LivenessAnalysis::visit(struct DESCAM::FunctionOperand &node) {
         for (auto param : node.getParamValueMap()) {
             param.second->accept(*this);
         }

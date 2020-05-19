@@ -12,7 +12,7 @@
 #include "PrintBitOperations.h"
 #include "Utilities.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 PrintCondition::PrintCondition(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->slice = false;

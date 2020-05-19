@@ -11,15 +11,15 @@
 #include <Stmts/StmtAbstractVisitor.h>
 #include <Stmts/Stmts_all.h>
 
-namespace SCAM {
+namespace DESCAM {
     /***
     * \brief: Collects values from assignments to variables that are not read in the CFG
     * \author:mi-alkoudsi
     * \inputs:
-    *    - std::map<int, SCAM::CfgNode *> cfg;
+    *    - std::map<int, DESCAM::CfgNode *> cfg;
     *    - std::set<std::string> readVariablesSet;
     * \outputs:
-    *    - std::map<std::string, std::set<SCAM::Expr *>> variableValuesMap;
+    *    - std::map<std::string, std::set<DESCAM::Expr *>> variableValuesMap;
     * \note: compound expressions values are not stored, only the values of their sub variables.
     */
 

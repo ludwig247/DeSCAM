@@ -10,7 +10,7 @@
 #include "PropertySuite.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor
@@ -155,7 +155,7 @@ namespace SCAM {
     //                             Function-Functions
     // ------------------------------------------------------------------------------
 
-    void PropertySuite::addFunction(SCAM::Function *function) {
+    void PropertySuite::addFunction(DESCAM::Function *function) {
         this->functions.push_back(function);
     }
 

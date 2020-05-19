@@ -19,15 +19,15 @@
 
 #include <set>
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Analyzes variables and output ports bitwidth
         * \author: mi-alkoudsi
         * \inputs:
-        *       - SCAM::Module *module
+        *       - DESCAM::Module *module
         * \outputs:
         *       - std::map<std::string, int> variablesBitwidthMap
-        *       - std::map<SCAM::Port, int> outputPortsBitwidthMap
+        *       - std::map<DESCAM::Port, int> outputPortsBitwidthMap
         */
     class RangeAndBitWidthAnalysis : public StmtAbstractVisitor {
     public:

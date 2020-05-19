@@ -6,7 +6,7 @@
 #include "SynthesisScripts.h"
 #include "../HLS/Utilities.h"
 
-using namespace SCAM::HLSPlugin::Script;
+using namespace DESCAM::HLSPlugin::Script;
 
 SynthesisScripts::SynthesisScripts(std::shared_ptr<OptimizerHLS> optimizer, HLSOption hlsOption) :
     propertySuite(nullptr),

@@ -31,7 +31,7 @@ std::map<std::string, std::string> PrintTrueOperation::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintTrueOperation::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintTrueOperation::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -848,9 +848,9 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation *> &cycle) {
     std::vector<std::string> freezeSignals;
     for (auto &&op : cycle) {
         //Find all objects that need to be freezed
-        std::set<SCAM::SyncSignal *> syncSignals;
-        std::set<SCAM::Variable *> variables;
-        std::set<SCAM::DataSignal *> dataSignals;
+        std::set<DESCAM::SyncSignal *> syncSignals;
+        std::set<DESCAM::Variable *> variables;
+        std::set<DESCAM::DataSignal *> dataSignals;
         for (auto &&assignment : op->getCommitmentsList()) {
             auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
             syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());

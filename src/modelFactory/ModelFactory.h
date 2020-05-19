@@ -34,12 +34,12 @@ using namespace clang::tooling;
 using namespace clang;
 
 
-namespace SCAM {
+namespace DESCAM {
 
     bool containsSubstring(std::string,std::string);
 
     /*!
-     * \brief Factory for creating a SCAM::Model
+     * \brief Factory for creating a DESCAM::Model
      *
      * HandleTranslationUnit is called after instantiation of the model and calls three methods preFire, fire and postFire
      * The preFire face is unimportant for us and is automatically followed by the fire face.
@@ -49,8 +49,8 @@ namespace SCAM {
      * Aferwards a netlist of all modules is extracted, starting with the sc_main().
      * Right now only two modules can be connceted and  a nested modules are not supported
      *
-     * The model is then accessed using the SCAM::GraphVistor. This visitors only prints the structural information of the system.
-     * In order to access the behavioral information  for each module we refer SCAM::SuspensionAutomata.
+     * The model is then accessed using the DESCAM::GraphVistor. This visitors only prints the structural information of the system.
+     * In order to access the behavioral information  for each module we refer DESCAM::SuspensionAutomata.
      *
      */
     class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {

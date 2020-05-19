@@ -8,12 +8,12 @@
 #include "PrintStatement.h"
 #include "PrintStmt.h"
 
-namespace SCAM { namespace HLSPlugin { namespace HLS {
+namespace DESCAM { namespace HLSPlugin { namespace HLS {
 
     class PrintReset : PrintStmt {
 
     public:
-        PrintReset(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        PrintReset(DESCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         bool hasReset();
 

@@ -14,7 +14,7 @@
  * e.g., x * 65 => ((x << 6) + x)
  */
 
-SCAM::OperatorStrengthReduction::OperatorStrengthReduction(std::map<int, CfgNode *> CFG) : isCFGOptimizer(true),
+DESCAM::OperatorStrengthReduction::OperatorStrengthReduction(std::map<int, CfgNode *> CFG) : isCFGOptimizer(true),
                                                                                            CFG(std::move(CFG)),
                                                                                            hasReduction(false) {
 
@@ -35,8 +35,8 @@ SCAM::OperatorStrengthReduction::OperatorStrengthReduction(std::map<int, CfgNode
     }
 }
 
-SCAM::OperatorStrengthReduction::OperatorStrengthReduction(
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList) : isCFGOptimizer(
+DESCAM::OperatorStrengthReduction::OperatorStrengthReduction(
+        std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> returnValueConditionList) : isCFGOptimizer(
         false), returnValueConditionList(std::move(returnValueConditionList)), hasReduction(false), newStmt(nullptr) {
 
     for (const auto &pair : this->returnValueConditionList) {
@@ -75,22 +75,22 @@ SCAM::OperatorStrengthReduction::OperatorStrengthReduction(
     this->tempList.clear();
 }
 
-const std::map<int, SCAM::CfgNode *> &SCAM::OperatorStrengthReduction::getCFG() const {
+const std::map<int, DESCAM::CfgNode *> &DESCAM::OperatorStrengthReduction::getCFG() const {
     return this->CFG;
 }
 
-const std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> &
-SCAM::OperatorStrengthReduction::getReturnValueConditionList() const {
+const std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> &
+DESCAM::OperatorStrengthReduction::getReturnValueConditionList() const {
     return this->returnValueConditionList;
 }
 
 template<class T>
-bool SCAM::OperatorStrengthReduction::isPowerOfTwo(T num) {
+bool DESCAM::OperatorStrengthReduction::isPowerOfTwo(T num) {
     return ((num != 0) && ((num & num - 1) == 0));
 }
 
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::Assignment &node) {
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::Assignment &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -105,11 +105,11 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::Assignment &node) {
 
     //Create new stmt
     if (hasReduction) {
-        this->newStmt = new SCAM::Assignment(lhs, rhs, node.getStmtInfo());
+        this->newStmt = new DESCAM::Assignment(lhs, rhs, node.getStmtInfo());
     }
 }
 
-void SCAM::OperatorStrengthReduction::visit(struct UnaryExpr &node) {
+void DESCAM::OperatorStrengthReduction::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
     if (this->newExpr != nullptr && hasReduction) {
         if (node.getOperation() == "not") {
@@ -126,7 +126,7 @@ void SCAM::OperatorStrengthReduction::visit(struct UnaryExpr &node) {
     }
 }
 
-void SCAM::OperatorStrengthReduction::visit(struct If &node) {
+void DESCAM::OperatorStrengthReduction::visit(struct If &node) {
     node.getConditionStmt()->accept(*this);
     if (this->newExpr != nullptr && hasReduction) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
@@ -135,7 +135,7 @@ void SCAM::OperatorStrengthReduction::visit(struct If &node) {
 }
 
 
-void SCAM::OperatorStrengthReduction::visit(struct Write &node) {
+void DESCAM::OperatorStrengthReduction::visit(struct Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr != nullptr && hasReduction) {
         this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand(),
@@ -143,7 +143,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Write &node) {
     }
 }
 
-void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
+void DESCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
 
     this->newExpr = nullptr;
     Expr *nodeLhs = node.getLhs();
@@ -158,11 +158,11 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
     if (this->newExpr != nullptr) { nodeRhs = this->newExpr; }
 
     if (hasReduction) {
-        this->newExpr = new SCAM::Arithmetic(nodeLhs, node.getOperation(), nodeRhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Arithmetic(nodeLhs, node.getOperation(), nodeRhs, node.getStmtInfo());
     } else {
         this->newExpr = &node;
     }
-    auto arithNode = dynamic_cast<SCAM::Arithmetic *> (this->newExpr);
+    auto arithNode = dynamic_cast<DESCAM::Arithmetic *> (this->newExpr);
     if (arithNode == nullptr) { TERMINATE("not arithmetic expression not expected!"); }
 
 
@@ -451,7 +451,7 @@ void SCAM::OperatorStrengthReduction::visit(struct Arithmetic &node) {
     }
 }
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::Logical &node) {
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::Logical &node) {
 //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -466,11 +466,11 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::Logical &node) {
 
     //Create new stmt
     if (hasReduction) {
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Logical(lhs, node.getOperation(), rhs, node.getStmtInfo());
     } else { this->newExpr = &node; }
 }
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::Relational &node) {
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::Relational &node) {
 //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -485,11 +485,11 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::Relational &node) {
 
     //Create new stmt
     if (hasReduction) {
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Relational(lhs, node.getOperation(), rhs, node.getStmtInfo());
     } else { this->newExpr = &node; }
 }
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::Bitwise &node) {
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::Bitwise &node) {
 //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -504,11 +504,11 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::Bitwise &node) {
 
     //Create new stmt
     if (hasReduction) {
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs, node.getStmtInfo());
+        this->newExpr = new DESCAM::Bitwise(lhs, node.getOperation(), rhs, node.getStmtInfo());
     } else { this->newExpr = &node; }
 }
 
-void SCAM::OperatorStrengthReduction::visit(struct Cast &node) {
+void DESCAM::OperatorStrengthReduction::visit(struct Cast &node) {
     node.getSubExpr()->accept(*this);
     if (this->newExpr != nullptr && hasReduction) {
         this->newExpr = new Cast(this->newExpr, node.getDataType(), node.getStmtInfo());
@@ -516,8 +516,8 @@ void SCAM::OperatorStrengthReduction::visit(struct Cast &node) {
 }
 
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::FunctionOperand &node) {
-    std::map<std::string, SCAM::Expr *> newParamValueMap;
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::FunctionOperand &node) {
+    std::map<std::string, DESCAM::Expr *> newParamValueMap;
     for (auto param : node.getParamValueMap()) {
         this->newExpr = nullptr;
         param.second->accept(*this);
@@ -528,11 +528,11 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::FunctionOperand &node) {
         }
     }
     if (hasReduction) {
-        this->newExpr = new SCAM::FunctionOperand(node.getFunction(), newParamValueMap);
+        this->newExpr = new DESCAM::FunctionOperand(node.getFunction(), newParamValueMap);
     } else { this->newExpr = &node; }
 }
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayOperand &node) {
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::ArrayOperand &node) {
     this->newExpr = nullptr;
     node.getIdx()->accept(*this);
     if (this->newExpr) {
@@ -541,8 +541,8 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayOperand &node) {
 }
 
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::CompoundExpr &node) {
-    std::map<std::string, SCAM::Expr *> valueMap;
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::CompoundExpr &node) {
+    std::map<std::string, DESCAM::Expr *> valueMap;
     for (auto subVar : node.getValueMap()) {
         this->newExpr = nullptr;
         subVar.second->accept(*this);
@@ -557,8 +557,8 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::CompoundExpr &node) {
 }
 
 
-void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayExpr &node) {
-    std::map<std::string, SCAM::Expr *> valueMap;
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::ArrayExpr &node) {
+    std::map<std::string, DESCAM::Expr *> valueMap;
     for (auto subVar : node.getValueMap()) {
         this->newExpr = nullptr;
         subVar.second->accept(*this);
@@ -575,7 +575,7 @@ void SCAM::OperatorStrengthReduction::visit(SCAM::ArrayExpr &node) {
  *   x >= y ? z : false <=>  x>=y && z
  *   x >= y ? false : z <=>  !x>=y && z
  */
-void SCAM::OperatorStrengthReduction::visit(SCAM::Ternary &node) {
+void DESCAM::OperatorStrengthReduction::visit(DESCAM::Ternary &node) {
     if (auto falseExpr = dynamic_cast<BoolValue *>(node.getFalseExpr())) {
         if (!falseExpr->getValue()) {
             this->newExpr = new Logical(node.getCondition(), "and", node.getTrueExpr(), node.getStmtInfo());

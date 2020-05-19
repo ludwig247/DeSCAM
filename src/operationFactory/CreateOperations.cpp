@@ -14,9 +14,9 @@
 
 //#define DEBUG_CREATEOPERATIONS
 
-namespace SCAM {
+namespace DESCAM {
 
-    CreateOperations::CreateOperations(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module) :
+    CreateOperations::CreateOperations(const std::vector<std::vector<DESCAM::CfgNode *> > &rawOperations, std::map<std::string, DESCAM::State *> statesMap, DESCAM::Module *module) :
             firstStatement(false),
             lastStatement(false),
             condition(false),
@@ -41,7 +41,7 @@ namespace SCAM {
             auto node = op.begin();
             if ((*node)->getStmt() == nullptr) continue;
 
-            SCAM::FindCommunication2 findComm;
+            DESCAM::FindCommunication2 findComm;
             (*node)->getStmt()->accept(findComm);
             if (findComm.isBlockingInterface()) {
                 bool isNewWaitOperation = (std::find(this->nodeWaitList.begin(), this->nodeWaitList.end(), (*node)) == this->nodeWaitList.end());
@@ -90,15 +90,15 @@ namespace SCAM {
 #endif
     }
 
-    const std::vector<SCAM::Operation*> &CreateOperations::getOperationsList() const{
+    const std::vector<DESCAM::Operation*> &CreateOperations::getOperationsList() const{
         return this->operationsList;
     }
 
-    const std::map<std::string, SCAM::State *> &CreateOperations::getStatesMap() const {
+    const std::map<std::string, DESCAM::State *> &CreateOperations::getStatesMap() const {
         return this->statesMap;
     }
 
-    void CreateOperations::addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation) {
+    void CreateOperations::addStates(const std::vector<DESCAM::CfgNode *> &rawOperation, Operation *operation) {
         /// Process starting state
         auto node = rawOperation.begin();
         if ((*node)->getStmt() == nullptr) {
@@ -133,7 +133,7 @@ namespace SCAM {
         }
     }
 
-    void CreateOperations::addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation) {
+    void CreateOperations::addStatementsList(const std::vector<DESCAM::CfgNode *> &rawOperation, Operation *operation) {
         this->statementsList.clear();
 
         auto node = rawOperation.begin();
@@ -176,15 +176,15 @@ namespace SCAM {
 
 
 // Visitor functions
-namespace SCAM {
-    void SCAM::CreateOperations::visit(SCAM::If &node) {
+namespace DESCAM {
+    void DESCAM::CreateOperations::visit(DESCAM::If &node) {
         if (this->condition)
             this->statementsList.push_back(&node);
         else
             this->statementsList.push_back(new If(new UnaryExpr("not", node.getConditionStmt(),node.getStmtInfo()),node.getStmtInfo()));
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Read &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Read &node) {
         if(firstStatement) {
             if (node.isBlocking())
                 node.getPort()->getSynchSignal()->accept(*this);
@@ -212,7 +212,7 @@ namespace SCAM {
         }
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Write &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Write &node) {
         if(firstStatement) {
             if(node.getPort()->getInterface()->isBlocking()) {
                 node.getPort()->getSynchSignal()->accept(*this);
@@ -230,7 +230,7 @@ namespace SCAM {
         }
     }
 
-    void SCAM::CreateOperations::visit(SCAM::SyncSignal &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::SyncSignal &node) {
         if(this->firstStatement) {
             if(this->waitOp || this->notSyncOp) {
                 this->statementsList.push_back(new If(new UnaryExpr("not", &node,node.getStmtInfo()),node.getStmtInfo()));
@@ -243,124 +243,124 @@ namespace SCAM {
         }
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Assignment &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Assignment &node) {
         node.getRhs()->accept(*this);
         if(this->newExpr != nullptr)
             this->statementsList.push_back(new Assignment(node.getLhs(), this->newExpr,node.getStmtInfo()));
     }
 
-    void SCAM::CreateOperations::visit(SCAM::VariableOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::VariableOperand &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::IntegerValue &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::IntegerValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::UnsignedValue &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::UnsignedValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::BoolValue &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::BoolValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::EnumValue &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::EnumValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::CompoundValue &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::CompoundValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::PortOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::PortOperand &node) {
         TERMINATE("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(SCAM::TimePointOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::TimePointOperand &node) {
         TERMINATE("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(SCAM::UnaryExpr &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::UnaryExpr &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::While &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::While &node) {
     }
 
-    void SCAM::CreateOperations::visit(SCAM::SectionOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::SectionOperand &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::SectionValue &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::SectionValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::ITE &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::ITE &node) {
         TERMINATE("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Arithmetic &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Arithmetic &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Logical &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Logical &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Relational &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Relational &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Ternary &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Ternary &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Bitwise &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Bitwise &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::DataSignalOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::DataSignalOperand &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Cast &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Cast &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::FunctionOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::FunctionOperand &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::ArrayOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::ArrayOperand &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::CompoundExpr &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::CompoundExpr &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::ParamOperand &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::ParamOperand &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Return &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Return &node) {
         TERMINATE("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Notify &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Notify &node) {
         TERMINATE("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(class ArrayExpr &node) {
+    void DESCAM::CreateOperations::visit(class ArrayExpr &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Wait &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Wait &node) {
         //TERMINATE("CreateOperations: Not allowed ");
     }
 
-    void SCAM::CreateOperations::visit(SCAM::Peek &node) {
+    void DESCAM::CreateOperations::visit(DESCAM::Peek &node) {
         this->newExpr = node.getPort()->getSynchSignal();
     }
 }

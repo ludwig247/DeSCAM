@@ -9,7 +9,7 @@
 #include <DataSignal.h>
 #include "VariableOperand.h"
 
-namespace SCAM {
+namespace DESCAM {
     class DataSignalOperand : public Operand {
     public:
         DataSignalOperand(DataSignal *dataSignal, LocationInfo stmtLocationInfo = LocationInfo());

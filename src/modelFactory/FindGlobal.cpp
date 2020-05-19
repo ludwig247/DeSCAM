@@ -11,14 +11,14 @@
 #include "FatalError.h"
 
 
-SCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci) :
+DESCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci) :
         ci(ci),
         decl(decl){
     assert(!(decl == nullptr));
     TraverseDecl(decl);
 }
 
-bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
+bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
     auto type = varDecl->getType();
     auto isConst = type.isConstant(decl->getASTContext());
     auto isBuiltIn = type->isBuiltinType();
@@ -80,7 +80,7 @@ bool SCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
     return true;
 }
 
-const std::map<std::string, SCAM::Variable *> &SCAM::FindGlobal::getVariableMap() const {
+const std::map<std::string, DESCAM::Variable *> &DESCAM::FindGlobal::getVariableMap() const {
     return variableMap;
 }
 
@@ -93,7 +93,7 @@ const std::map<std::string, SCAM::Variable *> &SCAM::FindGlobal::getVariableMap(
  * @return
  */
 
-bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
+bool DESCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
      //Define lambdas for checking the function
     auto valid_result_type = [=](){
         auto res = funDecl->getResultType();
@@ -131,23 +131,23 @@ bool SCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
     return true;
 }
 
-SCAM::DataType * SCAM::FindGlobal::getDataType(const clang::QualType& type) const {
-    SCAM::DataType * dataType;
+DESCAM::DataType * DESCAM::FindGlobal::getDataType(const clang::QualType& type) const {
+    DESCAM::DataType * dataType;
     if(type->isBooleanType()){
-        dataType = SCAM::DataTypes::getDataType("bool");
+        dataType = DESCAM::DataTypes::getDataType("bool");
     }else if(type->isUnsignedIntegerType()){
-        dataType = SCAM::DataTypes::getDataType("unsigned");
+        dataType = DESCAM::DataTypes::getDataType("unsigned");
     }else if(type->isIntegerType()){
-        dataType = SCAM::DataTypes::getDataType("int");
+        dataType = DESCAM::DataTypes::getDataType("int");
     }else TERMINATE("Type: "+type.getAsString() + "not allowed");
     return dataType;
 }
 
-const std::map<std::string, SCAM::Function *> &SCAM::FindGlobal::getFunctionMap() const {
+const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunctionMap() const {
     return functionMap;
 }
 
-const std::map<std::string, const clang::FunctionDecl *> &SCAM::FindGlobal::getFunctionDeclMap() const {
+const std::map<std::string, const clang::FunctionDecl *> &DESCAM::FindGlobal::getFunctionDeclMap() const {
     return functionDeclMap;
 }
 

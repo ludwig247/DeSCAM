@@ -12,12 +12,12 @@
 #include <Stmts/IntegerValue.h>
 #include <Stmts/Notify.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     Port::~Port() {
     }
 
-    Port::Port(const std::string &name, Interface *_interface, SCAM::DataType *datatype, LocationInfo locationInfo) :
+    Port::Port(const std::string &name, Interface *_interface, DESCAM::DataType *datatype, LocationInfo locationInfo) :
             _interface(_interface),
             TypeInterface(datatype),
             notify(new Notify(this)),

@@ -10,7 +10,7 @@
 #include "Logger/Logger.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     Module::Module(std::string name, LocationInfo locationInfo) :
             fsm(new FSM(this)),
@@ -182,27 +182,27 @@ namespace SCAM {
         Module::propertySuite = propertySuite;
     }
 
-    std::map<int, SCAM::CfgNode *> Module::getCFG() const {
+    std::map<int, DESCAM::CfgNode *> Module::getCFG() const {
         return this->cfg;
     }
 
-    std::multimap<std::string, std::vector<SCAM::CfgNode *>> Module::getcommGroups() const {
+    std::multimap<std::string, std::vector<DESCAM::CfgNode *>> Module::getcommGroups() const {
         return this->commGroups;
     }
 
-//    std::map<int, SCAM::CfgNode *> Module::getCFG_Original() const {
+//    std::map<int, DESCAM::CfgNode *> Module::getCFG_Original() const {
 //        return this->cfg_Original;
 //    }
 //
-//    std::map<int, SCAM::CfgNode *> Module::getCFG_Implicit() const {
+//    std::map<int, DESCAM::CfgNode *> Module::getCFG_Implicit() const {
 //        return this->cfg_Implicit;
 //    }
 
-    void Module::setCFG(std::map<int, SCAM::CfgNode *> cfg_arg) {
+    void Module::setCFG(std::map<int, DESCAM::CfgNode *> cfg_arg) {
         this->cfg = std::move(cfg_arg);
     }
 
-    void Module::setCFG(std::map<int, SCAM::CfgNode *> cfg_arg, std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups_arg) {
+    void Module::setCFG(std::map<int, DESCAM::CfgNode *> cfg_arg, std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups_arg) {
         this->cfg = std::move(cfg_arg);
         this->commGroups = std::move(commGroups_arg);
     }
@@ -215,11 +215,11 @@ namespace SCAM {
         Module::variableMap = variableMap;
     }
 
-//    void Module::setCFG_Original(std::map<int, SCAM::CfgNode *> blockCFG) {
+//    void Module::setCFG_Original(std::map<int, DESCAM::CfgNode *> blockCFG) {
 //        this->cfg_Original = std::move(blockCFG);
 //    }
 //
-//    void Module::setCFG_Implicit(std::map<int, SCAM::CfgNode *> blockCFG) {
+//    void Module::setCFG_Implicit(std::map<int, DESCAM::CfgNode *> blockCFG) {
 //        this->cfg_Implicit = std::move(blockCFG);
 //    }
 }
