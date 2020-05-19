@@ -1,0 +1,37 @@
+[
+	{
+		"file": "fileDir/file1.h",
+		"statement": "statement1",
+		"line": [[1 , 2], [3 , 4]],
+		"severity": "Info",
+		"location": "while adding module functions",
+		"message": "message1"
+	},
+	{
+		"file": "fileDir/file2.h",
+		"statement": "statement2",
+		"line": [[1 , 2], [3 , 4]],
+		"severity": "Error",
+		"violation": "Syntax",
+		"location": "while parsing",
+		"message": "message2"
+	},
+	{
+		"file": "fileDir/file3.h",
+		"statement": "statement3",
+		"line": [[1 , 2], [3 , 4]],
+		"severity": "Warning",
+		"violation": "SystemC PPA Compliance",
+		"location": "while extracting module behavior",
+		"message": "message3"
+	},
+	{
+		"file": "fileDir/file4.h",
+		"statement": "statement4",
+		"line": [[1 , 2], [3 , 4]],
+		"severity": "Error",
+		"violation": "SystemC PPA Compliance",
+		"location": "while adding global constants",
+		"message": "message4"
+	}
+]

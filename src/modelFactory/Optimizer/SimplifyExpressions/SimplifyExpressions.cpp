@@ -123,6 +123,8 @@ void SCAM::SimplifyExpressions::translateExpression(SCAM::Expr *expr) {
             return;
         }
         this->newExpr = translator.translate(z3Expr, module);
+        auto locationInfo = expr->getStmtInfo();
+        this->newExpr->setStmtInfo(locationInfo);
         if (translator.isAbort() || *expr == *this->newExpr) {
             this->newExpr = nullptr;
             return;

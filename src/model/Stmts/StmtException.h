@@ -40,15 +40,15 @@ namespace SCAM {
     try {                                                          \
     x;                                                              \
     }                                                                \
-    CATCH_STMT_EXCEPTION(err.getStmtLocationInfo())
+    CATCH_STMT_EXCEPTION()
 
-#define CATCH_STMT_EXCEPTION(stmtLocationInfo)                       \
+#define CATCH_STMT_EXCEPTION()                                       \
    catch (StmtException& err) {                                       \
     auto msg = std::string(err.what());                                \
     auto sl = SCAM::LoggerMsg::SeverityLevel::Error;                    \
     auto vt = SCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
     auto pl = SCAM::Logger::getCurrentProcessedLocation();                \
-    SCAM::LoggerMsg lmsg(msg,stmtLocationInfo,sl,vt,pl);                   \
+    SCAM::LoggerMsg lmsg(msg,err.getStmtLocationInfo(),sl,vt,pl);          \
     SCAM::Logger::addMsg(lmsg);                                             \
     if(pl == SCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
     Logger::setTerminate();                                                   \

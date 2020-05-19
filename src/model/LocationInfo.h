@@ -49,6 +49,8 @@ namespace SCAM {
 
         inline void setColumnEndNumber(int columnEndNumber);
 
+        bool operator==(const LocationInfo &other) const;
+
     private:
         std::string stmt = "", fileDir = "";
         int rowStartNumber = 0, rowEndNumber = 0, columnStartNumber = 0, columnEndNumber = 0;
