@@ -1,24 +1,29 @@
-#include "../Interfaces_new/Interfaces.h"
-
+#include "Interfaces.h"
+#include "FIFO.h"
 #include "systemc.h"
 
 SC_MODULE(Consumer){
-  blocking_in<int> inp;
+  sc_port<FIFO_in_if<int>> inp;
 
   int value = 0;
-  bool start = true;
+  float random;
+  float limit = 0.75;
+  int value_old = 0;
 
   void check_inp(){
 
       while(true) {
-          if(start){
-              start = false;
-              wait(3.001, SC_NS);
+          //Consumes values from the Output of the FIFO
+          random = ((float) rand()) / (float) RAND_MAX;
+          while (random < limit) {
+              insert_state();
+              random = ((float) rand()) / (float) RAND_MAX;
           }
-          //Read Output of FIFO
           inp->read(value);
+          sc_assert(value == value_old + 1);
+          value_old = value;
           std::cout << "At " << sc_time_stamp() << " Consumer received: " << value << endl;
-          wait(1,SC_NS);
+          insert_state();
       }
   }
 

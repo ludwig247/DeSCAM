@@ -19,6 +19,7 @@ namespace SCAM {
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
         clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(), b);
+        clangCFG->dump({},true);
         if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
@@ -43,7 +44,27 @@ namespace SCAM {
         this->translateToScamCFG();
     }
 
-/*
+    CFGFactory::CFGFactory(const clang::FunctionDecl  * functionDecl, clang::CompilerInstance &ci, Module *module, Protocol *protocol, bool sourceModule):
+            sourceModule(sourceModule),
+            methodDecl(nullptr),
+            ci(ci),
+            module(module),
+            protocol(protocol) {
+
+        //TODO: remove ci and methodDecl from class
+        //Create Control flow graph(blockCFG)
+        clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(), &functionDecl->getASTContext(), b);
+        if (clangCFG == nullptr) {
+            llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
+            return;
+        }
+        this->translateToScamCFG();
+
+    }
+
+
+    /*
  * \brief Generates an simple blockCFG for a given clang::blockCFG
  *
  * 1)Find entry point in blockCFG(block w/o predecessors)

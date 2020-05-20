@@ -9,20 +9,3 @@ add_subdirectory(SimplifyVisitor_Test)
 add_subdirectory(Stmts_Test)
 add_subdirectory(Optimizer_Test)
 add_subdirectory(Operation_Test)
-
-add_subdirectory(operationFactory)
-
-
-#find_file(
-#        TEST_FILE
-#        NAMES "Bus_new.h"
-#        PATHS /import/lab/users/hesselberg/Simon_repo/DeSCAM/example/Bus ENV TEST
-#        PATH_SUFFIXES "ESL"
-#        NO_DEFAULT_PATH
-#)
-#message(STATUS ".h => ${TEST_FILE}")
-#
-#file(GLOB SOURCES
-#        ../example/Bus/ESL/*.h
-#        )
-#message(STATUS ".h => ${SOURCES}")

@@ -17,6 +17,8 @@
 #include "FindFunctions.h"
 #include "FindGlobal.h"
 #include "../parser/CommandLineParameter.h"
+#include "FindChannels.h"
+#include "FindChannelMethods.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
 #include <z3.h>
@@ -55,11 +57,14 @@ bool SCAM::ModelFactory::fire() {
     //Global variables
     this->addGlobalConstants(tu);
 
+    //Add Channels
+    this->addChannels(tu);
+
     //Modules
     this->addModules(tu);
-
     //Remove unused things from the model
     this->removeUnused();
+
 
     //Instances
     this->addInstances(tu);
@@ -106,6 +111,100 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         //Processe
         this->addBehavior(module, scparModule.second);
         //this->addCommunicationFSM(module);
+    }
+}
+void SCAM::ModelFactory::addChannels(clang::TranslationUnitDecl *tu){
+    DataType * T_and = new DataType("T &");
+    DataTypes::addDataType(T_and);
+    DataType * const_T_and = new DataType("const T &");
+    DataTypes::addDataType(const_T_and);
+    DataType * event = new DataType("class sc_core::sc_event");
+    DataTypes::addDataType(event);
+    DataType * T_star = new DataType("T *");
+    DataTypes::addDataType(T_star);
+    DataType * void_type = new DataType("void");
+    DataTypes::addDataType(void_type);
+
+    //Find CXXRecordDecls
+    FindChannels protocols(tu);
+
+    //Fill the model with channels (structural describtion)
+    for (auto &scparProtocol: protocols.getChannelMap()) {
+
+        //Channel Name
+        std::string name = scparProtocol.first;
+
+        if(name == "FIFO"){
+            auto protocol = new Protocol(scparProtocol.first);
+            model->addModule(protocol);
+
+            this->addVariables(protocol,scparProtocol.second);
+
+
+            //Get the MethodDecls of the protocol's RecordDecl
+            FindChannelMethods methods(scparProtocol.second);
+            for (auto func: methods.getFunctionMap()) {
+                auto newType = FindNewDatatype::getDataType(func.second->getResultType());
+                if (FindNewDatatype::isGlobal(func.second->getResultType())) {
+                    DataTypes::addDataType(newType);
+                } else DataTypes::addLocalDataType(protocol->getName(), newType);
+            }
+
+            //Add Structural description of functions to module
+            for (auto method: methods.getFunctionReturnTypeMap()) {
+                DataType *datatype;
+                if (DataTypes::isLocalDataType(method.second, protocol->getName())) {
+                    datatype = DataTypes::getLocalDataType(method.second, protocol->getName());
+                } else datatype = DataTypes::getDataType(method.second);
+
+                //Parameter
+                std::map<std::string, Parameter *> paramMap;
+                auto paramList = methods.getFunctionParamNameMap().find(method.first)->second;
+                auto paramTypeList = methods.getFunctionParamTypeMap().find(method.first)->second;
+                if (paramList.size() != paramTypeList.size())
+                    throw std::runtime_error("Parameter: # of names and types not equal");
+                for (int i = 0; i < paramList.size(); i++) {
+                    auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
+                    paramMap.insert(std::make_pair(paramList.at(i), param));
+                }
+                auto new_function = new Function(method.first, datatype, paramMap);
+                protocol->addFunction(new_function);
+            }
+
+            //Add behavioral description of function to module
+            for (auto method: methods.getFunctionMap()) {
+                //Create blockCFG for this process
+                //Active searching only for functions
+                FindDataFlow::functionName = method.first;
+                FindDataFlow::isFunction = true;
+                SCAM::CFGFactory cfgFactory(method.second, _ci, protocol, false);
+                FindDataFlow::functionName = "";
+                FindDataFlow::isFunction = false;
+                //Transfor blockCFG back to code
+                FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), protocol->getFunction(method.first), nullptr);
+                protocol->getFunction(method.first)->setStmtList(functionFactory.getStmtList());
+                if (ErrorMsg::hasError()) {
+                    std::cout << "" << std::endl;
+                    std::cout << "======================" << std::endl;
+                    std::cout << "Errors: Translation of Stmts for module " << protocol->getName() << std::endl;
+                    std::cout << "----------------------" << std::endl;
+                    for (auto item: ErrorMsg::getInstance().getErrorList()) {
+                        std::cout << "- " << item.msg << std::endl;
+                        for (auto log: item.errorLog) {
+                            std::cout << "\t" << log << std::endl;
+                        }
+                    }
+                    ErrorMsg::clear();
+                }
+            }
+        }
+        else{
+            continue;
+        };
+
+        std::cout << "############################" << std::endl;
+        std::cout << "Channel: " << name << std::endl;
+        std::cout << "############################" << std::endl;
     }
 }
 
@@ -394,13 +493,16 @@ void SCAM::ModelFactory::addVariables(SCAM::Module *module, clang::CXXRecordDecl
                     initialValue = new UnsignedValue(0);
                 } else if (type->isEnumType()) {
                     initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
-                } else throw std::runtime_error("No initialValue for type " + type->getName());
+                } else if (type->isT_starType()){
+                    initialValue = new IntegerValue(0);
+                } else if (type->isEventType()){
+                    initialValue = new IntegerValue(0);
+                }
+                else throw std::runtime_error("No initialValue for type " + type->getName());
             }
             module->addVariable(new Variable(variable.first, type, initialValue));
         }
     }
-
-
 }
 
 bool SCAM::ModelFactory::postFire() {
@@ -430,7 +532,6 @@ void SCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 void SCAM::ModelFactory::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
     FindFunctions findFunction(decl);
     //Add datatypes for functions
-
     for (auto func: findFunction.getFunctionMap()) {
         auto newType = FindNewDatatype::getDataType(func.second->getResultType());
         if (FindNewDatatype::isGlobal(func.second->getResultType())) {
@@ -639,8 +740,3 @@ void SCAM::ModelFactory::removeUnused() {
         }
     }
 }
-
-
-
-
-

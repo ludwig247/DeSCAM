@@ -39,6 +39,9 @@ namespace SCAM {
         virtual void visit(class Parameter &node) = 0;
 
         virtual void visit(class Timepoint &node) = 0;
+
+        virtual void visit(class Protocol &node) = 0;
+
     };
 }
 

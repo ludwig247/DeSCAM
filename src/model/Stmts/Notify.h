@@ -14,6 +14,7 @@ namespace SCAM {
         Notify() = delete;
 
         Notify(Port *port);
+        Notify(std::string name);
 
         virtual ~Notify() = default;
 
@@ -22,10 +23,11 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const;
 
         Port *getPort() const;
+        std::string getEventname();
 
     private:
         Port *port;
-
+        std::string eventname;
     };
 }
 

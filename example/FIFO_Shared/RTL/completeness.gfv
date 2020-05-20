@@ -1,0 +1,87 @@
+completeness FIFO;
+disable iff:(rst);
+inputs: rst, clk, consumer_sync, producer_sync, producer;
+
+determination_requirements:
+  determined(state);
+  determined(head);
+  determined(tail);
+  determined(fifo);
+  determined(consumer_notify);
+  determined(producer_notify);
+  if(consumer_notify)determined(consumer);endif;
+  if(producer_notify)determined(producer);endif;
+
+reset_property:
+  reset;
+property_graph:
+  reset -> wait_in_empty;
+  reset -> empty_to_filled;
+  reset -> empty_to_empty_read_and_write;
+
+  empty_to_empty_read_and_write -> wait_in_empty;
+  empty_to_empty_read_and_write -> empty_to_filled;
+  empty_to_empty_read_and_write -> empty_to_empty_read_and_write;
+
+  empty_to_filled -> wait_in_filled;
+  empty_to_filled -> filled_to_filled_read;
+  empty_to_filled -> filled_to_filled_write;
+  empty_to_filled -> filled_to_filled_read_and_write;
+  empty_to_filled -> filled_to_full;
+  empty_to_filled -> filled_to_empty;
+
+  filled_to_filled_write -> wait_in_filled;
+  filled_to_filled_write -> filled_to_filled_read;
+  filled_to_filled_write -> filled_to_filled_write;
+  filled_to_filled_write -> filled_to_filled_read_and_write;
+  filled_to_filled_write -> filled_to_full;
+  //filled_to_filled_write -> filled_to_empty;
+
+  filled_to_filled_read -> wait_in_filled;
+  filled_to_filled_read -> filled_to_filled_read;
+  filled_to_filled_read -> filled_to_filled_write;
+  filled_to_filled_read -> filled_to_filled_read_and_write;
+  filled_to_filled_read -> filled_to_empty;
+//filled_to_filled_read -> filled_to_full;
+
+  filled_to_filled_read_and_write -> wait_in_filled;
+  filled_to_filled_read_and_write -> filled_to_filled_read;
+  filled_to_filled_read_and_write -> filled_to_filled_write;
+  filled_to_filled_read_and_write -> filled_to_filled_read_and_write;
+  filled_to_filled_read_and_write -> filled_to_full;
+  filled_to_filled_read_and_write -> filled_to_empty;
+
+  filled_to_empty -> wait_in_empty;
+  filled_to_empty -> empty_to_filled;
+  filled_to_empty -> empty_to_empty_read_and_write;
+
+  filled_to_full -> wait_in_full;
+  filled_to_full -> full_to_filled;
+  filled_to_full -> full_to_full_read_and_write;
+
+  full_to_filled -> wait_in_filled;
+  full_to_filled -> filled_to_filled_read;
+  full_to_filled -> filled_to_filled_write;
+  full_to_filled -> filled_to_filled_read_and_write;
+  full_to_filled -> filled_to_full;
+  full_to_filled -> filled_to_empty;
+
+  full_to_full_read_and_write -> wait_in_full;
+  full_to_full_read_and_write -> full_to_filled;
+  full_to_full_read_and_write -> full_to_full_read_and_write;
+
+  wait_in_empty -> wait_in_empty;
+  wait_in_empty -> empty_to_filled;
+  wait_in_empty -> empty_to_empty_read_and_write;
+
+  wait_in_filled -> wait_in_filled;
+  wait_in_filled -> filled_to_filled_read;
+  wait_in_filled -> filled_to_filled_write;
+  wait_in_filled -> filled_to_filled_read_and_write;
+  wait_in_filled -> filled_to_full;
+  wait_in_filled -> filled_to_empty;
+
+  wait_in_full -> wait_in_full;
+  wait_in_full -> full_to_filled;
+  wait_in_full -> full_to_full_read_and_write;
+end completeness;

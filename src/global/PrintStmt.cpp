@@ -326,14 +326,24 @@ void SCAM::PrintStmt::visit(SCAM::ParamOperand &node) {
 
 void SCAM::PrintStmt::visit(SCAM::Return &node) {
     useParenthesesFlag = true;
-    this->ss << "return(";
-    node.getReturnValue()->accept(*this);
-    this->ss << ")";
+//    if(node.getReturnValue() != nullptr) {
+//        this->ss << "return(";
+//        node.getReturnValue()->accept(*this);
+//        this->ss << ")";
+//    }
+//    else{
+        this->ss << node.getFunctionName();
+//    }
 }
 
 void SCAM::PrintStmt::visit(SCAM::Notify &node) {
     useParenthesesFlag = true;
-    this->ss << node.getPort()->getName() << "_notify";
+    if(node.getPort() != nullptr) {
+        this->ss << node.getPort()->getName() << "_notify";
+    }
+    else{
+        this->ss << node.getEventname();
+    }
 }
 
 void SCAM::PrintStmt::visit(SCAM::Wait &node) {

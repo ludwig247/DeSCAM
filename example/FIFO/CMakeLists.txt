@@ -1,7 +1,7 @@
 
 
 cmake_minimum_required(VERSION 2.8)
-project(FIFO)
+project(FIFO_Channel)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
 set (CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib   -rt -dl -tinfo -pthread -z")
@@ -14,8 +14,6 @@ include_directories(Interfaces_new)
 
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
-
-add_executable(FIFO_Simulation ${R_SRC} ../RISCV_ISA/ESL/ISA_test.h ../Interfaces/ImportantState.h)
-
+add_executable(FIFO_Simulation ${R_SRC} FIFO.hpp)
 
 target_link_libraries(FIFO_Simulation systemc)

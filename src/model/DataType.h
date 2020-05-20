@@ -72,6 +72,15 @@ namespace SCAM {
 
         const bool isArrayType() const;
 
+        const bool isT_andType() const;
+
+        const bool isconst_T_andType() const;
+
+        const bool isEventType() const;
+
+        const bool isT_starType() const;
+
+
         ConstValue *getDefaultVal() const;
 
         int getArraySize() const;

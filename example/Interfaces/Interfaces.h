@@ -10,7 +10,6 @@
 #include "Shared.h"
 #include "ImportantState.h"
 
-
 //Blocking
 template<typename T>
 using blocking_in = sc_port<blocking_in_if<T> >;

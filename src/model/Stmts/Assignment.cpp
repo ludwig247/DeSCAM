@@ -26,12 +26,12 @@ SCAM::Assignment::Assignment(SCAM::Expr *lhs, SCAM::Expr *rhs) :
         throw std::runtime_error(ss.str());
     }
 
-    if (NodePeekVisitor::nodePeekArrayOperand(lhs)) {
-        std::string msg = "ERROR:\n";
-        msg += "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index\n";
-        msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
-        throw std::runtime_error(msg);
-    }
+//    if (NodePeekVisitor::nodePeekArrayOperand(lhs)) {
+//        std::string msg = "ERROR:\n";
+//        msg += "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index\n";
+//        msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
+//        throw std::runtime_error(msg);
+//    }
     if (NodePeekVisitor::isConstTypeNode(lhs)) {
         std::string msg = "ERROR:\n";
         msg += "LHS of assignemnt has to be a variable\n";
