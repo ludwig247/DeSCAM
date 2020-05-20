@@ -14,27 +14,19 @@ project(Operation_Test C CXX)
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
 
+add_executable(OperationGraphTest tests.cpp
+        ${CMAKE_SOURCE_DIR}/src/modelFactory/Optimizer/Utilities/OptUtilities.cpp
+        ${CMAKE_SOURCE_DIR}/src/modelFactory/FindDataFlow.cpp
+        ${CMAKE_SOURCE_DIR}/src/modelFactory/Optimizer/Optimizer.cpp
+        ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParameter.cpp
+        OperationGraphTest.h )
+target_compile_options(OperationGraphTest PRIVATE -fPIC -O2 )
 
-#DIRECTORIES
-set(SOURCE_FILES tests.cpp OperationGraphTest.h
-        )
+#TODO: factory should not be included
+target_link_libraries(OperationGraphTest PRIVATE parser)
 
-link_directories(${CMAKE_SOURCE_DIR}/lib/)
+target_link_libraries(OperationGraphTest PRIVATE ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
 
-set(GLOBAL_FILES
-        ${CMAKE_SOURCE_DIR}/src/global/DataTypes.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/PrintStmt.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/ExprTranslator.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/ExprVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
-        )
 
-add_executable(OperationGraphTest ${SOURCE_FILES} ${GLOBAL_FILES})
-target_link_libraries(OperationGraphTest z3)
-target_link_libraries(OperationGraphTest Stmts)
-target_link_libraries(OperationGraphTest Model)
-target_link_libraries(OperationGraphTest ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a pthread)
 
 

@@ -9,7 +9,11 @@
 #include <gtest/gtest.h>
 #include <Stmts_all.h>
 #include <PrintStmt.h>
+#include <ModelGlobal.h>
+#include <PrintITL/PrintITL.h>
 #include <ReconstructOperations.h>
+
+
 #include "gmock/gmock.h"
 #include "Model.h"
 
@@ -17,7 +21,7 @@ using namespace SCAM;
 
 class OperationGraphTest: public ::testing::Test{
 public:
-    OperationGraphTest():module(new Module("TestModule")){
+    OperationGraphTest():module(new SCAM::Module("TestModule")){
     }
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
         std::stringstream ss;
@@ -205,7 +209,7 @@ public:
         }
 
         //Generate Operations Read
-        std::vector<Stmt*> statementList;
+        std::vector<SCAM::Stmt*> statementList;
         for(auto path = pathsRead.begin(); path != pathsRead.end(); path++){
             auto op = new Operation();
             op->setState(CfgIdToStateRead.at(path->front()));
@@ -453,9 +457,9 @@ TEST_F(OperationGraphTest, ExtractPaths){
 
     ASSERT_EQ(compareVector,this->pathsWrite);
     std::cout << "Write Paths are correct!" << std::endl;
-//}
+}
 //
-//TEST_F(OperationGraphTest, CheckOperations){
+TEST_F(OperationGraphTest, CheckOperations){
     ASSERT_EQ(operationsRead.at(0)->getState()->getName(), "state_0");
     ASSERT_EQ(operationsRead.at(0)->getNextState()->getName(), "state_1");
     ASSERT_EQ(operationsRead.at(0)->getStatementsList().size(), 2);

@@ -189,10 +189,10 @@ void SCAM::ModelFactory::addChannels(clang::TranslationUnitDecl *tu){
                     std::cout << "Errors: Translation of Stmts for module " << protocol->getName() << std::endl;
                     std::cout << "----------------------" << std::endl;
                     for (auto item: ErrorMsg::getInstance().getErrorList()) {
-                        std::cout << "- " << item.msg << std::endl;
-                        for (auto log: item.errorLog) {
-                            std::cout << "\t" << log << std::endl;
-                        }
+//                        std::cout << "- " << item.msg << std::endl;
+//                        for (auto log: item.errorLog) {
+//                            std::cout << "\t" << log << std::endl;
+//                        }
                     }
                     ErrorMsg::clear();
                 }
