@@ -1,5 +1,5 @@
 //
-// Created by mehmedag on 10.04.20.
+// Created by Dino Mehmedagić on 10.04.20.
 //
 
 #include "PowerEstimator.h"
@@ -42,49 +42,40 @@ void PowerEstimator::countOperation(const std::string &moduleName, unsigned int 
     operations.at(moduleName).at(operation)++;
 }
 
-void PowerEstimator::displayResults(const std::string& moduleName) {
-    std::ofstream logFile;
-    unsigned int total = 0;
-    logFile.open("../../RISCV_ISA/Dino_test/Log_files/" + moduleName + "_operations_count.txt");
-    logFile << "Operation:\tNumber:" << std::endl;
-    for (auto module : operations)  {
-        int i = 0;
-        for (auto operation : module.second)  {
-            logFile << i++ << "\t\t" << operation << std::endl;
-            total += operation;
-        }
-    }
-    logFile << "TOTAL: \t\t" << total << std::endl;
-    logFile.close();
-}
 
 void PowerEstimator::displayResults(const std::string &moduleName, const std::string &testName) {
     std::ofstream logFile;
     double total = 0;
-    const double R = 2045.679303890155;
-    const double B = 2039.979233442413;
-    const double S = 3997.215110772804;
-    const double U = 2051.223097038867;
-    const double J = 2071.77403060257;
-    const double I_I = 2181.599331151734;
-    const double I_L = 4062.646783599133;
-    const double I_J = 2066.009061328963;
+    const double R = 475.89628;
+    const double B = 477.71575;
+    const double S = 802.46415;
+    const double U = 514.803881;
+    const double J = 515.44433;
+    const double I_I = 479.016149;
+    const double I_L = 808.394055;
+    const double I_J = 475.644236;
+    const double RESTART = 1495.242;
+   // int switches = 1283;
+
+
 
     logFile.open("../../RISCV_ISA/Dino_test/Log_files/" + moduleName + "_" + testName + ".txt");
     logFile << "Operation:\tNumber:" << std::endl;
     std::cout << "Operation:\tNumber:" << std::endl;
         int i = 0;
         for (auto operation : operations.at(moduleName))  {
-            logFile << i++ << "\t\t" << operation << std::endl;
+            logFile << i << "\t\t" << operation << std::endl;
             std::cout << i++ << "\t\t" << operation << std::endl;
             total += operation;
         }
     logFile << "TOTAL: \t\t" << (int) (total + 0.5) << std::endl;
    std::cout << "TOTAL: \t\t" << (int) (total + 0.5) << std::endl;
 
-    double power = R * (operations.at(moduleName).at(2) / total) + B * (operations.at(moduleName).at(3) / total) + S * (operations.at(moduleName).at(4) / total) +
-            U * (operations.at(moduleName).at(5) / total) + J * (operations.at(moduleName).at(6) / total) + I_I * (operations.at(moduleName).at(7) / total) +
-            I_L * (operations.at(moduleName).at(8) / total) + I_J * (operations.at(moduleName).at(9) / total);
+    double power = R * operations.at(moduleName).at(2) + B * operations.at(moduleName).at(3) + S * operations.at(moduleName).at(4) +
+            U * operations.at(moduleName).at(5) + J * operations.at(moduleName).at(6) + I_I * operations.at(moduleName).at(7) +
+            I_L * operations.at(moduleName).at(8) + I_J * operations.at(moduleName).at(9) + RESTART * operations.at(moduleName).at(0);
+    power /= total;
+  //  power += switches * 0.02;
 
     logFile << "Estimated dynamic power consumption: " << power << "uW" << std::endl;
     std::cout << "Estimated dynamic power consumption: " << power << "uW" << std::endl;

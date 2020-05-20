@@ -23,7 +23,7 @@ add_plugin(PrintSVA; "Complete set of properties in SVA")
 add_plugin(PrintSkeleton; "Structure and FSM in AML")
 #add_plugin(PrintChisel; "Print a module in CHISEL")
 
-add_plugin(EstimatePower; "Provide an accurate power estimation on system level")
+add_plugin(InstrumentPower; "Instrument the file with code that enables power estimation on system level")
 
 #add_plugin(PrintDotSimple; "statemachine + conditions as .dot" ; PrintDot)
 #add_plugin(PrintDotFull; "statemachine + conditions + commitments as .dot" ; PrintDot)
@@ -90,7 +90,7 @@ foreach (plugin_lib ${PLUGIN_NAMES})
 endforeach ()
 
 # First we add the executable that generates the table
-add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp EstimatePower/EstimatePower.h)
+add_executable(MakeStyles MakeStyles.cpp ${CMAKE_SOURCE_DIR}/src/parser/CommandLineParametersConfig.cpp InstrumentPower/InstrumentPower.h)
 set_target_properties(MakeStyles PROPERTIES
         CXX_STANDARD 11
         CXX_STANDARD_REQUIRED ON

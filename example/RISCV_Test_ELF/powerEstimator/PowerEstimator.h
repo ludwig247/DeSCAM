@@ -28,7 +28,6 @@ public:
     void enterHierarchy(const std::string& name);
     void initializeOperations(const std::string& name, unsigned int operationsNumber);
     void countOperation(const std::string &moduleName, unsigned int operation);
-    void displayResults(const std::string& moduleName);
     void displayResults(const std::string& moduleName, const std::string& testName);
 
 };

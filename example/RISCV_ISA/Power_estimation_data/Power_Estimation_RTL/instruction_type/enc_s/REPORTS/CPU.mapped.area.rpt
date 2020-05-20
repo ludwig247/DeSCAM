@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : CPU
+Version: N-2017.09-SP3
+Date   : Fri May  8 12:08:49 2020
+****************************************
+
+Library(s) Used:
+
+    NangateOpenCellLibrary (File: /import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/doc/Howto/PowerEstimation/NangateOpenCellLibrary_PDKv1_3_v2010_12/Front_End/Liberty/NLDM/NangateOpenCellLibrary_typical.db)
+
+Number of ports:                          268
+Number of nets:                          6356
+Number of cells:                         6025
+Number of combinational cells:           4212
+Number of sequential cells:              1759
+Number of macros/black boxes:               0
+Number of buf/inv:                        439
+Number of references:                      87
+
+Combinational area:               4863.012073
+Buf/Inv area:                      261.212000
+Noncombinational area:            7853.649725
+Macro/Black Box area:                0.000000
+Net Interconnect area:      undefined  (Wire load has zero net area)
+
+Total cell area:                 12716.661798
+Total area:                 undefined
+1

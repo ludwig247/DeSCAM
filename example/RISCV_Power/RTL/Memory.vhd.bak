@@ -70,7 +70,7 @@ begin
 
              -- Specify Program to be loaded into Memory 
              --ram <= (others => (others => '0'));
-             ram <= InitMemFromFile("/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Test_ELF/Instruction_Power_Tests/lowPower/enc_i_l_low.hex");
+             ram <= InitMemFromFile("/import/lab/users/mehmedag/DeSCAM_Remote/DeSCAM/example/RISCV_Test_ELF/Instruction_Power_Tests/lowPower/enc_u_low.hex");
              section <= '0';
              MemToCtl_port <= (others => '0');
              CtlToMem_port_notify <= '1';

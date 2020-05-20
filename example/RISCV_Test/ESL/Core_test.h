@@ -19,7 +19,7 @@
  * ##################
  * ADD YOUR CORE IMPLEMENTATION HERE
  */
-#include "../../RISCV_ISA/Dino_test/EstimatePower/Core_new.h"
+#include "../../RISCV_ISA/Dino_test/InstrumentPower/Core_new.h"
 //#include "../../RISCV_Pipelined/ESL/Core.h"
 //#include "../../RISCV_OLD/ESL/Core.h"
 //#include "../../RISCV_ISA/ESL/Core.h"
