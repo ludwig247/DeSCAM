@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 #include <Stmts_all.h>
 #include <PrintStmt.h>
-#include <OperationMiscellaneous/FindCommunication2.h>
+#include <ReconstructOperations.h>
 #include "gmock/gmock.h"
 #include "Model.h"
 
@@ -79,6 +79,12 @@ public:
             return;
         }
     }
+    void generateOperations(){
+        auto op = new Operation();
+
+    }
+
+
 
     virtual void SetUp() {
         auto states = new DataType("states");
@@ -173,7 +179,7 @@ public:
         controlFlowMapRead.insert(std::make_pair(return_read->getId(),return_read));
 
         //Print CFG for Read
-        std::cout << printCFG(controlFlowMapRead) << std::endl;
+        //std::cout << printCFG(controlFlowMapRead) << std::endl;
 
         //Find important states Read
         std::map<int, CfgNode *> importantStatesRead;
@@ -181,12 +187,48 @@ public:
 
         //Find operations Read
         auto start_read = controlFlowMapRead.begin()->second;
-        std::vector<std::vector<int>> pathsRead;
         findPathsfromNode(start_read,&pathsRead);
         for(auto const& node : importantStatesRead) {
             findPathsfromNode(node.second,&pathsRead);
         }
-        this->pathsRead = pathsRead;
+
+        //Create a map from CfgNode Id to State Read
+        std::map<int,State*> CfgIdToStateRead;
+        //If the state for the node is not yet created, create one
+        for(auto path = pathsRead.begin(); path != pathsRead.end(); path++){
+            if(CfgIdToStateRead.find(path->front()) == CfgIdToStateRead.end()){
+                CfgIdToStateRead.insert(std::make_pair(path->front(),new State(controlFlowMapRead.at(path->front())->getName())));
+            }
+            if(CfgIdToStateRead.find(path->back()) == CfgIdToStateRead.end()){
+                CfgIdToStateRead.insert(std::make_pair(path->back(), new State(controlFlowMapRead.at(path->back())->getName())));
+            }
+        }
+
+        //Generate Operations Read
+        std::vector<Stmt*> statementList;
+        for(auto path = pathsRead.begin(); path != pathsRead.end(); path++){
+            auto op = new Operation();
+            op->setState(CfgIdToStateRead.at(path->front()));
+            op->setNextState(CfgIdToStateRead.at(path->back()));
+            statementList.clear();
+            for(auto index = path->begin(); index != path->end(); index++){
+                statementList.push_back(controlFlowMapRead.at(*index)->getStmt());
+            }
+            op->setStatementsList(statementList);
+            operationsRead.push_back(op);
+        }
+
+
+        for (auto val: CfgIdToStateRead){
+            StateStringMapRead.insert(std::make_pair(std::to_string(val.first),val.second));
+        }
+        //Get Assumptions and Commitments
+        SCAM::ReconstructOperations rOperations(this->StateStringMapRead,this->module);
+        for(auto op: this->operationsRead) {
+            rOperations.sortOperation(op);
+        }
+
+
 
         //Write Expressions/Assignments
         //if (state == FULL)
@@ -250,7 +292,7 @@ public:
         controlFlowMapWrite.insert(std::make_pair(return_write->getId(),return_write));
 
         //Print CFG Write
-        std::cout << printCFG(controlFlowMapWrite) << std::endl;
+        //std::cout << printCFG(controlFlowMapWrite) << std::endl;
 
         //Find important states Write
         std::map<int, CfgNode *> importantStatesWrite;
@@ -258,12 +300,38 @@ public:
 
         //Find operations Write
         auto start_write = controlFlowMapWrite.begin()->second;
-        std::vector<std::vector<int>> pathsWrite;
         findPathsfromNode(start_write,&pathsWrite);
         for(auto const& node : importantStatesWrite) {
             findPathsfromNode(node.second,&pathsWrite);
         }
-        this->pathsWrite = pathsWrite;
+
+        //Create a map from CfgNode Id to State Write
+        std::map<int,State*> CfgIdToStateWrite;
+        //If the state for the node is not yet created, create one
+        for(auto path = pathsWrite.begin(); path != pathsWrite.end(); path++){
+            if(CfgIdToStateWrite.find(path->front()) == CfgIdToStateWrite.end()){
+                CfgIdToStateWrite.insert(std::make_pair(path->front(),new State(controlFlowMapWrite.at(path->front())->getName())));
+            }
+            if(CfgIdToStateWrite.find(path->back()) == CfgIdToStateWrite.end()){
+                CfgIdToStateWrite.insert(std::make_pair(path->back(), new State(controlFlowMapWrite.at(path->back())->getName())));
+            }
+        }
+
+        //Generate Operations Write
+
+        for(auto path = pathsWrite.begin(); path != pathsWrite.end(); path++){
+            auto op = new Operation();
+            op->setState(CfgIdToStateWrite.at(path->front()));
+            op->setNextState(CfgIdToStateWrite.at(path->back()));
+            statementList.clear();
+            for(auto index = path->begin(); index != path->end(); index++){
+                statementList.push_back(controlFlowMapWrite.at(*index)->getStmt());
+            }
+            op->setStatementsList(statementList);
+            operationsWrite.push_back(op);
+        }
+
+        return;
     }
 
     virtual void TearDown() {}
@@ -271,6 +339,9 @@ public:
     SCAM::Module *module;
     std::vector<std::vector<int>> pathsRead;
     std::vector<std::vector<int>> pathsWrite;
+    std::map<std::string, State*> StateStringMapRead;
+    std::vector<Operation*> operationsRead;
+    std::vector<Operation*> operationsWrite;
 };
 
 TEST_F(OperationGraphTest, ExtractPaths){
@@ -382,8 +453,13 @@ TEST_F(OperationGraphTest, ExtractPaths){
 
     ASSERT_EQ(compareVector,this->pathsWrite);
     std::cout << "Write Paths are correct!" << std::endl;
-
-
+//}
+//
+//TEST_F(OperationGraphTest, CheckOperations){
+    ASSERT_EQ(operationsRead.at(0)->getState()->getName(), "state_0");
+    ASSERT_EQ(operationsRead.at(0)->getNextState()->getName(), "state_1");
+    ASSERT_EQ(operationsRead.at(0)->getStatementsList().size(), 2);
+    std::cout << "First Operation is correct!" <<std::endl;
 }
 
 
