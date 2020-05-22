@@ -10,6 +10,7 @@ add_subdirectory(Bus)
 #add_subdirectory(Comm_Test_newInterfaces)
 #add_subdirectory(operation-pipeline)
 add_subdirectory(UART_NORDIC)
+add_subdirectory(RISCV_Test_ELF)
 
 include(AddExample.cmake)
 
