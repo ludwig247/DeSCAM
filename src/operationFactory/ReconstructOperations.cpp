@@ -517,14 +517,16 @@ namespace SCAM {
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Return &node) {
-        node.getReturnValue()->accept(*this);
-        if (this->returnValue != nullptr) throw std::runtime_error("Current path has two return values");
-        this->returnValue = new Return(this->newExpr);
+        if(node.getReturnValue() != nullptr) {
+            node.getReturnValue()->accept(*this);
+            if (this->returnValue != nullptr) throw std::runtime_error("Current path has two return values");
+            this->returnValue = new Return(this->newExpr);
+        }
 
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Notify &node) {
-        throw std::runtime_error("ReconstructOperations::Notify: Not implemented");
+        //throw std::runtime_error("ReconstructOperations::Notify: Not implemented");
     }
 
     DataSignal *ReconstructOperations::reconstructArrayVar(Operand *operand) {
