@@ -8,6 +8,7 @@
 #include "Parameter.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "DescamException.h"
 
 namespace DESCAM {
     template<class T>
@@ -20,19 +21,19 @@ namespace DESCAM {
 
         //Build sub varialbes for complex types
         if (this->isCompoundType()) {
-            if (this->isSubVar()) TERMINATE("Variable Constructor, a compound sub-variable is not allowed");
+            if (this->isSubVar()) throw DescamException("in variable '" + getName() +  "', a compound sub-variable is not allowed",locationInfo);
             //if (parent == nullptr) TERMINATE("Parent is not supposed to be null");
             //create the subVariables (with default init values)
             for (auto &&subvar : dataType->getSubVarMap()) {
                 subVarList.push_back(new T(subvar.first, subvar.second, subvar.second->getDefaultVal(), (T *) (this)));
             }
         } else if (this->isArrayType()) {
-            if (this->isSubVar()) TERMINATE("Variable Constructor, a array sub-variable is not allowed");
+            if (this->isSubVar()) throw DescamException("in variable '" + getName() +  "', a array sub-variable is not allowed",locationInfo);
             //if (parent == nullptr) TERMINATE("Parent is not supposed to be null");
             for (int i = 0; i < dataType->getArraySize(); ++i) {
                 subVarList.push_back(new T(std::to_string(i), this->getDataType()->getArrayType(), this->getDataType()->getArrayType()->getDefaultVal(), (T *) (this)));
             }
-        } else if (!this->isBuiltInType() && !this->isEnumType()) TERMINATE("Unknown datatype: " + this->getName());
+        } else if (!this->isBuiltInType() && !this->isEnumType()) throw DescamException("variable '" + getName() + ", with unknown datatype",locationInfo);
 
         if (this->initialValue == nullptr) {
             this->initialValue = dataType->getDefaultVal();

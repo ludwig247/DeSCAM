@@ -42,15 +42,15 @@ namespace DESCAM {
     }                                                                \
     CATCH_DESCAM_EXCEPTION()
 
-#define CATCH_DESCAM_EXCEPTION()                                     \
+#define CATCH_DESCAM_EXCEPTION()                                       \
    catch (DESCAM::DescamException& err) {                               \
-    auto msg = std::string(err.what());                                \
+    auto msg = std::string(err.what());                                  \
     auto sl = DESCAM::LoggerMsg::SeverityLevel::Error;                    \
     auto vt = DESCAM::LoggerMsg::ViolationType::SystemC_PPA_compliance;    \
     auto pl = DESCAM::Logger::getCurrentProcessedLocation();                \
     DESCAM::LoggerMsg lmsg(msg,err.getStmtLocationInfo(),sl,vt,pl);          \
     DESCAM::Logger::addMsg(lmsg);                                             \
-    if(pl == DESCAM::LoggerMsg::ProcessedLocation::Behavior)                   \
+    if(pl != DESCAM::LoggerMsg::ProcessedLocation::GlobalConstants)            \
     DESCAM::Logger::setTerminate();                                             \
     }
 }

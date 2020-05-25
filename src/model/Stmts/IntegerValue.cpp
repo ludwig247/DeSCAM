@@ -3,15 +3,15 @@
 //
 
 #include "IntegerValue.h"
-
 #include <utility>
+#include <DescamException.h>
 #include "NodePeekVisitor.h"
 
-DESCAM::IntegerValue::IntegerValue(int value, LocationInfo stmtLocationInfo) :
+DESCAM::IntegerValue::IntegerValue(int value, LocationInfo locationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("int")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
-    assert(value >= -2147483648 && value <= 2147483647 && "Value is only allowed to be 32bit");
+    if(!(value >= -2147483648) || !(value <= 2147483647)) throw DescamException("Integer value is only allowed to be 32bit",locationInfo);
 
 }
 

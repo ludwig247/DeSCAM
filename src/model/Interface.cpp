@@ -2,8 +2,8 @@
 // Created by ludwig on 22.09.15.
 //
 
-#include <assert.h>
 #include "Interface.h"
+#include "DescamException.h"
 
 DESCAM::Interface::Interface() :
         _direction("UNKNOWN"),
@@ -15,8 +15,11 @@ DESCAM::Interface::Interface(std::string interfaceName, std::string direction, L
         _direction(direction),
         _interface(interfaceName),
         AbstractNode(interfaceName,locationInfo) {
-    assert(_direction == "in" || direction == "out");
-    assert(_interface == "blocking" || _interface == "shared" || _interface == "master" || _interface == "slave");
+    if(!(_direction == "in" || direction == "out"))
+        throw DescamException("Interface direction can only be either 'in' or 'out'",locationInfo);
+    if(!(_interface == "blocking" || _interface == "shared" || _interface == "master" || _interface == "slave")){
+        throw DescamException("Interface can only be 'blocking', 'shared', 'master, or 'slave'",locationInfo);
+    }
 }
 
 DESCAM::Interface::~Interface() {

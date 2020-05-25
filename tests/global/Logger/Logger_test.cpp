@@ -162,40 +162,109 @@ TEST_F(Logger_test, Logger_terminate_flag) {
     ASSERT_EQ(DESCAM::Logger::isTerminate(), false) << "failed to reset terminate flag\n";
 }
 
-TEST_F(Logger_test, Logger_stmt_exception_in_behavior) {
-    DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::Behavior);
+TEST_F(Logger_test, logger_descam_exception) {
     auto integerVal = new DESCAM::IntegerValue(2);
     auto unsignedVal = new DESCAM::UnsignedValue(2);
     ASSERT_THROW(new DESCAM::Arithmetic(integerVal,"+",unsignedVal),DESCAM::DescamException);
-    ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Arithmetic(integerVal, "+", unsignedVal)));
-    ASSERT_EQ(DESCAM::Logger::isTerminate(), true) << "Logger Terminate flag should be set after a stmt exception in behavior occurs\n";
-    ASSERT_EQ(DESCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after DescamException and processedLocation is Behavior";
-    DESCAM::Logger::resetTerminate();
-    DESCAM::Logger::clear();
+    {
+        DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::Behavior);
+        ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Arithmetic(integerVal, "+", unsignedVal)));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true)
+                                    << "Logger Terminate flag should be set after a stmt exception in behavior occurs\n";
+        ASSERT_EQ(DESCAM::Logger::getMsgsMap().size(), 1)
+                                    << "Error message was not added to MsgsMap after DescamException and processedLocation is Behavior";
+        DESCAM::Logger::resetTerminate();
+        DESCAM::Logger::clear();
+    }
+    {
+        DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::Functions);
+        ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Arithmetic(integerVal, "+", unsignedVal)));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true)
+                                    << "Logger Terminate flag should be set after a stmt exception in behavior occurs\n";
+        ASSERT_EQ(DESCAM::Logger::getMsgsMap().size(), 1)
+                                    << "Error message was not added to MsgsMap after DescamException and processedLocation is Behavior";
+        DESCAM::Logger::resetTerminate();
+        DESCAM::Logger::clear();
+    }
+    {
+        // we don't expect to terminate during the processing of global constants because errors here might originate from another unrelated file
+        DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::GlobalConstants);
+        ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Arithmetic(integerVal, "+", unsignedVal)));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), false) << "terminate flag was set during the processing of global constants\n";
+        // the error message now is added to TempVector of the logger, we tag it with a variable or function name
+        DESCAM::Logger::tagTempMsgs("globalConstantVarOrFunc");
+        ASSERT_EQ(DESCAM::Logger::getTempMsgsMap().at("globalConstantVarOrFunc").size(),1) << "Error message was not added to TempMsgsMap after DescamException and processedLocation is GlobalConstants";
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
 }
 
-TEST_F(Logger_test, Logger_stmt_exception_in_functions) {
-    DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::Functions);
-    auto integerVal = new DESCAM::IntegerValue(2);
-    auto unsignedVal = new DESCAM::UnsignedValue(2);
-    ASSERT_THROW(new DESCAM::Arithmetic(integerVal,"+",unsignedVal),DESCAM::DescamException);
-    ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Arithmetic(integerVal, "+", unsignedVal)));
-    ASSERT_EQ(DESCAM::Logger::isTerminate(), false) << "Logger Terminate flag was set after a stmt exception in functions!\n";
-    ASSERT_EQ(DESCAM::Logger::getMsgsMap().size(),1) << "Error message was not added to MsgsMap after DescamException and processedLocation is Behavior";
-    DESCAM::Logger::clear();
+TEST_F(Logger_test, logger_descam_exception_ports) {
+    DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::Ports);
+    DESCAM::Interface* interface1 = nullptr, *interface2 = nullptr;
+    {
+        ASSERT_THROW(new DESCAM::Interface("blocking", "inout"), DESCAM::DescamException);
+        ASSERT_NO_THROW(DESCAM_ASSERT(interface1 = new DESCAM::Interface("blocking", "inout")));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true);
+        ASSERT_TRUE(DESCAM::Logger::hasFeedback());
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
+    {
+        ASSERT_THROW(new DESCAM::Interface("unkowntype", "in"), DESCAM::DescamException);
+        ASSERT_NO_THROW(DESCAM_ASSERT(interface2 = new DESCAM::Interface("unkowntype", "in")));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true);
+        ASSERT_TRUE(DESCAM::Logger::hasFeedback());
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
+    DESCAM::Port *inPort = nullptr;
+    {
+        ASSERT_THROW(new DESCAM::Port("port_no_interface",interface1,DESCAM::DataTypes::getDataType("int")), DESCAM::DescamException);
+        ASSERT_NO_THROW(DESCAM_ASSERT(inPort = new DESCAM::Port("port_no_interface",interface1,DESCAM::DataTypes::getDataType("int"))));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true);
+        ASSERT_TRUE(DESCAM::Logger::hasFeedback());
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
+    {
+        ASSERT_THROW(new DESCAM::Port("port_no_interface",interface1,DESCAM::DataTypes::getDataType("int")), DESCAM::DescamException);
+        ASSERT_NO_THROW(DESCAM_ASSERT(interface1 = new DESCAM::Interface("blocking", "in")));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), false);
+        ASSERT_NO_THROW(DESCAM_ASSERT(inPort = new DESCAM::Port("port_no_datatype",interface1,nullptr)));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true);
+        ASSERT_TRUE(DESCAM::Logger::hasFeedback());
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
 }
 
-TEST_F(Logger_test, Logger_stmt_exception_during_global_constants) {
-    // we don't expect to terminate during the processing of global constants because errors here might originate from another unrelated file
-    DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::GlobalConstants);
-    auto integerVal = new DESCAM::IntegerValue(2);
-    auto unsignedVal = new DESCAM::UnsignedValue(2);
-    ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Arithmetic(integerVal, "+", unsignedVal)));
-    ASSERT_EQ(DESCAM::Logger::isTerminate(), false) << "terminate flag was set during the processing of global constants\n";
-    // the error message now is added to TempVector of the logger, we tag it with a variable or function name
-    DESCAM::Logger::tagTempMsgs("globalConstantVarOrFunc");
-    ASSERT_EQ(DESCAM::Logger::getTempMsgsMap().at("globalConstantVarOrFunc").size(),1) << "Error message was not added to TempMsgsMap after DescamException and processedLocation is GlobalConstants";
-    DESCAM::Logger::clear();
+TEST_F(Logger_test, logger_descam_exception_variables) {
+    DESCAM::Logger::setCurrentProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation::Variables);
+    DESCAM::Variable* var = nullptr;
+    ASSERT_THROW(new DESCAM::Variable("var_no_type",nullptr), DESCAM::DescamException);
+    { // var with no datatype
+        ASSERT_NO_THROW(DESCAM_ASSERT(var = new DESCAM::Variable("var_no_type",nullptr)));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true);
+        ASSERT_TRUE(DESCAM::Logger::hasFeedback());
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
+    { //complex subvar
+        DESCAM::Variable* subvar = nullptr ,*subsubvar = nullptr;
+        ASSERT_NO_THROW(
+                auto complex = new DESCAM::DataType("complex");
+                complex->addSubVar("subvar",DESCAM::DataTypes::getDataType("int"));
+                DESCAM::DataTypes::addDataType(complex);
+                var = new DESCAM::Variable("var",DESCAM::DataTypes::getDataType("int"));
+        );
+        ASSERT_THROW(new DESCAM::Variable("subvar",DESCAM::DataTypes::getDataType("complex"),nullptr,var),DESCAM::DescamException);
+        ASSERT_NO_THROW(DESCAM_ASSERT(new DESCAM::Variable("subvar",DESCAM::DataTypes::getDataType("complex"),nullptr,var)));
+        ASSERT_EQ(DESCAM::Logger::isTerminate(), true);
+        ASSERT_TRUE(DESCAM::Logger::hasFeedback());
+        DESCAM::Logger::clear();
+        DESCAM::Logger::resetTerminate();
+    }
 }
 
 Logger_test::Logger_test() {

@@ -5,19 +5,21 @@
 #include "Function.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "DescamException.h"
 
-
-DESCAM::Function::Function(std::string name, DESCAM::DataType *returnType, const std::map<std::string, Parameter *> &paramMap, LocationInfo locationInfo) :
+DESCAM::Function::Function(std::string name, DESCAM::DataType *returnType,
+                           const std::map<std::string, Parameter *> &paramMap, LocationInfo locationInfo) :
         returnType(returnType),
         paramMap(paramMap),
-        AbstractNode(name,locationInfo) {
+        AbstractNode(name, locationInfo) {
     if (returnType->isCompoundType()) {
-        TERMINATE(" Function " + name + "() unallowed return type: " + returnType->getName() + " only built-in types allowed");
+        auto errorMsg = " Function " + name + "() unallowed return type: " + returnType->getName() + " only built-in types allowed";
+        throw DescamException(errorMsg, locationInfo);
     }
-
     for (auto &&param : paramMap) {
         if (param.second == nullptr) {
-            TERMINATE("Parameter " + param.first + " is not initialized");
+            auto errorMsg = "Parameter " + param.first + " is not initialized";
+            throw DescamException(errorMsg, locationInfo);
         }
     }
 }
@@ -47,7 +49,8 @@ void DESCAM::Function::setStmtList(const std::vector<DESCAM::Stmt *> &stmtList) 
     Function::stmtList = stmtList;
 }
 
-const std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> &DESCAM::Function::getReturnValueConditionList() const {
+const std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> &
+DESCAM::Function::getReturnValueConditionList() const {
     return returnValueConditionList;
 }
 

@@ -2,15 +2,15 @@
 // Created by tobias on 24.10.16.
 //
 
-#include <assert.h>
 #include "EnumValue.h"
 #include "NodePeekVisitor.h"
+#include "DescamException.h"
 
-DESCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo) :
+DESCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, LocationInfo locationInfo) :
         enumValue(enumValue),
         ConstValue(enumType) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
-    assert(enumType != nullptr);
+    if(!enumType) throw DescamException("enumType is null",locationInfo);
 }
 
 const std::string &DESCAM::EnumValue::getEnumValue() const {

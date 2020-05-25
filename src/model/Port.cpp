@@ -6,11 +6,11 @@
 #include "Port.h"
 #include <Stmts/SyncSignal.h>
 #include <DataSignal.h>
-#include <assert.h>
 #include <Stmts/EnumValue.h>
 #include <Stmts/BoolValue.h>
 #include <Stmts/IntegerValue.h>
 #include <Stmts/Notify.h>
+#include "DescamException.h"
 
 namespace DESCAM {
 
@@ -22,8 +22,8 @@ namespace DESCAM {
             TypeInterface(datatype),
             notify(new Notify(this)),
             AbstractNode(name,locationInfo) {
-        assert(_interface != nullptr);
-        assert(datatype != nullptr);
+        if(!_interface)  throw DescamException("Interface of port '" + name + "' is null",locationInfo);
+        if(!datatype)  throw DescamException("datatype of port '" + name + "' is null",locationInfo);
 
         //this->notify = new Notify(this);
         this->synchSignal = new SyncSignal(this);
