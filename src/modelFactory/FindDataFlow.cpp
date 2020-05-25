@@ -39,12 +39,8 @@ SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigne
         lhsExpr(nullptr),
         unsigned_flag(unsigned_flag),
         pass(0) {
-
     //stmt->dump();
-
     TraverseStmt(stmt);
-
-
 }
 
 bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {

@@ -8,12 +8,12 @@ entity TestMasterSlave10 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	s_in:		in int;
+	s_in:		in signed(31 downto 0);
 	s_in_sync:		in bool;
-	s_in2:		in int;
+	s_in2:		in signed(31 downto 0);
 	s_in2_sync:		in bool;
-	s_out:		out int;
-	sharded_in:		in int
+	s_out:		out signed(31 downto 0);
+	sharded_in:		in signed(31 downto 0)
 );
 end TestMasterSlave10;
 
@@ -21,7 +21,7 @@ architecture TestMasterSlave10_arch of TestMasterSlave10 is
 	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
 	signal succ_signal: bool;
-	signal val_signal: int;
+	signal val_signal: signed(31 downto 0);
 
 begin
 	process(clk)
