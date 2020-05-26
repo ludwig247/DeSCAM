@@ -24,8 +24,11 @@ DESCAM::LoggerFormatter::getMessagesJSON(std::vector<DESCAM::LoggerMsg> loggerMe
         json << "\t{\n";
         if (stmtInfo.getFile() != "")
             json << "\t\t" << R"("file": ")" << stmtInfo.getFile() << "\",\n";
-        if (stmtInfo.getObject() != "")
-            json << "\t\t" << R"("object": ")" << stmtInfo.getObject() << "\",\n";
+        if (stmtInfo.getObject() != "") {
+            auto object = stmtInfo.getObject();
+            std::replace(object.begin(), object.end(), '\"', '\'');
+            json << "\t\t" << R"("object": ")" << object << "\",\n";
+        }
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&
               stmtInfo.getColumnStartNumber() == 0 && stmtInfo.getColumnEndNumber() == 0))
             json << "\t\t" << R"("line": [[)" << stmtInfo.getRowStartNumber() << " , "
@@ -37,7 +40,11 @@ DESCAM::LoggerFormatter::getMessagesJSON(std::vector<DESCAM::LoggerMsg> loggerMe
             json << "\t\t" << R"("violation": ")" << msgPtr->getViolationType() << "\",\n";
         if (msgPtr->getProcessedLocationString() != "")
             json << "\t\t" << R"("location": ")" << msgPtr->getProcessedLocationString() << "\",\n";
-        json << "\t\t" << R"("message": ")" << msgPtr->getMessage() << "\"\n";
+        if(msgPtr->getMessage()!=""){
+            auto msg = msgPtr->getMessage();
+            std::replace(msg.begin(), msg.end(), '\"', '\'');
+            json << "\t\t" << R"("message": ")" << msgPtr->getMessage() << "\"\n";
+        }
         if (std::next(msgPtr, 1) == loggerMessages.end()) {
             json << "\t}\n";
         } else {
