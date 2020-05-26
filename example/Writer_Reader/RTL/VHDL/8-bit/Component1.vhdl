@@ -28,6 +28,7 @@ architecture Component1_arch of Component1 is
 	signal component1_out_notify_sig: bool;
 	signal component1_out_running: bool;
 	signal component1_in_running: bool;
+	signal component1_in_running_help: bool;
 	signal component1_in: bus_req_t;
 	signal component1_out: bus_req_t;
 	signal counter1: unsigned(5 downto 0);
@@ -37,7 +38,7 @@ begin
 	component1_out_notify<= component1_out_notify_sig;
 
 	--FSM
-	process(clk)
+	FSM: process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
@@ -46,22 +47,27 @@ begin
 			component1_out_notify_sig <= true;
 			component1_out_running <= false;
 			component1_in_running <= false;
+			component1_in_running_help <= false;
 			counter1 <= to_unsigned(0,6);
+			component1_out.data <= to_signed(1,32);
+			component1_out.addr <= to_signed(8,32);
+			component1_out.trans_type <= SINGLE_WRITE;
 			
 		else
 
-			if component1_out_running = false and component1_in_running = false then 
+			if component1_out_running = false and component1_in_running = false and component1_in_running_help = false then 
 				if(component1_out_notify_sig = true and component1_out_sync = true) then 
 					component1_out_running <= true;
 					component1_out_notify_sig <= false;
-					component1_out_addr <= component1_out.addr(to_integer(counter1)+7 downto to_integer(counter1));
-					component1_out_data <= component1_out.data(to_integer(counter1)+7 downto to_integer(counter1));
-					counter1 <= to_unsigned(8,6);
+					counter1 <= to_unsigned(0,6);
 				elsif(component1_in_notify_sig = true and component1_in_sync = true) then 
-					component1_in_running <= true;
+					component1_in_running_help <= true;
 					component1_in_notify_sig <= false;
 					counter1 <= to_unsigned(0,6);
 				end if;
+			elsif component1_in_running_help = true then 
+				component1_in_running_help <= false;
+				component1_in_running <= true;
 			else 
 				if (counter1 >= 24) then
 					counter1 <= to_unsigned(0,6);
@@ -84,19 +90,28 @@ begin
 
 
 	--Communication
-	process(clk)
+	comm_in: process(clk)
 	begin	
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			component1_out.data <= to_signed(1,32);
-			component1_out.addr <= to_signed(8,32);
-			component1_out.trans_type <= SINGLE_WRITE;
+			
 		else
 			if component1_in_running = true then 
 				component1_in.addr(to_integer(counter1)+7 downto to_integer(counter1)) <= component1_in_addr;
 				component1_in.data(to_integer(counter1)+7 downto to_integer(counter1)) <= component1_in_data;
 				component1_in.trans_type <= component1_in_trans_type;
-			elsif component1_out_running = true then 
+			end if;
+		end if;
+	end if;
+	end process;
+
+	comm_out: process(clk)
+	begin	
+	if(clk='1' and clk'event) then
+		if rst = '1' then
+			
+		else
+			if component1_out_running = true then 
 				component1_out_addr <= component1_out.addr(to_integer(counter1)+7 downto to_integer(counter1));
 				component1_out_data <= component1_out.data(to_integer(counter1)+7 downto to_integer(counter1));
 				component1_out_trans_type <= component1_out.trans_type;
