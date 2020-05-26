@@ -24,7 +24,7 @@ int main(int argc, const char **argv) {
     std::shared_ptr<LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
     consoleSink->setFormatOption(LoggerFormatter::FormatOption::TEXT);
     DESCAM::Logger::addSink(consoleSink);
-    std::shared_ptr<LoggerSink> fileSink = std::make_shared<DESCAM::FileSink>();
+    std::shared_ptr<LoggerSink> fileSink = std::make_shared<DESCAM::FileSink>(std::string(SCAM_HOME"/bin/LOGS"),true);
     fileSink->setFormatOption(LoggerFormatter::FormatOption::JSON);
     DESCAM::Logger::addSink(fileSink);
     //setting filtering options

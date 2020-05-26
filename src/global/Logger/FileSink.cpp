@@ -11,7 +11,7 @@ DESCAM::FileSink::FileSink(std::string outputDirectory, bool useTimeStamping) : 
 void DESCAM::FileSink::setOutputDirectory(std::string outputDirectory) {
     struct stat st_buf{};
     int status = stat(outputDirectory.c_str(), &st_buf);
-    if(status == 0 && S_ISDIR (st_buf.st_mode)) this->outputDirectory = outputDirectory;
+    if((status == 0 && S_ISDIR (st_buf.st_mode)) || (status!=0)) this->outputDirectory = outputDirectory;
 }
 
 
