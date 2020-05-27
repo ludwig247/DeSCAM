@@ -13,7 +13,7 @@ aml_driver::~aml_driver() {
 
 }
 
-int aml_driver::parse(const std::string &f, SCAM::Model *m) {
+int aml_driver::parse(const std::string &f, DESCAM::Model *m) {
     filename = f;
     model = m;
     scan_begin();
@@ -37,9 +37,9 @@ void aml_driver::error(const std::string &m) {
 }
 
 
-bool aml_driver::addModule(SCAM::Module *m) {
+bool aml_driver::addModule(DESCAM::Module *m) {
     //check name against the names of the already defined ones
-    std::map<std::string, SCAM::Module *> tmp_map = model->getModules();
+    std::map<std::string, DESCAM::Module *> tmp_map = model->getModules();
 
     if (tmp_map.find(m->getName()) != tmp_map.end()) {
         return false; //another module with this name is already created
@@ -53,8 +53,8 @@ bool aml_driver::addModule(SCAM::Module *m) {
     return true;
 }
 
-bool aml_driver::isConstExpr(SCAM::Expr *e) const {
-    SCAM::ExprTranslator translator;
+bool aml_driver::isConstExpr(DESCAM::Expr *e) const {
+    DESCAM::ExprTranslator translator;
     z3::expr z3Expr = translator.translate(e);
     z3Expr = z3Expr.simplify();
 
@@ -63,18 +63,18 @@ bool aml_driver::isConstExpr(SCAM::Expr *e) const {
     return (z3Expr.decl().name().str() == "Int" || z3Expr.decl().name().str() == "true" || z3Expr.decl().name().str() == "false");
 }
 
-SCAM::ConstValue *aml_driver::reduzeToConstValue(SCAM::Expr *e) const {
-    SCAM::ExprTranslator translator;
+DESCAM::ConstValue *aml_driver::reduzeToConstValue(DESCAM::Expr *e) const {
+    DESCAM::ExprTranslator translator;
     z3::expr z3Expr = translator.translate(e);
     z3Expr = z3Expr.simplify();
     if (!z3Expr.is_const()) TERMINATE("aml_driver reduzeToConstValue: not a constant value");
 
     if (e->isDataType("int")) {
-        return (new SCAM::IntegerValue(z3Expr.get_numeral_int()));
+        return (new DESCAM::IntegerValue(z3Expr.get_numeral_int()));
     } else if (e->isDataType("bool")) {
         z3::solver s(z3Expr.ctx());
         s.add(!z3Expr);
-        return (new SCAM::BoolValue((s.check() == z3::unsat)));
+        return (new DESCAM::BoolValue((s.check() == z3::unsat)));
     }
     TERMINATE("aml_driver reduzeToConstValue: unsupported datatype");
 }

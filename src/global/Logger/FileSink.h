@@ -14,15 +14,13 @@
 #include <Config.h>
 
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief A logger sink that outputs log messages to an output file.
  */
     class FileSink : public LoggerSink {
     public:
-        FileSink() = default;
-
-        explicit FileSink(std::string outputDirectory,bool useTimeStamping = true);
+        FileSink(std::string outputDirectory = std::string(SCAM_HOME"/bin/LOGS") ,bool useTimeStamping = true);
 
         void setOutputDirectory(std::string outputDirectory);
 
@@ -30,7 +28,7 @@ namespace SCAM {
 
         void print(std::string formattedOutput) override;
     private:
-        std::string outputDirectory = std::string(SCAM_HOME"/bin/LOGS"),
+        std::string outputDirectory,
         generatedFileType = "txt";
         bool useTimeStamping;
     };

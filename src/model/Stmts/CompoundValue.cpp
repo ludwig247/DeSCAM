@@ -7,36 +7,36 @@
 #include "CompoundValue.h"
 #include "PrintStmt.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
-SCAM::CompoundValue::CompoundValue(const std::vector<ConstValue *> &values, const SCAM::DataType *dataType, LocationInfo stmtLocationInfo) : ConstValue(dataType) {
+DESCAM::CompoundValue::CompoundValue(const std::vector<ConstValue *> &values, const DESCAM::DataType *dataType, LocationInfo stmtLocationInfo) : ConstValue(dataType) {
     this->stmtLocationInfo = stmtLocationInfo;
     assert(dataType != nullptr);
-    if (!dataType->isCompoundType() && !dataType->isArrayType())throw SCAM::StmtException("Type " + dataType->getName() + "is not a compound type",this->stmtLocationInfo);
+    if (!dataType->isCompoundType() && !dataType->isArrayType())throw DESCAM::DescamException("Type " + dataType->getName() + "is not a compound type",this->stmtLocationInfo);
     auto subTypes = dataType->getSubVarMap();
-    if (subTypes.size() != values.size()) throw SCAM::StmtException("Wrong number of values specified for compound value",this->stmtLocationInfo);
+    if (subTypes.size() != values.size()) throw DESCAM::DescamException("Wrong number of values specified for compound value",this->stmtLocationInfo);
     int i = 0;
     for (auto subType : subTypes) {
-        if (subType.second != values[i]->getDataType()) throw SCAM::StmtException("Wrong datatype for compound value",this->stmtLocationInfo);
+        if (subType.second != values[i]->getDataType()) throw DESCAM::DescamException("Wrong datatype for compound value",this->stmtLocationInfo);
         this->values.insert(std::make_pair(subType.first, values[i]));
         i++;
     }
 }
 
 
-std::string SCAM::CompoundValue::getValueAsString() const {
+std::string DESCAM::CompoundValue::getValueAsString() const {
     return PrintStmt::toString(this);
 }
 
-void SCAM::CompoundValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::CompoundValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-const std::map<std::string, SCAM::ConstValue *> &SCAM::CompoundValue::getValues() const {
+const std::map<std::string, DESCAM::ConstValue *> &DESCAM::CompoundValue::getValues() const {
     return values;
 }
 
-bool SCAM::CompoundValue::operator==(const Stmt &other) const {
+bool DESCAM::CompoundValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekCompoundValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (CompoundValue *) this;

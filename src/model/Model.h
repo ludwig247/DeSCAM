@@ -10,7 +10,7 @@
 #include "Module.h"
 #include "ModuleInstance.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Model : public AbstractNode {
     public:

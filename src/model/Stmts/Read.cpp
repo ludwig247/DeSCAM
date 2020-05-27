@@ -9,7 +9,7 @@
 #include "Read.h"
 #include "NodePeekVisitor.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     Read::Read(Port *port, VariableOperand *variable, bool is_non_blocking_access, VariableOperand *status, LocationInfo stmtLocationInfo) :
             variable(variable),

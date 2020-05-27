@@ -2,6 +2,8 @@
 // Created by M.I.Alkoudsi on 17.07.19.
 //
 
+#include <Logger/LoggerMsg.h>
+#include <Logger/Logger.h>
 #include "MergeRedundantIfElse.h"
 #include "Optimizer/Debug.h"
 
@@ -10,7 +12,7 @@
  * in another conditional statement in same level.
  */
 
-SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *> CFG)
+DESCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, DESCAM::CfgBlock *> CFG)
         : blockCFG(std::move(CFG)), currentElseIfID(0),
           currentIfID(0) {
     for (auto node : this->blockCFG) {
@@ -84,8 +86,8 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                     auto cond2TrueBranchPtr = (*pair).second.begin();
                     while (cond1TrueBranchPtr != conditionTrueBranchPair.second.end()) {
 #ifdef DEBUG_MERGE_REDUNDANT_IF_ELSE
-                        auto stmt1 = SCAM::PrintStmt::toString((*cond1TrueBranchPtr));
-                        auto stmt2 = SCAM::PrintStmt::toString((*cond2TrueBranchPtr));
+                        auto stmt1 = DESCAM::PrintStmt::toString((*cond1TrueBranchPtr));
+                        auto stmt2 = DESCAM::PrintStmt::toString((*cond2TrueBranchPtr));
                         std::cout << "(*cond1TrueBranchPtr)= " << stmt1 << std::endl;
                         std::cout << "(*cond2TrueBranchPtr)= " << stmt2 << std::endl << std::endl;
 #endif
@@ -109,14 +111,14 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                                 elseIfBlock = this->blockCFG.at(-conditionTrueBranchPair.first);
                             }
                             if (toBeDeletedMap.find(elseIfBlock->getBlockID()) != toBeDeletedMap.end()) { continue; }
-                            printWarning("if", PrintStmt::toString(ifBlock->getTerminator()), "else if",
+                            printWarning("if", ifBlock->getTerminator(), "else if",
                                          PrintStmt::toString(elseIfBlock->getTerminator()));
 
-                            auto ifCondition = dynamic_cast<SCAM::If *>(ifBlock->getTerminator());
-                            auto elseifcondition = dynamic_cast<SCAM::If *>(elseIfBlock->getTerminator());
+                            auto ifCondition = dynamic_cast<DESCAM::If *>(ifBlock->getTerminator());
+                            auto elseifcondition = dynamic_cast<DESCAM::If *>(elseIfBlock->getTerminator());
                             if (ifCondition && elseifcondition) {
-                                auto newCondition = new SCAM::If(
-                                        new SCAM::Logical(ifCondition->getConditionStmt(), "or",
+                                auto newCondition = new DESCAM::If(
+                                        new DESCAM::Logical(ifCondition->getConditionStmt(), "or",
                                                           elseifcondition->getConditionStmt(),ifCondition->getStmtInfo()),ifCondition->getStmtInfo());
                                 if (newCondition &&
                                     this->blockCFG.find(ifBlock->getBlockID()) != this->blockCFG.end()) {
@@ -133,7 +135,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                                 elseIfBlock = this->blockCFG.at(-conditionTrueBranchPair.first);
                             }
                             if (toBeDeletedMap.find(elseIfBlock->getBlockID()) != toBeDeletedMap.end()) { continue; }
-                            printWarning("else if", PrintStmt::toString(elseIfBlock->getTerminator()), "else",
+                            printWarning("else if", elseIfBlock->getTerminator(), "else",
                                          "");
                             this->toBeDeletedMap.insert(elseIfBlock->getBlockID());
 
@@ -145,7 +147,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                             } else {
                                 ifBlock = this->blockCFG.at(conditionTrueBranchPair.first);
                             }
-                            printWarning("if", PrintStmt::toString(ifBlock->getTerminator()), "else",
+                            printWarning("if", ifBlock->getTerminator(), "else",
                                          "");
                             this->toBeDeletedMap.insert(ifBlock->getBlockID());
                         } else if (conditionTrueBranchPair.first < 0 && (*pair).first < 0) {
@@ -154,13 +156,13 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
                             elseIfBlock2 = this->blockCFG.at(-(*pair).first);
                             if (toBeDeletedMap.find(elseifBlock1->getBlockID()) != toBeDeletedMap.end() ||
                                 toBeDeletedMap.find(elseIfBlock2->getBlockID()) != toBeDeletedMap.end()) { continue; }
-                            printWarning("else if", PrintStmt::toString(elseifBlock1->getTerminator()), "else if",
+                            printWarning("else if", elseifBlock1->getTerminator(), "else if",
                                          PrintStmt::toString(elseIfBlock2->getTerminator()));
-                            auto elseIf1Condition = dynamic_cast<SCAM::If *>(elseifBlock1->getTerminator());
-                            auto elseIf2condition = dynamic_cast<SCAM::If *>(elseIfBlock2->getTerminator());
+                            auto elseIf1Condition = dynamic_cast<DESCAM::If *>(elseifBlock1->getTerminator());
+                            auto elseIf2condition = dynamic_cast<DESCAM::If *>(elseIfBlock2->getTerminator());
                             if (elseIf1Condition && elseIf2condition) {
-                                auto newCondition = new SCAM::If(
-                                        new SCAM::Logical(elseIf1Condition->getConditionStmt(), "or",
+                                auto newCondition = new DESCAM::If(
+                                        new DESCAM::Logical(elseIf1Condition->getConditionStmt(), "or",
                                                           elseIf2condition->getConditionStmt(),elseIf1Condition->getStmtInfo()),elseIf1Condition->getStmtInfo());
                                 if (newCondition &&
                                     this->blockCFG.find(elseifBlock1->getBlockID()) != this->blockCFG.end()) {
@@ -190,7 +192,7 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
 
                     if (stmt != nullptr) {
                         std::cout <<
-                                  SCAM::PrintStmt::toString(stmt)
+                                  DESCAM::PrintStmt::toString(stmt)
                                   <<
                                   std::endl;
                     }
@@ -234,8 +236,8 @@ SCAM::MergeRedundantIfElse::MergeRedundantIfElse(std::map<int, SCAM::CfgBlock *>
     }
 }
 
-void SCAM::MergeRedundantIfElse::addNestedIfStatementsToStmtsMap(int &currentBlockID,
-                                                                 std::vector<SCAM::Stmt *> &ifStmtList) {
+void DESCAM::MergeRedundantIfElse::addNestedIfStatementsToStmtsMap(int &currentBlockID,
+                                                                 std::vector<DESCAM::Stmt *> &ifStmtList) {
     ///add if statements
     auto elseIfID = currentBlockID;
     auto elseifbranchID = this->blockCFG.at(currentBlockID)->getSuccessorList()[1]->getBlockID();
@@ -363,11 +365,11 @@ void SCAM::MergeRedundantIfElse::addNestedIfStatementsToStmtsMap(int &currentBlo
     }
 }
 
-const std::map<int, SCAM::CfgBlock *> &SCAM::MergeRedundantIfElse::getNewBlockCFG() const {
+const std::map<int, DESCAM::CfgBlock *> &DESCAM::MergeRedundantIfElse::getNewBlockCFG() const {
     return this->blockCFG;
 }
 
-bool SCAM::MergeRedundantIfElse::notFromTheSameGroupIfStatement(int ifId) {
+bool DESCAM::MergeRedundantIfElse::notFromTheSameGroupIfStatement(int ifId) {
     if (this->blockCFG.at(ifId)->getPredecessorList().size() > 1) {
         for (auto pred : this->blockCFG.at(ifId)->getPredecessorList()) {
             if (pred->getBlockID() == ifId - 1) {
@@ -378,12 +380,12 @@ bool SCAM::MergeRedundantIfElse::notFromTheSameGroupIfStatement(int ifId) {
     return false;
 }
 
-void SCAM::MergeRedundantIfElse::addStatementsInTrueBranch(int &firstBlockInTrueBranchId, int &elseIfblockId,
+void DESCAM::MergeRedundantIfElse::addStatementsInTrueBranch(int &firstBlockInTrueBranchId, int &elseIfblockId,
                                                            bool isIfBranch) {
     std::vector<int> blocksInsideIf;
     for (auto i = firstBlockInTrueBranchId; i < elseIfblockId; i++) { blocksInsideIf.push_back(i); }
 
-    std::vector<SCAM::Stmt *> ifStmtVector;
+    std::vector<DESCAM::Stmt *> ifStmtVector;
     while (firstBlockInTrueBranchId != elseIfblockId) {
         for (auto stmt : this->blockCFG.at(firstBlockInTrueBranchId)->getStmtList()) {
             ifStmtVector.push_back(stmt);
@@ -402,9 +404,9 @@ void SCAM::MergeRedundantIfElse::addStatementsInTrueBranch(int &firstBlockInTrue
     }
 }
 
-void SCAM::MergeRedundantIfElse::addStatementsInElseBranch(int &currentBlockId, bool isElseBranch) {
+void DESCAM::MergeRedundantIfElse::addStatementsInElseBranch(int &currentBlockId, bool isElseBranch) {
     bool elseHasIf = false;
-    std::vector<SCAM::Stmt *> ifStmtVector;
+    std::vector<DESCAM::Stmt *> ifStmtVector;
     while (!(this->blockCFG.at(currentBlockId)->getSuccessorList().size() == 1 &&
              (this->blockCFG.at(currentBlockId)->getBlockID() >
               this->blockCFG.at(currentBlockId)->getSuccessorList()[0]->getBlockID()))) {
@@ -451,23 +453,31 @@ void SCAM::MergeRedundantIfElse::addStatementsInElseBranch(int &currentBlockId, 
 }
 
 void
-SCAM::MergeRedundantIfElse::printWarning(const std::string &firstCondType, const std::string &firstCond,
+DESCAM::MergeRedundantIfElse::printWarning(const std::string &firstCondType, DESCAM::Stmt* firstCond,
                                          const std::string &secondCondType,
                                          const std::string &secondCond) {
+
     std::stringstream warning;
-    warning << "\t\033[1;33mWarning\033[0m: found the same code in the following '" << firstCondType
+    warning << "Found the same code in the following '" << firstCondType
             << "' and related '" << secondCondType << "' branch:" << std::endl;
     if (firstCondType == "if") {
-        warning << firstCond << std::endl;
+        warning << PrintStmt::toString(firstCond) << std::endl;
+
     } else if (firstCondType == "else if") {
-        warning << "else " << firstCond << std::endl;
+        warning << "else " << PrintStmt::toString(firstCond) << std::endl;
     }
     if (secondCondType == "else if") {
         warning << "else " << secondCond << std::endl;
     }
     warning << "This might indicate a copy and paste or logic error. Therefore, the conditions are merged!"
             << std::endl;
-    std::cout << warning.str();
+    auto msg = warning.str();
+    LocationInfo locationInfo = firstCond->getStmtInfo();
+    auto sl = DESCAM::LoggerMsg::SeverityLevel::Warning;
+    auto vt = DESCAM::LoggerMsg::ViolationType::NA;
+    auto pl = DESCAM::Logger::getCurrentProcessedLocation();
+    DESCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+    DESCAM::Logger::addMsg(lmsg);
 }
 
 

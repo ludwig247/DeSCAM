@@ -10,7 +10,7 @@
 #include "Logger/Logger.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     SimplifyVisitor::SimplifyVisitor(Stmt *node) : nodePointer(node) {
         Stmt *tempNodePointer;

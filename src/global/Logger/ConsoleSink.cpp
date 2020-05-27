@@ -1,5 +1,5 @@
 #include "ConsoleSink.h"
 
-void SCAM::ConsoleSink::print(std::string formattedOutput) {
+void DESCAM::ConsoleSink::print(std::string formattedOutput) {
     std::cout << formattedOutput;
 }

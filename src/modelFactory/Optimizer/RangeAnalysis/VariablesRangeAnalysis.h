@@ -23,13 +23,13 @@
 #include <stack>
 #include <set>
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Finds the ranges of unsigned and integer variables, which are not assigned by read operations
         * \author:mi-alkoudsi
         * \inputs:
-        *       - std::map<int, SCAM::CfgNode *> CFG;
-        *       - std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        *       - std::map<int, DESCAM::CfgNode *> CFG;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> variablesValuesMap;
         *       - std::set<std::string>& variablesThatHaveReadSet;
         * \outputs:
         *       - std::map<std::string, int> variablesBitwidthMap
@@ -38,8 +38,8 @@ namespace SCAM {
     public:
         VariablesRangeAnalysis() = delete;
 
-        VariablesRangeAnalysis(const std::map<int, SCAM::CfgNode *>& CFG,
-                               const std::map<std::string, std::set<SCAM::Expr *>>& variablesValuesMap,
+        VariablesRangeAnalysis(const std::map<int, CfgNode *>& CFG,
+                               const std::map<std::string, std::set<Expr *>>& variablesValuesMap,
                                const std::set<std::string>& variablesThatHaveReadSet);
 
         ~VariablesRangeAnalysis() = default;
@@ -48,17 +48,17 @@ namespace SCAM {
 
     private:
         int currentNodeID{};
-        std::map<int, SCAM::CfgNode *> CFG;
+        std::map<int, CfgNode *> CFG;
         std::set<std::string> variablesThatHaveReadSet;
         std::set<std::string> difficultToAnalyzeVariablesSet;
-        std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        std::map<std::string, std::set<Expr *>> variablesValuesMap;
         std::set<std::string> toBeAnalysedCounterVariablesSet;
         std::map<std::string, std::set<std::string>> variablesThatAssignedCounterVariablesMap;
         std::map<std::string, std::string> variablesDataTypesMap;
         std::map<std::string, int> variableBitWidthMap;
 
-        std::set<SCAM::Expr *> substituteVariablesWithValues(SCAM::Expr *toBeSubstitutedExpr,
-                                                             const std::map<std::string, std::set<SCAM::Expr *>> &substitutionMap);
+        std::set<Expr *> substituteVariablesWithValues(Expr *toBeSubstitutedExpr,
+                                                             const std::map<std::string, std::set<Expr *>> &substitutionMap);
     };
 }
 

@@ -8,7 +8,7 @@
 #include <Module.h>
 #include <memory>
 
-namespace SCAM{
+namespace DESCAM{
 
 class PropertyFactory {
 public:

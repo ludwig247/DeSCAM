@@ -4,18 +4,18 @@
 #include "Logger/Logger.h"
 
 
-SCAM::FileSink::FileSink(std::string outputDirectory, bool useTimeStamping) : useTimeStamping(useTimeStamping) {
+DESCAM::FileSink::FileSink(std::string outputDirectory, bool useTimeStamping) : useTimeStamping(useTimeStamping) {
     setOutputDirectory(outputDirectory);
 }
 
-void SCAM::FileSink::setOutputDirectory(std::string outputDirectory) {
+void DESCAM::FileSink::setOutputDirectory(std::string outputDirectory) {
     struct stat st_buf{};
     int status = stat(outputDirectory.c_str(), &st_buf);
-    if(status == 0 && S_ISDIR (st_buf.st_mode)) this->outputDirectory = outputDirectory;
+    if((status == 0 && S_ISDIR (st_buf.st_mode)) || (status!=0)) this->outputDirectory = outputDirectory;
 }
 
 
-void SCAM::FileSink::print(std::string formattedOutput) {
+void DESCAM::FileSink::print(std::string formattedOutput) {
     struct stat st_buf{};
     int status = stat(this->outputDirectory.c_str(), &st_buf);
     //If directory doesn't exist, make it
@@ -42,7 +42,7 @@ void SCAM::FileSink::print(std::string formattedOutput) {
     std::cout << "\033[1;31mLogs written to " << outputFileName << "\033[0m" <<  std::endl;
 }
 
-void SCAM::FileSink::setGeneratedFileType(const std::string &filetype) {
+void DESCAM::FileSink::setGeneratedFileType(const std::string &filetype) {
     this->generatedFileType = filetype;
 }
 

@@ -9,7 +9,7 @@
 #include "Expr.h"
 #include <string>
 
-namespace SCAM {
+namespace DESCAM {
 
     class Arithmetic : public Expr {
     public:

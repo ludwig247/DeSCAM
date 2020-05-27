@@ -9,7 +9,7 @@
 #include "LoggerSink.h"
 #include <iostream>
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief A logger sink that outputs log messages to the console.
  */

@@ -12,7 +12,7 @@
 #include "Constants.h"
 #include "PluginFactory.h"
 
-namespace SCAM { namespace HLSPlugin { namespace Script {
+namespace DESCAM { namespace HLSPlugin { namespace Script {
 
             class SynthesisScripts {
 
@@ -25,7 +25,7 @@ namespace SCAM { namespace HLSPlugin { namespace Script {
 
             private:
                 std::shared_ptr<PropertySuite> propertySuite;
-                SCAM::Module *currentModule;
+                DESCAM::Module *currentModule;
                 std::string moduleName;
                 std::shared_ptr<OptimizerHLS> optimizer;
                 HLSOption hlsOption;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "FindSCMain.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     FindSCMain::FindSCMain(clang::TranslationUnitDecl *tuDecl):
             pass(0),

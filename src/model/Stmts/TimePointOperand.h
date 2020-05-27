@@ -9,7 +9,7 @@
 #include "Operand.h"
 #include "Timepoint.h"
 
-namespace SCAM {
+namespace DESCAM {
     /**
      * \brief Points to a TimeExpr
      *

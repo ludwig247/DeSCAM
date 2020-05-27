@@ -5,7 +5,7 @@
 #include "DetectCounterVariable.h"
 
 
-SCAM::DetectCounterVariable::DetectCounterVariable(std::string variableName, SCAM::Expr *expr) : isCounter(
+DESCAM::DetectCounterVariable::DetectCounterVariable(std::string variableName, DESCAM::Expr *expr) : isCounter(
         false), variableName(std::move(variableName)), expr(expr), variableIncrementsChanged(false), variableIncrements(
         true),
                                                                                                  incrementKnown(
@@ -15,27 +15,27 @@ SCAM::DetectCounterVariable::DetectCounterVariable(std::string variableName, SCA
     }
 }
 
-bool SCAM::DetectCounterVariable::isCounterVariable() const {
+bool DESCAM::DetectCounterVariable::isCounterVariable() const {
     return this->isCounter;
 }
 
-bool SCAM::DetectCounterVariable::isIncrementKnown() const {
+bool DESCAM::DetectCounterVariable::isIncrementKnown() const {
     return this->incrementKnown;
 }
 
-bool SCAM::DetectCounterVariable::isVariableIncrements() const {
+bool DESCAM::DetectCounterVariable::isVariableIncrements() const {
     return this->variableIncrements;
 }
 
-void SCAM::DetectCounterVariable::visit(SCAM::VariableOperand &node) {
+void DESCAM::DetectCounterVariable::visit(DESCAM::VariableOperand &node) {
     if (node.getVariable()->getFullName() == this->variableName) { this->isCounter = true; }
 }
 
-void SCAM::DetectCounterVariable::visit(struct UnaryExpr &node) {
+void DESCAM::DetectCounterVariable::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
 }
 
-void SCAM::DetectCounterVariable::visit(struct Arithmetic &node) {
+void DESCAM::DetectCounterVariable::visit(struct Arithmetic &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 
@@ -84,52 +84,52 @@ void SCAM::DetectCounterVariable::visit(struct Arithmetic &node) {
     }
 }
 
-void SCAM::DetectCounterVariable::visit(struct Logical &node) {
+void DESCAM::DetectCounterVariable::visit(struct Logical &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::DetectCounterVariable::visit(struct Relational &node) {
+void DESCAM::DetectCounterVariable::visit(struct Relational &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::DetectCounterVariable::visit(struct Bitwise &node) {
+void DESCAM::DetectCounterVariable::visit(struct Bitwise &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::DetectCounterVariable::visit(struct Cast &node) {
+void DESCAM::DetectCounterVariable::visit(struct Cast &node) {
     node.getSubExpr()->accept(*this);
 }
 
-void SCAM::DetectCounterVariable::visit(SCAM::FunctionOperand &node) {
+void DESCAM::DetectCounterVariable::visit(DESCAM::FunctionOperand &node) {
     for (auto param : node.getParamValueMap()) {
         param.second->accept(*this);
     }
 }
 
-void SCAM::DetectCounterVariable::visit(struct ArrayOperand &node) {
+void DESCAM::DetectCounterVariable::visit(struct ArrayOperand &node) {
     node.getIdx()->accept(*this);
 }
 
-void SCAM::DetectCounterVariable::visit(struct CompoundExpr &node) {
+void DESCAM::DetectCounterVariable::visit(struct CompoundExpr &node) {
     for (auto subvar : node.getValueMap()) {
         subvar.second->accept(*this);
     }
 }
 
-void SCAM::DetectCounterVariable::visit(SCAM::ArrayExpr &node) {
+void DESCAM::DetectCounterVariable::visit(DESCAM::ArrayExpr &node) {
     for (auto subvar : node.getValueMap()) {
         subvar.second->accept(*this);
     }
 }
 
-void SCAM::DetectCounterVariable::visit(struct ParamOperand &node) {
+void DESCAM::DetectCounterVariable::visit(struct ParamOperand &node) {
     if (node.getOperandName() == this->variableName) { this->isCounter = true; }
 }
 
-void SCAM::DetectCounterVariable::visit(SCAM::Ternary &node) {
+void DESCAM::DetectCounterVariable::visit(DESCAM::Ternary &node) {
     node.getCondition()->accept(*this);
     node.getTrueExpr()->accept(*this);
     node.getFalseExpr()->accept(*this);

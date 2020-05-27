@@ -9,7 +9,7 @@
 #include "Logger/Logger.h"
 
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace DESCAM::HLSPlugin::HLS;
 
 HLS::HLS(
         HLSOption hlsOption,

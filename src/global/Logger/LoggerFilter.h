@@ -9,7 +9,7 @@
 #include <set>
 #include "LoggerMsg.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class LoggerFilter {
     public:

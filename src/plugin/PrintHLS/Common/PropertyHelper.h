@@ -8,7 +8,7 @@
 #include "Property.h"
 #include <memory>
 
-namespace SCAM { namespace HLSPlugin {
+namespace DESCAM { namespace HLSPlugin {
 
 class PropertyHelper : public Property {
 

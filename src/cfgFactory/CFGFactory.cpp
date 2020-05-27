@@ -12,7 +12,7 @@
 #include "FindDataFlow.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance &ci, Module *module, bool sourceModule) :
             sourceModule(sourceModule),
             methodDecl(decl),
@@ -67,9 +67,9 @@ namespace SCAM {
 
         if (sourceModule) {
             //Init Block
-            auto initBlock = new SCAM::CfgBlock();
+            auto initBlock = new DESCAM::CfgBlock();
             initBlock->setBlockID(this->controlFlowMap.size());
-            std::vector<SCAM::Stmt *> initList = SCAM::CreateInitSection2::createInitSection2(module);
+            std::vector<DESCAM::Stmt *> initList = DESCAM::CreateInitSection2::createInitSection2(module);
             for (auto stmt:initList) {
                 initBlock->addStmt(stmt);
             }
@@ -87,8 +87,8 @@ namespace SCAM {
         this->cleanEmptyBlocks();
     }
 
-//! Iterates over each statement of a block and create SCAM::Stmts*
-    CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, SCAM::CfgBlock *parent) {
+//! Iterates over each statement of a block and create DESCAM::Stmts*
+    CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *parent) {
         if (entryMap.find(block->getBlockID()) != entryMap.end()) {
             int scamBlockId = entryMap.find(block->getBlockID())->second;
             for (auto succ : parent->getSuccessorList()) {
@@ -104,9 +104,9 @@ namespace SCAM {
 
         //Create empty cfgNode
         auto cfgNode = new CfgBlock(-1, block->getBlockID());
-        //Translate CLANG::Stms to SCAM:Stmts and add to node
+        //Translate CLANG::Stms to DESCAM:Stmts and add to node
         for (auto clangStmt: statementList) {
-            SCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
+            DESCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
             //Check that the stmt is not null and the statement is not an Expr*
             //In case of an Expr* skips the statement, because the statementlist should only contain Statements
             if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
@@ -120,8 +120,8 @@ namespace SCAM {
         if (block->getTerminator().getStmt() != nullptr) {
             if (block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::IfStmtClass ||
                 block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass) {
-                //Translate clang::Stmts to SCAM::Stmts
-                SCAM::Stmt *terminator = this->getScamStmt(block->getTerminator().getStmt());
+                //Translate clang::Stmts to DESCAM::Stmts
+                DESCAM::Stmt *terminator = this->getScamStmt(block->getTerminator().getStmt());
 
                 if (terminator != nullptr) {
                     cfgNode->setTerminator(terminator);
@@ -316,10 +316,10 @@ namespace SCAM {
         return newStatementList;
     };
 
-    //! Methods that translates a Clang::Stmt into a SCAM::Stmt
-    SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
+    //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
+    DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
         // traverse clang stmt and create its equivalent descam stmt
-        SCAM::FindDataFlow dataFlow(clangStmt, module,ci, false);
+        DESCAM::FindDataFlow dataFlow(clangStmt, module,ci, false);
         return dataFlow.getStmt();
     }
 
@@ -338,7 +338,7 @@ namespace SCAM {
             //Check for successor size, if there are more than one successor and no condition -> remove
             bool succ_size = currentBlock->getSuccessorList().size() > 1;
             if (!terminator && stmts && succ_size) {
-                SCAM::CfgBlock *succ; //! depending whether it
+                DESCAM::CfgBlock *succ; //! depending whether it
                 //Check whether current block belongs to an AND or an OR
                 //AND
                 if (currentBlock->getSuccessorList().at(0) !=

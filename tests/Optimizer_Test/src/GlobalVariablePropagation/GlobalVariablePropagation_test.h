@@ -8,7 +8,7 @@
 
 #include "Optimizer_Test/src/CreateModel.h"
 
-class GlobalVariablePropagation_Test : public ::testing::TestWithParam<SCAM::Model *> {
+class GlobalVariablePropagation_Test : public ::testing::TestWithParam<DESCAM::Model *> {
 public:
     void SetUp() override {};
 
@@ -21,7 +21,7 @@ TEST_P(GlobalVariablePropagation_Test, propagate_constant_global_variables) {
     if (auto model = GetParam()) {
         for (auto module: model->getModules()) {
             ASSERT_FALSE(module.second->getCFG().empty()) << "CFG of module " << module.first << " is empty\n";
-            SCAM::GlobalConstantVariablePropagation globalVariablePropagation(module.second->getCFG(),
+            DESCAM::GlobalConstantVariablePropagation globalVariablePropagation(module.second->getCFG(),
                                                                               model->getGlobalVariableMap());
             ASSERT_FALSE(globalVariablePropagation.getCFG().empty())
                                         << "After global variable propagation, CFG of module "
@@ -29,7 +29,7 @@ TEST_P(GlobalVariablePropagation_Test, propagate_constant_global_variables) {
                                         << " is empty\n";
 
 
-            std::string CFG_str = SCAM::GlobalUtilities::printCFG(globalVariablePropagation.getCFG());
+            std::string CFG_str = DESCAM::GlobalUtilities::printCFG(globalVariablePropagation.getCFG());
             std::string refFilePath =
                     SCAM_HOME"/tests/Optimizer_Test/src/GlobalVariablePropagation/ref_files/" + module.first +
                     "_out.txt";

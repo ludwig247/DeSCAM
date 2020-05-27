@@ -16,40 +16,40 @@
 #include <cassert>
 #include "ExprVisitor.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 /**
  *  \brief check assignments of a specific variable through each path of all possible paths in the CFG
  *  \author:mi-alkoudsi
  *  \inputs:
- *    - std::map<int, std::vector<SCAM::CfgNode *>> allPathsToNodeMap;
- *    - SCAM::Variable *var;
+ *    - std::map<int, std::vector<DESCAM::CfgNode *>> allPathsToNodeMap;
+ *    - DESCAM::Variable *var;
  *    - int stmtId;
  *  \outputs:
- *    - SCAM::Expr *propagatedValue;
+ *    - DESCAM::Expr *propagatedValue;
  *    - int numLastAssignments;
- *    - std::map<int, SCAM::Expr *> lastAssignmentsMap;
+ *    - std::map<int, DESCAM::Expr *> lastAssignmentsMap;
  *  \details: On each Path, only the last assignment to the variable kept.
  *  if there was no read to the variable on any of the paths =>
  *  the result is map containing all last assignments, and if and only if they are all equal then propagation is valid
  *  Note: if the assignment contains another variable which is assigned before the statement to which we want to propagate, propagation is not valid.
  */
 
-    class PropagateConstantValue : public SCAM::StmtAbstractVisitor {
+    class PropagateConstantValue : public StmtAbstractVisitor {
     public:
 
-        PropagateConstantValue(const std::map<int, std::vector<SCAM::CfgNode *>> &allPathsToNodeMap,
-                               SCAM::Variable *var,int stmtId);
+        PropagateConstantValue(const std::map<int, std::vector<CfgNode *>> &allPathsToNodeMap,
+                               Variable *var,int stmtId);
 
-        SCAM::Expr *getPropagatedValue() const;
+        Expr *getPropagatedValue() const;
 
         int getNumLastAssignments() const;
 
-        const std::map<int, SCAM::Expr *> &getLastAssignmentsMap() const;
+        const std::map<int, Expr *> &getLastAssignmentsMap() const;
 
     private:
-        SCAM::Variable *variable;
-        SCAM::Expr *propagatedValue;
+        Variable *variable;
+        Expr *propagatedValue;
         int stmtId;
         int currentNodeId{};
         int lastAssignmentId{};
@@ -58,17 +58,17 @@ namespace SCAM {
         bool isVarRead;                                                                  // true when the last assignment of a specific path to the variable at hands is a read
         bool wasRhsVarOp{};                                                              // true when the right handside of an assignment is a variable operand
         std::map<std::string,std::set<int>> rhsVariableAssignmentsIds;                   // used when wasRhsVarOp is true to keep track of assignments to the rhs variable
-        std::map<std::string, SCAM::Expr *> variableValueMap;                            // Contains the current pointer to the value/s of a variable
-        std::map<int, SCAM::Expr *> LastAssignmentMap;                                   // Contains last assignments for a variable at a path n
-        std::map<int, std::vector<SCAM::CfgNode *>> allPathsToNodeMap;                   // Contains all the paths of the blockCFG
+        std::map<std::string, Expr *> variableValueMap;                            // Contains the current pointer to the value/s of a variable
+        std::map<int, Expr *> LastAssignmentMap;                                   // Contains last assignments for a variable at a path n
+        std::map<int, std::vector<CfgNode *>> allPathsToNodeMap;                   // Contains all the paths of the blockCFG
 
         //returns the last assignment value to the variable in check, null ptr in case of no assignment on the path or if the last assignment is read
-        SCAM::Expr *lastVariableValueInPath(const std::vector<SCAM::CfgNode *> &path);
+        Expr *lastVariableValueInPath(const std::vector<CfgNode *> &path);
 
         //if varName found in variableValueMap, change the value to expr, otherwise add them
-        void addOrSubstituteVariableValue(const std::string& varName, SCAM::Expr *expr);
+        void addOrSubstituteVariableValue(const std::string& varName, Expr *expr);
 
-        void checkIfRhsOfAssignmentIsAVarOp(SCAM::Expr *rhs);
+        void checkIfRhsOfAssignmentIsAVarOp(Expr *rhs);
 
         //visitors
         void visit(struct VariableOperand &node) override {};
@@ -117,7 +117,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override {};
 
-        void visit(struct SCAM::FunctionOperand &node) override {};
+        void visit(struct FunctionOperand &node) override {};
 
         void visit(struct ArrayOperand &node) override {};
 

@@ -9,7 +9,7 @@
 #include "Logger/Logger.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     Channel::Channel(std::string name, LocationInfo locationInfo) :
             fromPort(nullptr),

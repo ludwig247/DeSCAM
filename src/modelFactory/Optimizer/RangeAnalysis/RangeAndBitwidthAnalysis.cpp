@@ -28,14 +28,14 @@
  *   Output ports bitwidths are deduced by analyzing write statements in the CFG
  */
 
-SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
+DESCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(DESCAM::Module *module)
         : module(module), CFG(
         module->getCFG()) {
 
     //Finding all variable values
-    SCAM::FindReadVariables readVariablesFinder(this->CFG);
+    DESCAM::FindReadVariables readVariablesFinder(this->CFG);
     this->variablesThatHaveReadSet = readVariablesFinder.getReadVariablesSet();
-    SCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
+    DESCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
     this->variablesValuesMap = valuesFinder.getVariableValuesMap();
 
     //Filling initial Bitwidths of variables according to their data types
@@ -46,7 +46,7 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
         std::cout << "variable " << var.first << " : " << var.second << std::endl;
     }
 #endif
-    SCAM::VariablesRangeAnalysis vra(this->CFG, this->variablesValuesMap, this->variablesThatHaveReadSet);
+    DESCAM::VariablesRangeAnalysis vra(this->CFG, this->variablesValuesMap, this->variablesThatHaveReadSet);
     auto deducedBitwidthMapFromVariableRangeAnalysis = vra.getVariableBitWidthMap();
     for (const auto &variable : deducedBitwidthMapFromVariableRangeAnalysis) {
         if (this->variableBitWidthMap.at(variable.first) > variable.second) {
@@ -92,7 +92,7 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
     for (auto node : this->CFG) {
         auto stmt = node.second->getStmt();
         if (stmt) {
-            if (dynamic_cast<SCAM::Write *>(stmt)) {
+            if (dynamic_cast<DESCAM::Write *>(stmt)) {
                 this->propagatedBitWidth = 0;
                 stmt->accept(*this);
             }
@@ -148,21 +148,21 @@ SCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(SCAM::Module *module)
 #endif
 }
 
-const std::map<std::string, int> &SCAM::RangeAndBitWidthAnalysis::getVariableBitWidthMap() const {
+const std::map<std::string, int> &DESCAM::RangeAndBitWidthAnalysis::getVariableBitWidthMap() const {
     return this->variableBitWidthMap;
 }
 
 
-const std::map<SCAM::Port *, int> &SCAM::RangeAndBitWidthAnalysis::getPortsBitWidthMap() const {
+const std::map<DESCAM::Port *, int> &DESCAM::RangeAndBitWidthAnalysis::getPortsBitWidthMap() const {
     return this->writePortBitWidthMap;
 }
 
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::VariableOperand &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::VariableOperand &node) {
     this->propagatedBitWidth = this->variableBitWidthMap.at(node.getVariable()->getFullName());
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::IntegerValue &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::IntegerValue &node) {
     int signBit = 1;
     int value = node.getValue();
     if (value == 0) {
@@ -180,7 +180,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::IntegerValue &node) {
     this->propagatedBitWidth = binaryVal.size() + signBit;
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::UnsignedValue &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::UnsignedValue &node) {
     if (node.getValue() == 0) {
         this->propagatedBitWidth = 1;
         return;
@@ -194,15 +194,15 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::UnsignedValue &node) {
     this->propagatedBitWidth = binaryVal.size();
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::BoolValue &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::BoolValue &node) {
     this->propagatedBitWidth = 1;
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::EnumValue &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::EnumValue &node) {
     this->propagatedBitWidth = ceil(log2(node.getDataType()->getEnumValueMap().size()));
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundValue &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::CompoundValue &node) {
     int bitwidth = 0;
     for (auto val : node.getValues()) {
         bitwidth += this->variableBitWidthMap.at(this->nameFullNameMap.at(val.first));
@@ -210,12 +210,12 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundValue &node) {
     this->propagatedBitWidth = bitwidth;
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::UnaryExpr &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::UnaryExpr &node) {
     node.getExpr()->accept(*this);
 }
 
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Write &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Write &node) {
 //    std::cout<< PrintStmt::toString(&node) << std::endl;
     node.getValue()->accept(*this);
     auto port = node.getPort();
@@ -241,7 +241,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Write &node) {
 
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Arithmetic &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Arithmetic &node) {
     node.getLhs()->accept(*this);
     int lhsPropagatedValue = this->propagatedBitWidth;
     node.getRhs()->accept(*this);
@@ -263,27 +263,27 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Arithmetic &node) {
             int lhsMaxVal = pow(lhsPropagatedValue - 1, 2) - 1;
             int rhsMaxVal = pow(rhsPropagatedValue - 1, 2) - 1;
             int rem = lhsMaxVal - (rhsMaxVal * (floor(lhsMaxVal / rhsMaxVal)));
-            int remWidth = SCAM::GlobalUtilities::getRequiredBits(rem);
+            int remWidth = DESCAM::GlobalUtilities::getRequiredBits(rem);
             this->propagatedBitWidth = remWidth;
         } else if (node.getDataType()->getName() == "unsigned") {
             unsigned int lhsMaxVal = pow(lhsPropagatedValue, 2) - 1;
             unsigned int rhsMaxVal = pow(rhsPropagatedValue, 2) - 1;
             unsigned int rem = lhsMaxVal - (rhsMaxVal * (floor(lhsMaxVal / rhsMaxVal)));
-            int remWidth = SCAM::GlobalUtilities::getRequiredBits(rem);
+            int remWidth = DESCAM::GlobalUtilities::getRequiredBits(rem);
             this->propagatedBitWidth = remWidth;
         }
     }
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Logical &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Logical &node) {
     this->propagatedBitWidth = 1;
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Relational &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Relational &node) {
     this->propagatedBitWidth = 1;
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Bitwise &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Bitwise &node) {
     node.getLhs()->accept(*this);
     int lhsPropagatedValue = this->propagatedBitWidth;
     node.getRhs()->accept(*this);
@@ -313,11 +313,11 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Bitwise &node) {
 }
 
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Cast &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Cast &node) {
     node.getSubExpr()->accept(*this);
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::FunctionOperand &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::FunctionOperand &node) {
     this->propagatedBitWidth = 0;
     for (const auto &returnval : node.getFunction()->getReturnValueConditionList()) {
         int returnBitWidth = this->propagatedBitWidth;
@@ -328,14 +328,14 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::FunctionOperand &node) {
     }
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayOperand &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::ArrayOperand &node) {
     this->propagatedBitWidth = this->variableBitWidthMap.at(node.getArrayOperand()->getOperandName());
     if (this->propagatedBitWidth != 0) {
         this->propagatedBitWidth = this->propagatedBitWidth / node.getArrayOperand()->getDataType()->getArraySize();
     }
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundExpr &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::CompoundExpr &node) {
     int bitwidth = 0;
     for (const auto &val : node.getValueMap()) {
         val.second->accept(*this);
@@ -349,7 +349,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::CompoundExpr &node) {
     this->propagatedBitWidth = bitwidth;
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayExpr &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::ArrayExpr &node) {
     int bitwidth = 0;
     for (const auto &val : node.getValueMap()) {
         val.second->accept(*this);
@@ -365,7 +365,7 @@ void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::ArrayExpr &node) {
     this->propagatedBitWidth = bitwidth * node.getValueMap().size();
 }
 
-void SCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
+void DESCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
 
     for (const auto &variable : module->getVariableMap()) {
         this->nameFullNameMap.insert(std::make_pair(variable.second->getName(), variable.second->getFullName()));
@@ -426,7 +426,7 @@ void SCAM::RangeAndBitWidthAnalysis::initializeBitWidthMap() {
     }
 }
 
-void SCAM::RangeAndBitWidthAnalysis::visit(SCAM::Ternary &node) {
+void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::Ternary &node) {
     node.getTrueExpr()->accept(*this);
     int trueExprPropagatedValue = this->propagatedBitWidth;
     node.getFalseExpr()->accept(*this);

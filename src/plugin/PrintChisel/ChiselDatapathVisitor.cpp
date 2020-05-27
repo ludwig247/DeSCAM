@@ -4,17 +4,17 @@
 
 #include "ChiselDatapathVisitor.h"
 
-std::string SCAM::ChiselDatapathVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::ChiselDatapathVisitor::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     ChiselDatapathVisitor printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::SyncSignal &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::SyncSignal &node) {
     PrintStmt::toString(&node);
     this->ss << node.getPort()->getName() << "_sync_at_t";
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::DataSignalOperand &node) {
     PrintStmt::toString(&node);
     if (node.getPort()->getInterface()->getDirection() == "in") {
         this->ss << "io." << node.getDataSignal()->getPort()->getName() << "." << node.getDataSignal()->getName();
@@ -23,7 +23,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::DataSignalOperand &node) {
     }
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::EnumValue &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::EnumValue &node) {
     std::string str = node.getEnumValue();
     std::string::size_type i = str.find("_");
 
@@ -36,7 +36,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::EnumValue &node) {
     this->ss << str;
 }
 
-void SCAM::ChiselDatapathVisitor::visit(class VariableOperand &node) {
+void DESCAM::ChiselDatapathVisitor::visit(class VariableOperand &node) {
     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() + "_signal_r." + node.getVariable()->getName();
     } else {
@@ -44,7 +44,7 @@ void SCAM::ChiselDatapathVisitor::visit(class VariableOperand &node) {
     }
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::Arithmetic &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "%") {
@@ -57,7 +57,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::Arithmetic &node) {
     //this->ss << ")(31 downto 0)";
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::Bitwise &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::Bitwise &node) {
 
     if (node.getOperation() == "<<") {
         this->ss << "(shift_left(";
@@ -89,7 +89,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::Bitwise &node) {
 
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::UnsignedValue &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::UnsignedValue &node) {
     /*if (this->resize_flag) {
         //FIXME: remove once concat is present?
         this->ss << "resize(" << node.getValueAsString() << ",32)";
@@ -97,7 +97,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::UnsignedValue &node) {
     this->ss << node.getValueAsString() << ".U(32.W)";
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::IntegerValue &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::IntegerValue &node) {
     /*if (this->resize_flag) {
         //FIXME: remove once concat is present?
         this->ss << "resize(" << node.getValueAsString() << ",32)";
@@ -105,7 +105,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::IntegerValue &node) {
     this->ss << "(" << node.getValueAsString() << ")" << ".S(32.W)";
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::BoolValue &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::BoolValue &node) {
     if (node.getValue()) {
         this->ss << "true.B";
     } else {
@@ -113,7 +113,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::BoolValue &node) {
     }
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::Relational &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -125,7 +125,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::Relational &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::Cast &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
@@ -135,7 +135,7 @@ void SCAM::ChiselDatapathVisitor::visit(SCAM::Cast &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselDatapathVisitor::visit(SCAM::CompoundExpr &node) {
+void DESCAM::ChiselDatapathVisitor::visit(DESCAM::CompoundExpr &node) {
 
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {

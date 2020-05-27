@@ -2,7 +2,7 @@
 #include "FindModules.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
 
     FindModules::FindModules(clang::TranslationUnitDecl *tuDecl) {

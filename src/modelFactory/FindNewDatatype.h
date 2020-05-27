@@ -11,15 +11,15 @@
 #include <DataTypes.h>
 
 /*!
- * \brief Maps clang:Qualtypes to SCAM:Datatypes
+ * \brief Maps clang:Qualtypes to DESCAM:Datatypes
  */
 
-namespace SCAM{
+namespace DESCAM{
 
 class FindNewDatatype : public clang::RecursiveASTVisitor<FindNewDatatype> {
 public:
 
-    static SCAM::DataType*  getDataType(const clang::QualType& type);
+    static DESCAM::DataType*  getDataType(const clang::QualType& type);
     static std::string getTypeName(const clang::QualType& type);
     static bool isGlobal(const clang::QualType& type); //! Returns true, if datatype is not defined within a module class
 

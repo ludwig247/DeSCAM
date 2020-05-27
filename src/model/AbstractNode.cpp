@@ -4,7 +4,7 @@
 
 #include "AbstractNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     AbstractNode::AbstractNode() : name("undefined") {
 

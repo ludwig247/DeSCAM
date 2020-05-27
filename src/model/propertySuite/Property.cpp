@@ -8,20 +8,20 @@
 #include <utility>
 #include <Behavior/Operation.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor
     // ------------------------------------------------------------------------------
 
-    Property::Property(std::string name, const SCAM::Operation * operation) :
+    Property::Property(std::string name, const DESCAM::Operation * operation) :
             name(name){
             this->operationList.push_back(operation);
             assert(operation != nullptr && "Passing an operation that is null");
     }
 
 
-    Property::Property(std::string name, std::vector<const SCAM::Operation *> operationList):
+    Property::Property(std::string name, std::vector<const DESCAM::Operation *> operationList):
         name(name),
         operationList(operationList){
         assert(!operationList.empty() && "Passing an empty list of operations");
@@ -64,7 +64,7 @@ namespace SCAM {
     //                            Freeze-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addFreezeSignal(std::shared_ptr<SCAM::PropertyMacro> freezeSignal, Timepoint* timePoint) {
+    void Property::addFreezeSignal(std::shared_ptr<DESCAM::PropertyMacro> freezeSignal, Timepoint* timePoint) {
         this->freezeSignals.insert(std::make_pair(freezeSignal, timePoint));
     }
 
@@ -93,7 +93,7 @@ namespace SCAM {
 
     }
 
-    const std::vector<SCAM::TemporalExpr*> &Property::getCommitmentList() const {
+    const std::vector<DESCAM::TemporalExpr*> &Property::getCommitmentList() const {
         return commitmentList;
     }
 

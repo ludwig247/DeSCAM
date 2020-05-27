@@ -11,7 +11,7 @@
 #include "DataType.h"
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /** \brief Represnts a variable within the module structure
      *

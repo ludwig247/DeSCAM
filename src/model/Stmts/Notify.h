@@ -8,7 +8,7 @@
 #include "Port.h"
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Notify : public Expr {
     public:
         Notify() = delete;

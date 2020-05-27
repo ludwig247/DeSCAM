@@ -9,7 +9,7 @@
 #include "VHDLWrapperSCO.h"
 #include "VHDLWrapperMCO.h"
 
-using namespace SCAM::HLSPlugin;
+using namespace DESCAM::HLSPlugin;
 
 std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
     std::stringstream moduleNames;

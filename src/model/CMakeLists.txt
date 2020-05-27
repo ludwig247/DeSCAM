@@ -16,6 +16,7 @@ set(AST_FILES
         VariableTemplate.cpp
         Timepoint.cpp
         LocationInfo.cpp
+        DescamException.cpp
         )
 
 

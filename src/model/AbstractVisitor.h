@@ -6,7 +6,7 @@
 #define SCAM_ABSTRACTVISITOR_H
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class AbstractVisitor {
     public:

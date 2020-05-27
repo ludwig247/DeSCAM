@@ -11,7 +11,7 @@
 #include "LocationInfo.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /**
      * \brief Base class for every other suspensionAST node
@@ -51,7 +51,7 @@ namespace SCAM {
 
 }
 
-inline std::ostream &operator<<(std::ostream &os, SCAM::Stmt const &stmt) {
+inline std::ostream &operator<<(std::ostream &os, DESCAM::Stmt const &stmt) {
     return stmt.print(os);
 }
 

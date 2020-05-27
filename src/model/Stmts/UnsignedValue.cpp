@@ -3,31 +3,31 @@
 //
 
 #include "UnsignedValue.h"
-
+#include "DescamException.h"
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::UnsignedValue::UnsignedValue(unsigned int value, LocationInfo stmtLocationInfo) :
+DESCAM::UnsignedValue::UnsignedValue(unsigned int value, LocationInfo locationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("unsigned")) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
-    assert(value >= 0 && "Unsigned value only allowed for value >= 0");
-    assert(value <= (4294967295) && "Unsigned value only allowed for value <= 2^32-1");
+    if(!(value >= 0))  throw DescamException("Unsigned value only allowed for value >= 0",locationInfo);
+    if(!(value <= (4294967295)))  throw DescamException("Unsigned value only allowed for value <= 2^32-1",locationInfo);
 }
 
-unsigned int SCAM::UnsignedValue::getValue() {
+unsigned int DESCAM::UnsignedValue::getValue() {
     return value;
 }
 
-std::string SCAM::UnsignedValue::getValueAsString() const {
+std::string DESCAM::UnsignedValue::getValueAsString() const {
     return std::to_string(value);
 }
 
-void SCAM::UnsignedValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::UnsignedValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::UnsignedValue::operator==(const Stmt &other) const {
+bool DESCAM::UnsignedValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekUnsignedValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (UnsignedValue *) this;

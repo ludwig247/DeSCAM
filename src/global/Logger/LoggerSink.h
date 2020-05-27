@@ -7,14 +7,19 @@
 #define DESCAM_LOGGERSINK_H
 
 #include <string>
+#include "LoggerFormatter.h"
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief The base class for a logger sink to which all log messages are fed after being collected.
  */
     class LoggerSink {
     public:
         virtual void print(std::string formattedOutput) = 0;
+        void setFormatOption(LoggerFormatter::FormatOption formatOption){this->formatOption = formatOption;}
+        LoggerFormatter::FormatOption getFormatOtion() {return this->formatOption;}
+    private:
+        LoggerFormatter::FormatOption formatOption = LoggerFormatter::FormatOption::JSON;
     };
 }
 

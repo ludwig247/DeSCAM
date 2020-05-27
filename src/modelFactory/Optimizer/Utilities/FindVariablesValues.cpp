@@ -10,31 +10,31 @@
 #include "Logger/Logger.h"
 
 
-SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode *> &CFG,
+DESCAM::FindVariablesValues::FindVariablesValues(const std::map<int, DESCAM::CfgNode *> &CFG,
                                                const std::set<std::string>& readVariablesSet) : readVariablesSet(
         readVariablesSet) {
-    std::map<std::string, std::map<std::string, std::set<SCAM::Expr *>>> compoundVariablesT;
+    std::map<std::string, std::map<std::string, std::set<DESCAM::Expr *>>> compoundVariablesT;
     for (auto node: CFG) {
         auto statement = node.second->getStmt();
         if (statement != nullptr) {
-            if (auto assignment = dynamic_cast<SCAM::Assignment *>(statement)) {
-                if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(assignment->getLhs())) {
+            if (auto assignment = dynamic_cast<DESCAM::Assignment *>(statement)) {
+                if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
                     if (this->readVariablesSet.find(varOp->getVariable()->getFullName()) !=
                         this->readVariablesSet.end()) { continue; }
                     if (varOp->getVariable()->isCompoundType() || varOp->getVariable()->isArrayType()) {
-                        if(dynamic_cast<SCAM::VariableOperand *>(assignment->getRhs())){
-                        }else if (auto compoundValue = dynamic_cast<SCAM::CompoundValue *>(assignment->getRhs())) {
+                        if(dynamic_cast<DESCAM::VariableOperand *>(assignment->getRhs())){
+                        }else if (auto compoundValue = dynamic_cast<DESCAM::CompoundValue *>(assignment->getRhs())) {
                             addSubVariablesToValuesMap(varOp,compoundValue->getValues());
-                        } else if (auto compoundExpression = dynamic_cast<SCAM::CompoundExpr *>(assignment->getRhs())) {
+                        } else if (auto compoundExpression = dynamic_cast<DESCAM::CompoundExpr *>(assignment->getRhs())) {
                             addSubVariablesToValuesMap(varOp,compoundExpression->getValueMap());
-                        } else if (auto arrayExpression = dynamic_cast<SCAM::ArrayExpr *>(assignment->getRhs())) {
+                        } else if (auto arrayExpression = dynamic_cast<DESCAM::ArrayExpr *>(assignment->getRhs())) {
                             addSubVariablesToValuesMap(varOp,arrayExpression->getValueMap());
                         } else {
                             TERMINATE(
                                     "unexpected rhs of an assignment to a compound or array expression");
                         }
                     }
-                    if(auto ternaryExpr = dynamic_cast<SCAM::Ternary *>(assignment->getRhs())){
+                    if(auto ternaryExpr = dynamic_cast<DESCAM::Ternary *>(assignment->getRhs())){
                         addValToVariableValuesMap(varOp->getVariable(), ternaryExpr->getTrueExpr());
                         addValToVariableValuesMap(varOp->getVariable(), ternaryExpr->getFalseExpr());
                     }else {
@@ -50,18 +50,18 @@ SCAM::FindVariablesValues::FindVariablesValues(const std::map<int, SCAM::CfgNode
     for(auto variable : this->variablesValuesMap)
         {   std::cout << "Variable " << variable.first << ": ";
             for(auto value : variable.second){
-                std::cout << SCAM::PrintStmt::toString(value)  << ", " ;
+                std::cout << DESCAM::PrintStmt::toString(value)  << ", " ;
             }
             std::cout << std::endl;
         }
 #endif
 }
 
-const std::map<std::string, std::set<SCAM::Expr *>> &SCAM::FindVariablesValues::getVariableValuesMap() const {
+const std::map<std::string, std::set<DESCAM::Expr *>> &DESCAM::FindVariablesValues::getVariableValuesMap() const {
     return this->variablesValuesMap;
 }
 
-void SCAM::FindVariablesValues::addValToVariableValuesMap(SCAM::Variable *variable, SCAM::Expr *rhs) {
+void DESCAM::FindVariablesValues::addValToVariableValuesMap(DESCAM::Variable *variable, DESCAM::Expr *rhs) {
     if (this->variablesValuesMap.find(variable->getFullName()) !=
         this->variablesValuesMap.end()) {
         bool valAlreadyInSet = false;
@@ -76,19 +76,19 @@ void SCAM::FindVariablesValues::addValToVariableValuesMap(SCAM::Variable *variab
                     rhs);
         }
     } else {
-        std::set<SCAM::Expr *> valuesSet;
+        std::set<DESCAM::Expr *> valuesSet;
         valuesSet.insert(rhs);
         this->variablesValuesMap.insert(std::make_pair(variable->getFullName(), valuesSet));
     }
 }
 
 template<class T>
-void SCAM::FindVariablesValues::addSubVariablesToValuesMap(SCAM::VariableOperand *varOp,
+void DESCAM::FindVariablesValues::addSubVariablesToValuesMap(DESCAM::VariableOperand *varOp,
                                                            const std::map<std::string, T *> &compoundValuesMap) {
     auto valItr = compoundValuesMap.begin();
     for (auto &subVar : varOp->getVariable()->getSubVarList()) {
         if (valItr == compoundValuesMap.end()) { break; }
-        auto subVarVal = dynamic_cast<SCAM::Expr*>((*valItr).second);
+        auto subVarVal = dynamic_cast<DESCAM::Expr*>((*valItr).second);
         valItr++;
         if (subVarVal) {
             addValToVariableValuesMap(subVar, subVarVal);
@@ -96,9 +96,9 @@ void SCAM::FindVariablesValues::addSubVariablesToValuesMap(SCAM::VariableOperand
     }
 }
 /*
-void SCAM::FindVariablesValues::addSubVariablesToValuesMap(
-        SCAM::VariableOperand* varOp,
-        const std::map<std::string, SCAM::Expr *> &compoundValuesMap) {
+void DESCAM::FindVariablesValues::addSubVariablesToValuesMap(
+        DESCAM::VariableOperand* varOp,
+        const std::map<std::string, DESCAM::Expr *> &compoundValuesMap) {
     auto valItr = compoundValuesMap.begin();
     for (auto &subVar : varOp->getVariable()->getSubVarList()) {
         if (valItr == compoundValuesMap.end()) { break; }

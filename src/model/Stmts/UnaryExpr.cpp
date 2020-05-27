@@ -6,33 +6,33 @@
 
 #include <utility>
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
 
-SCAM::UnaryExpr::UnaryExpr(std::string operation, SCAM::Expr *expr, LocationInfo stmtLocationInfo) :
+DESCAM::UnaryExpr::UnaryExpr(std::string operation, DESCAM::Expr *expr, LocationInfo stmtLocationInfo) :
         expr(expr),
         operation(operation),
         Expr(expr->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (!(operation == "not" || operation == "-"|| operation == "~") ) {
-        throw SCAM::StmtException("UnaryExpr: unsuported operator: " + operation,this->stmtLocationInfo);
+        throw DESCAM::DescamException("UnaryExpr: unsuported operator: " + operation,this->stmtLocationInfo);
     }
 }
 
-SCAM::Expr *SCAM::UnaryExpr::getExpr() {
+DESCAM::Expr *DESCAM::UnaryExpr::getExpr() {
     return this->expr;
 }
 
-void SCAM::UnaryExpr::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::UnaryExpr::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
 
-std::string SCAM::UnaryExpr::getOperation() {
+std::string DESCAM::UnaryExpr::getOperation() {
     return this->operation;
 }
 
-bool SCAM::UnaryExpr::operator==(const Stmt &other) const {
+bool DESCAM::UnaryExpr::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekUnaryExpr(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (UnaryExpr *) this;

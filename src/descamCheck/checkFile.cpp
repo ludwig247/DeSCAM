@@ -17,20 +17,23 @@ namespace py = pybind11;
 
 int checkFile(int argc, const char *argv[]) {
     //Process commandline data
-    SCAM::CommandLineProcess cml = SCAM::CommandLineProcess(argc, argv);
-    //initialize logger
-    SCAM::Logger::addSink(std::make_shared<SCAM::ConsoleSink>());
-    SCAM::Logger::setFilteringOptions(
-            std::set<SCAM::LoggerFilter::FilterOptions>{SCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,
-                                                        SCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,
-                                                        SCAM::LoggerFilter::FilterOptions::showPortsMsgs,
-                                                        SCAM::LoggerFilter::FilterOptions::showFunctionMsgs}
+    DESCAM::CommandLineProcess cml = DESCAM::CommandLineProcess(argc, argv);
+    /* Initialize logger */
+    //setting sinks
+    std::shared_ptr<DESCAM::LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
+    consoleSink->setFormatOption(DESCAM::LoggerFormatter::FormatOption::JSON);
+    DESCAM::Logger::addSink(consoleSink);
+    //setting filtering options
+    DESCAM::Logger::setFilteringOptions(
+            std::set<DESCAM::LoggerFilter::FilterOptions>{DESCAM::LoggerFilter::FilterOptions::showSyntaxMsgs,
+                                                        DESCAM::LoggerFilter::FilterOptions::showBehaviorMsgs,
+                                                        DESCAM::LoggerFilter::FilterOptions::showPortsMsgs,
+                                                        DESCAM::LoggerFilter::FilterOptions::showFunctionMsgs}
     );
-    SCAM::Logger::setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions::JSON);
     //Create model
-    ASSERT_MODEL_CREATION(SCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
+    ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), true))
     // write log messages to all sinks
-    SCAM::Logger::log();
+    DESCAM::Logger::log();
     return 0;
 }
 

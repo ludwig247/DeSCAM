@@ -10,7 +10,7 @@
 #include <ModelGlobal.h>
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class PrintStmtForSystemC : public PrintStmt {
     public:
@@ -34,7 +34,7 @@ namespace SCAM {
             }
         }
 
-        virtual void visit(SCAM::Assignment &node) {
+        virtual void visit(DESCAM::Assignment &node) {
             node.getLhs()->accept(*this);
             if (sourceConstructor) {
                 this->ss << "(";

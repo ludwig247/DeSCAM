@@ -64,7 +64,6 @@ public:
         auto diagnosticOptions = new clang::DiagnosticOptions();
         diagnosticOptions->ShowSourceRanges = 1;
         auto diagnosticPrinter = new clang::ClangDiagnosticPrinter(ss, diagnosticOptions);
-
         Tool.setDiagnosticConsumer(diagnosticPrinter);
         FrontendActionFactory *fe = newFrontendActionFactory<LightsCameraAction<A> >();
         Tool.run(fe);

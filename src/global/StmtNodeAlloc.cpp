@@ -9,7 +9,7 @@
 #include "Logger/Logger.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     // Expr node tables
     std::vector<VariableOperand *> StmtNodeAlloc::allocTableVariableOperand;

@@ -18,11 +18,11 @@
  * @param operations
  * @return true, if case split test for assumptions of operations holds
  */
-bool SCAM::Completeness::checkCaseSplit(const std::vector<SCAM::Operation *> &operations, Module *module) {
+bool DESCAM::Completeness::checkCaseSplit(const std::vector<DESCAM::Operation *> &operations, Module *module) {
     //Case split check
     z3::context context;
     z3::solver solver(context);
-    SCAM::ExprTranslator translator(&context);
+    DESCAM::ExprTranslator translator(&context);
     z3::expr all_assumptions(context);
     all_assumptions = context.bool_val(false);
 

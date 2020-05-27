@@ -7,9 +7,9 @@
 #include <utility>
 #include "Arithmetic.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
-SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
+DESCAM::Arithmetic::Arithmetic(DESCAM::Expr *lhs, std::string operation, DESCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         operation(operation),
         rhs(rhs),
@@ -18,31 +18,31 @@ SCAM::Arithmetic::Arithmetic(SCAM::Expr *lhs, std::string operation, SCAM::Expr 
         setStmtInfo(stmtLocationInfo);
         std::string errorMsg = PrintStmt::toString(lhs) + operation + PrintStmt::toString(rhs);
         errorMsg += " Arithmetic: LHS(" + lhs->getDataType()->getName() + ") and RHS(" + rhs->getDataType()->getName() + ") are not of the same datatype";
-        throw StmtException(errorMsg,getStmtInfo());
+        throw DescamException(errorMsg,getStmtInfo());
     }
-    if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw StmtException("operands must be numeric",this->stmtLocationInfo);
+    if (lhs->getDataType()->getName() != "int" && lhs->getDataType()->getName() != "unsigned") throw DescamException("operands must be numeric",this->stmtLocationInfo);
     if (!(operation == "+" || operation == "-" || operation == "*" || operation == "/" || operation == "%")) {
-        throw StmtException("Arithmetic: unsuported operator",getStmtInfo());
+        throw DescamException("Arithmetic: unsuported operator",getStmtInfo());
     }
 }
 
-SCAM::Expr *SCAM::Arithmetic::getRhs() const {
+DESCAM::Expr *DESCAM::Arithmetic::getRhs() const {
     return this->rhs;
 }
 
-SCAM::Expr *SCAM::Arithmetic::getLhs() const {
+DESCAM::Expr *DESCAM::Arithmetic::getLhs() const {
     return this->lhs;
 }
 
-std::string SCAM::Arithmetic::getOperation() {
+std::string DESCAM::Arithmetic::getOperation() {
     return this->operation;
 }
 
-void SCAM::Arithmetic::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Arithmetic::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::Arithmetic::operator==(const Stmt &other) const {
+bool DESCAM::Arithmetic::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekArithmetic(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Arithmetic *) this;

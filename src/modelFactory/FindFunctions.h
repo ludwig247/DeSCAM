@@ -9,7 +9,7 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * \brief Finds all "combinational" functions of a module
      *

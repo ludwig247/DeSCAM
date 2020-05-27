@@ -12,7 +12,7 @@
 
 
 //#define DEBUG_PROCESSOPERATIONS
-SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) :
+DESCAM::ReconstructOperations::ReconstructOperations(std::vector<DESCAM::Stmt *> statementsList, DESCAM::Module *module) :
         isStateVar(false),
         newExpr(nullptr),
         module(module) {
@@ -26,7 +26,7 @@ SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> sta
     }
 }
 
-SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module) :
+DESCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, DESCAM::State *> statesMap, DESCAM::Module *module) :
         isStateVar(false),
         newExpr(nullptr),
         module(module),
@@ -57,7 +57,7 @@ SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::S
     }
 }
 
-void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
+void DESCAM::ReconstructOperations::sortOperation(DESCAM::Operation *operation) {
     this->assumptionsList.clear();
     this->commitmentsList.clear();
     this->variableAssignmentMap.clear();
@@ -101,18 +101,18 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
 
 }
 
-std::vector<SCAM::Expr *> SCAM::ReconstructOperations::extractConditions(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) {
+std::vector<DESCAM::Expr *> DESCAM::ReconstructOperations::extractConditions(std::vector<DESCAM::Stmt *> statementsList, DESCAM::Module *module) {
     ReconstructOperations *pOp = new ReconstructOperations(std::move(statementsList), module);
     return pOp->assumptionsList;
 }
 
 
-SCAM::Return *SCAM::ReconstructOperations::getReturnValue(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) {
+DESCAM::Return *DESCAM::ReconstructOperations::getReturnValue(std::vector<DESCAM::Stmt *> statementsList, DESCAM::Module *module) {
     ReconstructOperations pOp(std::move(statementsList), module);
     return pOp.returnValue;
 }
 
-SCAM::Expr *SCAM::ReconstructOperations::find_or_add_variable(const std::string &varName, SCAM::Expr *expr) {
+DESCAM::Expr *DESCAM::ReconstructOperations::find_or_add_variable(const std::string &varName, DESCAM::Expr *expr) {
     //Is variable already in map?
     if (this->variableAssignmentMap.find(varName) == this->variableAssignmentMap.end()) {
         //Add variable to map
@@ -122,13 +122,13 @@ SCAM::Expr *SCAM::ReconstructOperations::find_or_add_variable(const std::string 
     return this->variableAssignmentMap[varName];
 }
 
-void SCAM::ReconstructOperations::reset() {
+void DESCAM::ReconstructOperations::reset() {
     this->isStateVar = false;
 }
 
 // Visitor functions
-namespace SCAM {
-    void SCAM::ReconstructOperations::visit(SCAM::VariableOperand &node) {
+namespace DESCAM {
+    void DESCAM::ReconstructOperations::visit(DESCAM::VariableOperand &node) {
         if(node.getVariable()->isConstant()){
             this->newExpr = &node;
         }else if (node.getDataType()->isCompoundType()) {
@@ -152,35 +152,35 @@ namespace SCAM {
         }
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::IntegerValue &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::IntegerValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::UnsignedValue &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::UnsignedValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::BoolValue &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::BoolValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::EnumValue &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::EnumValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::CompoundValue &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::CompoundValue &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::PortOperand &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::PortOperand &node) {
         TERMINATE("ReconstructOperations::PortOperand: Not allowed ");
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::TimePointOperand &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::TimePointOperand &node) {
         TERMINATE("ReconstructOperations::TimeExprOperand: Not allowed ");
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Assignment &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Assignment &node) {
         reset();
         //LHS
         //Add both sides to variableMaps
@@ -228,7 +228,7 @@ namespace SCAM {
         }
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::UnaryExpr &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::UnaryExpr &node) {
         node.getExpr()->accept(*this);
         if (node.getOperation() == "not") {
             this->newExpr = new UnaryExpr("not", this->newExpr,node.getStmtInfo());
@@ -244,16 +244,16 @@ namespace SCAM {
         } else TERMINATE("ReconstructOperations::UnaryExpr: Unknown unary operator " + node.getOperation());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::While &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::While &node) {
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::If &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::If &node) {
         node.getConditionStmt()->accept(*this);
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
         this->assumptionsList.push_back(this->newExpr);
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Read &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Read &node) {
         if (node.getPort()->getDataType()->isVoid()) {
             //Nothing to do: no datasignal0
         } else if (node.getPort()->hasSubVar()) {
@@ -278,7 +278,7 @@ namespace SCAM {
         }
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Write &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Write &node) {
 
         if(this->isWaitOperation) {
             auto portOp = new DataSignalOperand(node.getPort()->getDataSignal(),node.getStmtInfo());
@@ -358,80 +358,80 @@ namespace SCAM {
         }
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::SectionOperand &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::SectionOperand &node) {
         this->isStateVar = true;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::SectionValue &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::SectionValue &node) {
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::ITE &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::ITE &node) {
         TERMINATE("ReconstructOperations::ITE: ITE not allowed");
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Arithmetic &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Arithmetic &node) {
         //LHS
-        SCAM::Expr *lhs;
+        DESCAM::Expr *lhs;
         node.getLhs()->accept(*this);
         lhs = this->newExpr;
 
         //RHS
-        SCAM::Expr *rhs;
+        DESCAM::Expr *rhs;
         node.getRhs()->accept(*this);
         rhs = this->newExpr;
 
         //Create new stmt
-        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
+        this->newExpr = new DESCAM::Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Logical &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Logical &node) {
         //LHS
-        SCAM::Expr *lhs;
+        DESCAM::Expr *lhs;
         node.getLhs()->accept(*this);
         lhs = this->newExpr;
 
         //RHS
-        SCAM::Expr *rhs;
+        DESCAM::Expr *rhs;
         node.getRhs()->accept(*this);
         rhs = this->newExpr;
 
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
+        this->newExpr = new DESCAM::Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Relational &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Relational &node) {
         //LHS
-        SCAM::Expr *lhs;
+        DESCAM::Expr *lhs;
         node.getLhs()->accept(*this);
         lhs = this->newExpr;
 
         //RHS
-        SCAM::Expr *rhs;
+        DESCAM::Expr *rhs;
         node.getRhs()->accept(*this);
         rhs = this->newExpr;
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
+        this->newExpr = new DESCAM::Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Bitwise &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Bitwise &node) {
         //LHS
-        SCAM::Expr *lhs;
+        DESCAM::Expr *lhs;
         node.getLhs()->accept(*this);
         lhs = this->newExpr;
 
         //RHS
-        SCAM::Expr *rhs;
+        DESCAM::Expr *rhs;
         node.getRhs()->accept(*this);
         rhs = this->newExpr;
 
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs),node.getStmtInfo();
+        this->newExpr = new DESCAM::Bitwise(lhs, node.getOperation(), rhs),node.getStmtInfo();
         //    //Reset var&const to false
         reset();
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::SyncSignal &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::SyncSignal &node) {
         this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::DataSignalOperand &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::DataSignalOperand &node) {
         if (node.getPort()->hasSubVar()) {
             for (auto subSig: node.getDataSignal()->getSubVarList()) {
                 auto *subSigOp = new DataSignalOperand(subSig,node.getStmtInfo());
@@ -442,14 +442,14 @@ namespace SCAM {
         }
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Cast &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Cast &node) {
         node.getSubExpr()->accept(*this);
         this->newExpr = new Cast(this->newExpr, node.getDataType(),node.getStmtInfo());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::FunctionOperand &node) {
-        std::map<std::string, SCAM::Parameter *> newParamMap;
-        std::map<std::string, SCAM::Expr *> newParamValueMap;
+    void DESCAM::ReconstructOperations::visit(DESCAM::FunctionOperand &node) {
+        std::map<std::string, DESCAM::Parameter *> newParamMap;
+        std::map<std::string, DESCAM::Expr *> newParamValueMap;
 
         for (auto &&param : node.getParamValueMap()) {
             param.second->accept(*this);
@@ -458,7 +458,7 @@ namespace SCAM {
                 if (NodePeekVisitor::nodePeekCompoundExpr(this->newExpr) != nullptr) {
                     auto *comExpr = NodePeekVisitor::nodePeekCompoundExpr(this->newExpr);
                     for (const auto &subVar : comExpr->getValueMap()) {
-                        SCAM::Parameter *newParam = new SCAM::Parameter(PrintStmt::toString(subVar.second), (SCAM::DataType *) subVar.second->getDataType());
+                        DESCAM::Parameter *newParam = new DESCAM::Parameter(PrintStmt::toString(subVar.second), (DESCAM::DataType *) subVar.second->getDataType());
                         newParamMap.insert(std::make_pair(newParam->getName(), newParam));
                         newParamValueMap.insert(std::make_pair(newParam->getName(), subVar.second));
                     }
@@ -467,7 +467,7 @@ namespace SCAM {
             } else if (param.second->getDataType()->isArrayType()) {
                 TERMINATE("NOT IMPLEMENTED");
             } else {
-                SCAM::Parameter *newParam = new SCAM::Parameter(param.first, (SCAM::DataType *) param.second->getDataType());
+                DESCAM::Parameter *newParam = new DESCAM::Parameter(param.first, (DESCAM::DataType *) param.second->getDataType());
                 newParamMap.insert(std::make_pair(newParam->getName(), newParam));
                 newParamValueMap.insert(std::make_pair(newParam->getName(), this->newExpr));
             }
@@ -483,7 +483,7 @@ namespace SCAM {
 
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::ArrayOperand &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::ArrayOperand &node) {
 
         //update idx
         node.getIdx()->accept(*this);
@@ -500,7 +500,7 @@ namespace SCAM {
         } else this->newExpr = &node;
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::CompoundExpr &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::CompoundExpr &node) {
         std::map<std::string, Expr *> valueMap;
         for (auto val: node.getValueMap()) {
             val.second->accept(*this);
@@ -509,7 +509,7 @@ namespace SCAM {
         this->newExpr = new CompoundExpr(valueMap, node.getDataType(),node.getStmtInfo());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::ParamOperand &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::ParamOperand &node) {
         if (node.getDataType()->isCompoundType()) {
             for (auto subVar: node.getParameter()->getSubVarList()) {
                 this->find_or_add_variable(node.getOperandName() + "." + subVar->getName(), new ParamOperand(subVar,node.getStmtInfo()));
@@ -519,14 +519,14 @@ namespace SCAM {
         }
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Return &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Return &node) {
         node.getReturnValue()->accept(*this);
         if (this->returnValue != nullptr) TERMINATE("Current path has two return values");
         this->returnValue = new Return(this->newExpr,node.getStmtInfo());
 
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Notify &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Notify &node) {
         TERMINATE("ReconstructOperations::Notify: Not implemented");
     }
 
@@ -539,7 +539,7 @@ namespace SCAM {
        * Every ArrayOperand is pointing to the same variable m_in_sig and this is why tmp has to be replaced with m_in_sig
       */
         //Step 1: find all entries in the variableAssignmentMap related to this array
-        std::map<std::string, SCAM::Expr *> arrayAssignemntMap;
+        std::map<std::string, DESCAM::Expr *> arrayAssignemntMap;
         for(auto element: operand->getDataType()->getSubVarMap()){
             std::string name = operand->getOperandName()+"["+element.first+"]";
             if(this->variableAssignmentMap.find(name) != this->variableAssignmentMap.end()){
@@ -568,7 +568,7 @@ namespace SCAM {
     }
 
 
-    void ReconstructOperations::simplifyTernary( SCAM::Operation * operation ) {
+    void ReconstructOperations::simplifyTernary( DESCAM::Operation * operation ) {
             for(auto assign: operation->getCommitmentList()){
                 assign->accept(*this);
             }
@@ -595,16 +595,16 @@ namespace SCAM {
         this->newExpr = new ArrayExpr(valueMap, node.getDataType(),node.getStmtInfo());
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Wait &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Wait &node) {
         //DO nothing
     }
 
-    void SCAM::ReconstructOperations::visit(SCAM::Peek &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Peek &node) {
         this->newExpr = node.getPort()->getSynchSignal();
     }
 
 
-    void SCAM::ReconstructOperations::visit(SCAM::Ternary &node) {
+    void DESCAM::ReconstructOperations::visit(DESCAM::Ternary &node) {
         node.getCondition()->accept(*this);
         auto cond = this->newExpr;
 
@@ -613,6 +613,6 @@ namespace SCAM {
         node.getFalseExpr()->accept(*this);
         auto falseExpr = this->newExpr;
         //Create new stmt
-        this->newExpr = new SCAM::Ternary(cond, trueExpr, falseExpr,node.getStmtInfo());
+        this->newExpr = new DESCAM::Ternary(cond, trueExpr, falseExpr,node.getStmtInfo());
     }
 }

@@ -14,9 +14,10 @@
 #include <OperationFactory.h>
 #include <FatalError.h>
 #include <CreateRealCFG.h>
+#include "DescamException.h"
 
 //Constructor
-SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
+DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
         _sm(ci.getSourceManager()),
         _ci(ci),
         _context(ci.getASTContext()),
@@ -28,15 +29,15 @@ SCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
     this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
-bool SCAM::CheckErrors::preFire() {
-    return !SCAM::Logger::isTerminate();
+bool DESCAM::CheckErrors::preFire() {
+    return !DESCAM::Logger::isTerminate();
 }
 
-bool SCAM::CheckErrors::fire() {
+bool DESCAM::CheckErrors::fire() {
     //Translation Unit
     TranslationUnitDecl *tu = _context.getTranslationUnitDecl();
 
-    //SCAM model
+    //DESCAM model
     this->model = new Model("top_level");
     ModelGlobal::setModel(model);
 
@@ -50,14 +51,14 @@ bool SCAM::CheckErrors::fire() {
     return true;
 }
 
-void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
+void DESCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
 
     //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
         std::string name = scparModule.first;
-        auto moduleLocationInfo = SCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
+        auto moduleLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
 
         //Module is on the unimportant module list -> skip
         if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
@@ -75,106 +76,110 @@ void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
         //Combinational Functions
         this->addFunctions(module, scparModule.second);
         //Processe
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
         this->addBehavior(module, scparModule.second);
         //this->addCommunicationFSM(module);
     }
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
-void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
     //Parse ports from CXXRecordDecl
     //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
     //Right now, we are not interested about the direction of the port.
 
-    SCAM::FindPorts findPorts(decl, this->_context, _ci);
+    DESCAM::FindPorts findPorts(decl, this->_context, _ci);
     auto portsLocationMap = findPorts.getLocationInfoMap();
     //Add Ports -> requires Name, Interface and DataType
     //RendezVouz
     //Input ports
     for (auto &port: findPorts.getInPortMap()) {
-        Interface *interface = new Interface("blocking", "in");
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("blocking", "in"))
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = nullptr;
-        if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            inPort = new Port(port.first, interface,
-                              DataTypes::getDataType(
-                                      port.second),
-                              portsLocationMap[port.first]);
-        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        DESCAM_ASSERT (if(portsLocationMap.find(port.first) != portsLocationMap.end())
+                           inPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                       else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                               module->addPort(inPort))
     }
     //Output ports
     for (auto &port: findPorts.getOutPortMap()) {
-        Interface *interface = new Interface("blocking", "out");
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("blocking", "out"))
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *outPort = nullptr;
-        if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            outPort = new Port(port.first, interface,
-                               DataTypes::getDataType(
-                                       port.second),
-                               portsLocationMap[port.first]);
-        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(outPort);
+        DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
 
     //AlwaysReady
     //Input ports
     for (auto &port: findPorts.getMasterInPortMap()) {
-        Interface *interface = new Interface("master", "in");
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("master", "in"))
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = nullptr;
-        if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            inPort = new Port(port.first, interface,
-                              DataTypes::getDataType(
-                                      port.second),
-                              portsLocationMap[port.first]);
-        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                          inPort = new Port(port.first, interface,
+                                            DataTypes::getDataType(
+                                                    port.second),
+                                            portsLocationMap[port.first]);
+                      else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(inPort))
 
     }
     //Output ports
     for (auto &port: findPorts.getMasterOutPortMap()) {
-        Interface *interface = new Interface("master", "out");
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("master", "out"))
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *outPort = nullptr;
-        if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            outPort = new Port(port.first, interface,
-                               DataTypes::getDataType(
-                                       port.second),
-                               portsLocationMap[port.first]);
-        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(outPort);
+        DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
 
     //Input ports
     for (auto &port: findPorts.getSlaveInPortMap()) {
-        Interface *interface = new Interface("slave", "in");
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("slave", "in"))
         if (DataTypes::isLocalDataType(port.second, module->getName())) {
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = nullptr;
-        if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            inPort = new Port(port.first, interface,
-                              DataTypes::getDataType(
-                                      port.second),
-                              portsLocationMap[port.first]);
-        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                          inPort = new Port(port.first, interface,
+                                            DataTypes::getDataType(
+                                                    port.second),
+                                            portsLocationMap[port.first]);
+                      else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(inPort))
 
     }
     //Output ports
@@ -183,17 +188,17 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Interface *interface = new Interface("slave", "out");
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("slave", "out"))
         Port *outPort = nullptr;
-        if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            outPort = new Port(port.first, interface,
-                               DataTypes::getDataType(
-                                       port.second),
-                               portsLocationMap[port.first]);
-        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(outPort);
+        DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
-
 
     //Shared ports
     //Input ports
@@ -202,9 +207,11 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Interface *interface = new Interface("shared", "in");
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("shared", "in"))
+        Port *inPort = nullptr;
+        DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(inPort))
 
     }
     //Output ports
@@ -213,39 +220,44 @@ void SCAM::CheckErrors::addPorts(SCAM::Module *module, clang::CXXRecordDecl *dec
             TERMINATE(
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
-        Interface *interface = new Interface("shared", "out");
-        Port *inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort);
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("shared", "out"))
+        Port *inPort = nullptr;
+        DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(inPort))
     }
+    TERMINATE_IF_ERROR
 }
 
 //! Adds processes to the model
-void SCAM::CheckErrors::addBehavior(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
+    Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
+
     //Find the process describing the behavior
-    SCAM::FindProcess findProcess(decl);
+    DESCAM::FindProcess findProcess(decl);
     if (findProcess.getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
     //Check Proces Type
     auto process = findProcess.getProcessMap().begin();
     //Process name
     std::string processName = process->first;
-    if (process->second.second != SCAM::PROCESS_TYPE::THREAD) {
+    if (process->second.second != DESCAM::PROCESS_TYPE::THREAD) {
         TERMINATE(processName + ":Only THREAD allowed as process type");
     }
 
     //Process declarationinde
     clang::CXXMethodDecl *methodDecl = process->second.first;
     //Create blockCFG for this process
-    SCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
+    DESCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
     TERMINATE_IF_ERROR
-    SCAM::CfgNode::node_cnt = 0;
-    SCAM::State::state_cnt = 0;
-    SCAM::Operation::operations_cnt = 0;
-    SCAM::CreateRealCFG stmtCFG(cfgFactory.getControlFlowMap());
+    DESCAM::CfgNode::node_cnt = 0;
+    DESCAM::State::state_cnt = 0;
+    DESCAM::Operation::operations_cnt = 0;
+    DESCAM::CreateRealCFG stmtCFG(cfgFactory.getControlFlowMap());
     module->setCFG(stmtCFG.getCFG());
 }
 
-//! Adds every Member of a sc_module to the SCAM::Module
-void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl *decl) {
+//! Adds every Member of a sc_module to the DESCAM::Module
+void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
     //Find all Variables within the Module
     FindVariables findVariables(decl);
@@ -257,7 +269,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
     for (auto &&variable: findVariables.getVariableTypeMap()) {
         //Add Variable to Module
         auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
-        auto varLocationInfo = SCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
+        auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
 
         /*
          * Disinguish between local and global DataTypes.
@@ -269,7 +281,7 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
         //Step 1: Check whether the DataType already exists? Set type accordingly
         bool is_local = DataTypes::isLocalDataType(typeName, module->getName());
         bool is_global = DataTypes::isDataType(typeName);
-        assert(!is_local || !is_global);
+        if(is_local && is_global) TERMINATE("Variable " + variable.first + "is local and global at the same time!")
         if (is_global) {
             type = DataTypes::getDataType(typeName);
         } else if (is_local) {
@@ -285,9 +297,9 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
         }
         //Compound: add a new variable compound.subVar as Variable
         if (type->isCompoundType()) {
-            module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo));
+            DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
         } else if (type->isArrayType()) {
-            module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo));
+            DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
         } else {
             ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
             //FindInitalValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
@@ -295,29 +307,30 @@ void SCAM::CheckErrors::addVariables(SCAM::Module *module, clang::CXXRecordDecl 
             //Variable not initialized -> intialize with default value
             if (initialValue == nullptr) {
                 if (type == DataTypes::getDataType("int")) {
-                    initialValue = new IntegerValue(0);
+                    DESCAM_ASSERT(initialValue = new IntegerValue(0))
                 } else if (type == DataTypes::getDataType("bool")) {
                     initialValue = new BoolValue(false);
                 } else if (type == DataTypes::getDataType("unsigned")) {
-                    initialValue = new UnsignedValue(0);
+                    DESCAM_ASSERT(initialValue = new UnsignedValue(0))
                 } else if (type->isEnumType()) {
-                    initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type);
+                    DESCAM_ASSERT(initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type))
                 } else TERMINATE("No initialValue for type " + type->getName());
             }
-            module->addVariable(new Variable(variable.first, type, initialValue, nullptr, varLocationInfo));
+            DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, initialValue, nullptr, varLocationInfo)))
         }
     }
+    TERMINATE_IF_ERROR
 }
 
-bool SCAM::CheckErrors::postFire() {
+bool DESCAM::CheckErrors::postFire() {
     return 0;
 }
 
-void SCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
+void DESCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
     if (preFire() && fire()) postFire();
 }
 
-void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) {
+void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
     FindFunctions findFunction(decl);
     //Add datatypes for functions
@@ -346,20 +359,20 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
             paramMap.insert(std::make_pair(paramList.at(i), param));
         }
         Function *new_function = nullptr;
-        //location Info
-        if (functionsMap.find(function.first) != functionsMap.end())
+        DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
             new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
                     functionsMap[function.first], _ci));
         else new_function = new Function(function.first, datatype, paramMap);
-        module->addFunction(new_function);
+        module->addFunction(new_function);)
     }
+    TERMINATE_IF_ERROR
     //Add behavioral description of function to module
     for (auto function: findFunction.getFunctionMap()) {
         //Create blockCFG for this process
         //Active searching only for functions
         FindDataFlow::functionName = function.first;
         FindDataFlow::isFunction = true;
-        SCAM::CFGFactory cfgFactory(function.second, _ci, module);
+        DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
         FindDataFlow::functionName = "";
         FindDataFlow::isFunction = false;
         //Transfor blockCFG back to code
@@ -368,7 +381,7 @@ void SCAM::CheckErrors::addFunctions(SCAM::Module *module, CXXRecordDecl *decl) 
     }
 }
 
-void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
+void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
     Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
     //Find all global functions and variables
@@ -394,7 +407,7 @@ void SCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
             FindDataFlow::functionName = func.first;
             FindDataFlow::isFunction = true;
             auto module = Module("placeholder");
-            SCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci, &module);
+            DESCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci, &module);
             FindDataFlow::functionName = "";
             FindDataFlow::isFunction = false;
             //Transfor blockCFG back to code

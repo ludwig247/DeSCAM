@@ -7,9 +7,9 @@
 #include <utility>
 #include "Logical.h"
 #include "NodePeekVisitor.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
-SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
+DESCAM::Logical::Logical(DESCAM::Expr *lhs, std::string operation, DESCAM::Expr *rhs, LocationInfo stmtLocationInfo) :
         lhs(lhs),
         rhs(rhs),
         operation(operation),
@@ -17,33 +17,33 @@ SCAM::Logical::Logical(SCAM::Expr *lhs, std::string operation, SCAM::Expr *rhs, 
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (lhs->getDataType() != rhs->getDataType()){
         std::string message = PrintStmt::toString(lhs) +":" + lhs->getDataType()->getName() + " " + operation + " " +  PrintStmt::toString(rhs) + ":" +  rhs->getDataType()->getName() + "\n";
-        throw SCAM::StmtException(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
+        throw DESCAM::DescamException(message + "Logical: RHS(" + rhs->getDataType()->getName() + ") and LHS(" + lhs->getDataType()->getName() + ") are not of the same datatype",this->stmtLocationInfo);
     }
 
-    if (lhs->getDataType()->getName() != "bool") throw SCAM::StmtException("operands must be boolean",this->stmtLocationInfo);
+    if (lhs->getDataType()->getName() != "bool") throw DESCAM::DescamException("operands must be boolean",this->stmtLocationInfo);
     if (!(operation == "and" || operation == "nand" || operation == "or" || operation == "nor" || operation == "xor" || operation == "xnor")) {
-        throw SCAM::StmtException("Logical: unsuported operator",this->stmtLocationInfo);
+        throw DESCAM::DescamException("Logical: unsuported operator",this->stmtLocationInfo);
     }
 }
 
-SCAM::Expr *SCAM::Logical::getRhs() {
+DESCAM::Expr *DESCAM::Logical::getRhs() {
     return rhs;
 }
 
-SCAM::Expr *SCAM::Logical::getLhs() {
+DESCAM::Expr *DESCAM::Logical::getLhs() {
     return lhs;
 }
 
-std::string SCAM::Logical::getOperation() const {
+std::string DESCAM::Logical::getOperation() const {
     return operation;
 }
 
-void SCAM::Logical::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Logical::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-bool SCAM::Logical::operator==(const Stmt &other) const {
+bool DESCAM::Logical::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekLogical(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Logical *) this;

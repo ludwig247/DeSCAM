@@ -7,21 +7,21 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::If::If(SCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) :
+DESCAM::If::If(DESCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) :
         conditionStmt(conditionStmt) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 
 }
 
-SCAM::Expr *SCAM::If::getConditionStmt() const {
+DESCAM::Expr *DESCAM::If::getConditionStmt() const {
     return this->conditionStmt;
 }
 
-void SCAM::If::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::If::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::If::operator==(const Stmt &other) const {
+bool DESCAM::If::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekIf(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (If *) this;
@@ -32,7 +32,7 @@ bool SCAM::If::operator==(const Stmt &other) const {
 }
 
 
-bool SCAM::If::hasElseStmt() {
+bool DESCAM::If::hasElseStmt() {
     return false;
 }
 

@@ -23,8 +23,8 @@
 #include <OperationOptimizations/TernaryOptimizer.h>
 #include <Completeness.h>
 
-namespace SCAM {
-    OperationFactory::OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module *module) :
+namespace DESCAM {
+    OperationFactory::OperationFactory(std::map<int, DESCAM::CfgNode *> controlFlowMap, DESCAM::Module *module) :
             module(module),
             cfg(std::move(controlFlowMap)) {
         std::cout << "======================" << std::endl;
@@ -70,33 +70,33 @@ namespace SCAM {
     }
 
     void OperationFactory::findOperations() {
-        SCAM::FindOperations ctest(cfg, this->module);
+        DESCAM::FindOperations ctest(cfg, this->module);
         this->statesMap = ctest.getStatesMap();
         this->rawOperations = ctest.getOperations();
     }
     void OperationFactory::createOperations() {
         if (this->module->isSlave()) {
-            SCAM::CreateOperationsSlave cOperations(this->rawOperations, this->statesMap, this->module);
+            DESCAM::CreateOperationsSlave cOperations(this->rawOperations, this->statesMap, this->module);
             this->operations = cOperations.getOperationsList();
             this->statesMap = cOperations.getStatesMap();
         } else {
-            SCAM::CreateOperations cOperations(this->rawOperations, this->statesMap, this->module);
+            DESCAM::CreateOperations cOperations(this->rawOperations, this->statesMap, this->module);
             this->operations = cOperations.getOperationsList();
             this->statesMap = cOperations.getStatesMap();
         }
     }
 
     void OperationFactory::reconstructOperations() {
-        SCAM::ReconstructOperations rOperations(this->statesMap, this->module);
+        DESCAM::ReconstructOperations rOperations(this->statesMap, this->module);
         for (auto op : this->operations) {
             rOperations.sortOperation(op);
         }
     }
 
     void OperationFactory::findValidOperations() {
-        std::vector<SCAM::Operation *> validOperations;
+        std::vector<DESCAM::Operation *> validOperations;
         for (auto op : this->operations) {
-            if (SCAM::ValidOperations::isOperationReachable(op)) {
+            if (DESCAM::ValidOperations::isOperationReachable(op)) {
                 validOperations.push_back(op);
             } else {
                 /// Remove from stateList operations
@@ -113,9 +113,15 @@ namespace SCAM {
     void OperationFactory::checkStates() {
         for (const auto &state : this->statesMap) {
             if (state.second->isInit()) continue;
-
-            if (state.second->getIncomingOperationsList().empty())
-                std::cout << "\t\033[1;33mWarning\033[0m: (" << state.first << ") is unreachable! consider removing it.\n";
+            if (state.second->getIncomingOperationsList().empty()) {
+                std::string msg = "the state (" + state.first + ") is unreachable! consider removing it.";
+                LocationInfo locationInfo;
+                auto sl = DESCAM::LoggerMsg::SeverityLevel::Warning;
+                auto vt = DESCAM::LoggerMsg::ViolationType::NA;
+                auto pl = DESCAM::Logger::getCurrentProcessedLocation();
+                DESCAM::LoggerMsg lmsg(msg, locationInfo,sl,vt,pl);
+                DESCAM::Logger::addMsg(lmsg);
+            }
         }
     }
 
@@ -135,7 +141,7 @@ namespace SCAM {
     }
 
     void OperationFactory::optimizeOperations() {
-        SCAM::OptimizeOperations2 oOperations(this->operations, module);
+        DESCAM::OptimizeOperations2 oOperations(this->operations, module);
         this->varMap = oOperations.getNewVarMap();
     }
 

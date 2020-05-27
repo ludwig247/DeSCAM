@@ -98,7 +98,7 @@ void PrintSystemC::visit(Model &node) {
     this->ss << "}//end of sc_main" << std::endl;
 }
 
-void PrintSystemC::visit(SCAM::Module &node) {
+void PrintSystemC::visit(DESCAM::Module &node) {
     this->ss << std::endl;
 
     printSpace(this->indent);
@@ -363,7 +363,7 @@ void PrintSystemC::visit(DataType &node) {
 //    }
 }
 
-void PrintSystemC::visit(SCAM::DataSignal &node) {
+void PrintSystemC::visit(DESCAM::DataSignal &node) {
     TERMINATE("NEVER GO HERE");
 }
 

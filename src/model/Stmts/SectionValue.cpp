@@ -5,32 +5,32 @@
 #include "SectionValue.h"
 #include "NodePeekVisitor.h"
 
-SCAM::SectionValue::SectionValue(std::string value, const DataType *type, LocationInfo stmtLocationInfo) :
+DESCAM::SectionValue::SectionValue(std::string value, const DataType *type, LocationInfo stmtLocationInfo) :
         value(value),
         ConstValue(type) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-std::string SCAM::SectionValue::getValue() {
+std::string DESCAM::SectionValue::getValue() {
     return this->value;
 }
 
-void SCAM::SectionValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::SectionValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-std::string SCAM::SectionValue::getValueAsString() const {
+std::string DESCAM::SectionValue::getValueAsString() const {
     return this->value;
 }
 
-SCAM::SectionValue::SectionValue(const SCAM::ConstValue *constValue, LocationInfo stmtLocationInfo) :
+DESCAM::SectionValue::SectionValue(const DESCAM::ConstValue *constValue, LocationInfo stmtLocationInfo) :
         value(constValue->getValueAsString()),
         ConstValue(constValue->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-bool SCAM::SectionValue::operator==(const Stmt &other) const {
+bool DESCAM::SectionValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekSectionValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (SectionValue *) this;

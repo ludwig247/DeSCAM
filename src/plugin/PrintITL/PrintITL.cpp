@@ -10,7 +10,7 @@
 
 
 
-using namespace SCAM;
+using namespace DESCAM;
 
 PrintITL::PrintITL()
 {
@@ -43,7 +43,7 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintITL::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -303,7 +303,7 @@ std::string PrintITL::macros() {
 
 std::string PrintITL::operations() {
 
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 
@@ -329,7 +329,7 @@ std::string PrintITL::operations() {
 
 std::string PrintITL::macrosForHLS()
 {
-    std::shared_ptr<SCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;

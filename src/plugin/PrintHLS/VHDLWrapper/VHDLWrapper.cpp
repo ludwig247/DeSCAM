@@ -12,7 +12,7 @@
 #include "Logger/Logger.h"
 
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 std::string VHDLWrapper::printTypes() {
     std::stringstream typeStream;

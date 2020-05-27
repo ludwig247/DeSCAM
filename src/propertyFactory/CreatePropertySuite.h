@@ -8,7 +8,7 @@
 #include <Model.h>
 #include <memory>
 
-namespace SCAM{
+namespace DESCAM{
     class CreatePropertySuite {
     public:
         CreatePropertySuite() = delete;
@@ -23,7 +23,7 @@ namespace SCAM{
         static void addWait(const Module *module, std::shared_ptr<PropertySuite> propertySuite);
         static void addOperations(const Module *module, std::shared_ptr<PropertySuite> propertySuite);
 
-        static void addTrueOperations(const SCAM::Module *module, std::shared_ptr<PropertySuite> propertySuite);
+        static void addTrueOperations(const DESCAM::Module *module, std::shared_ptr<PropertySuite> propertySuite);
 
     private:
 

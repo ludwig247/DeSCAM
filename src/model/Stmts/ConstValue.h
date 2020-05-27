@@ -7,7 +7,7 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class ConstValue : public Expr {
     public:

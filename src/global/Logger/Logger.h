@@ -21,7 +21,7 @@
 #include "Expr.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
 /*!
  * \brief A singelton that stores and reports logging messages during the creation of the SystemC PPA model
@@ -32,7 +32,7 @@ namespace SCAM {
         static Logger &getInstance();
 
         static void setTerminate();
-
+        static void resetTerminate();
         static bool isTerminate();
 
         static void addMsg(LoggerMsg);
@@ -41,9 +41,7 @@ namespace SCAM {
 
         static void clear();
 
-        static void addSink(std::shared_ptr<SCAM::LoggerSink> sink);
-
-        static void setTextFormatOptions(SCAM::LoggerFormatter::FormatOptions formatOptions);
+        static void addSink(std::shared_ptr<DESCAM::LoggerSink> sink);
 
         static void setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions);
 
@@ -61,7 +59,7 @@ namespace SCAM {
 
 #ifdef DEBUG_LOGGER
         static const std::unordered_map<std::string, std::vector<LoggerMsg>>& getTempMsgsMap();
-        static const std::vector<SCAM::LoggerMsg> &getMsgsMap();
+        static const std::vector<DESCAM::LoggerMsg> &getMsgsMap();
 #endif
         //DELETED
         Logger(Logger const &) = delete;             // copy constructor is private
@@ -86,8 +84,6 @@ namespace SCAM {
         static bool terminate;
         //logging options set
         std::set<LoggerFilter::FilterOptions> filterOptions;
-        //log messages formatter
-        LoggerFormatter::FormatOptions formatOptions = LoggerFormatter::FormatOptions::JSON;
         // a variable to track the violation location while processing a module
         LoggerMsg::ProcessedLocation currentProcessedLocation = LoggerMsg::ProcessedLocation::Parsing;
         // if set, the logger prints decorative frames around console messages

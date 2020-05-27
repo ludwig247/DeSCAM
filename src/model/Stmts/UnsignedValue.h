@@ -8,7 +8,7 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
     class UnsignedValue : public ConstValue {
     public:
         UnsignedValue(unsigned int value, LocationInfo stmtLocationInfo = LocationInfo());

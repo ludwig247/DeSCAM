@@ -8,11 +8,11 @@
 
 
 
-SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgBlock *> CFG) : blockCFG(std::move(CFG)) {
+DESCAM::RenumberCFG::RenumberCFG(std::map<int, DESCAM::CfgBlock *> CFG) : blockCFG(std::move(CFG)) {
 
     std::vector<bool> visitedNodesVector((*this->blockCFG.rbegin()).first + 1, false);
-    std::stack<SCAM::CfgBlock *> ifNodes;
-    SCAM::CfgBlock *currentNode = (*this->blockCFG.begin()).second;
+    std::stack<DESCAM::CfgBlock *> ifNodes;
+    DESCAM::CfgBlock *currentNode = (*this->blockCFG.begin()).second;
     int newId = 0;
     while (!areAllCFGNodesVisited(visitedNodesVector, this->blockCFG.size())) {
 #ifdef DEBUG_RENUMBER_CFG
@@ -44,10 +44,10 @@ SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgBlock *> CFG) : blockCFG(s
     }
 }
 
-SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgNode *> CFG) : nodeCFG(std::move(CFG)) {
+DESCAM::RenumberCFG::RenumberCFG(std::map<int, DESCAM::CfgNode *> CFG) : nodeCFG(std::move(CFG)) {
     std::vector<bool> visitedNodesVector((*this->nodeCFG.rbegin()).first + 10, false);
-    std::stack<SCAM::CfgNode *> ifNodes;
-    SCAM::CfgNode *currentNode = (*this->nodeCFG.begin()).second;
+    std::stack<DESCAM::CfgNode *> ifNodes;
+    DESCAM::CfgNode *currentNode = (*this->nodeCFG.begin()).second;
     int newId = 0;
     while (!areAllCFGNodesVisited(visitedNodesVector, this->nodeCFG.size())) {
 #ifdef DEBUG_RENUMBER_CFG
@@ -79,7 +79,7 @@ SCAM::RenumberCFG::RenumberCFG(std::map<int, SCAM::CfgNode *> CFG) : nodeCFG(std
 
 }
 
-bool SCAM::RenumberCFG::areAllCFGNodesVisited(const std::vector<bool> &VistedNodesVector, int numCFGNodes) {
+bool DESCAM::RenumberCFG::areAllCFGNodesVisited(const std::vector<bool> &VistedNodesVector, int numCFGNodes) {
     int cnt = 0;
     for (auto node : VistedNodesVector) {
         if (node) { cnt++; }
@@ -88,11 +88,11 @@ bool SCAM::RenumberCFG::areAllCFGNodesVisited(const std::vector<bool> &VistedNod
 }
 
 
-const std::map<int, SCAM::CfgBlock *> &SCAM::RenumberCFG::getNewBlockCFG() const {
+const std::map<int, DESCAM::CfgBlock *> &DESCAM::RenumberCFG::getNewBlockCFG() const {
     return this->newBlockCFG;
 }
 
-const std::map<int, SCAM::CfgNode *> &SCAM::RenumberCFG::getNewNodeCFG() const {
+const std::map<int, DESCAM::CfgNode *> &DESCAM::RenumberCFG::getNewNodeCFG() const {
     return this->newNodeCFG;
 }
 

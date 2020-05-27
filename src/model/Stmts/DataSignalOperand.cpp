@@ -9,25 +9,25 @@
 #include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::DataSignalOperand::DataSignalOperand(DataSignal *dataSignal, LocationInfo stmtLocationInfo) :
+DESCAM::DataSignalOperand::DataSignalOperand(DataSignal *dataSignal, LocationInfo stmtLocationInfo) :
         dataSignal(dataSignal), Operand(dataSignal->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 
 }
 
-void SCAM::DataSignalOperand::accept(StmtAbstractVisitor &visitor) {
+void DESCAM::DataSignalOperand::accept(StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-SCAM::DataSignal *SCAM::DataSignalOperand::getDataSignal() const {
+DESCAM::DataSignal *DESCAM::DataSignalOperand::getDataSignal() const {
     return dataSignal;
 }
 
-std::string SCAM::DataSignalOperand::getOperandName() const {
+std::string DESCAM::DataSignalOperand::getOperandName() const {
     return dataSignal->getName();
 }
 
-bool SCAM::DataSignalOperand::operator==(const Stmt &other) const {
+bool DESCAM::DataSignalOperand::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekDataSignalOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (DataSignalOperand *) this;
@@ -35,6 +35,6 @@ bool SCAM::DataSignalOperand::operator==(const Stmt &other) const {
     return (thisPtr->dataSignal == otherPtr->dataSignal);
 }
 
-SCAM::Port *SCAM::DataSignalOperand::getPort() const {
+DESCAM::Port *DESCAM::DataSignalOperand::getPort() const {
     return this->dataSignal->getPort();
 }

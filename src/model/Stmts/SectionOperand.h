@@ -10,14 +10,14 @@
 #include "Stmt.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief Operand for a state variable
      *
      */
-    class SectionOperand : public SCAM::Expr {
+    class SectionOperand : public DESCAM::Expr {
     public:
-        SectionOperand(SCAM::Variable *sectionVariable, LocationInfo stmtLocationInfo = LocationInfo());
+        SectionOperand(DESCAM::Variable *sectionVariable, LocationInfo stmtLocationInfo = LocationInfo());
 
         std::string getName();
 

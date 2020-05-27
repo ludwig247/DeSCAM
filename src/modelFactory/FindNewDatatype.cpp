@@ -10,21 +10,21 @@
 #include "Logger/Logger.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
 
-    SCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
+    DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
 
         std::string typeName = FindNewDatatype::getTypeName(type);
         //DataType already exists?
         if (DataTypes::isDataType(typeName)) return DataTypes::getDataType(typeName);
         //Create a new one
-        SCAM::DataType *newType = nullptr;
+        DESCAM::DataType *newType = nullptr;
         if (type->isEnumeralType()) {
             //Sections enum is a reserved key-word and is handlet by FindSections
             //if (typeName != "Sections") {
                 //create new DataType for enum
-                newType = new SCAM::DataType(typeName);
+                newType = new DESCAM::DataType(typeName);
                 //Add each enum_value
                 const clang::EnumType *enumType = type->getAs<clang::EnumType>();
                 for (auto it = enumType->getDecl()->enumerator_begin(); it != enumType->getDecl()->enumerator_end(); it++) {
@@ -49,7 +49,7 @@ namespace SCAM {
                 } else TERMINATE("Only built-in and enum type allowed for compound");
             }
         } else if (type->isConstantArrayType()) {
-            newType = new SCAM::DataType(typeName);
+            newType = new DESCAM::DataType(typeName);
             auto constantArrayType = clang::cast<clang::ConstantArrayType>(type);
             int size = constantArrayType->getSize().getSExtValue();
             std::string type = FindNewDatatype::getTypeName(constantArrayType->getElementType());

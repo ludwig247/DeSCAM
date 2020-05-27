@@ -14,14 +14,14 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Replaces the use of a function inside an expression with its all possible return values and stores the result in a map
         * \author:mi-alkoudsi
         * \inputs:
-        *       - std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> variablesValuesMap;
         * \outputs:
-        *       - std::map<std::string, std::set<SCAM::Expr *>> newVariablesValuesMap;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> newVariablesValuesMap;
         * \details: Replaces every function inside values in the variablesValuesMap with their returned values.
         * If any of a function' x return values rx uses a function y, y is also substituted with its return values in rx.
         * This creates a number of return values that replace rx in function x inside the newVariableValuesMap.
@@ -30,20 +30,20 @@ namespace SCAM {
     class SubstituteFunctionsWithReturnValues : public StmtAbstractVisitor {
     public:
         SubstituteFunctionsWithReturnValues() = delete;
-        explicit SubstituteFunctionsWithReturnValues(const std::map<std::string, std::set<SCAM::Expr*>>& variablesValuesMap);
+        explicit SubstituteFunctionsWithReturnValues(const std::map<std::string, std::set<Expr*>>& variablesValuesMap);
         ~SubstituteFunctionsWithReturnValues() = default;
-        const std::map<std::string, std::set<SCAM::Expr*>> &getNewVariableValuesMap() const;
+        const std::map<std::string, std::set<Expr*>> &getNewVariableValuesMap() const;
         const std::set<std::string>&  getVariablesWithRecrusiveFunctions() const;
     private:
         bool functionHasRecursion;
-        std::map<SCAM::Expr*,std::vector<SCAM::Expr*>> functionReturnsSubstitutionMap;
-        std::map<std::string, std::set<SCAM::Expr*>> variableValuesOfReturnsMap;
-        std::map<std::string, std::set<SCAM::Expr*>> newVariablesValuesMap;
+        std::map<Expr*,std::vector<Expr*>> functionReturnsSubstitutionMap;
+        std::map<std::string, std::set<Expr*>> variableValuesOfReturnsMap;
+        std::map<std::string, std::set<Expr*>> newVariablesValuesMap;
         std::set<std::string> variablesWithRecrusiveFunctions;
-        static std::set<SCAM::Expr *> substituteFunctionsWithTheirReturns(SCAM::Expr* toBeSubstitutedExpr, const std::map<SCAM::Expr*,std::vector<SCAM::Expr*>>& functionReturnsSubstitutionMap);
-        std::set<SCAM::Expr *>  substituteReturnValuesOfNestedFunctions(SCAM::Expr* returnValWithFunctions,const std::map<std::string, FunctionOperand *>& functionsInStmtMap);
-        static void addValToFunctionReturnsSubstitutionMap(SCAM::Expr* functionOp, SCAM::Expr* returnVal,  std::map<SCAM::Expr*,std::vector<SCAM::Expr*>>& functionReturnsSubstitutionMap);
-        void addValToVarValMap(const std::string& varName, SCAM::Expr * expr);
+        static std::set<Expr *> substituteFunctionsWithTheirReturns(Expr* toBeSubstitutedExpr, const std::map<Expr*,std::vector<Expr*>>& functionReturnsSubstitutionMap);
+        std::set<Expr *>  substituteReturnValuesOfNestedFunctions(Expr* returnValWithFunctions,const std::map<std::string, FunctionOperand *>& functionsInStmtMap);
+        static void addValToFunctionReturnsSubstitutionMap(Expr* functionOp, Expr* returnVal,  std::map<Expr*,std::vector<Expr*>>& functionReturnsSubstitutionMap);
+        void addValToVarValMap(const std::string& varName, Expr * expr);
 
 
         //visitors
@@ -95,7 +95,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

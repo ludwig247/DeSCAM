@@ -8,11 +8,11 @@
 #include "Operand.h"
 #include "Port.h"
 
-namespace SCAM {
+namespace DESCAM {
     /**
      * \brief Points to a port of the moodule
      */
-    class PortOperand : public SCAM::Operand {
+    class PortOperand : public DESCAM::Operand {
     public:
         PortOperand(Port *port, LocationInfo stmtLocationInfo = LocationInfo());
 

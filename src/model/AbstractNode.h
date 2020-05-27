@@ -13,7 +13,7 @@
 #include "LocationInfo.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class AbstractNode {
 

@@ -7,11 +7,11 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Cast : public Expr {
     public:
-        Cast(SCAM::Expr *, const DataType *toDatatype, LocationInfo stmtLocationInfo = LocationInfo());
+        Cast(DESCAM::Expr *, const DataType *toDatatype, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Cast();
 

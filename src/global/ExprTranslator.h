@@ -14,7 +14,7 @@
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class ExprTranslator : public StmtAbstractVisitor {
     public:
@@ -22,11 +22,11 @@ namespace SCAM {
 
         virtual ~ExprTranslator() = default;
 
-        Expr *translate(z3::expr &z3_expr, const SCAM::Module *module = nullptr);
+        Expr *translate(z3::expr &z3_expr, const DESCAM::Module *module = nullptr);
 
         bool isAbort() const;
 
-        z3::expr &translate(SCAM::Expr *scam_expr);
+        z3::expr &translate(DESCAM::Expr *scam_expr);
 
         z3::context *getContext();
 
@@ -37,44 +37,44 @@ namespace SCAM {
     private:
         ExprTranslator();
         //terminal expression, values
-        void visit(SCAM::IntegerValue &node);
+        void visit(DESCAM::IntegerValue &node);
 
-        void visit(SCAM::BoolValue &node);
+        void visit(DESCAM::BoolValue &node);
 
-        void visit(SCAM::UnsignedValue &node);
+        void visit(DESCAM::UnsignedValue &node);
 
-        void visit(SCAM::CompoundValue &node);
+        void visit(DESCAM::CompoundValue &node);
 
-        void visit(SCAM::EnumValue &node);
+        void visit(DESCAM::EnumValue &node);
 
-        void visit(SCAM::SectionValue &node);
+        void visit(DESCAM::SectionValue &node);
 
         //terminal expressions, variables
-        void visit(SCAM::VariableOperand &node);
+        void visit(DESCAM::VariableOperand &node);
 
-        void visit(SCAM::SectionOperand &node);
+        void visit(DESCAM::SectionOperand &node);
 
         //non-terminal expressions
-        void visit(SCAM::UnaryExpr &node);
+        void visit(DESCAM::UnaryExpr &node);
 
         //relational expr
-        void visit(SCAM::Arithmetic &node);
+        void visit(DESCAM::Arithmetic &node);
 
-        void visit(SCAM::Logical &node);
+        void visit(DESCAM::Logical &node);
 
-        void visit(SCAM::Relational &node);
+        void visit(DESCAM::Relational &node);
 
-        void visit(SCAM::Bitwise &node);
+        void visit(DESCAM::Bitwise &node);
 
-        void visit(SCAM::SyncSignal &node);
+        void visit(DESCAM::SyncSignal &node);
 
-        void visit(SCAM::DataSignalOperand &node);
+        void visit(DESCAM::DataSignalOperand &node);
 
-        void visit(SCAM::Cast &node);
+        void visit(DESCAM::Cast &node);
 
-        void visit(SCAM::FunctionOperand &node);
+        void visit(DESCAM::FunctionOperand &node);
 
-        void visit(SCAM::ArrayOperand &node);
+        void visit(DESCAM::ArrayOperand &node);
 
         void visit(class Ternary &node) override;
 
@@ -116,18 +116,18 @@ namespace SCAM {
         z3::expr z3_expr; //used as "return value" for visit
         z3::context *context;
 
-        //set by top-level transltate to SCAM
+        //set by top-level transltate to DESCAM
         const std::map<std::string, DataType *> &datatypeMap;
-        std::map<const SCAM::DataType *, z3::sort> enumTypeSortMap;
-        std::map<const SCAM::DataType *, z3::func_decl_vector> enumTypeValueMap;
+        std::map<const DESCAM::DataType *, z3::sort> enumTypeSortMap;
+        std::map<const DESCAM::DataType *, z3::func_decl_vector> enumTypeValueMap;
         std::map<std::string, FunctionOperand *> functionOperandMap;
         std::map<std::string, ArrayOperand *> arrayMap;
 
 
-        const SCAM::Module *module;
+        const DESCAM::Module *module;
 
-        //recursive version of translate to SCAM
-        SCAM::Expr *translate_intern(const z3::expr &z3_expr_intern);
+        //recursive version of translate to DESCAM
+        DESCAM::Expr *translate_intern(const z3::expr &z3_expr_intern);
 
         z3::sort find_or_add_sort(const DataType *pType);
 
@@ -146,9 +146,9 @@ namespace SCAM {
 
     };
 
-/** A macro that terminates DeSCAM in case a StmtException occurs */
+/** A macro that terminates DeSCAM in case a DescamException occurs */
 #define CHECK_EXCEPTION_AND_RETURN(RETURN_VALUE)                        \
-    if(SCAM::StmtException::isExceptionHappened()) throw SCAM::FatalError(); \
+    if(DESCAM::DescamException::isExceptionHappened()) throw DESCAM::FatalError(); \
     else return RETURN_VALUE;
 }
 

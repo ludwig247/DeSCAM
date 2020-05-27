@@ -7,7 +7,7 @@
 
 #include <Module.h>
 
-namespace SCAM{
+namespace DESCAM{
 
     /*!
      * \brief Creates operations that span across multiple important state
@@ -26,13 +26,13 @@ namespace SCAM{
 
         const std::vector<std::vector<const Operation *>> &getCycleMap() const;
 
-        const std::set<SCAM::SyncSignal *> &getSyncSignals() const;
-        const std::set<SCAM::Variable *> &getVariables() const;
-        const std::set<SCAM::DataSignal *> &getDataSignals() const;
+        const std::set<DESCAM::SyncSignal *> &getSyncSignals() const;
+        const std::set<DESCAM::Variable *> &getVariables() const;
+        const std::set<DESCAM::DataSignal *> &getDataSignals() const;
 
-        const std::map<SCAM::SyncSignal *, State *> &getSyncSignalTimepoints() const;
-        const std::map<SCAM::Variable *, State *> &getVariablesTimepoints() const;
-        const std::map<SCAM::DataSignal *, State *> &getDataSignalsTimepoints() const;
+        const std::map<DESCAM::SyncSignal *, State *> &getSyncSignalTimepoints() const;
+        const std::map<DESCAM::Variable *, State *> &getVariablesTimepoints() const;
+        const std::map<DESCAM::DataSignal *, State *> &getDataSignalsTimepoints() const;
 
         static bool isRequired2(Variable *const &var,const Operation * op, std::vector<const Operation *> &cycle);
         static bool isRequired(Variable *var, const Operation * currentOperation, const std::vector<const Operation *> &cycle);
@@ -40,14 +40,14 @@ namespace SCAM{
         const Module * module;
 
         std::vector<std::vector<const Operation *>> cycleMap;
-        std::set<SCAM::SyncSignal*> syncSignals;
-        std::map<SCAM::SyncSignal*,State*> syncSignalTimepoints; //! Provides the timpoints at which the signal is freezed
+        std::set<DESCAM::SyncSignal*> syncSignals;
+        std::map<DESCAM::SyncSignal*,State*> syncSignalTimepoints; //! Provides the timpoints at which the signal is freezed
 
-        std::set<SCAM::Variable*> variables;
-        std::map<SCAM::Variable*,State*> variablesTimepoints; //! Provides the timpoints at which the signal is freezed
+        std::set<DESCAM::Variable*> variables;
+        std::map<DESCAM::Variable*,State*> variablesTimepoints; //! Provides the timpoints at which the signal is freezed
 
-        std::set<SCAM::DataSignal*> dataSignals;
-        std::map<SCAM::DataSignal*,State*> dataSignalsTimepoints; //! Provides the timpoints at which the signal is freezed
+        std::set<DESCAM::DataSignal*> dataSignals;
+        std::map<DESCAM::DataSignal*,State*> dataSignalsTimepoints; //! Provides the timpoints at which the signal is freezed
 
 
         int loop_detection = 0;

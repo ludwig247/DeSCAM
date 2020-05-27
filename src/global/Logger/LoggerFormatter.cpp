@@ -5,18 +5,18 @@
 
 
 const std::string
-SCAM::LoggerFormatter::formatMessages(std::vector<SCAM::LoggerMsg> loggerMessages,
-                                      SCAM::LoggerFormatter::FormatOptions formatOptions) {
+DESCAM::LoggerFormatter::formatMessages(std::vector<DESCAM::LoggerMsg> loggerMessages,
+                                      DESCAM::LoggerFormatter::FormatOption formatOptions) {
     switch (formatOptions) {
-        case FormatOptions::JSON :
+        case FormatOption::JSON :
             return getMessagesJSON(loggerMessages);
-        case FormatOptions::Normal :
+        case FormatOption::TEXT :
             return getMessages(loggerMessages);
     }
 }
 
 std::string
-SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessages) {
+DESCAM::LoggerFormatter::getMessagesJSON(std::vector<DESCAM::LoggerMsg> loggerMessages) {
     std::stringstream json;
     json << "[\n";
     for (auto msgPtr = loggerMessages.begin(); msgPtr != loggerMessages.end(); msgPtr++) {
@@ -24,8 +24,11 @@ SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessag
         json << "\t{\n";
         if (stmtInfo.getFile() != "")
             json << "\t\t" << R"("file": ")" << stmtInfo.getFile() << "\",\n";
-        if (stmtInfo.getStmt() != "")
-            json << "\t\t" << R"("statement": ")" << stmtInfo.getStmt() << "\",\n";
+        if (stmtInfo.getObject() != "") {
+            auto object = stmtInfo.getObject();
+            std::replace(object.begin(), object.end(), '\"', '\'');
+            json << "\t\t" << R"("object": ")" << object << "\",\n";
+        }
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&
               stmtInfo.getColumnStartNumber() == 0 && stmtInfo.getColumnEndNumber() == 0))
             json << "\t\t" << R"("line": [[)" << stmtInfo.getRowStartNumber() << " , "
@@ -37,7 +40,11 @@ SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessag
             json << "\t\t" << R"("violation": ")" << msgPtr->getViolationType() << "\",\n";
         if (msgPtr->getProcessedLocationString() != "")
             json << "\t\t" << R"("location": ")" << msgPtr->getProcessedLocationString() << "\",\n";
-        json << "\t\t" << R"("message": ")" << msgPtr->getMessage() << "\"\n";
+        if(msgPtr->getMessage()!=""){
+            auto msg = msgPtr->getMessage();
+            std::replace(msg.begin(), msg.end(), '\"', '\'');
+            json << "\t\t" << R"("message": ")" << msgPtr->getMessage() << "\"\n";
+        }
         if (std::next(msgPtr, 1) == loggerMessages.end()) {
             json << "\t}\n";
         } else {
@@ -48,27 +55,34 @@ SCAM::LoggerFormatter::getMessagesJSON(std::vector<SCAM::LoggerMsg> loggerMessag
     return json.str();
 }
 
-std::string SCAM::LoggerFormatter::getMessages(std::vector<SCAM::LoggerMsg> loggerMessages) {
+std::string DESCAM::LoggerFormatter::getMessages(std::vector<DESCAM::LoggerMsg> loggerMessages) {
     std::stringstream normal;
     for (auto msgPtr = loggerMessages.begin(); msgPtr != loggerMessages.end(); msgPtr++) {
         auto stmtInfo = msgPtr->getLocationInfo();
         if (stmtInfo.getFile() != "")
             normal << "file: " << stmtInfo.getFile() << '\n';
-        if (stmtInfo.getStmt() != "")
-            normal << "statement: " << stmtInfo.getStmt() << '\n';
+        if (stmtInfo.getObject() != "")
+            normal << "object: " << stmtInfo.getObject() << '\n';
         if (!(stmtInfo.getRowStartNumber() == 0 && stmtInfo.getRowEndNumber() == 0 &&
               stmtInfo.getColumnStartNumber() == 0 && stmtInfo.getColumnEndNumber() == 0))
-            normal << "Rows: " << stmtInfo.getRowStartNumber() << " -> "
+            normal << "rows: " << stmtInfo.getRowStartNumber() << " -> "
                    << (stmtInfo.getRowEndNumber() < stmtInfo.getRowStartNumber() ? stmtInfo.getRowStartNumber()
                                                                                  : stmtInfo.getRowEndNumber()) << '\n';
-        normal << "Columns: " << stmtInfo.getColumnStartNumber() << " -> " << stmtInfo.getColumnEndNumber() << '\n';
-        normal << "severity: " << msgPtr->getSeverityLevel() << "\",\n";
+        normal << "columns: " << stmtInfo.getColumnStartNumber() << " -> " << stmtInfo.getColumnEndNumber() << '\n';
+        normal << "severity: " << msgPtr->getSeverityLevel() << '\n';
         if (msgPtr->getViolationType() != "NA")
             normal << "violation: " << msgPtr->getViolationType() << '\n';
         if (msgPtr->getProcessedLocationString() != "")
             normal << "location: " << msgPtr->getProcessedLocationString() << '\n';
         normal << "message: " << msgPtr->getMessage() << '\n';
-        normal << '\n';
+        if(std::next(msgPtr, 1)!=loggerMessages.end()) normal << '\n';
     }
     return normal.str();
+}
+
+std::string DESCAM::LoggerFormatter::getFormatFileType(DESCAM::LoggerFormatter::FormatOption formatOption) {
+    switch (formatOption) {
+        case FormatOption::TEXT : return "txt";
+        case FormatOption::JSON : return "JSON";
+    }
 }

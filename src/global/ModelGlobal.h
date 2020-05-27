@@ -14,7 +14,7 @@
 #include "FatalError.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 /** \brief Singleton that contains a pointer to the model
  *
  *  Necessary, because it's really hard to extract the model from the CheckErrors,
@@ -76,8 +76,8 @@ namespace SCAM {
                 commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
             }
             if (argc >= 1) {
-                if(!isWrapper) PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
-                else PluginAction<SCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
+                if(!isWrapper) PluginAction<DESCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
+                else PluginAction<DESCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
             } else TERMINATE("Wrong use of DeSCAM");
         };
 
@@ -124,7 +124,7 @@ namespace SCAM {
                 commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
             }
             if (argc >= 1) {
-                PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
+                PluginAction<DESCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
             } else TERMINATE("Wrong use of DeSCAM");
         }
 
@@ -136,7 +136,7 @@ namespace SCAM {
             static ModelGlobal instance;
             return instance;
         }
-        SCAM::Model *model;
+        DESCAM::Model *model;
     };
 }
 

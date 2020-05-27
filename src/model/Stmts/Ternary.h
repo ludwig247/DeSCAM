@@ -8,7 +8,7 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Ternary : public Expr {
     public:
         Ternary() = delete;

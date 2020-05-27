@@ -15,7 +15,7 @@
 
 #define DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
 
-namespace SCAM {
+namespace DESCAM {
    /***
    * \brief: Propagates the value of locally constant variables
    * \author:mi-alkoudsi
@@ -28,28 +28,28 @@ namespace SCAM {
    * relies on PropagateValue to safely propagate a value
    */
 
-    class LocalValuePropagation : public SCAM::StmtAbstractVisitor, FindCfgPaths {
+    class LocalValuePropagation : public StmtAbstractVisitor, FindCfgPaths {
 
     public:
 
         //Constructors and Destructor
         LocalValuePropagation() = delete;
 
-        explicit LocalValuePropagation(const std::map<int, SCAM::CfgNode *> &CFG);
+        explicit LocalValuePropagation(const std::map<int, CfgNode *> &CFG);
 
         ~LocalValuePropagation() = default;
 
         //Setters and Getters
-        const std::map<int, SCAM::CfgNode *> &getCFG() const;
+        const std::map<int, CfgNode *> &getCFG() const;
 
     private:
         bool propagationValid;
         int currentNodeID;
         int whileNodeID;
         Expr *newExpr;
-        std::map<int, SCAM::CfgNode *> CFG;
-        std::map<int, std::vector<SCAM::CfgNode *>> pathsToStmtMap;              //Stores the paths from while to the current statement
-        std::map<std::string, SCAM::Expr *> varValMap;                           // keeps the value of a variable operand if already checked in the same statement
+        std::map<int, CfgNode *> CFG;
+        std::map<int, std::vector<CfgNode *>> pathsToStmtMap;              //Stores the paths from while to the current statement
+        std::map<std::string, Expr *> varValMap;                           // keeps the value of a variable operand if already checked in the same statement
         std::set<std::string> varAlreadyCheckedSet;                              // keeps the name for each variable so PropagateValue won't be called if variable already checked
 
         //visitors
@@ -99,7 +99,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

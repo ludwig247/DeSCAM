@@ -13,7 +13,7 @@
 #include <clang/Basic/SourceManager.h>
 #include <clang/Frontend/CompilerInstance.h>
 
-namespace SCAM{
+namespace DESCAM{
     /**
      * \brief Visits the constructors of a sc_module in order to find inital values for members
      *
@@ -23,18 +23,18 @@ namespace SCAM{
     class FindInitalValues : public clang::RecursiveASTVisitor<FindInitalValues> {
     public:
         virtual ~ FindInitalValues() = default;
-        static ConstValue * getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, SCAM::Module *module, clang::CompilerInstance& ci);
+        static ConstValue * getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, DESCAM::Module *module, clang::CompilerInstance& ci);
 
         //Visitor
         virtual bool VisitCXXConstructorDecl(clang::CXXConstructorDecl* constructorDecl);
     private:
         FindInitalValues() = default;
-        FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, SCAM::Module *module, clang::CompilerInstance& ci);
+        FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, DESCAM::Module *module, clang::CompilerInstance& ci);
 
         clang::FieldDecl * fieldDecl;
         ConstValue * initValue;
         int pass;
-        SCAM::Module * module;
+        DESCAM::Module * module;
         clang::CompilerInstance& ci;
     };
 

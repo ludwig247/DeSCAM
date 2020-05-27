@@ -9,7 +9,7 @@
 #include "PortOperand.h"
 #include "Communication.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Write : public Communication, public Stmt {
     public:
         Write(Port *portOperand, Expr *value, bool is_non_blocking_access = false, VariableOperand *status = nullptr,

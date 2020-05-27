@@ -7,11 +7,11 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     /**
      * \brief Abstract class that bundles member and const value
      */
-    class Operand : public SCAM::Expr {
+    class Operand : public DESCAM::Expr {
     public:
         Operand(const DataType *type, LocationInfo stmtLocationInfo = LocationInfo());
 

@@ -6,24 +6,24 @@
 #include "Port.h"
 #include <Stmts/SyncSignal.h>
 #include <DataSignal.h>
-#include <assert.h>
 #include <Stmts/EnumValue.h>
 #include <Stmts/BoolValue.h>
 #include <Stmts/IntegerValue.h>
 #include <Stmts/Notify.h>
+#include "DescamException.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     Port::~Port() {
     }
 
-    Port::Port(const std::string &name, Interface *_interface, SCAM::DataType *datatype, LocationInfo locationInfo) :
+    Port::Port(const std::string &name, Interface *_interface, DESCAM::DataType *datatype, LocationInfo locationInfo) :
             _interface(_interface),
             TypeInterface(datatype),
             notify(new Notify(this)),
             AbstractNode(name,locationInfo) {
-        assert(_interface != nullptr);
-        assert(datatype != nullptr);
+        if(!_interface)  throw DescamException("Interface of port '" + name + "' is null",locationInfo);
+        if(!datatype)  throw DescamException("datatype of port '" + name + "' is null",locationInfo);
 
         //this->notify = new Notify(this);
         this->synchSignal = new SyncSignal(this);

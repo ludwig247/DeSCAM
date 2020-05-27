@@ -7,7 +7,7 @@
 
 #include <PrintStmt.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     /**
      * \brief: Visitor that translates rhs of assignment in datapath

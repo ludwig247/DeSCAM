@@ -14,13 +14,13 @@
 #include "Optimizer/Utilities/DetectCounterVariable.h"
 #include <utility>
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Analyzes counter variable values margins
         * \author:mi-alkoudsi
         * \inputs:
         *       - std::set<std::string> counterVariablesSet;
-        *       - std::map<int, SCAM::CfgNode *> CFG;
+        *       - std::map<int, DESCAM::CfgNode *> CFG;
         * \outputs:
         *       - std::map<std::string, std::string> marginalValuesMap;
         */
@@ -29,14 +29,14 @@ namespace SCAM {
         AnalyzeCounterVariables() = delete;
 
         AnalyzeCounterVariables(std::set<std::string> counterVariablesSet,
-                                std::map<int, SCAM::CfgNode *> CFG);
+                                std::map<int, CfgNode *> CFG);
 
         ~AnalyzeCounterVariables() = default;
 
         const std::map<std::string, std::string> &getMarginalValuesMap();
 
     private:
-        std::map<int, SCAM::CfgNode *> CFG;
+        std::map<int, CfgNode *> CFG;
         std::set<std::string> counterVariablesSet;
         std::string currentCounterVariable;
         std::set<std::string> counterVariablesInIfStmt;
@@ -97,7 +97,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override {};
 
-        void visit(struct SCAM::FunctionOperand &node) override {};
+        void visit(struct FunctionOperand &node) override {};
 
         void visit(struct ArrayOperand &node) override {};
 

@@ -41,5 +41,5 @@ add_library(Stmts SHARED
         ArrayExpr.cpp
         TimePointOperand.cpp
         Ternary.cpp
-        StmtException.cpp)
+)
 

@@ -12,7 +12,7 @@ public:
     MyFormatter() : Formatter() {}
 };
 
-namespace SCAM {
+namespace DESCAM {
 
     CommandLineProcess::CommandLineProcess(int argc, const char **argv) {
 
@@ -37,7 +37,7 @@ namespace SCAM {
     }
 
     void CommandLineProcess::commandLineInitialize() {
-        app = new CLI::App("-- SCAM tool --");
+        app = new CLI::App("-- DESCAM tool --");
         // we will need this to show the options available for each plugin
         app->set_help_all_flag("--help-all", "Show all help");
         // adjusting the spacing when help command is executed

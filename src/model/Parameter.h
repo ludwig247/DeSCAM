@@ -9,7 +9,7 @@
 #include <DataType.h>
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Parameter : public VariableTemplate<Parameter> {
     public:

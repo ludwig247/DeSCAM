@@ -4,60 +4,60 @@
 
 #include "LocationInfo.h"
 
-const std::string &SCAM::LocationInfo::getFile() {
+const std::string &DESCAM::LocationInfo::getFile() {
     return this->fileDir;
 }
 
-int SCAM::LocationInfo::getRowStartNumber() {
+int DESCAM::LocationInfo::getRowStartNumber() {
     return this->rowStartNumber;
 }
 
-int SCAM::LocationInfo::getRowEndNumber() {
+int DESCAM::LocationInfo::getRowEndNumber() {
     return this->rowEndNumber;
 }
 
-int SCAM::LocationInfo::getColumnStartNumber() {
+int DESCAM::LocationInfo::getColumnStartNumber() {
     return this->columnStartNumber;
 }
 
-int SCAM::LocationInfo::getColumnEndNumber() {
+int DESCAM::LocationInfo::getColumnEndNumber() {
     return this->columnEndNumber;
 }
 
 
-const std::string &SCAM::LocationInfo::getStmt() {
-    return this->stmt;
+const std::string &DESCAM::LocationInfo::getObject() {
+    return this->object;
 }
 
-void SCAM::LocationInfo::setStmt(const std::string &stmt) {
-    this->stmt = stmt;
+void DESCAM::LocationInfo::setObject(const std::string &object) {
+    this->object = object;
 }
 
-void SCAM::LocationInfo::setFile(const std::string &fileDir) {
+void DESCAM::LocationInfo::setFile(const std::string &fileDir) {
     this->fileDir = fileDir;
 }
 
-void SCAM::LocationInfo::setRowStartNumber(int rowStartNumber) {
+void DESCAM::LocationInfo::setRowStartNumber(int rowStartNumber) {
     this->rowStartNumber = rowStartNumber;
 }
 
-void SCAM::LocationInfo::setRowEndNumber(int rowEndNumber) {
+void DESCAM::LocationInfo::setRowEndNumber(int rowEndNumber) {
     this->rowEndNumber = rowEndNumber;
 }
 
-void SCAM::LocationInfo::setColumnStartNumber(int columnStartNumber) {
+void DESCAM::LocationInfo::setColumnStartNumber(int columnStartNumber) {
     this->columnStartNumber = columnStartNumber;
 }
 
-void SCAM::LocationInfo::setColumnEndNumber(int columnEndNumber) {
+void DESCAM::LocationInfo::setColumnEndNumber(int columnEndNumber) {
     this->columnEndNumber = columnEndNumber;
 }
 
 void
-SCAM::LocationInfo::setInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber, int rowEndNumber,
+DESCAM::LocationInfo::setInfo(const std::string &object, const std::string &fileDir, int rowStartNumber, int rowEndNumber,
                             int columnStartNumber,
                             int columnEndNumber) {
-    setStmt(stmt);
+    setObject(object);
     setFile(fileDir);
     setRowStartNumber(rowStartNumber);
     setRowEndNumber(rowEndNumber);
@@ -65,16 +65,16 @@ SCAM::LocationInfo::setInfo(const std::string &stmt, const std::string &fileDir,
     setColumnEndNumber(columnEndNumber);
 }
 
-SCAM::LocationInfo::LocationInfo(const std::string &stmt, const std::string &fileDir, int rowStartNumber,
+DESCAM::LocationInfo::LocationInfo(const std::string &object, const std::string &fileDir, int rowStartNumber,
                                  int rowEndNumber, int columnStartNumber,
                                  int columnEndNumber) {
-    setInfo(stmt, fileDir, rowStartNumber, rowEndNumber, columnStartNumber, columnEndNumber);
+    setInfo(object, fileDir, rowStartNumber, rowEndNumber, columnStartNumber, columnEndNumber);
 }
 
-bool SCAM::LocationInfo::operator==(const SCAM::LocationInfo &other) const {
+bool DESCAM::LocationInfo::operator==(const DESCAM::LocationInfo &other) const {
     if (this == &other) return true;
     return this->fileDir == other.fileDir &&
-            this->stmt == other.stmt &&
+            this->object == other.object &&
            this->rowStartNumber == other.rowStartNumber &&
            this->rowEndNumber == other.rowEndNumber &&
            this->columnStartNumber == other.columnStartNumber &&

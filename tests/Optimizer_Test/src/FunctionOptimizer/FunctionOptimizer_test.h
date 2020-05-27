@@ -7,7 +7,7 @@
 
 #include "Optimizer_Test/src/CreateModel.h"
 
-class FunctionOptimizer_Test : public ::testing::TestWithParam<SCAM::Model *> {
+class FunctionOptimizer_Test : public ::testing::TestWithParam<DESCAM::Model *> {
 public:
     void SetUp() override {};
     void TearDown() override {};
@@ -19,8 +19,8 @@ TEST_P(FunctionOptimizer_Test, optimizing_functions) {
     if (auto model = GetParam()) {
         for (auto module: model->getModules()) {
             ASSERT_FALSE(module.second->getCFG().empty()) << "CFG of module " << module.first << " is empty\n";
-            SCAM::FindReadVariables findReadVariables(module.second->getCFG());
-            SCAM::FunctionsOptimizer functionOptimizer(module.second->getCFG(),module.second,
+            DESCAM::FindReadVariables findReadVariables(module.second->getCFG());
+            DESCAM::FunctionsOptimizer functionOptimizer(module.second->getCFG(),module.second,
 
                                                                               model,findReadVariables.getReadVariablesSet());
 
@@ -30,7 +30,7 @@ TEST_P(FunctionOptimizer_Test, optimizing_functions) {
                                         << " is empty\n";
 
 
-            std::string CFG_str = SCAM::GlobalUtilities::printCFG(functionOptimizer.getCFG());
+            std::string CFG_str = DESCAM::GlobalUtilities::printCFG(functionOptimizer.getCFG());
             std::string refFilePath =
                     SCAM_HOME"/tests/Optimizer_Test/src/FunctionOptimizer/ref_files/" + module.first +
                     "_out.txt";

@@ -11,7 +11,7 @@
 #include "PropertySuiteHelper.h"
 #include "PropertyHelper.h"
 
-using namespace SCAM::HLSPlugin;
+using namespace DESCAM::HLSPlugin;
 
 OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module) :
         propertySuiteHelper(propertyHelper),

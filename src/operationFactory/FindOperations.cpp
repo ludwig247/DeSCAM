@@ -14,7 +14,7 @@
 
 //#define DEBUG_FINDOPERATIONS
 
-SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module * module) :
+DESCAM::FindOperations::FindOperations(std::map<int, DESCAM::CfgNode *> controlFlowMap, DESCAM::Module * module) :
     module(module),
     cfg(std::move(controlFlowMap)),
     new_important_state(false) {
@@ -22,7 +22,7 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
     /// Find the while(true) node to indicate fixed point
     for(auto node:cfg) {
         if(node.second->getStmt()!= nullptr) {
-            if (SCAM::NodePeekVisitor::nodePeekWhile(node.second->getStmt()) != nullptr) {
+            if (DESCAM::NodePeekVisitor::nodePeekWhile(node.second->getStmt()) != nullptr) {
                 this->whileNode = node.second;
                 break;
             }
@@ -36,19 +36,19 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
     /// Create empty states starting from importantStatements: reset, wait(0), and Blocking communication
     for (auto node : this->importantStates) {
         if(node->getStmt() == nullptr) {
-            auto  *state = new SCAM::State("init");
+            auto  *state = new DESCAM::State("init");
             state->setInit();
             this->statesMap.insert(std::make_pair("init",state));
         } else {
             //TODO: in the future, the name will represent the line of code
-            SCAM::FindCommunication2 findComm;
+            DESCAM::FindCommunication2 findComm;
             node->getStmt()->accept(findComm);
 
             std::string stateName = "state";
             if(findComm.hasStateName()) {
                 stateName = findComm.getStateName();
             }
-            auto *state = new SCAM::State(stateName);
+            auto *state = new DESCAM::State(stateName);
 
             if(findComm.isWaitComm()) {
                 state->setWait();
@@ -78,7 +78,7 @@ SCAM::FindOperations::FindOperations(std::map<int, SCAM::CfgNode *> controlFlowM
 #endif
 }
 
-void SCAM::FindOperations::checkSanity() {
+void DESCAM::FindOperations::checkSanity() {
     bool foundSlaves = false;
     bool foundBlocking = false;
 
@@ -100,7 +100,7 @@ void SCAM::FindOperations::checkSanity() {
     this->slaveModule = foundSlaves;
 }
 
-void SCAM::FindOperations::findInitialImportantStates() {
+void DESCAM::FindOperations::findInitialImportantStates() {
     /** @brief: initial coloring
      *  @details: Initial coloring only includes wait(0) and blocking communication statements
      */
@@ -110,7 +110,7 @@ void SCAM::FindOperations::findInitialImportantStates() {
 
     for(auto node:cfg){
         if(node.second->getStmt() != nullptr){
-            SCAM::FindCommunication2 findComm;
+            DESCAM::FindCommunication2 findComm;
             node.second->getStmt()->accept(findComm);
             /// Initial coloring only includes wait(0) and blocking communication statements
             if (findComm.isBlockingInterface()) {
@@ -125,7 +125,7 @@ void SCAM::FindOperations::findInitialImportantStates() {
     }
 }
 
-void SCAM::FindOperations::processCFG() {
+void DESCAM::FindOperations::processCFG() {
     /// do the processing before checking for new_important_state because we might start from a cfg without blocking comm
     do {
         //reset all
@@ -158,7 +158,7 @@ void SCAM::FindOperations::processCFG() {
                         std::cout << pathNode->printShort();
                     std::cout << "\n";
 #endif
-                    if (SCAM::ValidOperations::isPathReachable(backtrack, operationPath, module)) {
+                    if (DESCAM::ValidOperations::isPathReachable(backtrack, operationPath, module)) {
                         this->operations.push_back(operationPath);
                         break;//No need to check other backtracks
                     }
@@ -178,15 +178,15 @@ void SCAM::FindOperations::processCFG() {
     } while(this->new_important_state);
 }
 
-bool portNameCompare(SCAM::CfgNode* & obj, const std::string& name) {
-    SCAM::FindCommunication2 findComm;
+bool portNameCompare(DESCAM::CfgNode* & obj, const std::string& name) {
+    DESCAM::FindCommunication2 findComm;
     obj->getStmt()->accept(findComm);
     return (findComm.getPort()->getName() == name);
-//    return (SCAM::NodePeekVisitor::nodePeekPortOperand(obj->getStmt())->getOperandName() == name);//FIXME: nodePeekPortOperand is not correct
+//    return (DESCAM::NodePeekVisitor::nodePeekPortOperand(obj->getStmt())->getOperandName() == name);//FIXME: nodePeekPortOperand is not correct
 }
 
 //#define DEBUG_PROCESSSPURIOUS
-void SCAM::FindOperations::processSpurious(std::vector<SCAM::CfgNode *> spuriousPath) {
+void DESCAM::FindOperations::processSpurious(std::vector<DESCAM::CfgNode *> spuriousPath) {
     /**
      * The statement to be colored will be the one representing the last of the different master ports in use.
      * To make this happen we store possibleCandidates in reverse order (i.e. starting from the end of the path) and choose the first one to color.
@@ -230,10 +230,10 @@ void SCAM::FindOperations::processSpurious(std::vector<SCAM::CfgNode *> spurious
     for(auto node : spuriousPath)
         std::cout << node->printShort();
 #endif
-    std::vector<SCAM::CfgNode *> pathMasters;
+    std::vector<DESCAM::CfgNode *> pathMasters;
     for (auto it = spuriousPath.begin(); it != spuriousPath.end(); it++) {
         if ((*it)->getStmt() != nullptr) {
-            SCAM::FindCommunication2 findComm;
+            DESCAM::FindCommunication2 findComm;
             (*it)->getStmt()->accept(findComm);
             if (findComm.isCommunication() && findComm.isMaster()) {
                 /// read after write
@@ -337,11 +337,11 @@ void SCAM::FindOperations::processSpurious(std::vector<SCAM::CfgNode *> spurious
                              "\t\t\tCheck bin/" + this->module->getName() + "_Spurious.dot for more details");
 }
 
-void SCAM::FindOperations::processSpuriousSlave(const std::vector<SCAM::CfgNode *>& spuriousPath) {
+void DESCAM::FindOperations::processSpuriousSlave(const std::vector<DESCAM::CfgNode *>& spuriousPath) {
     printCFG_Spurious(spuriousPath);
 }
 
-void SCAM::FindOperations::checkForMasters() {
+void DESCAM::FindOperations::checkForMasters() {
     /**
      * Through ever path in operation, store all passed masterComm along the path.
      * If same port is used in more than one statement and it's not the important statement at the end of the path then
@@ -361,12 +361,12 @@ void SCAM::FindOperations::checkForMasters() {
      *                                     (c)
      */
     for(auto path:this->operations) {
-        /// have to store the pathMasters in std::vector<SCAM::CfgNode *> in order to add one to importantStates if needed
-        std::vector<SCAM::CfgNode *> pathMasters;
+        /// have to store the pathMasters in std::vector<DESCAM::CfgNode *> in order to add one to importantStates if needed
+        std::vector<DESCAM::CfgNode *> pathMasters;
         /// Excluding the important states at both ends of path
         for (auto it = (path.begin()+1); it != (path.end()-1); it++) {
             if ((*it)->getStmt() != nullptr) {
-                SCAM::FindCommunication2 findComm;
+                DESCAM::FindCommunication2 findComm;
                 (*it)->getStmt()->accept(findComm);
                 if (findComm.isCommunication() && findComm.isMaster()) {
                     /// read after write
@@ -404,17 +404,17 @@ void SCAM::FindOperations::checkForMasters() {
 
 }
 
-void SCAM::FindOperations::checkForSlaves() {
+void DESCAM::FindOperations::checkForSlaves() {
     bool resetProperty;
     for(const auto& path:this->operations) {
         resetProperty = false;
         if(path.front()->getStmt() == nullptr)
             resetProperty = true;
-        /// have to store the pathSlaves in std::vector<SCAM::CfgNode *> in order to add one to importantStates if needed
-        std::vector<SCAM::CfgNode *> pathSlaves;
+        /// have to store the pathSlaves in std::vector<DESCAM::CfgNode *> in order to add one to importantStates if needed
+        std::vector<DESCAM::CfgNode *> pathSlaves;
         for (auto & it : path) {
             if (it->getStmt() != nullptr) {
-                SCAM::FindCommunication2 findComm;
+                DESCAM::FindCommunication2 findComm;
                 it->getStmt()->accept(findComm);
                 if (findComm.isCommunication() && findComm.isSlave()) {
                     pathSlaves.push_back(it);
@@ -434,7 +434,7 @@ void SCAM::FindOperations::checkForSlaves() {
     }
 }
 
-bool SCAM::FindOperations::checkSlavesOrder(const std::vector<SCAM::CfgNode *>& pathSlaves) {
+bool DESCAM::FindOperations::checkSlavesOrder(const std::vector<DESCAM::CfgNode *>& pathSlaves) {
     /// reset slave ports status
     for(auto &port : this->slaveInOrder)
         port.second = false;
@@ -447,7 +447,7 @@ bool SCAM::FindOperations::checkSlavesOrder(const std::vector<SCAM::CfgNode *>& 
     /// traverse the path and flip the status of slave ports in their maps
     int countIns = 0;
     int countOuts = 0;
-    SCAM::FindCommunication2 findComm;
+    DESCAM::FindCommunication2 findComm;
     for (auto node : pathSlaves) {
         node->getStmt()->accept(findComm);
         auto it_in = this->slaveInOrder.find(findComm.getPort());
@@ -498,15 +498,15 @@ bool SCAM::FindOperations::checkSlavesOrder(const std::vector<SCAM::CfgNode *>& 
     return true;
 }
 
-const std::map<std::string, SCAM::State *> &SCAM::FindOperations::getStatesMap() const {
+const std::map<std::string, DESCAM::State *> &DESCAM::FindOperations::getStatesMap() const {
     return this->statesMap;
 }
 
-const std::vector<std::vector<SCAM::CfgNode *> > &SCAM::FindOperations::getOperations() const{
+const std::vector<std::vector<DESCAM::CfgNode *> > &DESCAM::FindOperations::getOperations() const{
     return this->operations;
 }
 
-std::string SCAM::FindOperations::printCFG_Spurious(std::vector<SCAM::CfgNode *> spuriousPath) {
+std::string DESCAM::FindOperations::printCFG_Spurious(std::vector<DESCAM::CfgNode *> spuriousPath) {
     std::stringstream ss;
     ss << "digraph Spurious {  graph [rankdir=TD];  " << std::endl;
 

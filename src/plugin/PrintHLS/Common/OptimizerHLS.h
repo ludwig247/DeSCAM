@@ -12,7 +12,7 @@
 #include "PluginFactory.h"
 #include "PropertySuiteHelper.h"
 
-namespace SCAM { namespace HLSPlugin {
+namespace DESCAM { namespace HLSPlugin {
 
     struct optional {
         bool valid = false;

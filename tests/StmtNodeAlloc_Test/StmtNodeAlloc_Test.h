@@ -11,7 +11,7 @@
 #include <PrintStmt.h>
 #include <StmtNodeAlloc.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class StmtNodeAlloc_Test : public ::testing::Test {
 protected:

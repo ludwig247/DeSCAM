@@ -1,10 +1,10 @@
 //
 // Created by ludwig on 30.01.17.
 //
-#include "../../Interfaces/Interfaces.h"
-#include "systemc.h"
 
+#include "../../Interfaces/Interfaces.h"
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "systemc.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
@@ -14,7 +14,7 @@ struct Bus_new : public sc_module {
     //In-port
     blocking_in<bus_req_t> master_in;
     blocking_in<bus_resp_t> slave_in0;
-    blocking_in<bus_resp_t> slave_in1;
+    blocking_in<bus_resp_t> slave_in1
     blocking_in<bus_resp_t> slave_in2;
     blocking_in<bus_resp_t> slave_in3;
 
@@ -95,7 +95,7 @@ struct Bus_new : public sc_module {
             }
             master_out->write(resp);
 
-            //wait(SC_ZERO_TIME);
+            wait(SC_ZERO_TIME);
         }
     }
 };

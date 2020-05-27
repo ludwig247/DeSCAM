@@ -14,7 +14,7 @@
 #include "OptimizerHLS.h"
 #include "PluginFactory.h"
 
-namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
+namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
 enum class Style {
     DOT,

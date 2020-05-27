@@ -5,48 +5,48 @@
 #include "ModuleInstance.h"
 #include "Port.h"
 
-SCAM::ModuleInstance::ModuleInstance(std::string name, Module *structure, LocationInfo locationInfo) :
+DESCAM::ModuleInstance::ModuleInstance(std::string name, Module *structure, LocationInfo locationInfo) :
         structure(structure),
         AbstractNode(name,locationInfo) {
 }
 
-SCAM::ModuleInstance::~ModuleInstance() {
+DESCAM::ModuleInstance::~ModuleInstance() {
 }
 
 
-void SCAM::ModuleInstance::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::ModuleInstance::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-void SCAM::ModuleInstance::addModuleInstance(SCAM::ModuleInstance *modulInstance) {
+void DESCAM::ModuleInstance::addModuleInstance(DESCAM::ModuleInstance *modulInstance) {
     auto entry = std::pair<std::string, ModuleInstance *>(modulInstance->getName(), modulInstance);
     this->moduleInstanceMap.insert(entry);
 }
 
-std::map<std::string, SCAM::ModuleInstance *> SCAM::ModuleInstance::getModuleInstances() {
+std::map<std::string, DESCAM::ModuleInstance *> DESCAM::ModuleInstance::getModuleInstances() {
     return this->moduleInstanceMap;
 }
 
-SCAM::Module *SCAM::ModuleInstance::getStructure() {
+DESCAM::Module *DESCAM::ModuleInstance::getStructure() {
     return this->structure;
 }
 
-void SCAM::ModuleInstance::addChannel(SCAM::Channel *channel) {
+void DESCAM::ModuleInstance::addChannel(DESCAM::Channel *channel) {
     this->channelMap.insert(std::make_pair(channel->getName(), channel));
 
 
 }
 
-std::map<std::string, SCAM::Channel *> SCAM::ModuleInstance::getChannelMap() {
+std::map<std::string, DESCAM::Channel *> DESCAM::ModuleInstance::getChannelMap() {
     return this->channelMap;
 }
 
-SCAM::ModuleInstance::ModuleInstance() :
+DESCAM::ModuleInstance::ModuleInstance() :
         structure(nullptr),
         AbstractNode("TopInstance") {
 }
 
-SCAM::Channel *SCAM::ModuleInstance::getChannel(SCAM::Port *port) {
+DESCAM::Channel *DESCAM::ModuleInstance::getChannel(DESCAM::Port *port) {
     //Creat portChannelMap
     //Only possible after Channels have been fully created
     //FIXME:

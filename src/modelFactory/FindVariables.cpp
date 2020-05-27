@@ -10,14 +10,14 @@
 
 
 
-SCAM::FindVariables::FindVariables(clang::CXXRecordDecl* recordDecl):
+DESCAM::FindVariables::FindVariables(clang::CXXRecordDecl* recordDecl):
         recordDecl(recordDecl) {
     //Find Members
     TraverseDecl(recordDecl);
 }
 
 
-bool SCAM::FindVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
+bool DESCAM::FindVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
     if(fieldDecl->getParent()->getName().str() != recordDecl->getName().str()) return true;
     //If field is builtin-> add else make sure its tracked such that we don't miss any values
     if (fieldDecl->getType()->isBuiltinType()) {
@@ -58,11 +58,11 @@ bool SCAM::FindVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
 
 }
 
-const std::map<std::string, clang::FieldDecl *> & SCAM::FindVariables::getVariableMap() const {
+const std::map<std::string, clang::FieldDecl *> & DESCAM::FindVariables::getVariableMap() const {
     return this->memberMap;
 }
 
-std::map<std::string, clang::QualType> SCAM::FindVariables::getVariableTypeMap() const {
+std::map<std::string, clang::QualType> DESCAM::FindVariables::getVariableTypeMap() const {
     std::map<std::string, clang::QualType> typeMap;
     for(auto var:  this->getVariableMap()){
         typeMap.insert(std::make_pair(var.first,var.second->getType()));

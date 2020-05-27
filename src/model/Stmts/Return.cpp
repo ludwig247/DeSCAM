@@ -7,31 +7,31 @@
 
 #include <utility>
 #include "Return.h"
-#include "StmtException.h"
+#include "DescamException.h"
 
-SCAM::Return::Return(SCAM::Expr *returnValue, LocationInfo stmtLocationInfo) :
+DESCAM::Return::Return(DESCAM::Expr *returnValue, LocationInfo stmtLocationInfo) :
         returnValue(returnValue) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
     if (returnValue == nullptr) {
-        throw SCAM::StmtException(" Return value is null ",this->stmtLocationInfo);
+        throw DESCAM::DescamException(" Return value is null ",this->stmtLocationInfo);
     }
 
 }
 
-void SCAM::Return::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Return::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-SCAM::Expr *SCAM::Return::getReturnValue() const {
+DESCAM::Expr *DESCAM::Return::getReturnValue() const {
     return returnValue;
 }
 
-void SCAM::Return::setReturnValue(SCAM::Expr *returnValue) {
+void DESCAM::Return::setReturnValue(DESCAM::Expr *returnValue) {
     Return::returnValue = returnValue;
 }
 
-bool SCAM::Return::operator==(const SCAM::Stmt &other) const {
+bool DESCAM::Return::operator==(const DESCAM::Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekReturn(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Return *) this;
@@ -39,7 +39,7 @@ bool SCAM::Return::operator==(const SCAM::Stmt &other) const {
     return (*thisPtr->returnValue == *otherPtr->returnValue);
 }
 
-std::ostream &SCAM::Return::print(std::ostream &ostream) const {
+std::ostream &DESCAM::Return::print(std::ostream &ostream) const {
     ostream << PrintStmt::toString(this);
     return ostream;
 }

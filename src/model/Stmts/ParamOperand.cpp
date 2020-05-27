@@ -6,27 +6,27 @@
 #include "ParamOperand.h"
 
 
-SCAM::ParamOperand::ParamOperand(SCAM::Parameter *parameter, LocationInfo stmtLocationInfo) :
+DESCAM::ParamOperand::ParamOperand(DESCAM::Parameter *parameter, LocationInfo stmtLocationInfo) :
         parameter(parameter),
         Operand(parameter->getDataType()) {
     this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-void SCAM::ParamOperand::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::ParamOperand::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 
 }
 
-std::string SCAM::ParamOperand::getOperandName() const {
+std::string DESCAM::ParamOperand::getOperandName() const {
     return this->parameter->getFullName();
 }
 
-SCAM::Parameter *SCAM::ParamOperand::getParameter() const {
+DESCAM::Parameter *DESCAM::ParamOperand::getParameter() const {
     return parameter;
 }
 
-bool SCAM::ParamOperand::operator==(const SCAM::Stmt &other) const {
+bool DESCAM::ParamOperand::operator==(const DESCAM::Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekParamOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (ParamOperand *) this;

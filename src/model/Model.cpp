@@ -10,7 +10,7 @@
 
 
 
-namespace SCAM {
+namespace DESCAM {
 
     Model::Model() :
             AbstractNode("Model_name_undefined"),
