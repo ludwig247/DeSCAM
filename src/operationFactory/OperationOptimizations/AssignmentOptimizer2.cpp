@@ -12,7 +12,12 @@ DESCAM::AssignmentOptimizer2::AssignmentOptimizer2(const std::vector<DESCAM::Ass
         translator(ExprTranslator(&context)),
         module(module) {
     //Visit assignment of the assignmentsList
+    int i=0;
     for (auto assignment: assignmentsList) {
+        if(i++ == 59){
+            std::cout << *assignment << std::endl;
+
+        }
         this->newAssignmentsList.push_back(this->optimizeAssignment(assignment));
     }
 }
@@ -21,14 +26,11 @@ DESCAM::AssignmentOptimizer2::AssignmentOptimizer2(const DESCAM::Operation *oper
         translator(ExprTranslator(&context)),
         module(module){
 
-    for(auto condition: operation->getAssumptionsList()){
-
-    }
 
     for (auto assignment: operation->getCommitmentsList()) {
+
         this->newAssignmentsList.push_back(this->optimizeAssignment(assignment));
     }
-
 
 }
 

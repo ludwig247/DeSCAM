@@ -25,6 +25,8 @@ namespace DESCAM {
 
         static bool isParameter(DESCAM::Expr *expr);
 
+        static bool isTernary(DESCAM::Expr *expr);
+
         static std::set<Operand *> getUsedOperands(DESCAM::Expr *expr);
 
         static std::set<Variable *> getUsedVariables(DESCAM::Expr *expr);

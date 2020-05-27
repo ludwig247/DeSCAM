@@ -287,7 +287,6 @@ void DESCAM::ExprVisitor::visit(struct TimePointOperand &node) {
 
     this->constVal = false;
     this->var = (this->usedOperands.size() == 1) && (this->usedVar.size() == 1);
-
 }
 
 void DESCAM::ExprVisitor::visit(DESCAM::Ternary &node) {

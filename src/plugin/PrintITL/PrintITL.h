@@ -21,11 +21,9 @@ class PrintITL : public PluginFactory {
 
 public:
     PrintITL();
-
     ~PrintITL() = default;
 
     std::map<std::string, std::string> printModel(Model *node);
-
     std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
     std::string print();

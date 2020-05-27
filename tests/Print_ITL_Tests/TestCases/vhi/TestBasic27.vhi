@@ -1,16 +1,16 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro m_out_1_notify : boolean := end macro;
-macro m_out_2_notify : boolean := end macro;
-macro m_out_3_notify : boolean := end macro;
+macro m_out_1_notify : boolean := true end  macro;
+macro m_out_2_notify : boolean := true end  macro;
+macro m_out_3_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro m_in_1_sig : signed := end macro;
-macro m_in_2_sig : signed := end macro;
-macro m_in_3_sig : signed := end macro;
-macro m_out_1_sig : signed := end macro;
-macro m_out_2_sig : signed := end macro;
-macro m_out_3_sig : signed := end macro;
+macro m_in_1_sig : signed :=resize(0,32) end macro;
+macro m_in_2_sig : signed :=resize(0,32) end macro;
+macro m_in_3_sig : signed :=resize(0,32) end macro;
+macro m_out_1_sig : signed :=resize(0,32) end macro;
+macro m_out_2_sig : signed :=resize(0,32) end macro;
+macro m_out_3_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -18,8 +18,8 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro data2 : signed := end macro;
-macro data3 : signed := end macro;
+macro data2 : signed :=resize(0,32) end macro;
+macro data3 : signed :=resize(0,32) end macro;
 
 
 -- STATES --

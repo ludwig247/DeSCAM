@@ -16,7 +16,6 @@ DESCAM::FindCommunication2::FindCommunication2() :
         readVariable(nullptr),
         non_blocking_access(false),
         stmt(nullptr){
-
 }
 
 DESCAM::FindCommunication2::~FindCommunication2() = default;

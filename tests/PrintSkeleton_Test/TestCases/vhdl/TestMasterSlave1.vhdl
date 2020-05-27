@@ -8,7 +8,7 @@ entity TestMasterSlave1 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	s_out:		out int
+	s_out:		out signed(31 downto 0)
 );
 end TestMasterSlave1;
 

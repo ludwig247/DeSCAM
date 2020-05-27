@@ -17,7 +17,6 @@
 namespace DESCAM {
     class FindCommunication2 : public StmtAbstractVisitor {
 
-
     public:
         FindCommunication2();
         virtual ~FindCommunication2();

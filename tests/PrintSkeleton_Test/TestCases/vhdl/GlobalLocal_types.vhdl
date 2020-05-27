@@ -7,7 +7,7 @@ type local_enum is (X, Y);
 type local_enum_class is (D, E);
 type local_compound_type is record
 	fest: global_enum;
-	x: int;
+	x: signed(31 downto 0);
 	y: bool;
 end record;
 end package GlobalLocal_types;

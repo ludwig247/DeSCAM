@@ -49,7 +49,6 @@ struct Bus_new : public sc_module {
     }
 
     void fsm() {
-
         while (true) {
             /*
             0 - 7  HEAT
@@ -57,34 +56,31 @@ struct Bus_new : public sc_module {
             16 - 23 TEMP_TOP
             24 - 31 TEMP_BOT
              */
-            master_in->read(req);
-//	    std::cout << "req addrs:" << req.addr << std::endl;
-//	    std::cout << "req data:" << req.data << std::endl;
-//	    std::cout << "req mode:" << req.trans_type << std::endl;
+            master_in->read(req,"master_in");
 
             if(SINGLE_READ == req.trans_type){
                 req.data = 0;
             }
 
             if  (req.addr >= 0 && req.addr < 8) {
-                slave_out0->write(req);
-                slave_in0->read(resp);
+                slave_out0->write(req,"slave_out0");
+                slave_in0->read(resp,"slave_in0");
             }
 
             else if (req.addr >= 8 && req.addr < 16) {
                 req.addr = req.addr - 8;
-                slave_out1->write(req);
-                slave_in1->read(resp);
+                slave_out1->write(req,"slave_out1");
+                slave_in1->read(resp,"slave_in1");
             }
             else if (req.addr >= 16 && req.addr < 24) {
                 req.addr = req.addr - 16;
-                slave_out2->write(req);
-                slave_in2->read(resp);
+                slave_out2->write(req,"slave_out2");
+                slave_in2->read(resp,"slave_in2");
             }
             else if (req.addr >= 24 && req.addr < 32) {
                 req.addr = req.addr - 24;
-                slave_out3->write(req);
-                slave_in3->read(resp);
+                slave_out3->write(req,"slave_out3");
+                slave_in3->read(resp,"slave_in3");
             }
             else {
 //                resp.ack = OK;
@@ -93,7 +89,7 @@ struct Bus_new : public sc_module {
             if(SINGLE_WRITE== req.trans_type){
                 resp.data = 0;
             }
-            master_out->write(resp);
+            master_out->write(resp,"master_out");
 
             wait(SC_ZERO_TIME);
         }

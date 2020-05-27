@@ -1,14 +1,14 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro frame_pulse_sync : boolean := end macro;
+macro frame_pulse_sync : boolean := true end macro;
 
 
 -- DP SIGNALS --
-macro config_in_sig : Config := end macro;
-macro config_in_sig_LOFreset : signed := end macro;
-macro config_in_sig_LOFset : signed := end macro;
-macro frame_pulse_sig : boolean := end macro;
-macro lof_sig : boolean := end macro;
-macro oof_sig : boolean := end macro;
+--macro config_in_sig : Config :={resize(0,32), resize(0,32)} end macro;
+macro config_in_sig_LOFreset : signed :=resize(0,32) end macro;
+macro config_in_sig_LOFset : signed :=resize(0,32) end macro;
+macro frame_pulse_sig : boolean :=false end macro;
+macro lof_sig : boolean :=false end macro;
+macro oof_sig : boolean :=false end macro;
 
 
 -- CONSTRAINTS --
@@ -16,9 +16,9 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro cnt : signed := end macro;
-macro nextphase : Phases := end macro;
-macro phase : Phases := end macro;
+macro cnt : signed :=resize(0,32) end macro;
+macro nextphase : Phases :=Monitor_LOF end macro;
+macro phase : Phases :=Monitor_LOF end macro;
 
 
 -- STATES --
