@@ -12,10 +12,10 @@
 std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     this->model = node;
     pluginOutput.insert(std::make_pair("ipc.sva", Text_ipc()));
-
     for (auto &module: node->getModules()) {
         this->module = module.second;
-        pluginOutput.insert(std::make_pair(module.first + ".sva", Text_body()));
+        pluginOutput.insert(std::make_pair(module.first + ".sva", properties()));
+        pluginOutput.insert(std::make_pair(module.first + "_macros.sva", macros()));
         pluginOutput.insert(std::make_pair(module.first + "_functions.sva", functions()));
     }
 
@@ -28,12 +28,10 @@ std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
 std::map<std::string, std::string> PrintSVA::printModule(SCAM::Module *node) {
 
     this->module = node;
-
-    pluginOutput.insert(std::make_pair(node->getName() + ".sva", Text_body()));
+    pluginOutput.insert(std::make_pair(node->getName() + ".sva", properties()));
     std::string funString = functions();
     if (funString != "")
         pluginOutput.insert(std::make_pair(node->getName() + "_functions.sva", funString));
-
     return pluginOutput;
 }
 
@@ -77,7 +75,15 @@ std::string PrintSVA::Text_ipc() {
     return result.str();
 }
 
-std::string PrintSVA::Text_body() {
+std::string PrintSVA::macros() {
+    std::stringstream result;
+    result
+            << signals() << registers() << states() << "\n\n";
+    return result.str();
+}
+
+
+std::string PrintSVA::properties() {
     std::stringstream result;
     result
             << dataTypes() << "\n"
@@ -90,7 +96,7 @@ std::string PrintSVA::Text_body() {
             << "input reset;\n\n"
             << "//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT\n"
             << "default clocking default_clk @(posedge " << this->module->getName() << ".clk); endclocking\n"
-            << signals() << registers() << states() << "\n\n"
+            << "`include \"" << this->module->getName() << "_macros.sva\"\n\n"
             << "////////////////////////////////////\n"
             << "//////////// Operations ////////////\n"
             << "////////////////////////////////////\n"
@@ -206,9 +212,9 @@ std::string PrintSVA::registers() {
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
-        bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        //bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        bool skip = false;
         if (!skip) {
-
             ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getFullName("_") << ";\n";
             if (vr->isCompoundType()) ss << "//";
             ss << "\t" << vr->getFullName("_");
@@ -316,7 +322,9 @@ std::string PrintSVA::operations() {
                 ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
             }
             for (auto f : op->getFreezeSignals()) {
-                ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
+                if(f.first->isSubVar() && f.first->getParentDataType()->isArrayType()){
+                    ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getParentName() << "("  << f.first->getSubVarName() <<")) and\n";
+                }else ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
             }
         }
 

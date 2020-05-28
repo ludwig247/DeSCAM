@@ -6,12 +6,16 @@
 
 
 void SCAM::ConditionVisitorSVA::visit(SCAM::VariableOperand &node) {
-    if (node.getVariable()->isSubVar()) {
+    if (node.getVariable()->isSubVar() && node.getVariable()->getParent()->isArrayType()){
+        this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
+    }else if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
+        this->ss << "()";
     } else {
         this->ss << node.getVariable()->getName();
+        this->ss << "()";
     }
-    this->ss << "()";
+
 }
 
 void SCAM::ConditionVisitorSVA::visit(SCAM::SyncSignal &node) {
@@ -237,4 +241,15 @@ void SCAM::ConditionVisitorSVA::visit(SCAM::Ternary &node) {
     this->ss << ")";
 
 }
+
+void SCAM::ConditionVisitorSVA::visit(SCAM::ArrayOperand &node) {
+        useParenthesesFlag = true;
+        this->ss << node.getArrayOperand()->getOperandName();
+        this->ss << "(";
+        node.getIdx()->accept(*this);
+        this->ss << ")";
+}
+
+
+
 

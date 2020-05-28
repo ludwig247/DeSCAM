@@ -5,7 +5,7 @@
 #include "DatapathVisitorSVA.h"
 
 void SCAM::DatapathVisitorSVA::visit(SCAM::VariableOperand &node) {
-    if (node.getVariable()->isSubVar()) {
+     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
     } else {
         this->ss << node.getVariable()->getName();
@@ -183,5 +183,13 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Ternary &node) {
     node.getTrueExpr()->accept(*this);
     this->ss << ":";
     node.getFalseExpr()->accept(*this);
+    this->ss << ")";
+}
+
+void SCAM::DatapathVisitorSVA::visit(SCAM::ArrayOperand &node) {
+    useParenthesesFlag = true;
+    this->ss << node.getArrayOperand()->getOperandName();
+    this->ss << "(";
+    node.getIdx()->accept(*this);
     this->ss << ")";
 }
