@@ -309,6 +309,7 @@ std::string PrintSVA::reset_operation() {
 
 std::string PrintSVA::operations() {
 
+
     PropertySuite *ps = this->module->getPropertySuite();
 
     std::stringstream ss;
