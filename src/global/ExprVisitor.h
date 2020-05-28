@@ -47,7 +47,7 @@ namespace DESCAM {
 
         void visit(class ArrayExpr &node) override;
 
-        static bool isTernary(Expr *expr);
+
 
     private:
         ExprVisitor(DESCAM::Expr *expr);
