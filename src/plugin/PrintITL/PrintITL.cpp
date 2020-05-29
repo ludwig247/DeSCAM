@@ -23,17 +23,16 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     this->model = node;
     for (auto &module: node->getModules()) {
 
-        std::cout << module.first << std::endl;
-        if(!module.second->isStructural()) {
-            std::cout << module.first << std::endl;
+        //if(!module.second->isStructural()) {
             this->module = module.second;
             pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macros()));
+            std::cout << module.first << std::endl;
             pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
             std::string funString = functions();
             if (funString != "") {
                 pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
             }
-        }
+        //}
     }
     if(!node->getGlobalFunctionMap().empty()){
         pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.vhi", globalFunctions()));
@@ -241,7 +240,7 @@ std::string PrintITL::printProperty(Property *property) {
             ss << printTemporalExpr(c);
         }
     }
-    
+
     ss << "end property;\n\n\n";
 
     return ss.str();

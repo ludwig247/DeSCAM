@@ -53,10 +53,9 @@ namespace SCAM {
         //Hierarchy Functions
         bool isStructural();
         void setStructural(bool isStructural);
-        void addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap);
-        const std::map<std::pair<std::string, std::string>, std::string> getInstanceMap() const;
-        clang::CXXRecordDecl * getRecordDecl();
-        void addRecordDecl(clang::CXXRecordDecl *recordDecl);
+        //void addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap);
+        //const std::map<std::pair<std::string, std::string>, std::string> getInstanceMap() const;
+
         //Accept
         void accept(AbstractVisitor &visitor);
 
@@ -71,6 +70,9 @@ namespace SCAM {
         void setCFG(std::map<int, SCAM::CfgNode *> cfg);
         void setCFG(std::map<int, SCAM::CfgNode *> cfg, std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups);
 
+        std::map<std::string, ModuleInstance *> getModuleInstanceMap() const;
+
+        void addModuleInstance(ModuleInstance* modInstance);
 
     private:
 
@@ -86,9 +88,7 @@ namespace SCAM {
         PropertySuite *propertySuite;
 
         bool _isStructural;
-        std::map<std::pair<std::string, std::string>, std::string> _instanceMap;
-        clang::CXXRecordDecl *_recordDecl;
-
+        std::map<std::string, ModuleInstance *> _instanceMap;
     };
 }
 

@@ -99,7 +99,6 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
         std::cout << "Module: " << name << std::endl;
         std::cout << "############################" << std::endl;
         auto module = new Module(scparModule.first);
-        module->addRecordDecl(scparModule.second);
         model->addModule(module);
         //Members
         this->addVariables(module, scparModule.second, modules.getModuleMap());
@@ -133,7 +132,7 @@ void SCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
             this->addBehavior(module, scparModule.second);
         } else {
             module->setStructural(true);
-            module->addInstanceMap(instances.getInstanceMap());
+            //module->addInstanceMap(instances.getInstanceMap());
         }
 
         //this->addCommunicationFSM(module);
@@ -207,7 +206,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
         topInstance->setLevel(0);
         topInstance->setID(0);
-        FindNetlistInModule findNetinMod(topmodule->getRecordDecl(), modules.getModuleMap());
+        FindNetlistInModule findNetinMod(modules.getModuleMap().find(topmodule->getName())->second, modules.getModuleMap());
         currentLevel = 1;
         id = 1;
         //! <instance_name, sc_module>
@@ -257,7 +256,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
         topInstance->setID(0);
         //Maybe FindNetlist and FindNetlistinModule can be merged but it didn't work yet
         FindNetlist findNetlist(scmain.getSCMainFunctionDecl(), modules.getModuleMap());
-        sc_main->addInstanceMap(findNetlist.getInstanceMap());
+        //sc_main->addInstanceMap(findNetlist.getInstanceMap());
         currentLevel = 1;
         id = 1;
 
@@ -303,7 +302,7 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
             if (instance->getStructure()->isStructural()) {
                 goDeeper++;
-                FindNetlistInModule netinMod(instance->getStructure()->getRecordDecl() , modules.getModuleMap());
+                FindNetlistInModule netinMod(modules.getModuleMap().find(instance->getStructure()->getName())->second , modules.getModuleMap());
                 std::string parentModuleName = instance->getStructure()->getName();
                 std::string parentInstanceName = instance->getName();
                 //! <instance_name, sc_module>
@@ -452,13 +451,30 @@ void SCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 
         currentLevel--;
     }
+    currentLevel = model->getMaxLevel();
+    //Add instances to modules
+    while(currentLevel >= 0) {
+        std::vector<ModuleInstance*> queue = model->getInstancesAtLevel(currentLevel);
+        while (!queue.empty()) {
+            auto module = queue.front()->getStructure();
+            if (module->isStructural()) {
+                for (const auto& inst: queue.front()->getSubmoduleInstances()) {
+                    module->addModuleInstance(inst.second);
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        currentLevel--;
+    }
+    currentLevel = model->getMaxLevel();
     //TODO generate properties for connections
     while(currentLevel >= 0) {
         std::vector<ModuleInstance*> queue = model->getInstancesAtLevel(currentLevel);
         while (!queue.empty()) {
             auto module = queue.front()->getStructure();
             if (module->isStructural()) {
-                PropertyFactory propertyFactory(module);
+                std::cout << "ModelFactory: " << module->getName() << std::endl;
+                PropertyFactory propertyFactory(module, model);
                 module->setPropertySuite(propertyFactory.getPropertySuite());
 
             }

@@ -17,7 +17,7 @@
 add_plugin(PrintITL; "Complete set of properties in ITL")
 add_plugin(PrintSVA; "Complete set of properties in SVA")
 
-add_plugin(PrintSVG; "Visualize module connections")
+add_plugin(PrintStructure; "Visualize module connections")
 
 
 #add_plugin(PrintTrueOperation; "Prints REAL operations ... ")

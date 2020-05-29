@@ -1,7 +1,7 @@
 //
 // Created by schmitz on 22.04.20.
 //
-#include "PrintSVG.h"
+#include "PrintStructure.h"
 #include "simple_svg_1.0.0.hpp"
 #include <iostream>
 //defines for dimensions of the graphic
@@ -16,7 +16,7 @@
 #define trianglesize 15
 #define spacinghorizontal 20
 
-std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
+std::map<std::string, std::string> PrintStructure::printModel(Model *node) {
     //init
     this->model = node;
     _r = 255;
@@ -312,58 +312,58 @@ std::map<std::string, std::string> PrintSVG::printModel(Model *node) {
 
 }
 
-int PrintSVG::r(int level) {
+int PrintStructure::r(int level) {
     return _r-40*level;
 }
-int PrintSVG::g(int level) {
+int PrintStructure::g(int level) {
     return _g+40*level;
 }
-int PrintSVG::b(int level) {
+int PrintStructure::b(int level) {
     return _b+15*level;
 }
 
-void PrintSVG::increaseWidth(SCAM::ModuleInstance* instance, unsigned width) {
+void PrintStructure::increaseWidth(SCAM::ModuleInstance* instance, unsigned width) {
     _widthMap.find(instance)->second += width;
 }
-void PrintSVG::increaseHeight(SCAM::ModuleInstance* instance, unsigned height) {
+void PrintStructure::increaseHeight(SCAM::ModuleInstance* instance, unsigned height) {
     _heightMap.find(instance)->second += height;
 }
 
-unsigned PrintSVG::getHeight(SCAM::ModuleInstance* instance) {
+unsigned PrintStructure::getHeight(SCAM::ModuleInstance* instance) {
     return this->_heightMap.find(instance)->second;
 }
-unsigned PrintSVG::getWidth(SCAM::ModuleInstance* instance) {
+unsigned PrintStructure::getWidth(SCAM::ModuleInstance* instance) {
     return this->_widthMap.find(instance)->second;
 }
-unsigned PrintSVG::getX(SCAM::ModuleInstance* instance) {
+unsigned PrintStructure::getX(SCAM::ModuleInstance* instance) {
     return this->_xMap.find(instance)->second;
 }
-unsigned PrintSVG::getY(SCAM::ModuleInstance* instance) {
+unsigned PrintStructure::getY(SCAM::ModuleInstance* instance) {
     return this->_yMap.find(instance)->second;
 }
-unsigned PrintSVG::getY(SCAM::Channel* channel) {
+unsigned PrintStructure::getY(SCAM::Channel* channel) {
     return this->_ChannelYMap.find(channel)->second;
 }
-unsigned PrintSVG::getXStart(SCAM::Channel* channel) {
+unsigned PrintStructure::getXStart(SCAM::Channel* channel) {
     return this->_xStartMap.find(channel)->second;
 }
-unsigned PrintSVG::getXEnd(SCAM::Channel* channel) {
+unsigned PrintStructure::getXEnd(SCAM::Channel* channel) {
     return this->_xEndMap.find(channel)->second;
 }
 
-void PrintSVG::setHeight(SCAM::ModuleInstance* instance, unsigned height) {
+void PrintStructure::setHeight(SCAM::ModuleInstance* instance, unsigned height) {
     if (_heightMap.find(instance) != _heightMap.end()) {
         _heightMap.erase(_heightMap.find(instance));
     }
     _heightMap.insert(std::make_pair(instance, height));
 }
-void PrintSVG::setWidth(SCAM::ModuleInstance* instance, unsigned width) {
+void PrintStructure::setWidth(SCAM::ModuleInstance* instance, unsigned width) {
     if (_widthMap.find(instance) != _widthMap.end()) {
         _widthMap.erase(_widthMap.find(instance));
     }
     _widthMap.insert(std::make_pair(instance, width));
 }
-void PrintSVG::setX(SCAM::ModuleInstance* instance, unsigned x) {
+void PrintStructure::setX(SCAM::ModuleInstance* instance, unsigned x) {
     if (_xMap.find(instance) != _xMap.end()) {
         _xMap.erase(_xMap.find(instance));
     }
@@ -371,32 +371,32 @@ void PrintSVG::setX(SCAM::ModuleInstance* instance, unsigned x) {
 
 }
 
-void PrintSVG::setY(SCAM::ModuleInstance* instance, unsigned y) {
+void PrintStructure::setY(SCAM::ModuleInstance* instance, unsigned y) {
     if (_yMap.find(instance) != _yMap.end()) {
         _yMap.erase(_yMap.find(instance));
     }
     _yMap.insert(std::make_pair(instance, y));
 }
-void PrintSVG::setY(SCAM::Channel* channel, unsigned y) {
+void PrintStructure::setY(SCAM::Channel* channel, unsigned y) {
     if (_ChannelYMap.find(channel) != _ChannelYMap.end()) {
         _ChannelYMap.erase(_ChannelYMap.find(channel));
     }
     _ChannelYMap.insert(std::make_pair(channel, y));
 }
-void PrintSVG::setXStart(SCAM::Channel* channel, unsigned x) {
+void PrintStructure::setXStart(SCAM::Channel* channel, unsigned x) {
     if (_xStartMap.find(channel) != _xStartMap.end()) {
         _xStartMap.erase(_xStartMap.find(channel));
     }
     _xStartMap.insert(std::make_pair(channel, x));
 }
-void PrintSVG::setXEnd(SCAM::Channel* channel, unsigned x) {
+void PrintStructure::setXEnd(SCAM::Channel* channel, unsigned x) {
     if (_xEndMap.find(channel) != _xEndMap.end()) {
         _xEndMap.erase(_xEndMap.find(channel));
     }
     _xEndMap.insert(std::make_pair(channel, x));
 }
 
-unsigned PrintSVG::getToPortX(SCAM::Channel* channel) {
+unsigned PrintStructure::getToPortX(SCAM::Channel* channel) {
     unsigned x = getX(channel->getToInstance()) + standardwidth;
 
     for(const auto& ports: channel->getToInstance()->getStructure()->getPorts()) {
@@ -407,7 +407,7 @@ unsigned PrintSVG::getToPortX(SCAM::Channel* channel) {
     }
     return x;
 }
-unsigned PrintSVG::getFromPortX(SCAM::Channel* channel) {
+unsigned PrintStructure::getFromPortX(SCAM::Channel* channel) {
     unsigned x = getX(channel->getFromInstance()) + standardwidth;
 
     for(const auto& ports: channel->getFromInstance()->getStructure()->getPorts()) {
@@ -419,7 +419,7 @@ unsigned PrintSVG::getFromPortX(SCAM::Channel* channel) {
     return x;
 }
 
-unsigned PrintSVG::getHigherPortX(SCAM::PortMapChannel* channel) {
+unsigned PrintStructure::getHigherPortX(SCAM::PortMapChannel* channel) {
     unsigned x = getX(channel->getHigherInstance()) + standardwidth;
 
     for(const auto& ports: channel->getHigherInstance()->getStructure()->getPorts()) {
@@ -431,7 +431,7 @@ unsigned PrintSVG::getHigherPortX(SCAM::PortMapChannel* channel) {
     return x;
 }
 
-unsigned PrintSVG::getLowerPortX(SCAM::PortMapChannel* channel) {
+unsigned PrintStructure::getLowerPortX(SCAM::PortMapChannel* channel) {
     unsigned x = getX(channel->getLowerInstance()) + standardwidth;
 
     for(const auto& ports: channel->getLowerInstance()->getStructure()->getPorts()) {
@@ -443,32 +443,32 @@ unsigned PrintSVG::getLowerPortX(SCAM::PortMapChannel* channel) {
     return x;
 }
 
-void PrintSVG::setY(SCAM::PortMapChannel* channel, unsigned y) {
+void PrintStructure::setY(SCAM::PortMapChannel* channel, unsigned y) {
     if (_ChannelYPortMapMap.find(channel) != _ChannelYPortMapMap.end()) {
         _ChannelYPortMapMap.erase(_ChannelYPortMapMap.find(channel));
     }
     _ChannelYPortMapMap.insert(std::make_pair(channel, y));
 }
 
-void PrintSVG::setXStart(SCAM::PortMapChannel* channel, unsigned x) {
+void PrintStructure::setXStart(SCAM::PortMapChannel* channel, unsigned x) {
     if (_xStartPortMapMap.find(channel) != _xStartPortMapMap.end()) {
         _xStartPortMapMap.erase(_xStartPortMapMap.find(channel));
     }
     _xStartPortMapMap.insert(std::make_pair(channel, x));
 }
-void PrintSVG::setXEnd(SCAM::PortMapChannel* channel, unsigned x) {
+void PrintStructure::setXEnd(SCAM::PortMapChannel* channel, unsigned x) {
     if (_xEndPortMapMap.find(channel) != _xEndPortMapMap.end()) {
         _xEndPortMapMap.erase(_xEndPortMapMap.find(channel));
     }
     _xEndPortMapMap.insert(std::make_pair(channel, x));
 }
 
-unsigned PrintSVG::getY(SCAM::PortMapChannel* channel) {
+unsigned PrintStructure::getY(SCAM::PortMapChannel* channel) {
     return this->_ChannelYPortMapMap.find(channel)->second;
 }
-unsigned PrintSVG::getXStart(SCAM::PortMapChannel* channel) {
+unsigned PrintStructure::getXStart(SCAM::PortMapChannel* channel) {
     return this->_xStartPortMapMap.find(channel)->second;
 }
-unsigned PrintSVG::getXEnd(SCAM::PortMapChannel* channel) {
+unsigned PrintStructure::getXEnd(SCAM::PortMapChannel* channel) {
     return this->_xEndPortMapMap.find(channel)->second;
 }

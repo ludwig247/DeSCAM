@@ -377,9 +377,101 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
 
 }
 
-void CreatePropertySuite::addConnections(const Module *module, PropertySuite *propertySuite, Model* model) {
-    for (const auto &inst: module->getInstanceMap()) {
+void CreatePropertySuite::addConnections(Module *module, PropertySuite *propertySuite, Model *model) {
+    std::cout << "addConnections" << module->getName() << std::endl;
+    int currentLevel = model->getMaxLevel();
+    ModuleInstance *inst;
+    while (currentLevel >= 0) {
+        std::vector<ModuleInstance *> queue = model->getInstancesAtLevel(currentLevel);
+        while (!queue.empty()) {
+            auto helper_module = queue.front()->getStructure();
+            if (helper_module == module) {
+                inst = queue.front();
+                currentLevel = 0;
+                break;
+            }
+            queue.erase(queue.begin());
+        }
+        currentLevel--;
+    }
+    for (const auto &chan: inst->getChannelMap()) {
+        auto channel = chan.second;
+        if (channel->getType() == "Blocking") {
+            std::cout << channel->getName() << std::endl;
+            auto operation = new Operation();
+            auto fromInstance = channel->getFromInstance();
+            auto toInstance = channel->getToInstance();
+            auto fromPort = channel->getFromPort();
+            auto toPort = channel->getToPort();
+            auto *newProperty = new Property("transmission_" + channel->getName(), operation);
+            propertySuite->addProperty(newProperty);
+            //===============================
+            // Constraints
+            //===============================
+            newProperty->addConstraint(propertySuite->getConstraint("no_reset"));
+            //===============================
+            // Timepoints
+            //===============================
+            //Add t_first timepoint:
+            auto t_var = new Timepoint("t");
+            auto t = new TimePointOperand(t_var);
 
+            auto t_end_var = new Timepoint("t_end");
+            auto t_end = new TimePointOperand(t_end_var);
+            auto variable = new Variable("messages", DataTypes::getDataType("unsigned"));
+            auto variableOperand = new VariableOperand(variable);
+            newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", variableOperand));
+
+            //===============================
+            // Timepoints
+            //===============================
+
+            //===============================
+            //FREEZE VARS
+            //===============================
+
+            //freeze output channel data
+            auto dataSig = fromPort->getDataSignal();
+            PropertyMacro *signalMacro;
+            if (dataSig->isSubVar()) {
+                signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
+            } else {
+                signalMacro = propertySuite->findSignal(dataSig->getName());
+            }
+            newProperty->addFreezeSignal(signalMacro, t_var);
+
+            //===============================
+            // Assumptions
+            //===============================
+
+            auto startStateExpr_to = new TemporalExpr(t, toPort->getNotify());
+            auto startStateExpr_from = new TemporalExpr(t, fromPort->getNotify());
+            newProperty->addAssumption(startStateExpr_to);
+            newProperty->addAssumption(startStateExpr_from);
+
+            //===============================
+            // Commitments
+            //===============================
+            //add commitment states from submodules
+            for (const auto &instance: module->getModuleInstanceMap()) {
+                for (const auto &state : instance.second->getStructure()->getFSM()->getStateMap()) {
+                    if (state.second->isInit()) continue;
+                    for (auto operation : state.second->getOutgoingOperationsList()) {
+                        if (operation->IsWait()) continue;
+
+                        if (operation->getState()->getCommunicationPort()->getName() == toPort->getName() || operation->getState()->getCommunicationPort()->getName() == fromPort->getName()) {
+                            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
+
+                            auto nextStateExpr = new TemporalExpr(t_end, nextState->getVariableOperand());
+                            newProperty->addCommitment(nextStateExpr);
+                        }
+                    }
+                }
+            }
+            //add commitment for data
+            auto commitment = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
+            newProperty->addCommitment(new TemporalExpr(t_end, commitment));
+        }
     }
 }
 
@@ -515,3 +607,122 @@ Timepoint *CreatePropertySuite::findTimeExpr(const std::map<Timepoint *, Expr *>
 }
 
 
+void SCAM::CreatePropertySuite::addNotifySignals(const Module *module, SCAM::PropertySuite *propertySuite, Model *model) {
+    for(auto& inst: module->getModuleInstanceMap()) {
+        for (auto port: inst.second->getStructure()->getPorts()) {
+            auto interface = port.second->getInterface();
+            if (interface->isShared()) continue;
+            if (interface->isMasterOut() || interface->isBlocking()) {
+                auto pm = new PropertyMacro(port.second->getNotify());
+                propertySuite->addNotifySignal(pm);
+            }
+        }
+    }
+}
+
+void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite, Model* model) {
+    for(auto& inst: module->getModuleInstanceMap()) {
+        for (auto port: inst.second->getStructure()->getPorts()) {
+            auto interface = port.second->getInterface();
+            if (interface->isShared()) continue;
+            if (!interface->isMaster() && !interface->isSlaveOut()) {
+                PropertyMacro *pm = new PropertyMacro(port.second->getSynchSignal());
+                propertySuite->addSyncSignal(pm);
+            }
+        }
+    }
+}
+
+void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite, Model* model) {
+    // DP SIGNALS
+    for(auto& inst: module->getModuleInstanceMap()) {
+        for (const auto &port: inst.second->getStructure()->getPorts()) {
+            if (port.second->getDataType()->isVoid()) continue;
+            //Add port as datapath signal
+            auto pm = new PropertyMacro(port.second->getDataSignal());
+            propertySuite->addDpSignal(pm);
+
+            if (port.second->getDataType()->isCompoundType() || port.second->getDataType()->isArrayType()) {
+                //Add all subignals of the compound type
+                for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
+                    auto sub_macro = new PropertyMacro(port.second->getDataSignal()->getSubVar(subVar.first));
+                    propertySuite->addDpSignal(sub_macro);
+                }
+            }
+        }
+    }
+}
+
+void SCAM::CreatePropertySuite::addStates(const SCAM::Module *module, SCAM::PropertySuite *propertySuite, Model* model) {
+    for(auto& inst: module->getModuleInstanceMap()) {
+        for (const auto &state: inst.second->getStructure()->getFSM()->getStateMap()) {
+            if (state.second->isInit()) continue;
+            state.second->setName(state.second->getName());
+            auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
+            auto pm = new PropertyMacro(stateVar);
+            pm->setExpression(new SCAM::BoolValue(true));
+            propertySuite->addState(pm);
+        }
+    }
+}
+
+void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *propertySuite, Model *model) {
+    auto reset_operation = new Operation();
+    propertySuite->setResetProperty(new Property("reset", reset_operation));
+    for(auto& inst: module->getModuleInstanceMap()) {
+        for (const auto &state: inst.second->getStructure()->getFSM()->getStateMap()) {
+            if (!state.second->isInit()) continue;
+            assert((state.second->getOutgoingOperationsList().size() == 1) && "Only one operation allowed to start from init");
+
+            for (auto operation : state.second->getOutgoingOperationsList()) {
+                assert((operation->getState()->isInit()) && "Operation should be starting from init state");
+                auto t_var = new Timepoint("t");
+                auto t = new TimePointOperand(t_var);
+                PropertyMacro *nextState = inst.second->getStructure()->getPropertySuite()->findSignal(operation->getNextState()->getName());
+                auto nextStateExpr = new TemporalExpr(t, nextState->getOperand());
+
+                propertySuite->getResetProperty()->addCommitment(nextStateExpr);
+
+
+
+                // Add commitments for ResetProperty
+                for (auto commitment: operation->getCommitmentsList()) {
+                    propertySuite->getResetProperty()->addCommitment(new TemporalExpr(t, commitment));
+                    //propertySuite->getResetProperty()->addCommitment(commitment);
+                }
+
+                //Notify&Sync Signals, no notification for shareds
+                std::set<Port *> usedPortsList;
+                for (auto commitment: operation->getCommitmentsList()) {
+                    //Add all output port that are used within this operation
+                    for (auto port: ExprVisitor::getUsedPorts(commitment->getLhs())) {
+                        if (port->getInterface()->isOutput()) {
+                            usedPortsList.insert(port);
+                        }
+                    }
+                }
+                if (!operation->getNextState()->isWait())
+                    usedPortsList.insert(operation->getNextState()->getCommunicationPort());
+
+
+                for (auto port: module->getPorts()) {
+                    if (port.second->getInterface()->isShared()) continue;
+                    if (port.second->getInterface()->isSlaveIn()) continue;
+                    if (port.second->getInterface()->isSlaveOut()) continue;
+                    if (port.second->getInterface()->isMasterIn()) continue;
+
+                    PropertyMacro *signalMacro = inst.second->getStructure()->getPropertySuite()->findSignal(port.first + "_notify");
+                    if (usedPortsList.find(port.second) != usedPortsList.end()) {
+                        auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(true)));
+                        propertySuite->getResetProperty()->addCommitment(commitment);
+                    } else {
+                        auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(false)));
+                        propertySuite->getResetProperty()->addCommitment(commitment);
+                    }
+                }
+                break;
+
+            }
+        }
+    }
+}

@@ -654,11 +654,11 @@ void PrintSkeleton::components(std::stringstream &ss) {
         return;
     }
     std::map<std::string, bool> added;
-    for (auto inst: module->getInstanceMap()) {
-        SCAM::Module* child = model->getModules().find(inst.first.second)->second;
+    for (auto inst: module->getModuleInstanceMap()) {
+        SCAM::Module* child = inst.second->getStructure();
         if(added.find(child->getName()) == added.end()) {
             if (language == VHDL) {
-                ss << "\tcomponent " + inst.first.second + "\n";
+                ss << "\tcomponent " + child->getName() + "\n";
                 ports(ss, child);
                 ss << "\tend component;\n\n";
             }
@@ -755,7 +755,7 @@ void PrintSkeleton::channels(std::stringstream &ss) {
 void PrintSkeleton::instances(std::stringstream &ss) {
     //At the moment VHDL only
     ss << "begin\n";
-    for (auto inst: module->getInstanceMap()) {
+    for (auto inst: module->getModuleInstanceMap()) {
         std::string syncNotifyType;
         std::string clockResetType;
         if (language == VHDL) {
@@ -765,8 +765,8 @@ void PrintSkeleton::instances(std::stringstream &ss) {
             syncNotifyType = "logic";
             clockResetType = "logic";
         }
-        SCAM::Module* child = model->getModules().find(inst.first.second)->second;
-        ss << "\t" + inst.first.first + ": " + inst.first.second + "\n";
+        SCAM::Module* child = inst.second->getStructure();
+        ss << "\t" + inst.second->getName()+"_inst" + ": " + inst.second->getStructure()->getName() + "\n";
         ss << "\tport map(\n";
         ss << "\t\tclk\t=>\tclk,\n";
         ss << "\t\trst\t=>\trst,\n";

@@ -176,20 +176,13 @@ namespace SCAM {
         _isStructural = isStructural;
     }
 
-    void Module::addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap) {
+    /*void Module::addInstanceMap(std::map<std::pair<std::string, std::string>, std::string> instanceMap) {
         _instanceMap = instanceMap;
-    }
+    }*/
 
-    const std::map<std::pair<std::string, std::string>, std::string> Module::getInstanceMap() const {
+   /* const std::map<std::pair<std::string, std::string>, std::string> Module::getInstanceMap() const {
         return _instanceMap;
-    }
-
-    clang::CXXRecordDecl * Module::getRecordDecl() {
-        return _recordDecl;
-    }
-    void Module::addRecordDecl(clang::CXXRecordDecl *recordDecl) {
-        _recordDecl = recordDecl;
-    }
+    }*/
 
     bool Module::isFunction(std::string name) const {
         return functionMap.find(name) != functionMap.end();
@@ -243,4 +236,13 @@ namespace SCAM {
 //    void Module::setCFG_Implicit(std::map<int, SCAM::CfgNode *> blockCFG) {
 //        this->cfg_Implicit = std::move(blockCFG);
 //    }
+
+    void Module::addModuleInstance(ModuleInstance* modInstance) {
+        auto entry = std::pair<std::string, ModuleInstance *>(modInstance->getName(), modInstance);
+        this->_instanceMap.insert(entry);
+    }
+
+    std::map<std::string, ModuleInstance *> Module::getModuleInstanceMap() const{
+        return _instanceMap;
+    }
 }

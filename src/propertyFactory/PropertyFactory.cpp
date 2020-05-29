@@ -35,6 +35,8 @@ SCAM::PropertyFactory::PropertyFactory(const Module *module) {
 
     // WAIT PROPERTIES
     SCAM::CreatePropertySuite::addWait(module, propertySuite);
+
+
 }
 
 
@@ -45,7 +47,13 @@ SCAM::PropertyFactory::PropertyFactory(Module *module, Model *model) {
     // Generate PropertySuite
     this->propertySuite = new PropertySuite(module->getName());
 
-    SCAM::CreatePropertySuite::addReset(module, propertySuite);
+    SCAM::CreatePropertySuite::addReset(module, propertySuite, model);
+    SCAM::CreatePropertySuite::addNotifySignals(module, propertySuite, model);
+    SCAM::CreatePropertySuite::addSyncSignals(module, propertySuite, model);
+    SCAM::CreatePropertySuite::addDataSignals(module, propertySuite, model);
+    SCAM::CreatePropertySuite::addStates(module, propertySuite, model);
+    SCAM::CreatePropertySuite::addConnections(module,propertySuite,model);
+
 }
 
 SCAM::PropertySuite *SCAM::PropertyFactory::getPropertySuite() const {

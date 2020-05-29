@@ -77,8 +77,7 @@ namespace SCAM {
         void addPorts(Module* module,clang::CXXRecordDecl* decl);
         void addFunctions(Module *module, CXXRecordDecl * decl, std::map <std::string, clang::CXXRecordDecl *> ModuleMap);
         void addBehavior(Module *module, clang::CXXRecordDecl *decl);
-        void addVariables(Module *module, clang::CXXRecordDecl *decl);
-        static void addVariables(Module *module, clang::CXXRecordDecl *decl, const std::map<std::string, clang::CXXRecordDecl *>& ModuleMap); //!Adds variable to module
+        void addVariables(Module *module, clang::CXXRecordDecl *decl, const std::map<std::string, clang::CXXRecordDecl *>& ModuleMap);//!Adds variable to module
         void addInstances(TranslationUnitDecl * tu );
         void removeUnused();
 

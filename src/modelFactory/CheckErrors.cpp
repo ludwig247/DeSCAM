@@ -73,7 +73,6 @@ void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
         std::cout << "Module: " << name << std::endl;
         std::cout << "############################" << std::endl;
         auto module = new Module(scparModule.first);
-        module->addRecordDecl(scparModule.second);
         model->addModule(module);
         //Members
         this->addVariables(module, scparModule.second, modules.getModuleMap());
@@ -107,7 +106,6 @@ void SCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
             this->addBehavior(module, scparModule.second);
         } else {
             module->setStructural(true);
-            module->addInstanceMap(instances.getInstanceMap());
         }
     }
 }

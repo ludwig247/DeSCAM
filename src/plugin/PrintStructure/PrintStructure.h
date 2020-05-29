@@ -8,10 +8,10 @@
 #include <PluginFactory.h>
 #include "Model.h"
 
-class PrintSVG : public PluginFactory {
+class PrintStructure : public PluginFactory {
 public:
-    PrintSVG() = default;
-    ~PrintSVG() = default;
+    PrintStructure() = default;
+    ~PrintStructure() = default;
     std::map<std::string, std::string> printModel(Model *node);
 
     void increaseWidth(SCAM::ModuleInstance* instance, unsigned width);
