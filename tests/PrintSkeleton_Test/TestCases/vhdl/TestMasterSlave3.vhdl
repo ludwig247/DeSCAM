@@ -8,15 +8,15 @@ entity TestMasterSlave3 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	s_in:		in int;
+	s_in:		in signed(31 downto 0);
 	s_in_sync:		in bool;
-	s_out:		out int
+	s_out:		out signed(31 downto 0)
 );
 end TestMasterSlave3;
 
 architecture TestMasterSlave3_arch of TestMasterSlave3 is
 	signal section_signal: Sections;
-	signal val_signal: int;
+	signal val_signal: signed(31 downto 0);
 
 begin
 	process(clk)

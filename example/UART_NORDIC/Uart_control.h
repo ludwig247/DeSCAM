@@ -30,7 +30,6 @@ SC_MODULE(Uart_control) {
 #endif
     // RX events
     slave_in<rx_events_t>  rx_events_in;
-    
 
     bus_req_t           bus_in_msg;
     bus_resp_t          bus_out_msg;
@@ -43,13 +42,10 @@ SC_MODULE(Uart_control) {
     bool            rx_active_out_msg;
     rx_events_t     rx_events_msg;
 
-
     tasks_t             tasks_in_msg;
     events_t            events_out_msg;
     bool                cts_in_msg;
     config_t            config_msg;
-
-    
 
     // "Valid" signals
     bool bus_in_valid;
@@ -130,32 +126,14 @@ SC_MODULE(Uart_control) {
 
     bool PARITY(unsigned int parity) const {return (parity & 0xE) != 0;}
     bool STOP(unsigned int stop_bit) const {return (stop_bit & CONFIG_STOP_MASK) != 0;}
-    bool HWFC(unsigned int stop_bit) const {return (stop_bit & CONFIG_HWFC_MASK) != 0;}
+    bool STOP2(unsigned int stop_bit) const {return (stop_bit & CONFIG_STOP_MASK) != 0;}
+    bool HWFC(unsigned int stop_bit) const {return (stop_bit & CONFIG_STOP_MASK) != 0;}
+    bool HWFC2(unsigned int stop_bit) const {return (stop_bit & CONFIG_STOP_MASK) != 0;}
     //bool HWFC(unsigned int hwfc) const {return (hwfc & CONFIG_HWFC_MASK) != 0;}
     bool ODD_PARITY(unsigned int odd_parity) const {return (odd_parity & 0x100) != 0;}
 
     void fsm();
 private:
-
-    // bool event_triggered_cts(bool valid, bool cts, bool hwfc_enabled) const {
-    //     if (valid && hwfc_enabled) return cts == CTS_ACTIVATED;
-    //     return false;
-    // }
-
-    // bool event_triggered_ncts(bool valid, bool cts, bool hwfc_enabled) const {
-    //     if (valid && hwfc_enabled) return cts == CTS_DEACTIVATED;
-    //     return false;
-    // }
-
-    // bool update_active(bool already_active, bool start, bool stop, bool enabled) const {
-    //     //if (!enabled) {
-    //     //    return false;
-    //     //}
-    //     //else if (already_active) {
-    //     //    return !(stop) || start;
-    //     //} else return start;
-    //     return enabled && (start || (already_active && !(stop)));
-    // }
 
 };
 
@@ -259,6 +237,7 @@ void Uart_control::fsm()
         config_msg.parity        = PARITY(frame_config);
         config_msg.two_stop_bits = STOP(frame_config);
         config_msg.odd_parity    = ODD_PARITY(frame_config);
+        //tx_control_out_msg.cts    = STOP(frame_config); // TOBIAS try with STOP()
         tx_control_out_msg.cts    = HWFC(frame_config); // TOBIAS try with STOP()
 
 #ifdef SIM

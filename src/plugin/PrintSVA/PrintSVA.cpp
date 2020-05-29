@@ -19,7 +19,7 @@ std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
         pluginOutput.insert(std::make_pair(module.first + "_functions.sva", functions()));
     }
 
-    if(!node->getGlobalFunctionMap().empty()){
+    if (!node->getGlobalFunctionMap().empty()) {
         pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.sva", globalFunctions()));
     }
     return pluginOutput;
@@ -84,7 +84,7 @@ std::string PrintSVA::Text_body() {
             << "`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR\n\n"
             << "`include \"ipc.sva\"\n"
             << "`include \"" << this->module->getName() << "_functions.sva\"\n\n"
-            << "import scam_model_types::*;\n\n"
+            << "import top_level_types::*;\n\n"
             //<< "import " << tolower(this->module->getName()) << "_functions::*;\n\n"
             << "module " << this->module->getName() << "_verification(reset);\n\n"
             << "input reset;\n\n"
@@ -182,19 +182,21 @@ std::string PrintSVA::signals() {
     std::stringstream ss;
 
     ss << "\n// SYNC AND NOTIFY SIGNALS (1-cycle macros) //\n";
-    for (auto sync: ps->getSyncSignals()){
-        ss << "function " << sync->getName() << ";\n\t"  << sync->getName() << " = ;\nendfunction" << std::endl;
+    for (auto sync: ps->getSyncSignals()) {
+        ss << "function " << sync->getName() << ";\n\t" << sync->getName() << " = 1'b1 ;\nendfunction" << std::endl;
     }
-    for (auto notify: ps->getNotifySignals()){
-        ss << "function " << notify->getName() << ";\n\t"  << notify->getName() << " = ;\nendfunction" << std::endl;
+    for (auto notify: ps->getNotifySignals()) {
+        ss << "function " << notify->getName() << ";\n\t" << notify->getName() << " = 1'b1 ;\nendfunction" << std::endl;
     }
 
     ss << "\n// DP SIGNALS //\n";
     for (auto dp: ps->getDpSignals()) {
-
         ss << "function " << convertDataType(dp->getDataType()) << " ";
         ss << dp->getFullName("_") << ";\n";
-        ss << "\t" << dp->getFullName("_") << " = ;\nendfunction\n";
+        if (dp->isCompoundType()) ss << "//";
+        ss << "\t" << dp->getFullName("_") << " = ";
+        ss << ConditionVisitorSVA::toString(dp->getDataType()->getDefaultVal());
+        ss << ";\nendfunction\n";
     }
     return ss.str();
 }
@@ -206,9 +208,14 @@ std::string PrintSVA::registers() {
     for (auto vr: ps->getVisibleRegisters()) {
         bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
         if (!skip) {
-             ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getFullName("_") << ";\n";
-             ss << "\t" << vr->getFullName("_");
-             ss << " = ;\nendfunction\n";
+
+            ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getFullName("_") << ";\n";
+            if (vr->isCompoundType()) ss << "//";
+            ss << "\t" << vr->getFullName("_");
+            ss << " = ";
+            ss << ConditionVisitorSVA::toString(vr->getDataType()->getDefaultVal());
+            ss << ";\nendfunction\n";
+
         }
     }
     //TODO: add array types
@@ -221,7 +228,7 @@ std::string PrintSVA::states() {
     ss << "\n// STATES //\n";
     for (auto state: ps->getStates()) {
         ss << "function " << state->getName() << ";\n\t"
-           << state->getName() << " = ;\n"
+           << state->getName() << " = 1'b1;\n"
            << "endfunction\n";
     }
     return ss.str();
@@ -229,7 +236,9 @@ std::string PrintSVA::states() {
 
 std::string PrintSVA::reset_sequence() {
     std::stringstream ss;
-    ss << "sequence reset_sequence;\n\t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\nendsequence\n\n";
+    ss << "sequence reset_sequence;\n";
+    ss << "reset ##1 !reset;  \t//DESIGNER REFER TO MODEL RESET SIGNAL HERE\n";
+    ss <<"endsequence\n\n";
     return ss.str();
 }
 
@@ -240,17 +249,17 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
     ss << "\t";
     if (temporalExpr->isAt()) {
         //TODO: instead of printing t+1 print t##1 create other visitor
-        if(NodePeekVisitor::nodePeekArithmetic(temporalExpr->getTimepointList().at(0))){
+        if (NodePeekVisitor::nodePeekArithmetic(temporalExpr->getTimepointList().at(0))) {
             auto arith = NodePeekVisitor::nodePeekArithmetic(temporalExpr->getTimepointList().at(0));
             ss << *arith->getLhs() << "##" << *arith->getRhs() << " ";
-        }else ss << ConditionVisitorSVA::toString((temporalExpr->getTimepointList().at(0))) << "##0 ";
+        } else ss << ConditionVisitorSVA::toString((temporalExpr->getTimepointList().at(0))) << "##0 ";
     } else if (temporalExpr->isDuring()) {  //TODO: Think of a smoother way for during case
         ss << "during_o (";
         for (auto t : temporalExpr->getTimepointList()) {
             if (NodePeekVisitor::nodePeekArithmetic(t)) {
                 Arithmetic *a = NodePeekVisitor::nodePeekArithmetic(t);
                 ss << ConditionVisitorSVA::toString(a->getLhs()) << ", ";
-                if (a->getOperation() == "-"){
+                if (a->getOperation() == "-") {
                     ss << "-";
                 }
                 ss << ConditionVisitorSVA::toString(a->getRhs()) << ", ";
@@ -260,9 +269,10 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
         }
         ss << ConditionVisitorSVA::toString(temporalExpr->getStatement()) << ")";
         return ss.str();
-    }else assert(false && "unreachable");
+    } else
+        assert(false && "unreachable");
     if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-        Assignment * a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
+        Assignment *a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
         ss << ConditionVisitorSVA::toString(a->getLhs());
         ss << " == ";
         ss << DatapathVisitorSVA::toString(a->getRhs());
@@ -277,7 +287,7 @@ std::string PrintSVA::reset_operation() {
     PropertySuite *ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
-       << "\treset_sequence |=>\n";
+       << "\treset_sequence |->\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
         ss << temporalExpr(commitment);
         if (commitment != ps->getResetProperty()->getCommitmentList().back())
@@ -310,7 +320,7 @@ std::string PrintSVA::operations() {
             }
         }
 
-        for (auto a = op->getAssumptionList().begin(); a != op->getAssumptionList().end(); a++){
+        for (auto a = op->getAssumptionList().begin(); a != op->getAssumptionList().end(); a++) {
             ss << temporalExpr(*a);
             if (std::next(a) != op->getAssumptionList().end()) {
                 ss << " and\n";
@@ -320,7 +330,7 @@ std::string PrintSVA::operations() {
 
         ss << "implies\n";
 
-        for (auto c = op->getCommitmentList().begin(); c != op->getCommitmentList().end(); c++){
+        for (auto c = op->getCommitmentList().begin(); c != op->getCommitmentList().end(); c++) {
             ss << temporalExpr(*c);
             if (std::next(c) != op->getCommitmentList().end()) {
                 ss << " and\n";
@@ -328,7 +338,7 @@ std::string PrintSVA::operations() {
         }
         ss << ";\n";
         ss << "endproperty;\n";
-        ss << op->getName() << "_a: assert property (disable iff (reset) "<< op->getName() << "_p(1)); //ASSIGN t_end offset here\n\n";
+        ss << op->getName() << "_a: assert property (disable iff (reset) " << op->getName() << "_p(1)); //ASSIGN t_end offset here\n\n";
         ss << "\n\n";
     }
     return ss.str();

@@ -1,13 +1,13 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro test_in_sync : boolean := end macro;
-macro test_out_sync : boolean := end macro;
-macro test_in_notify : boolean := end macro;
-macro test_out_notify : boolean := end macro;
+macro test_in_sync : boolean := true end macro;
+macro test_out_sync : boolean := true end macro;
+macro test_in_notify : boolean := true end  macro;
+macro test_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro test_in_sig : signed := end macro;
-macro test_out_sig : unsigned := end macro;
+macro test_in_sig : signed :=resize(0,32) end macro;
+macro test_out_sig : unsigned :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -15,7 +15,7 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro bar : unsigned := end macro;
+macro bar : unsigned :=resize(0,32) end macro;
 
 
 -- STATES --

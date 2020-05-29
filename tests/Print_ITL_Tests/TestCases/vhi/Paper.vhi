@@ -1,15 +1,15 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_in_sync : boolean := end macro;
-macro b_in_notify : boolean := end macro;
-macro m_out_notify : boolean := end macro;
+macro b_in_sync : boolean := true end macro;
+macro b_in_notify : boolean := true end  macro;
+macro m_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_in_sig : msg_t := end macro;
-macro b_in_sig_data : signed := end macro;
-macro b_in_sig_status : status_t := end macro;
-macro m_out_sig : signed := end macro;
-macro s_out_sig : boolean := end macro;
+--macro b_in_sig : msg_t :={resize(0,32), in_frame} end macro;
+macro b_in_sig_data : signed :=resize(0,32) end macro;
+macro b_in_sig_status : status_t :=in_frame end macro;
+macro m_out_sig : signed :=resize(0,32) end macro;
+macro s_out_sig : boolean :=false end macro;
 
 
 -- CONSTRAINTS --
@@ -17,10 +17,10 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro cnt : signed := end macro;
-macro msg_data : signed := end macro;
-macro msg_status : status_t := end macro;
-macro nextPhase : Phase := end macro;
+macro cnt : signed :=resize(0,32) end macro;
+macro msg_data : signed :=resize(0,32) end macro;
+macro msg_status : status_t :=in_frame end macro;
+macro nextPhase : Phase :=idle end macro;
 
 
 -- STATES --

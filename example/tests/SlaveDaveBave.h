@@ -20,6 +20,7 @@ SC_MODULE(Test_Nordic) {
 
     unsigned int bar;
     int foo;
+    int arr[10];
     bool test;
 
     unsigned int update_suspending_count(bool active, unsigned int suspending_count) const {
@@ -39,6 +40,7 @@ SC_MODULE(Test_Nordic) {
     void fsm() {
         while (true) {
             b_in->read(foo);
+            arr[foo] = foo + 3;
             if(update_suspending_count(test,bar) != 0 ){
                 test_out->master_write(0);
             }else{

@@ -1,15 +1,15 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_in_sync : boolean := end macro;
-macro b_out_sync : boolean := end macro;
-macro b_in_notify : boolean := end macro;
-macro b_out_notify : boolean := end macro;
+macro b_in_sync : boolean := true end macro;
+macro b_out_sync : boolean := true end macro;
+macro b_in_notify : boolean := true end  macro;
+macro b_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_in_sig : signed := end macro;
-macro b_out_sig : int_2 := end macro;
-macro b_out_sig_0 : signed := end macro;
-macro b_out_sig_1 : signed := end macro;
+macro b_in_sig : signed :=resize(0,32) end macro;
+macro b_out_sig : int_2 :={resize(0,32), resize(0,32)} end macro;
+macro b_out_sig_0 : signed :=resize(0,32) end macro;
+macro b_out_sig_1 : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -17,8 +17,8 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro myArray : int_2 := end macro;
-macro test : signed := end macro;
+macro myArray : int_2 :={resize(0,32), resize(0,32)} end macro;
+macro test : signed :=resize(0,32) end macro;
 
 
 -- STATES --
