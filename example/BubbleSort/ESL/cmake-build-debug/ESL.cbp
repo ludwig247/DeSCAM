@@ -89,6 +89,9 @@
 		<Unit filename="/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/BubbleSort_Step-1.h">
 			<Option target="ESL"/>
 		</Unit>
+		<Unit filename="/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/BubbleSort_Step-2_ternary.h">
+			<Option target="ESL"/>
+		</Unit>
 		<Unit filename="/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/DataTypes.h">
 			<Option target="ESL"/>
 		</Unit>
