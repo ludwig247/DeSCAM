@@ -137,7 +137,6 @@ namespace SCAM {
     }
 
     std::string PropertyMacro::getFullName(const std::string &delimiter) const {
-
         if (this->isSubVar()) {
             if(this->getParentDataType()->isArrayType() && delimiter == "."){
                 return this->getParentName() + "(" + this->getSubVarName() + ")";
