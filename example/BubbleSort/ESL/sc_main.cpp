@@ -3,8 +3,8 @@
 
 //Data Path Algorithm File
 //#include "BubbleSort_original.h"
-#include "BubbleSort_Step-1.h"
-#include "DataTypes.h"
+//#include "BubbleSort_Step-1.h"
+#include "BubbleSort_Step-2_ternary.h"
 
 //Testbench
 #include "Testbench.h"

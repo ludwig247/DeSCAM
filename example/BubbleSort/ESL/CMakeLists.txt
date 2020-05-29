@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 project(ESL)
 
 set(CMAKE_SOURCE_DIR /import/lab/users/jauch/CLionProjects/DESCAM_work)
@@ -14,6 +14,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 
-add_executable(ESL
-        sc_main.cpp Testbench.h BubbleSort_Step-1.h DataTypes.h)
-target_link_libraries(ESL systemc)
+add_executable(BubbleSort_ESL
+        sc_main.cpp Testbench.h BubbleSort_Step-1.h BubbleSort_Step-2_ternary.h DataTypes.h)
+target_link_libraries(BubbleSort_ESL systemc)
