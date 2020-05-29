@@ -1,0 +1,121 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function data_in_sync;
+	data_in_sync = 1'b1 ;
+endfunction
+function data_out_sync;
+	data_out_sync = 1'b1 ;
+endfunction
+function data_in_notify;
+	data_in_notify = 1'b1 ;
+endfunction
+function data_out_notify;
+	data_out_notify = 1'b1 ;
+endfunction
+
+// DP SIGNALS //
+function int_8 data_in_sig;
+	data_in_sig = {0, 0, 0, 0, 0, 0, 0, 0};
+endfunction
+function int data_in_sig_0;
+	data_in_sig_0 = 0;
+endfunction
+function int data_in_sig_1;
+	data_in_sig_1 = 0;
+endfunction
+function int data_in_sig_2;
+	data_in_sig_2 = 0;
+endfunction
+function int data_in_sig_3;
+	data_in_sig_3 = 0;
+endfunction
+function int data_in_sig_4;
+	data_in_sig_4 = 0;
+endfunction
+function int data_in_sig_5;
+	data_in_sig_5 = 0;
+endfunction
+function int data_in_sig_6;
+	data_in_sig_6 = 0;
+endfunction
+function int data_in_sig_7;
+	data_in_sig_7 = 0;
+endfunction
+function int_8 data_out_sig;
+	data_out_sig = {0, 0, 0, 0, 0, 0, 0, 0};
+endfunction
+function int data_out_sig_0;
+	data_out_sig_0 = 0;
+endfunction
+function int data_out_sig_1;
+	data_out_sig_1 = 0;
+endfunction
+function int data_out_sig_2;
+	data_out_sig_2 = 0;
+endfunction
+function int data_out_sig_3;
+	data_out_sig_3 = 0;
+endfunction
+function int data_out_sig_4;
+	data_out_sig_4 = 0;
+endfunction
+function int data_out_sig_5;
+	data_out_sig_5 = 0;
+endfunction
+function int data_out_sig_6;
+	data_out_sig_6 = 0;
+endfunction
+function int data_out_sig_7;
+	data_out_sig_7 = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function int_8 data_algorithm;
+	data_algorithm = {0, 0, 0, 0, 0, 0, 0, 0};
+endfunction
+function int data_algorithm_0;
+	data_algorithm_0 = 0;
+endfunction
+function int data_algorithm_1;
+	data_algorithm_1 = 0;
+endfunction
+function int data_algorithm_2;
+	data_algorithm_2 = 0;
+endfunction
+function int data_algorithm_3;
+	data_algorithm_3 = 0;
+endfunction
+function int data_algorithm_4;
+	data_algorithm_4 = 0;
+endfunction
+function int data_algorithm_5;
+	data_algorithm_5 = 0;
+endfunction
+function int data_algorithm_6;
+	data_algorithm_6 = 0;
+endfunction
+function int data_algorithm_7;
+	data_algorithm_7 = 0;
+endfunction
+function int i;
+	i = 0;
+endfunction
+function int j;
+	j = 0;
+endfunction
+function phases phase_algorithm;
+	phase_algorithm = IDLE;
+endfunction
+
+// STATES //
+function data_in_1;
+	data_in_1 = 1'b1;
+endfunction
+function loop_2;
+	loop_2 = 1'b1;
+endfunction
+function data_out_3;
+	data_out_3 = 1'b1;
+endfunction
+
+
