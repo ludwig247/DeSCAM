@@ -19,11 +19,9 @@ struct BubbleSort : public sc_module {
     phases phase_algorithm;
     int data_algorithm[ARRAY_SIZE];
 
-    int i; //counter for
-    int j;
-    int swap;
-
-    int cnt_read=0;
+    int i; //counter for outer loop
+    int j; //counter for inner loop
+    int swap; //buffer for swapping values
 
     //data
     blocking_in<int[ARRAY_SIZE]> data_in;
@@ -41,7 +39,6 @@ struct BubbleSort : public sc_module {
 
     void fsm() {
 
-        cnt_read = 0;
         phase_algorithm = IDLE;
 
         while (true) {
@@ -53,11 +50,20 @@ struct BubbleSort : public sc_module {
                 i = 0;
                 j = 0;
 
-              //  cout << "BubbleSort: data received" << endl;
+                /*cout << "Algorithm: data received" << endl;
+
+                cout << "unsorted: " << data_algorithm[0] << endl;
+                cout << "unsorted: " << data_algorithm[1] << endl;
+                cout << "unsorted: " << data_algorithm[2] << endl;
+                cout << "unsorted: " << data_algorithm[3] << endl;
+                cout << "unsorted: " << data_algorithm[4] << endl;
+                cout << "unsorted: " << data_algorithm[5] << endl;
+                cout << "unsorted: " << data_algorithm[6] << endl;
+                cout << "unsorted: " << data_algorithm[7] << endl;*/
 
             }else{
                 if (i != ARRAY_SIZE){
-                    if (j != ARRAY_SIZE - i -1){
+                    if (j != ARRAY_SIZE - i - 1){
                         if (data_algorithm[j] > data_algorithm[j+1]){
 //                            data_algorithm.array[0] = j==0 ?  data_algorithm.array[1] : data_algorithm.array[0];
 //                            data_algorithm.array[1] = j==1 ?  data_algorithm.array[2] : data_algorithm.array[1];
@@ -67,50 +73,60 @@ struct BubbleSort : public sc_module {
                                 data_algorithm[0] = data_algorithm[1];
                                 data_algorithm[1] = swap;
                             }
-                            if(j==1){
+                            else if(j==1){
                                 swap = data_algorithm[1];
                                 data_algorithm[1] = data_algorithm[2];
                                 data_algorithm[2] = swap;
                             }
-                            if(j==2){
+                            else if(j==2){
                                 swap = data_algorithm[2];
                                 data_algorithm[2] = data_algorithm[3];
                                 data_algorithm[3] = swap;
                             }
-                            if(j==3){
+                            else if(j==3){
                                 swap = data_algorithm[3];
                                 data_algorithm[3] = data_algorithm[4];
                                 data_algorithm[4] = swap;
                             }
-                            if(j==4){
+                            else if(j==4){
                                 swap = data_algorithm[4];
                                 data_algorithm[4] = data_algorithm[5];
                                 data_algorithm[5] = swap;
                             }
-                            if(j==5){
+                            else if(j==5){
                                 swap = data_algorithm[5];
                                 data_algorithm[5] = data_algorithm[6];
                                 data_algorithm[6] = swap;
                             }
-                            if(j==6){
+                            else if(j==6){
                                 swap = data_algorithm[6];
                                 data_algorithm[6] = data_algorithm[7];
                                 data_algorithm[7] = swap;
                             }
-
                         }
-                        j++;
-                        insert_state("clock_tick");
+                        ++j;
+                        //insert_state("inner_loop");
                     }else{
                         j = 0;
-                        i++;
-                        insert_state("clock_tick");
-                    }
+                        ++i;
 
+                    }
+                    insert_state("loop");
 
                 }else{
-                //    cout << "BubbleSort: data sent" << endl;
-                    data_out->write(data_algorithm);
+
+                  /*  cout << "sorted: " << data_algorithm[0] << endl;
+                    cout << "sorted: " << data_algorithm[1] << endl;
+                    cout << "sorted: " << data_algorithm[2] << endl;
+                    cout << "sorted: " << data_algorithm[3] << endl;
+                    cout << "sorted: " << data_algorithm[4] << endl;
+                    cout << "sorted: " << data_algorithm[5] << endl;
+                    cout << "sorted: " << data_algorithm[6] << endl;
+                    cout << "sorted: " << data_algorithm[7] << endl;
+
+                    cout << "Algorithm: data sorted sent" << endl;*/
+
+                    data_out->write(data_algorithm, "data_out");
 
                     phase_algorithm = IDLE;
 
