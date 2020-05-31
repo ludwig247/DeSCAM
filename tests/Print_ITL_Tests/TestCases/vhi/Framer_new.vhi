@@ -1,15 +1,15 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro data_word_sync : boolean := end macro;
-macro frame_pulse_notify : boolean := end macro;
+macro data_word_sync : boolean := true end macro;
+macro frame_pulse_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro data_word_sig : marker_t := end macro;
-macro data_word_sig_isMarker : boolean := end macro;
-macro data_word_sig_markerAlignment : signed := end macro;
-macro frame_pulse_sig : boolean := end macro;
-macro lof_sig : boolean := end macro;
-macro oof_sig : boolean := end macro;
+--macro data_word_sig : marker_t :={false, resize(0,32)} end macro;
+macro data_word_sig_isMarker : boolean :=false end macro;
+macro data_word_sig_markerAlignment : signed :=resize(0,32) end macro;
+macro frame_pulse_sig : boolean :=false end macro;
+macro lof_sig : boolean :=false end macro;
+macro oof_sig : boolean :=false end macro;
 
 
 -- CONSTRAINTS --
@@ -17,11 +17,11 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro FRM_PULSE_POS : signed := end macro;
-macro WORDS_IN_FRAME : signed := end macro;
-macro align : signed := end macro;
-macro frm_cnt : signed := end macro;
-macro nextphase : Phases := end macro;
+macro FRM_PULSE_POS : signed :=resize(0,32) end macro;
+macro WORDS_IN_FRAME : signed :=resize(0,32) end macro;
+macro align : signed :=resize(0,32) end macro;
+macro frm_cnt : signed :=resize(0,32) end macro;
+macro nextphase : Phases :=INITIALISE end macro;
 
 
 -- STATES --

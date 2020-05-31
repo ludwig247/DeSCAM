@@ -64,7 +64,12 @@ namespace SCAM {
         void checkStates();
         void optimizeConditions();
         void optimizeAssignments();
+        void optimizeTernary();
         void optimizeOperations();
+
+
+
+        static void simplifyTernary(const std::vector<Expr *>& assumptionList, Expr *expr);
     };
 
 }

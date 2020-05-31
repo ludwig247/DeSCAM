@@ -13,7 +13,6 @@ SCAM::FindCommunication2::FindCommunication2() :
         readVariable(nullptr),
         non_blocking_access(false),
         stmt(nullptr){
-
 }
 
 SCAM::FindCommunication2::~FindCommunication2() = default;
@@ -273,6 +272,11 @@ void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
 }
 
 void SCAM::FindCommunication2::visit(struct TimePointOperand &node) {
+    waitComm = false;
+    communication = false;
+}
+
+void SCAM::FindCommunication2::visit(SCAM::Ternary &node) {
     waitComm = false;
     communication = false;
 }

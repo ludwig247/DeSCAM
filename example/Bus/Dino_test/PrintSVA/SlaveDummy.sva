@@ -1,0 +1,145 @@
+// DATA TYPES //
+typedef enum {ERR, OK, RTY} ack_t;
+typedef enum {SINGLE_READ, SINGLE_WRITE} trans_t;
+
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "SlaveDummy_functions.sva"
+
+import scam_model_types::*;
+
+module SlaveDummy_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge SlaveDummy.clk); endclocking
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function bus_req_sync;
+	bus_req_sync = ;
+endfunction
+function bus_resp_sync;
+	bus_resp_sync = ;
+endfunction
+function bus_req_notify;
+	bus_req_notify = ;
+endfunction
+function bus_resp_notify;
+	bus_resp_notify = ;
+endfunction
+
+// DP SIGNALS //
+function bus_req_t bus_req_sig;
+	bus_req_sig = ;
+endfunction
+function int bus_req_sig_addr;
+	bus_req_sig_addr = ;
+endfunction
+function int bus_req_sig_data;
+	bus_req_sig_data = ;
+endfunction
+function trans_t bus_req_sig_trans_type;
+	bus_req_sig_trans_type = ;
+endfunction
+function bus_resp_t bus_resp_sig;
+	bus_resp_sig = ;
+endfunction
+function ack_t bus_resp_sig_ack;
+	bus_resp_sig_ack = ;
+endfunction
+function int bus_resp_sig_data;
+	bus_resp_sig_data = ;
+endfunction
+
+// VISIBLE REGISTERS //
+
+// STATES //
+function state_1;
+	state_1 = ;
+endfunction
+function state_2;
+	state_2 = ;
+endfunction
+
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |=>
+	t ##0 state_1() and
+	t ##0 bus_req_notify() == 1 and
+	t ##0 bus_resp_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] bus_req_sig_data_0;
+	t ##0 hold(bus_req_sig_data_0, bus_req_sig.data()) and
+	t ##0 state_1() and
+	t ##0 bus_req_sync()
+implies
+	t_end(o) ##0 state_2() and
+	t_end(o) ##0 bus_resp_sig_ack() == OK and
+	t_end(o) ##0 bus_resp_sig_data() == bus_req_sig_data_0 and
+	during_o (t, 1, t_end(o), 0, bus_req_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, bus_resp_notify() == 0) and
+	t_end(o) ##0 bus_resp_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_2_p(o);
+	t ##0 state_2() and
+	t ##0 bus_resp_sync()
+implies
+	t_end(o) ##0 state_1() and
+	during_o (t, 1, t_end(o), -1, bus_req_notify() == 0) and
+	t_end(o) ##0 bus_req_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, bus_resp_notify() == 0);
+endproperty;
+state_2_2_a: assert property (disable iff (reset) state_2_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_1_p(o);
+	t ##0 state_1() and
+	t ##0 !(bus_req_sync())
+implies
+	(t + 1) ##0 state_1() and
+	(t + 1) ##0 bus_req_notify() == 1 and
+	(t + 1) ##0 bus_resp_notify() == 0;
+endproperty;
+wait_state_1_a: assert property (disable iff (reset) wait_state_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_2_p(o);
+ bit[31:0] bus_resp_sig_0;
+	t ##0 hold(bus_resp_sig_0, bus_resp_sig()) and
+	t ##0 state_2() and
+	t ##0 !(bus_resp_sync())
+implies
+	(t + 1) ##0 state_2() and
+	(t + 1) ##0 bus_resp_sig() == bus_resp_sig_0 and
+	(t + 1) ##0 bus_req_notify() == 0 and
+	(t + 1) ##0 bus_resp_notify() == 1;
+endproperty;
+wait_state_2_a: assert property (disable iff (reset) wait_state_2_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind SlaveDummy SlaveDummy_verification inst (.*, .reset());

@@ -127,4 +127,11 @@ bool SCAM::FindVariablesAndFunctionsInStatement::hasReadVariable() {
     return this->hasReadVariables;
 }
 
+void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Ternary &node) {
+    node.getCondition()->accept(*this);
+    node.getTrueExpr()->accept(*this);
+    node.getFalseExpr()->accept(*this);
+
+}
+
 

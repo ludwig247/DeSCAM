@@ -87,19 +87,12 @@ public:
         //Receiver
 
         ctrl1.ctrl_from_rx(RX_reg_from_rec);
-
-
-
         //receiver
-
         RX1.rx_to_ctrl(RX_reg_from_rec);
-
 
         RX1.RX_pin(rx);
 
-
         //transmitter
-
         TX1.TX_flags_out(trans_to_reg_flags);
         TX1.tx_from_ctrl(TX_reg_to_trans);
 
@@ -108,13 +101,7 @@ public:
 
 
         ctrl1.interrupt(interrupt);
-
-
-
     }
-
-
-
 };
 
 

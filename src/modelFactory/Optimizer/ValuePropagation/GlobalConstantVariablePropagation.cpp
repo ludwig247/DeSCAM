@@ -234,3 +234,9 @@ void SCAM::GlobalConstantVariablePropagation::visit(SCAM::ArrayExpr &node) {
     } else { this->newExpr = nullptr; }
 }
 
+void SCAM::GlobalConstantVariablePropagation::visit(SCAM::Ternary &node) {
+
+    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+}
+

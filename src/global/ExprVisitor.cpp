@@ -132,9 +132,8 @@ void SCAM::ExprVisitor::visit(SCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     node.getArrayOperand()->accept(*this);
     this->usedOperands.insert(node.getArrayOperand());
-
+    this->usedArrayOperands.insert(&node);
 }
-
 
 void SCAM::ExprVisitor::visit(struct Read &node) {
     throw std::runtime_error("ExprVisitor::Read not implemented");
@@ -231,6 +230,11 @@ std::set<SCAM::DataSignal *> SCAM::ExprVisitor::getUsedDataSignals(SCAM::Expr *e
     return exprVisitor.usedDataSignal;
 }
 
+std::set<SCAM::ArrayOperand *> SCAM::ExprVisitor::getUsedArrayOperands(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedArrayOperands;
+}
+
 bool SCAM::ExprVisitor::isVar(SCAM::Expr *expr) {
     SCAM::ExprVisitor exprVisitor(expr);
     return exprVisitor.var;
@@ -240,6 +244,11 @@ void SCAM::ExprVisitor::visit(SCAM::CompoundExpr &node) {
     for (auto select: node.getValueMap()) {
         select.second->accept(*this);
     }
+}
+
+std::set<SCAM::Ternary *> SCAM::ExprVisitor::getUsedTernaryOperators(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.usedTernary;
 }
 
 void SCAM::ExprVisitor::visit(SCAM::ParamOperand &node) {
@@ -258,6 +267,12 @@ bool SCAM::ExprVisitor::isParameter(SCAM::Expr *expr) {
     return exprVisitor.parameter;
 }
 
+bool SCAM::ExprVisitor::isTernary(SCAM::Expr *expr) {
+    SCAM::ExprVisitor exprVisitor(expr);
+    return exprVisitor.compare;
+}
+
+
 void SCAM::ExprVisitor::visit(SCAM::Notify &node) {
     this->usedPorts.insert(node.getPort());
     this->constVal = false;
@@ -269,8 +284,20 @@ void SCAM::ExprVisitor::visit(struct TimePointOperand &node) {
 
     this->constVal = false;
     this->var = (this->usedOperands.size() == 1) && (this->usedVar.size() == 1);
-
 }
+
+void SCAM::ExprVisitor::visit(SCAM::Ternary &node) {
+    this->constVal = false;
+    this->compare = true;
+
+    this->usedTernary.insert(&node);
+    node.getCondition()->accept(*this);
+    node.getTrueExpr()->accept(*this);
+    node.getFalseExpr()->accept(*this);
+}
+
+
+
 
 
 

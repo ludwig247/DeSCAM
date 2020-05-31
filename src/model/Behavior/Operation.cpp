@@ -22,7 +22,7 @@ namespace SCAM {
         return this->resetOperation;
     }
 
-    bool SCAM::Operation::IsWait() {
+    bool SCAM::Operation::IsWait() const{
         return this->waitOperation;
     }
 
@@ -36,6 +36,10 @@ namespace SCAM {
 
     const std::vector<Assignment *> &SCAM::Operation::getCommitmentsList() const {
         return this->commitmentList;
+    }
+
+    const std::vector<SCAM::Assignment *> &Operation::getCommitmentList() const {
+        return commitmentList;
     }
 
     SCAM::State *SCAM::Operation::getState() const {
@@ -99,5 +103,7 @@ namespace SCAM {
 
         return ss.str();
     }
+
+
 
 }

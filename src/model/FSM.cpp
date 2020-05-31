@@ -25,7 +25,9 @@ void SCAM::FSM::setSectionMap(std::map<std::string, std::vector<SCAM::Stmt *>> s
 }
 
 const std::map<std::string, std::vector<SCAM::Stmt *>> &SCAM::FSM::getSectionMap() {
-    if (sectionVariable == nullptr) throw std::runtime_error("SectionVariable is not set");
+    if (sectionVariable == nullptr) throw std::runtime_error("SectionVariable is not set");// {
+        //std::map<std::string, std::vector<SCAM::Stmt *>> a = {"init", };
+    //}//
     return this->sectionMap;
 }
 

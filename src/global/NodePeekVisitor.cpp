@@ -122,6 +122,10 @@ namespace SCAM {
 
 
 
+    Ternary * NodePeekVisitor::nodePeekTernary() const {
+        return nodePtrTernary;
+    }
+
 
     ParamOperand *NodePeekVisitor::nodePeekParamOperand() const {
         return nodePtrParamOperand;
@@ -324,6 +328,12 @@ namespace SCAM {
     }
 
 
+    Ternary *NodePeekVisitor::nodePeekTernary(Stmt *node) {
+        NodePeekVisitor peekVisitor(node);
+        return peekVisitor.nodePeekTernary();
+    }
+
+
     void NodePeekVisitor::visit(VariableOperand &node) {
         nodePtrVariableOperand = &node;
     }
@@ -461,9 +471,17 @@ namespace SCAM {
         nodePtrArrayExpr = &node;
     }
 
+
+
     void NodePeekVisitor::visit(struct TimePointOperand &node) {
         nodePtrTimePointOperand = &node;
     }
+
+
+    void NodePeekVisitor::visit(struct Ternary &node) {
+        nodePtrTernary = &node;
+    }
+
 
 
 }

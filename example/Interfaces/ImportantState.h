@@ -8,7 +8,7 @@
 #include "systemc.h"
 
 //#define WAIT_TIME std::rand()%5
-//#define WAIT_TIME std::rand()%5
+//#define WAIT_TIME std::rand()%10
 #define WAIT_TIME 0
 #define important_state  wait(WAIT_TIME, SC_PS);
 

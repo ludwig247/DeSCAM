@@ -77,8 +77,12 @@ std::map<std::string, SCAM::DataType *> SCAM::DataTypes::getLocalDataTypes(std::
     auto ldt = DataTypes::getInstance().localDataTypeMap;
     if (DataTypes::getInstance().localDataTypeMap.find(moduleName) != DataTypes::getInstance().localDataTypeMap.end()) {
         return DataTypes::getInstance().localDataTypeMap.find(moduleName)->second;
-    } else throw std::runtime_error("Unknown module " + moduleName);
+    } else{//} throw std::runtime_error("Unknown module " + moduleName);
+         std::map<std::string, SCAM::DataType *> dummy = {};
+         return dummy;
+    }
 }
+
 
 bool SCAM::DataTypes::hasLocalDataTypes(const std::string &moduleName) {
     auto ldt = DataTypes::getInstance().localDataTypeMap;

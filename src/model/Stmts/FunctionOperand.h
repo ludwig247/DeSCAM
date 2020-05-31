@@ -22,6 +22,8 @@ namespace SCAM {
 
         const std::map<std::string, Expr *> &getParamValueMap() const;
 
+        void setParamValueMap(const std::map<std::string, SCAM::Expr *> &paramValueMap);
+
         virtual void accept(StmtAbstractVisitor &visitor);
 
         virtual bool operator==(const Stmt &other) const;

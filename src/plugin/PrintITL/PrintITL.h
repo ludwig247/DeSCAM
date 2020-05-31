@@ -5,37 +5,36 @@
 #ifndef SCAM_SYNTHESIZE_H
 #define SCAM_SYNTHESIZE_H
 
-#include <PluginFactory.h>
+#include <functional>
 #include <sstream>
+
 #include "Model.h"
+
 #include "CommandLineParameter.h"
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
+#include "PluginFactory.h"
 #include "TimePointVisitor.h"
+
 
 class PrintITL : public PluginFactory {
 
 public:
-    PrintITL() = default;
-
+    PrintITL();
     ~PrintITL() = default;
 
     std::map<std::string, std::string> printModel(Model *node);
-
     std::map<std::string, std::string> printModule(SCAM::Module *node);
 
     std::string print();
 
 private:
-    //std::stringstream ss;
-
-    //Model *model;
 
     std::string functions();
-
     std::string globalFunctions();
 
     std::string convertDataType(std::string dataTypeName);
+    std::string convertDataTypeForHLS(std::string dataTypeName);
 
     std::string location(bool loc);
 
@@ -44,14 +43,13 @@ private:
     std::string printProperty(Property* property);
 
     std::string macros();
+    std::string macrosForHLS();
     std::string operations();
 
-    //std::string adjustmacros();
+    SCAM::Module *module = nullptr;
+    Model *model = nullptr;
 
-    //std::string pipelined();
-
-//        std::string hideConstants();
-    SCAM::Module *module;
+    std::function<std::string()> macroFunction;
 };
 
 

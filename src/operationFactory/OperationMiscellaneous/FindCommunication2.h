@@ -17,7 +17,6 @@
 namespace SCAM {
     class FindCommunication2 : public StmtAbstractVisitor {
 
-
     public:
         FindCommunication2();
         virtual ~FindCommunication2();
@@ -76,6 +75,8 @@ namespace SCAM {
     public:
         const std::string &getStateName() const;
         bool hasStateName() const;
+
+        void visit(class Ternary &node) override;
 
     private:
         bool waitComm;

@@ -15,6 +15,11 @@ void SCAM::Wait::accept(SCAM::StmtAbstractVisitor &visitor) {
 
 bool SCAM::Wait::operator==(const SCAM::Stmt &other) const {
     //TODO: implement == for wait
+    if (this == &other) return true;
+    if (NodePeekVisitor::nodePeekWait(const_cast<Stmt *>(&other)) == nullptr) return false;
+    auto thisPtr = (Wait *) this;
+    auto otherPtr = (const Wait *) &other;
+    return thisPtr->getStateName() == otherPtr->getStateName();
     throw std::runtime_error("Not implemented");
 
 }

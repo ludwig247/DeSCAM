@@ -8,9 +8,9 @@ entity TestMasterSlave11 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	s_in:		in int;
+	s_in:		in signed(31 downto 0);
 	s_in_sync:		in bool;
-	s_out:		out int;
+	s_out:		out signed(31 downto 0);
 	shared_in:		in bool
 );
 end TestMasterSlave11;
@@ -18,7 +18,7 @@ end TestMasterSlave11;
 architecture TestMasterSlave11_arch of TestMasterSlave11 is
 	signal nextsection_signal: Sections;
 	signal section_signal: Sections;
-	signal val_signal: int;
+	signal val_signal: signed(31 downto 0);
 
 begin
 	process(clk)

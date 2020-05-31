@@ -1,29 +1,29 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro agent_to_master_sync : boolean := end macro;
-macro master_to_agent_sync : boolean := end macro;
-macro agent_to_master_notify : boolean := end macro;
-macro master_to_agent_notify : boolean := end macro;
+macro agent_to_master_sync : boolean := true end macro;
+macro master_to_agent_sync : boolean := true end macro;
+macro agent_to_master_notify : boolean := true end  macro;
+macro master_to_agent_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro agent_to_bus_sig : master_signals := end macro;
-macro agent_to_bus_sig_addr : signed := end macro;
-macro agent_to_bus_sig_cyc : boolean := end macro;
-macro agent_to_bus_sig_data : signed := end macro;
-macro agent_to_bus_sig_stb : boolean := end macro;
-macro agent_to_bus_sig_we : boolean := end macro;
-macro agent_to_master_sig : bus_resp_t := end macro;
-macro agent_to_master_sig_ack : ack_t := end macro;
-macro agent_to_master_sig_data : signed := end macro;
-macro bus_to_agent_sig : slave_signals := end macro;
-macro bus_to_agent_sig_ack : boolean := end macro;
-macro bus_to_agent_sig_data : signed := end macro;
-macro bus_to_agent_sig_err : boolean := end macro;
-macro clk_sig : boolean := end macro;
-macro master_to_agent_sig : bus_req_t := end macro;
-macro master_to_agent_sig_addr : signed := end macro;
-macro master_to_agent_sig_data : signed := end macro;
-macro master_to_agent_sig_trans_type : trans_t := end macro;
+--macro agent_to_bus_sig : master_signals :={resize(0,32), false, resize(0,32), false, false} end macro;
+macro agent_to_bus_sig_addr : signed :=resize(0,32) end macro;
+macro agent_to_bus_sig_cyc : boolean :=false end macro;
+macro agent_to_bus_sig_data : signed :=resize(0,32) end macro;
+macro agent_to_bus_sig_stb : boolean :=false end macro;
+macro agent_to_bus_sig_we : boolean :=false end macro;
+--macro agent_to_master_sig : bus_resp_t :={ERR, resize(0,32)} end macro;
+macro agent_to_master_sig_ack : ack_t :=OK end macro;
+macro agent_to_master_sig_data : signed :=resize(0,32) end macro;
+--macro bus_to_agent_sig : slave_signals :={false, resize(0,32), false} end macro;
+macro bus_to_agent_sig_ack : boolean :=false end macro;
+macro bus_to_agent_sig_data : signed :=resize(0,32) end macro;
+macro bus_to_agent_sig_err : boolean :=false end macro;
+macro clk_sig : boolean :=false end macro;
+--macro master_to_agent_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro master_to_agent_sig_addr : signed :=resize(0,32) end macro;
+macro master_to_agent_sig_data : signed :=resize(0,32) end macro;
+macro master_to_agent_sig_trans_type : trans_t :=SINGLE_READ end macro;
 
 
 -- CONSTRAINTS --
@@ -31,10 +31,10 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro agent_to_bus_req_trans_type : trans_t := end macro;
-macro agent_to_bus_resp_ack : ack_t := end macro;
-macro agent_to_bus_resp_data : signed := end macro;
-macro nextphase : Phases := end macro;
+macro agent_to_bus_req_trans_type : trans_t :=SINGLE_READ end macro;
+macro agent_to_bus_resp_ack : ack_t :=OK end macro;
+macro agent_to_bus_resp_data : signed :=resize(0,32) end macro;
+macro nextphase : Phases :=IDLE end macro;
 
 
 -- STATES --
