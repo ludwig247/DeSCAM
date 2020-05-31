@@ -31,9 +31,11 @@ namespace SCAM {
 
         void setName(std::string newName);
 
+        // Serialization
+        friend class Serializer;
+
     private:
         std::string name;
-
 
     };
 

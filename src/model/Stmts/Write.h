@@ -26,11 +26,12 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+        // Serialization
+        friend class Serializer;
 
     private:
-        Expr *value;
-        VariableOperand *status;
-
+        Expr *value = nullptr;
+        VariableOperand *status = nullptr;
 
     };
 

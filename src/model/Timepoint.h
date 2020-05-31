@@ -26,6 +26,9 @@ namespace SCAM {
 
         //Visitor
         virtual void accept(AbstractVisitor &visitor);
+
+        // Serialization
+        friend class Serializer;
     };
 
 }

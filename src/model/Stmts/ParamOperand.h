@@ -23,6 +23,8 @@ namespace SCAM {
 
         virtual void accept(StmtAbstractVisitor &visitor);
 
+        // Serialization
+        friend class Serializer;
 
     private:
 

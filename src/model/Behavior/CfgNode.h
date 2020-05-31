@@ -64,6 +64,10 @@ namespace SCAM {
         const std::string printShort();
 
         static int node_cnt; //! CFG ID
+
+        // Serialization
+        friend class Serializer;
+
     private:
         int id;
         mutable std::vector<CfgNode *> successorList;

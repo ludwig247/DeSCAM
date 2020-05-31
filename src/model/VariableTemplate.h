@@ -33,11 +33,13 @@ namespace SCAM {
         void setConstant(bool isConstant);
         bool isArrayElement() const;
 
-    private:
+        // Serialization
+        friend class Serializer;
 
+    private:
         std::vector<VariableTemplate *> subVarList;
         bool subVar; //! True, if this is a subVar
-        VariableTemplate *parent; //! If this is a subVar; parent points to the variable contining this
+        VariableTemplate *parent; //! If this is a subVar; parent points to the variable containing this
         SCAM::ConstValue *initialValue;
         bool constant = false;
 

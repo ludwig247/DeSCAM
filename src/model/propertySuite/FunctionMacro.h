@@ -23,6 +23,9 @@ namespace SCAM {
 
         void addParameter(Parameter* parameter);
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         std::vector<Parameter*> parameters;

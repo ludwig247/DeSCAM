@@ -24,6 +24,9 @@ namespace SCAM {
 
         void setStateName(const std::string &stateName);
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         std::string stateName ="";

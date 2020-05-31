@@ -62,6 +62,8 @@ namespace SCAM {
         void setCFG(std::map<int, SCAM::CfgNode *> cfg);
         void setCFG(std::map<int, SCAM::CfgNode *> cfg, std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups);
 
+        // Serialization
+        friend class Serializer;
 
     private:
 

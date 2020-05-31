@@ -29,11 +29,14 @@ namespace SCAM {
 
         virtual void accept(StmtAbstractVisitor &visitor);
 
-    private:
-        SCAM::Variable *arrayVar;
-        Operand * operand;
+        // Serialization
+        friend class Serializer;
 
-        SCAM::Expr *idx;
+    private:
+        SCAM::Variable *arrayVar = nullptr;
+        Operand * operand = nullptr;
+
+        SCAM::Expr *idx = nullptr;
     };
 }
 

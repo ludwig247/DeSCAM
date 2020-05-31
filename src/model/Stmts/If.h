@@ -23,6 +23,8 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+        // Serialization
+        friend class Serializer;
 
     protected:
         Expr *conditionStmt;

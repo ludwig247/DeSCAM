@@ -45,9 +45,12 @@ namespace SCAM {
 
         bool isOutput() const;
 
-
         //Accept
         void accept(AbstractVisitor &visitor);
+
+        // Serialization
+        friend class Serializer;
+//        friend class boost::serialization::access; // In order to use the private default constructor for serialization
 
     private:
         Interface();

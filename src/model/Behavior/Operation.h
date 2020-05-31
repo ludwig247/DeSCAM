@@ -62,6 +62,10 @@ namespace SCAM {
         std::string print();
 
         static int operations_cnt;
+
+        // Serialization
+        friend class Serializer;
+
     private:
         int id;
 
@@ -69,8 +73,8 @@ namespace SCAM {
         std::vector<SCAM::Expr *> assumptionList;
         std::vector<SCAM::Assignment *> commitmentList;
 
-        SCAM::State *state;
-        SCAM::State *nextState;
+        SCAM::State *state = nullptr;
+        SCAM::State *nextState = nullptr;
         bool resetOperation;
         bool waitOperation;
     };

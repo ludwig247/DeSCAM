@@ -85,6 +85,9 @@ namespace SCAM {
         //Visitor
         virtual void accept(AbstractVisitor &visitor);
 
+        // Serialization
+        friend class Serializer;
+
     private:
         int arraySize = 0;
         DataType *arrayType = nullptr;

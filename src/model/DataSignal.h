@@ -21,8 +21,11 @@ namespace SCAM {
 
         virtual void accept(AbstractVisitor &visitor);
 
+        // Serialization
+        friend class Serializer;
+
     private:
-        Port *port;
+        Port *port = nullptr;
     };
 }
 

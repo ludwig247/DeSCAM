@@ -38,6 +38,9 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const = 0;
 
         virtual std::ostream &print(std::ostream &) const = 0;
+
+        // Serialization
+        friend class Serializer;
     };
 }
 

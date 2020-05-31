@@ -41,6 +41,8 @@ namespace SCAM {
 
         void setToInstance(ModuleInstance *instance);
 
+        // Serialization
+        friend class Serializer;
 
     private:
         Port *fromPort;

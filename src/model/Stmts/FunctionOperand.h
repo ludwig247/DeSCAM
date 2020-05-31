@@ -26,6 +26,9 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+        // Serialization
+        friend class Serializer;
+
     private:
         std::map<std::string, SCAM::Expr *> paramValueMap;
         Function *function;

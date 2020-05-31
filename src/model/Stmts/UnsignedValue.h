@@ -21,6 +21,8 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const override;
 
+        // Serialization
+        friend class Serializer;
 
     private:
         unsigned int value;

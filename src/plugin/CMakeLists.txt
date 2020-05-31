@@ -34,6 +34,8 @@ add_plugin(PrintSkeleton; "Structure and FSM in AML")
 
 #add_plugin(PrintMonitor; "fill out")
 
+add_plugin(PrintXML; "Dumps the structure of whole model as XML")
+
 #UNDER MAINTANANCE
 #add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
 
@@ -42,7 +44,6 @@ add_plugin(PrintSkeleton; "Structure and FSM in AML")
 #NOT WORKING ANYMORE
 #add_plugin(PrintVHDL; "Print VHDL template")
 #add_plugin(PrintAML; "Structure and FSM in AML")
-#add_plugin(PrintXML; "Dumps the structure of each module as XML")
 #add_plugin(PrintModulesCheckers; "Create a project to check equivalency between generate module and original one" ; PrintSystemC)
 
 
@@ -93,4 +94,3 @@ add_custom_command(
         DEPENDS MakeStyles
         COMMAND MakeStyles ${CMAKE_SOURCE_DIR}/src/plugin/PluginFactory.cpp
 )
-

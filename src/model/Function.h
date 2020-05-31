@@ -36,12 +36,14 @@ namespace SCAM {
 
         virtual void accept(AbstractVisitor &visitor);
 
+        // Serialization
+        friend class Serializer;
+
     private:
         std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *> > > returnValueConditionList; //! Stores the return value for each possible sequence of inputs
         DataType *returnType;
         std::vector<Stmt *> stmtList;
         std::map<std::string, Parameter *> paramMap;
-
 
     };
 }

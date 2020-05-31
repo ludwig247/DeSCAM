@@ -25,6 +25,9 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+        // Serialization
+        friend class Serializer;
+
     private:
         std::string value;
     };

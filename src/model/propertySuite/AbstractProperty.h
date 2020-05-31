@@ -54,6 +54,9 @@ namespace SCAM {
         const std::vector<Assignment *> &getCommitmentList() const;
         void setCommitmentList(const std::vector<Assignment *> &commitmentList);
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         const std::string name;

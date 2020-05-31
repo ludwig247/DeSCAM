@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 14) # C++14...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 
+find_package(Boost COMPONENTS system serialization REQUIRED) # Boost dependency (for serialization with PrintXML)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib)

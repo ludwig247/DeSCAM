@@ -68,6 +68,9 @@ namespace SCAM {
         //std::set<AbstractProperty*> getPredecessorProperties(PropertyMacro* state);
         //std::set<AbstractProperty*> getSuccessorProperties(PropertyMacro* state);
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         std::string name;

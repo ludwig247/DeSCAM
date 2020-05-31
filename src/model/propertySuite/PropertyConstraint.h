@@ -30,6 +30,9 @@ namespace SCAM {
         void setName(const std::string &name);
         void setExpression(Stmt *expr);
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         std::string name;

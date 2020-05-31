@@ -28,6 +28,9 @@ public:
     void addStmt(SCAM::Stmt *stmt);
     const std::vector<Stmt *> &getStmtList() const;
 
+    // Serialization
+    friend class Serializer;
+
 private:
     std::vector<SCAM::Stmt*> stmtList;
 };

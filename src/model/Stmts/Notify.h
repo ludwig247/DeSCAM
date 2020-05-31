@@ -23,6 +23,10 @@ namespace SCAM {
 
         Port *getPort() const;
 
+        // Serialization
+        friend class Serializer;
+
+
     private:
         Port *port;
 

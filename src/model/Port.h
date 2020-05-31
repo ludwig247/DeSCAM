@@ -41,6 +41,9 @@ namespace SCAM {
 
         DataSignal *getDataSignal() const;
 
+        // Serialization
+        friend class Serializer;
+
     private:
         Interface *_interface; //! Interface of this port
         SyncSignal *synchSignal;

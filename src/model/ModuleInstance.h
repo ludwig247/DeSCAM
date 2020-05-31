@@ -39,6 +39,8 @@ namespace SCAM {
         //GETTER
         Module *getStructure();
 
+        // Serialization
+        friend class Serializer;
 
     private:
         Module *structure; //! Pointing to the structure of the model

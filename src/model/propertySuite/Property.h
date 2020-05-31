@@ -56,7 +56,8 @@ namespace SCAM {
 
         const Operation * getOperation() const;
 
-
+        // Serialization
+        friend class Serializer;
 
     private:
 

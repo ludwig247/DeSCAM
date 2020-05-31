@@ -17,6 +17,10 @@ namespace SCAM {
 
         virtual std::string getOperandName() const = 0;
 
+        // Serialization
+        friend class Serializer;
+
+
     private:
     };
 }

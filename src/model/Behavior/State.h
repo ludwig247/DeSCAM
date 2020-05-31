@@ -61,12 +61,16 @@ namespace SCAM {
         std::string print() const;
 
         static int state_cnt;
+
+        // Serialization
+        friend class Serializer;
+
     private:
         int stateId;
         std::string name;
         bool init;
         bool wait;
-        SCAM::Communication *commStmt;    //! Stmt that is communication in this state
+        SCAM::Communication *commStmt = nullptr;    //! Stmt that is communication in this state
         std::vector<SCAM::Operation *> incomingOperationsList;
         std::vector<SCAM::Operation *> outgoingOperationsList;
         std::vector<std::vector<SCAM::Stmt *> > incomingFreezeSignals;

@@ -25,6 +25,9 @@ namespace SCAM {
         bool isDataType(std::string n) const;
         virtual void accept(StmtAbstractVisitor &visitor) = 0;
 
+        // Serialization
+        friend class Serializer;
+
     private:
         const DataType *dataType;
     };

@@ -41,6 +41,9 @@ namespace SCAM {
         bool isSubVar() const; //! Returns true if object is part of a compound or array
         const DataType *getParentDataType() const;
 
+        // Serialization
+        friend class Serializer;
+
     private:
         Port *port = nullptr;
         //Ports

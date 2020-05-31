@@ -54,6 +54,9 @@ namespace SCAM {
             return this->isCompoundType() || this->isArrayType();
         }
 
+        // Serialization
+        friend class Serializer;
+
     private:
         TypeInterface() = default;
 

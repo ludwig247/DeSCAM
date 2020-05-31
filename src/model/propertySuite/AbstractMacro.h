@@ -32,10 +32,13 @@ namespace SCAM {
         void activateMacro();
         void deactivateMacro();
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         const std::string name;
-        Stmt* expression;
+        Stmt* expression = nullptr;
         bool active;
 
     };

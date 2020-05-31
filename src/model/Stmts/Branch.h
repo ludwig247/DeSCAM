@@ -15,6 +15,9 @@ namespace SCAM {
         virtual SCAM::Expr *getConditionStmt() const = 0;
 
         virtual std::ostream &print(std::ostream &ostream) const;
+
+        // Serialization
+        friend class Serializer;
     };
 
 }

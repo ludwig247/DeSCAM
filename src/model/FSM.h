@@ -48,12 +48,15 @@ namespace SCAM {
         //Accept
         virtual void accept(AbstractVisitor &visitor);
 
+        // Serialization
+        friend class Serializer;
+
     private:
         FSM();
 
-        Module *module;
-        Variable *sectionVariable; //! Section that is currently executed
-        Variable *nextSectionVariable; //! Section that is executed next
+        Module *module = nullptr;
+        Variable *sectionVariable = nullptr; //! Section that is currently executed
+        Variable *nextSectionVariable = nullptr; //! Section that is executed next
 
         std::map<std::string, std::vector<SCAM::Stmt *>> sectionMap; //!Sections: a section exists for each state of the FSM with the stmts within the section
         std::map<int, State *> stateMap; //! Stores a map of the abstract states and the connecting operations

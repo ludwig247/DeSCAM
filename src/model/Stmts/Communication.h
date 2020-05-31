@@ -33,8 +33,11 @@ namespace SCAM {
         const std::string &getStateName() const;
         void setStateName(const std::string &stateName);
 
+        // Serialization
+        friend class Serializer;
+
     private:
-        Port *port;
+        Port *port = nullptr;
         bool is_non_blocking_access;
 
         std::string stateName = "";

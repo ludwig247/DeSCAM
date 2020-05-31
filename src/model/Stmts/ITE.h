@@ -36,6 +36,9 @@ namespace SCAM {
 
         virtual bool operator==(const Stmt &other) const;
 
+        // Serialization
+        friend class Serializer;
+
     private:
         std::vector<SCAM::Stmt *> ifList; //! List containing each entry for each element that is within the if block
         std::vector<SCAM::Stmt *> elseList; //! List containing an entry for each element that is within the else block

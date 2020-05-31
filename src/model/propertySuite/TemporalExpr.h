@@ -40,6 +40,9 @@ namespace SCAM {
 
         bool isDuring();
 
+        // Serialization
+        friend class Serializer;
+
     private:
 
         Type type;

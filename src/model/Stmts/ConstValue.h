@@ -15,6 +15,9 @@ namespace SCAM {
 
         virtual std::string getValueAsString() const = 0;
 
+        // Serialization
+        friend class Serializer;
+
     };
 }
 

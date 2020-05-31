@@ -20,6 +20,9 @@ namespace SCAM {
 
         bool operator==(const Stmt &other) const override;
 
+        // Serialization
+        friend class Serializer;
+
     };
 
 }
