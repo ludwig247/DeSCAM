@@ -1,13 +1,13 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_in_sync : boolean := end macro;
-macro b_out_sync : boolean := end macro;
-macro b_in_notify : boolean := end macro;
-macro b_out_notify : boolean := end macro;
+macro b_in_sync : boolean := true end macro;
+macro b_out_sync : boolean := true end macro;
+macro b_in_notify : boolean := true end  macro;
+macro b_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_in_sig : signed := end macro;
-macro b_out_sig : unsigned := end macro;
+macro b_in_sig : signed :=resize(0,32) end macro;
+macro b_out_sig : unsigned :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -147,47 +147,7 @@ prove:
 end property;
 
 
-property state_1_7 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-assume:
-	at t: state_1;
-	at t: b_in_sync;
-	at t: not((resize(15,32) > unsigned(foo(b_in_sig))));
-	at t: not((unsigned(foo(b_in_sig)) > resize(0,32)));
-	at t: ((unsigned(b_in_sig) > unsigned(foo(b_in_sig))) or (unsigned(foo(b_in_sig)) > unsigned(b_in_sig)));
-prove:
-	at t_end: state_2;
-	at t_end: b_out_sig = 2;
-	during[t+1, t_end]: b_in_notify = false;
-	during[t+1, t_end-1]: b_out_notify = false;
-	at t_end: b_out_notify = true;
-end property;
-
-
-property state_1_8 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	b_in_sig_at_t = b_in_sig@t;
-assume:
-	at t: state_1;
-	at t: b_in_sync;
-	at t: not((resize(15,32) > unsigned(foo(b_in_sig))));
-	at t: not((unsigned(foo(b_in_sig)) > resize(0,32)));
-	at t: not(((unsigned(b_in_sig) > unsigned(foo(b_in_sig))) or (unsigned(foo(b_in_sig)) > unsigned(b_in_sig))));
-prove:
-	at t_end: state_2;
-	at t_end: b_out_sig = unsigned(foo(b_in_sig_at_t));
-	during[t+1, t_end]: b_in_notify = false;
-	during[t+1, t_end-1]: b_out_notify = false;
-	at t_end: b_out_notify = true;
-end property;
-
-
-property state_2_9 is
+property state_2_7 is
 dependencies: no_reset;
 for timepoints:
 	t_end = t+1;

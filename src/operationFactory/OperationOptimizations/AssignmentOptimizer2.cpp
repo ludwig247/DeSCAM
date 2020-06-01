@@ -9,9 +9,26 @@ SCAM::AssignmentOptimizer2::AssignmentOptimizer2(const std::vector<SCAM::Assignm
         translator(ExprTranslator(&context)),
         module(module) {
     //Visit assignment of the assignmentsList
+    int i=0;
     for (auto assignment: assignmentsList) {
+        if(i++ == 59){
+            std::cout << *assignment << std::endl;
+
+        }
         this->newAssignmentsList.push_back(this->optimizeAssignment(assignment));
     }
+}
+
+SCAM::AssignmentOptimizer2::AssignmentOptimizer2(const SCAM::Operation *operation, SCAM::Module *module):
+        translator(ExprTranslator(&context)),
+        module(module){
+
+
+    for (auto assignment: operation->getCommitmentsList()) {
+
+        this->newAssignmentsList.push_back(this->optimizeAssignment(assignment));
+    }
+
 }
 
 std::vector<SCAM::Assignment *> SCAM::AssignmentOptimizer2::getNewAssignmentsList() {
@@ -19,7 +36,6 @@ std::vector<SCAM::Assignment *> SCAM::AssignmentOptimizer2::getNewAssignmentsLis
 }
 
 SCAM::Assignment *SCAM::AssignmentOptimizer2::applyTactics(SCAM::Assignment *assignment) {
-
     z3::params params(context);
     params.set("arith_lhs",false);
     params.set("eq2ineq",false);
@@ -121,6 +137,8 @@ SCAM::Assignment * SCAM::AssignmentOptimizer2::optimizeAssignment(SCAM::Assignme
     AssignmentOptimizer2 assignmentOptimizer2({assignment},module);
     return assignmentOptimizer2.getNewAssignmentsList().front();
 }
+
+
 
 
 

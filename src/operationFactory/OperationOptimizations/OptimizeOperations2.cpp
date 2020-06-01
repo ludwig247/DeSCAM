@@ -21,8 +21,6 @@ namespace SCAM {
         }
 
 
-
-
         for (auto op : operationsList) {
             //Check assumptions for usage
             for (auto ass: op->getAssumptionsList()) {

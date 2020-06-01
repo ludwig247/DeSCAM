@@ -8,7 +8,7 @@ entity TestArray5 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	b_in:		in int;
+	b_in:		in signed(31 downto 0);
 	b_in_sync:		in bool;
 	b_in_notify:		out bool;
 	b_out:		out int_2;
@@ -19,7 +19,7 @@ end TestArray5;
 
 architecture TestArray5_arch of TestArray5 is
 	signal myArray_signal: int_2;
-	signal test_signal: int;
+	signal test_signal: signed(31 downto 0);
 
 begin
 	process(clk)

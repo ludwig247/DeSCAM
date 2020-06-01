@@ -39,25 +39,23 @@ SCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigne
         lhsExpr(nullptr),
         unsigned_flag(unsigned_flag),
         pass(0) {
-
     //stmt->dump();
-
     TraverseStmt(stmt);
-
-
 }
 
 bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
+
     //Binary Expression is always TOP statement. In case of a substmt, new FindDataFlow object is neccesary
     if (pass == 0) {
         //OperationName
         std::string operationName = binaryOperator->getOpcodeStr().str();
         //Pass = 1 LHS
         //LHS Operator
-        FindDataFlow findLHS(binaryOperator->getLHS(), this->module, unsigned_flag);
+        FindDataFlow findLHS(binaryOperator->getLHS(), this->module, this->unsigned_flag);
         this->lhsExpr = findLHS.getExpr();
         //RHS Operator
-        FindDataFlow findRHS(binaryOperator->getRHS(), this->module, unsigned_flag);
+        if(this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
+        FindDataFlow findRHS(binaryOperator->getRHS(), this->module, this->unsigned_flag);
         this->rhsExpr = findRHS.getExpr();
 
 
@@ -72,6 +70,7 @@ bool SCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperat
         }
         //Create new Element
         switch (binaryOperator->getOpcode()) {
+            binaryOperator->dumpColor();
             case clang::BinaryOperator::Opcode::BO_Assign:
                 this->stmt = new Assignment(this->lhsExpr, this->rhsExpr);
                 break;
@@ -250,6 +249,7 @@ bool SCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *member
                     } else if (memberCallExpr->getNumArgs() > 0 && hasValidArgument(memberCallExpr->getArg((0)))) {
                         //Blocking read
                         if (methodString == "read") {
+                            assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 4 && "Wrong number of arguments arguments");
                             //add variable as parameter
                             if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(memberCallExpr->getArg((0))))) {
                                 auto read = new Read(operand->getPort(), variableOp);
@@ -733,13 +733,13 @@ bool SCAM::FindDataFlow::exitVisitor(std::string msg, ErrorMsg::ErrorType errorT
 
     switch (errorType) {
         case ErrorMsg::ErrorType::error:
-            ErrorMsg::getInstance().addErrorLog("-E- " + msg);
+            ErrorMsg::getInstance().addErrorLog(msg,"E");
             break;
         case ErrorMsg::ErrorType::warning:
-            ErrorMsg::getInstance().addErrorLog("-W- " + msg);
+            ErrorMsg::getInstance().addErrorLog(msg, "W");
             break;
         case ErrorMsg::ErrorType::information:
-            ErrorMsg::getInstance().addErrorLog("-I- " + msg);
+            ErrorMsg::getInstance().addErrorLog(msg,"I");
             break;
     }
 
@@ -808,6 +808,28 @@ bool SCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arra
             }
         } else return exitVisitor("Stmt is null");
     } else return exitVisitor("Not an array type!");
+}
+
+bool SCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) {
+
+    FindDataFlow findCond(conditionalOperator->getCond(), this->module, false);
+    auto condExpr = findCond.getExpr();
+
+
+    FindDataFlow findTrue(conditionalOperator->getTrueExpr(), this->module, unsigned_flag);
+    auto trueExpr = findTrue.getExpr();
+
+    FindDataFlow findFalse(conditionalOperator->getFalseExpr(), this->module, unsigned_flag);
+    auto falseExpr = findFalse.getExpr();
+
+
+    if(condExpr && trueExpr && falseExpr){
+        //conditionalOperator->dumpColor();
+        //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
+        this->expr = new Ternary(condExpr,trueExpr,falseExpr);
+    }else return exitVisitor("Operator not correctly used!");
+
+    return false;
 }
 
 

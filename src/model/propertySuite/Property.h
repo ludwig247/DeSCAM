@@ -59,11 +59,13 @@ namespace SCAM {
         // Serialization
         friend class Serializer;
 
+    protected:
+
+        std::vector<const SCAM::Operation *> operationList; //! Contains a reference to the abstract operations
+
     private:
 
         const std::string name;
-
-        std::vector<const SCAM::Operation *> operationList; //! Contains a reference to the abstract operations
 
         std::vector<PropertyConstraint*> constraints;
 

@@ -7,27 +7,32 @@
 
 #include <Interfaces.h>
 
-struct TestArray0 : public sc_module {
-    blocking_in<int> b_in;
-    blocking_out<int[2]> b_out;
-    //Constructor
-    SC_HAS_PROCESS(TestArray0);
 
-    TestArray0(sc_module_name name) :
-            b_in("m_in"),
-            b_out("m_out"){
+/*
+ *
+ */
+
+
+
+struct ExampleModule : public sc_module {
+    blocking_in<int[32]> input;
+    blocking_out<int[32]> output;
+    //Constructor
+    SC_CTOR(ExampleModule){
         SC_THREAD(fsm);
     }
 
-    int test;
-    int myArray[2];
+    int[32] sort(int[32] val) const;
 
+    int val[32];
     void fsm() {
         while (true) {
-            b_in->read(test);
-            myArray[0] = test + myArray[1];
-            myArray[1]  = test;
-            b_out->write(myArray);
+             input->read(val);
+             val = sort(val);
+
+             insert_state("name");
+
+             output->write(val);
         }
     }
 };

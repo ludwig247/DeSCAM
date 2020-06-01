@@ -16,7 +16,7 @@ namespace SCAM {
  */
     class ITE : public If {
     public:
-        ITE(Expr *conditionStmt);
+        explicit ITE(Expr *conditionStmt);
 
         void addIfList(SCAM::Stmt *);
 
@@ -26,15 +26,13 @@ namespace SCAM {
 
         void setElseList(const std::vector<Stmt *> &elseList);
 
-
         const std::vector<Stmt *> &getIfList() const;
 
         const std::vector<Stmt *> &getElseList() const;
 
+        void accept(SCAM::StmtAbstractVisitor &visitor) override ;
 
-        virtual void accept(SCAM::StmtAbstractVisitor &visitor);
-
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
         // Serialization
         friend class Serializer;

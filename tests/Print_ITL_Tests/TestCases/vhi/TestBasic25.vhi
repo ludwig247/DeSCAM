@@ -1,13 +1,13 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro alu_out_notify : boolean := end macro;
-macro reg_out_notify : boolean := end macro;
+macro alu_out_notify : boolean := true end  macro;
+macro reg_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro alu_in_sig : signed := end macro;
-macro alu_out_sig : signed := end macro;
-macro reg_in_sig : signed := end macro;
-macro reg_out_sig : signed := end macro;
+macro alu_in_sig : signed :=resize(0,32) end macro;
+macro alu_out_sig : signed :=resize(0,32) end macro;
+macro reg_in_sig : signed :=resize(0,32) end macro;
+macro reg_out_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --

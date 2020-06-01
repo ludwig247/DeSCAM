@@ -13,6 +13,7 @@ namespace SCAM {
     public:
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
+
     protected:
         virtual void visit(class Relational &node);
 

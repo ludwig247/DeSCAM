@@ -383,4 +383,9 @@ namespace SCAM {
         }
         this->CFG.erase(nodeId);
     }
+
+    void LivenessAnalysis::visit(class Ternary &node) {
+        throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
+
+    }
 }

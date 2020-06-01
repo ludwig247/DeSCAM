@@ -1,13 +1,13 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_out_sync : boolean := end macro;
-macro b_out2_sync : boolean := end macro;
-macro b_out_notify : boolean := end macro;
-macro b_out2_notify : boolean := end macro;
+macro b_out_sync : boolean := true end macro;
+macro b_out2_sync : boolean := true end macro;
+macro b_out_notify : boolean := true end  macro;
+macro b_out2_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_out_sig : unsigned := end macro;
-macro b_out2_sig : signed := end macro;
+macro b_out_sig : unsigned :=resize(0,32) end macro;
+macro b_out2_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -15,9 +15,9 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro phase : Phases := end macro;
-macro val_signed : signed := end macro;
-macro val_unsigned : unsigned := end macro;
+macro phase : Phases :=SECTION_A end macro;
+macro val_signed : signed :=resize(0,32) end macro;
+macro val_unsigned : unsigned :=resize(0,32) end macro;
 
 
 -- STATES --
@@ -127,12 +127,9 @@ assume:
 	at t: b_out_sync;
 	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -157,12 +154,9 @@ assume:
 	at t: b_out_sync;
 	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -187,12 +181,9 @@ assume:
 	at t: b_out_sync;
 	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -217,12 +208,9 @@ assume:
 	at t: b_out_sync;
 	at t: ((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
 	at t: ((shift_left(val_unsigned,resize(2,32))) = resize(0,32));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -247,12 +235,9 @@ assume:
 	at t: b_out_sync;
 	at t: ((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: ((shift_left(val_unsigned,resize(2,32))) = resize(0,32));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -277,12 +262,9 @@ assume:
 	at t: b_out_sync;
 	at t: ((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -307,12 +289,9 @@ assume:
 	at t: b_out_sync;
 	at t: ((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -337,12 +316,9 @@ assume:
 	at t: b_out_sync;
 	at t: ((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: not(((val_unsigned and resize(2,32)) = resize(0,32)));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -367,12 +343,9 @@ assume:
 	at t: b_out_sync;
 	at t: not(((val_unsigned mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: ((val_unsigned and resize(2,32)) = resize(0,32));
-	at t: not(((val_unsigned or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_unsigned,resize(2,32))) = resize(0,32));
 	at t: not(((shift_left(val_unsigned,resize(2,32))) = resize(0,32)));
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
 prove:
 	at t_end: state_5;
 	at t_end: b_out2_sig = (shift_right(val_signed_at_t,2));
@@ -466,10 +439,8 @@ assume:
 	at t: b_out2_sync;
 	at t: ((val_signed mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: ((val_signed and resize(2,32)) = resize(0,32));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_signed,resize(2,32))) = resize(0,32));
 	at t: ((shift_left(val_signed,resize(2,32))) = resize(0,32));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -494,10 +465,8 @@ assume:
 	at t: b_out2_sync;
 	at t: ((val_signed mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: ((val_signed and resize(2,32)) = resize(0,32));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_signed,resize(2,32))) = resize(0,32)));
 	at t: ((shift_left(val_signed,resize(2,32))) = resize(0,32));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -522,10 +491,8 @@ assume:
 	at t: b_out2_sync;
 	at t: ((val_signed mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: ((val_signed and resize(2,32)) = resize(0,32));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_signed,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -550,10 +517,8 @@ assume:
 	at t: b_out2_sync;
 	at t: ((val_signed mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: not(((val_signed and resize(2,32)) = resize(0,32)));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_signed,resize(2,32))) = resize(0,32));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -578,10 +543,8 @@ assume:
 	at t: b_out2_sync;
 	at t: ((val_signed mod resize(2,32))(31 downto 0) = resize(0,32));
 	at t: not(((val_signed and resize(2,32)) = resize(0,32)));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_signed,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -606,10 +569,8 @@ assume:
 	at t: b_out2_sync;
 	at t: not(((val_signed mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: ((val_signed and resize(2,32)) = resize(0,32));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_signed,resize(2,32))) = resize(0,32));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -634,10 +595,8 @@ assume:
 	at t: b_out2_sync;
 	at t: not(((val_signed mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: ((val_signed and resize(2,32)) = resize(0,32));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_signed,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -662,10 +621,8 @@ assume:
 	at t: b_out2_sync;
 	at t: not(((val_signed mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: not(((val_signed and resize(2,32)) = resize(0,32)));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: ((shift_right(val_signed,resize(2,32))) = resize(0,32));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));
@@ -690,10 +647,8 @@ assume:
 	at t: b_out2_sync;
 	at t: not(((val_signed mod resize(2,32))(31 downto 0) = resize(0,32)));
 	at t: not(((val_signed and resize(2,32)) = resize(0,32)));
-	at t: not(((val_signed or resize(2,32)) = resize(0,32)));
 	at t: not(((shift_right(val_signed,resize(2,32))) = resize(0,32)));
 	at t: not(((shift_left(val_signed,resize(2,32))) = resize(0,32)));
-	at t: (SECTION_A = SECTION_A);
 prove:
 	at t_end: state_1;
 	at t_end: b_out_sig = (shift_right(val_unsigned_at_t,2));

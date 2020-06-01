@@ -13,7 +13,6 @@ namespace SCAM {
     class Branch : public SCAM::Stmt {
     public:
         virtual SCAM::Expr *getConditionStmt() const = 0;
-
         virtual std::ostream &print(std::ostream &ostream) const;
 
         // Serialization

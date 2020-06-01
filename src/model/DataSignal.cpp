@@ -4,7 +4,7 @@
 #include "DataSignal.h"
 
 
-SCAM::DataSignal::DataSignal(std::string name, SCAM::DataType *type, SCAM::ConstValue *initialValue, SCAM::DataSignal *parent, SCAM::Port *port) :
+SCAM::DataSignal::DataSignal(std::string name, const SCAM::DataType *type, SCAM::ConstValue *initialValue, SCAM::DataSignal *parent, SCAM::Port *port) :
         port(port),
         VariableTemplate(name, type, initialValue, parent) {
     //! Commenting this below because it breaks the serialization (for cases when 'parent' is of type VariableTemplate
