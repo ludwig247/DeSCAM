@@ -1,0 +1,58 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function data_in_sync;
+	data_in_sync = BubbleSort.data_in_sync;
+endfunction
+function data_out_sync;
+	data_out_sync = BubbleSort.data_out_sync;
+endfunction
+function data_in_notify;
+	data_in_notify = BubbleSort.data_in_notify;
+endfunction
+function data_out_notify;
+	data_out_notify = BubbleSort.data_out_notify;
+endfunction
+
+// DP SIGNALS //
+function int data_in_sig(int index);
+	data_in_sig = BubbleSort.data_in[index];
+endfunction
+
+function int data_out_sig(int index);
+	data_out_sig = BubbleSort.data_out[index];
+endfunction
+
+
+// VISIBLE REGISTERS //
+function int data_algorithm(int index);
+	data_algorithm = BubbleSort.data_algorithm_signal[index];
+endfunction
+
+function int i;
+	i = BubbleSort.i_signal;
+endfunction
+function int j;
+	j = BubbleSort.j_signal;
+endfunction
+function phases phase_algorithm;
+	phase_algorithm = BubbleSort.phase_algorithm_signal;
+endfunction
+
+// STATES //
+function data_in_1;
+	data_in_1 = ((phase_algorithm() == IDLE)
+		&& (data_in_notify() == true)
+		&& (data_out_notify() == false));
+endfunction
+function loop_2;
+	loop_2 = ((phase_algorithm() == RUN)
+		&& (data_in_notify() == false)
+		&& (data_out_notify() == false));
+endfunction
+function data_out_3;
+	data_out_3 = ((phase_algorithm() == RUN)
+		&& (data_in_notify() == false)
+		&& (data_out_notify() == true));
+endfunction
+
+
