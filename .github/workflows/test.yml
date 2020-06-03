@@ -44,7 +44,6 @@ jobs:
 #          rm -rf $GITHUB_WORKSPACE/install/tmp
       - name: AppImage Elaboration
         uses: ./
-	id: AppImage
 
      
 
