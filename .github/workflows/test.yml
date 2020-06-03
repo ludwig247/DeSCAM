@@ -18,8 +18,8 @@ jobs:
       ROOT_DIR: "/"
     steps:
       - uses: actions/checkout@v1
-      - name: Build System Generation
-        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+#      - name: Build System Generation
+#        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       #- name: Build SYSTEMC
       #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
       #- name: Build GTEST

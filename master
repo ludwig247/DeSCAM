@@ -5,10 +5,10 @@ apt-get update
 
 #Relocating Files
 mkdir /root/DeSCAM 
-mv /AppImage /root/
-mv /install /root/DeSCAM/
-mv /src /root/DeSCAM/
-mv /transcript /root/DeSCAM/
+mv ./AppImage /root/
+mv ./install /root/DeSCAM/
+mv ./src /root/DeSCAM/
+mv ./transcript /root/DeSCAM/
 mv /root/AppImage/appimagetool-x86_64.AppImage /root/
 mv /root/AppImage/tempenv.sh /root/
 cd /root/
