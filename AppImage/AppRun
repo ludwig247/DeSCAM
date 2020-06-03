@@ -1,19 +1,17 @@
 #!/bin/sh
 
 echo "Executing DeSCAM..."
-echo $SCAM_DIR
-echo $SYSTEMC_DIR
-
 cd "$(dirname "$0")"
 SELF_DIR="$(dirname "$0")"
 SCAM_HOME="$SELF_DIR/root/DeSCAM"
 SCAM_DIR="$SELF_DIR/root/DeSCAM/"
+ROOT_DIR="$SELF_DIR/"
 SYSTEMC_DIR="$SELF_DIR/root/DeSCAM/include/"
 CLANG_DIR="$SELF_DIR/root/DeSCAM/include/clang/3.4.2/include"
-LIBS_PATH="$SELF_DIR/root/DeSCAM/lib:$SELF_DIR/root/DeSCAM/include:$SELF_DIR/usr/lib:$SELF_DIR/root/DeSCAM/build"
+LIBS_PATH="$SELF_DIR/usr/include:$SELF_DIR/usr/include/x86_64-linux-gnu:$SELF_DIR/root/DeSCAM/lib:$SELF_DIR/root/DeSCAM/include:$SELF_DIR/usr/lib:$SELF_DIR/root/DeSCAM/build:$SELF_DIR/usr/lib/x86_64-linux-gnu:$SELF_DIR/lib:$SELF_DIR/lib/x86_64-linux-gnu:$SELF_DIR/usr/include/c++:$SELF_DIR/usr/include/c++/v1:$SELF_DIR/usr/include/c++/7:$SELF_DIR/usr/local:$SELF_DIR/usr/local/lib"
 
 #All Internal Libraries
-LIBS_PATH=${LIBS_PATH}:$(find ./root/DeSCAM/build/src -type d | tr '\n' ':' | sed 's/:$//')
+LIBS_PATH=${LIBS_PATH}:$(find ${SELF_DIR}/root/DeSCAM/build/src -type d | tr '\n' ':' | sed 's/:$//')
 
 if [ -z "$LD_LIBRARY_PATH" ]; then
   LD_LIBRARY_PATH="$LIBS_PATH"
@@ -22,6 +20,8 @@ else
 fi
 
 SC_HOME="$SELF_DIR/root/DeSCAM/include"
+
+#SYSTEMC_HOME="$SC_HOME"
 
 if [ -z "$SYSTEMC_HOME" ]; then
   SYSTEMC_HOME="$SC_HOME"
@@ -38,8 +38,16 @@ export SCAM_HOME
 export SCAM_DIR
 export SYSTEMC_DIR
 export CLANG_DIR
+export ROOT_DIR
 
+ldconfig
+#sed -i -e 's|/usr|././|g' ./usr/bin/DESCAM
+cd usr/ 
+#Libs
+#rm ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5 
+#ln -s ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5.9 ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5   
+#echo $(ls -l ./lib/x86_64-linux-gnu/libtinfo*)
 #exec ./root/DeSCAM/bin/DESCAM --file $1 --output $2 -PrintSkeleton
-exec ./root/DeSCAM/bin/DESCAM "$@" 
+exec ./bin/DESCAM "$@" 
 
 
