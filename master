@@ -2,7 +2,8 @@
 
 #Updating System and installing basic packages
 apt-get update
-apt-get install fuse unionfs-fuse
+apt-get install fuse
+apt-get install unionfs-fuse
 
 #Relocating Files
 mkdir /root/DeSCAM 
