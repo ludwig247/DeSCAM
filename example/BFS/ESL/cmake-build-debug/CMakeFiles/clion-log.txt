@@ -1,0 +1,30 @@
+/import/public/common/clion-2019.2.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BFS/ESL
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+CMake Error at CMakeLists.txt:16 (add_executable):
+  Cannot find source file:
+
+    /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BFS/ESL/example/Interfaces/Interfaces.h
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .m .M .mm .h .hh .h++ .hm
+  .hpp .hxx .in .txx
+
+
+CMake Error at CMakeLists.txt:16 (add_executable):
+  No SOURCES given to target: Bus
+
+
+-- Build files have been written to: /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BFS/ESL/cmake-build-debug

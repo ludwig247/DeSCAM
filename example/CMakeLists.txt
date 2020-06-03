@@ -1,5 +1,6 @@
 
 add_subdirectory(Bus)
+add_subdirectory(BubbleSort/ESL)
 #add_subdirectory(Framer)
 #add_subdirectory(SingleMasterMultiSlave)
 #add_subdirectory(FPI)
