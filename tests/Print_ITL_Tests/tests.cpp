@@ -27,13 +27,13 @@ int main(int argc, char **argv) {
         if (line.size() > 0 && !(line.find("//") == 0))
             header_includes.push_back(line);
     }
+    ifs.close();
+
 
 for(int i = 0; i < header_includes.size(); i++) {
     //Binary
     std::string bin = std::string(SCAM_HOME"/bin/SCAM");
     commandLineArugmentsVector.push_back(bin.c_str());
-
-
 
 //    for (int i = 0; i < header_includes.size(); i++) {
         commandLineArugmentsVector.push_back(header_includes[i].c_str());
@@ -63,7 +63,9 @@ for(int i = 0; i < header_includes.size(); i++) {
 //    for (int i = 1; i < commandLineArugmentsVector.size(); i++) {
         SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],
                                        commandLineArgumentsArray[1]);
+        SCAM::ModelGlobal::reset();
 //    }
+//header_includes.clear();
 commandLineArugmentsVector.clear();
 }
     std::vector<SCAM::Module*> result;

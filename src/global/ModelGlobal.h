@@ -28,10 +28,16 @@ namespace SCAM {
             ModelGlobal::getInstance().model = model;
         };
 
+        static void reset(){
+            if (ModelGlobal::getInstance().model == nullptr) throw std::runtime_error("ModelGlobal: model is null");
+            return ModelGlobal::getInstance().model->clear();
+        };
+
         static Model *getModel(){
             if (ModelGlobal::getInstance().model == nullptr) throw std::runtime_error("ModelGlobal: model is null");
             return ModelGlobal::getInstance().model;
         };
+
 
         static void
         createModel(int argc, const std::string &Binary, const std::string &srcFile, bool isWrapper=false){
@@ -84,8 +90,8 @@ namespace SCAM {
                 else PluginAction<SCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
             } else throw std::runtime_error("Wrong use of DeSCAM");
 
-                commandLineArugmentsVector.clear();
-                SCAM::DataTypes::reset();
+//                commandLineArgumentsArray();
+//                SCAM::DataTypes::reset();
 
 
         };

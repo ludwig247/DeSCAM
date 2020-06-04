@@ -26,6 +26,8 @@
 #include "clang/Parse/Parser.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
+#include "ModelFactory.h"
+#include <vector>
 
 
 using namespace clang::driver;
@@ -54,9 +56,12 @@ template < typename A > class PluginAction
 {
 public:
 	PluginAction (int argc, const char **argv) {
+    for(int i=0; i>=0; i++) {
+        std::cout << argv[i] << std::endl;
+    }
+        CommonOptionsParser OptionsParser (argc, argv);
 
-		CommonOptionsParser OptionsParser (argc, argv);
-
+//        OptionsParser.getSourcePathList ().erase(OptionsParser.SourcePathList.begin());
 		ClangTool Tool (OptionsParser.getCompilations (), OptionsParser.getSourcePathList ());
 
 		std::string output;
@@ -69,7 +74,7 @@ public:
 		FrontendActionFactory *fe =	newFrontendActionFactory < LightsCameraAction < A > >();
 		Tool.run(fe);
 		std::cout << ss.str() << std::endl;
-
+//		OptionsParser.getSourcePathList().clear();
 	};
 
 

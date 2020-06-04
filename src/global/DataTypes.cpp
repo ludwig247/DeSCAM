@@ -47,6 +47,7 @@ bool SCAM::DataTypes::isLocalDataType(const std::string &name, const std::string
 
 void SCAM::DataTypes::reset() {
     DataTypes::getInstance().dataTypeMap.clear();
+    DataTypes::getInstance().localDataTypeMap.clear();
     DataTypes::getInstance().dataTypeMap.insert(std::make_pair("bool", new DataType("bool")));
     DataTypes::getInstance().dataTypeMap.insert(std::make_pair("int", new DataType("int")));
     DataTypes::getInstance().dataTypeMap.insert(std::make_pair("unsigned", new DataType("unsigned")));
