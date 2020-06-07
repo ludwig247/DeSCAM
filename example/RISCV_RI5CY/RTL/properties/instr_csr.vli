@@ -1,0 +1,107 @@
+macro boolean IR_CSR (unsigned instr_imem, opcode, func3) :=
+        instr_imem[6:0] == opcode &&  
+        (instr_imem[11:7] >= 5'd0 && instr_imem[11:7] <= 5'd5) &&   //rd
+        instr_imem[14:12] == func3 && 
+        (instr_imem[19:15] > 5'd0 && instr_imem[19:15] <= 5'd8)     //rs1             
+end macro;
+
+macro unsigned CSR_OP(unsigned func3) := 
+    case (func3[1:0])
+        2'b01:     riscv_defines::CSR_OP_WRITE;
+        2'b10:     riscv_defines::CSR_OP_SET;
+        2'b11:     riscv_defines::CSR_OP_CLEAR;
+        default:    2'd0;
+    endcase; 
+end macro;
+
+macro property instr_csr (unsigned opcode, func3) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode + 1,
+        t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+
+        rd_at_t_fetch = instr_rdata_i[11:7] @ t_fetch,
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        csr_at_t_fetch = instr_rdata_i[31:20] @ t_fetch,
+        imm_at_t_fetch = {27'd0, instr_rdata_i[19:15]} @ t_fetch,
+
+        rs1Data_at_t_decode = REGISTER(rs1_at_t_fetch) @ t_decode,
+        wdata_at_t_decode = (func3[2] == 0 ? rs1Data_at_t_decode : imm_at_t_fetch) @ t_decode,
+
+        csr_rdata_at_t_execute = csr_rdata @ t_execute;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_CSR (instr_imem_at_t_fetch, opcode, func3);
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+        
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+        //ID to EX
+        at t_execute: csr_addr == csr_at_t_fetch;
+        at t_execute: csr_access == 1'b1;
+        at t_execute: csr_wdata == wdata_at_t_decode;
+        at t_execute: csr_op ==  CSR_OP(func3);
+        at t_execute: regfile_alu_we_fw == 1;
+
+        //EX to WB
+        at t_writeb: (rd_at_t_fetch == 0 ? 1 : REGISTER(rd_at_t_fetch) == csr_rdata_at_t_execute);
+
+        right_hook: t_decode;
+end macro;
+
+property instr_csrrw;
+    instr_csr(7'b1110011, 3'b001);
+end property;
+
+property instr_csrrs;
+    instr_csr(7'b1110011, 3'b010);
+end property;
+
+property instr_csrrc;
+    instr_csr(7'b1110011, 3'b011);
+end property;
+
+property instr_csrrwi;
+    instr_csr(7'b1110011, 3'b101);
+end property;
+
+property instr_csrrsi;
+    instr_csr(7'b1110011, 3'b110);
+end property;
+
+property instr_csrrci;
+    instr_csr(7'b1110011, 3'b111);
+end property;
