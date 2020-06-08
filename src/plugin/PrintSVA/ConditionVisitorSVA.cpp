@@ -24,12 +24,16 @@ void SCAM::ConditionVisitorSVA::visit(SCAM::SyncSignal &node) {
 }
 
 void SCAM::ConditionVisitorSVA::visit(SCAM::DataSignalOperand &node) {
-    if (node.getDataSignal()->isSubVar()) {
+    if (node.getDataSignal()->isSubVar() && node.getDataSignal()->getParent()->isArrayType()) {
+        this->ss << node.getDataSignal()->getParent()->getName() << "(" << node.getDataSignal()->getName() << ")";
+    }else if (node.getDataSignal()->isSubVar()) {
         this->ss << node.getDataSignal()->getParent()->getName() << "_" << node.getDataSignal()->getName();
+        this->ss << "()";
     } else {
         this->ss << node.getDataSignal()->getName();
+        this->ss << "()";
     }
-    this->ss << "()";
+
 }
 
 void SCAM::ConditionVisitorSVA::visit(SCAM::Relational &node) {
@@ -197,7 +201,7 @@ void SCAM::ConditionVisitorSVA::visit(UnaryExpr &node) {
 }
 
 
-std::string SCAM::ConditionVisitorSVA::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string SCAM::ConditionVisitorSVA:: toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     ConditionVisitorSVA printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
