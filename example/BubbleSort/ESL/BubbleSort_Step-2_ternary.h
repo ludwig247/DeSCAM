@@ -79,7 +79,7 @@ struct BubbleSort : public sc_module {
                             data_algorithm[0] = j==0 ?  data_algorithm[1] : data_algorithm[0];
                             data_algorithm[1] = j==1 ?  data_algorithm[2] : data_algorithm[1];
                             data_algorithm[2] = j==2 ?  data_algorithm[3] : data_algorithm[2];
-                            data_algorithm[3] = j==3 ?  data_algorithm[4] : data_algorithm[3];
+                            data_algorithm[3] = j==3 ?  data_algorithm[4] : data_algot_end(o)##0 data_algorithm(1) == ((j_0 == 0)?data_algorithm_0(j_0):((j_0 == 1)?data_algorithm_2_0:data_algorithm_1_0)) andrithm[3];
                             data_algorithm[4] = j==4 ?  data_algorithm[5] : data_algorithm[4];
                             data_algorithm[5] = j==5 ?  data_algorithm[6] : data_algorithm[5];
                             data_algorithm[6] = j==6 ?  data_algorithm[7] : data_algorithm[6];

@@ -361,18 +361,7 @@ implies
 	t_end(o)##0 data_algorithm(4) == data_algorithm_4_0 and
 	t_end(o)##0 data_algorithm(5) == data_algorithm_5_0 and
 	t_end(o)##0 data_algorithm(6) == data_algorithm_6_0 and
-	/*t_end(o)##0 data_algorithm(7) == data_algorithm_7_0 and
-	t_end(o)##0 data_out_sig_0() == data_algorithm_0_0 and
-	t_end(o)##0 data_out_sig_1() == data_algorithm_1_0 and
-	t_end(o)##0 data_out_sig_2() == data_algorithm_2_0 and
-	t_end(o)##0 data_out_sig_3() == data_algorithm_3_0 and
-	t_end(o)##0 data_out_sig_4() == data_algorithm_4_0 and
-	t_end(o)##0 data_out_sig_5() == data_algorithm_5_0 and
-	t_end(o)##0 data_out_sig_6() == data_algorithm_6_0 and
-	t_end(o)##0 data_out_sig_7() == data_algorithm_7_0 and*/
-
-	//++++++++++++++++++Änderung++++++++++++++++++++++++++++
-
+	t_end(o)##0 data_algorithm(7) == data_algorithm_7_0 and
 	t_end(o)##0 data_out_sig(0) == data_algorithm_0_0 and
 	t_end(o)##0 data_out_sig(1) == data_algorithm_1_0 and
 	t_end(o)##0 data_out_sig(2) == data_algorithm_2_0 and
@@ -380,9 +369,7 @@ implies
 	t_end(o)##0 data_out_sig(4) == data_algorithm_4_0 and
 	t_end(o)##0 data_out_sig(5) == data_algorithm_5_0 and
 	t_end(o)##0 data_out_sig(6) == data_algorithm_6_0 and
-
-	//+++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+	t_end(o)##0 data_out_sig(7) == data_algorithm_7_0 and
 	t_end(o)##0 i() == i_0 and
 	t_end(o)##0 j() == j_0 and
 	t_end(o)##0 phase_algorithm() == phase_algorithm_0 and

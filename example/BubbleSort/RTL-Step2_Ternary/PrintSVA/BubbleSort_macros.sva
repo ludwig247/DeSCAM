@@ -41,18 +41,18 @@ endfunction
 // STATES //
 function data_in_1;
 	data_in_1 = ((phase_algorithm() == IDLE)
-		&& (data_in_notify() == true)
-		&& (data_out_notify() == false));
+		&& (data_in_notify() == 1'b1)
+		&& (data_out_notify() == 1'b0));
 endfunction
 function loop_2;
 	loop_2 = ((phase_algorithm() == RUN)
-		&& (data_in_notify() == false)
-		&& (data_out_notify() == false));
+		&& (data_in_notify() == 1'b0)
+		&& (data_out_notify() == 1'b0));
 endfunction
 function data_out_3;
 	data_out_3 = ((phase_algorithm() == RUN)
-		&& (data_in_notify() == false)
-		&& (data_out_notify() == true));
+		&& (data_in_notify() == 1'b0)
+		&& (data_out_notify() == 1'b1));
 endfunction
 
 

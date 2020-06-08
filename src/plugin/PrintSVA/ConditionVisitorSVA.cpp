@@ -200,7 +200,6 @@ void SCAM::ConditionVisitorSVA::visit(UnaryExpr &node) {
     this->ss << ")";
 }
 
-
 std::string SCAM::ConditionVisitorSVA:: toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     ConditionVisitorSVA printer;
     return printer.createString(stmt, indentSize, indentOffset);
