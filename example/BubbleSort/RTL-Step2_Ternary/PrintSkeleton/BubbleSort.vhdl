@@ -8,17 +8,17 @@ entity BubbleSort is
 port(	
 	clk:			in std_logic;
 	rst:			in std_logic;
-	data_in:		in int_8;
+	data_in:		in int_16;
 	data_in_sync:		in bool;
 	data_in_notify:		out bool;
-	data_out:		out int_8;
+	data_out:		out int_16;
 	data_out_sync:		in bool;
 	data_out_notify:	out bool
 );
 end BubbleSort;
 
 architecture BubbleSort_arch of BubbleSort is
-	signal data_algorithm_signal: int_8;
+	signal data_algorithm_signal: int_16;
 	signal i_signal: int;
 	signal j_signal: int;
 	signal phase_algorithm_signal: phases;
@@ -26,7 +26,7 @@ architecture BubbleSort_arch of BubbleSort is
 	signal data_in_notify_sig: bool;
 	signal data_out_notify_sig: bool;
 
-	--signal swap: int;
+	constant ARRAY_SIZE : integer := 16;
 
 begin
 
@@ -35,7 +35,7 @@ begin
 
 	process(clk)
 		variable swap: int;
-		variable data_array: int_8;
+		variable data_array: int_16;
 	begin
 
 	if(clk='1' and clk'event) then
@@ -76,52 +76,13 @@ begin
 
 			elsif (phase_algorithm_signal = RUN and data_out_notify_sig = false) then
 				
-				if(i_signal < 8) then 
+				if(i_signal < ARRAY_SIZE) then 
 					
-					if(j_signal < 8 - i_signal - 1) then 
-						
-						if(j_signal = 0) then
-							if(data_algorithm_signal(0) > data_algorithm_signal(1)) then
-								data_algorithm_signal(0) <= data_algorithm_signal(1);
-								data_algorithm_signal(1) <= data_algorithm_signal(0);
-							end if;
+					if(j_signal < ARRAY_SIZE - i_signal - 1) then 
 
-						elsif(j_signal = 1) then
-							if(data_algorithm_signal(1) > data_algorithm_signal(2)) then	
-								data_algorithm_signal(1) <= data_algorithm_signal(2);
-								data_algorithm_signal(2) <= data_algorithm_signal(1);
-							end if;
-
-						elsif(j_signal = 2) then
-							if(data_algorithm_signal(2) > data_algorithm_signal(3)) then	
-								data_algorithm_signal(2) <= data_algorithm_signal(3);
-								data_algorithm_signal(3) <= data_algorithm_signal(2);
-							end if;
-
-						elsif(j_signal = 3) then
-							if(data_algorithm_signal(3) > data_algorithm_signal(4)) then	
-								data_algorithm_signal(3) <= data_algorithm_signal(4);
-								data_algorithm_signal(4) <= data_algorithm_signal(3);
-							end if;
-
-						elsif(j_signal = 4) then
-							if(data_algorithm_signal(4) > data_algorithm_signal(5)) then	
-								data_algorithm_signal(4) <= data_algorithm_signal(5);
-								data_algorithm_signal(5) <= data_algorithm_signal(4);
-							end if;
-
-						elsif(j_signal = 5) then
-							if(data_algorithm_signal(5) > data_algorithm_signal(6)) then	
-								data_algorithm_signal(5) <= data_algorithm_signal(6);
-								data_algorithm_signal(6) <= data_algorithm_signal(5);
-							end if;
-
-						elsif(j_signal = 6) then
-							if(data_algorithm_signal(6) > data_algorithm_signal(7)) then	
-								data_algorithm_signal(6) <= data_algorithm_signal(7);
-								data_algorithm_signal(7) <= data_algorithm_signal(6);
-							end if;
- 							
+						if(data_algorithm_signal(to_integer(j_signal)) > data_algorithm_signal(to_integer(j_signal) + 1)) then
+							data_algorithm_signal(to_integer(j_signal)) <= data_algorithm_signal(to_integer(j_signal) + 1);
+							data_algorithm_signal(to_integer(j_signal) + 1) <= data_algorithm_signal(to_integer(j_signal));
 						end if;
 						
 						j_signal <= j_signal + 1;
