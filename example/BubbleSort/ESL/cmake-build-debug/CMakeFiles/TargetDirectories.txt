@@ -1,3 +1,0 @@
-/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/CMakeFiles/BubbleSort_ESL.dir
-/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/CMakeFiles/edit_cache.dir
