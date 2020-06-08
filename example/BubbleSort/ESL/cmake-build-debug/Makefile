@@ -48,10 +48,10 @@ RM = /import/public/common/clion-2019.2.2/bin/cmake/linux/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL
+CMAKE_SOURCE_DIR = /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/cmake-build-debug
+CMAKE_BINARY_DIR = /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/cmake-build-debug/CMakeFiles /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/cmake-build-debug/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/CMakeFiles /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named ESL
+# Target rules for targets named BubbleSort_ESL
 
 # Build rule for target.
-ESL: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ESL
-.PHONY : ESL
+BubbleSort_ESL: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 BubbleSort_ESL
+.PHONY : BubbleSort_ESL
 
 # fast build rule for target.
-ESL/fast:
-	$(MAKE) -f CMakeFiles/ESL.dir/build.make CMakeFiles/ESL.dir/build
-.PHONY : ESL/fast
+BubbleSort_ESL/fast:
+	$(MAKE) -f CMakeFiles/BubbleSort_ESL.dir/build.make CMakeFiles/BubbleSort_ESL.dir/build
+.PHONY : BubbleSort_ESL/fast
 
 sc_main.o: sc_main.cpp.o
 
@@ -129,7 +129,7 @@ sc_main.o: sc_main.cpp.o
 
 # target to build an object file
 sc_main.cpp.o:
-	$(MAKE) -f CMakeFiles/ESL.dir/build.make CMakeFiles/ESL.dir/sc_main.cpp.o
+	$(MAKE) -f CMakeFiles/BubbleSort_ESL.dir/build.make CMakeFiles/BubbleSort_ESL.dir/sc_main.cpp.o
 .PHONY : sc_main.cpp.o
 
 sc_main.i: sc_main.cpp.i
@@ -138,7 +138,7 @@ sc_main.i: sc_main.cpp.i
 
 # target to preprocess a source file
 sc_main.cpp.i:
-	$(MAKE) -f CMakeFiles/ESL.dir/build.make CMakeFiles/ESL.dir/sc_main.cpp.i
+	$(MAKE) -f CMakeFiles/BubbleSort_ESL.dir/build.make CMakeFiles/BubbleSort_ESL.dir/sc_main.cpp.i
 .PHONY : sc_main.cpp.i
 
 sc_main.s: sc_main.cpp.s
@@ -147,7 +147,7 @@ sc_main.s: sc_main.cpp.s
 
 # target to generate assembly for a file
 sc_main.cpp.s:
-	$(MAKE) -f CMakeFiles/ESL.dir/build.make CMakeFiles/ESL.dir/sc_main.cpp.s
+	$(MAKE) -f CMakeFiles/BubbleSort_ESL.dir/build.make CMakeFiles/BubbleSort_ESL.dir/sc_main.cpp.s
 .PHONY : sc_main.cpp.s
 
 # Help Target
@@ -157,7 +157,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... ESL"
+	@echo "... BubbleSort_ESL"
 	@echo "... edit_cache"
 	@echo "... sc_main.o"
 	@echo "... sc_main.i"

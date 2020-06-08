@@ -1,4 +1,4 @@
-/import/public/common/clion-2019.2.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL
+/import/public/common/clion-2019.2.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL
 -- Configuring done
 -- Generating done
--- Build files have been written to: /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/cmake-build-debug
+-- Build files have been written to: /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug

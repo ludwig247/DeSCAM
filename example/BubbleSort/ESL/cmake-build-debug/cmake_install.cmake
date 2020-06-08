@@ -1,4 +1,4 @@
-# Install script for directory: /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL
+# Install script for directory: /import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/ESL/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/import/lab/users/jauch/CLionProjects/DESCAM_work/example/BubbleSort/Array_8/ESL/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

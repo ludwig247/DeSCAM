@@ -61,8 +61,6 @@ begin
 		variable range_of_rand : real := 255.0;
 		variable rand_num : signed(31 downto 0);
 
-		variable v_time: time := 0 ns;
-
 			
 
 	begin
@@ -74,7 +72,7 @@ begin
 
 		seed1 := 1;
 
-		for i in 0 to 1000000 loop
+		for i in 0 to 10000000 loop
 		
 			seed1 := seed1 + 1;
 			seed2 := 1;
@@ -96,8 +94,6 @@ begin
 			data_out_sync_tb <= false;
 
 		end loop;
-
-		Report "time consumed: " &TIME'image(v_time);
 
 		assert FALSE Report "Simulation ended after 10.000.000 runs" severity FAILURE;
 

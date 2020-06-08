@@ -5,8 +5,6 @@
 #ifndef ESL_DATATYPES_H
 #define ESL_DATATYPES_H
 
-#define ARRAY_SIZE 8
-
 enum phases{
     IDLE, RUN
 };

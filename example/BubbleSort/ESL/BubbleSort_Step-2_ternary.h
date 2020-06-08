@@ -9,7 +9,7 @@
 //#ifndef PROJECT_BUS_H
 //#define PROJECT_BUS_H
 
-#define ARRAY_SIZE 8
+#define ARRAY_SIZE 16
 
 using namespace std;
 
@@ -50,29 +50,10 @@ struct BubbleSort : public sc_module {
                 i = 0;
                 j = 0;
 
-                /*cout << "Algorithm: data received" << endl;
-
-                cout << "unsorted: " << data_algorithm[0] << endl;
-                cout << "unsorted: " << data_algorithm[1] << endl;
-                cout << "unsorted: " << data_algorithm[2] << endl;
-                cout << "unsorted: " << data_algorithm[3] << endl;
-                cout << "unsorted: " << data_algorithm[4] << endl;
-                cout << "unsorted: " << data_algorithm[5] << endl;
-                cout << "unsorted: " << data_algorithm[6] << endl;
-                cout << "unsorted: " << data_algorithm[7] << endl;*/
-
             }else{
                 if (i != ARRAY_SIZE){
                     if (j != ARRAY_SIZE - i - 1){
                         if (data_algorithm[j] > data_algorithm[j+1]){
-
-                            /*swap = j==0 ?  data_algorithm[0] : swap;
-                            swap = j==1 ?  data_algorithm[1] : swap;
-                            swap = j==2 ?  data_algorithm[2] : swap;
-                            swap = j==3 ?  data_algorithm[3] : swap;
-                            swap = j==4 ?  data_algorithm[4] : swap;
-                            swap = j==5 ?  data_algorithm[5] : swap;
-                            swap = j==6 ?  data_algorithm[6] : swap;*/
 
                             swap = data_algorithm[j];
 
@@ -83,6 +64,14 @@ struct BubbleSort : public sc_module {
                             data_algorithm[4] = j==4 ?  data_algorithm[5] : data_algorithm[4];
                             data_algorithm[5] = j==5 ?  data_algorithm[6] : data_algorithm[5];
                             data_algorithm[6] = j==6 ?  data_algorithm[7] : data_algorithm[6];
+                            data_algorithm[7] = j==7 ?  data_algorithm[8] : data_algorithm[7];
+                            data_algorithm[8] = j==8 ?  data_algorithm[9] : data_algorithm[8];
+                            data_algorithm[9] = j==9 ?  data_algorithm[10] : data_algorithm[9];
+                            data_algorithm[10] = j==10 ?  data_algorithm[11] : data_algorithm[10];
+                            data_algorithm[11] = j==11 ?  data_algorithm[12] : data_algorithm[11];
+                            data_algorithm[12] = j==12 ?  data_algorithm[13] : data_algorithm[12];
+                            data_algorithm[13] = j==13 ?  data_algorithm[14] : data_algorithm[13];
+                            data_algorithm[14] = j==14 ?  data_algorithm[15] : data_algorithm[14];
 
                             data_algorithm[1] = j==0 ?  swap : data_algorithm[1];
                             data_algorithm[2] = j==1 ?  swap : data_algorithm[2];
@@ -91,42 +80,15 @@ struct BubbleSort : public sc_module {
                             data_algorithm[5] = j==4 ?  swap : data_algorithm[5];
                             data_algorithm[6] = j==5 ?  swap : data_algorithm[6];
                             data_algorithm[7] = j==6 ?  swap : data_algorithm[7];
+                            data_algorithm[8] = j==7 ?  swap : data_algorithm[8];
+                            data_algorithm[9] = j==8 ?  swap : data_algorithm[9];
+                            data_algorithm[10] = j==9 ?  swap : data_algorithm[10];
+                            data_algorithm[11] = j==10 ?  swap : data_algorithm[11];
+                            data_algorithm[12] = j==11 ?  swap : data_algorithm[12];
+                            data_algorithm[13] = j==12 ?  swap : data_algorithm[13];
+                            data_algorithm[14] = j==13 ?  swap : data_algorithm[14];
+                            data_algorithm[15] = j==14 ?  swap : data_algorithm[15];
 
-                            /*if(j==0){
-                                swap = data_algorithm[0];
-                                data_algorithm[0] = data_algorithm[1];
-                                data_algorithm[1] = swap;
-                            }
-                            else if(j==1){
-                                swap = data_algorithm[1];
-                                data_algorithm[1] = data_algorithm[2];
-                                data_algorithm[2] = swap;
-                            }
-                            else if(j==2){
-                                swap = data_algorithm[2];
-                                data_algorithm[2] = data_algorithm[3];
-                                data_algorithm[3] = swap;
-                            }
-                            else if(j==3){
-                                swap = data_algorithm[3];
-                                data_algorithm[3] = data_algorithm[4];
-                                data_algorithm[4] = swap;
-                            }
-                            else if(j==4){
-                                swap = data_algorithm[4];
-                                data_algorithm[4] = data_algorithm[5];
-                                data_algorithm[5] = swap;
-                            }
-                            else if(j==5){
-                                swap = data_algorithm[5];
-                                data_algorithm[5] = data_algorithm[6];
-                                data_algorithm[6] = swap;
-                            }
-                            else if(j==6){
-                                swap = data_algorithm[6];
-                                data_algorithm[6] = data_algorithm[7];
-                                data_algorithm[7] = swap;
-                            }*/
                         }
                         ++j;
                         //insert_state("inner_loop");
@@ -138,17 +100,6 @@ struct BubbleSort : public sc_module {
                     insert_state("loop");
 
                 }else{
-
-                  /*  cout << "sorted: " << data_algorithm[0] << endl;
-                    cout << "sorted: " << data_algorithm[1] << endl;
-                    cout << "sorted: " << data_algorithm[2] << endl;
-                    cout << "sorted: " << data_algorithm[3] << endl;
-                    cout << "sorted: " << data_algorithm[4] << endl;
-                    cout << "sorted: " << data_algorithm[5] << endl;
-                    cout << "sorted: " << data_algorithm[6] << endl;
-                    cout << "sorted: " << data_algorithm[7] << endl;
-
-                    cout << "Algorithm: data sorted sent" << endl;*/
 
                     data_out->write(data_algorithm, "data_out");
 
