@@ -6,5 +6,5 @@ package top_level_types is
 subtype bool is Boolean;
 subtype int is signed(31 downto 0);
 type phases is (IDLE, RUN);
-type int_16 is array(15 downto 0) of signed(31 downto 0);
+type int_64 is array(63 downto 0) of signed(31 downto 0);
 end package top_level_types;

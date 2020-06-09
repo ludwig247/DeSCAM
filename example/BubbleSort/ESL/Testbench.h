@@ -9,7 +9,7 @@
 #include "DataTypes.h"
 
 
-#define ARRAY_SIZE 16
+#define ARRAY_SIZE 64
 
 //#ifndef ESL_TESTBENCH_H
 //#define ESL_TESTBENCH_H
@@ -58,6 +58,7 @@ struct Testbench : public sc_module {
                         cout << data_testbench[cnt_fill] << " ";
                     }
                     cout << " " << endl;*/
+
 
                     data_out->write(data_testbench);
 

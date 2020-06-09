@@ -6,38 +6,39 @@ use work.BubbleSort_types.all;
 
 entity BubbleSort is
 port(	
-	clk:			in std_logic;
-	rst:			in std_logic;
-	data_in:		in int_16;
+	clk:		in std_logic;
+	rst:		in std_logic;
+	data_in:		in int_64;
 	data_in_sync:		in bool;
 	data_in_notify:		out bool;
-	data_out:		out int_16;
+	data_out:		out int_64;
 	data_out_sync:		in bool;
-	data_out_notify:	out bool
+	data_out_notify:		out bool
 );
 end BubbleSort;
 
 architecture BubbleSort_arch of BubbleSort is
-	signal data_algorithm_signal: int_16;
-	signal i_signal: int;
-	signal j_signal: int;
+	signal data_algorithm_signal: int_64;
+	signal i_signal: signed(31 downto 0);
+	signal j_signal: signed(31 downto 0);
 	signal phase_algorithm_signal: phases;
 
 	signal data_in_notify_sig: bool;
 	signal data_out_notify_sig: bool;
 
-	constant ARRAY_SIZE : integer := 16;
+	constant ARRAY_SIZE : integer := 64;
 
 begin
-
+	
 	data_in_notify <= data_in_notify_sig;
 	data_out_notify <= data_out_notify_sig;
 
 	process(clk)
-		variable swap: int;
-		variable data_array: int_16;
-	begin
 
+		variable swap: int;
+		variable data_array: int_64;
+
+	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
 			data_algorithm_signal <= (others => to_signed(0, 32));
@@ -48,7 +49,7 @@ begin
 			data_out_notify_sig <= false;
 		else
 			 -- FILL OUT HERE;
-			if (phase_algorithm_signal = IDLE and data_in_sync = false) then --STATE: DATA_IN
+if (phase_algorithm_signal = IDLE and data_in_sync = false) then --STATE: DATA_IN
 				data_in_notify_sig <= true;
 				data_out_notify_sig <= false;
 				--data_algorithm_signal <= (others => to_signed(0, 32));
@@ -115,7 +116,7 @@ begin
 
 	end if;
 
---end if;
+	--end if;
 	--end if;
 
 	end process;
