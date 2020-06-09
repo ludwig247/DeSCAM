@@ -1,6 +1,6 @@
 #!/bin/bash
 #BINARY LOCATIONS
-SCAM_HOME="/import/lab/users/jauch/CLionProjects/DeSCAM" #NO SLASH AT THE END
+SCAM_HOME="/import/lab/users/jauch/CLionProjects/DESCAM_work" #NO SLASH AT THE END
 CMAKE_BIN="cmake" #NO SLASH AT THE END
 PYTHON3="python3" #NO SLASH AT THE END
 
