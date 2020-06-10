@@ -14,6 +14,12 @@ RUN mkdir /root/DeSCAM/install
 COPY install  /root/DeSCAM/install/
 RUN mkdir /root/DeSCAM/src
 COPY src  /root/DeSCAM/src/
+RUN mkdir /root/DeSCAM/doc
+COPY doc  /root/DeSCAM/doc/
+RUN mkdir /root/DeSCAM/example
+COPY example /root/DeSCAM/example/
+RUN mkdir /root/DeSCAM/test
+COPY test  /root/DeSCAM/test/
 COPY transcript /root/DeSCAM/
 COPY CMakeLists.txt /root/DeSCAM/
 COPY master /root/
