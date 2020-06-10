@@ -18,8 +18,8 @@ RUN mkdir /root/DeSCAM/doc
 COPY doc  /root/DeSCAM/doc/
 RUN mkdir /root/DeSCAM/example
 COPY example /root/DeSCAM/example/
-RUN mkdir /root/DeSCAM/test
-COPY test  /root/DeSCAM/test/
+RUN mkdir /root/DeSCAM/tests
+COPY tests /root/DeSCAM/tests/
 COPY transcript /root/DeSCAM/
 COPY CMakeLists.txt /root/DeSCAM/
 COPY master /root/
