@@ -8,8 +8,8 @@ RUN apt --assume-yes install git
 RUN apt-get --assume-yes install curl
 RUN curl -L https://git.io/get_helm.sh | bash
 RUN mkdir /root/DeSCAM
-RUN mkdir /root/DeSCAM/AppImage
-COPY AppImage  /root/DeSCAM/AppImage/
+RUN mkdir /root/AppImage
+COPY AppImage  /root/AppImage/
 RUN mkdir /root/DeSCAM/install
 COPY install  /root/DeSCAM/install/
 RUN mkdir /root/DeSCAM/src
