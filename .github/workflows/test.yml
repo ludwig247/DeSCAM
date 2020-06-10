@@ -18,6 +18,8 @@ jobs:
       ROOT_DIR: "/"
     steps:
       - uses: actions/checkout@v1
+      - name: Docker Run
+        run: docker run --name MyUbuntu -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse ubuntu
 #      - name: Build System Generation
 #        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       #- name: Build SYSTEMC
@@ -44,9 +46,5 @@ jobs:
 #          rm -rf $GITHUB_WORKSPACE/install/tmp
 ##      - name: AppImage Elaboration
 ##        uses: ./
-      - name: Docker Creation
-	run: docker run --name MyUbuntu -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse ubuntu
-      - name: Docker Connection
-	run: docker start MyUbuntu
      
 
