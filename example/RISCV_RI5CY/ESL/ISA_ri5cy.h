@@ -15,7 +15,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 0
+#define SCAM 1
 
 class ISA_ri5cy : public sc_module {
 public:
@@ -261,8 +261,8 @@ void ISA_ri5cy::run() {
                     //Set-up PC
                     if (branchDecision) {
                         //pcReg = branchPCcalculation(encodedInstr, branchDecision, pcReg - 4);
-                        pcReg = pcReg - 4;
-                        pcReg = pcReg + getImmediate(encodedInstr);
+                        //pcReg = pcReg - 4;
+                        pcReg = pcReg - 4 + getImmediate(encodedInstr);
                     }
 
                 } else if (getEncType(encodedInstr) == ENC_J){
@@ -314,7 +314,10 @@ EncType ISA_ri5cy::getEncType(unsigned int encodedInstr) const {
     } else if (OPCODE_FIELD(encodedInstr) == OPCODE_I_L) {
         return ENC_I_L;
     } else if (OPCODE_FIELD(encodedInstr) == OPCODE_I_J) {
-        return ENC_I_J;
+        if (FUNCT3_FIELD(encodedInstr) == 0x00)
+            return ENC_I_J;
+        else
+            return ENC_ERR;
     }  else if (OPCODE_FIELD(encodedInstr) == OPCODE_S) {
         return ENC_S;
     } else if (OPCODE_FIELD(encodedInstr) == OPCODE_B) {
