@@ -13,4 +13,9 @@ cd /root/
 #Initializing temporal environment
 ./tempenv.sh setup
 ./tempenv.sh start
+
+#AppImage creation
+apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-dev 
+cd /root/DeSCAM
+ls -l
 exit
