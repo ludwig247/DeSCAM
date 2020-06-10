@@ -21,7 +21,6 @@ WORKDIR /apps
 ENTRYPOINT tail -f /dev/null
 CMD [ "/bin/bash" ]
 
-
 ## Container image that runs your code
 #FROM ubuntu:18.04
 ##CMD -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse 
