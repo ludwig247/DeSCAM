@@ -28,6 +28,8 @@ jobs:
         run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
       - name: Docker Check
         run: docker ps -a
+      - name: Run Master
+        run: docker exec MyUbuntu "/master"
 #        run: |
 #          docker start MyUbuntu
 #          docker exec MyUbuntu "cat /etc/os-release"

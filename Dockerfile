@@ -7,6 +7,11 @@ RUN apt-get update
 RUN apt --assume-yes install git
 RUN apt-get --assume-yes install curl
 RUN curl -L https://git.io/get_helm.sh | bash
+COPY AppImage  /
+COPY install  /
+COPY src  /
+COPY transcript  /
+COPY master  /
 WORKDIR /apps
 ENTRYPOINT tail -f /dev/null
 CMD [ "/bin/bash" ]
