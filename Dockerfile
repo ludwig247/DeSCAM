@@ -1,6 +1,6 @@
 # Container image that runs your code
 FROM ubuntu:18.04
-CMD -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse 
+#CMD -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse 
 # Copying required folders
 COPY AppImage  /
 COPY install  /
