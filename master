@@ -6,13 +6,6 @@ apt-get install -y fuse
 apt-get install -y unionfs-fuse
 
 #Relocating Files
-mkdir /root/DeSCAM 
-cd /
-ls -l
-mv /AppImage /root/
-mv /install /root/DeSCAM/
-mv /src /root/DeSCAM/
-mv /transcript /root/DeSCAM/
 mv /root/AppImage/appimagetool-x86_64.AppImage /root/
 mv /root/AppImage/tempenv.sh /root/
 cd /root/

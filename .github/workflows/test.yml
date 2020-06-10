@@ -29,10 +29,7 @@ jobs:
       - name: Docker Check
         run: docker ps -a
       - name: Run Master
-        run: docker exec MyUbuntu "/master"
-#        run: |
-#          docker start MyUbuntu
-#          docker exec MyUbuntu "cat /etc/os-release"
+        run: docker exec MyUbuntu "/root/master"
 #      - name: Build System Generation
 #        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       #- name: Build SYSTEMC

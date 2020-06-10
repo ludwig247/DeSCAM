@@ -7,11 +7,15 @@ RUN apt-get update
 RUN apt --assume-yes install git
 RUN apt-get --assume-yes install curl
 RUN curl -L https://git.io/get_helm.sh | bash
-COPY AppImage  /
-COPY install  /
-COPY src  /
-COPY transcript  /
-COPY master  /
+RUN mkdir /root/DeSCAM
+RUN mkdir /root/DeSCAM/AppImage
+COPY AppImage  /root/DeSCAM/AppImage/
+RUN mkdir /root/DeSCAM/install
+COPY install  /root/DeSCAM/install/
+RUN mkdir /root/DeSCAM/src
+COPY src  /root/DeSCAM/src/
+COPY transcript /root/DeSCAM/
+COPY master /root/
 WORKDIR /apps
 ENTRYPOINT tail -f /dev/null
 CMD [ "/bin/bash" ]
