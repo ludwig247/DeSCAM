@@ -15,6 +15,7 @@ COPY install  /root/DeSCAM/install/
 RUN mkdir /root/DeSCAM/src
 COPY src  /root/DeSCAM/src/
 COPY transcript /root/DeSCAM/
+COPY CMakeLists.txt /root/DeSCAM/
 COPY master /root/
 WORKDIR /apps
 ENTRYPOINT tail -f /dev/null

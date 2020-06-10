@@ -14,14 +14,11 @@ cd /root/
 #./tempenv.sh setup
 #./tempenv.sh start
 
-#Installing dependencies
+#AppImage creation
 apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-dev 
 add-apt-repository ppa:deadsnakes/ppa
 apt-get update
 apt-get install python3.7
-
-#Building DeSCAM
 cd /root/DeSCAM
-mkdir build && cd build
-cmake ../
-cmake --build . --target SCAM -- -j 4
+ls -l
+exit
