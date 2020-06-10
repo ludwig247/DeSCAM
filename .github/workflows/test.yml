@@ -45,8 +45,8 @@ jobs:
 ##      - name: AppImage Elaboration
 ##        uses: ./
       - name: Docker Creation
-	 run: docker run --name MyUbuntu -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse ubuntu
+	run: docker run --name MyUbuntu -it --privileged --cap-add=SYS_ADMIN --device /dev/fuse ubuntu
       - name: Docker Connection
-	 run: docker start MyUbuntu
+	run: docker start MyUbuntu
      
 
