@@ -19,6 +19,7 @@ apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-d
 add-apt-repository ppa:deadsnakes/ppa
 apt-get update
 apt-get install python3.7
+apt install python3-distutils
 
 #Building DeSCAM
 cd /root/DeSCAM
