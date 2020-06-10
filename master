@@ -6,8 +6,6 @@ apt-get install -y fuse
 apt-get install -y unionfs-fuse
 
 #Relocating Files
-mv /root/AppImage/appimagetool-x86_64.AppImage /root/
-#mv /root/AppImage/tempenv.sh /root/
 cd /root/
 
 ##Initializing temporal environment
@@ -26,3 +24,35 @@ cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
 cmake --build . --target SCAM -- -j 4
+
+#Preparing System files
+mv /root/AppImage /
+cp -rf -P /etc /AppImage/
+cp -rf -P /lib /AppImage/
+cp -rf -P /root /AppImage/
+cp -rf -P /sbin /AppImage/
+cp -rf -P /tmp /AppImage/
+cp -rf -P /usr /AppImage/
+cp -rf -P /var /AppImage/
+mv /AppImage /root/
+
+#Filtering unneeded files
+cd /root/
+mv /root/AppImage/tempenv.sh /root/
+mv /root/AppImage/test /root/
+mv /root/AppImage/appimagetool-x86_64.AppImage /root/
+rm -rf /root/AppImage/root/DeSCAM/install/tmp
+rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
+
+#Trick: Place the binary on a convenient folder and patch it
+mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
+sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
+
+#Create AppImage
+/root/appimagetool-x86_64.AppImage ./AppImage/
+mv DeSCAM-x86_64.AppImage DeSCAM
+
+#Validate ApptImage
+mkdir outputs
+ls -l
+./DeSCAM --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
