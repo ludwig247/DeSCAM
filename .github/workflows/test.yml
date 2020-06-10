@@ -23,9 +23,9 @@ jobs:
 #      - name: Docker Run
 #        run: docker run --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse ubuntu
       - name: Docker Build
-        run: docker build --tag myImage:1.0 .
+        run: docker build --tag myimage:1.0 .
       - name: Docker Run
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myImage:1.0
+        run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
       - name: Docker Check
         run: docker ps -a
 #        run: |
