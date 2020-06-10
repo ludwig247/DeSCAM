@@ -75,9 +75,9 @@ struct Testbench : public sc_module {
                     /*for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; cnt_fill++){
                         cout << data_testbench[cnt_fill] << " ";
                     }
-                    cout << " " << endl;*/
+                    cout << " " << endl;
 
-                    //cnt_fill = 0;
+                    cnt_fill = 0;*/
 
                     cnt++;
                 }
