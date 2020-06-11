@@ -51,9 +51,9 @@ sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 #Create AppImage
 export ARCH=x86_64
 /root/appimagetool-x86_64.AppImage ./AppImage/
-mv DeSCAM-x86_64.AppImage DeSCAM
+mv DeSCAM-x86_64.AppImage DeSCAM_v
 
 #Validate ApptImage
 mkdir outputs
 ls -l
-./DeSCAM --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
+./DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
