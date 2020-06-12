@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 project(DeSCAM)
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_HOME_DIRECTORY}/bin)
 
-set(CMAKE_SOURCE_DIR /import/lab/users/jauch/CLionProjects/DeSCAM)
 
 set(CMAKE_CXX_STANDARD 14) # C++14...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...

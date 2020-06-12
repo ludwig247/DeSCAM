@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(ESL)
 
-set(CMAKE_SOURCE_DIR /import/lab/users/jauch/CLionProjects/DeSCAM)
+#set(CMAKE_SOURCE_DIR /import/lab/users/jauch/CLionProjects/DeSCAM)
 
 #set(CMAKE_CXX_STANDARD ${SystemC_CXX_STANDARD})
 
