@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11   -g   CMakeFiles/ESL.dir/sc_main.cpp.o  -o ESL  -L/import/lab/users/jauch/CLionProjects/DESCAM_work/lib -Wl,-rpath,/import/lab/users/jauch/CLionProjects/DESCAM_work/lib -lsystemc 
