@@ -9,7 +9,6 @@
 //Testbench
 #include "Testbench.h"
 
-//#define ARRAY_SIZE 8
 
 using namespace std;
 
