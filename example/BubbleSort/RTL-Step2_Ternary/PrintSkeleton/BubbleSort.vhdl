@@ -8,17 +8,17 @@ entity BubbleSort is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	data_in:		in int_64;
+	data_in:		in int_128;
 	data_in_sync:		in bool;
 	data_in_notify:		out bool;
-	data_out:		out int_64;
+	data_out:		out int_128;
 	data_out_sync:		in bool;
 	data_out_notify:		out bool
 );
 end BubbleSort;
 
 architecture BubbleSort_arch of BubbleSort is
-	signal data_algorithm_signal: int_64;
+	signal data_algorithm_signal: int_128;
 	signal i_signal: signed(31 downto 0);
 	signal j_signal: signed(31 downto 0);
 	signal phase_algorithm_signal: phases;
@@ -26,7 +26,7 @@ architecture BubbleSort_arch of BubbleSort is
 	signal data_in_notify_sig: bool;
 	signal data_out_notify_sig: bool;
 
-	constant ARRAY_SIZE : integer := 64;
+	constant ARRAY_SIZE : integer := 128;
 
 begin
 	
@@ -36,7 +36,7 @@ begin
 	process(clk)
 
 		variable swap: int;
-		variable data_array: int_64;
+		variable data_array: int_128;
 
 	begin
 	if(clk='1' and clk'event) then
