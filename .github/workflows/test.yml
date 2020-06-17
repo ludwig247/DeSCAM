@@ -30,6 +30,38 @@ jobs:
         run: docker ps -a
       - name: Run Master
         run: docker exec MyUbuntu "/root/master"
+      - name: Copy Image back
+        run: docker cp MyUbuntu "/root/DeSCAM_v" .
+      - name: Check path
+        run: pwd
+      - name: Stop Container
+        run: docker stop MyUbuntu
+	# Ubuntu 18.04 -----------------------------------------------------------
+      - name: Docker Build Ubuntu18
+        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
+      - name: Docker Run Ubuntu18
+        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
+      - name: Docker Check Ubuntu18
+        run: docker ps -a
+      - name: Run Test Ubuntu18
+        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
+      - name: Stop Container Ubuntu18
+        run: docker stop MyUbuntu18
+	# -----------------------------------------------------------------------------
+
+	# Ubuntu 16.04 -----------------------------------------------------------
+      - name: Docker Build Ubuntu16
+        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
+      - name: Docker Run Ubuntu16
+        run: docker run --publish 8000:8080 --detach --name MyUbuntu16 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest2:1.0
+      - name: Docker Check Ubuntu16
+        run: docker ps -a
+      - name: Run Test Ubuntu16
+        run: docker exec MyUbuntu16 "/root/ubuntu16_script"
+      - name: Stop Container Ubuntu16
+        run: docker stop MyUbuntu16
+	# -----------------------------------------------------------------------------
+
 #      - name: Build System Generation
 #        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       #- name: Build SYSTEMC

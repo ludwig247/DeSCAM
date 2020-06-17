@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Updating System and installing basic packages
+apt-get update
+apt-get install -y fuse
+apt-get install -y unionfs-fuse
+
+#Test
+/root/DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
