@@ -470,8 +470,10 @@ implies
 	t_end(o)##0 data_algorithm(17) == data_in_sig_17_0 and
 	t_end(o)##0 data_algorithm(18) == data_in_sig_18_0 and
 	t_end(o)##0 data_algorithm(19) == data_in_sig_19_0 and
+//##########################################################################
 	//t_end(o)##0 data_algorithm(1) == data_in_sig_0(0) and
 	t_end(o)##0 data_algorithm(1) == data_in_sig_0_0 and
+//##########################################################################
 	t_end(o)##0 data_algorithm(20) == data_in_sig_20_0 and
 	t_end(o)##0 data_algorithm(21) == data_in_sig_21_0 and
 	t_end(o)##0 data_algorithm(22) == data_in_sig_22_0 and
@@ -1375,8 +1377,10 @@ data_out_3_7_a: assert property (disable iff (reset) data_out_3_7_p(1)); //ASSIG
 
 
 property loop_2_3_p(o);
+//##############################################################################################################################################
  //bit[31:0] data_algorithm_0; --> wants to access array by index: data_algorithm_0(j_0), not useful on right site of comparison in assertion
  bit[31:0] data_algorithm_0_0;
+//###############################################################################################################################################
  bit[31:0] data_algorithm_1_0;
  bit[31:0] data_algorithm_10_0;
  bit[31:0] data_algorithm_100_0;
@@ -1507,8 +1511,10 @@ property loop_2_3_p(o);
  bit[31:0] i_0;
  bit[31:0] j_0;
  bit[31:0] phase_algorithm_0;
+	//######################################################################################################################################################################
 	//t ##0 hold(data_algorithm_0, data_algorithm()) and --> wants to access array by index: data_algorithm_0(j_0), not useful on right site of comparison in assertion
 	t ##0 hold(data_algorithm_0_0, data_algorithm(0)) and
+	//#####################################################################################################################################################################
 	t ##0 hold(data_algorithm_1_0, data_algorithm(1)) and
 	t ##0 hold(data_algorithm_10_0, data_algorithm(10)) and
 	t ##0 hold(data_algorithm_100_0, data_algorithm(100)) and
@@ -3800,8 +3806,10 @@ property wait_data_out_3_p(o);
  bit[31:0] data_algorithm_97_0;
  bit[31:0] data_algorithm_98_0;
  bit[31:0] data_algorithm_99_0;
+//##############################################################################################################
  //bit[31:0] data_out_sig_0; --> shall contain entire array[128], needs to be type "int_128" not "bit[31:0]"
  int_128 data_out_sig_0;
+//##############################################################################################################
  bit[31:0] i_0;
  bit[31:0] j_0;
  bit[31:0] phase_algorithm_0;
@@ -3933,8 +3941,10 @@ property wait_data_out_3_p(o);
 	t ##0 hold(data_algorithm_97_0, data_algorithm(97)) and
 	t ##0 hold(data_algorithm_98_0, data_algorithm(98)) and
 	t ##0 hold(data_algorithm_99_0, data_algorithm(99)) and
+//####################################################################################
 	//t ##0 hold(data_out_sig_0, data_out_sig())
 	t ##0 hold(data_out_sig_0, BubbleSort.data_out) and
+//####################################################################################
 	t ##0 hold(i_0, i()) and
 	t ##0 hold(j_0, j()) and
 	t ##0 hold(phase_algorithm_0, phase_algorithm()) and
@@ -4070,8 +4080,10 @@ implies
 	t##1 data_algorithm(98) == data_algorithm_98_0 and
 	t##1 data_algorithm(99) == data_algorithm_99_0 and
 	t##1 data_algorithm(9) == data_algorithm_9_0 and
+//##################################################################################
 	//t##1 data_out_sig() == data_out_sig_0 and
 	t##1 BubbleSort.data_out == data_out_sig_0 and
+//##################################################################################
 	t##1 i() == i_0 and
 	t##1 j() == j_0 and
 	t##1 phase_algorithm() == phase_algorithm_0 and
