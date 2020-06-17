@@ -317,9 +317,12 @@ std::string PrintSVA::operations() {
     // Operations
     for (auto op : ps->getProperties()) {
         ss << "property " << op->getName() << "_p(o);\n";
-
+        if(op->getName() == "data_in_1_1") {
+            std::cout << "yes" << std::endl;
+        }
         if (!op->getFreezeSignals().empty()) {
             for (auto f : op->getFreezeSignals()) {
+                std::cout << f.first->getFullName("_") << std::endl;
                 ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
             }
             for (auto f : op->getFreezeSignals()) {

@@ -185,8 +185,9 @@ struct BubbleSort : public sc_module {
                             data_algorithm[125] = j==125 ?  data_algorithm[126] : data_algorithm[125];
                             data_algorithm[126] = j==126 ?  data_algorithm[127] : data_algorithm[126];
 
-
+                            //cnt = 0;
                             data_algorithm[1] = j==0 ?  swap : data_algorithm[1];
+                            //++cnt;
                             data_algorithm[2] = j==1 ?  swap : data_algorithm[2];
                             data_algorithm[3] = j==2 ?  swap : data_algorithm[3];
                             data_algorithm[4] = j==3 ?  swap : data_algorithm[4];

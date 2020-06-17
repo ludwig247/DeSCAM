@@ -189,6 +189,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Ternary &node) {
 void SCAM::DatapathVisitorSVA::visit(SCAM::ArrayOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getArrayOperand()->getOperandName();
+    this->ss << "_0";
     this->ss << "(";
     node.getIdx()->accept(*this);
     this->ss << ")";
