@@ -40,7 +40,7 @@ export SYSTEMC_DIR
 export CLANG_DIR
 export ROOT_DIR
 
-ldconfig
+#ldconfig
 #sed -i -e 's|/usr|././|g' ./usr/bin/DESCAM
 cd usr/ 
 #Libs
