@@ -14,12 +14,12 @@
 #endif //DESCAM_ESTIMATEPOWER_H
 
 
-class EstimatePower : public PluginFactory {
+class InstrumentPower : public PluginFactory {
 
 public:
-    EstimatePower() = default;
+    InstrumentPower() = default;
 
-    ~EstimatePower() = default;
+    ~InstrumentPower() = default;
 
     std::map<std::string, std::string> printModel(Model *node);
 

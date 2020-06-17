@@ -2,27 +2,32 @@
 // Created by Dino Mehmedagić on 21.03.20.
 //
 
-#include "EstimatePower.h"
+#include "InstrumentPower.h"
 #include <sstream>
 #include <string>
 #include <PrintStmt.h>
 
-std::map<std::string, std::string> EstimatePower::printModel(Model *node) {
+#define DEBUG 0
+
+std::map<std::string, std::string> InstrumentPower::printModel(Model *node) {
 
     std::map<std::string, Module *> moduleMap = node->getModules();
     for (auto module : moduleMap) {
         portMap = module.second->getPorts();
         std::cout << "Module " << module.first << std::endl;
         registerOperations(*module.second->getFSM());
+#if DEBUG == 1
         debug(*module.second);
-      //  mapStates2Lines(*module.second->getFSM());
+        pluginOutput.insert(std::make_pair(module.first + "_instrumented.h", ""));
+        return pluginOutput;
+#endif
         pluginOutput.insert(std::make_pair(module.first + "_instrumented.h", writeFile(module)));
     }
 
     return pluginOutput;
 }
 
-void EstimatePower::registerOperations(FSM &node) {
+void InstrumentPower::registerOperations(FSM &node) {
     for (auto state : node.getStateMap())  {
         for (auto operation : state.second->getOutgoingOperationsList())  {
             if (operation->getNextState() != operation->getState())
@@ -36,7 +41,7 @@ void EstimatePower::registerOperations(FSM &node) {
 
 
 
-std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
+std::string InstrumentPower::writeFile(std::pair <std::string, Module*> module ) {
     std::string ss = "";
     std::ifstream inFile;
     inFile.open(module.first + ".h");
@@ -65,10 +70,7 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
         if (insideProcess)
             processBody.push_back(line);
         if (line.find("SC_HAS_PROCESS(") != std::string::npos)  {
-          //  ss += ("unsigned int operations[" + std::to_string(operationsCounter) + "];\n");
             ss += ("unsigned int originState;\n");
-          //  ss += (   " void operationsCounter()  { \nfor (int i = 0; i < " + std::to_string(operationsCounter) +
-              //      "; i++)\nstd::cout << \"Operation \" << i << \": \" << operations[i] << std::endl;\n}\n");
         }
         startPosition = line.find("SC_THREAD(");
         if (startPosition != std::string::npos) {
@@ -101,7 +103,7 @@ std::string EstimatePower::writeFile(std::pair <std::string, Module*> module ) {
     return ss;
 }
 
-void EstimatePower::debug(Module &node) {
+void InstrumentPower::debug(Module &node) {
     std::cout << "Module: " << node.getName() << std::endl;
    // int i = 0;
     for (auto state : node.getFSM()->getStateMap())  {
@@ -123,7 +125,7 @@ void EstimatePower::debug(Module &node) {
     }
 }
 
-void EstimatePower::mapStates(FSM &node) {
+void InstrumentPower::mapStates(FSM &node) {
     for (auto port : portMap)
         ports2States.insert(std::pair <Port*, std::vector <State *>> (port.second, std::vector<State*> {}));
     for (auto state : node.getStateMap())
@@ -131,19 +133,19 @@ void EstimatePower::mapStates(FSM &node) {
             ports2States.at(state.second->getCommunicationPort()).push_back(state.second);
 }
 
-int EstimatePower::whichLine(State &state) {
+int InstrumentPower::whichLine(State &state) {
     int line;
     std::cout << "Please enter line number for state " << state.getStateId() << std::endl;
     std::cin >> line;
     return line;
 }
 
-void EstimatePower::mapStates2Lines(FSM &node) {
+void InstrumentPower::mapStates2Lines(FSM &node) {
     for (auto state : node.getStateMap())
         stateLines.insert(std::pair<int, State*> (whichLine(*state.second), state.second));
 }
 
-std::string EstimatePower::lhs(std::string condition) {
+std::string InstrumentPower::lhs(std::string condition) {
     std::size_t startPosition, length;
     startPosition = condition.find("(");
     if (isPositive(condition)) startPosition += 2;
@@ -153,7 +155,7 @@ std::string EstimatePower::lhs(std::string condition) {
     return lhs;
 }
 
-std::string EstimatePower::rhs(std::string condition) {
+std::string InstrumentPower::rhs(std::string condition) {
     std::size_t startPosition, length;
     startPosition = condition.find("==");
     if (startPosition == std::string::npos)  {
@@ -174,13 +176,13 @@ std::string EstimatePower::rhs(std::string condition) {
     return rhs;
 }
 
-bool EstimatePower::isPositive(std::string condition) {
+bool InstrumentPower::isPositive(std::string condition) {
     if (condition.find("(not(") == std::string::npos)
         return true;
     return false;
 }
 
-void EstimatePower::traverseProcessBody(FSM &node, unsigned int processPosition) {
+void InstrumentPower::traverseProcessBody(FSM &node, unsigned int processPosition) {
     int startState, currentLine = -1, conditionLine;
     std::string statementString, condition;
     std::vector <std::string> currentConditions;
