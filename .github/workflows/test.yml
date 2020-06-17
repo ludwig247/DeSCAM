@@ -36,7 +36,6 @@ jobs:
         run: pwd
       - name: Stop Container
         run: docker stop MyUbuntu
-	# Ubuntu 18.04 -----------------------------------------------------------
       - name: Docker Build Ubuntu18
         run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
       - name: Docker Run Ubuntu18
@@ -47,9 +46,6 @@ jobs:
         run: docker exec MyUbuntu18 "/root/ubuntu18_script"
       - name: Stop Container Ubuntu18
         run: docker stop MyUbuntu18
-	# -----------------------------------------------------------------------------
-
-	# Ubuntu 16.04 -----------------------------------------------------------
       - name: Docker Build Ubuntu16
         run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
       - name: Docker Run Ubuntu16
@@ -60,7 +56,6 @@ jobs:
         run: docker exec MyUbuntu16 "/root/ubuntu16_script"
       - name: Stop Container Ubuntu16
         run: docker stop MyUbuntu16
-	# -----------------------------------------------------------------------------
 
 #      - name: Build System Generation
 #        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
