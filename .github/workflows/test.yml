@@ -31,7 +31,7 @@ jobs:
       - name: Run Master
         run: docker exec MyUbuntu "/root/master"
       - name: Copy Image back
-        run: docker cp MyUbuntu "/root/DeSCAM_v" .
+        run: docker cp MyUbuntu:/root/DeSCAM_v .
       - name: Check path
         run: pwd
       - name: Stop Container
