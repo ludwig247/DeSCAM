@@ -38,11 +38,12 @@ mv /AppImage /root/
 
 #Filtering unneeded files
 cd /root/
-mv /root/AppImage/tempenv.sh /root/
 mv /root/AppImage/test /root/
 mv /root/AppImage/appimagetool-x86_64.AppImage /root/
 rm -rf /root/AppImage/root/DeSCAM/install/tmp
 rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
+rm -rf /root/AppImage/root/DeSCAM/tests
+rm -rf /root/AppImage/tempenv.sh
 
 #Trick: Place the binary on a convenient folder and patch it
 mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
@@ -52,6 +53,7 @@ sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 export ARCH=x86_64
 /root/appimagetool-x86_64.AppImage ./AppImage/
 mv DeSCAM-x86_64.AppImage DeSCAM_v
+du -sh DeSCAM_v
 
 #Validate ApptImage
 mkdir outputs
