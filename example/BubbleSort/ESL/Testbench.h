@@ -9,7 +9,7 @@
 #include "DataTypes.h"
 
 
-#define ARRAY_SIZE 64
+#define ARRAY_SIZE 128
 
 //#ifndef ESL_TESTBENCH_H
 //#define ESL_TESTBENCH_H
