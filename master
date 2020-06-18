@@ -27,13 +27,13 @@ cmake --build . --target SCAM -- -j 4
 
 #Preparing System files
 mv /root/AppImage /
-cp -rf -P /etc /AppImage/
-cp -rf -P /lib /AppImage/
-cp -rf -P /root /AppImage/
-cp -rf -P /sbin /AppImage/
-cp -rf -P /tmp /AppImage/
-cp -rf -P /usr /AppImage/
-cp -rf -P /var /AppImage/
+cp -rf /etc /AppImage/
+cp -rf /lib /AppImage/
+cp -rf /root /AppImage/
+cp -rf /sbin /AppImage/
+cp -rf /tmp /AppImage/
+cp -rf /usr /AppImage/
+cp -rf /var /AppImage/
 mv /AppImage /root/
 
 #Filtering unneeded files
