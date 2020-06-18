@@ -8,7 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-16.04, ubuntu-18.04]
+        # os: [ubuntu-16.04, ubuntu-18.04]
+        os: [ubuntu-18.04] #Only one OS is necessary
     env:
       CMAKE_BIN: "cmake"
       PYTHON3: "python3"
@@ -20,8 +21,6 @@ jobs:
       - uses: actions/checkout@v1
       - name: Test before
         run: cat /etc/os-release
-#      - name: Docker Run
-#        run: docker run --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse ubuntu
       - name: Docker Build
         run: docker build --tag myimage:1.0 .
       - name: Docker Run
@@ -59,6 +58,16 @@ jobs:
             - Ubuntu 18.04 Support
           draft: false
           prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./DeSCAM_v
+          asset_name: DeSCAM
+          asset_content_type: application/octet-stream
 
 #      - name: Docker Build Ubuntu16
 #        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
