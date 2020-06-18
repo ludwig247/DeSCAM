@@ -58,14 +58,13 @@ constraint no_reset := rst == 0; end constraint;
 //-- VISIBLE REGISTERS --
 macro unsigned encodedInstr :=resize(0,32) end macro;
 macro unsigned iaddr :=resize(0,32) end macro;
-macro Sections nextsection :=fetch_ph end macro;
 macro unsigned pcReg :=resize(0,32) end macro;
 
 
 //-- STATES --
 macro boolean state_1 := true end macro;
 macro boolean state_2 := true end macro;
-macro boolean state_3 := true end macro;
+macro boolean FETCH_3 := true end macro;
 macro boolean state_4 := true end macro;
 macro boolean state_5 := true end macro;
 macro boolean state_6 := true end macro;
