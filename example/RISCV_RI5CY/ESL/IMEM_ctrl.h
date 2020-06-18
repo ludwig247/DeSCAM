@@ -21,7 +21,6 @@ public:
         data(0)
     {
         SC_THREAD(run);
-        SC_THREAD(run_2);
     }
 
     // ports for communication with memory
@@ -37,51 +36,54 @@ public:
     slave_out<unsigned int > dataToCPUPort;
 
     // data for communication with memory
-    CUtoME_IF memoryAccess;
-    MEtoCU_IF fromMemoryData;
+    CUtoME_IF imemMemoryAccess;
+    MEtoCU_IF imemFromMemoryData;
+
+    CUtoME_IF dmemMemoryAccess;
+    MEtoCU_IF dmemFromMemoryData;
 
     //data for communication with CPU
     unsigned int addr;
+    unsigned int instr;
     unsigned int data;
 
+    //flags
+    bool flagFromCPUPort;
+    bool flagDmemMemoryAccess;
+
     void run();
-    void run_2();
 };
 
-void IMEM_ctrl::run() {
+void IMEM_ctrl::run(){
     while (true){
-        wait(WAIT_TIME, SC_PS);
-        fromCPUPort->slave_read(addr);
+        fromCPUPort->slave_read(addr, flagFromCPUPort);
+        if(flagFromCPUPort){
+            // Set up memory access
+            imemMemoryAccess.req = ME_RD;
+            imemMemoryAccess.mask = MT_W; // always for instructions
+            imemMemoryAccess.addrIn = addr;
+            imemMemoryAccess.dataIn = 0;    // not relevant
 
+            toMemoryPort->write(imemMemoryAccess); //Send request to memory
+            fromMemoryPort->read(imemFromMemoryData); //Read encoded instruction from memory
+            instr = imemFromMemoryData.loadedData;
 
-        // Set up memory access
-        memoryAccess.req = ME_RD;
-        memoryAccess.mask = MT_W; // always for instructions
-        memoryAccess.addrIn = addr;
-        memoryAccess.dataIn = 0;    // not relevant
+            dataFromCPUPort->try_read(dmemMemoryAccess, flagDmemMemoryAccess);
+            if(flagDmemMemoryAccess){
+                toMemoryPort->write(dmemMemoryAccess); //Send request to memory
+                fromMemoryPort->read(dmemFromMemoryData); //Read encoded instruction from memory
 
-        toMemoryPort->write(memoryAccess); //Send request to memory
-        fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
+                data = dmemFromMemoryData.loadedData;
 
-        data = fromMemoryData.loadedData;
-
-        toCPUPort->slave_write(data);
-        wait(WAIT_TIME, SC_PS);
-    }
-}
-
-void IMEM_ctrl::run_2() {
-    while (true){
-        dataFromCPUPort->read(memoryAccess);
-        //wait(WAIT_TIME, SC_PS);
-        toMemoryPort->write(memoryAccess); //Send request to memory
-
-        fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
-
-        data = fromMemoryData.loadedData;
-        dataToCPUPort->slave_write(data);
-        //wait(WAIT_TIME, SC_PS);
+                dataToCPUPort->slave_write(data);
+            }
+            toCPUPort->slave_write(instr);
+        }else{
+            //toCPUPort->slave_write(instr);
+            wait(WAIT_TIME, SC_PS);
+        }
     }
 }
 
 #endif //DESCAM_IMEM_CTRL_H
+

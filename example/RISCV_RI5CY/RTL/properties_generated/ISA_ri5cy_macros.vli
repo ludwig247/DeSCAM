@@ -1,0 +1,81 @@
+//-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
+macro boolean data_out_sync := true end macro;
+macro boolean data_out_notify := true end  macro;
+macro boolean instr_req_notify := true end  macro;
+macro boolean toRegsPort_notify := true end  macro;
+
+
+//-- DP SIGNALS --
+macro unsigned data_in_sig :=resize(0,32) end macro;
+//macro CUtoME_IF data_out_sig :={resize(0,32), resize(0,32), mt_b, me_rd} end macro;
+macro unsigned data_out_sig_addrIn :=resize(0,32) end macro;
+macro unsigned data_out_sig_dataIn :=resize(0,32) end macro;
+macro ME_MaskType data_out_sig_mask :=mt_x end macro;
+macro ME_AccessType data_out_sig_req :=me_x end macro;
+//macro RegfileType fromRegsPort_sig :={resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
+macro unsigned fromRegsPort_sig_reg_file_01 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_02 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_03 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_04 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_05 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_06 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_07 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_08 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_09 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_10 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_11 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_12 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_13 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_14 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_15 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_16 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_17 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_18 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_19 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_20 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_21 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_22 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_23 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_24 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_25 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_26 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_27 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_28 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_29 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_30 :=resize(0,32) end macro;
+macro unsigned fromRegsPort_sig_reg_file_31 :=resize(0,32) end macro;
+macro unsigned instr_in_sig :=resize(0,32) end macro;
+macro unsigned instr_req_sig :=resize(0,32) end macro;
+//macro RegfileWriteType toRegsPort_sig :={resize(0,32), resize(0,32)} end macro;
+macro unsigned toRegsPort_sig_dst :=resize(0,32) end macro;
+macro unsigned toRegsPort_sig_dstData :=resize(0,32) end macro;
+
+
+//-- CONSTRAINTS --
+constraint no_reset := rst == 0; end constraint;
+
+
+//-- VISIBLE REGISTERS --
+macro unsigned encodedInstr :=resize(0,32) end macro;
+macro unsigned iaddr :=resize(0,32) end macro;
+macro Sections nextsection :=fetch_ph end macro;
+macro unsigned pcReg :=resize(0,32) end macro;
+
+
+//-- STATES --
+macro boolean state_1 := true end macro;
+macro boolean state_2 := true end macro;
+macro boolean state_3 := true end macro;
+macro boolean state_4 := true end macro;
+macro boolean state_5 := true end macro;
+macro boolean state_6 := true end macro;
+macro boolean state_7 := true end macro;
+macro boolean state_8 := true end macro;
+macro boolean state_9 := true end macro;
+macro boolean state_10 := true end macro;
+macro boolean state_11 := true end macro;
+macro boolean state_12 := true end macro;
+macro boolean state_13 := true end macro;
+macro boolean state_14 := true end macro;
+
+
