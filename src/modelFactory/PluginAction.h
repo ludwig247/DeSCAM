@@ -57,7 +57,6 @@ public:
 	PluginAction (int argc, const char **argv) {
 
         std::vector<std::string> arg;
-//        const char *arg[argc];
 
         for(int i=1; i < argc ; i++) {
             if(!(std::string(argv[i]) == "--")){
@@ -67,7 +66,6 @@ public:
             else break;
         };
 
-
         CommonOptionsParser OptionsParser (argc, argv);
 
 
@@ -76,7 +74,7 @@ public:
         }
 
 
-		ClangTool Tool (OptionsParser.getCompilations (), OptionsParser.getSourcePathList());
+		ClangTool Tool (OptionsParser.getCompilations (), arg);
 
 		std::string output;
 		llvm::raw_string_ostream ss(output);
