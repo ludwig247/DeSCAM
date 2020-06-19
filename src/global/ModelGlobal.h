@@ -71,9 +71,9 @@ namespace SCAM {
             std::string interfaces = std::string("-I" + scam_dir + "example/Interfaces/");
             commandLineArugmentsVector.push_back(interfaces.c_str());
 
-            for(int i =0; i< commandLineArugmentsVector.size(); i++){
-                std::cout<<"small step:"<< commandLineArugmentsVector[i]<<std::endl;
-            }
+//            for(int i =0; i< commandLineArugmentsVector.size(); i++){
+//                std::cout<<"small step:"<< commandLineArugmentsVector[i]<<std::endl;
+//            }
 
             //Parameters for clang: may not be changed
             std::vector<const char *> clangParameter = {"-std=c++11", "-x", "c++", "-w", "-c"};
@@ -104,9 +104,9 @@ namespace SCAM {
             std::string clang_dir = SCAM_HOME"/include/clang/3.4.2/include";
             std::string systemc_dir = SCAM_HOME"/include/";
             std::string scam_dir = SCAM_HOME"/";
-            if (clang_dir == "") throw std::runtime_error("Specfiy CLANG_DIR as environment variable");
-            if (systemc_dir == "") throw std::runtime_error("Specfiy SYSTEMC_DIR as environment variable");
-            if (scam_dir == "") throw std::runtime_error("Specfiy SCAM_DIR as environment variable");
+            if (clang_dir == "") throw std::runtime_error("Specifiy CLANG_DIR as environment variable");
+            if (systemc_dir == "") throw std::runtime_error("Specifiy SYSTEMC_DIR as environment variable");
+            if (scam_dir == "") throw std::runtime_error("Specifiy SCAM_DIR as environment variable");
 
             //Binaray
             commandLineArugmentsVector.push_back(argv[0]);

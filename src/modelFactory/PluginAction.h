@@ -27,12 +27,11 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "ModelFactory.h"
-#include <vector>
+
 
 
 using namespace clang::driver;
 using namespace clang::tooling;
-
 
 
 
@@ -56,13 +55,28 @@ template < typename A > class PluginAction
 {
 public:
 	PluginAction (int argc, const char **argv) {
-    for(int i=0; i>=0; i++) {
-        std::cout << argv[i] << std::endl;
-    }
+
+        std::vector<std::string> arg;
+//        const char *arg[argc];
+
+        for(int i=1; i < argc ; i++) {
+            if(!(std::string(argv[i]) == "--")){
+                arg.push_back(argv[i]);
+                std::cout << "ARG: " << arg[i-1] << std::endl;
+            }
+            else break;
+        };
+
+
         CommonOptionsParser OptionsParser (argc, argv);
 
-//        OptionsParser.getSourcePathList ().erase(OptionsParser.SourcePathList.begin());
-		ClangTool Tool (OptionsParser.getCompilations (), OptionsParser.getSourcePathList ());
+
+        for(auto src: OptionsParser.getSourcePathList()){
+            std::cout << "OP:" << src << std::endl;
+        }
+
+
+		ClangTool Tool (OptionsParser.getCompilations (), OptionsParser.getSourcePathList());
 
 		std::string output;
 		llvm::raw_string_ostream ss(output);
@@ -74,9 +88,10 @@ public:
 		FrontendActionFactory *fe =	newFrontendActionFactory < LightsCameraAction < A > >();
 		Tool.run(fe);
 		std::cout << ss.str() << std::endl;
-//		OptionsParser.getSourcePathList().clear();
+
 	};
 
+//    ~PluginAction(){std::cout<<"delte,delete"<<std::endl;};
 
 private:
 
