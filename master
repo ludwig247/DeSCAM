@@ -25,9 +25,6 @@ cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
 cmake --build . --target SCAM -- -j 4
-exit
-du -sh ./*/
-ls -l
 
 #Preparing System files
 mv /root/AppImage /
