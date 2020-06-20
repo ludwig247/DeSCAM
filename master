@@ -9,8 +9,8 @@ apt-get install -y unionfs-fuse
 cd /root/
 
 ##Initializing temporal environment
-#./tempenv.sh setup
-#./tempenv.sh start
+./tempenv.sh setup
+./tempenv.sh start
 
 #Installing dependencies
 apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-dev 
@@ -24,38 +24,47 @@ cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
 cmake --build . --target SCAM -- -j 4
-
-#Preparing System files
-mv /root/AppImage /
-cp -rf /etc /AppImage/
-cp -rf /lib /AppImage/
-cp -rf /root /AppImage/
-cp -rf /sbin /AppImage/
-cp -rf /tmp /AppImage/
-cp -rf /usr /AppImage/
-cp -rf /var /AppImage/
-mv /AppImage /root/
-
-#Filtering unneeded files
-cd /root/
-mv /root/AppImage/test /root/
-mv /root/AppImage/appimagetool-x86_64.AppImage /root/
-rm -rf /root/AppImage/root/DeSCAM/install/tmp
-rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
-rm -rf /root/AppImage/root/DeSCAM/tests
-rm -rf /root/AppImage/tempenv.sh
-
-#Trick: Place the binary on a convenient folder and patch it
-mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
-sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
-
-#Create AppImage
-export ARCH=x86_64
-/root/appimagetool-x86_64.AppImage ./AppImage/
-mv DeSCAM-x86_64.AppImage DeSCAM_v
-du -sh DeSCAM_v
-
-#Validate ApptImage
-mkdir outputs
+exit
+du -sh ./*/
 ls -l
-./DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
+
+##Preparing System files
+#mv /root/AppImage /
+#cp -rf /etc /AppImage/
+#cp -rf /lib /AppImage/
+#cp -rf /root /AppImage/
+#cp -rf /sbin /AppImage/
+#cp -rf /tmp /AppImage/
+#cp -rf /usr /AppImage/
+#cp -rf /var /AppImage/
+#mv /AppImage /root/
+#
+##Filtering unneeded files
+#cd /root/
+#mv /root/AppImage/test /root/
+#mv /root/AppImage/appimagetool-x86_64.AppImage /root/
+#rm -rf /root/AppImage/root/DeSCAM/install/tmp
+#rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
+#rm -rf /root/AppImage/root/DeSCAM/tests
+#rm -rf /root/AppImage/root/DeSCAM/install/*.zip
+#rm -rf /root/AppImage/tempenv.sh
+#rm -rf /root/AppImage/etc/ssh
+#rm -rf /root/AppImage/etc/ssl
+#rm -rf /root/AppImage/lib/x86_64-linux-gnu/security
+#rm -rf /root/AppImage/usr/local/bin
+#rm -rf /root/AppImage/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_bionic_universe_binary-amd64_Packages.lz4
+#
+##Trick: Place the binary on a convenient folder and patch it
+#mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
+#sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
+#
+##Create AppImage
+#export ARCH=x86_64
+#/root/appimagetool-x86_64.AppImage ./AppImage/
+#mv DeSCAM-x86_64.AppImage DeSCAM_v
+#du -sh DeSCAM_v
+#
+##Validate ApptImage
+#mkdir outputs
+#ls -l
+#./DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
