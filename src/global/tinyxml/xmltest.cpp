@@ -604,9 +604,9 @@ int main() {
                 }
             }
             if (saved)
-                fclose(saved);
+                //fclose(saved);
             if (verify)
-                fclose(verify);
+                //fclose(verify);
             XmlTest("UTF-8: Verified multi-language round trip.", 1, okay);
 
             // On most Western machines, this is an element that contains
@@ -953,7 +953,7 @@ int main() {
         FILE *textfile = fopen("textfile.txt", "w");
         if (textfile) {
             psg->Print(textfile, 0);
-            fclose(textfile);
+            //fclose(textfile);
         }
         textfile = fopen("textfile.txt", "r");
         assert(textfile);
@@ -966,14 +966,14 @@ int main() {
                     buf,
                     true);
         }
-        fclose(textfile);
+        //fclose(textfile);
     }
 
     {
         FILE *textfile = fopen("test5.xml", "w");
         if (textfile) {
             fputs("<?xml version='1.0'?><a.elem xmi.version='2.0'/>", textfile);
-            fclose(textfile);
+            //fclose(textfile);
 
             TiXmlDocument doc;
             doc.LoadFile("test5.xml");
@@ -985,7 +985,7 @@ int main() {
         FILE *textfile = fopen("test6.xml", "w");
         if (textfile) {
             fputs("<element><Name>1.1 Start easy ignore fin thickness&#xA;</Name></element>", textfile);
-            fclose(textfile);
+            //fclose(textfile);
 
             TiXmlDocument doc;
             bool result = doc.LoadFile("test6.xml");

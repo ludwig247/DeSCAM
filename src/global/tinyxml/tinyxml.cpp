@@ -858,7 +858,7 @@ bool TiXmlDocument::LoadFile(const char *_filename, TiXmlEncoding encoding) {
 
     if (file) {
         bool result = LoadFile(file, encoding);
-        fclose(file);
+        //fclose(file);
         return result;
     } else {
         SetError(TIXML_ERROR_OPENING_FILE, 0, 0, TIXML_ENCODING_UNKNOWN);
@@ -965,7 +965,7 @@ bool TiXmlDocument::SaveFile(const char *filename) const {
     FILE *fp = TiXmlFOpen(filename, "w");
     if (fp) {
         bool result = SaveFile(fp);
-        fclose(fp);
+        //fclose(fp);
         return result;
     }
     return false;

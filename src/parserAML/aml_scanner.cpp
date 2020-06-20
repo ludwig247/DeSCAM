@@ -2926,6 +2926,6 @@ void aml_driver::scan_begin() {
 }
 
 void aml_driver::scan_end() {
-    fclose(yyin);
+    //fclose(yyin);
 }
 
