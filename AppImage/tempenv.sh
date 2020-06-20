@@ -30,6 +30,7 @@ function verifysetup() {
 
 function start() {
 	set -m
+	echo "Starting.."
 	if ! verifysetup; then
 		echo "Environment wasn't set up."
 		return 1
