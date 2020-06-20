@@ -48,6 +48,7 @@ cd usr/
 #ln -s ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5.9 ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5   
 #echo $(ls -l ./lib/x86_64-linux-gnu/libtinfo*)
 #exec ./root/DeSCAM/bin/DESCAM --file $1 --output $2 -PrintSkeleton
-exec ./bin/DESCAM "$@" 
+#exec ./bin/DESCAM "$@" 
+./bin/DESCAM "$@" 
 
 
