@@ -36,12 +36,17 @@ function start() {
 	#	return 1
 	#fi
 
+	echo "Step 1.."
 	unionfs-fuse -o cow,allow_other tempenv/files=RW:tempenv/persist:/ tempenv/chroot
+	echo "Step 2.."
 	mount --bind tempenv/dev tempenv/chroot/dev
+	echo "Step 3.."
 	mount --bind /dev/pts tempenv/chroot/dev/pts
 
+	echo "Step 4.."
 	#set +e
 	chroot tempenv/chroot
+	echo "Step 5.."
 	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
 	#set -e
 }

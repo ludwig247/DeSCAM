@@ -10,8 +10,8 @@ cd /root/
 
 ##Initializing temporal environment
 mv /root/AppImage/tempenv.sh /root/
-sudo ./tempenv.sh setup
-sudo ./tempenv.sh start
+./tempenv.sh setup
+./tempenv.sh start
 pwd
 echo "am I inside the temp file system?"
 #Installing dependencies
