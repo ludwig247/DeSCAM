@@ -31,10 +31,10 @@ function verifysetup() {
 function start() {
 	set -m
 	echo "Starting.."
-	if ! verifysetup; then
-		echo "Environment wasn't set up."
-		return 1
-	fi
+	#if ! verifysetup; then
+	#	echo "Environment wasn't set up."
+	#	return 1
+	#fi
 
 	unionfs-fuse -o cow,allow_other tempenv/files=RW:tempenv/persist:/ tempenv/chroot
 	mount --bind tempenv/dev tempenv/chroot/dev
