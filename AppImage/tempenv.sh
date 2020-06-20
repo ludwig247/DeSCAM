@@ -5,6 +5,7 @@ function showhelp() {
 }
 
 function setup() {
+	set -m
 	mkdir -p tempenv/{chroot,persist,files,dev/pts}
 
 	mknod -m 622 tempenv/dev/console c 5 1
@@ -28,6 +29,7 @@ function verifysetup() {
 }
 
 function start() {
+	set -m
 	if ! verifysetup; then
 		echo "Environment wasn't set up."
 		return 1

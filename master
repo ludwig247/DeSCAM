@@ -12,7 +12,8 @@ cd /root/
 mv /root/AppImage/tempenv.sh /root/
 ./tempenv.sh setup
 ./tempenv.sh start
-
+pwd
+echo "am I inside the temp file system?"
 #Installing dependencies
 apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-dev 
 add-apt-repository ppa:deadsnakes/ppa
