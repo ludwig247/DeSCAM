@@ -9,6 +9,7 @@ apt-get install -y unionfs-fuse
 cd /root/
 
 ##Initializing temporal environment
+mv /root/AppImage/tempenv.sh /root/
 ./tempenv.sh setup
 ./tempenv.sh start
 
@@ -20,10 +21,10 @@ apt-get install -y python3.7
 apt-get install -y python3-distutils
 
 #Building DeSCAM
-cd /root/DeSCAM
-mkdir build && cd build
-cmake ../
-cmake --build . --target SCAM -- -j 4
+#cd /root/DeSCAM
+#mkdir build && cd build
+#cmake ../
+#cmake --build . --target SCAM -- -j 4
 exit
 du -sh ./*/
 ls -l
