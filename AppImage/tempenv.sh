@@ -40,10 +40,10 @@ function start() {
 	mount --bind tempenv/dev tempenv/chroot/dev
 	mount --bind /dev/pts tempenv/chroot/dev/pts
 
-	set +e
+	#set +e
 	chroot tempenv/chroot
 	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
-	set -e
+	#set -e
 }
 
 set -e
