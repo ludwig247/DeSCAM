@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         # os: [ubuntu-16.04, ubuntu-18.04]
-        os: [ubuntu-18.04] #Only one OS is necessary
+        os: [ubuntu-16.04] #Only one OS is necessary
     env:
       CMAKE_BIN: "cmake"
       PYTHON3: "python3"
@@ -19,20 +19,20 @@ jobs:
       ROOT_DIR: "/"
     steps:
       - uses: actions/checkout@v1
-      - name: Test before
-        run: cat /etc/os-release
-      - name: Docker Build
-        run: docker build --tag myimage:1.0 .
-      - name: Docker Run
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
-      - name: Docker Check
-        run: docker ps -a
+#      - name: Test before
+#        run: cat /etc/os-release
+#      - name: Docker Build
+#        run: docker build --tag myimage:1.0 .
+#      - name: Docker Run
+#        run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
+#      - name: Docker Check
+#        run: docker ps -a
 #      - name: Run Master
 #        run: docker exec MyUbuntu "/root/master"
 #      - name: Copy Image back
 #        run: docker cp MyUbuntu:/root/DeSCAM_v .
-      - name: Check path
-        run: pwd && ls -l
+#      - name: Check path
+#        run: pwd && ls -l
 #      - name: Stop Container
 #        run: docker stop MyUbuntu
 #      - name: Docker Build Ubuntu18
@@ -80,8 +80,8 @@ jobs:
 #      - name: Stop Container Ubuntu16
 #        run: docker stop MyUbuntu16
 
-#      - name: Build System Generation
-#        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+      - name: Build System Generation
+        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       #- name: Build SYSTEMC
       #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
       #- name: Build GTEST
@@ -90,21 +90,23 @@ jobs:
       #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
       #- name: Build LLVM/CLANG
       #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
-#      - name: Build DESCAM
-#        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
-#      - name: Build Tests
-#        run: |
-#          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
-#          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
-#      - name: Run Tests
-#        run: |
-#          $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
-#          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
-#      - name: Clean up
-#        run: |
-#          rm -rf $GITHUB_WORKSPACE/build/3rdParty
-#          rm -rf $GITHUB_WORKSPACE/install/tmp
-##      - name: AppImage Elaboration
-##        uses: ./
+      - name: Build DESCAM
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
+      - name: Build Tests
+        run: |
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
+      - name: Run Tests
+        run: |
+          $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
+          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
+      - name: Clean up
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/3rdParty
+          rm -rf $GITHUB_WORKSPACE/install/tmp
+      - name: AppImage Creation
+        run: $GITHUB_WORKSPACE/linuxdeployqt-6-x86_64.AppImage $GITHUB_WORKSPACE/bin/DESCAM -appimage # -executable=$GITHUB_WORKSPACE/
+#      - name: AppImage Elaboration
+#        uses: ./
      
 
