@@ -6,14 +6,14 @@ FROM ubuntu:18.04
 #Disclaimer: This tool is used to have a running container inside Github Actions
 # 	     otherwise, it is not possible, since it is closed by default
 # ------------------------------------------------------------------------------
-ENV SHELL /bin/bash
-RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
-RUN source ~/.profile
-RUN export GPG_TTY=$(tty)
-RUN apt-get update
-RUN apt --assume-yes install git
-RUN apt-get --assume-yes install curl
-RUN curl -L https://git.io/get_helm.sh | bash
+#ENV SHELL /bin/bash
+#RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
+#RUN source ~/.profile
+#RUN export GPG_TTY=$(tty)
+#RUN apt-get update
+#RUN apt --assume-yes install git
+#RUN apt-get --assume-yes install curl
+#RUN curl -L https://git.io/get_helm.sh | bash
 # ------------------------------------------------------------------------------
 
 #2) Create all directories that are necessary
@@ -44,8 +44,9 @@ COPY master /root/
 
 #4) Change working dir and start bash
 # ------------------------------------------------------------------------------
-WORKDIR /apps
-ENTRYPOINT tail -f /dev/null
-CMD [ "/bin/bash" ]
-# ------------------------------------------------------------------------------
+#WORKDIR /apps
+#ENTRYPOINT tail -f /dev/null
+ENTRYPOINT ["/root/master"]
+#CMD [ "/bin/bash" ]
+## ------------------------------------------------------------------------------
 
