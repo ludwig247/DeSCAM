@@ -7,7 +7,7 @@
 
 #Relocating Files
 cd /root/
-
+set -m
 ##Initializing temporal environment
 mv /root/AppImage/tempenv.sh /root/
 ./tempenv.sh setup
