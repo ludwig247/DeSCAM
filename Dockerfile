@@ -50,7 +50,8 @@ COPY master /root/
 # ------------------------------------------------------------------------------
 #WORKDIR /apps
 #ENTRYPOINT tail -f /dev/null
-ENTRYPOINT ["/root/master"]
+ENTRYPOINT /root/master
+CMD ["/bin/echo","HelloWorld"]
 #CMD [ "/bin/bash" ]
 ## ------------------------------------------------------------------------------
 
