@@ -5,7 +5,6 @@ function showhelp() {
 }
 
 function setup() {
-	set -m
 	mkdir -p tempenv/{chroot,persist,files,dev/pts}
 
 	mknod -m 622 tempenv/dev/console c 5 1
@@ -29,12 +28,11 @@ function verifysetup() {
 }
 
 function start() {
-	set -m
 	echo "Starting.."
-	#if ! verifysetup; then
-	#	echo "Environment wasn't set up."
-	#	return 1
-	#fi
+	if ! verifysetup; then
+		echo "Environment wasn't set up."
+		return 1
+	fi
 
 	echo "Step 1.."
 	unionfs-fuse -o cow,allow_other tempenv/files=RW:tempenv/persist:/ tempenv/chroot
@@ -44,11 +42,11 @@ function start() {
 	mount --bind /dev/pts tempenv/chroot/dev/pts
 
 	echo "Step 4.."
-	#set +e
+	set +e
 	chroot tempenv/chroot
 	echo "Step 5.."
 	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
-	#set -e
+	set -e
 }
 
 set -e

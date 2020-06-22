@@ -7,11 +7,11 @@
 
 #Relocating Files
 cd /root/
-set -m
+
 ##Initializing temporal environment
 mv /root/AppImage/tempenv.sh /root/
-./tempenv.sh setup
-./tempenv.sh start
+tempenv.sh setup
+tempenv.sh start
 
 #Installing dependencies
 apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-dev 
@@ -19,18 +19,19 @@ add-apt-repository ppa:deadsnakes/ppa
 apt-get update
 apt-get install -y python3.7
 apt-get install -y python3-distutils
-pwd
-ls -l
-echo "am I inside the temp file system?"
+
+#Building DeSCAM
+cd /root/DeSCAM
+mkdir build && cd build
+cmake ../
+cmake --build . --target SCAM -- -j 4
 exit
 
-##Building DeSCAM
-#cd /root/DeSCAM
-#mkdir build && cd build
-#cmake ../
-#cmake --build . --target SCAM -- -j 4
-#
 ##Preparing System files
+cp -rf /root/tempenv/files/ /root/AppImage/
+mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
+sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
+
 #mv /root/AppImage /
 #cp -rf /etc /AppImage/
 #cp -rf /lib /AppImage/
@@ -40,8 +41,13 @@ exit
 #cp -rf /usr /AppImage/
 #cp -rf /var /AppImage/
 #mv /AppImage /root/
-#
-##Filtering unneeded files
+
+#Filtering unneeded files
+rm -rf /root/AppImage/root/AppImage
+rm -rf /root/AppImage/root/DeSCAM/install/tmp
+rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
+mv /root/AppImage/appimagetool-x86_64.AppImage /root/
+
 #cd /root/
 #mv /root/AppImage/test /root/
 #mv /root/AppImage/appimagetool-x86_64.AppImage /root/
@@ -60,13 +66,14 @@ exit
 #mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
 #sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 #
-##Create AppImage
-#export ARCH=x86_64
-#/root/appimagetool-x86_64.AppImage ./AppImage/
-#mv DeSCAM-x86_64.AppImage DeSCAM_v
+#Create AppImage
+export ARCH=x86_64
+/root/appimagetool-x86_64.AppImage ./AppImage/
+mv DeSCAM-x86_64.AppImage DeSCAM_v
+docker cp /root/DeSCAM_v .
 #du -sh DeSCAM_v
-#
-##Validate ApptImage
+
+##Validate AppImage
 #mkdir outputs
 #ls -l
 #./DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
