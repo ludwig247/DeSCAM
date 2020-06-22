@@ -14,7 +14,7 @@ tempenv.sh setup
 tempenv.sh start
 
 #Installing dependencies
-apt-get install -y cmake gcc g++ unzip sed software-properties-common libtinfo-dev 
+apt-get install -y cmake gcc g++ unzip sed git software-properties-common libtinfo-dev 
 add-apt-repository ppa:deadsnakes/ppa
 apt-get update
 apt-get install -y python3.7
