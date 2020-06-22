@@ -16,6 +16,9 @@ FROM ubuntu:18.04
 #RUN curl -L https://git.io/get_helm.sh | bash
 # ------------------------------------------------------------------------------
 
+RUN apt-get update
+RUN apt-get install -y fuse
+RUN apt-get install -y unionfs-fuse
 #2) Create all directories that are necessary
 #Disclaimer: The command COPY just copies contents of a directory
 # ------------------------------------------------------------------------------

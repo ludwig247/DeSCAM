@@ -1,9 +1,9 @@
 #!/bin/sh
 
 #Updating System and installing basic packages
-apt-get update
-apt-get install -y fuse
-apt-get install -y unionfs-fuse
+#apt-get update
+#apt-get install -y fuse
+#apt-get install -y unionfs-fuse
 
 #Relocating Files
 cd /root/
