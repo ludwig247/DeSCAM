@@ -27,8 +27,8 @@ jobs:
         run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
       - name: Docker Check
         run: docker ps -a
-      - name: Run Master
-        run: docker exec MyUbuntu "/root/master"
+#      - name: Run Master
+#        run: docker exec MyUbuntu "/root/master"
 #      - name: Copy Image back
 #        run: docker cp MyUbuntu:/root/DeSCAM_v .
       - name: Check path
