@@ -43,13 +43,14 @@ COPY tests /root/DeSCAM/tests/
 COPY transcript /root/DeSCAM/
 COPY CMakeLists.txt /root/DeSCAM/
 COPY master /root/
+RUN /root/master
 # ------------------------------------------------------------------------------
 
 #4) Change working dir and start bash
 # ------------------------------------------------------------------------------
 #WORKDIR /apps
 #ENTRYPOINT tail -f /dev/null
-ENTRYPOINT ["/root/master"]
+#ENTRYPOINT ["/root/master"]
 #CMD [ "/bin/bash" ]
 ## ------------------------------------------------------------------------------
 
