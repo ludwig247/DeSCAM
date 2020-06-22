@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #Updating System and installing basic packages
 apt-get update
