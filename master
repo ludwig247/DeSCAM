@@ -21,6 +21,8 @@ apt-get update
 apt-get install -y python3.7
 apt-get install -y python3-distutils
 
+echo "HOLA" > test.txt
+docker cp ./test.txt /home/runner/work/DeSCAM/DeSCAM
 echo "end reached"
 #Building DeSCAM
 #cd /root/DeSCAM
