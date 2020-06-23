@@ -15,7 +15,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 0
+#define SCAM 1
 
 class ISA_ri5cy : public sc_module {
 public:
@@ -120,6 +120,9 @@ void ISA_ri5cy::run() {
                 pcReg = 0;
             }
 
+            #if SCAM == 1
+                insert_state("IF");
+            #endif
             instr_in->master_read(encodedInstr);
             nextsection = Sections::DECODE_PH;
             #if SCAM == 0
@@ -136,6 +139,9 @@ void ISA_ri5cy::run() {
             iaddr = iaddr + 4;
 
             instr_req->master_write(iaddr);
+            #if SCAM == 1
+                insert_state("ID");
+            #endif
             fromRegsPort->master_read(regfile); //Read register contents
             nextsection = Sections::EXECUTE_PH;
 
@@ -179,7 +185,7 @@ void ISA_ri5cy::run() {
                     memoryAccess.dataIn = 0; // (not relevant for loads)
 
                     // Request load
-                    data_out->write(memoryAccess);
+                    data_out->write(memoryAccess, "LOAD");
 
                     // Load done
                     data_in->master_read(fromMemoryData);
@@ -206,11 +212,7 @@ void ISA_ri5cy::run() {
                     memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for stores
                     memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
 
-                    data_out->write(memoryAccess); // Request store
-
-                    #if SCAM == 1
-                    insert_state("FETCH");
-                    #endif
+                    data_out->write(memoryAccess, "STORE"); // Request store
 
                     #if SCAM == 0
                     // Store done
@@ -229,10 +231,14 @@ void ISA_ri5cy::run() {
 
                     if (branchDecision){
                         iaddr = pcReg + getImmediate(encodedInstr);
+                        instr_in->master_read(temp);
+                        instr_req->master_write(iaddr);
+                    #if SCAM == 1
+                        insert_state("EX");
+                    #endif
                     }
 
-                    instr_in->master_read(temp);
-                    instr_req->master_write(iaddr);
+                    pcReg = iaddr;
 
                 } else if (getEncType(encodedInstr) == ENC_U) {
                     /////////////////////////////////////////////////////////////////////////////

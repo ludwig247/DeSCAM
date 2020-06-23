@@ -80,30 +80,9 @@ constraint no_reset := rst_ni == 1 ; end constraint;
 
 
 //-- VISIBLE REGISTERS --
-macro unsigned aluResult := regfile_alu_wdata_fw end macro;
-macro boolean branchDecision := branch_decision end macro;
 macro unsigned iaddr := instr_addr_o end macro;
 macro unsigned encodedInstr := instr_rdata_id end macro;
 macro unsigned pcReg := pc_if end macro;
-macro unsigned regfileWrite_dst := 
-    if (regfile_we_wb)
-        regfile_waddr_fw_wb_o;
-    elseif(regfile_alu_we_fw)
-        regfile_alu_waddr_fw;
-    else
-        regfile_alu_waddr_fw;
-    endif; 
-end macro;
-macro unsigned regfileWrite_dstData := 
-    if (regfile_we_wb)
-        regfile_wdata;
-    elseif(regfile_alu_we_fw)
-        regfile_alu_wdata_fw;
-    else
-        regfile_alu_wdata_fw;
-    endif;
-end macro;
-macro unsigned fromMemoryData := regfile_wdata end macro;
 
 
 

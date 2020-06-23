@@ -62,19 +62,12 @@ macro unsigned pcReg :=resize(0,32) end macro;
 
 
 //-- STATES --
-macro boolean state_1 := true end macro;
-macro boolean state_2 := true end macro;
-macro boolean FETCH_3 := true end macro;
-macro boolean state_4 := true end macro;
-macro boolean state_5 := true end macro;
+macro boolean IF_1 := true end macro;
+macro boolean ID_2 := true end macro;
+macro boolean LOAD_3 := true end macro;
+macro boolean STORE_4 := true end macro;
+macro boolean EX_5 := true end macro;
 macro boolean state_6 := true end macro;
 macro boolean state_7 := true end macro;
-macro boolean state_8 := true end macro;
-macro boolean state_9 := true end macro;
-macro boolean state_10 := true end macro;
-macro boolean state_11 := true end macro;
-macro boolean state_12 := true end macro;
-macro boolean state_13 := true end macro;
-macro boolean state_14 := true end macro;
 
 
