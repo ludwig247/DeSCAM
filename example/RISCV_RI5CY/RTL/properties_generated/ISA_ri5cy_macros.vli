@@ -58,16 +58,17 @@ constraint no_reset := rst == 0; end constraint;
 //-- VISIBLE REGISTERS --
 macro unsigned encodedInstr :=resize(0,32) end macro;
 macro unsigned iaddr :=resize(0,32) end macro;
+macro unsigned pcJump :=resize(0,32) end macro;
 macro unsigned pcReg :=resize(0,32) end macro;
 
 
 //-- STATES --
 macro boolean IF_1 := true end macro;
-macro boolean ID_2 := true end macro;
-macro boolean LOAD_3 := true end macro;
-macro boolean STORE_4 := true end macro;
-macro boolean EX_5 := true end macro;
-macro boolean state_6 := true end macro;
+macro boolean ID_J_2 := true end macro;
+macro boolean ID_3 := true end macro;
+macro boolean LOAD_4 := true end macro;
+macro boolean STORE_5 := true end macro;
+macro boolean EX_6 := true end macro;
 macro boolean state_7 := true end macro;
 
 
