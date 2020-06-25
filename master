@@ -32,6 +32,7 @@ cmake ../
 #exit
 /root/tempenv.sh terminate
 ls -l
+cd ..
 echo "After:"
 du -sh tempenv/
 
