@@ -45,7 +45,7 @@ function start() {
 	set +e
 	chroot tempenv/chroot
 	echo "Step 5.."
-	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
+	#umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
 	set -e
 }
 
