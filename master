@@ -27,7 +27,7 @@ cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
 #cmake --build . --target SCAM -- -j 4
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo --build . --target SCAM -- -j 4
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo --build . --target SCAM -- -j4
 
 ##Preparing System files
 #cp -rf /root/tempenv/files/ /root/AppImage/
