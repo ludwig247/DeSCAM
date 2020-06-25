@@ -27,24 +27,26 @@ jobs:
         run: docker run --publish 8000:8080 --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
       - name: Docker Check
         run: docker ps -a
-      - name: Run Master
-        run: docker exec MyUbuntu "/root/master"
-      - name: Copy Image back
-        run: docker cp MyUbuntu:/root/DeSCAM_v .
-      - name: Check path
-        run: pwd && ls -l
-      - name: Stop Container
-        run: docker stop MyUbuntu
-      - name: Docker Build Ubuntu18
-        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
-      - name: Docker Run Ubuntu18
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
-      - name: Docker Check Ubuntu18
-        run: docker ps -a
-      - name: Run Test Ubuntu18
-        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
-      - name: Stop Container Ubuntu18
-        run: docker stop MyUbuntu18
+      - name: Attach Attempt
+        run: docker attach MyUbuntu && pwd && ls -l
+#      - name: Run Master
+#        run: docker exec MyUbuntu "/root/master"
+#      - name: Copy Image back
+#        run: docker cp MyUbuntu:/root/DeSCAM_v .
+#      - name: Check path
+#        run: pwd && ls -l
+#      - name: Stop Container
+#        run: docker stop MyUbuntu
+#      - name: Docker Build Ubuntu18
+#        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
+#      - name: Docker Run Ubuntu18
+#        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
+#      - name: Docker Check Ubuntu18
+#        run: docker ps -a
+#      - name: Run Test Ubuntu18
+#        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
+#      - name: Stop Container Ubuntu18
+#        run: docker stop MyUbuntu18
 ##      - name: Create Release
 ##        id: create_release
 ##        uses: actions/create-release@v1
