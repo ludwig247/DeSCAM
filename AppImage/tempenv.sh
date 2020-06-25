@@ -73,6 +73,9 @@ case "$1" in
 	"setup")
 		setup
 		;;
+	"terminate")
+		terminate
+		;;
 	*)
 		echo "Unknown command: $1"
 		;;
