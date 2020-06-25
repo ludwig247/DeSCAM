@@ -31,8 +31,8 @@ cmake ../
 #cmake --build . --target SCAM -- -j 4
 #exit
 /root/tempenv.sh terminate
+cd ../
 ls -l
-cd ..
 echo "After:"
 du -sh tempenv/
 
