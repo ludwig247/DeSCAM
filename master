@@ -12,29 +12,22 @@ cd /root/
 mv /root/AppImage/tempenv.sh /root/
 chmod +x /root/tempenv.sh
 /root/tempenv.sh setup
-ls tempenv/ -l
-echo "Before:"
-du -sh tempenv/
 /root/tempenv.sh start
 
 #Installing dependencies
-apt-get install -y cmake gcc g++ unzip sed git software-properties-common libtinfo-dev 
-add-apt-repository ppa:deadsnakes/ppa
-apt-get update
-apt-get install -y python3.7
-apt-get install -y python3-distutils
+echo "HELLO"
+#apt-get install -y cmake gcc g++ unzip sed git software-properties-common libtinfo-dev 
+#add-apt-repository ppa:deadsnakes/ppa
+#apt-get update
+#apt-get install -y python3.7
+#apt-get install -y python3-distutils
 
 #Building DeSCAM
-cd /root/DeSCAM
-mkdir build && cd build
-cmake ../
+#cd /root/DeSCAM
+#mkdir build && cd build
+#cmake ../
 #cmake --build . --target SCAM -- -j 4
-#exit
-/root/tempenv.sh terminate
-cd
-ls -l
-echo "After:"
-du -sh tempenv/
+exit
 
 #Preparing System files
 #cp -rf /root/tempenv/files/ /root/AppImage/

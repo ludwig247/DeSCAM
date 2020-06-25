@@ -6,10 +6,10 @@ FROM ubuntu:18.04
 # Disclaimer: This tool is used to have a running container inside Github Actions
 # 	     otherwise, it is not possible, since it is closed by default
 # ------------------------------------------------------------------------------
-# ENV SHELL /bin/bash
-# RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
-# RUN source ~/.profile
-# RUN export GPG_TTY=$(tty)
+ENV SHELL /bin/bash
+RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
+RUN source ~/.profile
+RUN export GPG_TTY=$(tty)
 RUN apt-get update
 # RUN apt --assume-yes install git
 # RUN apt-get --assume-yes install curl
