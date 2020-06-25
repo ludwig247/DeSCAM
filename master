@@ -13,6 +13,8 @@ mv /root/AppImage/tempenv.sh /root/
 chmod +x /root/tempenv.sh
 /root/tempenv.sh setup
 ls tempenv/ -l
+echo "Before:"
+du -sh tempenv/
 /root/tempenv.sh start
 
 #Installing dependencies
@@ -27,7 +29,10 @@ cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
 #cmake --build . --target SCAM -- -j 4
-exit
+#exit
+/root/tempenv.sh terminate
+echo "After:"
+du -sh tempenv/
 
 #Preparing System files
 #cp -rf /root/tempenv/files/ /root/AppImage/

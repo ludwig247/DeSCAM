@@ -27,6 +27,9 @@ function verifysetup() {
 	return 0
 }
 
+function terminate() {
+	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
+}
 function start() {
 	echo "Starting.."
 	if ! verifysetup; then
@@ -42,11 +45,11 @@ function start() {
 	mount --bind /dev/pts tempenv/chroot/dev/pts
 
 	echo "Step 4.."
-	set +e
-	chroot tempenv/chroot
-	echo "Step 5.."
-	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
-	set -e
+	#set +e
+	#chroot tempenv/chroot
+	#echo "Step 5.."
+	#umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
+	#set -e
 }
 
 set -e
