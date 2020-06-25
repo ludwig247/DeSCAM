@@ -1,5 +1,5 @@
 #The Target OS is set to be the last stable version of Ubuntu
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 # STEPS
 
 #1) Run the helm tool

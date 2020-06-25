@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #Updating System and installing basic packages
 #apt-get update
@@ -12,6 +12,7 @@ cd /root/
 #mv /root/AppImage/tempenv.sh /root/
 #chmod +x /root/tempenv.sh
 #/root/tempenv.sh setup
+#ls tempenv/ -l
 #/root/tempenv.sh start
 
 #Installing dependencies
@@ -25,7 +26,8 @@ apt-get install -y python3-distutils
 cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
-cmake --build . --target SCAM -- -j 4
+#cmake --build . --target SCAM -- -j 4
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo --build . --target SCAM -- -j 4
 
 ##Preparing System files
 #cp -rf /root/tempenv/files/ /root/AppImage/
