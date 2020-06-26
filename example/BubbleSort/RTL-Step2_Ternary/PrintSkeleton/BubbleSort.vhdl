@@ -8,17 +8,17 @@ entity BubbleSort is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	data_in:		in int_128;
+	data_in:		in int_256;
 	data_in_sync:		in bool;
 	data_in_notify:		out bool;
-	data_out:		out int_128;
+	data_out:		out int_256;
 	data_out_sync:		in bool;
 	data_out_notify:		out bool
 );
 end BubbleSort;
 
 architecture BubbleSort_arch of BubbleSort is
-	signal data_algorithm_signal: int_128;
+	signal data_algorithm_signal: int_256;
 	signal i_signal: signed(31 downto 0);
 	signal j_signal: signed(31 downto 0);
 	signal phase_algorithm_signal: phases;
@@ -26,7 +26,7 @@ architecture BubbleSort_arch of BubbleSort is
 	signal data_in_notify_sig: bool;
 	signal data_out_notify_sig: bool;
 
-	constant ARRAY_SIZE : integer := 128;
+	constant ARRAY_SIZE : integer := 256;
 
 begin
 	
@@ -36,7 +36,7 @@ begin
 	process(clk)
 
 		variable swap: int;
-		variable data_array: int_128;
+		variable data_array: int_256;
 
 	begin
 	if(clk='1' and clk'event) then
@@ -82,7 +82,7 @@ if (phase_algorithm_signal = IDLE and data_in_sync = false) then --STATE: DATA_I
 					if(j_signal < ARRAY_SIZE - i_signal - 1) then 
 
 						if(data_algorithm_signal(to_integer(j_signal)) > data_algorithm_signal(to_integer(j_signal) + 1)) then
-							data_algorithm_signal(to_integer(j_signal)) <= data_algorithm_signal(to_integer(j_signal) + 1);
+							data_algorithm_signal(to_integer(j_signal)) <= data_algorithm_signal(to_integer(j_signal) + 1); 
 							data_algorithm_signal(to_integer(j_signal) + 1) <= data_algorithm_signal(to_integer(j_signal));
 						end if;
 						
