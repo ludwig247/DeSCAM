@@ -62,3 +62,7 @@ example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.wlf
 example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.bak
 example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.mti
 
+#FFT
+example/FFT/SEQ/DeSCAM_parse
+example/FFT/PIPELINE/DeSCAM_parse
+
