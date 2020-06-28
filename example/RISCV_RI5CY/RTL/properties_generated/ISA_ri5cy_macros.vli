@@ -58,7 +58,7 @@ constraint no_reset := rst == 0; end constraint;
 //-- VISIBLE REGISTERS --
 macro unsigned encodedInstr :=resize(0,32) end macro;
 macro unsigned iaddr :=resize(0,32) end macro;
-macro unsigned pcJump :=resize(0,32) end macro;
+macro unsigned pcIf :=resize(0,32) end macro;
 macro unsigned pcReg :=resize(0,32) end macro;
 
 

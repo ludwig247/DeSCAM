@@ -15,7 +15,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 1
+#define SCAM 0
 
 class ISA_ri5cy : public sc_module {
 public:
@@ -73,7 +73,7 @@ public:
 
     unsigned int iaddr;
     unsigned int pcReg;
-    unsigned int pcJump;
+    unsigned int pcIf;
 
     unsigned int temp;
 
@@ -119,7 +119,7 @@ void ISA_ri5cy::run() {
             if(fromReset){
                 instr_req->master_write(iaddr);
                 pcReg = 0;
-                pcJump = pcReg;
+                pcIf = pcReg;
             }
             #if SCAM == 1
                 insert_state("IF");
@@ -138,7 +138,7 @@ void ISA_ri5cy::run() {
         } else if (section == Sections::DECODE_PH){
             if(getEncType(encodedInstr) == ENC_J){
                 pcReg = iaddr;
-                iaddr = pcJump + getImmediate(encodedInstr);
+                iaddr = pcIf + getImmediate(encodedInstr);
                 instr_req->master_write(iaddr);
                 #if SCAM == 1
                     insert_state("ID_J");
@@ -168,7 +168,7 @@ void ISA_ri5cy::run() {
                     regfileWrite.dstData = aluResult;
                     toRegsPort->master_write(regfileWrite); //Perform write back
 
-                    pcJump = iaddr;
+                    pcIf = iaddr;
                 }else if (getEncType(encodedInstr) == ENC_I_I){
                     //Set-up operands for alu by reading from regfile
                     aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
@@ -180,7 +180,7 @@ void ISA_ri5cy::run() {
                     regfileWrite.dstData = aluResult;
                     toRegsPort->master_write(regfileWrite); //Perform write back
 
-                    pcJump = iaddr;
+                    pcIf = iaddr;
                 }else if (getEncType(encodedInstr) == ENC_I_L) {
                     /////////////////////////////////////////////////////////////////////////////
                     //|  ID (RF_READ)   |        EX       |       MEM       |  ID (RF_WRITE)  |//
@@ -192,7 +192,7 @@ void ISA_ri5cy::run() {
 
                     aluResult = getALUresult(ALU_ADD, aluOp1, aluOp2);
 
-                    pcJump = iaddr;
+                    pcIf = iaddr;
 
                     //prepare memory access
                     memoryAccess.req = ME_RD;
@@ -222,7 +222,7 @@ void ISA_ri5cy::run() {
 
                     aluResult = getALUresult(ALU_ADD, aluOp1, aluOp2); //Compute result
 
-                    pcJump = iaddr;
+                    pcIf = iaddr;
 
                     //prepare memory access
                     memoryAccess.req = ME_WR;
@@ -248,7 +248,7 @@ void ISA_ri5cy::run() {
                     branchDecision = branchDecisionCalculation(encodedInstr, getALUresult(getALUfunc(getInstrType(encodedInstr)), aluOp1, aluOp2));
 
                     if (branchDecision){
-                        iaddr = pcReg + getImmediate(encodedInstr);
+                        iaddr = pcIf + getImmediate(encodedInstr);
                         instr_in->master_read(temp);
                         instr_req->master_write(iaddr);
                     #if SCAM == 1
@@ -257,30 +257,30 @@ void ISA_ri5cy::run() {
                     }
 
                     pcReg = iaddr;
-                    pcJump = iaddr;
+                    pcIf = iaddr;
 
                 } else if (getEncType(encodedInstr) == ENC_U) {
                     /////////////////////////////////////////////////////////////////////////////
                     //|        ID       |        EX       |    ---------    |  WB (RF_WRITE)  |//
                     /////////////////////////////////////////////////////////////////////////////
-                    aluResult = getEncUALUresult(encodedInstr, pcReg);
+                    aluResult = getEncUALUresult(encodedInstr, pcIf);
 
                     regfileWrite.dst = getRdAddr(encodedInstr);
                     regfileWrite.dstData = aluResult;
                     toRegsPort->master_write(regfileWrite); //Perform write back
 
-                    pcJump = iaddr;
+                    pcIf = iaddr;
                 } else if (getEncType(encodedInstr) == ENC_J) {
                     /////////////////////////////////////////////////////////////////////////////
                     //|        ID       |    ---------    |    ---------    |  WB (RF_WRITE)  |//
                     /////////////////////////////////////////////////////////////////////////////
-                    aluResult = pcReg + 4; //Compute result
+                    aluResult = pcIf + 4; //Compute result
 
                     regfileWrite.dst = getRdAddr(encodedInstr);
                     regfileWrite.dstData = aluResult;
                     toRegsPort->master_write(regfileWrite); //Perform write back
 
-                    pcJump = iaddr;
+                    pcIf = iaddr;
                 } else if (getEncType(encodedInstr) == ENC_I_J) {
                     /////////////////////////////////////////////////////////////////////////////
                     //|  ID (RF_READ)   |    ---------    |    ---------    |  WB (RF_WRITE)  |//
