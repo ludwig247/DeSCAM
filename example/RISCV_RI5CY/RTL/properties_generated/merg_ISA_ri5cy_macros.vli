@@ -20,6 +20,7 @@ macro ME_AccessType data_out_sig_req :=
         me_x;
     endif;
 end macro;
+macro boolean flush_in_sig := branch_decision & branch_in_ex end macro;
 //macro RegfileType fromRegsPort_sig :={resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
 macro unsigned fromRegsPort_sig_reg_file_01 := REGISTER(1)  end macro;
 macro unsigned fromRegsPort_sig_reg_file_02 := REGISTER(2)  end macro;
@@ -86,7 +87,6 @@ macro unsigned pcJump := pc_if end macro;
 macro unsigned pcReg := pc_if end macro;
 
 
-
 //-- STATES --
 macro boolean DECODE_1 := conceptual_state end macro;
 macro boolean state_2 := conceptual_state end macro;
@@ -98,12 +98,13 @@ macro boolean DECODE_1_v2 :=
     id_ready == 1 &&
     branch_decision == 0 &&
     data_req_o == 0 &&
-    regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+    regfile_alu_we_fw == 0 && regfile_we_wb == 0;   //should not be needed (Jump constraint and read regfile at t_ex not t_id)
 end macro;
 
 
 //-- MANUAL ADDED MACROS --
 macro boolean conceptual_state :=
+    halt_if == 0 &&
     id_ready && ex_ready && lsu_ready_ex && wb_valid &&
     !data_req_o &&                  		    //no mem ops
     !branch_decision &&                         //no branch

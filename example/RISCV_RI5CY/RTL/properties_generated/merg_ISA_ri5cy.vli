@@ -64,7 +64,7 @@ prove:
 	during[t+1, t_id]: data_out_notify == false;
 	during[t+1, t_id-1]: instr_req_notify == false;
 	at t_id: instr_req_notify == true;
-	//during[t+1, t_id]: toRegsPort_notify == false;
+	during[t+1, t_id]: toRegsPort_notify == false;
 
 	// at t_end: encodedInstr == encodedInstr_at_t;
 	// at t_end: iaddr == iaddr_at_t;
@@ -719,5 +719,106 @@ prove:
 	during[t_id+1, t_ex-1]: instr_req_notify == false;
 	at t_ex: instr_req_notify == true;
 	during[t_id+1, t_ex]: toRegsPort_notify == false;
+
+end property;
+
+property VACUOS;
+dependencies: 
+	no_reset,
+	in_out_constraints,
+	no_unaligned_case,
+	no_hwlp_case,
+	instr_mem;
+for timepoints:
+	t_id = t+1,
+	t_ex = t_id+1,
+	t_wb = t_ex+1;
+freeze:
+	iaddr_at_t = iaddr@t,
+	instr_in_sig_at_t = instr_in_sig@t,
+	encodedInstr_at_t = encodedInstr@t_id,
+	iaddr_at_t_id = iaddr@t_id,
+	pcReg_at_t_id = pcReg@t_id;
+assume:
+	at t: state_5;
+	at t: !((getEncType(instr_in_sig) == enc_j));
+	at t: !((getEncType(instr_in_sig) == enc_i_j));
+
+	at t_id: DECODE_1_v2;
+	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
+	at t_id: !((getEncType(encodedInstr) == enc_r));
+	at t_id: !((getEncType(encodedInstr) == enc_i_i));
+	at t_id: !((getEncType(encodedInstr) == enc_i_l));
+	at t_id: !((getEncType(encodedInstr) == enc_s));
+	at t_id: !((getEncType(encodedInstr) == enc_b));
+	at t_id: !((getEncType(encodedInstr) == enc_u));
+	at t_id: !((getEncType(encodedInstr) == enc_j));
+	at t_id: !((getEncType(encodedInstr) == enc_i_j));
+prove:
+
+	at t_id: encodedInstr == instr_in_sig_at_t;
+	at t_id: iaddr == (4 + iaddr_at_t)[31:0];
+	at t_id: instr_req_sig == (4 + iaddr_at_t)[31:0];
+	// at t_id: pcJump == pcJump_at_t;
+	at t_id: pcReg == iaddr_at_t;
+	during[t+1, t_id]: data_out_notify == false;
+	during[t+1, t_id-1]: instr_req_notify == false;
+	at t_id: instr_req_notify == true;
+	during[t+1, t_id]: toRegsPort_notify == false;
+
+	// at t_ex: encodedInstr == encodedInstr_at_t;
+	//at t_ex: iaddr == (4 + iaddr_at_t_id)[31:0];
+	// at t_ex: pcReg == pcReg_at_t_id;
+	// at t_ex: pcJump == iaddr_at_t_id;
+	// during[t_id+1, t_ex]: data_out_notify == false;
+	// during[t_id+1, t_ex]: instr_req_notify == false;
+	// during[t_id+1, t_ex]: toRegsPort_notify == false;
+
+end property;
+
+property UNCOVERED;
+dependencies: 
+	no_reset,
+	in_out_constraints,
+	no_unaligned_case,
+	no_hwlp_case,
+	instr_mem;
+for timepoints:
+	t_id = t+1,
+	t_ex = t_id+1,
+	t_wb = t_ex+1;
+freeze:
+	iaddr_at_t = iaddr@t,
+	instr_in_sig_at_t = instr_in_sig@t,
+	encodedInstr_at_t = encodedInstr@t_id,
+	iaddr_at_t_id = iaddr@t_id,
+	pcReg_at_t_id = pcReg@t_id;
+assume:
+	at t: state_5;
+	at t: !((getEncType(instr_in_sig) == enc_j));
+	at t: !((getEncType(instr_in_sig) == enc_i_j));
+
+	at t_id: DECODE_1_v2;
+	at t_id: (getInstrType(encodedInstr) == instr_unknown);
+
+prove:
+
+	at t_id: encodedInstr == instr_in_sig_at_t;
+	at t_id: iaddr == (4 + iaddr_at_t)[31:0];
+	at t_id: instr_req_sig == (4 + iaddr_at_t)[31:0];
+	// at t_id: pcJump == pcJump_at_t;
+	at t_id: pcReg == iaddr_at_t;
+	during[t+1, t_id]: data_out_notify == false;
+	during[t+1, t_id-1]: instr_req_notify == false;
+	at t_id: instr_req_notify == true;
+	during[t+1, t_id]: toRegsPort_notify == false;
+
+	// at t_ex: encodedInstr == encodedInstr_at_t;
+	// at t_ex: iaddr == iaddr_at_t;
+	// at t_ex: pcJump == pcJump_at_t;
+	// at t_ex: pcReg == pcReg_at_t;
+	// during[t_id+1, t_ex]: data_out_notify == false;
+	// during[t_id+1, t_ex]: instr_req_notify == false;
+	// during[t_id+1, t_ex]: toRegsPort_notify == false;
 
 end property;

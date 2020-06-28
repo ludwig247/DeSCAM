@@ -456,7 +456,11 @@ InstrType ISA_ri5cy::getInstrType(unsigned int encodedInstr) const {
             return InstrType::INSTR_UNKNOWN;
         }
     } else if (OPCODE_FIELD(encodedInstr) == OPCODE_I_J) {
-        return InstrType::INSTR_JALR;
+        if (FUNCT3_FIELD(encodedInstr) == 0x00) {
+            return InstrType::INSTR_JALR;
+        } else {
+            return InstrType::INSTR_UNKNOWN;
+        }
     } else if (OPCODE_FIELD(encodedInstr) == OPCODE_S) {
         if (FUNCT3_FIELD(encodedInstr) == 0x00) {
             return InstrType::INSTR_SB;
