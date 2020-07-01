@@ -23,7 +23,8 @@ int main(int argc, const char **argv) {
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
 
     for (auto it = cml.getActivePlugins().begin(); it != cml.getActivePlugins().end(); it++) {
-        PluginFactory *style = PluginFactory::create(*it);
+        PluginFactory *style =nullptr;
+        style = PluginFactory::create(*it);
         if (style != nullptr) {
             std::cout << "=======================================================================\n";
             std::cout << "========================= " << *it << " =========================\n";
