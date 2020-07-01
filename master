@@ -28,9 +28,9 @@ cmake ../
 cmake --build . --target SCAM -- -j 4
 
 #Preparing System files
-cp -rf /root/tempenv/files/ /root/AppImage/
-mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
-sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
+#cp -rf /root/tempenv/files/ /root/AppImage/
+#mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
+#sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 
 #mv /root/AppImage /
 cp -rf /etc /root/AppImage/
