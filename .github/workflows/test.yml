@@ -1,6 +1,12 @@
 name: DESCAM-BUILD
 
-on: [push, pull_request]
+#on: [push, pull_request]
+on:
+  push:
+    branches:
+      - development
+    tags:
+      - v1.*
 
 jobs:
   build:

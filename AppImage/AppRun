@@ -42,14 +42,14 @@ export ROOT_DIR
 
 #ldconfig
 #sed -i -e 's|/usr|././|g' ./usr/bin/DESCAM
-#cd $SELF_DIR/usr/ 
+cd $SELF_DIR/usr/ 
 #Libs
 #rm ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5 
 #ln -s ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5.9 ${SELF_DIR}/lib/x86_64-linux-gnu/libtinfo.so.5   
 #echo $(ls -l ./lib/x86_64-linux-gnu/libtinfo*)
 #exec ./root/DeSCAM/bin/DESCAM --file $1 --output $2 -PrintSkeleton
-#exec $SELF_DIR/usr/bin/DESCAM "$@" 
-exec $SELF_DIR/bin/DESCAM "$@" 
+exec $SELF_DIR/usr/bin/DESCAM "$@" 
+#exec $SELF_DIR/bin/DESCAM "$@" 
 #./bin/DESCAM "$@" 
 
 
