@@ -10,7 +10,7 @@ assume:
 	 reset_sequence;
 	 during[t, t_end]: no_reset;
 prove:
-	 at t_end: state_5;
+	 at t_end: IF_1;
 	 at t_end: encodedInstr == resize(0,32);
 	 at t_end: iaddr == resize(0,32);
 	 at t_end: instr_req_sig == resize(0,32);
@@ -70,11 +70,11 @@ freeze:
 	iaddr_at_t_id = iaddr@t_id,
 	pcReg_at_t_id = pcReg@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_r);
 prove:
@@ -150,11 +150,11 @@ freeze:
 	iaddr_at_t_id = iaddr@t_id,
 	pcReg_at_t_id = pcReg@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_i_i);
 prove:
@@ -200,11 +200,11 @@ freeze:
 	iaddr_at_t_id = iaddr@t_id,
 	pcReg_at_t = pcReg@t;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_u);
 prove:
@@ -283,11 +283,11 @@ freeze:
 	instr_in_sig_at_t_ex = instr_in_sig@t_ex,
 	iaddr_at_t_ex = iaddr@t_ex;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2; 
+	at t_id: ID_3; 
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_b);
 	at t_id: branchDecisionCalculation(getALUresult(getALUfunc(getInstrType(encodedInstr_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(encodedInstr_at_t))),encodedInstr_at_t);
@@ -338,11 +338,11 @@ freeze:
 	iaddr_at_t_id = iaddr@t_id,
 	instr_in_sig_at_t_id = instr_in_sig@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2; 
+	at t_id: ID_3; 
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_b);
 	at t_id: !branchDecisionCalculation(getALUresult(getALUfunc(getInstrType(encodedInstr)),readRegfile(fromRegsPort_sig_reg_file_01,fromRegsPort_sig_reg_file_02,fromRegsPort_sig_reg_file_03,fromRegsPort_sig_reg_file_04,fromRegsPort_sig_reg_file_05,fromRegsPort_sig_reg_file_06,fromRegsPort_sig_reg_file_07,fromRegsPort_sig_reg_file_08,fromRegsPort_sig_reg_file_09,fromRegsPort_sig_reg_file_10,fromRegsPort_sig_reg_file_11,fromRegsPort_sig_reg_file_12,fromRegsPort_sig_reg_file_13,fromRegsPort_sig_reg_file_14,fromRegsPort_sig_reg_file_15,fromRegsPort_sig_reg_file_16,fromRegsPort_sig_reg_file_17,fromRegsPort_sig_reg_file_18,fromRegsPort_sig_reg_file_19,fromRegsPort_sig_reg_file_20,fromRegsPort_sig_reg_file_21,fromRegsPort_sig_reg_file_22,fromRegsPort_sig_reg_file_23,fromRegsPort_sig_reg_file_24,fromRegsPort_sig_reg_file_25,fromRegsPort_sig_reg_file_26,fromRegsPort_sig_reg_file_27,fromRegsPort_sig_reg_file_28,fromRegsPort_sig_reg_file_29,fromRegsPort_sig_reg_file_30,fromRegsPort_sig_reg_file_31,getRs1Addr(encodedInstr)),readRegfile(fromRegsPort_sig_reg_file_01,fromRegsPort_sig_reg_file_02,fromRegsPort_sig_reg_file_03,fromRegsPort_sig_reg_file_04,fromRegsPort_sig_reg_file_05,fromRegsPort_sig_reg_file_06,fromRegsPort_sig_reg_file_07,fromRegsPort_sig_reg_file_08,fromRegsPort_sig_reg_file_09,fromRegsPort_sig_reg_file_10,fromRegsPort_sig_reg_file_11,fromRegsPort_sig_reg_file_12,fromRegsPort_sig_reg_file_13,fromRegsPort_sig_reg_file_14,fromRegsPort_sig_reg_file_15,fromRegsPort_sig_reg_file_16,fromRegsPort_sig_reg_file_17,fromRegsPort_sig_reg_file_18,fromRegsPort_sig_reg_file_19,fromRegsPort_sig_reg_file_20,fromRegsPort_sig_reg_file_21,fromRegsPort_sig_reg_file_22,fromRegsPort_sig_reg_file_23,fromRegsPort_sig_reg_file_24,fromRegsPort_sig_reg_file_25,fromRegsPort_sig_reg_file_26,fromRegsPort_sig_reg_file_27,fromRegsPort_sig_reg_file_28,fromRegsPort_sig_reg_file_29,fromRegsPort_sig_reg_file_30,fromRegsPort_sig_reg_file_31,getRs2Addr(encodedInstr))),encodedInstr);
@@ -426,11 +426,11 @@ freeze:
 	
 	offset_at_t_decode = getALUresult(alu_add,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),getImmediate(encodedInstr_at_t))[1:0]  @ t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 	
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_i_l);// && (getInstrType(encodedInstr) == instr_lw);
 	
@@ -524,14 +524,14 @@ freeze:
 	encodedInstr_at_t = encodedInstr@t_id,
 	iaddr_at_t_id = iaddr@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 	
 	//How to fix this coinstraint
 	at t_id: getALUresult(alu_add,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),getImmediate(encodedInstr_at_t))[1:0] == 2'h0;
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_s);// && (getInstrType(encodedInstr) == instr_sw);
 prove:
@@ -586,10 +586,10 @@ freeze:
 	pcReg_at_t_id = pcReg@t_id,
 	iaddr_at_t_id = iaddr@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: (getEncType(instr_in_sig) == enc_j);
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_J_2;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_j);
 prove:
@@ -666,10 +666,10 @@ freeze:
 	encodedInstr_at_t = encodedInstr@t_id,
 	iaddr_at_t_id = iaddr@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: (getEncType(instr_in_sig) == enc_i_j);
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: (getEncType(encodedInstr) == enc_i_j);
 prove:
@@ -714,11 +714,11 @@ freeze:
 	iaddr_at_t_id = iaddr@t_id,
 	pcReg_at_t_id = pcReg@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: !((getInstrType(encodedInstr) == instr_unknown));
 	at t_id: !((getEncType(encodedInstr) == enc_r));
 	at t_id: !((getEncType(encodedInstr) == enc_i_i));
@@ -768,11 +768,11 @@ freeze:
 	iaddr_at_t_id = iaddr@t_id,
 	pcReg_at_t_id = pcReg@t_id;
 assume:
-	at t: state_5;
+	at t: IF_1;
 	at t: !((getEncType(instr_in_sig) == enc_j));
 	at t: !((getEncType(instr_in_sig) == enc_i_j));
 
-	at t_id: DECODE_1_v2;
+	at t_id: ID_3;
 	at t_id: (getInstrType(encodedInstr) == instr_unknown);
 
 prove:

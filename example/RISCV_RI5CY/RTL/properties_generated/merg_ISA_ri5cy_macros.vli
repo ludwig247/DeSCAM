@@ -88,13 +88,16 @@ macro unsigned pcReg := pc_if end macro;
 
 
 //-- STATES --
-macro boolean DECODE_1 := conceptual_state end macro;
-macro boolean state_2 := conceptual_state end macro;
-macro boolean state_3 := conceptual_state end macro;
-macro boolean W_BACK_4 := conceptual_state end macro;
-macro boolean state_5 := conceptual_state end macro;
+macro boolean IF_1 := conceptual_state end macro;
+macro boolean ID_J_2 := DECODE_ASSUMPTION end macro;
+macro boolean ID_3 := DECODE_ASSUMPTION end macro;
+macro boolean LOAD_4 := conceptual_state end macro;
+macro boolean STORE_5 := conceptual_state end macro;
+macro boolean EX_6 := conceptual_state end macro;
+macro boolean state_7 := conceptual_state end macro;
+
 //TEMP MANUAL STATE
-macro boolean DECODE_1_v2 :=
+macro boolean DECODE_ASSUMPTION :=
     id_ready == 1 &&
     branch_decision == 0 &&
     data_req_o == 0 &&
