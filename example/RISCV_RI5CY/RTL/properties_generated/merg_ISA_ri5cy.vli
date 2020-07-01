@@ -1,3 +1,26 @@
+property reset;
+dependencies:
+	boot_addr_TEMP,
+    in_out_constraints,
+    no_unaligned_case,
+    instr_mem;
+for timepoints:
+	t_end = t + 1;
+assume:
+	 reset_sequence;
+	 during[t, t_end]: no_reset;
+prove:
+	 at t_end: state_5;
+	 at t_end: encodedInstr == resize(0,32);
+	 at t_end: iaddr == resize(0,32);
+	 at t_end: instr_req_sig == resize(0,32);
+	 at t_end: pcIf == resize(0,32);
+	 at t_end: pcReg == resize(0,32);
+	 at t_end: data_out_notify == false;
+	 at t_end: instr_req_notify == true;
+	 at t_end: toRegsPort_notify == false;
+end property;
+
 property ARITH;
 dependencies: 
 	no_reset,

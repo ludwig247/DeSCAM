@@ -109,7 +109,7 @@ macro boolean conceptual_state :=
     !data_req_o &&                  		    //no mem ops
     !branch_decision &&                         //no branch
     !regfile_alu_we_fw && !regfile_we_wb &&     //no write back
-    if_stage_i/offset_fsm_cs == WAIT &&
+    //if_stage_i/offset_fsm_cs == WAIT &&
     empty_prefetch_buffer;
 end macro;
 
