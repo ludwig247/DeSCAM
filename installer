@@ -15,3 +15,13 @@ cd /root/DeSCAM
 mkdir build && cd build
 cmake ../
 cmake --build . --target SCAM -- -j 4
+
+#Testing
+mkdir /root/outputs
+export SCAM_HOME="/root/DeSCAM"
+export SCAM_DIR="/root/DeSCAM/"
+export ROOT_DIR="/"
+export SYSTEMC_DIR="/root/DeSCAM/include/"
+/root/DeSCAM/bin/DESCAM --file /root/DeSCAM/example/Bus/ESL/Bus_new.h --output /root/outputs -PrintSkeleton
+/root/DeSCAM/bin/DESCAM --file /root/DeSCAM/example/Bus/ESL/Bus_new.h --output /root/outputs -PrintITL
+rm -rf /root/outputs
