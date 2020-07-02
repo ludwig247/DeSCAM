@@ -9,65 +9,67 @@
 cd /root/
 
 #Initializing temporal environment
-#mv /root/AppImage/tempenv.sh /root/
-#chmod +x /root/tempenv.sh
-#/root/tempenv.sh setup
-#/root/tempenv.sh start
+mv /root/AppImage/tempenv.sh /root/
+chmod +x /root/tempenv.sh
+/root/tempenv.sh setup
+/root/tempenv.sh start
 
-#Installing dependencies
-apt-get install -y cmake gcc g++ unzip sed git software-properties-common libtinfo-dev 
-add-apt-repository -y ppa:deadsnakes/ppa
-apt-get update
-apt-get install -y python3.7
-apt-get install -y python3-distutils
-
-#Building DeSCAM
-cd /root/DeSCAM
-mkdir build && cd build
-cmake ../
-cmake --build . --target SCAM -- -j 4
+##Installing dependencies
+#apt-get install -y cmake gcc g++ unzip sed git software-properties-common libtinfo-dev 
+#add-apt-repository -y ppa:deadsnakes/ppa
+#apt-get update
+#apt-get install -y python3.7
+#apt-get install -y python3-distutils
+#
+##Building DeSCAM
+#cd /root/DeSCAM
+#mkdir build && cd build
+#cmake ../
+#cmake --build . --target SCAM -- -j 4
 
 #Preparing System files
-#cp -rf /root/tempenv/files/ /root/AppImage/
-#mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
-#sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
+du -sh /root/tempenv/files
+ls /root/tempenv/files -l
+cp -rf /root/tempenv/files/ /root/AppImage/
+mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
+sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 
 #mv /root/AppImage /
-cp -rf /etc /root/AppImage/
-cp -rf /lib /root/AppImage/
-cp -rf /sbin /root/AppImage/
-cp -rf /tmp /root/AppImage/
-cp -rf /usr /root/AppImage/
-cp -rf /var /root/AppImage/
-mkdir /root/AppImage/root
-cp -rf /root/DeSCAM /root/AppImage/root/
+#cp -rf /etc /root/AppImage/
+#cp -rf /lib /root/AppImage/
+#cp -rf /sbin /root/AppImage/
+#cp -rf /tmp /root/AppImage/
+#cp -rf /usr /root/AppImage/
+#cp -rf /var /root/AppImage/
+#mkdir /root/AppImage/root
+#cp -rf /root/DeSCAM /root/AppImage/root/
 #mv /AppImage /root/
 
 #Filtering unneeded files
 #rm -rf /root/DeSCAM/install/tmp
 #rm -rf /root/DeSCAM/build/3rdparty
 #rm -rf /root/AppImage/root/AppImage
-#rm -rf /root/AppImage/root/DeSCAM/install/tmp
-#rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
-#mv /root/AppImage/appimagetool-x86_64.AppImage /root/
-
-cd /root/
-mv /root/AppImage/test /root/
-mv /root/AppImage/appimagetool-x86_64.AppImage /root/
 rm -rf /root/AppImage/root/DeSCAM/install/tmp
 rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
-rm -rf /root/AppImage/root/DeSCAM/tests
-rm -rf /root/AppImage/root/DeSCAM/install/*.zip
-rm -rf /root/AppImage/tempenv.sh
-rm -rf /root/AppImage/etc/ssh
-rm -rf /root/AppImage/etc/ssl
-rm -rf /root/AppImage/lib/x86_64-linux-gnu/security
-rm -rf /root/AppImage/usr/local/bin
-rm -rf /root/AppImage/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_bionic_universe_binary-amd64_Packages.lz4
+mv /root/AppImage/appimagetool-x86_64.AppImage /root/
+
+#cd /root/
+#mv /root/AppImage/test /root/
+#mv /root/AppImage/appimagetool-x86_64.AppImage /root/
+#rm -rf /root/AppImage/root/DeSCAM/install/tmp
+#rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
+#rm -rf /root/AppImage/root/DeSCAM/tests
+#rm -rf /root/AppImage/root/DeSCAM/install/*.zip
+#rm -rf /root/AppImage/tempenv.sh
+#rm -rf /root/AppImage/etc/ssh
+#rm -rf /root/AppImage/etc/ssl
+#rm -rf /root/AppImage/lib/x86_64-linux-gnu/security
+#rm -rf /root/AppImage/usr/local/bin
+#rm -rf /root/AppImage/var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_bionic_universe_binary-amd64_Packages.lz4
 
 #Trick: Place the binary on a convenient folder and patch it
-mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
-sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
+#mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
+#sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 
 #Create AppImage
 export ARCH=x86_64

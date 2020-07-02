@@ -40,12 +40,11 @@ function start() {
 	mount --bind tempenv/dev tempenv/chroot/dev
 	echo "Step 3.."
 	mount --bind /dev/pts tempenv/chroot/dev/pts
-
 	echo "Step 4.."
 	set +e
-	chroot tempenv/chroot
+	chroot tempenv/chroot /root/installer
 	echo "Step 5.."
-	#umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
+	umount tempenv/chroot/{dev/pts,dev} tempenv/chroot
 	set -e
 }
 

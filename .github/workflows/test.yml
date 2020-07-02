@@ -3,8 +3,8 @@ name: DESCAM-BUILD
 #on: [push, pull_request]
 on:
   push:
-    branches:
-      - development
+#    branches:
+#      - development
     tags:
       - v1.*
 
@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         # os: [ubuntu-16.04, ubuntu-18.04]
-        os: [ubuntu-16.04] #Only one OS is necessary
+        os: [ubuntu-18.04] #Only one OS is necessary
     env:
       CMAKE_BIN: "cmake"
       PYTHON3: "python3"
@@ -51,16 +51,16 @@ jobs:
         run: docker exec MyUbuntu16 "/root/ubuntu16_script"
       - name: Stop Container Ubuntu16
         run: docker stop MyUbuntu16
-#      - name: Docker Build Ubuntu18
-#        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
-#      - name: Docker Run Ubuntu18
-#        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
-#      - name: Docker Check Ubuntu18
-#        run: docker ps -a
-#      - name: Run Test Ubuntu18
-#        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
-#      - name: Stop Container Ubuntu18
-#        run: docker stop MyUbuntu18
+      - name: Docker Build Ubuntu18
+        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
+      - name: Docker Run Ubuntu18
+        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
+      - name: Docker Check Ubuntu18
+        run: docker ps -a
+      - name: Run Test Ubuntu18
+        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
+      - name: Stop Container Ubuntu18
+        run: docker stop MyUbuntu18
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

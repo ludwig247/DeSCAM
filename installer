@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Relocating
+cd /root/
+
+#Installing dependencies
+apt-get install -y cmake gcc g++ unzip sed git software-properties-common libtinfo-dev 
+add-apt-repository -y ppa:deadsnakes/ppa
+apt-get update
+apt-get install -y python3.7
+apt-get install -y python3-distutils
+
+#Building DeSCAM
+cd /root/DeSCAM
+mkdir build && cd build
+cmake ../
+cmake --build . --target SCAM -- -j 4
