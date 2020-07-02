@@ -33,7 +33,7 @@ RUN mkdir /root/DeSCAM/tests
 #3) Copy all required contents to create the AppImage
 # Disclaimer: only needed files are copied for size optmization
 # ------------------------------------------------------------------------------
-##Trial
+#Trial
 #################################################
 #COPY AppImage/AppRun /root/DeSCAM/
 #COPY AppImage/DeSCAM-icon.png /root/DeSCAM/
