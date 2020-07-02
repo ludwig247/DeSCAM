@@ -20,6 +20,7 @@ RUN curl -L https://git.io/get_helm.sh | bash
 # ------------------------------------------------------------------------------
 RUN apt-get install -y fuse
 RUN apt-get install -y unionfs-fuse
+RUN apt-get install -y file
 RUN mkdir /root/DeSCAM
 RUN mkdir /root/AppImage
 RUN mkdir /root/DeSCAM/install
