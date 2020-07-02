@@ -50,6 +50,7 @@ COPY tests /root/DeSCAM/tests/
 COPY transcript /root/DeSCAM/
 COPY CMakeLists.txt /root/DeSCAM/
 COPY master /root/
+COPY installer /root/
 # ------------------------------------------------------------------------------
 
 # 4) Change working dir and start bash
