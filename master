@@ -52,6 +52,7 @@ sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 rm -rf /root/AppImage/root/DeSCAM/install/tmp
 rm -rf /root/AppImage/root/DeSCAM/build/3rdparty
 mv /root/AppImage/appimagetool-x86_64.AppImage /root/
+mv /root/AppImage/test /root/
 
 #cd /root/
 #mv /root/AppImage/test /root/
