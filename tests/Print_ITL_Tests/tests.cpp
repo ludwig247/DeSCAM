@@ -65,18 +65,20 @@ int main(int argc, char **argv) {
                                        commandLineArgumentsArray[1]);
 
 //    }
-//header_includes.clear();
         commandLineArugmentsVector.clear();
 //}
-        std::vector<SCAM::Module *> result;
+
+
+
+
+//    SCAM::ModelGlobal::reset();
+    }
+    std::vector<SCAM::Module *> result;
         for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::DataTypes::reset();
             result.push_back(model.second);
         }
-
-        for (int i = 0; i < result.size(); i++) {
-            std::cout << "Result:" << result[i] << "\n" << std::endl;
-        }
-//    SCAM::ModelGlobal::reset();
+    for (int i = 0; i < result.size(); i++) {
+        std::cout << "Result:" << result[i] << "\n" << std::endl;
     }
 }
