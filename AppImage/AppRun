@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Executing DeSCAM..."
 cd "$(dirname "$0")"
@@ -51,5 +51,3 @@ cd usr/
 #exec $SELF_DIR/usr/bin/DESCAM "$@" 
 #exec $SELF_DIR/bin/DESCAM "$@" 
 exec ./bin/DESCAM "$@" 
-
-

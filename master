@@ -31,6 +31,7 @@ chmod +x /root/tempenv.sh
 du -sh /root/tempenv/files
 ls /root/tempenv/files -l
 cp -rf /root/tempenv/files/* /root/AppImage/
+ls /root/AppImage
 mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
 sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 
