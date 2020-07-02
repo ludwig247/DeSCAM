@@ -90,10 +90,6 @@ namespace SCAM {
                 else PluginAction<SCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
             } else throw std::runtime_error("Wrong use of DeSCAM");
 
-//                commandLineArgumentsArray();
-//                SCAM::DataTypes::reset();
-
-
         };
 
 
