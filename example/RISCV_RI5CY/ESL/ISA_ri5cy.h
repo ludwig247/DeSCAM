@@ -206,8 +206,6 @@ void ISA_ri5cy::run() {
                     // Load done
                     data_in->master_read(fromMemoryData);
 
-                    fromMemoryData = applyMask(fromMemoryData, getMemoryMask(getInstrType(encodedInstr)));
-
                     regfileWrite.dst = getRdAddr(encodedInstr);
                     regfileWrite.dstData = fromMemoryData;
                     toRegsPort->master_write(regfileWrite); //Perform write back

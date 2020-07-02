@@ -6,10 +6,26 @@ macro boolean toRegsPort_notify := (regfile_alu_we_fw || regfile_we_wb) end  mac
 
 
 //-- DP SIGNALS --
-macro unsigned data_in_sig := data_rdata_i end macro;
-//macro CUtoME_IF data_out_sig :={resize(0,32), resize(0,32), mt_b, me_rd} end macro;
+macro unsigned data_in_sig := 
+    case ({load_store_unit_i/data_sign_ext_q[0], load_store_unit_i/data_type_q})
+        3'b110:      // LB
+            (load_store_unit_i/rdata_offset_q == 2'b00) ? signExtend(data_rdata_i[7:0]) : ((load_store_unit_i/rdata_offset_q == 2'b01) ? signExtend(data_rdata_i[15:8]) : ((load_store_unit_i/rdata_offset_q == 2'b10) ? signExtend(data_rdata_i[23:16]) : signExtend(data_rdata_i[31:24])));
+        3'b101:      // LH
+            (load_store_unit_i/rdata_offset_q == 2'b00) ? signExtend(data_rdata_i[15:0]) : ((load_store_unit_i/rdata_offset_q == 2'b01) ? signExtend(data_rdata_i[23:8]) : ((load_store_unit_i/rdata_offset_q == 2'b10) ? signExtend(data_rdata_i[31:16]) : signExtend({data_rdata_i[7:0],data_rdata_i[31:24]})));
+        3'b010:      // LBU
+            {24'h00_0000,(load_store_unit_i/rdata_offset_q == 2'b00) ? data_rdata_i[7:0] : ((load_store_unit_i/rdata_offset_q == 2'b01) ? data_rdata_i[15:8] : ((load_store_unit_i/rdata_offset_q == 2'b10) ? data_rdata_i[23:16] : data_rdata_i[31:24]))};
+        3'b001:      // LHU
+            {16'h0000,(load_store_unit_i/rdata_offset_q == 2'b00) ? data_rdata_i[15:0] : ((load_store_unit_i/rdata_offset_q == 2'b01) ? data_rdata_i[23:8] : ((load_store_unit_i/rdata_offset_q == 2'b10) ? data_rdata_i[31:16] : {data_rdata_i[7:0],data_rdata_i[31:24]}))};
+        3'b000, 3'b100:     data_rdata_i[31:0];      // LW
+        default:    1'd0;
+    endcase;
+end macro;
+// macro unsigned data_in_sig := lsu_rdata end macro;
+// macro unsigned data_in_sig := data_rdata_i end macro;
+// macro CUtoME_IF data_out_sig :={resize(0,32), resize(0,32), mt_b, me_rd} end macro;
 macro unsigned data_out_sig_addrIn := data_addr_o end macro;
-macro unsigned data_out_sig_dataIn := data_wdata_o end macro;
+// macro unsigned data_out_sig_dataIn := data_wdata_o end macro;
+macro unsigned data_out_sig_dataIn := alu_operand_c_ex end macro;
 macro ME_MaskType data_out_sig_mask := getMemoryMask(getInstrType(prev(encodedInstr))) end macro;
 macro ME_AccessType data_out_sig_req := 
     if (getEncType(prev(encodedInstr)) == enc_i_l)
@@ -187,3 +203,8 @@ end constraint;
 constraint no_data_misaligned:=
     data_misaligned == 0;
 end constraint;
+
+macro unsigned signExtend(unsigned imm) := 
+    unsigned(resize(signed(imm),32));
+end macro;
+

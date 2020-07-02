@@ -587,7 +587,7 @@ prove:
 	at t_end: pcIf == pcIf_at_t;
 	at t_end: pcReg == pcReg_at_t;
 	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
-	at t_end: toRegsPort_sig_dstData == applyMask(data_in_sig_at_t,getMemoryMask(getInstrType(encodedInstr_at_t)));
+	at t_end: toRegsPort_sig_dstData == data_in_sig_at_t;
 	during[t+1, t_end]: data_out_notify == false;
 	during[t+1, t_end]: instr_req_notify == false;
 	during[t+1, t_end-1]: toRegsPort_notify == false;
