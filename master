@@ -30,7 +30,7 @@ chmod +x /root/tempenv.sh
 #Preparing System files
 du -sh /root/tempenv/files
 ls /root/tempenv/files -l
-cp -rf /root/tempenv/files/ /root/AppImage/
+cp -rf /root/tempenv/files/* /root/AppImage/
 mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
 sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 
