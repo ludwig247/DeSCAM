@@ -18,6 +18,7 @@ cmake --build . --target SCAM -- -j 4
 
 #Testing
 mkdir /root/outputs
+export CLANG_DIR="/root/DeSCAM/include/clang/3.4.2/include"
 export SCAM_HOME="/root/DeSCAM"
 export SCAM_DIR="/root/DeSCAM/"
 export ROOT_DIR="/"
