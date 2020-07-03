@@ -73,6 +73,9 @@ mv /root/AppImage/test /root/
 #mv /root/AppImage/root/DeSCAM/bin/DESCAM /root/AppImage/usr/bin/
 #sed -i -e 's|/usr|././|g' /root/AppImage/usr/bin/DESCAM
 
+#Patching broken links
+cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /root/AppImage/usr/lib/x86_64-linux-gnu/
+
 #Create AppImage
 export ARCH=x86_64
 /root/appimagetool-x86_64.AppImage ./AppImage/
