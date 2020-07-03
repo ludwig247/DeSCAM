@@ -8,7 +8,7 @@ entity TestBasic0 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	b_out:		out int;
+	b_out:		out signed(31 downto 0);
 	b_out_sync:		in bool;
 	b_out_notify:		out bool
 );

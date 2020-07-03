@@ -8,7 +8,7 @@ entity TestFunction0 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	b_in:		in int;
+	b_in:		in signed(31 downto 0);
 	b_in_sync:		in bool;
 	b_in_notify:		out bool;
 	b_out:		out unsigned (31 downto 0);

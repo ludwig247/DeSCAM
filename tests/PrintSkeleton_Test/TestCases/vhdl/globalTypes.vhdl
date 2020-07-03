@@ -10,7 +10,7 @@ type global_enum is (A, B);
 type global_enum_class is (M, N);
 type CompoundType is record
 	mode: Mode;
-	x: int;
+	x: signed(31 downto 0);
 	y: bool;
 end record;
 type global_compound_type is record
@@ -20,11 +20,11 @@ end record;
 type int_2 is array(1 downto 0) of int;
 type int_5 is array(4 downto 0) of int;
 type record_t is record
-	x: int;
+	x: signed(31 downto 0);
 	y: unsigned (31 downto 0);
 end record;
 type test_compound is record
-	x: int;
+	x: signed(31 downto 0);
 	y: unsigned (31 downto 0);
 end record;
 end package top_level_types;

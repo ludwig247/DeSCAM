@@ -2,9 +2,9 @@
 
 
 -- DP SIGNALS --
-macro s_out_1_sig : signed := end macro;
-macro s_out_2_sig : signed := end macro;
-macro s_out_3_sig : signed := end macro;
+macro s_out_1_sig : signed :=resize(0,32) end macro;
+macro s_out_2_sig : signed :=resize(0,32) end macro;
+macro s_out_3_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -12,9 +12,9 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro data1 : signed := end macro;
-macro data2 : signed := end macro;
-macro data3 : signed := end macro;
+macro data1 : signed :=resize(0,32) end macro;
+macro data2 : signed :=resize(0,32) end macro;
+macro data3 : signed :=resize(0,32) end macro;
 
 
 -- STATES --

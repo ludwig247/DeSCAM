@@ -11,7 +11,7 @@ port(
 	b_in:		in CompoundType;
 	b_in_sync:		in bool;
 	b_in_notify:		out bool;
-	m_out:		out int;
+	m_out:		out signed(31 downto 0);
 	m_out_notify:		out bool
 );
 end TestBasic12;

@@ -1,14 +1,14 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro data_in_sync : boolean := end macro;
-macro valid_out_sync : boolean := end macro;
-macro data_in_notify : boolean := end macro;
-macro valid_out_notify : boolean := end macro;
+macro data_in_sync : boolean := true end macro;
+macro valid_out_sync : boolean := true end macro;
+macro data_in_notify : boolean := true end  macro;
+macro valid_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro data_in_sig : signed := end macro;
-macro data_out_sig : boolean := end macro;
-macro valid_out_sig : signed := end macro;
+macro data_in_sig : signed :=resize(0,32) end macro;
+macro data_out_sig : boolean :=false end macro;
+macro valid_out_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -16,8 +16,8 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro valid : boolean := end macro;
-macro value_in : signed := end macro;
+macro valid : boolean :=false end macro;
+macro value_in : signed :=resize(0,32) end macro;
 
 
 -- STATES --
@@ -89,17 +89,16 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	data_in_sig_at_t = data_in_sig@t,
-	data_in_sync_at_t = data_in_sync@t;
+	data_in_sig_at_t = data_in_sig@t;
 assume:
 	at t: state_1;
 	at t: data_in_sync;
 	at t: (data_in_sig >= resize(5,32));
 prove:
 	at t_end: output1_2;
-	at t_end: data_out_sig = data_in_sync_at_t;
-	at t_end: valid = data_in_sync_at_t;
-	at t_end: valid_out_sig = (2 + data_in_sig_at_t)(31 downto 0);
+	at t_end: data_out_sig = true;
+	at t_end: valid = true;
+	at t_end: valid_out_sig = (1 + (1 + data_in_sig_at_t)(31 downto 0))(31 downto 0);
 	at t_end: value_in = data_in_sig_at_t;
 	during[t+1, t_end]: data_in_notify = false;
 	during[t+1, t_end-1]: valid_out_notify = false;
@@ -112,16 +111,15 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	data_in_sig_at_t = data_in_sig@t,
-	data_in_sync_at_t = data_in_sync@t;
+	data_in_sig_at_t = data_in_sig@t;
 assume:
 	at t: state_1;
 	at t: data_in_sync;
 	at t: (data_in_sig <= resize(4,32));
 prove:
 	at t_end: output1_2;
-	at t_end: data_out_sig = data_in_sync_at_t;
-	at t_end: valid = data_in_sync_at_t;
+	at t_end: data_out_sig = true;
+	at t_end: valid = true;
 	at t_end: valid_out_sig = (1 + data_in_sig_at_t)(31 downto 0);
 	at t_end: value_in = data_in_sig_at_t;
 	during[t+1, t_end]: data_in_notify = false;
@@ -135,7 +133,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	data_in_sync_at_t = data_in_sync@t,
 	value_in_at_t = value_in@t;
 assume:
 	at t: state_1;
@@ -143,8 +140,8 @@ assume:
 	at t: (value_in >= resize(6,32));
 prove:
 	at t_end: output1_2;
-	at t_end: data_out_sig = data_in_sync_at_t;
-	at t_end: valid = data_in_sync_at_t;
+	at t_end: data_out_sig = false;
+	at t_end: valid = false;
 	at t_end: valid_out_sig = (1 + value_in_at_t)(31 downto 0);
 	at t_end: value_in = value_in_at_t;
 	during[t+1, t_end]: data_in_notify = false;
@@ -158,7 +155,6 @@ dependencies: no_reset;
 for timepoints:
 	t_end = t+1;
 freeze:
-	data_in_sync_at_t = data_in_sync@t,
 	value_in_at_t = value_in@t;
 assume:
 	at t: state_1;
@@ -166,8 +162,8 @@ assume:
 	at t: (value_in <= resize(5,32));
 prove:
 	at t_end: output1_2;
-	at t_end: data_out_sig = data_in_sync_at_t;
-	at t_end: valid = data_in_sync_at_t;
+	at t_end: data_out_sig = false;
+	at t_end: valid = false;
 	at t_end: valid_out_sig = value_in_at_t;
 	at t_end: value_in = value_in_at_t;
 	during[t+1, t_end]: data_in_notify = false;

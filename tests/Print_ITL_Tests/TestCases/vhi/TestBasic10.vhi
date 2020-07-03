@@ -1,19 +1,19 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_in_sync : boolean := end macro;
-macro b_out_sync : boolean := end macro;
-macro b_in_notify : boolean := end macro;
-macro b_out_notify : boolean := end macro;
+macro b_in_sync : boolean := true end macro;
+macro b_out_sync : boolean := true end macro;
+macro b_in_notify : boolean := true end  macro;
+macro b_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_in_sig : CompoundType := end macro;
-macro b_in_sig_mode : Mode := end macro;
-macro b_in_sig_x : signed := end macro;
-macro b_in_sig_y : boolean := end macro;
-macro b_out_sig : CompoundType := end macro;
-macro b_out_sig_mode : Mode := end macro;
-macro b_out_sig_x : signed := end macro;
-macro b_out_sig_y : boolean := end macro;
+--macro b_in_sig : CompoundType :={READ, resize(0,32), false} end macro;
+macro b_in_sig_mode : Mode :=READ end macro;
+macro b_in_sig_x : signed :=resize(0,32) end macro;
+macro b_in_sig_y : boolean :=false end macro;
+--macro b_out_sig : CompoundType :={READ, resize(0,32), false} end macro;
+macro b_out_sig_mode : Mode :=READ end macro;
+macro b_out_sig_x : signed :=resize(0,32) end macro;
+macro b_out_sig_y : boolean :=false end macro;
 
 
 -- CONSTRAINTS --
@@ -21,7 +21,7 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro phase : Phases := end macro;
+macro phase : Phases :=SECTION_A end macro;
 
 
 -- STATES --
