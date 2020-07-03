@@ -8,24 +8,24 @@ entity TestMasterSlave13 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	m_in:		in int;
-	m_out:		out int;
+	m_in:		in signed(31 downto 0);
+	m_out:		out signed(31 downto 0);
 	m_out_notify:		out bool;
-	s_in:		in int;
+	s_in:		in signed(31 downto 0);
 	s_in_sync:		in bool;
-	s_in2:		in int;
+	s_in2:		in signed(31 downto 0);
 	s_in2_sync:		in bool;
-	s_out:		out int;
-	shared_out:		out int
+	s_out:		out signed(31 downto 0);
+	shared_out:		out signed(31 downto 0)
 );
 end TestMasterSlave13;
 
 architecture TestMasterSlave13_arch of TestMasterSlave13 is
 	signal nextsection_signal: Sections;
-	signal save_val_signal: int;
+	signal save_val_signal: signed(31 downto 0);
 	signal section_signal: Sections;
 	signal succ_signal: bool;
-	signal val_signal: int;
+	signal val_signal: signed(31 downto 0);
 
 begin
 	process(clk)

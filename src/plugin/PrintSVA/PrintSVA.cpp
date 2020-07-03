@@ -287,7 +287,7 @@ std::string PrintSVA::reset_operation() {
     PropertySuite *ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
-       << "\treset_sequence |=>\n";
+       << "\treset_sequence |->\n";
     for (auto commitment : ps->getResetProperty()->getCommitmentList()) {
         ss << temporalExpr(commitment);
         if (commitment != ps->getResetProperty()->getCommitmentList().back())

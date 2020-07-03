@@ -11,7 +11,7 @@ port(
 	b_in:		in int_5;
 	b_in_sync:		in bool;
 	b_in_notify:		out bool;
-	b_out:		out int;
+	b_out:		out signed(31 downto 0);
 	b_out_sync:		in bool;
 	b_out_notify:		out bool
 );

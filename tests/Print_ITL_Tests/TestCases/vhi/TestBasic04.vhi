@@ -1,10 +1,10 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_out_sync : boolean := end macro;
-macro b_out_notify : boolean := end macro;
+macro b_out_sync : boolean := true end macro;
+macro b_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_out_sig : signed := end macro;
+macro b_out_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -12,7 +12,7 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro var : signed := end macro;
+macro var : signed :=resize(0,32) end macro;
 
 
 -- STATES --

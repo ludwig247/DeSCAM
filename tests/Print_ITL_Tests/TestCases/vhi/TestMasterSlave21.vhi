@@ -1,13 +1,13 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro s_in_1_sync : boolean := end macro;
-macro s_in_2_sync : boolean := end macro;
-macro s_in_3_sync : boolean := end macro;
+macro s_in_1_sync : boolean := true end macro;
+macro s_in_2_sync : boolean := true end macro;
+macro s_in_3_sync : boolean := true end macro;
 
 
 -- DP SIGNALS --
-macro s_in_1_sig : signed := end macro;
-macro s_in_2_sig : signed := end macro;
-macro s_in_3_sig : signed := end macro;
+macro s_in_1_sig : signed :=resize(0,32) end macro;
+macro s_in_2_sig : signed :=resize(0,32) end macro;
+macro s_in_3_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --

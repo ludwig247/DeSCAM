@@ -8,14 +8,14 @@ entity TestBasic4 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	b_out:		out int;
+	b_out:		out signed(31 downto 0);
 	b_out_sync:		in bool;
 	b_out_notify:		out bool
 );
 end TestBasic4;
 
 architecture TestBasic4_arch of TestBasic4 is
-	signal var_signal: int;
+	signal var_signal: signed(31 downto 0);
 
 begin
 	process(clk)
