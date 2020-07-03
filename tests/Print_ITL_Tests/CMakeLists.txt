@@ -12,7 +12,7 @@ target_link_libraries(PrintITL_Test_Run PRIVATE modelFactory)
 target_link_libraries(PrintITL_Test_Run PRIVATE optimizer)
 target_link_libraries(PrintITL_Test_Run PRIVATE parser)
 
-#target_link_libraries(PrintITL_Test_Run PRIVATE ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
+target_link_libraries(PrintITL_Test_Run PRIVATE ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
 
 get_directory_property(EXAMPLE_H DIRECTORY ${CMAKE_SOURCE_DIR}/example/ DEFINITION EXAMPLE_H_LIST)
 

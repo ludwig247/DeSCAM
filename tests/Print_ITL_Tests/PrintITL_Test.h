@@ -36,10 +36,7 @@ static std::vector<SCAM::Module *> parameter() {
         std::string bin = std::string(SCAM_HOME"/bin/SCAM");
         commandLineArugmentsVector.push_back(bin.c_str());
 
-//    for (int i = 0; i < header_includes.size(); i++) {
         commandLineArugmentsVector.push_back(file_path.c_str());
-//std::cout<<commandLineArugmentsVector[i]<<std::endl;
-//    }
 
 //    add optimizations
 //        std::set<std::string> optimizeOptions = {"all"};
