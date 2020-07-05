@@ -31,8 +31,8 @@ struct FFT : public sc_module {
     sc_fix real_bitmirror[ARRAY_SIZE];
     sc_fix img_bitmirror[ARRAY_SIZE];
 
-    sc_fix real_twid[ARRAY_SIZE/2];
-    sc_fix img_twid[ARRAY_SIZE/2];
+    sc_fix real_twid[ARRAY_SIZE/2] = {1,0.707107,0,-0.707107};;
+    sc_fix img_twid[ARRAY_SIZE/2] = {0,-0.707107,-1,-0.707107};
 
     sc_fix typed;
 
@@ -82,6 +82,8 @@ struct FFT : public sc_module {
 
             if (phase_algorithm == IDLE) {
 
+                cout << twoPi << endl;
+
                 //data_in->read(data_algorithm, "data_in");
                 data_in_real->read(real, "data_in_real");
                 data_in_img->read(img);
@@ -92,9 +94,9 @@ struct FFT : public sc_module {
             }else if (phase_algorithm == PREP){
 
                 if (n != ARRAY_SIZE>>1){
-                    typed = (sc_fix)(twoPi*n/ARRAY_SIZE);
+                    /*typed = (sc_fix)(twoPi*n/ARRAY_SIZE);
                     real_twid[n] = cos(typed);
-                    img_twid[n] = (-1.0)*sin(typed);
+                    img_twid[n] = (-1.0)*sin(typed);*/
 
                     cout << real_twid[n] << endl;
                     cout << img_twid[n] << endl;

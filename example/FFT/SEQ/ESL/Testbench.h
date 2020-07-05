@@ -62,6 +62,7 @@ struct Testbench : public sc_module {
                 for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
                     //data_testbench_real[cnt_fill] = random() % 255;
 
+
                      cout << data_testbench_real[cnt_fill] << " ";
 
                      if(cnt_fill == ARRAY_SIZE-1){
