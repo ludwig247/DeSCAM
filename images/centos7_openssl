@@ -15,7 +15,7 @@ make install
 cd /etc/ld.so.conf.d/
 echo "/usr/local/ssl/lib" > openssl-1.0.2o.conf
 ldconfig -v
-mv /bin/openssl /bin/openssl.BEKUP
+#mv /bin/openssl /bin/openssl.BEKUP
 OUT=/etc/profile.d/openssl.sh
 cat <<EOF >$OUT
 #Set OPENSSL_PATH

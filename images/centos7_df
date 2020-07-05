@@ -1,26 +1,26 @@
 FROM centos:centos7
-#ENV SHELL /bin/bash
-#RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
-#RUN source ~/.bash_profile
-#RUN export GPG_TTY=$(tty)
+ENV SHELL /bin/bash
+RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
+RUN source ~/.bash_profile
+RUN export GPG_TTY=$(tty)
 RUN yum -y update
-#RUN yum -y install git curl
+RUN yum -y install git curl
 RUN yum -y install fuse fuse-libs
-#RUN yum -y install make gcc
+RUN yum -y install make gcc
 #Installing openssl
-#COPY images/centos7_openssl  /root/
-#RUN chmod +x /root/centos7_openssl
-#RUN /root/centos7_openssl
-#RUN curl -L https://git.io/get_helm.sh | bash
+COPY images/centos7_openssl  /root/
+RUN chmod +x /root/centos7_openssl
+RUN yes | /root/centos7_openssl
+RUN curl -L https://git.io/get_helm.sh | bash
 
 RUN mkdir /root/test
 RUN mkdir /root/outputs
 COPY AppImage/test  /root/test/
 COPY DeSCAM_v  /root/
-#COPY images/centos7_script  /root/
+COPY images/centos7_script  /root/
 RUN chmod +x /root/DeSCAM_v
 RUN /root/DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
 
-#WORKDIR /apps
-#ENTRYPOINT tail -f /dev/null
-#CMD [ "/bin/bash" ]
+WORKDIR /apps
+ENTRYPOINT tail -f /dev/null
+CMD [ "/bin/bash" ]
