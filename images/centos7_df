@@ -10,7 +10,7 @@ RUN yum -y install make gcc
 #Installing openssl
 COPY images/centos7_openssl  /root/
 RUN chmod +x /root/centos7_openssl
-RUN yes | /root/centos7_openssl && curl -L https://git.io/get_helm.sh | bash
+RUN yes | /root/centos7_openssl && export PATH=$PATH:/usr/local/ssl/bin && curl -L https://git.io/get_helm.sh | bash
 #RUN curl -L https://git.io/get_helm.sh | bash
 
 RUN mkdir /root/test
