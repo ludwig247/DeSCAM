@@ -106,11 +106,11 @@ macro unsigned pcReg := pc_if end macro;
 //-- STATES --
 macro boolean IF_1 := conceptual_state end macro;
 macro boolean ID_J_2 := DECODE_ASSUMPTION end macro;
+macro boolean ID_I_J_3 := DECODE_ASSUMPTION end macro;
 macro boolean ID_3 := DECODE_ASSUMPTION end macro;
 macro boolean LOAD_4 := conceptual_state end macro;
 macro boolean STORE_5 := conceptual_state end macro;
 macro boolean EX_6 := conceptual_state end macro;
-macro boolean state_7 := conceptual_state end macro;
 
 //TEMP MANUAL STATE
 macro boolean DECODE_ASSUMPTION :=

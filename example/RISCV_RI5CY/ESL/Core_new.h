@@ -31,7 +31,8 @@ public:
     IMEM_ctrl imem;
 
     MasterSlave<RegfileWriteType> toRegsChannel;
-    MasterSlave<RegfileType> fromRegsChannel;
+    Shared<RegfileType> fromRegsChannel;
+
 
     MasterSlave<unsigned int> toIMEMChannel;
     MasterSlave<unsigned int> fromIMEMChannel;

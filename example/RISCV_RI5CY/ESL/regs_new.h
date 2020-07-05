@@ -52,7 +52,7 @@ public:
     }
 
     slave_in<RegfileWriteType> toRegsPort;
-    slave_out<RegfileType> fromRegsPort;
+    shared_out<RegfileType> fromRegsPort;
 
     RegfileWriteType regfileWrite;
     RegfileType regfile; // RegisterFile
@@ -132,7 +132,7 @@ void Regs_new::run() {
         regfile.reg_file_30 = reg_file_30;
         regfile.reg_file_31 = reg_file_31;
 
-        fromRegsPort->slave_write(regfile);
+        fromRegsPort->set(regfile);
 
         wait(WAIT_TIME, SC_PS);
         toRegsPort->slave_read(regfileWrite,rec); // read request

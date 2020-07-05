@@ -59,16 +59,15 @@ constraint no_reset := rst == 0; end constraint;
 macro unsigned encodedInstr :=resize(0,32) end macro;
 macro unsigned iaddr :=resize(0,32) end macro;
 macro unsigned pcIf :=resize(0,32) end macro;
-macro unsigned pcReg :=resize(0,32) end macro;
 
 
 //-- STATES --
 macro boolean IF_1 := true end macro;
 macro boolean ID_J_2 := true end macro;
-macro boolean ID_3 := true end macro;
-macro boolean LOAD_4 := true end macro;
-macro boolean STORE_5 := true end macro;
-macro boolean EX_6 := true end macro;
-macro boolean state_7 := true end macro;
+macro boolean ID_I_J_3 := true end macro;
+macro boolean ID_4 := true end macro;
+macro boolean LOAD_5 := true end macro;
+macro boolean STORE_6 := true end macro;
+macro boolean EX_7 := true end macro;
 
 

@@ -42,7 +42,7 @@ public:
     blocking_out<CUtoME_IF> data_out;
 
     // ports for communication with register file
-    master_in<RegfileType> fromRegsPort;
+    shared_in<RegfileType> fromRegsPort;
     master_out<RegfileWriteType> toRegsPort;
 
     // data for communication with memory
@@ -143,6 +143,15 @@ void ISA_ri5cy::run() {
                 #if SCAM == 1
                     insert_state("ID_J");
                 #endif
+
+            } else if (getEncType(encodedInstr) == ENC_I_J) {
+                fromRegsPort->get(regfile); //Read register contents
+                pcReg = iaddr;
+                iaddr = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
+                instr_req->master_write(iaddr);
+                #if SCAM == 1
+                    insert_state("ID_I_J");
+                #endif
             } else {
                 pcReg = iaddr;
                 iaddr = iaddr + 4;
@@ -151,8 +160,7 @@ void ISA_ri5cy::run() {
                     insert_state("ID");
                 #endif
             }
-
-            fromRegsPort->master_read(regfile); //Read register contents
+            fromRegsPort->get(regfile); //Read register contents
             nextsection = Sections::EXECUTE_PH;
 
         } else if (section == Sections::EXECUTE_PH) {
@@ -283,16 +291,13 @@ void ISA_ri5cy::run() {
                     /////////////////////////////////////////////////////////////////////////////
                     //|  ID (RF_READ)   |    ---------    |    ---------    |  WB (RF_WRITE)  |//
                     /////////////////////////////////////////////////////////////////////////////
-                    aluResult = pcReg + 4; //Compute result
-
-                    iaddr = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
+                    aluResult = pcIf + 4; //Compute result
 
                     regfileWrite.dst = getRdAddr(encodedInstr);
                     regfileWrite.dstData = aluResult;
                     toRegsPort->master_write(regfileWrite); //Perform write back
 
-                    instr_in->master_read(temp);
-                    instr_req->master_write(iaddr);
+                    pcIf = iaddr;
                 }
             }
             nextsection = Sections::FETCH_PH;
