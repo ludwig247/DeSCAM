@@ -16,16 +16,19 @@ cd /etc/ld.so.conf.d/
 echo "/usr/local/ssl/lib" > openssl-1.0.2o.conf
 ldconfig -v
 #mv /bin/openssl /bin/openssl.BEKUP
-OUT=/etc/profile.d/openssl.sh
-cat <<EOF >$OUT
-#Set OPENSSL_PATH
-OPENSSL_PATH="/usr/local/ssl/bin"
-export OPENSSL_PATH
-PATH=$PATH:$OPENSSL_PATH
-export PATH
-EOF
-chmod +x /etc/profile.d/openssl.sh
-source /etc/profile.d/openssl.sh
-echo $PATH
+export OPENSSL_PATH="/usr/local/ssl/bin"
+export PATH=$PATH$OPENSSL_PATH
 which openssl
 openssl version -a
+
+#OUT=/etc/profile.d/openssl.sh
+#cat <<EOF >$OUT
+##Set OPENSSL_PATH
+#OPENSSL_PATH="/usr/local/ssl/bin"
+#export OPENSSL_PATH
+#PATH=$PATH:$OPENSSL_PATH
+#export PATH
+#EOF
+#chmod +x /etc/profile.d/openssl.sh
+#source /etc/profile.d/openssl.sh
+#echo $PATH
