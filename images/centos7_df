@@ -4,11 +4,9 @@ RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
 RUN source ~/.bash_profile
 RUN export GPG_TTY=$(tty)
 RUN yum -y update
-RUN yum -y install git
-RUN yum -y install curl
-RUN yum -y install fuse
-RUN yum -y install fuse-libs
-RUN yum -y install make
+RUN yum -y install git curl
+RUN yum -y install fuse fuse-libs
+RUN yum -y install make gcc
 #Installing openssl
 COPY images/centos7_openssl  /root/
 RUN chmod +x /root/centos7_openssl
