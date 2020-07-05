@@ -1,0 +1,21 @@
+FROM centos:centos7
+ENV SHELL /bin/bash
+RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
+RUN source ~/.bash_profile
+RUN export GPG_TTY=$(tty)
+RUN yum -y update
+RUN yum -y install git
+RUN yum -y install curl
+RUN yum -y install fuse
+RUN yum -y install fuse-libs
+RUN curl -L https://git.io/get_helm.sh | bash
+
+RUN mkdir /root/test
+RUN mkdir /root/outputs
+COPY AppImage/test  /root/test/
+COPY DeSCAM_v  /root/
+COPY images/centos7_script  /root/
+
+WORKDIR /apps
+ENTRYPOINT tail -f /dev/null
+CMD [ "/bin/bash" ]
