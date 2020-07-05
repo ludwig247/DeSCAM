@@ -21,27 +21,22 @@ using namespace sc_dt;
 struct FFT : public sc_module {
 
 
-    sc_fix test_fix;
-    sc_fix test_2_fix;
-
-    sc_fix array[8];
-
     //Variables
     phases phase_algorithm;
-    //float data_algorithm[ARRAY_DIM][ARRAY_SIZE];
+    //sc_fix data_algorithm[ARRAY_DIM][ARRAY_SIZE];
 
-    float real[ARRAY_SIZE];
-    float img[ARRAY_SIZE];
+    sc_fix real[ARRAY_SIZE];
+    sc_fix img[ARRAY_SIZE];
 
-    float real_bitmirror[ARRAY_SIZE];
-    float img_bitmirror[ARRAY_SIZE];
+    sc_fix real_bitmirror[ARRAY_SIZE];
+    sc_fix img_bitmirror[ARRAY_SIZE];
 
-    float real_twid[ARRAY_SIZE/2];
-    float img_twid[ARRAY_SIZE/2];
+    sc_fix real_twid[ARRAY_SIZE/2];
+    sc_fix img_twid[ARRAY_SIZE/2];
 
-    float typed;
+    sc_fix typed;
 
-    float twoPi = 6.28318530717959;
+    sc_fix twoPi = 6.28318530717959;
 
     int n; // counter for prep loop
 
@@ -55,16 +50,16 @@ struct FFT : public sc_module {
     int rootindex;
 
 
-    float temp;
+    sc_fix temp;
 
     //data
-    //blocking_in<float[ARRAY_DIM][ARRAY_SIZE]> data_in;
-    //blocking_out<float[ARRAY_DIM][ARRAY_SIZE]> data_out;
+    //blocking_in<sc_fix[ARRAY_DIM][ARRAY_SIZE]> data_in;
+    //blocking_out<sc_fix[ARRAY_DIM][ARRAY_SIZE]> data_out;
 
-    blocking_in<float[ARRAY_SIZE]> data_in_real;
-    blocking_in<float[ARRAY_SIZE]> data_in_img;
-    blocking_out<float[ARRAY_SIZE]> data_out_real;
-    blocking_out<float[ARRAY_SIZE]> data_out_img;
+    blocking_in<sc_fix[ARRAY_SIZE]> data_in_real;
+    blocking_in<sc_fix[ARRAY_SIZE]> data_in_img;
+    blocking_out<sc_fix[ARRAY_SIZE]> data_out_real;
+    blocking_out<sc_fix[ARRAY_SIZE]> data_out_img;
 
 
     SC_HAS_PROCESS(FFT);
@@ -87,13 +82,6 @@ struct FFT : public sc_module {
 
             if (phase_algorithm == IDLE) {
 
-                test_fix = 4.4;
-                test_2_fix = 1.1;
-
-                test_fix = test_fix + test_2_fix;
-
-                cout << "Test Fix: " << test_fix << endl;
-
                 //data_in->read(data_algorithm, "data_in");
                 data_in_real->read(real, "data_in_real");
                 data_in_img->read(img);
@@ -101,26 +89,16 @@ struct FFT : public sc_module {
                 n = 0;
                 i = 0;
 
-            /*}else if (phase_algorithm == DATA_IN){
-
-                if(i != ARRAY_SIZE) {
-                    real[i] = data_algorithm[0][i];
-                    img[i] = data_algorithm[1][i];
-                    ++i;
-                    //cout << "Real " << i << ": " << data_algorithm[0][i] << endl;
-                    //cout << "Img " << i << ": " << data_algorithm[1][i] << endl;
-                }else{
-                    phase_algorithm = PREP;
-                    n = 0;
-
-                }*/
-
             }else if (phase_algorithm == PREP){
 
                 if (n != ARRAY_SIZE>>1){
-                    typed = (float)(twoPi*n/ARRAY_SIZE);
+                    typed = (sc_fix)(twoPi*n/ARRAY_SIZE);
                     real_twid[n] = cos(typed);
                     img_twid[n] = (-1.0)*sin(typed);
+
+                    cout << real_twid[n] << endl;
+                    cout << img_twid[n] << endl;
+
                     ++n;
 
                     insert_state("prep");

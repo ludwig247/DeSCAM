@@ -13,7 +13,7 @@ enum phases{
     IDLE, DATA_IN, PREP, RUN, DATA_OUT
 };
 
-sc_fxtype_params parameters (8,4,SC_RND_ZERO,SC_SAT_ZERO);
+sc_fxtype_params parameters (32,16,SC_RND_CONV,SC_SAT);
 sc_fxtype_context context(parameters);
 
 

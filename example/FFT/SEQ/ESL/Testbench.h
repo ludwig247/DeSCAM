@@ -20,16 +20,16 @@ using namespace std;
 struct Testbench : public sc_module {
 
     //Variables
-    float data_testbench_real[ARRAY_SIZE] = {1,4,-6,3,2,4,-10,3};
-    float data_testbench_img[ARRAY_SIZE] = {0,0,0,0,0,0,0,0};
+    sc_fix data_testbench_real[ARRAY_SIZE] = {1,4,-6,3,2,4,-10,3};
+    sc_fix data_testbench_img[ARRAY_SIZE] = {0,0,0,0,0,0,0,0};
 
     //out-port
-   blocking_out<float[ARRAY_SIZE]> data_out_real;
-    blocking_out<float[ARRAY_SIZE]> data_out_img;
+    blocking_out<sc_fix[ARRAY_SIZE]> data_out_real;
+    blocking_out<sc_fix[ARRAY_SIZE]> data_out_img;
 
     //in-port
-   blocking_in<float[ARRAY_SIZE]> data_in_real;
-    blocking_in<float[ARRAY_SIZE]> data_in_img;
+    blocking_in<sc_fix[ARRAY_SIZE]> data_in_real;
+    blocking_in<sc_fix[ARRAY_SIZE]> data_in_img;
 
 
     int cnt = 0;

@@ -16,19 +16,19 @@ int sc_main(int argc, char* argv[]) {
     FFT FFT("BubbleSort");
     Testbench testbench("Testbench");
 
-    Blocking<float[ARRAY_SIZE]>time_real("time_real");
+    Blocking<sc_fix[ARRAY_SIZE]>time_real("time_real");
     testbench.data_out_real(time_real);
     FFT.data_in_real(time_real);
 
-    Blocking<float[ARRAY_SIZE]>time_img("time_img");
+    Blocking<sc_fix[ARRAY_SIZE]>time_img("time_img");
     testbench.data_out_img(time_img);
     FFT.data_in_img(time_img);
 
-    Blocking<float[ARRAY_SIZE]> frequency_real("frequency_real");
+    Blocking<sc_fix[ARRAY_SIZE]> frequency_real("frequency_real");
     testbench.data_in_real(frequency_real);
     FFT.data_out_real(frequency_real);
 
-    Blocking<float[ARRAY_SIZE]> frequency_img("frequency_img");
+    Blocking<sc_fix[ARRAY_SIZE]> frequency_img("frequency_img");
     testbench.data_in_img(frequency_img);
     FFT.data_out_img(frequency_img);
 
