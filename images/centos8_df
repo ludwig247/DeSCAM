@@ -1,7 +1,7 @@
 FROM centos:centos8
 ENV SHELL /bin/bash
 RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
-RUN source ~/.profile
+RUN source ~/.bash_profile
 RUN export GPG_TTY=$(tty)
 RUN yum -y update
 RUN yum -y install git
@@ -14,7 +14,7 @@ RUN mkdir /root/test
 RUN mkdir /root/outputs
 COPY AppImage/test  /root/test/
 COPY DeSCAM_v  /root/
-COPY images/ubuntu16_script  /root/
+COPY images/centos8_script  /root/
 
 WORKDIR /apps
 ENTRYPOINT tail -f /dev/null
