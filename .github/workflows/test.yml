@@ -73,9 +73,9 @@ jobs:
         run: docker stop MyCentos8
 # 	TEST ON CENTOS 7
       - name: Docker Build CentOS7 
-        run: docker build --file ./images/centos7_df --tag mytest3:1.0 .
+        run: docker build --file ./images/centos7_df --tag mytest4:1.0 .
       - name: Docker Run CentOS7
-        run: docker run --publish 8000:8080 --detach --name MyCentos7 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest3:1.0
+        run: docker run --publish 8000:8080 --detach --name MyCentos7 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest4:1.0
       - name: Docker Check CentOS7
         run: docker ps -a
       - name: Run Test CentOS7
