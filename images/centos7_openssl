@@ -17,7 +17,7 @@ echo "/usr/local/ssl/lib" > openssl-1.0.2o.conf
 ldconfig -v
 #mv /bin/openssl /bin/openssl.BEKUP
 export OPENSSL_PATH="/usr/local/ssl/bin"
-export PATH=$PATH$OPENSSL_PATH
+export PATH=$PATH:$OPENSSL_PATH
 which openssl
 openssl version -a
 
