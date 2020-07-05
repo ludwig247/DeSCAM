@@ -1,13 +1,13 @@
-FROM ubuntu:16.04
+FROM centos:centos8
 ENV SHELL /bin/bash
 RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
 RUN source ~/.profile
 RUN export GPG_TTY=$(tty)
-RUN apt-get update
-RUN apt --assume-yes install git
-RUN apt-get --assume-yes install curl
-RUN apt-get --assume-yes install fuse
-RUN apt-get --assume-yes install unionfs-fuse
+RUN yum -y update
+RUN yum -y install git
+RUN yum -y install curl
+RUN yum -y install fuse
+RUN yum -y install fuse-libs
 RUN curl -L https://git.io/get_helm.sh | bash
 
 RUN mkdir /root/test

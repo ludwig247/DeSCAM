@@ -1,7 +1,0 @@
-# action.yml
-name: 'AppImage Elaboration' 
-description: 'Using Ubuntu 18.04 as Base OS'
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-
