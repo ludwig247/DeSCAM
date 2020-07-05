@@ -20,13 +20,16 @@ using namespace std;
 struct Testbench : public sc_module {
 
     //Variables
-    double data_testbench[ARRAY_DIM][ARRAY_SIZE] = {1,4,-6,3,2,4,-10,3,0,0,0,0,0,0,0,0};
+    float data_testbench_real[ARRAY_SIZE] = {1,4,-6,3,2,4,-10,3};
+    float data_testbench_img[ARRAY_SIZE] = {0,0,0,0,0,0,0,0};
 
     //out-port
-   blocking_out<double[ARRAY_DIM][ARRAY_SIZE]> data_out;
+   blocking_out<float[ARRAY_SIZE]> data_out_real;
+    blocking_out<float[ARRAY_SIZE]> data_out_img;
 
     //in-port
-   blocking_in<double[ARRAY_DIM][ARRAY_SIZE]> data_in;
+   blocking_in<float[ARRAY_SIZE]> data_in_real;
+    blocking_in<float[ARRAY_SIZE]> data_in_img;
 
 
     int cnt = 0;
@@ -40,8 +43,10 @@ struct Testbench : public sc_module {
     SC_HAS_PROCESS(Testbench);
 
     Testbench(sc_module_name name) :
-                 data_out("data_out"),
-                 data_in("data_in")
+                 data_out_real("data_out_real"),
+                 data_out_img("data_out_img"),
+                 data_in_real("data_in_real"),
+                 data_in_img("data_in_img")
                  {
                  SC_THREAD(fsm);
                  }
@@ -54,37 +59,54 @@ struct Testbench : public sc_module {
 
             if (cnt < runs_simulated) {
 
-                for (i = 0; i < ARRAY_DIM; ++i) {
-                    for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
-                        data_testbench[i][cnt_fill] = random() % 255;
+                for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
+                    //data_testbench_real[cnt_fill] = random() % 255;
 
-                        cout << data_testbench[i][cnt_fill] << " ";
+                     cout << data_testbench_real[cnt_fill] << " ";
 
-                        if(cnt_fill == ARRAY_SIZE-1){
+                     if(cnt_fill == ARRAY_SIZE-1){
                             cout << endl;
-                        }
+                     }
+                }
 
+                for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
+                    //data_testbench_img[cnt_fill] = random() % 255;
+
+                    cout << data_testbench_img[cnt_fill] << " ";
+
+                    if(cnt_fill == ARRAY_SIZE-1){
+                        cout << endl;
                     }
                 }
+
+
 
                 cout << "data sent" << endl;
 
 
-                data_out->write(data_testbench);
+                data_out_real->write(data_testbench_real);
+                data_out_img->write(data_testbench_img);
 
-                data_in->read(data_testbench);
+                data_in_real->read(data_testbench_real);
+                data_in_img->read(data_testbench_img);
 
-                for (i = 0; i < ARRAY_DIM ; ++i) {
-                    for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
+            for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
 
-                        cout << data_testbench[i][cnt_fill] << " ";
+                cout << data_testbench_real[cnt_fill] << " ";
 
-                        if(cnt_fill == ARRAY_SIZE-1){
-                            cout << endl;
-                        }
-
-                    }
+                if(cnt_fill == ARRAY_SIZE-1){
+                    cout << endl;
                 }
+            }
+
+            for (cnt_fill = 0; cnt_fill < ARRAY_SIZE; ++cnt_fill) {
+
+                cout << data_testbench_img[cnt_fill] << " ";
+
+                if(cnt_fill == ARRAY_SIZE-1){
+                    cout << endl;
+                }
+            }
 
 
 

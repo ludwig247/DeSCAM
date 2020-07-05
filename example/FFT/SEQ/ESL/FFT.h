@@ -6,6 +6,7 @@
 #include "DataTypes.h"
 
 
+
 //#ifndef PROJECT_BUS_H
 //#define PROJECT_BUS_H
 
@@ -14,25 +15,33 @@
 
 
 using namespace std;
+using namespace sc_dt;
+
 
 struct FFT : public sc_module {
 
+
+    sc_fix test_fix;
+    sc_fix test_2_fix;
+
+    sc_fix array[8];
+
     //Variables
     phases phase_algorithm;
-    double data_algorithm[ARRAY_DIM][ARRAY_SIZE];
+    //float data_algorithm[ARRAY_DIM][ARRAY_SIZE];
 
-    double real[ARRAY_SIZE];
-    double img[ARRAY_SIZE];
+    float real[ARRAY_SIZE];
+    float img[ARRAY_SIZE];
 
-    double real_bitmirror[ARRAY_SIZE];
-    double img_bitmirror[ARRAY_SIZE];
+    float real_bitmirror[ARRAY_SIZE];
+    float img_bitmirror[ARRAY_SIZE];
 
-    double real_twid[ARRAY_SIZE/2];
-    double img_twid[ARRAY_SIZE/2];
+    float real_twid[ARRAY_SIZE/2];
+    float img_twid[ARRAY_SIZE/2];
 
-    double typed;
+    float typed;
 
-    double twoPi = 6.28318530717959;
+    float twoPi = 6.28318530717959;
 
     int n; // counter for prep loop
 
@@ -45,18 +54,28 @@ struct FFT : public sc_module {
     int log = 0;
     int rootindex;
 
-    double temp;
+
+    float temp;
 
     //data
-    blocking_in<double[ARRAY_DIM][ARRAY_SIZE]> data_in;
-    blocking_out<double[ARRAY_DIM][ARRAY_SIZE]> data_out;
+    //blocking_in<float[ARRAY_DIM][ARRAY_SIZE]> data_in;
+    //blocking_out<float[ARRAY_DIM][ARRAY_SIZE]> data_out;
+
+    blocking_in<float[ARRAY_SIZE]> data_in_real;
+    blocking_in<float[ARRAY_SIZE]> data_in_img;
+    blocking_out<float[ARRAY_SIZE]> data_out_real;
+    blocking_out<float[ARRAY_SIZE]> data_out_img;
 
 
     SC_HAS_PROCESS(FFT);
 
     FFT(sc_module_name name) :
-            data_in("data_in"),
-            data_out("data_out") {
+            //data_in("data_in"),
+            //data_out("data_out") {
+            data_in_real("data_in_real"),
+            data_in_img("data_in_img"),
+            data_out_real("data_out_real"),
+            data_out_img("data_out_img"){
         SC_THREAD(fsm);
     }
 
@@ -68,11 +87,21 @@ struct FFT : public sc_module {
 
             if (phase_algorithm == IDLE) {
 
-                data_in->read(data_algorithm, "data_in");
-                phase_algorithm = DATA_IN;
+                test_fix = 4.4;
+                test_2_fix = 1.1;
+
+                test_fix = test_fix + test_2_fix;
+
+                cout << "Test Fix: " << test_fix << endl;
+
+                //data_in->read(data_algorithm, "data_in");
+                data_in_real->read(real, "data_in_real");
+                data_in_img->read(img);
+                phase_algorithm = PREP;
+                n = 0;
                 i = 0;
 
-            }else if (phase_algorithm == DATA_IN){
+            /*}else if (phase_algorithm == DATA_IN){
 
                 if(i != ARRAY_SIZE) {
                     real[i] = data_algorithm[0][i];
@@ -84,15 +113,18 @@ struct FFT : public sc_module {
                     phase_algorithm = PREP;
                     n = 0;
 
-                }
+                }*/
 
             }else if (phase_algorithm == PREP){
 
                 if (n != ARRAY_SIZE>>1){
-                    typed = (double)(twoPi*n/ARRAY_SIZE);
+                    typed = (float)(twoPi*n/ARRAY_SIZE);
                     real_twid[n] = cos(typed);
                     img_twid[n] = (-1.0)*sin(typed);
                     ++n;
+
+                    insert_state("prep");
+
                 }else{
                     phase_algorithm = RUN;
                 }
@@ -131,6 +163,8 @@ struct FFT : public sc_module {
 
                         ++odd;
 
+                        insert_state("inner loop");
+
                         /*for (i = 0; i < ARRAY_SIZE ; ++i) {
                             cout << real[i] << " ";
                         }
@@ -147,7 +181,7 @@ struct FFT : public sc_module {
                         ++log;
                     }
 
-                    insert_state("loop");
+
 
                 } else {
 
@@ -176,16 +210,9 @@ struct FFT : public sc_module {
 
             }else{
 
-                if(i != ARRAY_SIZE){
-                    data_algorithm[0][i] = real_bitmirror[i];
-                    data_algorithm[1][i] = img_bitmirror[i];
-                    ++i;
-                }else{
-                    data_out->write(data_algorithm, "data_out");
-                    phase_algorithm = IDLE;
-                }
-
-
+                data_out_real->write(real_bitmirror, "data_out");
+                data_out_img->write(img_bitmirror);
+                phase_algorithm = IDLE;
 
             }
 

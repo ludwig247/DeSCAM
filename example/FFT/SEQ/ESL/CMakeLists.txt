@@ -7,6 +7,7 @@ set(CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib -rt -dl -tinfo -pthre
 #set(CMAKE_CXX_STANDARD 14)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include/sysc/datatypes/fx/)
 include_directories(${CMAKE_SOURCE_DIR}/exampe/interfaces)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

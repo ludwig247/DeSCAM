@@ -1,5 +1,6 @@
 #include "../../../Interfaces/Blocking.h"
 #include "systemc.h"
+#include "DataTypes.h"
 
 //Data Path Algorithm File
 #include "FFT.h"
@@ -15,13 +16,21 @@ int sc_main(int argc, char* argv[]) {
     FFT FFT("BubbleSort");
     Testbench testbench("Testbench");
 
-    Blocking<double[ARRAY_DIM][ARRAY_SIZE]> unsorted_data("unsorted_data");
-    testbench.data_out(unsorted_data);
-    FFT.data_in(unsorted_data);
+    Blocking<float[ARRAY_SIZE]>time_real("time_real");
+    testbench.data_out_real(time_real);
+    FFT.data_in_real(time_real);
 
-    Blocking<double[ARRAY_DIM][ARRAY_SIZE]> sorted_data("sorted_data");
-    testbench.data_in(sorted_data);
-    FFT.data_out(sorted_data);
+    Blocking<float[ARRAY_SIZE]>time_img("time_img");
+    testbench.data_out_img(time_img);
+    FFT.data_in_img(time_img);
+
+    Blocking<float[ARRAY_SIZE]> frequency_real("frequency_real");
+    testbench.data_in_real(frequency_real);
+    FFT.data_out_real(frequency_real);
+
+    Blocking<float[ARRAY_SIZE]> frequency_img("frequency_img");
+    testbench.data_in_img(frequency_img);
+    FFT.data_out_img(frequency_img);
 
     sc_start();
 
