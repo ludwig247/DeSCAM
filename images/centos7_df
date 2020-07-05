@@ -8,6 +8,7 @@ RUN yum -y install git
 RUN yum -y install curl
 RUN yum -y install fuse
 RUN yum -y install fuse-libs
+RUN yum -y install make
 #Installing openssl
 COPY images/centos7_openssl  /root/
 RUN chmod +x /root/centos7_openssl
