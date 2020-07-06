@@ -12,6 +12,7 @@
 #include <ModelGlobal.h>
 #include <PrintITL/PrintITL.h>
 #include <ReconstructOperations.h>
+#include <ExprVisitor.h>
 
 
 #include "gmock/gmock.h"
@@ -23,6 +24,32 @@ class OperationGraphTest: public ::testing::Test{
 public:
     OperationGraphTest():module(new SCAM::Module("TestModule")){
     }
+
+    struct pathIDStmt{
+        std::vector<int> idList;
+        std::vector<SCAM::Stmt*> stmtList;
+    };
+
+    struct eventID{
+        int id;
+        std::string eventname;
+    };
+
+    SCAM::Module *module;
+    std::map<int, CfgNode *> controlFlowMapRead;
+    std::map<int, CfgNode *> controlFlowMapWrite;
+    std::map<int, CfgNode *> controlFlowMap;
+    std::vector<std::vector<SCAM::Stmt*>> pathsRead;
+    std::vector<std::vector<int>> pathsReadIDs;
+    std::vector<std::vector<SCAM::Stmt*>> pathsWrite;
+    std::vector<std::vector<int>> pathsWriteIDs;
+    std::vector<Operation*> operationsRead;
+    std::vector<Operation*> operationsWrite;
+    std::vector<pathIDStmt> allPaths;
+    std::vector<pathIDStmt> finalPaths;
+    std::vector<Operation*> operationsFinal;
+
+
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
         //Print CFG for debugging
         std::stringstream ss;
@@ -99,7 +126,83 @@ public:
             return;
         }
     }
+    void combinePaths(std::vector<eventID> readyQueue, std::vector<eventID> blockedFunctions) {
+        static pathIDStmt currentPath;
 
+        //Try out all paths
+        for(auto path: allPaths){
+            //Check if there are still functions to run
+            if(readyQueue.size() > 0) {
+                int start = readyQueue.front().id;
+                //if path starts with id start
+                if(path.idList.front()==start){
+                    //store context to restore it later for other possible paths
+                    pathIDStmt savedPath = currentPath;
+                    std::vector<eventID> savedReady = readyQueue;
+                    std::vector<eventID> savedBlocked = blockedFunctions;
+
+                    //add IDs and statements to global path
+                    currentPath.idList.insert(currentPath.idList.end(),path.idList.begin(),path.idList.end());
+                    currentPath.stmtList.insert(currentPath.stmtList.end(),path.stmtList.begin(),path.stmtList.end());
+
+                    //check if path stmts contain a notify
+                    for(auto p:path.idList){
+                        //if node is a notify statement
+                        Notify* notify = NodePeekVisitor::nodePeekNotify(controlFlowMap.at(p)->getStmt());
+                        if(notify)
+                        {
+                            for(int i=0; i< blockedFunctions.size();i++){
+                                //check if function is existent in blockedFunctions
+                                for(auto iter=blockedFunctions.begin(); iter!=blockedFunctions.end(); ++iter)
+                                {
+                                    std::string eventname = notify->getEventname();
+                                    if(iter->eventname == eventname) {
+                                        //add function to readyQueue
+                                        readyQueue.push_back(*iter);
+                                        //remove function from blockedFunctions
+                                        blockedFunctions.erase(iter);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    //check if path ends with a wait
+                    Wait* wait = NodePeekVisitor::nodePeekWait(controlFlowMap.at(path.idList.back())->getStmt());
+                    if(wait)
+                    {
+                        std::string eventname = wait->getStateName();
+                        //add function to blockedFunctions
+                        eventID blocked = {path.idList.back(),eventname};
+                        blockedFunctions.push_back(blocked);
+                        //remove function from readyQueue
+                        readyQueue.erase(readyQueue.begin());
+                    }
+                    //check if path ends with return
+                    if(NodePeekVisitor::nodePeekReturn(controlFlowMap.at(path.idList.back())->getStmt()))
+                    {
+                        //remove function from readyQueue
+                        readyQueue.erase(readyQueue.begin());
+                    }
+
+                    //Start Recursion
+                    combinePaths(readyQueue,blockedFunctions);
+
+                    //After reaching the end of a path:
+                    //Restore Context to old value to be able to try next path
+                    currentPath = savedPath;
+                    readyQueue = savedReady;
+                    blockedFunctions = savedBlocked;
+                }
+            }
+            else{
+                //End of path reached
+                finalPaths.push_back(currentPath);
+                return;
+            }
+        }
+    }
     virtual void SetUp() {
         //create variables and datatypes
         auto states = new DataType("states");
@@ -118,6 +221,9 @@ public:
         auto out = new Variable("out", DataTypes::getDataType("int"));
         auto val = new Variable("val", DataTypes::getDataType("int"));
 
+        auto reader_sync = new Variable("reader_sync",DataTypes::getDataType("bool"));
+        auto writer_sync = new Variable("writer_sync", DataTypes::getDataType("bool"));
+
         //add Variables to Module
         module->addVariable(buffer);
         module->addVariable(fifo_size);
@@ -128,6 +234,8 @@ public:
         module->addVariable(writer_notify);
         module->addVariable(out);
         module->addVariable(val);
+        module->addVariable(reader_sync);
+        module->addVariable(writer_sync);
 
         //Read Expressions/Assignments
         //if(state == EMPTY)
@@ -135,7 +243,7 @@ public:
         auto state_eq_empty = new Relational(new VariableOperand(module->getVariable("state")),"==",empty_enum);
         auto check_state_empty = new If(state_eq_empty);
         //wait(writer_notify)
-        auto writer_wait = new Wait("writer_wait");
+        auto writer_wait = new Wait("writer_notify");
         //out = buffer[tail]
         auto variable_out = new VariableOperand(module->getVariable("out"));
         auto buffer_at_tail = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new VariableOperand(module->getVariable(("tail"))));
@@ -163,7 +271,7 @@ public:
         auto state_eq_full = new Relational(new VariableOperand(module->getVariable("state")),"==",full_enum);
         auto check_state_full = new If(state_eq_full);
         //wait(reader_notify);
-        auto reader_wait = new Wait("reader_wait");
+        auto reader_wait = new Wait("reader_notify");
         //buffer[head] = val;
         auto variable_val = new VariableOperand(module->getVariable("val"));
         auto buffer_at_head = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new VariableOperand(head));
@@ -207,7 +315,6 @@ public:
         reader_noti->addSuccessor(return_read);
 
         //create map with CFG nodes Read
-        std::map<int, CfgNode *> controlFlowMapRead;
         controlFlowMapRead.insert(std::make_pair(state_equal_empty->getId(),state_equal_empty));
         controlFlowMapRead.insert(std::make_pair(read_wait->getId(),read_wait));
         controlFlowMapRead.insert(std::make_pair(read_value->getId(),read_value));
@@ -217,6 +324,16 @@ public:
         controlFlowMapRead.insert(std::make_pair(state_empty->getId(),state_empty));
         controlFlowMapRead.insert(std::make_pair(reader_noti->getId(),reader_noti));
         controlFlowMapRead.insert(std::make_pair(return_read->getId(),return_read));
+
+        controlFlowMap.insert(std::make_pair(state_equal_empty->getId(),state_equal_empty));
+        controlFlowMap.insert(std::make_pair(read_wait->getId(),read_wait));
+        controlFlowMap.insert(std::make_pair(read_value->getId(),read_value));
+        controlFlowMap.insert(std::make_pair(tail_incr->getId(),tail_incr));
+        controlFlowMap.insert(std::make_pair(state_filled_read->getId(),state_filled_read));
+        controlFlowMap.insert(std::make_pair(head_equal_tail_read->getId(),head_equal_tail_read));
+        controlFlowMap.insert(std::make_pair(state_empty->getId(),state_empty));
+        controlFlowMap.insert(std::make_pair(reader_noti->getId(),reader_noti));
+        controlFlowMap.insert(std::make_pair(return_read->getId(),return_read));
 
         //Print CFG for Read
         //std::cout << printCFG(controlFlowMapRead) << std::endl;
@@ -245,7 +362,6 @@ public:
         writer_noti->addSuccessor(return_write);
 
         //Create map with CFG nodes Write
-        std::map<int, CfgNode *> controlFlowMapWrite;
         controlFlowMapWrite.insert(std::make_pair(state_equal_full->getId(),state_equal_full));
         controlFlowMapWrite.insert(std::make_pair(write_wait->getId(),write_wait));
         controlFlowMapWrite.insert(std::make_pair(write_value->getId(),write_value));
@@ -256,121 +372,121 @@ public:
         controlFlowMapWrite.insert(std::make_pair(writer_noti->getId(),writer_noti));
         controlFlowMapWrite.insert(std::make_pair(return_write->getId(),return_write));
 
+        controlFlowMap.insert(std::make_pair(state_equal_full->getId(),state_equal_full));
+        controlFlowMap.insert(std::make_pair(write_wait->getId(),write_wait));
+        controlFlowMap.insert(std::make_pair(write_value->getId(),write_value));
+        controlFlowMap.insert(std::make_pair(head_incr->getId(),head_incr));
+        controlFlowMap.insert(std::make_pair(state_filled_write->getId(),state_filled_write));
+        controlFlowMap.insert(std::make_pair(head_equal_tail_write->getId(),head_equal_tail_write));
+        controlFlowMap.insert(std::make_pair(state_full->getId(),state_full));
+        controlFlowMap.insert(std::make_pair(writer_noti->getId(),writer_noti));
+        controlFlowMap.insert(std::make_pair(return_write->getId(),return_write));
+
         //Print CFG Write
         //std::cout << printCFG(controlFlowMapWrite) << std::endl;
-
-        //Find important states Read
-        std::map<int, CfgNode *> importantStatesRead;
-        findImportantStates(controlFlowMapRead,&importantStatesRead);
-
-        //Find operations Read
-        auto start_read = controlFlowMapRead.begin()->second;
-        findPathsfromNode(start_read,&pathsRead,&pathsReadIDs);
-        for(auto const& node : importantStatesRead) {
-            findPathsfromNode(node.second,&pathsRead,&pathsReadIDs);
-        }
-
-        //Create a map from CfgNode Id to State Read
-        std::map<int,State*> CfgIdToStateRead;
-        //If the state for the node is not yet created, create one
-        for(auto path = pathsReadIDs.begin(); path != pathsReadIDs.end(); path++){
-            if(CfgIdToStateRead.find(path->front()) == CfgIdToStateRead.end()){
-                CfgIdToStateRead.insert(std::make_pair(path->front(),new State(controlFlowMapRead.at(path->front())->getName())));
-            }
-            if(CfgIdToStateRead.find(path->back()) == CfgIdToStateRead.end()){
-                CfgIdToStateRead.insert(std::make_pair(path->back(), new State(controlFlowMapRead.at(path->back())->getName())));
-            }
-        }
-
-        //Generate Operations Read
-        //Iterate over all paths and set State, nextState and statementList
-        for(auto path = pathsReadIDs.begin(); path != pathsReadIDs.end(); path++){
-            auto op = new Operation();
-            op->setState(CfgIdToStateRead.at(path->front()));
-            op->setNextState(CfgIdToStateRead.at(path->back()));
-            operationsRead.push_back(op);
-        }
-        int cnt = 0;
-        std::vector<SCAM::Stmt*> statementList;
-        for(auto op: operationsRead) {
-            for (auto stmt: pathsRead.at(cnt)) {
-                statementList.push_back(stmt);
-            }
-            op->setStatementsList(statementList);
-            cnt++;
-            statementList.clear();
-        }
-
-        //Get Assumptions and Commitments
-        auto rOperations = new ReconstructOperations();
-        for(auto op: this->operationsRead) {
-            rOperations->sortOperation(op);
-        }
-
-        //Find important states Write
-        std::map<int, CfgNode *> importantStatesWrite;
-        findImportantStates(controlFlowMapWrite,&importantStatesWrite);
-
-        //Find operations Write
-        auto start_write = controlFlowMapWrite.begin()->second;
-        findPathsfromNode(start_write,&pathsWrite,&pathsWriteIDs);
-        for(auto const& node : importantStatesWrite) {
-            findPathsfromNode(node.second,&pathsWrite,&pathsWriteIDs);
-        }
-
-        //Create a map from CfgNode Id to State Write
-        std::map<int,State*> CfgIdToStateWrite;
-        //If the state for the node is not yet created, create one
-        for(auto path = pathsWriteIDs.begin(); path != pathsWriteIDs.end(); path++){
-            if(CfgIdToStateWrite.find(path->front()) == CfgIdToStateWrite.end()){
-                CfgIdToStateWrite.insert(std::make_pair(path->front(),new State(controlFlowMapWrite.at(path->front())->getName())));
-            }
-            if(CfgIdToStateWrite.find(path->back()) == CfgIdToStateWrite.end()){
-                CfgIdToStateWrite.insert(std::make_pair(path->back(), new State(controlFlowMapWrite.at(path->back())->getName())));
-            }
-        }
-
-        //Generate Operations Write
-        //Iterate over all paths and set State, nextState and statementList
-        for(auto path = pathsWriteIDs.begin(); path != pathsWriteIDs.end(); path++){
-            auto op = new Operation();
-            op->setState(CfgIdToStateWrite.at(path->front()));
-            op->setNextState(CfgIdToStateWrite.at(path->back()));
-            statementList.clear();
-
-            operationsWrite.push_back(op);
-        }
-        cnt = 0;
-        for(auto op: operationsWrite) {
-            for (auto stmt: pathsWrite.at(cnt)) {
-                statementList.push_back(stmt);
-            }
-            op->setStatementsList(statementList);
-            cnt++;
-            statementList.clear();
-        }
-
-        for(auto op: this->operationsWrite) {
-            rOperations->sortOperation(op);
-        }
-
-        return;
     }
 
     virtual void TearDown() {}
 
-    SCAM::Module *module;
-    std::vector<std::vector<SCAM::Stmt*>> pathsRead;
-    std::vector<std::vector<int>> pathsReadIDs;
-    std::vector<std::vector<SCAM::Stmt*>> pathsWrite;
-    std::vector<std::vector<int>> pathsWriteIDs;
-    std::map<std::string, State*> StateStringMapRead;
-    std::map<std::string, State*> StateStringMapWrite;
-    std::vector<Operation*> operationsRead;
-    std::vector<Operation*> operationsWrite;
 };
 
 TEST_F(OperationGraphTest, ExtractPaths){
+    //Find important states Read
+    std::map<int, CfgNode *> importantStatesRead;
+    findImportantStates(controlFlowMapRead,&importantStatesRead);
+
+    //Find operations Read
+    auto start_read = controlFlowMapRead.begin()->second;
+    findPathsfromNode(start_read,&pathsRead,&pathsReadIDs);
+    for(auto const& node : importantStatesRead) {
+        findPathsfromNode(node.second,&pathsRead,&pathsReadIDs);
+    }
+
+    //Create a map from CfgNode Id to State Read
+    std::map<int,State*> CfgIdToStateRead;
+    //If the state for the node is not yet created, create one
+    for(auto path = pathsReadIDs.begin(); path != pathsReadIDs.end(); path++){
+        if(CfgIdToStateRead.find(path->front()) == CfgIdToStateRead.end()){
+            CfgIdToStateRead.insert(std::make_pair(path->front(),new State(controlFlowMapRead.at(path->front())->getName())));
+        }
+        if(CfgIdToStateRead.find(path->back()) == CfgIdToStateRead.end()){
+            CfgIdToStateRead.insert(std::make_pair(path->back(), new State(controlFlowMapRead.at(path->back())->getName())));
+        }
+    }
+
+    //Generate Operations Read
+    //Iterate over all paths and set State, nextState and statementList
+    for(auto path = pathsReadIDs.begin(); path != pathsReadIDs.end(); path++){
+        auto op = new Operation();
+        op->setState(CfgIdToStateRead.at(path->front()));
+        op->setNextState(CfgIdToStateRead.at(path->back()));
+        operationsRead.push_back(op);
+    }
+    int cnt = 0;
+    std::vector<SCAM::Stmt*> statementList;
+    for(auto op: operationsRead) {
+        for (auto stmt: pathsRead.at(cnt)) {
+            statementList.push_back(stmt);
+        }
+        op->setStatementsList(statementList);
+        cnt++;
+        statementList.clear();
+    }
+
+    //Get Assumptions and Commitments
+    auto rOperations = new ReconstructOperations();
+    for(auto op: this->operationsRead) {
+        rOperations->sortOperation(op);
+    }
+
+    //Find important states Write
+    std::map<int, CfgNode *> importantStatesWrite;
+    findImportantStates(controlFlowMapWrite,&importantStatesWrite);
+
+    //Find operations Write
+    auto start_write = controlFlowMapWrite.begin()->second;
+    findPathsfromNode(start_write,&pathsWrite,&pathsWriteIDs);
+    for(auto const& node : importantStatesWrite) {
+        findPathsfromNode(node.second,&pathsWrite,&pathsWriteIDs);
+    }
+
+    //Create a map from CfgNode Id to State Write
+    std::map<int,State*> CfgIdToStateWrite;
+    //If the state for the node is not yet created, create one
+    for(auto path = pathsWriteIDs.begin(); path != pathsWriteIDs.end(); path++){
+        if(CfgIdToStateWrite.find(path->front()) == CfgIdToStateWrite.end()){
+            CfgIdToStateWrite.insert(std::make_pair(path->front(),new State(controlFlowMapWrite.at(path->front())->getName())));
+        }
+        if(CfgIdToStateWrite.find(path->back()) == CfgIdToStateWrite.end()){
+            CfgIdToStateWrite.insert(std::make_pair(path->back(), new State(controlFlowMapWrite.at(path->back())->getName())));
+        }
+    }
+
+    //Generate Operations Write
+    //Iterate over all paths and set State, nextState and statementList
+    for(auto path = pathsWriteIDs.begin(); path != pathsWriteIDs.end(); path++){
+        auto op = new Operation();
+        op->setState(CfgIdToStateWrite.at(path->front()));
+        op->setNextState(CfgIdToStateWrite.at(path->back()));
+        statementList.clear();
+
+        operationsWrite.push_back(op);
+    }
+    cnt = 0;
+    for(auto op: operationsWrite) {
+        for (auto stmt: pathsWrite.at(cnt)) {
+            statementList.push_back(stmt);
+        }
+        op->setStatementsList(statementList);
+        cnt++;
+        statementList.clear();
+    }
+
+    for(auto op: this->operationsWrite) {
+        rOperations->sortOperation(op);
+    }
+
+
     std::vector<std::vector<int>> compareVector;
     std::vector<int> helpVector;
     //Path 1
@@ -527,7 +643,134 @@ TEST_F(OperationGraphTest, ExtractPaths){
     ASSERT_EQ(operationsWrite.at(4)->getStatementsList().size(), 7);
 
     std::cout << "Write Operations are correct!" <<std::endl;
+
+
+    //Generate final FSM
+    std::vector<eventID> blockedFunctions;
+    std::vector<eventID> readyQueue;
+    std::vector<std::vector<eventID>>permutations;
+    std::vector<eventID> hv;
+
+//    //no function calls
+//    permutations.push_back(hv);
+    //only read call
+    eventID read = {0,"read"};
+    hv.push_back(read);
+    permutations.push_back(hv);
+    hv.clear();
+    //only write call
+    eventID write = {9,"write"};
+    hv.push_back(write);
+    permutations.push_back(hv);
+    hv.clear();
+    //read and write call
+    hv.push_back(read);
+    hv.push_back(write);
+    permutations.push_back(hv);
+
+    //construct a vector of all paths by pushing the paths from Read and Write to allPaths
+    for(int i=0; i<pathsReadIDs.size();i++){
+        pathIDStmt p = {pathsReadIDs.at(i),pathsRead.at(i)};
+        allPaths.push_back(p);
+    }
+    for(int i=0; i<pathsWriteIDs.size();i++){
+        pathIDStmt p = {pathsWriteIDs.at(i),pathsWrite.at(i)};
+        allPaths.push_back(p);
+    }
+
+
+    pathIDStmt currentPath;
+    for(auto perm: permutations){
+        readyQueue = perm;
+        blockedFunctions.clear();
+        combinePaths(readyQueue,blockedFunctions);
+    }
+
+for(auto p:finalPaths){
+    for(auto id:p.idList){
+        std::cout<<id<<"\t";
+    }
+    std::cout<< std::endl;
 }
+
+    std::map<int,State*> CfgIdToState;
+    for(auto i:CfgIdToStateRead){
+        CfgIdToState.insert(i);
+    }
+    for(auto i:CfgIdToStateWrite){
+        CfgIdToState.insert(i);
+    }
+
+    //Generate final Operations
+    //Iterate over all paths and set State, nextState and statementList
+    for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
+        auto op = new Operation();
+        op->setState(CfgIdToState.at(path->idList.front()));
+        op->setNextState(CfgIdToState.at(path->idList.back()));
+        statementList.clear();
+
+        operationsFinal.push_back(op);
+    }
+    cnt = 0;
+    for(auto op: operationsFinal) {
+        for (auto stmt: finalPaths.at(cnt).stmtList) {
+            statementList.push_back(stmt);
+        }
+        op->setStatementsList(statementList);
+        cnt++;
+        statementList.clear();
+    }
+
+    for(auto op: this->operationsFinal) {
+        rOperations->sortOperation(op);
+    }
+
+    std::vector<eventID> startnodes;
+    eventID temp = {0, "reader_sync"};
+    startnodes.push_back(temp);
+    temp = {9,"writer_sync"};
+    startnodes.push_back(temp);
+
+    bool addsync[startnodes.size()];
+
+    for(int i=0;i<operationsFinal.size();i++){
+        auto op = operationsFinal.at(i);
+        for(int j=0;j<startnodes.size();j++){
+            addsync[j] = false;
+        }
+        for(auto id: finalPaths.at(i).idList){
+            for(int j=0; j<startnodes.size();j++){
+                if(id==startnodes.at(j).id){
+                    addsync[j]=true;
+                }
+            }
+        }
+        for(int j=0; j<startnodes.size();j++){
+            auto sync = new SyncSignal(startnodes.at(j).eventname);
+            if(addsync[j]){
+                op->addAssumption(sync);
+            }
+            else{
+                op->addAssumption(new UnaryExpr("not",sync));
+            }
+        }
+    }
+
+
+    for(auto op: operationsFinal){
+        std::cout << "Assumptions Operation" << op->getId() <<std::endl;
+        for(auto assump: op->getAssumptionsList()){
+            std::cout << *assump << std::endl;
+        }
+        std::cout << std::endl;
+        std::cout << "Commitments Operation" << op->getId() <<std::endl;
+        for(auto commit: op->getCommitmentsList()){
+            std::cout << *commit << std::endl;
+        }
+        std::cout << std::endl;
+    }
+}
+
 
 
 #endif //DESCAM_OPERATION_GRAPH_H

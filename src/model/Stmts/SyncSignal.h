@@ -13,8 +13,10 @@ namespace SCAM {
     class SyncSignal : public Expr {
     public:
         SyncSignal(SCAM::Port *port);
+        SyncSignal(std::string name);
 
         Port *getPort() const;
+        std::string getPortname();
 
         virtual void accept(StmtAbstractVisitor &visitor);
 
@@ -22,6 +24,7 @@ namespace SCAM {
 
     private:
         Port *port;
+        std::string portname;
     };
 
 

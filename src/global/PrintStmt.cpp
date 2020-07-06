@@ -269,7 +269,12 @@ void SCAM::PrintStmt::visit(SCAM::FunctionOperand &node) {
 
 void SCAM::PrintStmt::visit(SyncSignal &node) {
     useParenthesesFlag = true;
-    this->ss << node.getPort()->getName() << ".sync()";
+    if(node.getPort()) {
+        this->ss << node.getPort()->getName() << ".sync()";
+    }
+    else{
+        this->ss << node.getPortname()<< ".sync()";
+    }
 }
 
 void SCAM::PrintStmt::visit(DataSignalOperand &node) {

@@ -11,6 +11,11 @@ SCAM::SyncSignal::SyncSignal(SCAM::Port *port) :
         Expr(DataTypes::getDataType("bool")) {
 }
 
+SCAM::SyncSignal::SyncSignal(std::string name):
+    portname(name),
+    Expr(DataTypes::getDataType(("bool"))){
+}
+
 void SCAM::SyncSignal::accept(SCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
@@ -18,6 +23,10 @@ void SCAM::SyncSignal::accept(SCAM::StmtAbstractVisitor &visitor) {
 
 SCAM::Port *SCAM::SyncSignal::getPort() const {
     return port;
+}
+
+std::string SCAM::SyncSignal::getPortname(){
+    return portname;
 }
 
 bool SCAM::SyncSignal::operator==(const Stmt &other) const {
