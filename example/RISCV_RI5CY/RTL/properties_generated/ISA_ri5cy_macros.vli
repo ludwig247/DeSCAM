@@ -12,6 +12,7 @@ macro unsigned data_out_sig_addrIn :=resize(0,32) end macro;
 macro unsigned data_out_sig_dataIn :=resize(0,32) end macro;
 macro ME_MaskType data_out_sig_mask :=mt_x end macro;
 macro ME_AccessType data_out_sig_req :=me_x end macro;
+macro boolean flush_in_sig :=false end macro;
 //macro RegfileType fromRegsPort_sig :={resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
 macro unsigned fromRegsPort_sig_reg_file_01 :=resize(0,32) end macro;
 macro unsigned fromRegsPort_sig_reg_file_02 :=resize(0,32) end macro;
@@ -59,6 +60,7 @@ constraint no_reset := rst == 0; end constraint;
 macro unsigned encodedInstr :=resize(0,32) end macro;
 macro unsigned iaddr :=resize(0,32) end macro;
 macro unsigned pcIf :=resize(0,32) end macro;
+macro unsigned prevInstr :=resize(0,32) end macro;
 
 
 //-- STATES --

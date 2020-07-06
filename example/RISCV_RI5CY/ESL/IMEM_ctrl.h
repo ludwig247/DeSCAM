@@ -21,6 +21,7 @@ public:
         data(0)
     {
         SC_THREAD(run);
+        SC_THREAD(run_flush);
     }
 
     // ports for communication with memory
@@ -34,6 +35,9 @@ public:
     //ports for communication with CPU for data
     blocking_in<CUtoME_IF> dataFromCPUPort;
     slave_out<unsigned int > dataToCPUPort;
+
+    //port for send not flush signal (ONLY FOR ESL SIMULATION)
+    shared_out<bool> flushCPUPort;
 
     // data for communication with memory
     CUtoME_IF imemMemoryAccess;
@@ -52,6 +56,7 @@ public:
     bool flagDmemMemoryAccess;
 
     void run();
+    void run_flush();
 };
 
 void IMEM_ctrl::run(){
@@ -82,6 +87,13 @@ void IMEM_ctrl::run(){
             //toCPUPort->slave_write(instr);
             wait(WAIT_TIME, SC_PS);
         }
+    }
+}
+
+void IMEM_ctrl::run_flush() {
+    while (true){
+        flushCPUPort->set(false);
+        wait(WAIT_TIME, SC_PS);
     }
 }
 

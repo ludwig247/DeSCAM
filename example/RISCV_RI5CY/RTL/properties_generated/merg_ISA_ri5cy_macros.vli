@@ -36,7 +36,7 @@ macro ME_AccessType data_out_sig_req :=
         me_x;
     endif;
 end macro;
-macro boolean flush_in_sig := branch_decision & branch_in_ex end macro;
+macro boolean flush_in_sig := next(branch_decision) & next(branch_in_ex) end macro;
 //macro RegfileType fromRegsPort_sig :={resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
 macro unsigned fromRegsPort_sig_reg_file_01 := REGISTER(1)  end macro;
 macro unsigned fromRegsPort_sig_reg_file_02 := REGISTER(2)  end macro;
@@ -101,6 +101,7 @@ macro unsigned iaddr := instr_addr_o end macro;
 macro unsigned encodedInstr := instr_rdata_id end macro;
 macro unsigned pcIf := pc_if end macro;
 macro unsigned pcReg := pc_if end macro;
+macro unsigned prevInstr := instr_rdata_id end macro;
 
 
 //-- STATES --

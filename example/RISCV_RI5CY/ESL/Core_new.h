@@ -33,12 +33,13 @@ public:
     MasterSlave<RegfileWriteType> toRegsChannel;
     Shared<RegfileType> fromRegsChannel;
 
-
     MasterSlave<unsigned int> toIMEMChannel;
     MasterSlave<unsigned int> fromIMEMChannel;
 
     Blocking<CUtoME_IF> toDMEMChannel;
     MasterSlave<unsigned int> fromDMEMChannel;
+
+    Shared<bool> flushChannel;
 
     Core(sc_module_name name) :
             isa("isa"),
@@ -51,7 +52,8 @@ public:
             toIMEMChannel("toIMEMChannel"),
             fromIMEMChannel("fromIMEMChannel"),
             toDMEMChannel("toDMEMChannel"),
-            fromDMEMChannel("fromDMEMChannel")
+            fromDMEMChannel("fromDMEMChannel"),
+            flushChannel("flushChannel")
     {
 
         // Module port binding:
@@ -66,6 +68,9 @@ public:
         isa.instr_req(toIMEMChannel);
         imem.fromCPUPort(toIMEMChannel);
 
+        //Flush interface
+        isa.flush_in(flushChannel);
+        imem.flushCPUPort(flushChannel);
 
         //Data Memory and CPU interface
         isa.data_in(fromDMEMChannel);
