@@ -731,34 +731,54 @@ for(auto p:finalPaths){
     temp = {9,"writer_sync"};
     startnodes.push_back(temp);
 
+    std::vector<eventID> endnodes;
+    temp = {8,"reader_notify"};
+    endnodes.push_back(temp);
+    temp = {17,"writer_notify"};
+    endnodes.push_back(temp);
+
     bool addsync[startnodes.size()];
+    bool addnoti[startnodes.size()];
 
     for(int i=0;i<operationsFinal.size();i++){
         auto op = operationsFinal.at(i);
         for(int j=0;j<startnodes.size();j++){
             addsync[j] = false;
+            addnoti[j] = false;
         }
         for(auto id: finalPaths.at(i).idList){
             for(int j=0; j<startnodes.size();j++){
                 if(id==startnodes.at(j).id){
                     addsync[j]=true;
                 }
+                if(id==endnodes.at(j).id){
+                    addnoti[j]=true;
+                }
             }
         }
         for(int j=0; j<startnodes.size();j++){
             auto sync = new SyncSignal(startnodes.at(j).eventname);
+            auto noti = new Notify(endnodes.at(j).eventname);
             if(addsync[j]){
                 op->addAssumption(sync);
             }
             else{
                 op->addAssumption(new UnaryExpr("not",sync));
             }
+            if(addnoti[j]){
+                auto assign = new Assignment(noti,new BoolValue(true));
+                op->addCommitment(assign);
+            }
+            else{
+                auto assign = new Assignment(noti,new BoolValue(false));
+                op->addCommitment(assign);
+            }
         }
     }
 
 
     for(auto op: operationsFinal){
-        std::cout << "Assumptions Operation" << op->getId() <<std::endl;
+        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
         for(auto assump: op->getAssumptionsList()){
             std::cout << *assump << std::endl;
         }
