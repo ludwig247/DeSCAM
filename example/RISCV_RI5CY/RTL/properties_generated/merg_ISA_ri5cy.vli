@@ -760,9 +760,10 @@ prove:
 
 end property;
 
-property UNCOVERED;
+property UNKNOWN;
 dependencies: 
 	no_reset,
+	boot_addr_TEMP,
 	in_out_constraints,
 	no_unaligned_case,
 	no_hwlp_case,
@@ -785,6 +786,7 @@ assume:
 
 	at t_id: ID_3;
 	at t_id: (getInstrType(encodedInstr) == instr_unknown);
+	at t_id: illegal_instr (encodedInstr);
 
 prove:
 

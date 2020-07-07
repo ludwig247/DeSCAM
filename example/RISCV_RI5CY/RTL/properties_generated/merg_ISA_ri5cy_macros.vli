@@ -209,3 +209,31 @@ macro unsigned signExtend(unsigned imm) :=
     unsigned(resize(signed(imm),32));
 end macro;
 
+macro boolean illegal_instr (unsigned instr) := 
+    !(instr[6:0] == riscv_defines::OPCODE_SYSTEM) &&
+    !(instr[6:0] == riscv_defines::OPCODE_SYSTEM) &&   
+    !(instr[6:0] == riscv_defines::OPCODE_FENCE) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_OP) &&       
+    !(instr[6:0] == riscv_defines::OPCODE_OPIMM) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_STORE) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_LOAD) &&     
+    !(instr[6:0] == riscv_defines::OPCODE_BRANCH) &&   
+    !(instr[6:0] == riscv_defines::OPCODE_JALR) &&     
+    !(instr[6:0] == riscv_defines::OPCODE_JAL) &&      
+    !(instr[6:0] == riscv_defines::OPCODE_AUIPC) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_LUI) &&      
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FP) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FMADD) && 
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FNMADD) &&
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FMSUB) && 
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FNMSUB) &&
+    !(instr[6:0] == riscv_defines::OPCODE_STORE_FP) && 
+    !(instr[6:0] == riscv_defines::OPCODE_LOAD_FP) &&  
+    !(instr[6:0] == riscv_defines::OPCODE_LOAD_POST) && 
+    !(instr[6:0] == riscv_defines::OPCODE_STORE_POST) &&
+    !(instr[6:0] == riscv_defines::OPCODE_PULP_OP) &&   
+    !(instr[6:0] == riscv_defines::OPCODE_VECOP) &&     
+    !(instr[6:0] == riscv_defines::OPCODE_HWLOOP) &&
+    prev(if_stage_i/offset_fsm_cs == WAIT); //This one guarantees tha the illegal instruction is a fetched instruction  
+end macro;
+
