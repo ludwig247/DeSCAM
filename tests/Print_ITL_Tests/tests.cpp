@@ -4,10 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "PrintITL_Test.h"
-//#include <ModelGlobal.h>
-//#include <fstream>
 
-//#include <PrintITL/PrintITL.h>
 
 
 //TODO: no need for main

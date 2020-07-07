@@ -7,8 +7,8 @@
 #include "systemc.h"
 #include "../../Interfaces/Interfaces.h"
 #include "env/Compound_Bus.h"
-//#include "../../SingleMasterMultiSlave/ESL/Compound.h"
-#include "../../../tests/Print_ITL_Tests/TestCases/to_delete/Types.h"
+#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+//#include "../../../tests/Print_ITL_Tests/TestCases/to_delete/Types.h"
 
 
 

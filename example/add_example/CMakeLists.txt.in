@@ -13,7 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces/)
 
 add_subdirectory(env)
 get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
-file(GLOB R_SRC *.cpp *.hpp *.h)
+file(GLOB R_SRC CONFIGURE_DEPENDS *.cpp *.hpp *.h)
 list(APPEND R_SRC ${ENV_SRC})
 
 add_executable(@EXAMPLE_NAME@ R_SRC)
