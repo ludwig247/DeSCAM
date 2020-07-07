@@ -15,7 +15,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 1
+#define SCAM 0
 
 class ISA_ri5cy : public sc_module {
 public:
@@ -162,6 +162,7 @@ void ISA_ri5cy::run() {
                     fromRegsPort->get(regfile); //Read register contents
                     pcReg = iaddr;
                     iaddr = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
+                    iaddr = iaddr & 0xFFFFFFFE;
                     instr_req->master_write(iaddr);
                     #if SCAM == 1
                         insert_state("ID_I_J");
