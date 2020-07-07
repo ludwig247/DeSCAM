@@ -7,11 +7,13 @@ RUN yum -y update
 RUN yum -y install git curl
 RUN yum -y install fuse fuse-libs
 RUN yum -y install make gcc
-#Installing openssl
+#Installing openssl and helm
+#This Tools are just required to maintain the Docker container running on Github Actions
+#So that the test can be exercised and the results can be shown
+#On a clean installation of CentOS 7, the AppImage will run normally, if this test is passed
 COPY images/centos7_openssl  /root/
 RUN chmod +x /root/centos7_openssl
 RUN yes | /root/centos7_openssl 
-#RUN yes | /root/centos7_openssl && export PATH=$PATH:/usr/local/ssl/bin && curl -L https://git.io/get_helm.sh | bash
 #RUN curl -L https://git.io/get_helm.sh | bash
 
 RUN mkdir /root/test
@@ -19,8 +21,6 @@ RUN mkdir /root/outputs
 COPY AppImage/test  /root/test/
 COPY DeSCAM_v  /root/
 COPY images/centos7_script  /root/
-RUN chmod +x /root/DeSCAM_v
-RUN /root/DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton
 
 WORKDIR /apps
 ENTRYPOINT tail -f /dev/null

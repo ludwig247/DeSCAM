@@ -21,15 +21,3 @@ export PATH=$PATH:$OPENSSL_PATH
 which openssl
 openssl version -a
 curl -L https://git.io/get_helm.sh | bash
-
-#OUT=/etc/profile.d/openssl.sh
-#cat <<EOF >$OUT
-##Set OPENSSL_PATH
-#OPENSSL_PATH="/usr/local/ssl/bin"
-#export OPENSSL_PATH
-#PATH=$PATH:$OPENSSL_PATH
-#export PATH
-#EOF
-#chmod +x /etc/profile.d/openssl.sh
-#source /etc/profile.d/openssl.sh
-#echo $PATH
