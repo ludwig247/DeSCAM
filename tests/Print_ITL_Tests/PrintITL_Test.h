@@ -19,6 +19,7 @@ static std::vector<std::string> parameter() {
 
 //    std::vector<SCAM::Module *> result;
 //    std::vector<const char *> commandLineArugmentsVector;
+
     //SRC-File to be analyzed
     std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/tests.h");
 
@@ -76,7 +77,6 @@ static std::vector<std::string> parameter() {
 //class ITL_Test : public ::testing::TestWithParam<SCAM::Module *> {
 class ITLTest : public ::testing::TestWithParam<std::string> {
 
-
     public:
     std::vector<SCAM::Module *> result;
     static void SetUpTestCase() {
@@ -87,30 +87,21 @@ class ITLTest : public ::testing::TestWithParam<std::string> {
     }
 
     virtual void SetUp() {
-        std::vector<const char *> commandLineArugmentsVector;
+        const char *commandLineArgumentsArray[2];
 
         //Binary
         std::string bin = std::string(SCAM_HOME"/bin/SCAM");
-        commandLineArugmentsVector.push_back(bin.c_str());
-
-        commandLineArugmentsVector.push_back(GetParam().c_str());
+        commandLineArgumentsArray[0] = (bin.c_str());
+        commandLineArgumentsArray[1] = (GetParam().c_str());
 
 //    add optimizations
 //        std::set<std::string> optimizeOptions = {"all"};
 //        CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
 
-
         //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-        const char *commandLineArgumentsArray[commandLineArugmentsVector.size()];
-        for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
-            commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
-        }
-
-
-        SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],
+        SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
                                        commandLineArgumentsArray[1]);
 
-        commandLineArugmentsVector.clear();
         for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::ModelGlobal::reset();
             result.push_back(model.second);
@@ -144,7 +135,7 @@ TEST_P(ITLTest, Basic) {
     ASSERT_NE(module, nullptr) << "Module not found";
     std::cout << "Instance: " << module->getName() << std::endl;
 
-//    std::ifstream ifs(SCAM_HOME"/example/" + GetParam()->getName() +"/RTL/properties/" + GetParam()->getName() + ".vhi");
+//    std::ifstream ifs(SCAM_HOME"/example/" + module->getName() +"/RTL/properties/" + module->getName() + ".vhi");
     std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
     ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" << module->getName()  << ".vhi";
 

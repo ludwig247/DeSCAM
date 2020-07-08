@@ -12,7 +12,7 @@ add_example(Framer; Print_ITL_Tests)
 add_example(Paper; "Print_ITL_Tests")
 #add_example(operation-pipeline;Print_ITL_Tests)
 #add_example(RISCV_ISA)
-add_example(Whishbone)
+#add_example(Whishbone)
 #add_example(example_test)
 #add_example(does_not_make_sense; A_Test; nonsense)
 

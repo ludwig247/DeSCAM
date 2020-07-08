@@ -68,10 +68,10 @@ public:
 
         CommonOptionsParser OptionsParser (argc, argv);
 
-
-        for(auto src: OptionsParser.getSourcePathList()){
-            std::cout << "OP:" << src << std::endl;
-        }
+        //Print to screen file paths given to compiler
+//        for(auto src: OptionsParser.getSourcePathList()){
+//            std::cout << "OP:" << src << std::endl;
+//        }
 
 
 		ClangTool Tool (OptionsParser.getCompilations (), arg);

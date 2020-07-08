@@ -2,8 +2,7 @@ project(PrintITL_Test_Run C CXX)
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-#TestCases/ModulesTernary.h
-add_executable(PrintITL_Test_Run tests.cpp)
+add_executable(PrintITL_Test_Run tests.cpp TestCases/ModulesTernary.h)
 target_compile_options(PrintITL_Test_Run PRIVATE -fPIC -O2 )
 
 #TODO: factory should not be included
@@ -19,8 +18,7 @@ get_directory_property(EXAMPLE_H DIRECTORY ${CMAKE_SOURCE_DIR}/example/ DEFINITI
 foreach(EXAMPLE_H_FILE ${EXAMPLE_H})
 #    get_filename_component(EXAMPLE_H_FILE_NAME ${EXAMPLE_H_FILE} NAME)
 #    set(INCLUDE_HEADER "${INCLUDE_HEADER}#include \"${EXAMPLE_H_FILE}\" \n")
-    set(INCLUDE_HEADER "${INCLUDE_HEADER}${EXAMPLE_H_FILE}\n")
-
+    set(INCLUDE_HEADER "${EXAMPLE_H_FILE}\n")
 endforeach()
 
 configure_file (
