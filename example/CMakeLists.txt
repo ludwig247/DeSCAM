@@ -13,7 +13,7 @@ add_example(Paper; "Print_ITL_Tests")
 #add_example(operation-pipeline;Print_ITL_Tests)
 #add_example(RISCV_ISA)
 add_example(Whishbone)
-#add_example(new_example)
+add_example(example_test)
 #add_example(does_not_make_sense; A_Test; nonsense)
 
 
@@ -31,6 +31,4 @@ add_subdirectory(Bus)
 #add_subdirectory(UART_NORDIC)
 #add_subdirectory(RISCV_Test_ELF)
 
-
-
-
+add_subdirectory(example_test)
