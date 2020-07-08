@@ -15,7 +15,7 @@
 #include "ModulesTernary.h"
 
 
-#include "Bus_new.h"
+#include "Print_ITL_Tests/TestCases/Bus_new.h"
 #include "Paper_new.h"
 #include "ISA_new.h"
 #include "FPI_Master_new.h"

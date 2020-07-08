@@ -2,10 +2,10 @@
 // Created by ludwig on 30.01.17.
 //
 
-#include "../../../example/Interfaces/Interfaces.h"
+#include "Interfaces.h"
 #include "systemc.h"
 
-#include "Types.h"
+#include "Print_ITL_Tests/TestCases/to_delete/Types.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H

@@ -22,7 +22,6 @@ macro (add_example)
             file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/RTL/properties)
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/CMakeLists.txt "file(GLOB ENV_SRC CONFIGURE_DEPENDS *.cpp *.hpp *.h)")
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/CMakeLists.txt "add_subdirectory(ESL)")
-            file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/sc_main.cpp "#include\"../${FIRST_ARG}.h\"")
             file(APPEND ./CMakeLists.txt "add_subdirectory(${FIRST_ARG})\n")
             configure_file ( #Creates new example header-file
                 "./add_example/template_h.h.in"
@@ -30,6 +29,9 @@ macro (add_example)
             configure_file ( #Creates CMakeLists for the ESL-folder
                 "./add_example/CMakeLists.txt.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/CMakeLists.txt" @ONLY)
+            configure_file ( #Creates a sc_main.cpp for example
+                    "./add_example/template_sc_main.cpp.in"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/sc_main.cpp" @ONLY)
         endif()
         list(APPEND EXAMPLE_NAMES_LIST ${FIRST_ARG})
     elseif(${NUM_MACRO_ARG} EQUAL 3)
@@ -50,7 +52,6 @@ macro (add_example)
             file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/RTL/properties)
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env/CMakeLists.txt "file(GLOB ENV_SRC CONFIGURE_DEPENDS *.cpp *.hpp *.h)")
             file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/CMakeLists.txt "add_subdirectory(ESL)")
-            file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env/sc_main.cpp "#include\"../${THIRD_ARG}.h\"")
             file(APPEND ./CMakeLists.txt "add_subdirectory(${THIRD_ARG})\n")
             configure_file ( #Creates new example header-file
                     "./add_example/template_h.h.in"
@@ -58,6 +59,9 @@ macro (add_example)
             configure_file ( #Creates CMakeLists.txt for the ESL-folder
                     "./add_example/CMakeLists.txt.in"
                     "${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/CMakeLists.txt" @ONLY)
+            configure_file ( #Creates a sc_main.cpp for example
+                    "./add_example/template_sc_main.cpp.in"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL/env/sc_main.cpp" @ONLY)
         endif()
         list(APPEND EXAMPLE_NAMES_LIST ${THIRD_ARG})
     endif ()

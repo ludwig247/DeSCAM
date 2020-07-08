@@ -15,8 +15,8 @@ get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
 file(GLOB R_SRC *.cpp *.hpp *.h)
 list(APPEND R_SRC ${ENV_SRC})
 
-add_executable(Whishbone_hierarchy ${R_SRC}
+add_executable(Whishbone_hierarchy_Simulation ${R_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
         MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
 
-target_link_libraries(Whishbone_hierarchy systemc)
+target_link_libraries(Whishbone_hierarchy_Simulation systemc)

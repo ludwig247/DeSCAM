@@ -1,0 +1,7 @@
+#include"../@FIRST_ARG@@THIRD_ARG@.h"
+
+
+int sc_main(int, char **){
+    std::cout << "New example!";
+    return 0;
+}
