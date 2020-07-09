@@ -1,0 +1,55 @@
+macro boolean start_state :=
+    cpu1/halt_if == 0 &&
+    cpu1/id_ready && cpu1/ex_ready && cpu1/lsu_ready_ex && cpu1/wb_valid &&
+    !cpu1/data_req_o &&                  		    //no mem ops
+    !cpu1/branch_decision &&                         //no branch
+    !cpu1/regfile_alu_we_fw && !cpu1/regfile_we_wb &&     //no write back
+    //cpu1/if_stage_i/offset_fsm_cs == WAIT &&
+    empty_prefetch_buffer;
+end macro;
+
+macro boolean empty_prefetch_buffer :=
+    cpu1/if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/valid_Q   == 4'd0;
+end macro;
+
+macro boolean empty_pipeline :=
+    cpu1/id_ready == 1 &&
+    cpu1/branch_decision == 0 &&
+    cpu1/data_req_o == 0 &&
+    cpu1/regfile_alu_we_fw == 0 && cpu1/regfile_we_wb == 0;   //should not be needed (Jump constraint and read regfile at t_ex not t_id)
+end macro;
+
+macro boolean cpu1_flush_sig := cpu1/branch_decision & cpu1/branch_in_ex end macro;
+macro boolean cpu2_flush_sig := cpu2/branch_decision & cpu2/branch_in_ex end macro;
+
+
+constraint no_reset := rst_ni == 1 ; end constraint;
+
+constraint in_out_constraints :=
+    irq_i == 0 &&
+    irq_sec_i == 0 &&
+    irq_id_i == 0 &&
+    test_en_i == 0 &&
+    fregfile_disable_i == 1 &&
+    cpu1/apu_master_req_o == 0 && cpu2/apu_master_req_o == 0 &&
+    debug_req_i == 0 && 
+    fetch_enable_i == 1 &&
+    cpu1/id_stage_i/controller_i/debug_mode_q == 0 && cpu2/id_stage_i/controller_i/debug_mode_q == 0 &&
+    cpu1/if_stage_i/is_compressed_id_o == 0 && cpu2/if_stage_i/is_compressed_id_o == 0;
+end constraint;
+
+constraint no_hwlp_case := 
+    cpu1/if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/is_hwlp_Q == 2'd0 &&
+    cpu1/if_stage_i/is_hwlp_id_o == 0 &&
+    cpu1/if_stage_i/hwloop_controller_i/pc_is_end_addr == 0 &&
+    cpu1/if_stage_i/fetch_is_hwlp == 0;
+end constraint;
+
+constraint no_unaligned_case :=
+    cpu1/if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/out_addr_o[1]  == 0;
+end constraint;
+
+constraint instr_mem:=
+    (!cpu1/instr_req_o || (cpu1/instr_req_o && cpu1/instr_gnt_i && next(cpu1/instr_rvalid_i))) &&
+    (!cpu2/instr_req_o || (cpu2/instr_req_o && cpu2/instr_gnt_i && next(cpu2/instr_rvalid_i)));
+end constraint;

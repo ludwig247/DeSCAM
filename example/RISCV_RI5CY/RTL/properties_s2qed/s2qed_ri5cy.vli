@@ -1,0 +1,53 @@
+property S2QED_ARITH;
+dependencies: 
+    no_reset,
+    in_out_constraints,
+    no_unaligned_case,
+	no_hwlp_case,
+	instr_mem;
+for timepoints:
+	t_if_i1 = t,
+	t_idex_i1 = t_if_i1+1,
+	t_wb_i1 = t_idex_i1+1,
+	t_done_i1 = t_wb_i1+1,
+
+	t_if_i2 = t,
+	//t_idex_i2 = t_if_i2+1..5 waits_for (cpu2/data_req_o==0 || cpu2/data_rvalid_i),
+	t_idex_i2 = t_if_i2+1..5 waits_for (cpu2/perf_pipeline_stall == 0),
+	t_wb_i2 = t_idex_i2+1,
+	t_done_i2 = t_wb_i2+1;
+freeze:
+	//Flushing
+    cpu1_flush_sig_at_t_idex_i1 = cpu1_flush_sig@t_idex_i1,
+
+    //regfile
+    regfile_i1_at_t_wb_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_wb_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+
+	
+
+assume:
+	// constraints on CPU1
+	at t_if_i1: start_state;
+    at t_idex_i1: empty_pipeline;
+
+    // same instruction for IUV
+	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
+    at t: getEncType(cpu1/instr_rdata_i) == enc_r;
+	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+
+	// QED consistent registers
+	at t_wb_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_wb_i1;
+
+	//Flushing
+    at t_idex_i2: !cpu1_flush_sig_at_t_idex_i1;
+    at t_idex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
+
+	//I/O should be the same (no stalling)
+	//at t: (cpu2/data_req_o==0 || cpu2/data_rvalid_i);
+	at t: cpu2/perf_pipeline_stall == 0;
+	
+prove:
+	// general registers
+	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+end property;
