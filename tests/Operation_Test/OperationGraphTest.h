@@ -741,6 +741,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     bool addsync[startnodes.size()];
     bool addnoti[startnodes.size()];
 
+//    //Add sync and notify signals
 //    for(int i=0;i<operationsFinal.size();i++){
 //        auto op = operationsFinal.at(i);
 //        for(int j=0;j<startnodes.size();j++){
@@ -792,21 +793,24 @@ TEST_F(OperationGraphTest, ExtractPaths){
     module->getFSM()->setStateMap(CfgIdToState);
 
     PropertyFactory propertyFactory(module);
-    //PrintITL::printModule(module);
+    module->setPropertySuite(propertyFactory.getPropertySuite());
+    PrintITL printITL;
+    auto map = printITL.printModule(module);
 
 
-    for(auto op: operationsFinalOpt){
-        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
-        for(auto assump: op->getAssumptionsList()){
-            std::cout << *assump << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Commitments Operation" << op->getId() <<std::endl;
-        for(auto commit: op->getCommitmentsList()){
-            std::cout << *commit << std::endl;
-        }
-        std::cout << std::endl;
-    }
+//    //Debug
+//    for(auto op: operationsFinalOpt){
+//        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
+//        for(auto assump: op->getAssumptionsList()){
+//            std::cout << *assump << std::endl;
+//        }
+//        std::cout << std::endl;
+//        std::cout << "Commitments Operation" << op->getId() <<std::endl;
+//        for(auto commit: op->getCommitmentsList()){
+//            std::cout << *commit << std::endl;
+//        }
+//        std::cout << std::endl;
+//    }
 }
 
 

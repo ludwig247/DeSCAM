@@ -45,7 +45,6 @@ void FIFO<T>::write(const T &val) {
     }
     writer_notify.notify();
     return;
-
 }
 
 #endif //#SCAM_FIFO_HPP
