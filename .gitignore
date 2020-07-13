@@ -52,3 +52,17 @@ example/RISCV_synthesis/riscv_tailoring/synthesis_flow/work/
 example/exampleheaders.h
 tests/testheaders.h
 /tests/Print_ITL_Tests/TestCases/tests.h
+
+#BubbleSort
+example/BubbleSort/ESL/cmake-build-debug/
+example/BubbleSort/DeSCAM_parse/
+example/BubbleSort/RTL-Step2_Ternary/Simulation/
+example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/work/
+example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.wlf
+example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.bak
+example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.mti
+
+#FFT
+example/FFT/SEQ/DeSCAM_parse
+example/FFT/PIPELINE/DeSCAM_parse
+
