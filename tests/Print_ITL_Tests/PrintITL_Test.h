@@ -20,11 +20,11 @@ struct Param
 };
 
 
-static std::vector<Param> parameter() {
+static std::vector<Param> parameter(const char* header_list) {
 
 
     //SRC-File to be analyzed
-    std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/tests.h");
+    std::ifstream ifs(header_list);
 
     std::string line;
     std::vector<Param> header_includes;
@@ -46,37 +46,8 @@ static std::vector<Param> parameter() {
     return header_includes;
 }
 
-static std::vector<Param> funcparameter() {
 
-    //SRC-File to be analyzed
-//    std::string file_path = std::string(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/functionality_tests.h");
-
-    //SRC-File to be analyzed
-    std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/functionality_tests.h");
-
-    std::string line;
-    std::vector<Param> functionality_h;
-    int i = 0;
-    // Creates a struct containing the file path and name for gtest to retrieve name of test
-
-    while (std::getline(ifs, line)) {
-        if (line.size() > 0 && !(line.find("//") == 0)){
-            std::string test_name = line.substr(line.find_last_of("/\\") + 1);
-            const size_t period = test_name.rfind(".");
-            if(std::string::npos != period) test_name.erase(period);
-            functionality_h.push_back(Param());
-            functionality_h[i].FilePath = line;
-            functionality_h[i].Name = test_name;
-            i++;
-        }
-    }
-    ifs.close();
-
-    return functionality_h;
-}
-
-
-class ITLTestExamples : public ::testing::TestWithParam<Param> {
+class ITLTest : public ::testing::TestWithParam<Param> {
 
 public:
     std::vector<SCAM::Module *> result;
@@ -89,14 +60,7 @@ public:
             return Parameter.Name;
         }
     };
-    static void SetUpTestCase() {
-
-    }
-
-    static void TearDownTestCase() {
-    }
-
-    virtual void SetUp() {
+    void SetUp() {
         const char *commandLineArgumentsArray[2];
 
         //Binary
@@ -117,67 +81,29 @@ public:
             result.push_back(model.second);
         }
     }
-};
-
-    class ITLTestFunctionality : public ::testing::TestWithParam<Param> {
-
-    public:
-        std::vector<SCAM::Module *> result;
-        struct PrintToStringParamName
-        {
-            template <class ParamType>
-            std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
-            {
-                auto Parameter = static_cast<Param>(info.param);
-                return Parameter.Name;
-            }
-        };
-        static void SetUpTestCase() {
-
-        }
-
-        static void TearDownTestCase() {
-        }
-
-        virtual void SetUp() {
-            const char *commandLineArgumentsArray[2];
-
-            //Binary
-            std::string bin = std::string(SCAM_HOME"/bin/SCAM");
-            commandLineArgumentsArray[0] = (bin.c_str());
-            commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
-
-//    add optimizations
-//        std::set<std::string> optimizeOptions = {"all"};
-//        CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
-
-            //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-            SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
-                                           commandLineArgumentsArray[1]);
-
-            for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
-//        SCAM::ModelGlobal::reset();
-                result.push_back(model.second);
-            }
-        }
-    virtual void TearDown() {
+    void TearDown() {
     }
 };
+
+
+class ITLTestExamples : public ITLTest {};
+
+class ITLTestFunctionality : public ITLTest {};
 
 INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Examples,
         Examples,
         ITLTestExamples,
-        ::testing::ValuesIn(parameter()),
-        ITLTestExamples::PrintToStringParamName()
+        testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/tests.h")),
+        ITLTest::PrintToStringParamName()
                 );
 
 INSTANTIATE_TEST_CASE_P(
-//        DISABLED_Functionality,
-        Functionality,
+        DISABLED_Functionality,
+//        Functionality,
         ITLTestFunctionality,
-        ::testing::ValuesIn(funcparameter()),
-        ITLTestFunctionality::PrintToStringParamName()
+        testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/functionality_tests.h")),
+        ITLTest::PrintToStringParamName()
         );
 
 TEST_P(ITLTestExamples, Examples) {
