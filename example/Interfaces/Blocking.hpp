@@ -63,9 +63,13 @@ void Blocking<T>::read(T &out) {
         assert(available_data && "blocking_read: data hasn't been written yet!");
     }
 //    std::cout << "@" << this->name() << ": blocking->read: reading\n";
+#define SLOW
+#ifndef SLOW
 
+    out = *shared_data;
+#else
     memcpy(out, *shared_data, sizeof(T));
-    //out = *shared_data;
+#endif
     available_data = false;
     reader_notify.notify();
 }

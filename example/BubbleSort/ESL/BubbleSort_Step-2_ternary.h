@@ -8,7 +8,6 @@
 
 //#ifndef PROJECT_BUS_H
 //#define PROJECT_BUS_H
-
 #define ARRAY_SIZE 256
 
 using namespace std;
@@ -17,15 +16,22 @@ struct BubbleSort : public sc_module {
 
     //Variables
     phases phase_algorithm;
-    int data_algorithm[ARRAY_SIZE];
-
     int i; //counter for outer loop
     int j; //counter for inner loop
     int swap; //buffer for swapping values
 
     //data
-    blocking_in<int[ARRAY_SIZE]> data_in;
-    blocking_out<int[ARRAY_SIZE]> data_out;
+
+#ifndef SLOW
+    blocking_in< int*> data_in;
+    blocking_out<int*> data_out;
+    int data_ptr[ARRAY_SIZE];
+    int * data_algorithm = data_ptr;
+#else
+    int data_algorithm[ARRAY_SIZE];
+    blocking_in< int[ARRAY_SIZE]> data_in;
+    blocking_out< int[ARRAY_SIZE]> data_out;
+#endif
 
 
     SC_HAS_PROCESS(BubbleSort);
@@ -46,6 +52,7 @@ struct BubbleSort : public sc_module {
             if(phase_algorithm == IDLE) {
 
                 data_in->read(data_algorithm,"data_in");
+
                 phase_algorithm = RUN;
                 i = 0;
                 j = 0;
@@ -568,7 +575,6 @@ struct BubbleSort : public sc_module {
                             data_algorithm[253] = j==252 ?  swap : data_algorithm[253];
                             data_algorithm[254] = j==253 ?  swap : data_algorithm[254];
                             data_algorithm[255] = j==254 ?  swap : data_algorithm[255];
-
                         }
                         ++j;
                         //insert_state("inner_loop");
@@ -580,9 +586,7 @@ struct BubbleSort : public sc_module {
                     insert_state("loop");
 
                 }else{
-
                     data_out->write(data_algorithm, "data_out");
-
                     phase_algorithm = IDLE;
 
                 }

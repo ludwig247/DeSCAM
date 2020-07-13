@@ -14,7 +14,6 @@
 class EstimatePower : public PluginFactory, public AbstractVisitor {
 public:
     EstimatePower() = default;
-
     ~EstimatePower() = default;
 
     std::map<std::string, std::string> printModel(Model *node);
@@ -43,6 +42,4 @@ private:
     void visit(Parameter &node);
 
     void visit(Timepoint &node);
-
-
 };
