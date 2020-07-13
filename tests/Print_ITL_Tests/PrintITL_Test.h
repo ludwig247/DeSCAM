@@ -13,43 +13,62 @@
 
 #include <PrintITL/PrintITL.h>
 
+struct Param
+{
+    std::string FilePath;
+    std::string Name;
+};
 
-static std::vector<std::string> parameter() {
+
+static std::vector<Param> parameter() {
 
 
     //SRC-File to be analyzed
     std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/tests.h");
 
     std::string line;
-    std::vector<std::string> header_includes;
+    std::vector<Param> header_includes;
+    int i = 0;
 
     while (std::getline(ifs, line)) {
-
-        if (line.size() > 0 && !(line.find("//") == 0))
-            header_includes.push_back(line);
+        if (line.size() > 0 && !(line.find("//") == 0)){
+            std::string test_name = line.substr(line.find_last_of("/\\") + 1);
+            const size_t period = test_name.rfind(".");
+            if(std::string::npos != period) test_name.erase(period);
+            header_includes.push_back(Param());
+            header_includes[i].FilePath = line;
+            header_includes[i].Name = test_name;
+            i++;
+        }
     }
     ifs.close();
 
     return header_includes;
 }
 
-static std::vector<std::string> FuncParameter() {
-
+static std::vector<Param> funcparameter() {
 
     //SRC-File to be analyzed
 //    std::string file_path = std::string(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/functionality_tests.h");
-
 
     //SRC-File to be analyzed
     std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/functionality_tests.h");
 
     std::string line;
-    std::vector<std::string> functionality_h;
+    std::vector<Param> functionality_h;
+    int i = 0;
+    // Creates a struct containing the file path and name for gtest to retrieve name of test
 
     while (std::getline(ifs, line)) {
-
-        if (line.size() > 0 && !(line.find("//") == 0))
-            functionality_h.push_back(line);
+        if (line.size() > 0 && !(line.find("//") == 0)){
+            std::string test_name = line.substr(line.find_last_of("/\\") + 1);
+            const size_t period = test_name.rfind(".");
+            if(std::string::npos != period) test_name.erase(period);
+            functionality_h.push_back(Param());
+            functionality_h[i].FilePath = line;
+            functionality_h[i].Name = test_name;
+            i++;
+        }
     }
     ifs.close();
 
@@ -57,11 +76,19 @@ static std::vector<std::string> FuncParameter() {
 }
 
 
-class ITLTestExamples : public ::testing::TestWithParam<std::string> {
+class ITLTestExamples : public ::testing::TestWithParam<Param> {
 
 public:
     std::vector<SCAM::Module *> result;
-
+    struct PrintToStringParamName
+    {
+        template <class ParamType>
+        std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
+        {
+            auto Parameter = static_cast<Param>(info.param);
+            return Parameter.Name;
+        }
+    };
     static void SetUpTestCase() {
 
     }
@@ -75,7 +102,7 @@ public:
         //Binary
         std::string bin = std::string(SCAM_HOME"/bin/SCAM");
         commandLineArgumentsArray[0] = (bin.c_str());
-        commandLineArgumentsArray[1] = (GetParam().c_str());
+        commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
 
 //    add optimizations
 //        std::set<std::string> optimizeOptions = {"all"};
@@ -92,10 +119,19 @@ public:
     }
 };
 
-    class ITLTestFunctionality : public ::testing::TestWithParam<std::string> {
+    class ITLTestFunctionality : public ::testing::TestWithParam<Param> {
 
     public:
         std::vector<SCAM::Module *> result;
+        struct PrintToStringParamName
+        {
+            template <class ParamType>
+            std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
+            {
+                auto Parameter = static_cast<Param>(info.param);
+                return Parameter.Name;
+            }
+        };
         static void SetUpTestCase() {
 
         }
@@ -109,7 +145,7 @@ public:
             //Binary
             std::string bin = std::string(SCAM_HOME"/bin/SCAM");
             commandLineArgumentsArray[0] = (bin.c_str());
-            commandLineArgumentsArray[1] = (GetParam().c_str());
+            commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
 
 //    add optimizations
 //        std::set<std::string> optimizeOptions = {"all"};
@@ -129,17 +165,20 @@ public:
 };
 
 INSTANTIATE_TEST_CASE_P(
+//        DISABLED_Examples,
         Examples,
         ITLTestExamples,
-        testing::ValuesIn(parameter()),
-//        testing::PrintToStringParamName()
+        ::testing::ValuesIn(parameter()),
+        ITLTestExamples::PrintToStringParamName()
                 );
 
 INSTANTIATE_TEST_CASE_P(
-        DISABLED_Functionality,
+//        DISABLED_Functionality,
+        Functionality,
         ITLTestFunctionality,
-        testing::ValuesIn(FuncParameter()
-        ));
+        ::testing::ValuesIn(funcparameter()),
+        ITLTestFunctionality::PrintToStringParamName()
+        );
 
 TEST_P(ITLTestExamples, Examples) {
 
