@@ -155,7 +155,6 @@ void SCAM::ExprVisitor::visit(struct SyncSignal &node) {
     this->usedPorts.insert(node.getPort());
     this->usedSynchSignal.insert(node.getPort()->getSynchSignal());
     this->constVal = false;
-
 }
 
 void SCAM::ExprVisitor::visit(struct DataSignalOperand &node) {

@@ -13,6 +13,8 @@
 #include <PrintITL/PrintITL.h>
 #include <ReconstructOperations.h>
 #include <ExprVisitor.h>
+#include <PropertyFactory.h>
+#include <ValidOperations.h>
 
 
 #include "gmock/gmock.h"
@@ -48,6 +50,9 @@ public:
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
     std::vector<Operation*> operationsFinal;
+    std::vector<pathIDStmt> finalPathsOpt;
+    std::vector<Operation*> operationsFinalOpt;
+    std::map<int,State*> StateMap;
 
 
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
@@ -218,11 +223,8 @@ public:
         auto tail = new Variable("tail", DataTypes::getDataType("int"));
         auto reader_notify = new Variable("reader_notify", DataTypes::getDataType("bool"));
         auto writer_notify = new Variable("writer_notify", DataTypes::getDataType("bool"));
-        auto out = new Variable("out", DataTypes::getDataType("int"));
-        auto val = new Variable("val", DataTypes::getDataType("int"));
-
-        auto reader_sync = new Variable("reader_sync",DataTypes::getDataType("bool"));
-        auto writer_sync = new Variable("writer_sync", DataTypes::getDataType("bool"));
+        auto out = new Port("out",new Interface("blocking","out"),DataTypes::getDataType(("int")));
+        auto val = new Port("val",new Interface("blocking","in"), DataTypes::getDataType("int"));
 
         //add Variables to Module
         module->addVariable(buffer);
@@ -232,10 +234,8 @@ public:
         module->addVariable(tail);
         module->addVariable(reader_notify);
         module->addVariable(writer_notify);
-        module->addVariable(out);
-        module->addVariable(val);
-        module->addVariable(reader_sync);
-        module->addVariable(writer_sync);
+        module->addPort(out);
+        module->addPort(val);
 
         //Read Expressions/Assignments
         //if(state == EMPTY)
@@ -245,9 +245,9 @@ public:
         //wait(writer_notify)
         auto writer_wait = new Wait("writer_notify");
         //out = buffer[tail]
-        auto variable_out = new VariableOperand(module->getVariable("out"));
+        auto port_out = new DataSignalOperand(out->getDataSignal());
         auto buffer_at_tail = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new VariableOperand(module->getVariable(("tail"))));
-        auto out_assign_buffer_at_tail = new Assignment(variable_out,buffer_at_tail);
+        auto out_assign_buffer_at_tail = new Assignment(port_out,buffer_at_tail);
         //tail = (tail+1)%fifo_size
         auto tail_increment = new Arithmetic(new VariableOperand(module->getVariable("tail")),"+",new IntegerValue(1));
         auto tail_modulo_increment = new Arithmetic(tail_increment,"%",new Cast(new VariableOperand(module->getVariable("fifo_size")),DataTypes::getDataType("int")));
@@ -273,9 +273,9 @@ public:
         //wait(reader_notify);
         auto reader_wait = new Wait("reader_notify");
         //buffer[head] = val;
-        auto variable_val = new VariableOperand(module->getVariable("val"));
+        auto port_val = new DataSignalOperand(val->getDataSignal());
         auto buffer_at_head = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new VariableOperand(head));
-        auto buffer_at_head_assign_val = new Assignment(buffer_at_head, variable_val);
+        auto buffer_at_head_assign_val = new Assignment(buffer_at_head, port_val);
         //head = (head+1)%fifo_size
         auto head_increment = new Arithmetic(new VariableOperand(module->getVariable("head")),"+",new IntegerValue(1));
         auto head_modulo_increment = new Arithmetic(head_increment,"%",new Cast(new VariableOperand(module->getVariable("fifo_size")),DataTypes::getDataType("int")));
@@ -686,12 +686,13 @@ TEST_F(OperationGraphTest, ExtractPaths){
         combinePaths(readyQueue,blockedFunctions);
     }
 
-for(auto p:finalPaths){
-    for(auto id:p.idList){
-        std::cout<<id<<"\t";
-    }
-    std::cout<< std::endl;
-}
+//    //Debug
+//    for(auto p:finalPaths){
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//    }
 
     std::map<int,State*> CfgIdToState;
     for(auto i:CfgIdToStateRead){
@@ -740,44 +741,61 @@ for(auto p:finalPaths){
     bool addsync[startnodes.size()];
     bool addnoti[startnodes.size()];
 
-    for(int i=0;i<operationsFinal.size();i++){
-        auto op = operationsFinal.at(i);
-        for(int j=0;j<startnodes.size();j++){
-            addsync[j] = false;
-            addnoti[j] = false;
-        }
-        for(auto id: finalPaths.at(i).idList){
-            for(int j=0; j<startnodes.size();j++){
-                if(id==startnodes.at(j).id){
-                    addsync[j]=true;
-                }
-                if(id==endnodes.at(j).id){
-                    addnoti[j]=true;
-                }
-            }
-        }
-        for(int j=0; j<startnodes.size();j++){
-            auto sync = new SyncSignal(startnodes.at(j).eventname);
-            auto noti = new Notify(endnodes.at(j).eventname);
-            if(addsync[j]){
-                op->addAssumption(sync);
-            }
-            else{
-                op->addAssumption(new UnaryExpr("not",sync));
-            }
-            if(addnoti[j]){
-                auto assign = new Assignment(noti,new BoolValue(true));
-                op->addCommitment(assign);
-            }
-            else{
-                auto assign = new Assignment(noti,new BoolValue(false));
-                op->addCommitment(assign);
-            }
+//    for(int i=0;i<operationsFinal.size();i++){
+//        auto op = operationsFinal.at(i);
+//        for(int j=0;j<startnodes.size();j++){
+//            addsync[j] = false;
+//            addnoti[j] = false;
+//        }
+//        for(auto id: finalPaths.at(i).idList){
+//            for(int j=0; j<startnodes.size();j++){
+//                if(id==startnodes.at(j).id){
+//                    addsync[j]=true;
+//                }
+//                if(id==endnodes.at(j).id){
+//                    addnoti[j]=true;
+//                }
+//            }
+//        }
+//        for(int j=0; j<startnodes.size();j++){
+//            auto sync = new SyncSignal(startnodes.at(j).eventname);
+//            auto noti = new Notify(endnodes.at(j).eventname);
+//            if(addsync[j]){
+//                op->addAssumption(sync);
+//            }
+//            else{
+//                op->addAssumption(new UnaryExpr("not",sync));
+//            }
+//            if(addnoti[j]){
+//                auto assign = new Assignment(noti,new BoolValue(true));
+//                op->addCommitment(assign);
+//            }
+//            else{
+//                auto assign = new Assignment(noti,new BoolValue(false));
+//                op->addCommitment(assign);
+//            }
+//        }
+//    }
+
+    for(int i= 0; i<operationsFinal.size();i++){
+        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
+            operationsFinalOpt.push_back(operationsFinal.at(i));
+            finalPathsOpt.push_back(finalPaths.at(i));
         }
     }
 
+    for(auto op:operationsFinalOpt){
+        op->getState()->addOutgoingOperation(op);
+        op->getNextState()->addIncomingOperation(op);
+    }
 
-    for(auto op: operationsFinal){
+    module->getFSM()->setStateMap(CfgIdToState);
+
+    PropertyFactory propertyFactory(module);
+    //PrintITL::printModule(module);
+
+
+    for(auto op: operationsFinalOpt){
         std::cout << "Assumptions Operation " << op->getId() <<std::endl;
         for(auto assump: op->getAssumptionsList()){
             std::cout << *assump << std::endl;
