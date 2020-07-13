@@ -16,9 +16,8 @@
 
 struct Testbench : public sc_module {
 
-
-
     //out-port
+#define SLOW
 #ifndef SLOW
     blocking_out<int*> data_out;
     blocking_in<int*> data_in;
@@ -26,15 +25,15 @@ struct Testbench : public sc_module {
     int data_ptr[ARRAY_SIZE];
     int * data_testbench = data_ptr;
 #else
-    blocking_in<int[ARRAY_SIZE]> data_in;
-    blocking_out<int[ARRAY_SIZE]> data_out;
-    int data_testbench[ARRAY_SIZE];
+    blocking_in<std::array<int,ARRAY_SIZE>> data_in;
+    blocking_out<std::array<int,ARRAY_SIZE>> data_out;
+    std::array<int,ARRAY_SIZE> data_testbench;
 #endif
 
     int cnt = 0;
     int cnt_fill = 0;
 
-    int runs_simulated = 100; //1.000.000
+    int runs_simulated = 100000; //1.000.000
 
     //Constructor
     SC_HAS_PROCESS(Testbench);

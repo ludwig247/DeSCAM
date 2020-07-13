@@ -20,7 +20,7 @@ int sc_main(int argc, char* argv[]) {
 #ifndef SLOW
     Blocking<int*> unsorted_data("unsorted_data");
 #else
-    Blocking<int[ARRAY_SIZE]> unsorted_data("unsorted_data");
+    Blocking<std::array<int,ARRAY_SIZE>> unsorted_data("unsorted_data");
 #endif
     testbench.data_out(unsorted_data);
     bubbleSort.data_in(unsorted_data);
@@ -28,7 +28,7 @@ int sc_main(int argc, char* argv[]) {
 #ifndef SLOW
     Blocking<int*> sorted_data("sorted_data");
 #else
-    Blocking<int[ARRAY_SIZE]> sorted_data("sorted_data");
+    Blocking<std::array<int,ARRAY_SIZE>> sorted_data("sorted_data");
 #endif
     testbench.data_in(sorted_data);
     bubbleSort.data_out(sorted_data);
