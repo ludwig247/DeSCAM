@@ -39,16 +39,16 @@ jobs:
       - name: Stop Container
         run: docker stop MyUbuntu
 # 	TEST ON UBUNTU 16
-      - name: Docker Build Ubuntu16
-        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
-      - name: Docker Run Ubuntu16
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu16 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest2:1.0
-      - name: Docker Check Ubuntu16
-        run: docker ps -a
-      - name: Run Test Ubuntu16
-        run: docker exec MyUbuntu16 "/root/ubuntu16_script"
-      - name: Stop Container Ubuntu16
-        run: docker stop MyUbuntu16
+#      - name: Docker Build Ubuntu16
+#        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
+#      - name: Docker Run Ubuntu16
+#        run: docker run --publish 8000:8080 --detach --name MyUbuntu16 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest2:1.0
+#      - name: Docker Check Ubuntu16
+#        run: docker ps -a
+#      - name: Run Test Ubuntu16
+#        run: docker exec MyUbuntu16 "/root/ubuntu16_script"
+#      - name: Stop Container Ubuntu16
+#        run: docker stop MyUbuntu16
 # 	TEST ON UBUNTU 18
       - name: Docker Build Ubuntu18
         run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
