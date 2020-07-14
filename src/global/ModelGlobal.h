@@ -10,12 +10,13 @@
 #include <vector>
 #include <PluginAction.h>
 #include <ModelFactory.h>
+#include "CheckErrors.h"
 
 
 namespace SCAM {
 /** \brief Singleton that contains a pointer to the model
  *
- *  Necessary, because it's really hard to extract the model from the ModelFactory,
+ *  Necessary, because it's really hard to extract the model from the CheckErrors,
  *  which is somehow instantiated within the clang environment
  */
     class Model;
@@ -33,7 +34,7 @@ namespace SCAM {
         };
 
         static void
-        createModel(int argc, const std::string &Binary, const std::string &srcFile){
+        createModel(int argc, const std::string &Binary, const std::string &srcFile, bool isWrapper=false){
             std::vector<std::string> result;
             std::vector<const char *> commandLineArugmentsVector;
 	    //Analyzing Environmental Variables          -----Default Values for Reference
@@ -81,8 +82,8 @@ namespace SCAM {
                 commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
             }
             if (argc >= 1) {
-                PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
-
+                if(!isWrapper) PluginAction<SCAM::ModelFactory> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
+                else PluginAction<SCAM::CheckErrors> pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray);
             } else throw std::runtime_error("Wrong use of DeSCAM");
         };
 

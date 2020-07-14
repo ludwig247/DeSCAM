@@ -21,16 +21,20 @@ namespace SCAM {
 
         ~Operation();
 
+        Operation& operator=(const Operation &operation) = default;
+
         // Getter
         bool IsReset();
 
-        bool IsWait();
+        bool IsWait() const;
 
         const std::vector<SCAM::Stmt *> &getStatementsList() const;
 
         const std::vector<Expr *> &getAssumptionsList() const;
 
-        const std::vector<Assignment *> &getCommitmentsList() const;
+        const std::vector<Assignment *> & getCommitmentsList() const;
+
+        const std::vector<SCAM::Assignment *> &getCommitmentList() const;
 
         SCAM::State *getState() const;
 

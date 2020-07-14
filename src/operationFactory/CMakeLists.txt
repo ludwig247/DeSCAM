@@ -11,7 +11,7 @@ add_library(operationFactory SHARED
         CreateOperationsSlave.cpp
         ReconstructOperations.cpp
         ValidOperations.cpp
-        OperationFactory.cpp)
+        OperationFactory.cpp OperationOptimizations/TernaryOptimizer.cpp OperationOptimizations/TernaryOptimizer.h)
 
 
 target_link_libraries(operationFactory propertySuite)

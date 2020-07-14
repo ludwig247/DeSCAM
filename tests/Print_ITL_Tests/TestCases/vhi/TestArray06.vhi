@@ -1,15 +1,15 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro b_out_sync : boolean := end macro;
-macro b_out_notify : boolean := end macro;
+macro b_out_sync : boolean := true end macro;
+macro b_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro b_out_sig : unsigned := end macro;
-macro m_in_sig : unsigned_4 := end macro;
-macro m_in_sig_0 : unsigned := end macro;
-macro m_in_sig_1 : unsigned := end macro;
-macro m_in_sig_2 : unsigned := end macro;
-macro m_in_sig_3 : unsigned := end macro;
+macro b_out_sig : unsigned :=resize(0,32) end macro;
+macro m_in_sig : unsigned_4 :={resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
+macro m_in_sig_0 : unsigned :=resize(0,32) end macro;
+macro m_in_sig_1 : unsigned :=resize(0,32) end macro;
+macro m_in_sig_2 : unsigned :=resize(0,32) end macro;
+macro m_in_sig_3 : unsigned :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --

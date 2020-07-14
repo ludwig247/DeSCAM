@@ -624,6 +624,12 @@ namespace SCAM {
         this->allocNodeAddress = tempPtr;
     }
 
+
+    Ternary *StmtNodeAlloc::allocNode(Ternary &node, bool simplifyNode) {
+        throw std::runtime_error("StmtNodeAlloc::visit: Ternary not implemented");
+    }
+
+
     void StmtNodeAlloc::visit(class ArrayExpr &node) {
             throw std::runtime_error("Not implemented");
     }
@@ -678,6 +684,10 @@ namespace SCAM {
 
     ArrayExpr *StmtNodeAlloc::allocNode(ArrayExpr &node, bool simplifyNode) {
         throw std::runtime_error("StmtNodeAlloc::visit: ArrayExpr not implemented");
+    }
+
+    void StmtNodeAlloc::visit(class Ternary &node) {
+        throw std::runtime_error("StmtNodeAlloc::visit: Ternary not implemented");
     }
 
 

@@ -1,11 +1,11 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro m_out_notify : boolean := end macro;
+macro m_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro m_out_sig : test_compound := end macro;
-macro m_out_sig_x : signed := end macro;
-macro m_out_sig_y : unsigned := end macro;
+--macro m_out_sig : test_compound :={resize(0,32), resize(0,32)} end macro;
+macro m_out_sig_x : signed :=resize(0,32) end macro;
+macro m_out_sig_y : unsigned :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -13,10 +13,10 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro phase : Phases := end macro;
-macro test_x : signed := end macro;
-macro test_y : unsigned := end macro;
-macro test2 : unsigned := end macro;
+macro phase : Phases :=SECTION_A end macro;
+macro test_x : signed :=resize(0,32) end macro;
+macro test_y : unsigned :=resize(0,32) end macro;
+macro test2 : unsigned :=resize(0,32) end macro;
 
 
 -- STATES --
@@ -50,9 +50,6 @@ freeze:
 assume:
 	at t: state_1;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: (test2 > resize(10,32));
 prove:
 	at t_end: state_1;
@@ -77,9 +74,6 @@ freeze:
 assume:
 	at t: state_1;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: not((test2 > resize(10,32)));
 prove:
 	at t_end: state_2;
@@ -104,9 +98,6 @@ freeze:
 assume:
 	at t: state_2;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: (test2 > resize(10,32));
 prove:
 	at t_end: state_1;
@@ -131,9 +122,6 @@ freeze:
 assume:
 	at t: state_2;
 	at t: not((phase = SECTION_B));
-	at t: not((SECTION_B = SECTION_A));
-	at t: (SECTION_B = SECTION_B);
-	at t: (SECTION_A = SECTION_A);
 	at t: not((test2 > resize(10,32)));
 prove:
 	at t_end: state_2;

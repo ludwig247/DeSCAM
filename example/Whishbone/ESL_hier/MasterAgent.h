@@ -37,6 +37,7 @@ struct MasterAgent : public sc_module {
     master_signals wb_out;
     slave_signals wb_in;
 
+
     //Constructor
     SC_HAS_PROCESS(MasterAgent);
 

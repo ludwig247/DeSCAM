@@ -1,62 +1,62 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro master_in_sync : boolean := end macro;
-macro master_out_sync : boolean := end macro;
-macro slave_in0_sync : boolean := end macro;
-macro slave_in1_sync : boolean := end macro;
-macro slave_in2_sync : boolean := end macro;
-macro slave_in3_sync : boolean := end macro;
-macro slave_out0_sync : boolean := end macro;
-macro slave_out1_sync : boolean := end macro;
-macro slave_out2_sync : boolean := end macro;
-macro slave_out3_sync : boolean := end macro;
-macro master_in_notify : boolean := end macro;
-macro master_out_notify : boolean := end macro;
-macro slave_in0_notify : boolean := end macro;
-macro slave_in1_notify : boolean := end macro;
-macro slave_in2_notify : boolean := end macro;
-macro slave_in3_notify : boolean := end macro;
-macro slave_out0_notify : boolean := end macro;
-macro slave_out1_notify : boolean := end macro;
-macro slave_out2_notify : boolean := end macro;
-macro slave_out3_notify : boolean := end macro;
+macro master_in_sync : boolean := true end macro;
+macro master_out_sync : boolean := true end macro;
+macro slave_in0_sync : boolean := true end macro;
+macro slave_in1_sync : boolean := true end macro;
+macro slave_in2_sync : boolean := true end macro;
+macro slave_in3_sync : boolean := true end macro;
+macro slave_out0_sync : boolean := true end macro;
+macro slave_out1_sync : boolean := true end macro;
+macro slave_out2_sync : boolean := true end macro;
+macro slave_out3_sync : boolean := true end macro;
+macro master_in_notify : boolean := true end  macro;
+macro master_out_notify : boolean := true end  macro;
+macro slave_in0_notify : boolean := true end  macro;
+macro slave_in1_notify : boolean := true end  macro;
+macro slave_in2_notify : boolean := true end  macro;
+macro slave_in3_notify : boolean := true end  macro;
+macro slave_out0_notify : boolean := true end  macro;
+macro slave_out1_notify : boolean := true end  macro;
+macro slave_out2_notify : boolean := true end  macro;
+macro slave_out3_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro master_in_sig : bus_req_t := end macro;
-macro master_in_sig_addr : signed := end macro;
-macro master_in_sig_data : signed := end macro;
-macro master_in_sig_trans_type : trans_t := end macro;
-macro master_out_sig : bus_resp_t := end macro;
-macro master_out_sig_ack : ack_t := end macro;
-macro master_out_sig_data : signed := end macro;
-macro slave_in0_sig : bus_resp_t := end macro;
-macro slave_in0_sig_ack : ack_t := end macro;
-macro slave_in0_sig_data : signed := end macro;
-macro slave_in1_sig : bus_resp_t := end macro;
-macro slave_in1_sig_ack : ack_t := end macro;
-macro slave_in1_sig_data : signed := end macro;
-macro slave_in2_sig : bus_resp_t := end macro;
-macro slave_in2_sig_ack : ack_t := end macro;
-macro slave_in2_sig_data : signed := end macro;
-macro slave_in3_sig : bus_resp_t := end macro;
-macro slave_in3_sig_ack : ack_t := end macro;
-macro slave_in3_sig_data : signed := end macro;
-macro slave_out0_sig : bus_req_t := end macro;
-macro slave_out0_sig_addr : signed := end macro;
-macro slave_out0_sig_data : signed := end macro;
-macro slave_out0_sig_trans_type : trans_t := end macro;
-macro slave_out1_sig : bus_req_t := end macro;
-macro slave_out1_sig_addr : signed := end macro;
-macro slave_out1_sig_data : signed := end macro;
-macro slave_out1_sig_trans_type : trans_t := end macro;
-macro slave_out2_sig : bus_req_t := end macro;
-macro slave_out2_sig_addr : signed := end macro;
-macro slave_out2_sig_data : signed := end macro;
-macro slave_out2_sig_trans_type : trans_t := end macro;
-macro slave_out3_sig : bus_req_t := end macro;
-macro slave_out3_sig_addr : signed := end macro;
-macro slave_out3_sig_data : signed := end macro;
-macro slave_out3_sig_trans_type : trans_t := end macro;
+--macro master_in_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro master_in_sig_addr : signed :=resize(0,32) end macro;
+macro master_in_sig_data : signed :=resize(0,32) end macro;
+macro master_in_sig_trans_type : trans_t :=SINGLE_READ end macro;
+--macro master_out_sig : bus_resp_t :={ERR, resize(0,32)} end macro;
+macro master_out_sig_ack : ack_t :=OK end macro;
+macro master_out_sig_data : signed :=resize(0,32) end macro;
+--macro slave_in0_sig : bus_resp_t :={ERR, resize(0,32)} end macro;
+macro slave_in0_sig_ack : ack_t :=OK end macro;
+macro slave_in0_sig_data : signed :=resize(0,32) end macro;
+--macro slave_in1_sig : bus_resp_t :={ERR, resize(0,32)} end macro;
+macro slave_in1_sig_ack : ack_t :=OK end macro;
+macro slave_in1_sig_data : signed :=resize(0,32) end macro;
+--macro slave_in2_sig : bus_resp_t :={ERR, resize(0,32)} end macro;
+macro slave_in2_sig_ack : ack_t :=OK end macro;
+macro slave_in2_sig_data : signed :=resize(0,32) end macro;
+--macro slave_in3_sig : bus_resp_t :={ERR, resize(0,32)} end macro;
+macro slave_in3_sig_ack : ack_t :=OK end macro;
+macro slave_in3_sig_data : signed :=resize(0,32) end macro;
+--macro slave_out0_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro slave_out0_sig_addr : signed :=resize(0,32) end macro;
+macro slave_out0_sig_data : signed :=resize(0,32) end macro;
+macro slave_out0_sig_trans_type : trans_t :=SINGLE_READ end macro;
+--macro slave_out1_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro slave_out1_sig_addr : signed :=resize(0,32) end macro;
+macro slave_out1_sig_data : signed :=resize(0,32) end macro;
+macro slave_out1_sig_trans_type : trans_t :=SINGLE_READ end macro;
+--macro slave_out2_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro slave_out2_sig_addr : signed :=resize(0,32) end macro;
+macro slave_out2_sig_data : signed :=resize(0,32) end macro;
+macro slave_out2_sig_trans_type : trans_t :=SINGLE_READ end macro;
+--macro slave_out3_sig : bus_req_t :={resize(0,32), resize(0,32), SINGLE_READ} end macro;
+macro slave_out3_sig_addr : signed :=resize(0,32) end macro;
+macro slave_out3_sig_data : signed :=resize(0,32) end macro;
+macro slave_out3_sig_trans_type : trans_t :=SINGLE_READ end macro;
 
 
 -- CONSTRAINTS --
@@ -64,9 +64,9 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro req_trans_type : trans_t := end macro;
-macro resp_ack : ack_t := end macro;
-macro resp_data : signed := end macro;
+macro req_trans_type : trans_t :=SINGLE_READ end macro;
+macro resp_ack : ack_t :=OK end macro;
+macro resp_data : signed :=resize(0,32) end macro;
 
 
 -- STATES --
@@ -216,10 +216,10 @@ freeze:
 assume:
 	at t: state_1;
 	at t: master_in_sync;
-	at t: not(((master_in_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_in_sig_addr))));
+	at t: not(((master_in_sig_addr >= resize(0,32)) and (master_in_sig_addr <= resize(7,32))));
+	at t: not(((master_in_sig_addr >= resize(8,32)) and (master_in_sig_addr <= resize(15,32))));
+	at t: not(((master_in_sig_addr >= resize(16,32)) and (master_in_sig_addr <= resize(23,32))));
+	at t: not(((master_in_sig_addr >= resize(24,32)) and (master_in_sig_addr <= resize(31,32))));
 	at t: (SINGLE_WRITE = master_in_sig_trans_type);
 prove:
 	at t_end: state_4;
@@ -365,10 +365,10 @@ assume:
 	at t: state_1;
 	at t: master_in_sync;
 	at t: (SINGLE_READ = master_in_sig_trans_type);
-	at t: not(((master_in_sig_addr >= resize(0,32)) and not((resize(8,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(8,32)) and not((resize(16,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(16,32)) and not((resize(24,32) <= master_in_sig_addr))));
-	at t: not(((master_in_sig_addr >= resize(24,32)) and not((resize(32,32) <= master_in_sig_addr))));
+	at t: not(((master_in_sig_addr >= resize(0,32)) and (master_in_sig_addr <= resize(7,32))));
+	at t: not(((master_in_sig_addr >= resize(8,32)) and (master_in_sig_addr <= resize(15,32))));
+	at t: not(((master_in_sig_addr >= resize(16,32)) and (master_in_sig_addr <= resize(23,32))));
+	at t: not(((master_in_sig_addr >= resize(24,32)) and (master_in_sig_addr <= resize(31,32))));
 prove:
 	at t_end: state_4;
 	at t_end: master_out_sig_ack = resp_ack_at_t;

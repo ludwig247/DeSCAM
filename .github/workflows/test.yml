@@ -28,40 +28,40 @@ jobs:
       - uses: actions/checkout@v1
 #      - name: Test before
 #        run: cat /etc/os-release
-      - name: Docker Build
-        run: docker build --tag myimage:1.0 .
-      - name: Docker Run
-        run: docker run --publish 8000:8080 -it --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
-      - name: Docker Check
-        run: docker ps -a
-      - name: Run Master
-        run: docker exec MyUbuntu "/root/master"
-      - name: Copy Image back
-        run: docker cp MyUbuntu:/root/DeSCAM_v .
-      - name: Check path
-        run: pwd && ls -l
-      - name: Stop Container
-        run: docker stop MyUbuntu
-      - name: Docker Build Ubuntu16
-        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
-      - name: Docker Run Ubuntu16
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu16 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest2:1.0
-      - name: Docker Check Ubuntu16
-        run: docker ps -a
-      - name: Run Test Ubuntu16
-        run: docker exec MyUbuntu16 "/root/ubuntu16_script"
-      - name: Stop Container Ubuntu16
-        run: docker stop MyUbuntu16
-      - name: Docker Build Ubuntu18
-        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
-      - name: Docker Run Ubuntu18
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
-      - name: Docker Check Ubuntu18
-        run: docker ps -a
-      - name: Run Test Ubuntu18
-        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
-      - name: Stop Container Ubuntu18
-        run: docker stop MyUbuntu18
+#      - name: Docker Build
+#        run: docker build --tag myimage:1.0 .
+#      - name: Docker Run
+#        run: docker run --publish 8000:8080 -it --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
+#      - name: Docker Check
+#        run: docker ps -a
+#      - name: Run Master
+#        run: docker exec MyUbuntu "/root/master"
+#      - name: Copy Image back
+#        run: docker cp MyUbuntu:/root/DeSCAM_v .
+#      - name: Check path
+#        run: pwd && ls -l
+#      - name: Stop Container
+#        run: docker stop MyUbuntu
+#      - name: Docker Build Ubuntu16
+#        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
+#      - name: Docker Run Ubuntu16
+#        run: docker run --publish 8000:8080 --detach --name MyUbuntu16 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest2:1.0
+#      - name: Docker Check Ubuntu16
+#        run: docker ps -a
+#      - name: Run Test Ubuntu16
+#        run: docker exec MyUbuntu16 "/root/ubuntu16_script"
+#      - name: Stop Container Ubuntu16
+#        run: docker stop MyUbuntu16
+#      - name: Docker Build Ubuntu18
+#        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
+#      - name: Docker Run Ubuntu18
+#        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
+#      - name: Docker Check Ubuntu18
+#        run: docker ps -a
+#      - name: Run Test Ubuntu18
+#        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
+#      - name: Stop Container Ubuntu18
+#        run: docker stop MyUbuntu18
 #      - name: Create Release
 #        id: create_release
 #        uses: actions/create-release@v1
@@ -87,33 +87,29 @@ jobs:
 #          asset_content_type: application/octet-stream
 
 
-#      - name: Build System Generation
-#        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
-      #- name: Build SYSTEMC
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
-      #- name: Build GTEST
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j4
-      #- name: Build Z3
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
-      #- name: Build LLVM/CLANG
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
-#      - name: Build DESCAM
-#        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
-#      - name: Build Tests
-#        run: |
-#          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
-#          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
-#      - name: Run Tests
-#        run: |
-#          $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
-#          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
-#      - name: Clean up
-#        run: |
-#          rm -rf $GITHUB_WORKSPACE/build/3rdParty
-#          rm -rf $GITHUB_WORKSPACE/install/tmp
-#      - name: AppImage Creation
-#        run: $GITHUB_WORKSPACE/linuxdeployqt-6-x86_64.AppImage $GITHUB_WORKSPACE/bin/DESCAM -appimage # -executable=$GITHUB_WORKSPACE/
-#      - name: AppImage Elaboration
-#        uses: ./
-     
-
+      - name: Build System Generation
+        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+      - name: Build SYSTEMC
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
+      - name: Build GTEST
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j4
+      - name: Build Z3
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
+      - name: Build LLVM/CLANG
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
+      - name: Build DESCAM
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
+      - name: Build Tests
+        run: |
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
+      - name: Run Tests
+        run: |
+          $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
+          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
+      - name: Clean up
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/3rdParty
+          rm -rf $GITHUB_WORKSPACE/install/tmp
+          #      - name: AppImage Creation
+          #        run: $GITHUB_WORKSPACE/linuxdeployqt-6-x86_64.AppImage $GITHUB_WORKSPACE/bin/DESCAM -appimage # -executable=$GITHUB_WORKSPACE/
