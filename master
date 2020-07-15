@@ -77,9 +77,11 @@ mv /root/AppImage/test /root/
 cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /root/AppImage/usr/lib/x86_64-linux-gnu/
 cp /lib/x86_64-linux-gnu/libtinfo.so.5 /root/AppImage/lib/x86_64-linux-gnu/
 rm /root/AppImage/usr/lib/x86_64-linux-gnu/libtinfo.so
+cd /root/AppImage/usr/lib/x86_64-linux-gnu/
 ln ../../../lib/x86_64-linux-gnu/libtinfo.so.5 libtinfo.so
 
 #Create AppImage
+cd /root/
 export ARCH=x86_64
 /root/appimagetool-x86_64.AppImage ./AppImage/
 mv DeSCAM-x86_64.AppImage DeSCAM_v
