@@ -31,7 +31,7 @@ struct FFT : public sc_module {
     sc_fix real_bitmirror[ARRAY_SIZE];
     sc_fix img_bitmirror[ARRAY_SIZE];
 
-    sc_fix real_twid[ARRAY_SIZE/2] = {1,0.707107,0,-0.707107};;
+    sc_fix real_twid[ARRAY_SIZE/2] = {1,0.707107,0,-0.707107};
     sc_fix img_twid[ARRAY_SIZE/2] = {0,-0.707107,-1,-0.707107};
 
     sc_fix typed;
