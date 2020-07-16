@@ -58,17 +58,18 @@ public:
 
         std::vector<std::string> arg;
 
+     //Ensures that only the specified file paths given as arguments in command line are passed to CLang at a time
         for(int i=1; i < argc ; i++) {
             if(!(std::string(argv[i]) == "--")){
                 arg.push_back(argv[i]);
-                std::cout << "ARG: " << arg[i-1] << std::endl;
+//                std::cout << "ARG: " << arg[i-1] << std::endl;
             }
             else break;
         };
 
         CommonOptionsParser OptionsParser (argc, argv);
 
-        //Print to screen file paths given to compiler
+        //Print to screen file paths given to compiler through CommonOptionsParser
 //        for(auto src: OptionsParser.getSourcePathList()){
 //            std::cout << "OP:" << src << std::endl;
 //        }

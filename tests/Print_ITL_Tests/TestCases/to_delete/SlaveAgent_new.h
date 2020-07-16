@@ -4,6 +4,7 @@
 
 #ifndef PROJECT_SLAVEAGENT_H
 #define PROJECT_SLAVEAGENT_H
+
 #include "systemc.h"
 #include "../../../example/Interfaces/Interfaces.h"
 #include "../../../example/Whishbone/ESL/env/Compound_Bus.h"

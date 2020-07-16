@@ -26,7 +26,7 @@ list(APPEND OUTPUT_FROM_EACH "
    {
     \"test-suite\":\"${PROJECT}\",
     \"test_name\":\"${EXAMPLE_NAME}\",
-    \"Success\":${SUCCESS},
+    \"success\":${SUCCESS},
     \"errors\":[
     \"${ERROR}\"
     ]}")

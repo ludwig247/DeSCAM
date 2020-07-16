@@ -19,7 +19,7 @@ list(APPEND R_SRC ${ENV_SRC})
 
 add_executable(Whishbone_Simulation ${ENV_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
-        to_delete/MasterAgent_old.h to_delete/SlaveAgent_old.h to_delete/Interconnect_old.h env/MasterDummy.h env/SlaveDummy.h)
+        MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
 
 
 target_link_libraries(Whishbone_Simulation systemc)

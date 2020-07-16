@@ -6,22 +6,21 @@
 #define PROJECT_MASTERAGENT_H
 
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
+#include "Interfaces.h"
 #include "env/Compound_Bus.h"
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
-//#include "../../../tests/Print_ITL_Tests/TestCases/to_delete/Types.h"
 
 
 
 struct MasterAgent : public sc_module {
     //Sections
-    enum Phases {
+    enum Sections {
         IDLE, READ, WRITE, WAITING, DONE
     };
-    Phases phase;
-    Phases nextphase;
+    Sections section;
+    Sections nextsection;
     //CLK
-    master_in<bool> clk;
+    //master_in<bool> clk;
     bool clk_pulse;
 
     //Communication between Master and Agent
@@ -42,24 +41,26 @@ struct MasterAgent : public sc_module {
     //Constructor
     SC_HAS_PROCESS(MasterAgent);
 
-    MasterAgent(sc_module_name name) {
-        SC_THREAD(fsm)
+    MasterAgent(sc_module_name name) :
+            section(IDLE),
+            nextsection(IDLE){
+        SC_THREAD(fsm);
     }
 
     void fsm() {
-        nextphase = IDLE;
         while (true) {
-            phase = nextphase;
-            if (phase == IDLE) {
+
+            section = nextsection;
+            if (section == IDLE) {
 //                std::cout << this->name() << " - IDLE" << std::endl;
                 this->master_to_agent->read(agent_to_bus_req);
 
                 if(agent_to_bus_req.trans_type == SINGLE_READ){
-                    nextphase = READ;
+                    nextsection = READ;
                 }
-                else nextphase = WRITE;
+                else nextsection = WRITE;
             }
-            else if (phase == READ) {
+            if (section == READ) {
 //                std::cout << this->name() << " - READ" << std::endl;
                 wb_out.addr = agent_to_bus_req.addr;
                 wb_out.data = 0;
@@ -67,9 +68,9 @@ struct MasterAgent : public sc_module {
                 wb_out.cyc = true;
                 wb_out.stb = true;
                 agent_to_bus->set(wb_out);
-                nextphase = WAITING;
+                nextsection = WAITING;
             }
-            else if (phase == WRITE) {
+            if (section == WRITE) {
 //                std::cout << this->name() << " - WRITE " << std::endl;
                 wb_out.addr = agent_to_bus_req.addr;
                 wb_out.data = agent_to_bus_req.data;
@@ -77,11 +78,11 @@ struct MasterAgent : public sc_module {
                 wb_out.cyc = true;
                 wb_out.stb = true;
                 agent_to_bus->set(wb_out);
-                nextphase = WAITING;
+                nextsection = WAITING;
             }
-            else if (phase == WAITING) {
+            if (section == WAITING) {
 //                std::cout << this->name() << " - WAIT " << std::endl;
-                clk->master_read(clk_pulse);
+                important_state
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == true){
                     agent_to_bus_resp.ack = OK;
@@ -99,26 +100,24 @@ struct MasterAgent : public sc_module {
                     wb_out.stb = false;
 
                     agent_to_bus->set(wb_out);
-                    nextphase = DONE;
+                    nextsection = DONE;
                 }
             }
-            else if(phase == DONE){
+            if(section == DONE){
 //                std::cout << this->name() << " - DONE " << std::endl;
-                clk->master_read(clk_pulse);
+                important_state
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == false){
                     agent_to_master->write(agent_to_bus_resp);
-                    nextphase = IDLE;
+                    nextsection = IDLE;
                 }
 
             }
-//            wait(WAIT_TIME, SC_PS);
-//            wait(SC_ZERO_TIME);
+
         }
     }
 
 
 };
-
 
 #endif //PROJECT_MASTERAGENT_H

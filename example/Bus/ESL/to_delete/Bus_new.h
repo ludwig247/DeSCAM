@@ -1,10 +1,11 @@
 //
 // Created by ludwig on 30.01.17.
 //
-#include "../../Interfaces/Interfaces.h"
+
+#include "Interfaces.h"
 #include "systemc.h"
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "Print_ITL_Tests/TestCases/to_delete/Types.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
@@ -29,8 +30,6 @@ struct Bus : public sc_module {
     bus_req_t req;
     bus_resp_t resp;
 
-    int foo;
-
     //Constructor
     SC_HAS_PROCESS(Bus);
 
@@ -48,7 +47,9 @@ struct Bus : public sc_module {
         SC_THREAD(fsm);
     }
 
+
     void fsm() {
+
         while (true) {
             /*
             0 - 7  HEAT
@@ -56,31 +57,34 @@ struct Bus : public sc_module {
             16 - 23 TEMP_TOP
             24 - 31 TEMP_BOT
              */
-            master_in->read(req,"master_in");
+            master_in->read(req);
+
+	    std::cout << "req addrs:" << req.addr << std::endl;
+	    std::cout << "req data:" << req.data << std::endl;
+	    std::cout << "req mode:" << req.trans_type << std::endl;
 
             if(SINGLE_READ == req.trans_type){
                 req.data = 0;
             }
 
             if  (req.addr >= 0 && req.addr < 8) {
-                slave_out0->write(req,"slave_out0");
-                slave_in0->read(resp,"slave_in0");
+                slave_out0->write(req);
+                slave_in0->read(resp);
             }
-
             else if (req.addr >= 8 && req.addr < 16) {
                 req.addr = req.addr - 8;
-                slave_out1->write(req,"slave_out1");
-                slave_in1->read(resp,"slave_in1");
+                slave_out1->write(req);
+                slave_in1->read(resp);
             }
             else if (req.addr >= 16 && req.addr < 24) {
                 req.addr = req.addr - 16;
-                slave_out2->write(req,"slave_out2");
-                slave_in2->read(resp,"slave_in2");
+                slave_out2->write(req);
+                slave_in2->read(resp);
             }
             else if (req.addr >= 24 && req.addr < 32) {
                 req.addr = req.addr - 24;
-                slave_out3->write(req,"slave_out3");
-                slave_in3->read(resp,"slave_in3");
+                slave_out3->write(req);
+                slave_in3->read(resp);
             }
             else {
 //                resp.ack = OK;
@@ -89,11 +93,11 @@ struct Bus : public sc_module {
             if(SINGLE_WRITE== req.trans_type){
                 resp.data = 0;
             }
-            master_out->write(resp,"master_out");
-
-            //wait(SC_ZERO_TIME);
+            master_out->write(resp);
+            wait(SC_ZERO_TIME);
         }
     }
 };
+
 
 #endif //PROJECT_BUS_H
