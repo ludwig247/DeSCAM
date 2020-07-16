@@ -9,6 +9,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
 #include <fstream>
+#include <ostream>
 #include <Config.h>
 
 using namespace rapidjson;
@@ -18,6 +19,8 @@ struct Param
     std::string Name;
     bool Success;
     std::vector<std::string> Errors;
+    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
+        return os << bar.Name;}
 };
 
 
@@ -56,8 +59,10 @@ static std::vector<Param> parameter(const char* json) {
 class CompileESL : public ::testing::TestWithParam<Param> {
 
 public:
+
+
     struct PrintToStringParamName
-    {
+        {
         template <class ParamType>
         std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
         {
@@ -76,6 +81,15 @@ public:
     }
 };
 
+::testing::AssertionResult CompileTest(Param s) {
+    if (s.Success){
+        return ::testing::AssertionSuccess() <<"Compilation of " << s.Name << "successful!";}
+    else{
+        for (auto &i : s.Errors)
+            std::cout << "Error "<< i <<std::endl;
+        return ::testing::AssertionFailure() << "compilation of " << s.Name << " failed";}
+}
+
 INSTANTIATE_TEST_CASE_P(
         Basic,
 //        DISABLED_Basic,
@@ -86,12 +100,12 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(CompileESL, Basic){
 
-EXPECT_TRUE(GetParam().Success);
-
+//EXPECT_TRUE(GetParam().Success)<< "Compilation of "<<GetParam().Name << " failed"<< std::endl;
+EXPECT_TRUE(CompileTest(GetParam()));
 for (auto &i : GetParam().Errors)
         std::cout << "Error "<< i <<std::endl;
 if(GetParam().Success) std::cout << "Compilation of "<<GetParam().Name << " succeeded"<< std::endl;
-    else  std::cout << "Compilation of "<<GetParam().Name << " failed"<< std::endl;
+
 
 
 }
