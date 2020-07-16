@@ -252,38 +252,38 @@ void SCAM::CreatePropertySuite::addOperations(const Module *module, PropertySuit
             auto t_end_minus_1 = new Arithmetic(t_end, "-", new UnsignedValue(1));
 
             //Notify&Sync Signals, no notification for shareds, alwaysReady in ...
-            for (auto port: module->getPorts()) {
-                auto interface = port.second->getInterface();
-                if (interface->isShared()) continue;
-                if (interface->isSlaveIn()) continue;
-                if (interface->isSlaveOut()) continue;
-                if (interface->isMasterIn()) continue;
-
-                if (module->isSlave()) {
-                    if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                        auto commitment = new Assignment(port.second->getNotify(), new BoolValue(true));
-                        newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
-                    } else {
-                        auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
-                        newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
-                    }
-                } else {
-                    if (port.second == operation->getNextState()->getCommunicationPort()) { //if NextState is a wait state it will have null_ptr as CommunicationPort
-                        auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
-                        auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
-                        newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end_minus_1, commitment1));
-                        newProperty->addCommitment(new TemporalExpr(t_end, commitment2));
-                    } else if (usedPortsList.find(port.second) != usedPortsList.end()) {
-                        auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
-                        auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
-                        newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end_minus_1, commitment1));
-                        newProperty->addCommitment(new TemporalExpr(t_end, commitment2));
-                    } else {
-                        auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
-                        newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end, commitment));
-                    }
-                }
-            }
+//            for (auto port: module->getPorts()) {
+//                auto interface = port.second->getInterface();
+//                if (interface->isShared()) continue;
+//                if (interface->isSlaveIn()) continue;
+//                if (interface->isSlaveOut()) continue;
+//                if (interface->isMasterIn()) continue;
+//
+//                if (module->isSlave()) {
+//                    if (usedPortsList.find(port.second) != usedPortsList.end()) {
+//                        auto commitment = new Assignment(port.second->getNotify(), new BoolValue(true));
+//                        newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
+//                    } else {
+//                        auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
+//                        newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
+//                    }
+//                } else {
+//                    if (port.second == operation->getNextState()->getCommunicationPort()) { //if NextState is a wait state it will have null_ptr as CommunicationPort
+//                        auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
+//                        auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
+//                        newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end_minus_1, commitment1));
+//                        newProperty->addCommitment(new TemporalExpr(t_end, commitment2));
+//                    } else if (usedPortsList.find(port.second) != usedPortsList.end()) {
+//                        auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
+//                        auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
+//                        newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end_minus_1, commitment1));
+//                        newProperty->addCommitment(new TemporalExpr(t_end, commitment2));
+//                    } else {
+//                        auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
+//                        newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end, commitment));
+//                    }
+//                }
+//            }
             propertySuite->addProperty(newProperty);
         }
     }

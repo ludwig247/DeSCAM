@@ -13,11 +13,12 @@ SC_MODULE(Consumer){
   void check_inp(){
       while(true) {
           //Consumes values from the Output of the FIFO
-//          random = ((float) rand()) / (float) RAND_MAX;
-//          while (random < limit) {
-//              insert_state();
-//              random = ((float) rand()) / (float) RAND_MAX;
-//          }
+          random = ((float) rand()) / (float) RAND_MAX;
+          while (random < limit) {
+              insert_state();
+              random = ((float) rand()) / (float) RAND_MAX;
+          }
+          std::cout << "At " << sc_time_stamp() << " Consumer tries to read" << endl;
           inp->read(value);
           sc_assert(value == value_old + 1);
           value_old = value;

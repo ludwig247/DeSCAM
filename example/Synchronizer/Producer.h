@@ -15,17 +15,16 @@ SC_MODULE(Producer){
         id = number_of_senders;
         number_of_senders++;
         while(true) {
-//            random = ((float) rand()) / (float) RAND_MAX;
-//            while (random < limit) {
-//                insert_state();
-//                random = ((float) rand()) / (float) RAND_MAX;
-//            }
-            wait((id+1)*3,SC_PS);
+            random = ((float) rand()) / (float) RAND_MAX;
+            while (random < limit) {
+                insert_state();
+                random = ((float) rand()) / (float) RAND_MAX;
+            }
             if (cnt > 10) break;
             //Produce Values and write them to the Input of the FIFO
+            std::cout << "At " << sc_time_stamp() << " Producer"<< id <<" tries to send" << cnt << endl;
             out->write(cnt++,id);
             std::cout << "At " << sc_time_stamp() << " Producer"<< id <<" sent: " << cnt-1 << endl;
-            wait(10/(id+1),SC_PS);
 //            insert_state();
         }
     }

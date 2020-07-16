@@ -25,7 +25,8 @@ macro writer_notify : boolean :=false end macro;
 
 
 -- STATES --
-macro Start_State : boolean := true end macro;
+macro Start_State : boolean := (head<3) and (tail<3) and((state = EMPTY) and (head = tail) or (state = FILLED) and not(head = tail) or (state = FULL) and (head = tail))
+end macro;
 
 
 -- OPERATIONS --
@@ -34,7 +35,9 @@ assume:
 	 reset_sequence;
 prove:
 	 at t: Start_State;
-	 at t: buffer(head) = buffer(head);
+	 at t: buffer(0) = 0;
+     at t: buffer(1) = 0;
+     at t: buffer(2) = 0;
 	 at t: fifo_size = fifo_size;
 	 at t: head = resize(0,32);
 	 at t: out_sig = out_sig;
@@ -65,6 +68,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = buffer_at_t(head_at_t);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+2)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = head_at_t;
 	at t_end: out_sig = out_sig_at_t;
@@ -94,6 +99,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = buffer_at_t(head_at_t);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+2)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = head_at_t;
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -123,6 +130,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = buffer_at_t(head_at_t);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+2)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = head_at_t;
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -153,6 +162,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = buffer_at_t(head_at_t);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+2)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = head_at_t;
 	at t_end: out_sig = out_sig_at_t;
@@ -169,6 +180,7 @@ for timepoints:
 	t_end = t+1;
 freeze:
 	fifo_size_at_t = fifo_size@t,
+	buffer_at_t = buffer@t,
 	head_at_t = head@t,
 	out_sig_at_t = out_sig@t,
 	tail_at_t = tail@t,
@@ -182,6 +194,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head_at_t) = val_sig_at_t;             --Changed head to head_at_t
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = out_sig_at_t;
@@ -198,6 +212,7 @@ for timepoints:
 	t_end = t+1;
 freeze:
 	fifo_size_at_t = fifo_size@t,
+    buffer_at_t = buffer@t,
 	head_at_t = head@t,
 	out_sig_at_t = out_sig@t,
 	tail_at_t = tail@t,
@@ -211,6 +226,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head_at_t) = val_sig_at_t;     --CHANGED head to head_at_t
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = out_sig_at_t;
@@ -242,6 +259,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = val_sig_at_t;
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -273,6 +292,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = val_sig_at_t;
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -304,6 +325,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head_at_t) = val_sig_at_t;         --Changed head to head_at_t
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer(tail_at_t);              --Changed buffer_at_t to buffer
@@ -335,6 +358,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = val_sig_at_t;
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -366,6 +391,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head) = val_sig_at_t;
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -397,6 +424,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head_at_t) = val_sig_at_t;             --Changed head to head_at_t
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -428,6 +457,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head_at_t) = val_sig_at_t;                 --Changed head to head_at_t
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -459,6 +490,8 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: buffer(head_at_t) = val_sig_at_t;                 --Changed head to head_at_t
+    at t_end: buffer((head)mod fifo_size) = buffer_at_t((head_at_t+1)mod fifo_size);
+    at t_end: buffer((head+1)mod fifo_size) = buffer_at_t((head_at_t+2)mod fifo_size);
 	at t_end: fifo_size = fifo_size_at_t;
 	at t_end: head = ((head_at_t + 1) mod signed(fifo_size_at_t))(31 downto 0);
 	at t_end: out_sig = buffer_at_t(tail_at_t);
@@ -486,6 +519,7 @@ assume:
 prove:
 	at t_end: Start_State;
 	at t_end: fifo_size = fifo_size_at_t;
+	at t_end: buffer = buffer_at_t;
 	at t_end: head = head_at_t;
 	at t_end: state = state_at_t;
 	at t_end: tail = tail_at_t;

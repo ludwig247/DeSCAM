@@ -47,12 +47,15 @@ public:
     std::vector<std::vector<int>> pathsWriteIDs;
     std::vector<Operation*> operationsRead;
     std::vector<Operation*> operationsWrite;
+    Operation *reset_op;
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
     std::vector<Operation*> operationsFinal;
     std::vector<pathIDStmt> finalPathsOpt;
     std::vector<Operation*> operationsFinalOpt;
     std::map<int,State*> StateMap;
+    State* start_state;
+    State* init;
 
 
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
@@ -384,6 +387,22 @@ public:
 
         //Print CFG Write
         //std::cout << printCFG(controlFlowMapWrite) << std::endl;
+
+        init = new State("init");
+        init->setInit();
+
+        //Generate Reset Operation
+        reset_op = new Operation();
+        reset_op->addStatement(state_assign_empty);
+        auto zero = new IntegerValue(0);
+        auto tail_assign_0 = new Assignment(new VariableOperand(module->getVariable("tail")),zero);
+        auto head_assign_0 = new Assignment(new VariableOperand(module->getVariable("head")),zero);
+        reset_op->addStatement(tail_assign_0);
+        reset_op->addStatement(head_assign_0);
+        reset_op->setState(init);
+        start_state = new State("Start_State");
+        reset_op->setNextState(start_state);
+        reset_op->setReset(true);
     }
 
     virtual void TearDown() {}
@@ -686,14 +705,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
         combinePaths(readyQueue,blockedFunctions);
     }
 
-//    //Debug
-//    for(auto p:finalPaths){
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//    }
-
     std::map<int,State*> CfgIdToState;
     for(auto i:CfgIdToStateRead){
         CfgIdToState.insert(i);
@@ -706,10 +717,10 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Iterate over all paths and set State, nextState and statementList
     for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
         auto op = new Operation();
-        op->setState(CfgIdToState.at(path->idList.front()));
-        op->setNextState(CfgIdToState.at(path->idList.back()));
-        statementList.clear();
-
+        if(path->idList.size()>0){
+        op->setState(start_state);
+        op->setNextState(start_state);
+        }
         operationsFinal.push_back(op);
     }
     cnt = 0;
@@ -738,65 +749,76 @@ TEST_F(OperationGraphTest, ExtractPaths){
     temp = {17,"writer_notify"};
     endnodes.push_back(temp);
 
+    std::vector<std::string> portnames;
+    portnames.push_back("out");
+    portnames.push_back("val");
+
     bool addsync[startnodes.size()];
     bool addnoti[startnodes.size()];
 
-//    //Add sync and notify signals
-//    for(int i=0;i<operationsFinal.size();i++){
-//        auto op = operationsFinal.at(i);
-//        for(int j=0;j<startnodes.size();j++){
-//            addsync[j] = false;
-//            addnoti[j] = false;
-//        }
-//        for(auto id: finalPaths.at(i).idList){
-//            for(int j=0; j<startnodes.size();j++){
-//                if(id==startnodes.at(j).id){
-//                    addsync[j]=true;
-//                }
-//                if(id==endnodes.at(j).id){
-//                    addnoti[j]=true;
-//                }
-//            }
-//        }
-//        for(int j=0; j<startnodes.size();j++){
-//            auto sync = new SyncSignal(startnodes.at(j).eventname);
-//            auto noti = new Notify(endnodes.at(j).eventname);
-//            if(addsync[j]){
-//                op->addAssumption(sync);
-//            }
-//            else{
-//                op->addAssumption(new UnaryExpr("not",sync));
-//            }
-//            if(addnoti[j]){
-//                auto assign = new Assignment(noti,new BoolValue(true));
-//                op->addCommitment(assign);
-//            }
-//            else{
-//                auto assign = new Assignment(noti,new BoolValue(false));
-//                op->addCommitment(assign);
-//            }
-//        }
-//    }
+    //Add sync and notify signals
+    for(int i=0;i<operationsFinal.size();i++){
+        auto op = operationsFinal.at(i);
+        for(int j=0;j<startnodes.size();j++){
+            addsync[j] = false;
+            addnoti[j] = false;
+        }
+        for(auto id: finalPaths.at(i).idList){
+            for(int j=0; j<startnodes.size();j++){
+                if(id==startnodes.at(j).id){
+                    addsync[j]=true;
+                }
+                if(id==endnodes.at(j).id){
+                    addnoti[j]=true;
+                }
+            }
+        }
+        for(int j=0; j<startnodes.size();j++){
+            auto sync = new SyncSignal(module->getPort(portnames.at(j)));
+            auto noti = new Notify(module->getPort(portnames.at(j)));
+            if(addsync[j]){
+                op->addAssumption(sync);
+            }
+            else{
+                op->addAssumption(new UnaryExpr("not",sync));
+            }
+            if(addnoti[j]){
+                auto assign = new Assignment(noti,new BoolValue(true));
+                op->addCommitment(assign);
+            }
+            else{
+                auto assign = new Assignment(noti,new BoolValue(false));
+                op->addCommitment(assign);
+            }
+        }
+    }
 
-    for(int i= 0; i<operationsFinal.size();i++){
+
+    //Optimize operations
+    for(int i=0; i<operationsFinal.size();i++){
         if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
             operationsFinalOpt.push_back(operationsFinal.at(i));
             finalPathsOpt.push_back(finalPaths.at(i));
         }
     }
 
+//    //Debug
+//    for(auto p:finalPathsOpt){
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//    }
+
     for(auto op:operationsFinalOpt){
         op->getState()->addOutgoingOperation(op);
         op->getNextState()->addIncomingOperation(op);
     }
-
-    module->getFSM()->setStateMap(CfgIdToState);
-
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-    PrintITL printITL;
-    auto map = printITL.printModule(module);
-
+    rOperations->sortOperation(reset_op);
+    //add reset operation
+    operationsFinalOpt.push_back(reset_op);
+    reset_op->getState()->addOutgoingOperation(reset_op);
+    reset_op->getNextState()->addIncomingOperation(reset_op);
 
 //    //Debug
 //    for(auto op: operationsFinalOpt){
@@ -811,6 +833,22 @@ TEST_F(OperationGraphTest, ExtractPaths){
 //        }
 //        std::cout << std::endl;
 //    }
+
+    std::map<int,State*> stateMap;
+    stateMap.insert(std::make_pair(init->getStateId(),init ));
+    stateMap.insert(std::make_pair(start_state->getStateId(),start_state));
+
+    module->getFSM()->setStateMap(stateMap);
+
+    PropertyFactory propertyFactory(module);
+    module->setPropertySuite(propertyFactory.getPropertySuite());
+    PrintITL printITL;
+    auto map = printITL.printModule(module);
+    //std::cout << std::endl << map.at("TestModule.vhi") << std::endl;
+    std::ofstream myfile;
+    myfile.open(SCAM_HOME"/tests/Operation_Test/TestModule.vhi");
+    myfile << map.at("TestModule.vhi") << std::endl;
+    myfile.close();
 }
 
 

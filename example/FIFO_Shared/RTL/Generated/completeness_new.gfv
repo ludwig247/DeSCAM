@@ -6,7 +6,7 @@ determination_requirements:
   determined(state);
   determined(head);
   determined(tail);
-  //determined(fifo);
+  determined(fifo);
   determined(consumer_notify);
   determined(producer_notify);
   if(consumer_notify)determined(consumer);endif;
@@ -74,4 +74,16 @@ property_graph:
   start_state_27 -> start_state_15;
   start_state_27 -> start_state_27;
   start_state_27 -> wait;
+
+  wait -> start_state_11;
+  wait -> start_state_12;
+  wait -> start_state_13;
+  wait -> start_state_14;
+  wait -> start_state_15;
+  wait -> start_state_16;
+  wait -> start_state_20;
+  wait -> start_state_24;
+  wait -> start_state_26;
+  wait -> start_state_27;
+  wait -> wait;
 end completeness;
