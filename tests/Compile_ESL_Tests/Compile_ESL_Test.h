@@ -5,6 +5,7 @@
 #ifndef DESCAM_COMPILE_ESL_TEST_H
 #define DESCAM_COMPILE_ESL_TEST_H
 
+#include <gtest/gtest.h>
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
 #include <fstream>
@@ -16,6 +17,7 @@ struct Param
 {
     std::string Name;
     bool Success;
+    std::vector<std::string> Errors;
 };
 
 
@@ -37,10 +39,13 @@ static std::vector<Param> parameter(const char* json) {
     std::vector<Param> JSON_vector;
 
 
-for(SizeType i; i< JSON["compile_output"].Size(); i++){
+    for(SizeType i = 0; i< JSON["compile_output"].Size(); i++){
             JSON_vector.push_back(Param());
             JSON_vector[i].Success = JSON["compile_output"][i]["success"].GetBool();
             JSON_vector[i].Name = JSON["compile_output"][i]["test_name"].GetString();
+            if(!JSON["compile_output"][i]["success"].GetBool())
+                for(SizeType x = 0; x < JSON["compile_output"][i]["errors"].Size(); x++)
+                    JSON_vector[i].Errors.push_back(JSON["compile_output"][i]["errors"][x].GetString());
         }
 
 
@@ -60,8 +65,10 @@ public:
             return Parameter.Name;
         }
     };
+
     static void SetUpTestCase() {
         #define SHELLSCRIPT "cmake --build ../cmake-build-debug --target Compile_ESL_Test_Run"
+
         system(SHELLSCRIPT);
     }
 
@@ -70,8 +77,8 @@ public:
 };
 
 INSTANTIATE_TEST_CASE_P(
-//        DISABLED_Basic,
         Basic,
+//        DISABLED_Basic,
         CompileESL,
         testing::ValuesIn(parameter(SCAM_HOME "/tests/Compile_ESL_Tests/json_output_files/error_compilation.json")),
         CompileESL::PrintToStringParamName()
@@ -80,6 +87,12 @@ INSTANTIATE_TEST_CASE_P(
 TEST_P(CompileESL, Basic){
 
 EXPECT_TRUE(GetParam().Success);
+
+for (auto &i : GetParam().Errors)
+        std::cout << "Error "<< i <<std::endl;
+if(GetParam().Success) std::cout << "Compilation of "<<GetParam().Name << " succeeded"<< std::endl;
+    else  std::cout << "Compilation of "<<GetParam().Name << " failed"<< std::endl;
+
 
 }
 
