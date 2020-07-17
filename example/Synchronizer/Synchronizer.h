@@ -16,7 +16,7 @@ public:
     Synchronizer(const char *name, unsigned int size);
 
     // Consumer reads Value from FIFO (blocking)
-    void read(T &out);
+    void read(T *out);
     //Producer writes Value to FIFO (blocking)
     void write(const T &val, int id);
 

@@ -9,7 +9,7 @@ template<typename T>
 class Synchronizer_in_if : virtual public sc_interface
 {
 public:
-    virtual void read(T & out) = 0;
+    virtual void read(T * out) = 0;
 };
 
 

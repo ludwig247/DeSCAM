@@ -22,9 +22,10 @@ SC_MODULE(Producer){
             }
             if (cnt > 10) break;
             //Produce Values and write them to the Input of the FIFO
-            std::cout << "At " << sc_time_stamp() << " Producer"<< id <<" tries to send" << cnt << endl;
-            out->write(cnt++,id);
-            std::cout << "At " << sc_time_stamp() << " Producer"<< id <<" sent: " << cnt-1 << endl;
+            std::cout << "At " << sc_time_stamp() << " Producer"<< id <<" tries to send" << cnt*(id+1) << endl;
+            out->write(cnt*(id+1),id);
+            std::cout << "At " << sc_time_stamp() << " Producer"<< id <<" sent: " << cnt*(id+1) << endl;
+            cnt++;
 //            insert_state();
         }
     }

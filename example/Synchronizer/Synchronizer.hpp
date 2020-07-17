@@ -11,7 +11,7 @@ Synchronizer<T>::Synchronizer (const char *name, unsigned int size) :
 
 
 template<typename T>
-void Synchronizer<T>::read(T &out) {
+void Synchronizer<T>::read(T *out) {
     bool valid = false;
     //loop to check if all flags are set
     while(!valid){
@@ -28,7 +28,9 @@ void Synchronizer<T>::read(T &out) {
     for(int i = 0; i<number_of_senders;i++){
         flags[i]=false;
     }
-    out = buffer[0];
+    for(int i=0; i<number_of_senders;i++) {
+        out[i] = buffer[i];
+    }
     reader_notify.notify();
     return;
 }
