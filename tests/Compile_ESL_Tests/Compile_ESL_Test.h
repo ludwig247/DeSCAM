@@ -72,15 +72,16 @@ public:
     };
 };
 
-::testing::AssertionResult CompileTest(Param s) {
-    if (s.Success){
-        return ::testing::AssertionSuccess() <<"Compilation of " << s.Name << "successful!";}
+::testing::AssertionResult CompileTest(Param *s) {
+    if (s->Success){
+        return ::testing::AssertionSuccess() <<"Compilation of " << s->Name << "successful!";}
     else{
-        for (auto &i : s.Errors)
+        for (auto &i : s->Errors)
             std::cout << "Error "<< i <<std::endl;
-        return ::testing::AssertionFailure() << "compilation of " << s.Name << " failed";}
+        return ::testing::AssertionFailure() << "compilation of " << s->Name << " failed";}
 }
-std::string printer(Param s){
+
+std::string printer(Param &s){
 for (auto &i : s.Errors)
 return i;
 }
@@ -95,12 +96,10 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(CompileESL,Basic){
 
+    Param compiled = GetParam();
 
+EXPECT_TRUE(compiled.Success)<<(compiled)<<std::endl<< "Errors: "<<printer(compiled);
 
-EXPECT_TRUE(GetParam().Success)<<(GetParam())<<std::endl<< "Errors: "<<printer(GetParam());
-
-//for (auto &i : GetParam().Errors)
-//        std::cout << "Error "<< i <<std::endl;
 if(GetParam().Success) std::cout << "Compilation of "<<GetParam().Name << " succeeded"<< std::endl;
 
 
