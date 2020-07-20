@@ -20,7 +20,7 @@ struct Param
     bool Success;
     std::vector<std::string> Errors;
     friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-        return os << bar.Name;}
+        return os << bar.Name << " was not compiled";}
 };
 
 
@@ -80,6 +80,10 @@ public:
             std::cout << "Error "<< i <<std::endl;
         return ::testing::AssertionFailure() << "compilation of " << s.Name << " failed";}
 }
+std::string printer(Param s){
+for (auto &i : s.Errors)
+return i;
+}
 
 INSTANTIATE_TEST_CASE_P(
         Basic,
@@ -91,8 +95,10 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(CompileESL,Basic){
 
-//EXPECT_TRUE(GetParam().Success)<< "Compilation of "<<GetParam().Name << " failed"<< std::endl;
-EXPECT_TRUE(CompileTest(GetParam()));
+
+
+EXPECT_TRUE(GetParam().Success)<<(GetParam())<<std::endl<< "Errors: "<<printer(GetParam());
+
 //for (auto &i : GetParam().Errors)
 //        std::cout << "Error "<< i <<std::endl;
 if(GetParam().Success) std::cout << "Compilation of "<<GetParam().Name << " succeeded"<< std::endl;
