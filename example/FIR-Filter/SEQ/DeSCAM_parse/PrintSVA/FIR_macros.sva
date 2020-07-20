@@ -1,0 +1,73 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function data_in_sync;
+	data_in_sync = 1'b1 ;
+endfunction
+function data_out_sync;
+	data_out_sync = 1'b1 ;
+endfunction
+function data_in_notify;
+	data_in_notify = 1'b1 ;
+endfunction
+function data_out_notify;
+	data_out_notify = 1'b1 ;
+endfunction
+
+// DP SIGNALS //
+function int data_in_sig;
+	data_in_sig = 0;
+endfunction
+function int data_out_sig;
+	data_out_sig = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function int acc;
+	acc = 0;
+endfunction
+function int_3 coef;
+	coef = {0, 0, 0};
+endfunction
+function int coef_0;
+	coef_0 = 0;
+endfunction
+function int coef_1;
+	coef_1 = 0;
+endfunction
+function int coef_2;
+	coef_2 = 0;
+endfunction
+function int data_algorithm;
+	data_algorithm = 0;
+endfunction
+function int i;
+	i = 0;
+endfunction
+function phases phase_algorithm;
+	phase_algorithm = IDLE;
+endfunction
+function int_3 shiftreg;
+	shiftreg = {0, 0, 0};
+endfunction
+function int shiftreg_0;
+	shiftreg_0 = 0;
+endfunction
+function int shiftreg_1;
+	shiftreg_1 = 0;
+endfunction
+function int shiftreg_2;
+	shiftreg_2 = 0;
+endfunction
+
+// STATES //
+function data_in_1;
+	data_in_1 = 1'b1;
+endfunction
+function Calculation_2;
+	Calculation_2 = 1'b1;
+endfunction
+function data_out_3;
+	data_out_3 = 1'b1;
+endfunction
+
+
