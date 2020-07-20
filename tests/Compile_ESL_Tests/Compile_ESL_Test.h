@@ -11,7 +11,6 @@
 #include <fstream>
 #include <ostream>
 #include <Config.h>
-#define SHELLSCRIPT "cmake --build ../cmake-build-debug --target Compile_ESL_Test_Run"
 
 using namespace rapidjson;
 
@@ -71,12 +70,6 @@ public:
             return Parameter.Name;
         }
     };
-
-    static void SetUpTestCase() {
-    }
-
-    static void TearDownTestCase() {
-    }
 };
 
 ::testing::AssertionResult CompileTest(Param s) {
