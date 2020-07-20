@@ -8,6 +8,7 @@
 
 
 int main(int argc, char **argv) {
+    system(SHELLSCRIPT);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 

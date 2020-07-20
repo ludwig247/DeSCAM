@@ -3,14 +3,28 @@ set(CURRENT_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
 set(PROJECT "@PROJECT_NAME@")
 set(OUTPUT_FROM_EACH "")
 
+file(GLOB ERROR_FILES_LIST "${CURRENT_DIR}/error_files/*.txt")
+foreach(ERROR_FILE_NAME ${ERROR_FILES_LIST})
+    get_filename_component(NAME ${ERROR_FILE_NAME} NAME_WLE)
+    string(REPLACE "error_file_" "" NAME ${NAME})
+    string(REPLACE "_Simulation" "" NAME ${NAME})
+
+    list(FIND EXAMPLE_NAMES "${NAME}" EXAMPLE_ADDED)
+    if(EXAMPLE_ADDED EQUAL -1)
+        file(REMOVE ${ERROR_FILE_NAME})
+        message(STATUS "Example not included anymore: removing ${ERROR_FILE_NAME}")
+    endif()
+endforeach()
 
 foreach(EXAMPLE_NAME ${EXAMPLE_NAMES})
     set(EXAMPLE_NAME "${EXAMPLE_NAME}_Simulation")
-    execute_process(COMMAND ${CMAKE_COMMAND} --build ../../cmake-build-debug --target ${EXAMPLE_NAME}  WORKING_DIRECTORY ${CURRENT_DIR} RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT ERROR_FILE ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME})
+    execute_process(COMMAND ${CMAKE_COMMAND} --build ../../cmake-build-debug --target ${EXAMPLE_NAME}
+    WORKING_DIRECTORY ${CURRENT_DIR} RESULT_VARIABLE RESULT OUTPUT_VARIABLE OUTPUT
+    ERROR_FILE ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME}.txt)
 #message(STATUS "EXAMPLE_NAME = ${EXAMPLE_NAME}")
 #message(STATUS "RESULT = ${RESULT}, OUTPUT = ${OUTPUT}")
 
-    file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME} ERROR ENCODING UTF-8)
+    file(STRINGS ${CURRENT_DIR}/error_files/error_file_${EXAMPLE_NAME}.txt ERROR ENCODING UTF-8)
     string(REPLACE "," "" ERROR "${ERROR}")
     string(REPLACE "\"" "\\\"" ERROR "${ERROR}")
     string(REPLACE ";" "\",

@@ -11,6 +11,7 @@
 #include <fstream>
 #include <ostream>
 #include <Config.h>
+#define SHELLSCRIPT "cmake --build ../cmake-build-debug --target Compile_ESL_Test_Run"
 
 using namespace rapidjson;
 
@@ -34,7 +35,7 @@ static std::vector<Param> parameter(const char* json) {
     JSON.ParseStream(isw);
 
     if(JSON.IsNull()){
-        std::cout << "Document" << json <<" does not exist"<< std::endl;
+        std::cout << "WARNING!!: Document" << json <<" does not exist"<< std::endl;
     std::terminate();}
 
 
@@ -72,9 +73,6 @@ public:
     };
 
     static void SetUpTestCase() {
-        #define SHELLSCRIPT "cmake --build ../cmake-build-debug --target Compile_ESL_Test_Run"
-
-        system(SHELLSCRIPT);
     }
 
     static void TearDownTestCase() {
@@ -98,12 +96,12 @@ INSTANTIATE_TEST_CASE_P(
         CompileESL::PrintToStringParamName()
 );
 
-TEST_P(CompileESL, Basic){
+TEST_P(CompileESL,Basic){
 
 //EXPECT_TRUE(GetParam().Success)<< "Compilation of "<<GetParam().Name << " failed"<< std::endl;
 EXPECT_TRUE(CompileTest(GetParam()));
-for (auto &i : GetParam().Errors)
-        std::cout << "Error "<< i <<std::endl;
+//for (auto &i : GetParam().Errors)
+//        std::cout << "Error "<< i <<std::endl;
 if(GetParam().Success) std::cout << "Compilation of "<<GetParam().Name << " succeeded"<< std::endl;
 
 

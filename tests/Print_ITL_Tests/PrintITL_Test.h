@@ -18,7 +18,7 @@ struct Param
     std::string FilePath;
     std::string Name;
     friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-        return os << bar.Name;}
+        return os << bar.FilePath;}
 };
 
 
