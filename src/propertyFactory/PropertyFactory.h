@@ -13,7 +13,7 @@ class PropertyFactory {
 public:
     PropertyFactory() = delete;
     explicit PropertyFactory(const Module *module);
-    explicit PropertyFactory(Module *module, Model* model);
+    explicit PropertyFactory(Channel *channel);
     virtual ~PropertyFactory() = default;
 
     PropertySuite *getPropertySuite() const;

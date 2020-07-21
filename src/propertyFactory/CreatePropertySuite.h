@@ -13,21 +13,21 @@ namespace SCAM{
         CreatePropertySuite() = delete;
 
         static void addNotifySignals(const Module * module,PropertySuite * propertySuite);
-        static void addNotifySignals(const Module *module, PropertySuite * propertySuite, Model *model);
+        static void addNotifySignals(Channel *channel, PropertySuite *propertySuite);
         static void addSyncSignals(const Module * module,PropertySuite * propertySuite);
-        static void addSyncSignals(const Module * module,PropertySuite * propertySuite, Model *model);
+        static void addSyncSignals(Channel *channel, PropertySuite *propertySuite);
         static void addDataSignals(const Module * module,PropertySuite * propertySuite);
-        static void addDataSignals(const Module * module,PropertySuite * propertySuite, Model *model);
+        static void addDataSignals(Channel *channel, PropertySuite *propertySuite);
         static void addVisibleRegisters(const Module * module,PropertySuite * propertySuite);
         static void addStates(const Module * module,PropertySuite * propertySuite);
-        static void addStates(const Module * module,PropertySuite * propertySuite, Model *model);
+        static void addStates(Channel *channel, PropertySuite *propertySuite);
         static void addFunctions(const Module * module,PropertySuite * propertySuite);
         static void addReset(const Module *module, PropertySuite *propertySuite);
-        static void addReset(const Module *module, PropertySuite *propertySuite, Model* model);
+        static void addReset(Channel *channel, PropertySuite *propertySuite);
         static void addWait(const Module *module, PropertySuite *propertySuite);
         static void addOperations(const Module *module, PropertySuite *propertySuite);
 
-        static void addConnections(Module *module, PropertySuite *propertySuite, Model *model);
+        static void addConnections(Channel *module, PropertySuite *propertySuite);
 
         static void addTrueOperations(const SCAM::Module *module, SCAM::PropertySuite *propertySuite);
 

@@ -18,12 +18,25 @@ namespace SCAM {
             AbstractMacro(dataSignal->getName(), dataSignal->getDataType()) {
     }
 
+    PropertyMacro::PropertyMacro(DataSignal *dataSignal, std::string name) :
+            port(dataSignal->getPort()),
+            dataSignal(dataSignal),
+            macroType(MacroType::portType),
+            AbstractMacro(name, dataSignal->getDataType()) {
+    }
 
     PropertyMacro::PropertyMacro(Notify *notifySignal) :
             notifySignal(notifySignal),
             port(notifySignal->getPort()),
             macroType(MacroType::notifyType),
             AbstractMacro(notifySignal->getPort()->getName() + "_notify", notifySignal->getDataType()) {
+    }
+
+    PropertyMacro::PropertyMacro(Notify *notifySignal, std::string name) :
+            notifySignal(notifySignal),
+            port(notifySignal->getPort()),
+            macroType(MacroType::notifyType),
+            AbstractMacro(name, notifySignal->getDataType()) {
     }
 
     PropertyMacro::PropertyMacro(SyncSignal *syncSignal) :
@@ -33,11 +46,25 @@ namespace SCAM {
             AbstractMacro(syncSignal->getPort()->getName() + "_sync", syncSignal->getDataType()) {
     }
 
+    PropertyMacro::PropertyMacro(SyncSignal *syncSignal, std::string name) :
+            port(syncSignal->getPort()),
+            syncSignal(syncSignal),
+            macroType(MacroType::syncType),
+            AbstractMacro(name, syncSignal->getDataType()) {
+    }
+
     PropertyMacro::PropertyMacro(Variable * variable) :
             variable(variable),
             variableOperand(new VariableOperand(variable)),
             macroType(MacroType::varType),
             AbstractMacro(variable->getName(), variable->getDataType()) {
+    }
+
+    PropertyMacro::PropertyMacro(Variable * variable, std::string name) :
+            variable(variable),
+            variableOperand(new VariableOperand(variable)),
+            macroType(MacroType::varType),
+            AbstractMacro(name, variable->getDataType()) {
     }
 
 

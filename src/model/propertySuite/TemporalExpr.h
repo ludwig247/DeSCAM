@@ -40,6 +40,10 @@ namespace SCAM {
 
         bool isDuring();
 
+        std::string getInstance();
+
+        void setInstance(std::string inst);
+
     private:
 
         Type type;
@@ -47,7 +51,7 @@ namespace SCAM {
         Stmt *statement;
 
         std::string freezeAt = "_at_t"; //! For commitment: xyz = value@freezeAt
-
+        std::string instance;
     };
 
 }

@@ -22,9 +22,13 @@ namespace SCAM {
     public:
         // Constructor
         explicit PropertyMacro(SyncSignal *syncSignal);
+        explicit PropertyMacro(SyncSignal *syncSignal, std::string name);
         explicit PropertyMacro(Notify *notifySignal);
+        explicit PropertyMacro(Notify *notifySignal, std::string name);
         explicit PropertyMacro(DataSignal *dataSignal);
+        explicit PropertyMacro(DataSignal *dataSignal, std::string name);
         explicit PropertyMacro(Variable *variable);
+        explicit PropertyMacro(Variable *variable, std::string name);
 
         // Getter
         Port *getPort() const;

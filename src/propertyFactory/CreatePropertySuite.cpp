@@ -376,9 +376,8 @@ void SCAM::CreatePropertySuite::addWait(const Module *module, PropertySuite *pro
     }
 
 }
+/*void CreatePropertySuite::addConnections(Module *module, PropertySuite *propertySuite, Model *model) {
 
-void CreatePropertySuite::addConnections(Module *module, PropertySuite *propertySuite, Model *model) {
-    std::cout << "addConnections" << module->getName() << std::endl;
     int currentLevel = model->getMaxLevel();
     ModuleInstance *inst;
     while (currentLevel >= 0) {
@@ -418,7 +417,7 @@ void CreatePropertySuite::addConnections(Module *module, PropertySuite *property
 
             auto t_end_var = new Timepoint("t_end");
             auto t_end = new TimePointOperand(t_end_var);
-            auto variable = new Variable("messages", DataTypes::getDataType("unsigned"));
+            auto variable = new Variable("cycles", DataTypes::getDataType("unsigned"));
             auto variableOperand = new VariableOperand(variable);
             newProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", variableOperand));
 
@@ -433,45 +432,397 @@ void CreatePropertySuite::addConnections(Module *module, PropertySuite *property
             //freeze output channel data
             auto dataSig = fromPort->getDataSignal();
             PropertyMacro *signalMacro;
-            if (dataSig->isSubVar()) {
-                signalMacro = propertySuite->findSignal(dataSig->getPort()->getName() + "_sig", dataSig->getName());
-            } else {
+            if(dataSig->getSubVarList().empty()) {
                 signalMacro = propertySuite->findSignal(dataSig->getName());
+                newProperty->addFreezeSignal(signalMacro, t_var);
+            } else {
+                for (const auto &subVar: fromPort->getDataSignal()->getSubVarList()) {
+                    signalMacro = propertySuite->findSignal(dataSig->getName(), subVar->getName());
+                    newProperty->addFreezeSignal(signalMacro, t_var);
+                }
             }
-            newProperty->addFreezeSignal(signalMacro, t_var);
 
-            //===============================
-            // Assumptions
-            //===============================
-
-            auto startStateExpr_to = new TemporalExpr(t, toPort->getNotify());
-            auto startStateExpr_from = new TemporalExpr(t, fromPort->getNotify());
-            newProperty->addAssumption(startStateExpr_to);
-            newProperty->addAssumption(startStateExpr_from);
-
-            //===============================
-            // Commitments
-            //===============================
-            //add commitment states from submodules
-            for (const auto &instance: module->getModuleInstanceMap()) {
-                for (const auto &state : instance.second->getStructure()->getFSM()->getStateMap()) {
-                    if (state.second->isInit()) continue;
-                    for (auto operation : state.second->getOutgoingOperationsList()) {
-                        if (operation->IsWait()) continue;
-
-                        if (operation->getState()->getCommunicationPort()->getName() == toPort->getName() || operation->getState()->getCommunicationPort()->getName() == fromPort->getName()) {
-                            PropertyMacro *nextState = propertySuite->findSignal(operation->getNextState()->getName());
-
-                            auto nextStateExpr = new TemporalExpr(t_end, nextState->getVariableOperand());
-                            newProperty->addCommitment(nextStateExpr);
+            //Freeze all other notifies
+            for (const auto &subinst: inst->getSubmoduleInstances()) {
+                if(subinst.second != channel->getToInstance() && subinst.second != channel->getFromInstance()) {
+                    for (const auto &ports: subinst.second->getStructure()->getPorts()) {
+                        //TODO: maybe add other interfaces aswell
+                        if(ports.second->getInterface()->isBlocking()) {
+                            PropertyMacro *notify = propertySuite->findSignal(subinst.first + "_" + ports.first + "_notify" );
+                            newProperty->addFreezeSignal(notify, t_var);
                         }
                     }
                 }
             }
-            //add commitment for data
-            auto commitment = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
-            newProperty->addCommitment(new TemporalExpr(t_end, commitment));
+            /*for (const auto &freezechan: inst->getChannelMap()) {
+                auto freezechannel = freezechan.second;
+                if (freezechannel->getToInstance() != channel->getToInstance()) {
+                    PropertyMacro *toNotify = propertySuite->findSignal(freezechannel->getToInstance()->getName() + "_" + freezechannel->getToPort()->getName() + "_notify" );
+                    PropertyMacro *fromNotify = propertySuite->findSignal(freezechannel->getFromInstance()->getName() + "_" + freezechannel->getFromPort()->getName() + "_notify" );
+                    newProperty->addFreezeSignal(toNotify, t_var);
+                    newProperty->addFreezeSignal(fromNotify, t_var);
+                }
+            }*/
+
+//===============================
+// Assumptions
+//===============================
+/*
+auto startStateExpr_to = new TemporalExpr(t, toPort->getNotify());
+auto startStateExpr_from = new TemporalExpr(t, fromPort->getNotify());
+startStateExpr_to->setInstance(toInstance->getName());
+startStateExpr_from->setInstance(fromInstance->getName());
+newProperty->addAssumption(startStateExpr_to);
+newProperty->addAssumption(startStateExpr_from);
+
+//===============================
+// Commitments
+//===============================
+//add commitment states from submodules
+for (const auto &instance: module->getModuleInstanceMap()) {
+for (const auto &state : instance.second->getStructure()->getFSM()->getStateMap()) {
+if (state.second->isInit()) continue;
+for (auto operation : state.second->getOutgoingOperationsList()) {
+if (operation->IsWait()) continue;
+
+if (operation->getState()->getCommunicationPort()->getName() == toPort->getName() || operation->getState()->getCommunicationPort()->getName() == fromPort->getName()) {
+PropertyMacro *nextState = propertySuite->findSignal(instance.first + "_" + operation->getNextState()->getName());
+
+auto nextStateExpr = new TemporalExpr(t_end, nextState->getVariableOperand());
+nextStateExpr->setInstance(instance.first);
+newProperty->addCommitment(nextStateExpr);
+}
+}
+}
+}
+//add commitment for data
+if (toPort->getDataSignal()->getSubVarList().empty()) {
+auto c = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
+auto commitment = new TemporalExpr(t_end, c);
+commitment->setInstance(toInstance->getName());
+newProperty->addCommitment(commitment);
+} else {
+for (const auto &subVar: toPort->getDataSignal()->getSubVarList()) {
+auto c = new Assignment(new DataSignalOperand(subVar), new DataSignalOperand(fromPort->getDataSignal()->getSubVar(subVar->getName())));
+auto commitment = new TemporalExpr(t_end, c);
+commitment->setInstance(toInstance->getName());
+newProperty->addCommitment(commitment);
+}
+}
+//auto timePointOperand = new TimePointOperand(timepoint);
+//add commitment for freeze notify
+for (const auto &subinst: inst->getSubmoduleInstances()) {
+if(subinst.second != channel->getToInstance() && subinst.second != channel->getFromInstance()) {
+for (const auto &ports: subinst.second->getStructure()->getPorts()) {
+//TODO: maybe add other interfaces aswell
+if(ports.second->getInterface()->isBlocking()) {
+//TO
+auto commitment = new Assignment(ports.second->getNotify(), ports.second->getNotify());
+auto temporalExpr = new TemporalExpr(t,t_end, commitment);
+temporalExpr->setFreezeAt( subinst.first + "_" + ports.first + "_notify_at_t");
+newProperty->addCommitment(temporalExpr);
+temporalExpr->setInstance(subinst.first);
+}
+}
+}
+}
+/*
+for (const auto &freezechan: inst->getChannelMap()) {
+    auto freezechannel = freezechan.second;
+    if (freezechannel != channel) {
+        //TO
+        auto commitment_to = new Assignment(freezechannel->getToPort()->getNotify(), freezechannel->getToPort()->getNotify());
+        auto temporalExpr_to = new TemporalExpr(t,t_end, commitment_to);
+        temporalExpr_to->setFreezeAt( freezechannel->getToInstance()->getName() + "_" + freezechannel->getToPort()->getName() + "_notify_at_t");
+        newProperty->addCommitment(temporalExpr_to);
+        temporalExpr_to->setInstance(freezechannel->getToInstance()->getName());
+        //FROM
+        auto commitment_from = new Assignment(freezechannel->getFromPort()->getNotify(), freezechannel->getFromPort()->getNotify());
+        auto temporalExpr_from = new TemporalExpr(t,t_end, commitment_from);
+        temporalExpr_from->setFreezeAt( freezechannel->getFromInstance()->getName() + "_" + freezechannel->getFromPort()->getName() + "_notify_at_t");
+        newProperty->addCommitment(temporalExpr_from);
+        temporalExpr_from->setInstance(freezechannel->getFromInstance()->getName());
+    }
+}
+
+}
+}
+}*/
+void CreatePropertySuite::addConnections(Channel *channel, PropertySuite *propertySuite) {
+
+    if (channel->getType() == "Blocking") {
+        //For general usage
+        auto fromInstance = channel->getFromInstance();
+        auto toInstance = channel->getToInstance();
+        auto fromPort = channel->getFromPort();
+        auto toPort = channel->getToPort();
+        //===============================
+        // Timepoints
+        //===============================
+        //Add t_first timepoint:
+        auto t_var = new Timepoint("t");
+        auto t = new TimePointOperand(t_var);
+
+        auto t_end_var = new Timepoint("t_end");
+        auto t_end = new TimePointOperand(t_end_var);
+
+        //===============================
+        //===============================
+        // Property to prove correct connection of sync and notify
+        //===============================
+        //===============================
+        auto sync_operation = new Operation();
+        auto *syncProperty = new Property("notify_sync_connection", sync_operation);
+        propertySuite->addProperty(syncProperty);
+        //===============================
+        // Commitments
+        //===============================
+        //add commitment states from submodules
+
+        //TO
+        auto syncc1 = new Assignment(toPort->getSynchSignal(), fromPort->getNotify());
+        auto synctE1 = new TemporalExpr(t, t_end, syncc1);
+        auto syncc2 = new Assignment(fromPort->getSynchSignal(), toPort->getNotify());
+        auto synctE2 = new TemporalExpr(t, t_end, syncc2);
+
+        auto synctE21 = new TemporalExpr(t, syncc2);
+        auto synctE11 = new TemporalExpr(t, syncc1);
+
+        synctE1->setInstance(toInstance->getName());
+        synctE2->setInstance(fromInstance->getName());
+
+        synctE11->setInstance(toInstance->getName());
+        synctE21->setInstance(fromInstance->getName());
+        syncProperty->addCommitment(synctE11);
+        syncProperty->addCommitment(synctE21);
+
+        //===============================
+        //===============================
+        // Transmission Property
+        //===============================
+        //===============================
+
+        std::cout << channel->getName() << std::endl;
+        auto trans_operation = new Operation();
+        auto *transProperty = new Property("transmission_" + channel->getName(), trans_operation);
+        propertySuite->addProperty(transProperty);
+        //===============================
+        // Constraints
+        //===============================
+        transProperty->addConstraint(propertySuite->getConstraint("no_reset"));
+        //===============================
+        // Timepoints
+        //===============================
+        auto variable = new Variable("cycles", DataTypes::getDataType("unsigned"));
+        auto variableOperand = new VariableOperand(variable);
+        transProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", variableOperand));
+        //===============================
+        //FREEZE VARS
+        //===============================
+
+        //freeze output channel data
+        auto dataSig = fromPort->getDataSignal();
+        PropertyMacro *signalMacro;
+        if(dataSig->getSubVarList().empty()) {
+            signalMacro = propertySuite->findSignal(dataSig->getName());
+            transProperty->addFreezeSignal(signalMacro, t_var);
+        } else {
+            for (const auto &subVar: fromPort->getDataSignal()->getSubVarList()) {
+                signalMacro = propertySuite->findSignal(dataSig->getName(), subVar->getName());
+                transProperty->addFreezeSignal(signalMacro, t_var);
+            }
         }
+
+        //===============================
+        // Assumptions
+        //===============================
+
+        auto startStateExpr_to = new TemporalExpr(t, toPort->getNotify());
+        auto startStateExpr_from = new TemporalExpr(t, fromPort->getNotify());
+        startStateExpr_to->setInstance(toInstance->getName());
+        startStateExpr_from->setInstance(fromInstance->getName());
+        transProperty->addAssumption(startStateExpr_to);
+        transProperty->addAssumption(startStateExpr_from);
+
+        //===============================
+        // Commitments
+        //===============================
+
+        //add commitment for data
+        if (toPort->getDataSignal()->getSubVarList().empty()) {
+            auto c = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
+            auto commitment = new TemporalExpr(t_end, c);
+            commitment->setInstance(toInstance->getName());
+            transProperty->addCommitment(commitment);
+        } else {
+            for (const auto &subVar: toPort->getDataSignal()->getSubVarList()) {
+                auto c = new Assignment(new DataSignalOperand(subVar), new DataSignalOperand(fromPort->getDataSignal()->getSubVar(subVar->getName())));
+                auto commitment = new TemporalExpr(t_end, c);
+                commitment->setInstance(toInstance->getName());
+                transProperty->addCommitment(commitment);
+            }
+        }
+
+        //===============================
+        //===============================
+        // No Transmission Property 1
+        //===============================
+        //===============================
+
+        std::cout << channel->getName() << std::endl;
+        auto notrans_operation = new Operation();
+        auto *notransProperty = new Property("no_transmission1", notrans_operation);
+        propertySuite->addProperty(notransProperty);
+        //===============================
+        // Constraints
+        //===============================
+        notransProperty->addConstraint(propertySuite->getConstraint("no_reset"));
+        //===============================
+        // Timepoints
+        //===============================
+        notransProperty->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
+        //===============================
+        //FREEZE VARS
+        //===============================
+        //===============================
+        // Assumptions
+        //===============================
+        auto no_trans1_stmt = new UnaryExpr("not", toPort->getNotify());
+        notrans_operation->setWait(true);
+        auto no_trans1 = new TemporalExpr(t, no_trans1_stmt);
+        auto no_trans2 = new TemporalExpr(t, fromPort->getNotify());
+        no_trans1->setInstance(toInstance->getName());
+        no_trans2->setInstance(fromInstance->getName());
+        notransProperty->addAssumption(no_trans1);
+        notransProperty->addAssumption(no_trans2);
+
+        //===============================
+        // Commitments
+        //===============================
+
+        //add commitment for data
+
+        /*
+        if (toPort->getDataSignal()->getSubVarList().empty()) {
+            auto c = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
+            auto commitment = new TemporalExpr(t_end, c);
+            commitment->setInstance(toInstance->getName());
+            notransProperty->addCommitment(commitment);
+        } else {
+            for (const auto &subVar: toPort->getDataSignal()->getSubVarList()) {
+                auto c = new Assignment(new DataSignalOperand(subVar), new DataSignalOperand(fromPort->getDataSignal()->getSubVar(subVar->getName())));
+                auto commitment = new TemporalExpr(t_end, c);
+                commitment->setInstance(toInstance->getName());
+                notransProperty->addCommitment(commitment);
+            }
+        }*/
+        notransProperty->addCommitment(synctE1);
+        notransProperty->addCommitment(synctE2);
+
+
+        //===============================
+        //===============================
+        // No Transmission Property 2
+        //===============================
+        //===============================
+
+        auto notrans_operation2 = new Operation();
+        auto *notransProperty2 = new Property("no_transmission2", notrans_operation2);
+        propertySuite->addProperty(notransProperty2);
+        //===============================
+        // Constraints
+        //===============================
+        notransProperty2->addConstraint(propertySuite->getConstraint("no_reset"));
+        //===============================
+        // Timepoints
+        //===============================
+        notransProperty2->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
+        //===============================
+        //FREEZE VARS
+        //===============================
+        //===============================
+        // Assumptions
+        //===============================
+        auto no_trans1_stmt2 = new UnaryExpr("not", fromPort->getNotify());
+        notrans_operation2->setWait(true);
+        auto no_trans12 = new TemporalExpr(t, no_trans1_stmt2);
+        auto no_trans22 = new TemporalExpr(t, toPort->getNotify());
+        no_trans12->setInstance(toInstance->getName());
+        no_trans22->setInstance(fromInstance->getName());
+        notransProperty2->addAssumption(no_trans12);
+        notransProperty2->addAssumption(no_trans22);
+
+        //===============================
+        // Commitments
+        //===============================
+
+        //add commitment for data
+        /*
+        if (toPort->getDataSignal()->getSubVarList().empty()) {
+            auto c = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
+            auto commitment = new TemporalExpr(t_end, c);
+            commitment->setInstance(toInstance->getName());
+            notransProperty2->addCommitment(commitment);
+        } else {
+            for (const auto &subVar: toPort->getDataSignal()->getSubVarList()) {
+                auto c = new Assignment(new DataSignalOperand(subVar), new DataSignalOperand(fromPort->getDataSignal()->getSubVar(subVar->getName())));
+                auto commitment = new TemporalExpr(t_end, c);
+                commitment->setInstance(toInstance->getName());
+                notransProperty2->addCommitment(commitment);
+            }
+        }*/
+
+        notransProperty2->addCommitment(synctE1);
+        notransProperty2->addCommitment(synctE2);
+
+        //===============================
+        //===============================
+        // No Transmission Property 3
+        //===============================
+        //===============================
+
+        auto notrans_operation3 = new Operation();
+        auto *notransProperty3 = new Property("no_transmission3", notrans_operation3);
+        propertySuite->addProperty(notransProperty3);
+        //===============================
+        // Constraints
+        //===============================
+        notransProperty3->addConstraint(propertySuite->getConstraint("no_reset"));
+        //===============================
+        // Timepoints
+        //===============================
+        notransProperty3->addTimePoint(t_end_var, new Arithmetic(t, "+", new UnsignedValue(1)));
+        //===============================
+        //FREEZE VARS
+        //===============================
+        //===============================
+        // Assumptions
+        //===============================
+        notrans_operation3->setWait(true);
+        notransProperty3->addAssumption(no_trans12);
+        notransProperty3->addAssumption(no_trans1);
+
+        //===============================
+        // Commitments
+        //===============================
+        /*
+        //add commitment for data
+        if (toPort->getDataSignal()->getSubVarList().empty()) {
+            auto c = new Assignment(new DataSignalOperand(toPort->getDataSignal()), new DataSignalOperand(fromPort->getDataSignal()));
+            auto commitment = new TemporalExpr(t_end, c);
+            commitment->setInstance(toInstance->getName());
+            notransProperty3->addCommitment(commitment);
+        } else {
+            for (const auto &subVar: toPort->getDataSignal()->getSubVarList()) {
+                auto c = new Assignment(new DataSignalOperand(subVar), new DataSignalOperand(fromPort->getDataSignal()->getSubVar(subVar->getName())));
+                auto commitment = new TemporalExpr(t_end, c);
+                commitment->setInstance(toInstance->getName());
+                notransProperty3->addCommitment(commitment);
+            }
+        }*/
+        notransProperty3->addCommitment(synctE1);
+        notransProperty3->addCommitment(synctE2);
+
     }
 }
 
@@ -607,67 +958,91 @@ Timepoint *CreatePropertySuite::findTimeExpr(const std::map<Timepoint *, Expr *>
 }
 
 
-void SCAM::CreatePropertySuite::addNotifySignals(const Module *module, SCAM::PropertySuite *propertySuite, Model *model) {
-    for(auto& inst: module->getModuleInstanceMap()) {
-        for (auto port: inst.second->getStructure()->getPorts()) {
-            auto interface = port.second->getInterface();
-            if (interface->isShared()) continue;
-            if (interface->isMasterOut() || interface->isBlocking()) {
-                auto pm = new PropertyMacro(port.second->getNotify());
-                propertySuite->addNotifySignal(pm);
-            }
-        }
+void SCAM::CreatePropertySuite::addNotifySignals(Channel *channel, PropertySuite *propertySuite) {
+    auto toport = channel->getToPort();
+    auto interface = toport->getInterface();
+    if (interface->isMasterOut() || interface->isBlocking()) {
+        auto pm = new PropertyMacro(toport->getNotify(), channel->getToInstance()->getName() + "_" + toport->getName() + "_notify");
+        propertySuite->addNotifySignal(pm);
+    }
+
+    auto fromport = channel->getFromPort();
+    interface = fromport->getInterface();
+    if (interface->isMasterOut() || interface->isBlocking()) {
+        auto pm = new PropertyMacro(fromport->getNotify(), channel->getFromInstance()->getName() + "_" + fromport->getName() + "_notify");
+        propertySuite->addNotifySignal(pm);
     }
 }
 
-void SCAM::CreatePropertySuite::addSyncSignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite, Model* model) {
-    for(auto& inst: module->getModuleInstanceMap()) {
-        for (auto port: inst.second->getStructure()->getPorts()) {
-            auto interface = port.second->getInterface();
-            if (interface->isShared()) continue;
-            if (!interface->isMaster() && !interface->isSlaveOut()) {
-                PropertyMacro *pm = new PropertyMacro(port.second->getSynchSignal());
-                propertySuite->addSyncSignal(pm);
-            }
-        }
+void SCAM::CreatePropertySuite::addSyncSignals(Channel *channel, PropertySuite *propertySuite) {
+
+
+    auto toport = channel->getToPort();
+    auto interface = toport->getInterface();
+    if (!interface->isMaster() && !interface->isSlaveOut()) {
+        auto pm = new PropertyMacro(toport->getSynchSignal(), channel->getToInstance()->getName() + "_" + toport->getName() + "_sync");
+        propertySuite->addNotifySignal(pm);
     }
+
+    auto fromport = channel->getFromPort();
+    interface = fromport->getInterface();
+    if (!interface->isMaster() && !interface->isSlaveOut()) {
+        auto pm = new PropertyMacro(fromport->getSynchSignal(), channel->getFromInstance()->getName() + "_" + fromport->getName() + "_sync");
+        propertySuite->addNotifySignal(pm);
+    }
+
+
 }
 
-void SCAM::CreatePropertySuite::addDataSignals(const SCAM::Module *module, SCAM::PropertySuite *propertySuite, Model* model) {
+void SCAM::CreatePropertySuite::addDataSignals(Channel *channel, PropertySuite *propertySuite) {
     // DP SIGNALS
-    for(auto& inst: module->getModuleInstanceMap()) {
-        for (const auto &port: inst.second->getStructure()->getPorts()) {
-            if (port.second->getDataType()->isVoid()) continue;
-            //Add port as datapath signal
-            auto pm = new PropertyMacro(port.second->getDataSignal());
-            propertySuite->addDpSignal(pm);
+    auto toport = channel->getToPort();
+    auto fromport = channel->getFromPort();
 
-            if (port.second->getDataType()->isCompoundType() || port.second->getDataType()->isArrayType()) {
-                //Add all subignals of the compound type
-                for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
-                    auto sub_macro = new PropertyMacro(port.second->getDataSignal()->getSubVar(subVar.first));
-                    propertySuite->addDpSignal(sub_macro);
-                }
+    if (!toport->getDataType()->isVoid()) {
+        auto pm = new PropertyMacro(toport->getDataSignal(), channel->getToInstance()->getName() + "_" + toport->getName() + "_sig");
+        propertySuite->addDpSignal(pm);
+
+        if (toport->getDataType()->isCompoundType() || toport->getDataType()->isArrayType()) {
+            //Add all subignals of the compound type
+            for (const auto &subVar: toport->getDataType()->getSubVarMap()) {
+                auto sub_macro = new PropertyMacro(toport->getDataSignal()->getSubVar(subVar.first), channel->getToInstance()->getName() + "_" + toport->getName() + "_sig_" + subVar.first);
+                propertySuite->addDpSignal(sub_macro);
+            }
+        }
+
+    }
+    if (!fromport->getDataType()->isVoid()) {
+        auto pm = new PropertyMacro(fromport->getDataSignal(), channel->getFromInstance()->getName() + "_" + fromport->getName() + "_sig");
+        propertySuite->addDpSignal(pm);
+
+        if (fromport->getDataType()->isCompoundType() || fromport->getDataType()->isArrayType()) {
+            //Add all subignals of the compound type
+            for (const auto &subVar: fromport->getDataType()->getSubVarMap()) {
+                auto sub_macro = new PropertyMacro(fromport->getDataSignal()->getSubVar(subVar.first), channel->getFromInstance()->getName() + "_" + fromport->getName() + "_sig_" + subVar.first);
+                propertySuite->addDpSignal(sub_macro);
             }
         }
     }
+
 }
 
-void SCAM::CreatePropertySuite::addStates(const SCAM::Module *module, SCAM::PropertySuite *propertySuite, Model* model) {
-    for(auto& inst: module->getModuleInstanceMap()) {
+void SCAM::CreatePropertySuite::addStates(Channel *channel, PropertySuite *propertySuite) {
+    for(auto& inst: channel->getParentInstance()->getStructure()->getModuleInstanceMap()) {
         for (const auto &state: inst.second->getStructure()->getFSM()->getStateMap()) {
             if (state.second->isInit()) continue;
             state.second->setName(state.second->getName());
             auto stateVar = new Variable(state.second->getName(), DataTypes::getDataType("bool"));
-            auto pm = new PropertyMacro(stateVar);
+            auto pm = new PropertyMacro(stateVar, inst.first + "_" + stateVar->getName());
             pm->setExpression(new SCAM::BoolValue(true));
             propertySuite->addState(pm);
         }
     }
 }
 
-void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *propertySuite, Model *model) {
+void SCAM::CreatePropertySuite::addReset(Channel *channel, PropertySuite *propertySuite) {
     auto reset_operation = new Operation();
+    auto module = channel->getParentInstance()->getStructure();
     propertySuite->setResetProperty(new Property("reset", reset_operation));
     for(auto& inst: module->getModuleInstanceMap()) {
         for (const auto &state: inst.second->getStructure()->getFSM()->getStateMap()) {
@@ -680,16 +1055,17 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *pr
                 auto t = new TimePointOperand(t_var);
                 PropertyMacro *nextState = inst.second->getStructure()->getPropertySuite()->findSignal(operation->getNextState()->getName());
                 auto nextStateExpr = new TemporalExpr(t, nextState->getOperand());
-
+                nextStateExpr->setInstance(inst.first);
                 propertySuite->getResetProperty()->addCommitment(nextStateExpr);
 
 
 
                 // Add commitments for ResetProperty
-                for (auto commitment: operation->getCommitmentsList()) {
-                    propertySuite->getResetProperty()->addCommitment(new TemporalExpr(t, commitment));
-                    //propertySuite->getResetProperty()->addCommitment(commitment);
-                }
+                /*for (auto c: operation->getCommitmentsList()) {
+                    auto commitment =  new TemporalExpr(t, c);
+                    commitment->setInstance(inst.first);
+                    propertySuite->getResetProperty()->addCommitment(commitment);
+                }*/
 
                 //Notify&Sync Signals, no notification for shareds
                 std::set<Port *> usedPortsList;
@@ -705,7 +1081,7 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *pr
                     usedPortsList.insert(operation->getNextState()->getCommunicationPort());
 
 
-                for (auto port: module->getPorts()) {
+                for (auto port: inst.second->getStructure()->getPorts()) {
                     if (port.second->getInterface()->isShared()) continue;
                     if (port.second->getInterface()->isSlaveIn()) continue;
                     if (port.second->getInterface()->isSlaveOut()) continue;
@@ -714,9 +1090,11 @@ void SCAM::CreatePropertySuite::addReset(const Module *module, PropertySuite *pr
                     PropertyMacro *signalMacro = inst.second->getStructure()->getPropertySuite()->findSignal(port.first + "_notify");
                     if (usedPortsList.find(port.second) != usedPortsList.end()) {
                         auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(true)));
+                        commitment->setInstance(inst.first);
                         propertySuite->getResetProperty()->addCommitment(commitment);
                     } else {
                         auto commitment = new TemporalExpr(t, new Assignment(signalMacro->getNotifySignal(), new BoolValue(false)));
+                        commitment->setInstance(inst.first);
                         propertySuite->getResetProperty()->addCommitment(commitment);
                     }
                 }

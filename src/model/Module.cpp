@@ -196,6 +196,15 @@ namespace SCAM {
         Module::propertySuite = propertySuite;
     }
 
+    std::vector<PropertySuite *> Module::getChannelPropertySuite() const {
+        return channelPropertySuites;
+    }
+
+    void Module::addChannelPropertySuite(PropertySuite *propertySuite) {
+        this->channelPropertySuites.push_back(propertySuite);
+    }
+
+
     std::map<int, SCAM::CfgNode *> Module::getCFG() const {
         return this->cfg;
     }

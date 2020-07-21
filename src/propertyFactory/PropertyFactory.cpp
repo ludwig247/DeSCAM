@@ -40,20 +40,26 @@ SCAM::PropertyFactory::PropertyFactory(const Module *module) {
 }
 
 
-SCAM::PropertyFactory::PropertyFactory(Module *module, Model *model) {
+SCAM::PropertyFactory::PropertyFactory(Channel *channel) {
 
-    assert(model != nullptr);
-    assert(module != nullptr);
+    assert(channel != nullptr);
     // Generate PropertySuite
-    this->propertySuite = new PropertySuite(module->getName());
+    this->propertySuite = new PropertySuite("");
+    //FIXME: at the moment only blocking is supported
+    // if new interfaces are added implement distinction in addConnections
 
-    SCAM::CreatePropertySuite::addReset(module, propertySuite, model);
-    SCAM::CreatePropertySuite::addNotifySignals(module, propertySuite, model);
-    SCAM::CreatePropertySuite::addSyncSignals(module, propertySuite, model);
-    SCAM::CreatePropertySuite::addDataSignals(module, propertySuite, model);
-    SCAM::CreatePropertySuite::addStates(module, propertySuite, model);
-    SCAM::CreatePropertySuite::addConnections(module,propertySuite,model);
-
+    //only take complete channels
+    if((channel->getToPort() != nullptr && channel->getFromPort() != nullptr )) {
+        if (channel->getType() == "Blocking") {
+            this->propertySuite->setName(channel->getName());
+            SCAM::CreatePropertySuite::addReset(channel, propertySuite);
+            SCAM::CreatePropertySuite::addNotifySignals(channel, propertySuite);
+            SCAM::CreatePropertySuite::addSyncSignals(channel, propertySuite);
+            SCAM::CreatePropertySuite::addDataSignals(channel, propertySuite);
+            SCAM::CreatePropertySuite::addStates(channel, propertySuite);
+            SCAM::CreatePropertySuite::addConnections(channel, propertySuite);
+        }
+    }
 }
 
 SCAM::PropertySuite *SCAM::PropertyFactory::getPropertySuite() const {

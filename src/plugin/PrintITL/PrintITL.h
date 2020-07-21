@@ -39,15 +39,20 @@ private:
     std::string location(bool loc);
 
     std::string printTemporalExpr(TemporalExpr* temporalExpr);
+    std::string printTemporalExpr_chan(TemporalExpr* temporalExpr);
 
     std::string printProperty(Property* property);
+    std::string printProperty_chan(Property* property);
 
     std::string macros();
+    std::string macros_chan();
     std::string macrosForHLS();
     std::string operations();
+    std::string operations_chan();
 
     SCAM::Module *module = nullptr;
     Model *model = nullptr;
+    PropertySuite* propertySuite = nullptr;
 
     std::function<std::string()> macroFunction;
 };

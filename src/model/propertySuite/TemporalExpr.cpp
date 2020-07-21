@@ -4,6 +4,8 @@
 
 #include "TemporalExpr.h"
 
+#include <utility>
+
 
 SCAM::TemporalExpr::TemporalExpr(Expr *timepoint, Stmt *statement) :
     statement(statement) {
@@ -46,4 +48,12 @@ const std::string &SCAM::TemporalExpr::getFreezeAt() const {
 
 void SCAM::TemporalExpr::setFreezeAt(const std::string &freezeAt) {
     TemporalExpr::freezeAt = freezeAt;
+}
+
+std::string SCAM::TemporalExpr::getInstance() {
+    return instance;
+}
+
+void SCAM::TemporalExpr::setInstance(std::string inst) {
+    instance = std::move(inst);
 }

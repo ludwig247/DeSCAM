@@ -64,6 +64,10 @@ namespace SCAM {
 
         void setPropertySuite(PropertySuite *propertySuite);
 
+        std::vector<PropertySuite *> getChannelPropertySuite() const;
+
+        void addChannelPropertySuite(PropertySuite *propertySuite);
+
         std::map<int, SCAM::CfgNode *> getCFG() const;
 
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> getcommGroups() const; //TODO: delete
@@ -86,6 +90,8 @@ namespace SCAM {
         std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups;
 
         PropertySuite *propertySuite;
+
+        std::vector<PropertySuite *> channelPropertySuites;
 
         bool _isStructural;
         std::map<std::string, ModuleInstance *> _instanceMap;

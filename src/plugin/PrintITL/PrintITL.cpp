@@ -23,16 +23,26 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     this->model = node;
     for (auto &module: node->getModules()) {
 
-        //if(!module.second->isStructural()) {
+        if(!module.second->isStructural()) {
             this->module = module.second;
             pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macros()));
-            std::cout << module.first << std::endl;
             pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
             std::string funString = functions();
             if (funString != "") {
                 pluginOutput.insert(std::make_pair(module.first + "_functions.vhi", funString));
             }
-        //}
+        } else {
+            this->module = module.second;
+            for (const auto & pSuite: module.second->getChannelPropertySuite()) {
+                this->propertySuite = pSuite;
+                pluginOutput.insert(std::make_pair(module.first + pSuite->getName() +  "_macros.vhi", macros_chan()));
+                pluginOutput.insert(std::make_pair(module.first + pSuite->getName() + ".vhi", operations_chan()));
+            }
+
+
+
+
+        }
     }
     if(!node->getGlobalFunctionMap().empty()){
         pluginOutput.insert(std::make_pair(node->getName() + "_global_functions.vhi", globalFunctions()));
@@ -41,7 +51,7 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 }
 
 std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
-    std::cout << "Print Module" << std::endl;
+
     this->module = node;
 
     pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macroFunction() + operations()));
@@ -211,14 +221,22 @@ std::string PrintITL::printProperty(Property *property) {
     }
 
     if (!property->getFreezeSignals().empty()) {
+        PropertySuite *ps = this->module->getPropertySuite();
         ss << "freeze:\n";
         for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
+
             ss <<  "\t" <<  f->first->getFullName("_");
             ss << "_at_" + f->second->getName();
             ss << " = ";
             if(f->first->isSubVar() && f->first->getParentDataType()->isArrayType()){
                 ss << f->first->getFullName();
-            }else ss << f->first->getFullName("_");
+            }else {
+                if (this->module->isStructural()) {
+                    ss << f->first->getName();
+                } else {
+                    ss << f->first->getFullName("_");
+                }
+            }
             ss << "@" << f->second->getName();
             if (std::next(f) != property->getFreezeSignals().end()) {
                 ss << ",\n";
@@ -265,7 +283,11 @@ std::string PrintITL::macros() {
     for (auto dp: ps->getDpSignals()) {
         if(dp->isCompoundType()) ss << "--";
         ss << "macro " ;
-        ss << dp->getFullName("_");
+        if(this->module->isStructural()) {
+            ss << dp->getName();
+        } else {
+            ss << dp->getFullName("_");
+        }
         ss << " : " << convertDataType(dp->getDataType()->getName()) << " :=";
         ss << ConditionVisitor::toString(dp->getDataType()->getDefaultVal());
         ss <<" end macro;" << std::endl;
@@ -303,6 +325,74 @@ std::string PrintITL::macros() {
     ss << std::endl << std::endl;
     return ss.str();
 }
+
+
+std::string PrintITL::macros_chan() {
+
+    std::stringstream ss;
+
+
+    ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
+    for (auto sync: propertySuite->getSyncSignals()) {
+        ss << "macro " << sync->getName() << " : " << convertDataType(sync->getDataType()->getName()) << " := true end macro;" << std::endl;
+    }
+    for (auto notify: propertySuite->getNotifySignals()) {
+        ss << "macro " << notify->getName() << " : " << convertDataType(notify->getDataType()->getName()) << " := true end  macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- DP SIGNALS --" << std::endl;
+    for (auto dp: propertySuite->getDpSignals()) {
+        if(dp->isCompoundType()) ss << "--";
+        ss << "macro " ;
+        if(this->module->isStructural()) {
+            ss << dp->getName();
+        } else {
+            ss << dp->getFullName("_");
+        }
+        ss << " : " << convertDataType(dp->getDataType()->getName()) << " :=";
+        ss << ConditionVisitor::toString(dp->getDataType()->getDefaultVal());
+        ss <<" end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- CONSTRAINTS --" << std::endl;
+    // Reset constraint is print out extra because of the quotation marks ('0')
+    ss << "constraint no_reset := rst = '0'; end constraint;" << std::endl;
+    for (auto co: propertySuite->getConstraints()) {
+        if (co->getName() != "no_reset") {
+            ss << "constraint " << co->getName() << " : " << ConditionVisitor::toString(co->getExpression()) << "; end constraint;" << std::endl;
+        }
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- TRANSMISSION MACROS --" << std::endl;
+    // Reset constraint is print out extra because of the quotation marks ('0')
+    ss << "macro cycles: unsigned := 0 end macro; " << std::endl;
+    ss << std::endl << std::endl;
+
+    ss << "-- VISIBLE REGISTERS --" << std::endl;
+    for (auto vr: propertySuite->getVisibleRegisters()) {
+        if(vr->isCompoundType()) ss << "--";
+        bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        if (!skip) {  //Dont print all the sub vars for an array
+            ss << "macro " << vr->getFullName("_");
+            ss << " : " << convertDataType(vr->getDataType()->getName()) << " :=";
+            ss << ConditionVisitor::toString(vr->getDataType()->getDefaultVal());
+            ss << " end macro;" << std::endl;
+        }
+    }
+    ss << std::endl << std::endl;
+
+    ss << "-- STATES --" << std::endl;
+    for (auto st: propertySuite->getStates()) {
+        ss << "macro " << st->getName() << " : " << convertDataType(st->getDataType()->getName());
+        ss << " := " << ConditionVisitor::toString(st->getExpression()) << " end macro;" << std::endl;
+    }
+    ss << std::endl << std::endl;
+    return ss.str();
+}
+
 
 std::string PrintITL::operations() {
 
@@ -461,5 +551,150 @@ std::string PrintITL::globalFunctions() {
         if (function.second->getReturnValueConditionList().size() > 1) ss << "end if;\n";
         ss << "end macro;\n\n";
     }
+    return ss.str();
+}
+
+std::string PrintITL::operations_chan() {
+
+    PropertySuite *ps = this->module->getPropertySuite();
+
+    std::stringstream ss;
+
+    ss << "-- OPERATIONS --" << std::endl;
+
+    // Reset property
+    ss << "property " << propertySuite->getResetProperty()->getName() << " is\n";
+    ss << "assume:\n";
+    ss << "\t reset_sequence;\n";
+    ss << "prove:\n";
+    for (auto c : propertySuite->getResetProperty()->getCommitmentList()) {
+        ss << "\t at t: " << c->getInstance() << "_" << ConditionVisitor::toString(c->getStatement()) << ";\n";
+    }
+    ss << "end property;\n";
+    ss << std::endl << std::endl;
+
+    for (auto p : propertySuite->getProperties()) {
+        ss << printProperty_chan(p);
+    }
+
+    return ss.str();
+}
+
+std::string PrintITL::printProperty_chan(Property *property) {
+
+    std::stringstream ss;
+
+    ss << "property " << property->getName() << " is\n";
+
+    if (!property->getConstraints().empty()) {
+        ss << "dependencies: ";
+        for (auto c : property->getConstraints()) {
+            ss << c->getName();
+            if (c != *(property->getConstraints().end()-1)){
+                ss << ", ";
+            }
+        }
+        ss << ";\n";
+    }
+
+    if (!property->getTimePoints().empty()) {
+        ss << "for timepoints:\n";
+        if (getOptionMap().at("hls-mco")) {
+            ss << "\tt_end = t+t_min..t_max waits_for done_sig = '1';\n";
+        } else {
+            for (auto tp = property->getTimePointsOrdered().begin(); tp!=property->getTimePointsOrdered().end(); tp++) {
+                ss << "\t" << tp->first->getName() << " = " << TimePointVisitor::toString(tp->second);
+                if (std::next(tp)!=property->getTimePointsOrdered().end()) {
+                    ss << ",\n";
+                }
+            }
+            ss << ";\n";
+        }
+    }
+
+    if (!property->getFreezeSignals().empty()) {
+        PropertySuite *ps = this->module->getPropertySuite();
+        ss << "freeze:\n";
+        for (auto f = property->getFreezeSignals().begin(); f != property->getFreezeSignals().end(); f++) {
+
+            ss <<  "\t" <<  f->first->getFullName("_");
+            ss << "_at_" + f->second->getName();
+            ss << " = ";
+            if(f->first->isSubVar() && f->first->getParentDataType()->isArrayType()){
+                ss << f->first->getFullName();
+            }else {
+                if (this->module->isStructural()) {
+                    ss << f->first->getName();
+                } else {
+                    ss << f->first->getFullName("_");
+                }
+            }
+            ss << "@" << f->second->getName();
+            if (std::next(f) != property->getFreezeSignals().end()) {
+                ss << ",\n";
+            }
+        }
+        ss << ";\n";
+    }
+
+    if (!property->getAssumptionList().empty()){
+        ss << "assume:\n";
+        for (auto a : property->getAssumptionList()) {
+            ss << printTemporalExpr_chan(a);
+        }
+    }
+
+    if (!property->getCommitmentList().empty()) {
+        ss << "prove:\n";
+        for (auto c : property->getCommitmentList()) {
+            ss << printTemporalExpr_chan(c);
+        }
+    }
+
+    ss << "end property;\n\n\n";
+
+    return ss.str();
+}
+
+std::string PrintITL::printTemporalExpr_chan(TemporalExpr* temporalExpr) {
+
+    std::stringstream ss;
+
+    ss << "\t";
+    if (temporalExpr->isAt()) {
+        ss << "at ";
+        ss << TimePointVisitor::toString(temporalExpr->getTimepointList().front());
+        ss << ": ";
+    } else if (temporalExpr->isDuring()) {
+        ss << "during[";
+        ss << TimePointVisitor::toString(temporalExpr->getTimepointList().front());
+        ss << ", ";
+        ss << TimePointVisitor::toString(temporalExpr->getTimepointList().back());
+        ss << "]: ";
+    }
+
+    if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
+        Assignment * a = NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement());
+        ss << temporalExpr->getInstance() << "_" << ConditionVisitor::toString(a->getLhs());
+        ss << " = ";
+        if(temporalExpr->getFreezeAt() != "_at_t") {
+            ss << temporalExpr->getFreezeAt();
+        } else {
+            ss << DatapathVisitor::toString(a->getRhs(),2,0,temporalExpr->getFreezeAt());
+        }
+    } else {
+        std::string foo = ConditionVisitor::toString(temporalExpr->getStatement());
+        std::string no = "not(";
+        if (foo.find(no) != std::string::npos) {
+            foo = foo.erase(0,4);
+            ss << "not(" << temporalExpr->getInstance() << "_" << foo;
+        } else {
+            ss << temporalExpr->getInstance() << "_" << ConditionVisitor::toString(temporalExpr->getStatement());
+        }
+
+
+    }
+    ss << ";\n";
+
     return ss.str();
 }
