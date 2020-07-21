@@ -1,5 +1,3 @@
-
-
 template<typename T>
 Synchronizer<T>::Synchronizer (const char *name, unsigned int size) :
         sc_prim_channel(name),
@@ -9,19 +7,13 @@ Synchronizer<T>::Synchronizer (const char *name, unsigned int size) :
     buffer = new T[size];
 }
 
-
 template<typename T>
 void Synchronizer<T>::read(T *out) {
-    bool valid = false;
     //loop to check if all flags are set
-    while(!valid){
-        valid = true;
-        for(int i=0; i<number_of_senders;i++){
-            //if one flag is not set wait for writer_notify
-            if(!flags[i]){
-                valid = false;
-                wait(writer_notify);
-            }
+    for(int i=0; i<number_of_senders;i++){
+        //if one flag is not set wait for writer_notify
+        if(!flags[i]){
+            wait(writer_notify);
         }
     }
     //Unset flags and write output

@@ -70,8 +70,10 @@ property_graph:
   start_state_26 -> start_state_26;
   start_state_26 -> wait;
 
+  start_state_27 -> start_state_12;//added for size 16
   start_state_27 -> start_state_13;
   start_state_27 -> start_state_15;
+  start_state_27 -> start_state_16; //added for size 16
   start_state_27 -> start_state_27;
   start_state_27 -> wait;
 
