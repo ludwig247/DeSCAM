@@ -22,6 +22,24 @@ end macro;
 macro boolean cpu1_flush_sig := cpu1/branch_decision & cpu1/branch_in_ex end macro;
 macro boolean cpu2_flush_sig := cpu2/branch_decision & cpu2/branch_in_ex end macro;
 
+macro boolean CPU2_STALL := 
+    cpu2/perf_jr_stall | 
+    cpu2/perf_ld_stall | 
+    cpu2/perf_pipeline_stall |
+    cpu2/halt_if
+end macro;
+
+macro boolean CPU2_NO_FLUSH_STATE := 
+    !(cpu2/id_stage_i/controller_i/ctrl_fsm_cs == FLUSH_EX)
+end macro;
+
+macro unsigned REGISTER_CPU1 (unsigned r) :=
+    cpu1/id_stage_i/registers_i/riscv_register_file_i/mem[r];
+end macro;
+
+macro unsigned REGISTER_CPU2 (unsigned r) :=
+    cpu2/id_stage_i/registers_i/riscv_register_file_i/mem[r];
+end macro;
 
 constraint no_reset := rst_ni == 1 ; end constraint;
 
@@ -52,4 +70,12 @@ end constraint;
 constraint instr_mem:=
     (!cpu1/instr_req_o || (cpu1/instr_req_o && cpu1/instr_gnt_i && next(cpu1/instr_rvalid_i))) &&
     (!cpu2/instr_req_o || (cpu2/instr_req_o && cpu2/instr_gnt_i && next(cpu2/instr_rvalid_i)));
+end constraint;
+
+// Avoid that fetched instructions are loaded into ID stage after an arbitrary time interval.
+// Prefetcher keeps the fetched intrsuctions in a fifo if the processor is stalled.
+// When the pipeline is ready, it loads from this fifo. If this constraint is taken off, then 
+// it will be hard to compute the t_id_2.
+constraint CPU2_no_prefetching :=
+    cpu2/if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/valid_Q   == 4'd0;
 end constraint;

@@ -1,10 +1,27 @@
+macro boolean INSTR_RESTRICTION (unsigned instr_imem) :=
+	instr_imem[6:0] == 7'h33 &&                                     //opcode 
+	(instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4) &&       //rd
+	instr_imem[14:12] == 3'h0 &&                                   //func3
+	instr_imem[19:15] <= 5'd4 &&                                   //rs1
+	instr_imem[24:20] <= 5'd4 &&                                   //rs2
+	instr_imem[31:25] == 7'h00                                     //func7
+end macro;
+
+constraint CPU2_allowed_instr :=
+	!((getInstrType(cpu2/instr_rdata_i) == instr_unknown));
+	//getEncType(cpu2/instr_rdata_i) == enc_r &&
+	//INSTR_RESTRICTION(cpu2/instr_rdata_i);
+end constraint;
+
 property S2QED_ARITH;
 dependencies: 
     no_reset,
     in_out_constraints,
     no_unaligned_case,
 	no_hwlp_case,
-	instr_mem;
+	instr_mem,
+	CPU2_no_prefetching,
+	CPU2_allowed_instr; 
 for timepoints:
 	t_if_i1 = t,
 	t_idex_i1 = t_if_i1+1,
@@ -13,7 +30,7 @@ for timepoints:
 
 	t_if_i2 = t,
 	//t_idex_i2 = t_if_i2+1..5 waits_for (cpu2/data_req_o==0 || cpu2/data_rvalid_i),
-	t_idex_i2 = t_if_i2+1..5 waits_for (cpu2/perf_pipeline_stall == 0),
+	t_idex_i2 = t_if_i2+1..5 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
 	t_wb_i2 = t_idex_i2+1,
 	t_done_i2 = t_wb_i2+1;
 freeze:
@@ -22,9 +39,16 @@ freeze:
 
     //regfile
     regfile_i1_at_t_wb_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_wb_i1,
-    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1,
 
-	
+	//----------------
+	// rd_at_t = getRdAddr(cpu1/instr_rdata_i)@t,
+	// instr_at_t = cpu1/instr_rdata_i@t,
+	// rs1_at_t = getRs1Addr(instr_at_t)@t,
+	// rs2_at_t = getRs2Addr(instr_at_t)@t,
+	// oper1_at_t_id = REGISTER_CPU1(rs1_at_t)@t_idex_i1,
+	// oper2_at_t_id = REGISTER_CPU1(rs2_at_t)@t_idex_i1;
+
 
 assume:
 	// constraints on CPU1
@@ -37,17 +61,39 @@ assume:
 	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
 
 	// QED consistent registers
-	at t_wb_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_wb_i1;
+	//at t_wb_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_wb_i1;
+	at t_wb_i2: foreach r in 0..31: 
+					(REGISTER_CPU1(r) == REGISTER_CPU2(r) || (cpu2/regfile_we_wb && cpu2/regfile_waddr_fw_wb_o == resize(r,6))); 
+				end foreach;
+	at t_wb_i2: foreach r in 0..31: 
+					(!cpu2/regfile_we_wb || (cpu2/regfile_we_wb && cpu2/regfile_wdata == REGISTER_CPU1(r))); 
+				end foreach;
 
 	//Flushing
     at t_idex_i2: !cpu1_flush_sig_at_t_idex_i1;
-    at t_idex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
+    //at t_idex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
+	during [t_if_i2, t_idex_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
+	during [t_if_i2, t_idex_i2]: CPU2_NO_FLUSH_STATE;
 
 	//I/O should be the same (no stalling)
 	//at t: (cpu2/data_req_o==0 || cpu2/data_rvalid_i);
-	at t: cpu2/perf_pipeline_stall == 0;
+	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
+
+
+	//------------------
+	//at t: INSTR_RESTRICTION(cpu1/instr_rdata_i);
+	//at t: getEncType(cpu2/instr_rdata_id) == enc_i_l;
 	
 prove:
 	// general registers
 	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+	//at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem[rd_at_t] == regfile_i1_at_t_done_i1[rd_at_t];
+	
+	//--------------------
+	// at t_wb_i1: cpu1/regfile_alu_waddr_fw == getRdAddr(instr_at_t);
+	// at t_wb_i1: cpu1/regfile_alu_we_fw == 1;
+	// at t_wb_i1: cpu1/regfile_alu_wdata_fw == getALUresult(getALUfunc(getInstrType(instr_at_t)),oper1_at_t_id, oper2_at_t_id);
+	// //WB to REGFILE
+	// at t_done_i1: REGISTER_CPU1(getRdAddr(instr_at_t)) == getALUresult(getALUfunc(getInstrType(instr_at_t)),oper1_at_t_id, oper2_at_t_id);
+
 end property;
