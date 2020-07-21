@@ -8,13 +8,13 @@ entity TestMasterSlave2 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	s_out:		out int
+	s_out:		out signed(31 downto 0)
 );
 end TestMasterSlave2;
 
 architecture TestMasterSlave2_arch of TestMasterSlave2 is
 	signal section_signal: Sections;
-	signal val_signal: int;
+	signal val_signal: signed(31 downto 0);
 
 begin
 	process(clk)

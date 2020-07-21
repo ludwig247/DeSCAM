@@ -31,7 +31,6 @@ namespace SCAM {
     public:
         FindEndNode(SCAM::CfgBlock *startNode);
 
-
         SCAM::CfgBlock *getEndNode();
 
         void recursion(SCAM::CfgBlock *node); //! Finds the endNode for a while.

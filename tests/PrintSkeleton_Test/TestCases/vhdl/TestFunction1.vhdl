@@ -19,7 +19,7 @@ end TestFunction1;
 
 architecture TestFunction1_arch of TestFunction1 is
 	signal record_var_signal: record_t;
-	signal x_signal: int;
+	signal x_signal: signed(31 downto 0);
 	signal y_signal: unsigned (31 downto 0);
 
 begin
