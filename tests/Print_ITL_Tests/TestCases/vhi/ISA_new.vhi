@@ -1,54 +1,54 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro fromMemoryPort_sync : boolean := end macro;
-macro toMemoryPort_sync : boolean := end macro;
-macro fromMemoryPort_notify : boolean := end macro;
-macro toMemoryPort_notify : boolean := end macro;
-macro toRegsPort_notify : boolean := end macro;
+macro fromMemoryPort_sync : boolean := true end macro;
+macro toMemoryPort_sync : boolean := true end macro;
+macro fromMemoryPort_notify : boolean := true end  macro;
+macro toMemoryPort_notify : boolean := true end  macro;
+macro toRegsPort_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro fromMemoryPort_sig : MEtoCU_IF := end macro;
-macro fromMemoryPort_sig_loadedData : unsigned := end macro;
-macro fromRegsPort_sig : RegfileType := end macro;
-macro fromRegsPort_sig_reg_file_01 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_02 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_03 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_04 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_05 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_06 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_07 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_08 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_09 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_10 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_11 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_12 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_13 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_14 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_15 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_16 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_17 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_18 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_19 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_20 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_21 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_22 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_23 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_24 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_25 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_26 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_27 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_28 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_29 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_30 : unsigned := end macro;
-macro fromRegsPort_sig_reg_file_31 : unsigned := end macro;
-macro toMemoryPort_sig : CUtoME_IF := end macro;
-macro toMemoryPort_sig_addrIn : unsigned := end macro;
-macro toMemoryPort_sig_dataIn : unsigned := end macro;
-macro toMemoryPort_sig_mask : ME_MaskType := end macro;
-macro toMemoryPort_sig_req : ME_AccessType := end macro;
-macro toRegsPort_sig : RegfileWriteType := end macro;
-macro toRegsPort_sig_dst : unsigned := end macro;
-macro toRegsPort_sig_dstData : unsigned := end macro;
+--macro fromMemoryPort_sig : MEtoCU_IF :={resize(0,32)} end macro;
+macro fromMemoryPort_sig_loadedData : unsigned :=resize(0,32) end macro;
+--macro fromRegsPort_sig : RegfileType :={resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
+macro fromRegsPort_sig_reg_file_01 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_02 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_03 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_04 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_05 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_06 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_07 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_08 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_09 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_10 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_11 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_12 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_13 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_14 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_15 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_16 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_17 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_18 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_19 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_20 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_21 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_22 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_23 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_24 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_25 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_26 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_27 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_28 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_29 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_30 : unsigned :=resize(0,32) end macro;
+macro fromRegsPort_sig_reg_file_31 : unsigned :=resize(0,32) end macro;
+--macro toMemoryPort_sig : CUtoME_IF :={resize(0,32), resize(0,32), MT_B, ME_RD} end macro;
+macro toMemoryPort_sig_addrIn : unsigned :=resize(0,32) end macro;
+macro toMemoryPort_sig_dataIn : unsigned :=resize(0,32) end macro;
+macro toMemoryPort_sig_mask : ME_MaskType :=MT_X end macro;
+macro toMemoryPort_sig_req : ME_AccessType :=ME_X end macro;
+--macro toRegsPort_sig : RegfileWriteType :={resize(0,32), resize(0,32)} end macro;
+macro toRegsPort_sig_dst : unsigned :=resize(0,32) end macro;
+macro toRegsPort_sig_dstData : unsigned :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -56,10 +56,10 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro pcReg : unsigned := end macro;
-macro phase : Phases := end macro;
-macro regfileWrite_dst : unsigned := end macro;
-macro regfileWrite_dstData : unsigned := end macro;
+macro pcReg : unsigned :=resize(0,32) end macro;
+macro phase : Phases :=fetch_PH end macro;
+macro regfileWrite_dst : unsigned :=resize(0,32) end macro;
+macro regfileWrite_dstData : unsigned :=resize(0,32) end macro;
 
 
 -- STATES --
@@ -330,7 +330,7 @@ prove:
 	at t_end: regfileWrite_dst = regfileWrite_dst_at_t;
 	at t_end: regfileWrite_dstData = regfileWrite_dstData_at_t;
 	at t_end: toMemoryPort_sig_addrIn = getALUresult(ALU_ADD,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t)),getImmediate(fromMemoryPort_sig_loadedData_at_t));
-	at t_end: toMemoryPort_sig_dataIn = readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(fromMemoryPort_sig_loadedData_at_t));
+	at t_end: toMemoryPort_sig_dataIn = readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(fromMemoryPort_sig_loadedData_at_t));
 	at t_end: toMemoryPort_sig_mask = getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_at_t));
 	at t_end: toMemoryPort_sig_req = ME_WR;
 	during[t+1, t_end]: fromMemoryPort_notify = false;

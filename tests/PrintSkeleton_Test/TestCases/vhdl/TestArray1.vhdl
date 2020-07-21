@@ -8,10 +8,10 @@ entity TestArray1 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	m_in:		in int;
+	m_in:		in signed(31 downto 0);
 	m_in_sync:		in bool;
 	m_in_notify:		out bool;
-	m_out:		out int;
+	m_out:		out signed(31 downto 0);
 	m_out_sync:		in bool;
 	m_out_notify:		out bool
 );

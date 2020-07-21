@@ -12,6 +12,8 @@
 #include "ModulesMasterSlave_new.h"
 #include "ModuleArrays_new.h"
 #include "ModulesGlobal.h"
+#include "ModulesTernary.h"
+
 
 #include "Bus_new.h"
 #include "Paper_new.h"

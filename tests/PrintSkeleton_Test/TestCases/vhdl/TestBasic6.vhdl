@@ -8,10 +8,10 @@ entity TestBasic6 is
 port(	
 	clk:		in std_logic;
 	rst:		in std_logic;
-	b_in:		in int;
+	b_in:		in signed(31 downto 0);
 	b_in_sync:		in bool;
 	b_in_notify:		out bool;
-	b_in2:		in int;
+	b_in2:		in signed(31 downto 0);
 	b_in2_sync:		in bool;
 	b_in2_notify:		out bool
 );

@@ -11,7 +11,7 @@ port(
 	b_out:		out unsigned (31 downto 0);
 	b_out_sync:		in bool;
 	b_out_notify:		out bool;
-	b_out2:		out int;
+	b_out2:		out signed(31 downto 0);
 	b_out2_sync:		in bool;
 	b_out2_notify:		out bool
 );
@@ -19,7 +19,7 @@ end TestBasic23;
 
 architecture TestBasic23_arch of TestBasic23 is
 	signal section_signal: Sections;
-	signal val_signed_signal: int;
+	signal val_signed_signal: signed(31 downto 0);
 	signal val_unsigned_signal: unsigned (31 downto 0);
 
 begin
