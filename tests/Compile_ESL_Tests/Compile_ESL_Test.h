@@ -94,7 +94,7 @@ INSTANTIATE_TEST_CASE_P(
         CompileESL::PrintToStringParamName()
 );
 
-TEST_P(CompileESL,Basic){
+TEST_P(CompileESL, CompileTestBasic){
 
     Param compiled = GetParam();
 

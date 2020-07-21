@@ -16,6 +16,6 @@ get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
 file(GLOB R_SRC CONFIGURE_DEPENDS *.cpp *.hpp *.h)
 list(APPEND R_SRC ${ENV_SRC})
 
-add_executable(@EXAMPLE_NAME@ ${R_SRC})
+add_executable(@EXAMPLE_NAME@ ${R_SRC} env/sc_main.cpp)
 
 target_link_libraries(@EXAMPLE_NAME@ systemc)
