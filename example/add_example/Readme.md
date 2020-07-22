@@ -41,3 +41,4 @@ the macro will assume that the name of the directory is the same as the name of 
 
 Add_Example automatically adds "add_subdirectory()" for the new example to the [CMakeLists.txt](../CMakeLists.txt) in the parent "example"-directory
 for Cmake to recognize the build-target.
+Every time the add_example

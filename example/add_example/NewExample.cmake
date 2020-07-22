@@ -1,4 +1,4 @@
-include(AddExample.cmake)
+#include(AddExample.cmake)
 message(STATUS "This is : ${CMAKE_CURRENT_SOURCE_DIR}")
 get_directory_property(FIRST_ARG DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEFINITION FIRST_ARG)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/RTL/properties)
