@@ -2,7 +2,7 @@
 
 
 -- DP SIGNALS --
-macro s_out_sig : signed := end macro;
+macro s_out_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -10,7 +10,7 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro phase : Phases := end macro;
+macro phase : Phases :=SECTION_A end macro;
 
 
 -- STATES --

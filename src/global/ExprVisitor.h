@@ -25,6 +25,8 @@ namespace SCAM {
 
         static bool isParameter(SCAM::Expr *expr);
 
+        static bool isTernary(Expr *expr);
+
         static std::set<Operand *> getUsedOperands(SCAM::Expr *expr);
 
         static std::set<Variable *> getUsedVariables(SCAM::Expr *expr);
@@ -45,7 +47,7 @@ namespace SCAM {
 
         void visit(class ArrayExpr &node) override;
 
-        static bool isTernary(Expr *expr);
+
 
     private:
         ExprVisitor(SCAM::Expr *expr);

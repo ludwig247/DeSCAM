@@ -1,33 +1,33 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro updateQ_i_sync : boolean := end macro;
+macro updateQ_i_sync : boolean := true end macro;
 
 
 -- DP SIGNALS --
-macro buffer1_sig : req_t := end macro;
-macro buffer1_sig_abort : boolean := end macro;
-macro buffer1_sig_addr : signed := end macro;
-macro buffer1_sig_data : signed := end macro;
-macro buffer1_sig_opc : opc_t := end macro;
-macro buffer2_sig : req_t := end macro;
-macro buffer2_sig_abort : boolean := end macro;
-macro buffer2_sig_addr : signed := end macro;
-macro buffer2_sig_data : signed := end macro;
-macro buffer2_sig_opc : opc_t := end macro;
-macro buffer3_sig : req_t := end macro;
-macro buffer3_sig_abort : boolean := end macro;
-macro buffer3_sig_addr : signed := end macro;
-macro buffer3_sig_data : signed := end macro;
-macro buffer3_sig_opc : opc_t := end macro;
-macro peripheral_request_i_sig : req_t := end macro;
-macro peripheral_request_i_sig_abort : boolean := end macro;
-macro peripheral_request_i_sig_addr : signed := end macro;
-macro peripheral_request_i_sig_data : signed := end macro;
-macro peripheral_request_i_sig_opc : opc_t := end macro;
-macro req_o_sig : boolean := end macro;
-macro status1_sig : req_status_t := end macro;
-macro status2_sig : req_status_t := end macro;
-macro status3_sig : req_status_t := end macro;
-macro updateQ_i_sig : update_t := end macro;
+--macro buffer1_sig : req_t :={false, resize(0,32), resize(0,32), BTR2_OPC} end macro;
+macro buffer1_sig_abort : boolean :=false end macro;
+macro buffer1_sig_addr : signed :=resize(0,32) end macro;
+macro buffer1_sig_data : signed :=resize(0,32) end macro;
+macro buffer1_sig_opc : opc_t :=NOP_OPC end macro;
+--macro buffer2_sig : req_t :={false, resize(0,32), resize(0,32), BTR2_OPC} end macro;
+macro buffer2_sig_abort : boolean :=false end macro;
+macro buffer2_sig_addr : signed :=resize(0,32) end macro;
+macro buffer2_sig_data : signed :=resize(0,32) end macro;
+macro buffer2_sig_opc : opc_t :=NOP_OPC end macro;
+--macro buffer3_sig : req_t :={false, resize(0,32), resize(0,32), BTR2_OPC} end macro;
+macro buffer3_sig_abort : boolean :=false end macro;
+macro buffer3_sig_addr : signed :=resize(0,32) end macro;
+macro buffer3_sig_data : signed :=resize(0,32) end macro;
+macro buffer3_sig_opc : opc_t :=NOP_OPC end macro;
+--macro peripheral_request_i_sig : req_t :={false, resize(0,32), resize(0,32), BTR2_OPC} end macro;
+macro peripheral_request_i_sig_abort : boolean :=false end macro;
+macro peripheral_request_i_sig_addr : signed :=resize(0,32) end macro;
+macro peripheral_request_i_sig_data : signed :=resize(0,32) end macro;
+macro peripheral_request_i_sig_opc : opc_t :=NOP_OPC end macro;
+macro req_o_sig : boolean :=false end macro;
+macro status1_sig : req_status_t :=EMPTY_STATUS end macro;
+macro status2_sig : req_status_t :=EMPTY_STATUS end macro;
+macro status3_sig : req_status_t :=EMPTY_STATUS end macro;
+macro updateQ_i_sig : update_t :=NXT_GRANT_Q end macro;
 
 
 -- CONSTRAINTS --
@@ -35,22 +35,22 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro buffer2_var_abort : boolean := end macro;
-macro buffer2_var_addr : signed := end macro;
-macro buffer2_var_data : signed := end macro;
-macro buffer2_var_opc : opc_t := end macro;
-macro buffer3_var_abort : boolean := end macro;
-macro buffer3_var_addr : signed := end macro;
-macro buffer3_var_data : signed := end macro;
-macro buffer3_var_opc : opc_t := end macro;
-macro nextphase : Phases := end macro;
-macro status1_var : req_status_t := end macro;
-macro status2_var : req_status_t := end macro;
-macro status3_var : req_status_t := end macro;
-macro tmp_buffer_abort : boolean := end macro;
-macro tmp_buffer_addr : signed := end macro;
-macro tmp_buffer_data : signed := end macro;
-macro tmp_buffer_opc : opc_t := end macro;
+macro buffer2_var_abort : boolean :=false end macro;
+macro buffer2_var_addr : signed :=resize(0,32) end macro;
+macro buffer2_var_data : signed :=resize(0,32) end macro;
+macro buffer2_var_opc : opc_t :=NOP_OPC end macro;
+macro buffer3_var_abort : boolean :=false end macro;
+macro buffer3_var_addr : signed :=resize(0,32) end macro;
+macro buffer3_var_data : signed :=resize(0,32) end macro;
+macro buffer3_var_opc : opc_t :=NOP_OPC end macro;
+macro nextphase : Phases :=STARTUP end macro;
+macro status1_var : req_status_t :=EMPTY_STATUS end macro;
+macro status2_var : req_status_t :=EMPTY_STATUS end macro;
+macro status3_var : req_status_t :=EMPTY_STATUS end macro;
+macro tmp_buffer_abort : boolean :=false end macro;
+macro tmp_buffer_addr : signed :=resize(0,32) end macro;
+macro tmp_buffer_data : signed :=resize(0,32) end macro;
+macro tmp_buffer_opc : opc_t :=NOP_OPC end macro;
 
 
 -- STATES --

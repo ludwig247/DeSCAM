@@ -1,11 +1,11 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro s_in_sync : boolean := end macro;
-macro s_in2_sync : boolean := end macro;
+macro s_in_sync : boolean := true end macro;
+macro s_in2_sync : boolean := true end macro;
 
 
 -- DP SIGNALS --
-macro s_in_sig : signed := end macro;
-macro s_in2_sig : signed := end macro;
+macro s_in_sig : signed :=resize(0,32) end macro;
+macro s_in2_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --
@@ -13,7 +13,7 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro phase : Phases := end macro;
+macro phase : Phases :=SECTION_A end macro;
 
 
 -- STATES --
