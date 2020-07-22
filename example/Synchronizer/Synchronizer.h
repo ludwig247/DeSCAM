@@ -13,17 +13,17 @@ class Synchronizer : public sc_prim_channel,
              virtual public Synchronizer_in_if<T>,          //
              virtual public Synchronizer_out_if<T> {        //
 public:
-    Synchronizer(const char *name, unsigned int size);
+    Synchronizer(const char *name);
 
     // Consumer reads Value from FIFO (blocking)
-    void read(T *out);
+    void read(std::array<T,NUMBER_OF_SENDERS> * out);
     //Producer writes Value to FIFO (blocking)
     void write(const T &val, int id);
 
 private:
-    unsigned int number_of_senders;
-    bool * flags;
-    T  * buffer;
+    int cnt;
+    std::array<bool,NUMBER_OF_SENDERS> flags;
+    std::array<T,NUMBER_OF_SENDERS> buffer;
     sc_event reader_notify, writer_notify;
 };
 

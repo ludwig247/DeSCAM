@@ -221,17 +221,15 @@ public:
         }
     }
     virtual void SetUp() {
-
         //create variables and datatypes
         auto buffer_array = new DataType("int_32");
         buffer_array->addArray(DataTypes::getDataType("int"),3);
         auto buffer = new Variable("buffer", buffer_array);
-        auto number_of_senders = new Variable("number_of_senders", DataTypes::getDataType("unsigned"));
+        auto number_of_senders = new UnsignedValue(3);
+        auto cnt = new Variable("cnt",DataTypes::getDataType("unsigned"));
         auto flag_array = new DataType("bool");
         flag_array->addArray(DataTypes::getDataType("bool"),3);
         auto flags = new Variable("flags", flag_array);
-        auto reader_notify = new Variable("reader_notify", DataTypes::getDataType("bool"));
-        auto writer_notify = new Variable("writer_notify", DataTypes::getDataType("bool"));
         auto out = new Port("out",new Interface("blocking","out"),buffer_array);
         auto val_0 = new Port("val_0",new Interface("blocking","in"), DataTypes::getDataType("int"));
         auto val_1 = new Port("val_1",new Interface("blocking","in"), DataTypes::getDataType("int"));
@@ -239,53 +237,44 @@ public:
 
         //add Variables to Module
         module->addVariable(buffer);
-        module->addVariable(number_of_senders);
         module->addVariable(flags);
-        module->addVariable(reader_notify);
-        module->addVariable(writer_notify);
+        module->addVariable(cnt);
         module->addPort(out);
         module->addPort(val_0);
         module->addPort(val_1);
         module->addPort(val_2);
 
         //Read Statements
-        //for(int i=0; i<number_of_senders;i++) unrolled
-        //if(!flags[0])
-        auto flags_0 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(0));
-        auto not_flags_0 = new UnaryExpr("not",flags_0);
-        auto if_not_flags_0 = new If(not_flags_0);
+        //while(cnt < NUMBER_OF_SENDERS) unrolled
+        auto cnt_less_NOS = new Relational(new VariableOperand(cnt),"<",number_of_senders);
+        //if(cnt<NUMBER_OF_SENDERS)
+        auto if_cnt_less_NOS = new If(cnt_less_NOS);
         //wait(writer_notify)
         auto writer_wait = new Wait("writer_notify");
-        //if(!flags[1])
+
+        auto flags_0 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(0));
         auto flags_1 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(1));
-        auto not_flags_1 = new UnaryExpr("not",flags_1);
-        auto if_not_flags_1 = new If(not_flags_1);
-        //wait(writer_notify)
-        //already exists
-        //if(!flags[2])
         auto flags_2 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(2));
-        auto not_flags_2 = new UnaryExpr("not",flags_2);
-        auto if_not_flags_2 = new If(not_flags_2);
-        //wait(writer_notify)
-        //already exists
         //for(int i=0; i<number_of_senders; i++) unrolled
-        //flags[0] = false;
+        //flags.at(i) = false;
         auto false_value = new BoolValue(false);
         auto flags_0_assign_false = new Assignment(flags_0,false_value);
         //flags[1] = false;
         auto flags_1_assign_false = new Assignment(flags_1,false_value);
         //flags[2] = false;
         auto flags_2_assign_false = new Assignment(flags_2,false_value);
+        //cnt = 0
+        auto cnt_assign_0 = new Assignment(new VariableOperand(cnt),new UnsignedValue(0));
         //for(int i=0; i<number_of_senders; i++) unrolled
-        //out[0]=buffer[0]
+        //out.at(0)=buffer.at(0)
         auto out_0 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(0));
         auto buffer_0 = new ArrayOperand(new VariableOperand(buffer),new IntegerValue(0));
         auto out_0_assign_buffer_0 = new Assignment(out_0,buffer_0);
-        //out[1]=buffer[1]
+        //out.at(1)=buffer.at(1)
         auto out_1 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(1));
         auto buffer_1 = new ArrayOperand(new VariableOperand(buffer),new IntegerValue(1));
         auto out_1_assign_buffer_1 = new Assignment(out_1,buffer_1);
-        //out[2]=buffer[2]
+        //out.at(2)=buffer.at(2)
         auto out_2 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(2));
         auto buffer_2 = new ArrayOperand(new VariableOperand(buffer),new IntegerValue(2));
         auto out_2_assign_buffer_2 = new Assignment(out_2,buffer_2);
@@ -295,61 +284,69 @@ public:
         auto read_return = new Return("read_return");
 
         //Write Expressions/Assignments id=0
-        //if(flags[0])
+        //if(flags.at(0))
         auto if_flags_0 = new If(flags_0);
         //wait(reader_notify)
-        auto reader_wait_0 = new Wait("reader_notify_0");
-        //flags[0] = true
+        auto reader_wait = new Wait("reader_notify");
+        //flags.at(0) = true
         auto true_value = new BoolValue(true);
         auto flags_0_assign_true = new Assignment(flags_0,true_value);
-        //buffer[0]=val;
+        //buffer.at(0)=val;
         auto port_val_0 = new DataSignalOperand(val_0->getDataSignal());
         auto buffer_0_assign_port_val_0 = new Assignment(buffer_0,port_val_0);
+        //cnt++
+        auto cnt_add_1 = new Arithmetic(new VariableOperand(cnt),"+",new UnsignedValue(1));
+        auto cnt_inc = new Assignment(new VariableOperand(cnt),cnt_add_1);
         //writer_notify.notify()
-        auto notify_writer_0 = new Notify("writer_notify_0");
+        auto notify_writer = new Notify("writer_notify");
         //return
-        auto write_return_0 = new Return("write_return_0");
+        auto write_return = new Return("write_return");
 
         //Write Expressions/Assignments id=1
-        //if(flags[1])
+        //if(flags.at(1))
         auto if_flags_1 = new If(flags_1);
         //wait(reader_notify)
-        auto reader_wait_1 = new Wait("reader_notify_1");
-        //flags[1] = true
+        //already exists
+        //flags.at(1) = true
         auto flags_1_assign_true = new Assignment(flags_1,true_value);
-        //buffer[id]=val;
+        //buffer.at(1)=val;
         auto port_val_1 = new DataSignalOperand(val_1->getDataSignal());
         auto buffer_1_assign_port_val_1 = new Assignment(buffer_1,port_val_1);
+        //cnt++
+        //already exists
         //writer_notify.notify()
-        auto notify_writer_1 = new Notify("writer_notify_1");
+        //already exists
         //return
-        auto write_return_1 = new Return("write_return_1");
+        //already exists
 
         //Write Expressions/Assignments id=2
-        //if(flags[2])
+        //if(flags.at(2))
         auto if_flags_2 = new If(flags_2);
         //wait(reader_notify)
-        auto reader_wait_2 = new Wait("reader_notify_2");
-        //flags[2] = true
+        //already exists
+        //flags.at(2) = true
         auto flags_2_assign_true = new Assignment(flags_2,true_value);
-        //buffer[2]=val;
+        //buffer.at(2)=val;
         auto port_val_2 = new DataSignalOperand(val_2->getDataSignal());
         auto buffer_2_assign_port_val_2 = new Assignment(buffer_2,port_val_2);
+        //cnt++
+        //already exists
         //writer_notify.notify()
-        auto notify_writer_2 = new Notify("writer_notify_2");
-        //return
-        auto write_return_2 = new Return("write_return_2");
+        //already exists
+        // return
+        //already exists
 
         //CFG nodes Read
-        auto check_flags_0 = new CfgNode(if_not_flags_0);
+        auto check_cnt_0 = new CfgNode(cnt_less_NOS);
         auto wait_writer_0 = new CfgNode(writer_wait);
-        auto check_flags_1 = new CfgNode(if_not_flags_1);
+        auto check_cnt_1 = new CfgNode(cnt_less_NOS);
         auto wait_writer_1 = new CfgNode(writer_wait);
-        auto check_flags_2 = new CfgNode(if_not_flags_2);
+        auto check_cnt_2 = new CfgNode(cnt_less_NOS);
         auto wait_writer_2 = new CfgNode(writer_wait);
         auto unset_flags_0 = new CfgNode(flags_0_assign_false);
         auto unset_flags_1 = new CfgNode(flags_1_assign_false);
         auto unset_flags_2 = new CfgNode(flags_2_assign_false);
+        auto reset_cnt = new CfgNode(cnt_assign_0);
         auto set_output_0 = new CfgNode(out_0_assign_buffer_0);
         auto set_output_1 = new CfgNode(out_1_assign_buffer_1);
         auto set_output_2 = new CfgNode(out_2_assign_buffer_2);
@@ -357,18 +354,19 @@ public:
         auto return_read = new CfgNode(read_return);
 
         //Link CFG nodes Read
-        check_flags_0->addSuccessor(wait_writer_0);
-        check_flags_0->addSuccessor(check_flags_1);
-        wait_writer_0->addSuccessor(check_flags_1);
-        check_flags_1->addSuccessor(wait_writer_1);
-        check_flags_1->addSuccessor(check_flags_2);
-        wait_writer_1->addSuccessor(check_flags_2);
-        check_flags_2->addSuccessor(wait_writer_2);
-        check_flags_2->addSuccessor(unset_flags_0);
+        check_cnt_0->addSuccessor(wait_writer_0);
+        check_cnt_0->addSuccessor(check_cnt_1);
+        wait_writer_0->addSuccessor(check_cnt_1);
+        check_cnt_1->addSuccessor(wait_writer_1);
+        check_cnt_1->addSuccessor(check_cnt_2);
+        wait_writer_1->addSuccessor(check_cnt_2);
+        check_cnt_2->addSuccessor(wait_writer_2);
+        check_cnt_2->addSuccessor(unset_flags_0);
         wait_writer_2->addSuccessor(unset_flags_0);
         unset_flags_0->addSuccessor(unset_flags_1);
         unset_flags_1->addSuccessor(unset_flags_2);
-        unset_flags_2->addSuccessor(set_output_0);
+        unset_flags_2->addSuccessor(reset_cnt);
+        reset_cnt->addSuccessor(set_output_0);
         set_output_0->addSuccessor(set_output_1);
         set_output_1->addSuccessor(set_output_2);
         set_output_2->addSuccessor(read_notify);
@@ -376,15 +374,16 @@ public:
 
 
         //create map with CFG nodes Read
-        controlFlowMapRead.insert(std::make_pair(check_flags_0->getId(),check_flags_0));
+        controlFlowMapRead.insert(std::make_pair(check_cnt_0->getId(),check_cnt_0));
         controlFlowMapRead.insert(std::make_pair(wait_writer_0->getId(),wait_writer_0));
-        controlFlowMapRead.insert(std::make_pair(check_flags_1->getId(),check_flags_1));
+        controlFlowMapRead.insert(std::make_pair(check_cnt_1->getId(),check_cnt_1));
         controlFlowMapRead.insert(std::make_pair(wait_writer_1->getId(),wait_writer_1));
-        controlFlowMapRead.insert(std::make_pair(check_flags_2->getId(),check_flags_2));
+        controlFlowMapRead.insert(std::make_pair(check_cnt_2->getId(),check_cnt_2));
         controlFlowMapRead.insert(std::make_pair(wait_writer_2->getId(),wait_writer_2));
         controlFlowMapRead.insert(std::make_pair(unset_flags_0->getId(),unset_flags_0));
         controlFlowMapRead.insert(std::make_pair(unset_flags_1->getId(),unset_flags_1));
         controlFlowMapRead.insert(std::make_pair(unset_flags_2->getId(),unset_flags_2));
+        controlFlowMapRead.insert(std::make_pair(reset_cnt->getId(),reset_cnt));
         controlFlowMapRead.insert(std::make_pair(set_output_0->getId(),set_output_0));
         controlFlowMapRead.insert(std::make_pair(set_output_1->getId(),set_output_1));
         controlFlowMapRead.insert(std::make_pair(set_output_2->getId(),set_output_2));
@@ -392,54 +391,59 @@ public:
         controlFlowMapRead.insert(std::make_pair(return_read->getId(),return_read));
 
         //add nodes to global controlFlowMap
-        controlFlowMap.insert(std::make_pair(check_flags_0->getId(),check_flags_0));
+        controlFlowMap.insert(std::make_pair(check_cnt_0->getId(),check_cnt_0));
         controlFlowMap.insert(std::make_pair(wait_writer_0->getId(),wait_writer_0));
-        controlFlowMap.insert(std::make_pair(check_flags_1->getId(),check_flags_1));
+        controlFlowMap.insert(std::make_pair(check_cnt_1->getId(),check_cnt_1));
         controlFlowMap.insert(std::make_pair(wait_writer_1->getId(),wait_writer_1));
-        controlFlowMap.insert(std::make_pair(check_flags_2->getId(),check_flags_2));
+        controlFlowMap.insert(std::make_pair(check_cnt_2->getId(),check_cnt_2));
         controlFlowMap.insert(std::make_pair(wait_writer_2->getId(),wait_writer_2));
         controlFlowMap.insert(std::make_pair(unset_flags_0->getId(),unset_flags_0));
         controlFlowMap.insert(std::make_pair(unset_flags_1->getId(),unset_flags_1));
         controlFlowMap.insert(std::make_pair(unset_flags_2->getId(),unset_flags_2));
+        controlFlowMap.insert(std::make_pair(reset_cnt->getId(),reset_cnt));
         controlFlowMap.insert(std::make_pair(set_output_0->getId(),set_output_0));
         controlFlowMap.insert(std::make_pair(set_output_1->getId(),set_output_1));
         controlFlowMap.insert(std::make_pair(set_output_2->getId(),set_output_2));
         controlFlowMap.insert(std::make_pair(read_notify->getId(),read_notify));
         controlFlowMap.insert(std::make_pair(return_read->getId(),return_read));
 
-//        //Print CFG for Read
-//        std::cout << printCFG(controlFlowMapRead) << std::endl;
+        //Print CFG for Read
+        std::cout << printCFG(controlFlowMapRead) << std::endl;
 
         //CFG nodes Write id=0
         auto check_flags_id_0 = new CfgNode(if_flags_0);
-        auto wait_reader_0 = new CfgNode(reader_wait_0);
+        auto wait_reader_0 = new CfgNode(reader_wait);
         auto set_flags_id_0 = new CfgNode(flags_0_assign_true);
         auto set_buffer_id_0 = new CfgNode(buffer_0_assign_port_val_0);
-        auto write_notify_0 = new CfgNode(notify_writer_0);
-        auto return_write_0 = new CfgNode(write_return_0);
+        auto cnt_increment_0 = new CfgNode(cnt_inc);
+        auto write_notify_0 = new CfgNode(notify_writer);
+        auto return_write_0 = new CfgNode(write_return);
 
         //CFG nodes Write id=1
         auto check_flags_id_1 = new CfgNode(if_flags_1);
-        auto wait_reader_1 = new CfgNode(reader_wait_1);
+        auto wait_reader_1 = new CfgNode(reader_wait);
         auto set_flags_id_1 = new CfgNode(flags_1_assign_true);
         auto set_buffer_id_1 = new CfgNode(buffer_1_assign_port_val_1);
-        auto write_notify_1 = new CfgNode(notify_writer_1);
-        auto return_write_1 = new CfgNode(write_return_1);
+        auto cnt_increment_1 = new CfgNode(cnt_inc);
+        auto write_notify_1 = new CfgNode(notify_writer);
+        auto return_write_1 = new CfgNode(write_return);
 
         //CFG nodes Write id=2
         auto check_flags_id_2 = new CfgNode(if_flags_2);
-        auto wait_reader_2 = new CfgNode(reader_wait_2);
+        auto wait_reader_2 = new CfgNode(reader_wait);
         auto set_flags_id_2 = new CfgNode(flags_2_assign_true);
         auto set_buffer_id_2 = new CfgNode(buffer_2_assign_port_val_2);
-        auto write_notify_2 = new CfgNode(notify_writer_2);
-        auto return_write_2 = new CfgNode(write_return_2);
+        auto cnt_increment_2 = new CfgNode(cnt_inc);
+        auto write_notify_2 = new CfgNode(notify_writer);
+        auto return_write_2 = new CfgNode(write_return);
 
         //Connect CFG nodes Write id=0
         check_flags_id_0->addSuccessor(wait_reader_0);
         check_flags_id_0->addSuccessor(set_flags_id_0);
         wait_reader_0->addSuccessor(set_flags_id_0);
         set_flags_id_0->addSuccessor(set_buffer_id_0);
-        set_buffer_id_0->addSuccessor(write_notify_0);
+        set_buffer_id_0->addSuccessor(cnt_increment_0);
+        cnt_increment_0->addSuccessor(write_notify_0);
         write_notify_0->addSuccessor(return_write_0);
 
         //Connect CFG nodes Write id=1
@@ -447,7 +451,8 @@ public:
         check_flags_id_1->addSuccessor(set_flags_id_1);
         wait_reader_1->addSuccessor(set_flags_id_1);
         set_flags_id_1->addSuccessor(set_buffer_id_1);
-        set_buffer_id_1->addSuccessor(write_notify_1);
+        set_buffer_id_1->addSuccessor(cnt_increment_1);
+        cnt_increment_1->addSuccessor(write_notify_1);
         write_notify_1->addSuccessor(return_write_1);
 
         //Connect CFG nodes Write id=2
@@ -455,7 +460,8 @@ public:
         check_flags_id_2->addSuccessor(set_flags_id_2);
         wait_reader_2->addSuccessor(set_flags_id_2);
         set_flags_id_2->addSuccessor(set_buffer_id_2);
-        set_buffer_id_2->addSuccessor(write_notify_2);
+        set_buffer_id_2->addSuccessor(cnt_increment_2);
+        cnt_increment_2->addSuccessor(write_notify_2);
         write_notify_2->addSuccessor(return_write_2);
 
         //Create map with CFG nodes Write id=0
@@ -463,6 +469,7 @@ public:
         controlFlowMapWrite_0.insert(std::make_pair(wait_reader_0->getId(),wait_reader_0));
         controlFlowMapWrite_0.insert(std::make_pair(set_flags_id_0->getId(),set_flags_id_0));
         controlFlowMapWrite_0.insert(std::make_pair(set_buffer_id_0->getId(),set_buffer_id_0));
+        controlFlowMapWrite_0.insert(std::make_pair(cnt_increment_0->getId(),cnt_increment_0));
         controlFlowMapWrite_0.insert(std::make_pair(write_notify_0->getId(),write_notify_0));
         controlFlowMapWrite_0.insert(std::make_pair(return_write_0->getId(),return_write_0));
 
@@ -471,6 +478,7 @@ public:
         controlFlowMapWrite_1.insert(std::make_pair(wait_reader_1->getId(),wait_reader_1));
         controlFlowMapWrite_1.insert(std::make_pair(set_flags_id_1->getId(),set_flags_id_1));
         controlFlowMapWrite_1.insert(std::make_pair(set_buffer_id_1->getId(),set_buffer_id_1));
+        controlFlowMapWrite_1.insert(std::make_pair(cnt_increment_1->getId(),cnt_increment_1));
         controlFlowMapWrite_1.insert(std::make_pair(write_notify_1->getId(),write_notify_1));
         controlFlowMapWrite_1.insert(std::make_pair(return_write_1->getId(),return_write_1));
 
@@ -479,6 +487,7 @@ public:
         controlFlowMapWrite_2.insert(std::make_pair(wait_reader_2->getId(),wait_reader_2));
         controlFlowMapWrite_2.insert(std::make_pair(set_flags_id_2->getId(),set_flags_id_2));
         controlFlowMapWrite_2.insert(std::make_pair(set_buffer_id_2->getId(),set_buffer_id_2));
+        controlFlowMapWrite_2.insert(std::make_pair(cnt_increment_2->getId(),cnt_increment_2));
         controlFlowMapWrite_2.insert(std::make_pair(write_notify_2->getId(),write_notify_2));
         controlFlowMapWrite_2.insert(std::make_pair(return_write_2->getId(),return_write_2));
 
@@ -487,25 +496,28 @@ public:
         controlFlowMap.insert(std::make_pair(wait_reader_0->getId(),wait_reader_0));
         controlFlowMap.insert(std::make_pair(set_flags_id_0->getId(),set_flags_id_0));
         controlFlowMap.insert(std::make_pair(set_buffer_id_0->getId(),set_buffer_id_0));
+        controlFlowMap.insert(std::make_pair(cnt_increment_0->getId(),cnt_increment_0));
         controlFlowMap.insert(std::make_pair(write_notify_0->getId(),write_notify_0));
         controlFlowMap.insert(std::make_pair(return_write_0->getId(),return_write_0));
         controlFlowMap.insert(std::make_pair(check_flags_id_1->getId(),check_flags_id_1));
         controlFlowMap.insert(std::make_pair(wait_reader_1->getId(),wait_reader_1));
         controlFlowMap.insert(std::make_pair(set_flags_id_1->getId(),set_flags_id_1));
         controlFlowMap.insert(std::make_pair(set_buffer_id_1->getId(),set_buffer_id_1));
+        controlFlowMap.insert(std::make_pair(cnt_increment_1->getId(),cnt_increment_1));
         controlFlowMap.insert(std::make_pair(write_notify_1->getId(),write_notify_1));
         controlFlowMap.insert(std::make_pair(return_write_1->getId(),return_write_1));
         controlFlowMap.insert(std::make_pair(check_flags_id_2->getId(),check_flags_id_2));
         controlFlowMap.insert(std::make_pair(wait_reader_2->getId(),wait_reader_2));
         controlFlowMap.insert(std::make_pair(set_flags_id_2->getId(),set_flags_id_2));
         controlFlowMap.insert(std::make_pair(set_buffer_id_2->getId(),set_buffer_id_2));
+        controlFlowMap.insert(std::make_pair(cnt_increment_2->getId(),cnt_increment_2));
         controlFlowMap.insert(std::make_pair(write_notify_2->getId(),write_notify_2));
         controlFlowMap.insert(std::make_pair(return_write_2->getId(),return_write_2));
 
-//        //Print CFG Write
-//        std::cout << printCFG(controlFlowMapWrite_0) << std::endl;
-//        std::cout << printCFG(controlFlowMapWrite_1) << std::endl;
-//        std::cout << printCFG(controlFlowMapWrite_1) << std::endl;
+        //Print CFG Write
+        std::cout << printCFG(controlFlowMapWrite_0) << std::endl;
+        std::cout << printCFG(controlFlowMapWrite_1) << std::endl;
+        std::cout << printCFG(controlFlowMapWrite_2) << std::endl;
 
 
         init = new State("init");
@@ -513,6 +525,10 @@ public:
 
         //Generate Reset Operation
         reset_op = new Operation();
+        reset_op->addStatement(cnt_assign_0);
+        reset_op->addStatement(flags_0_assign_false);
+        reset_op->addStatement(flags_1_assign_false);
+        reset_op->addStatement(flags_2_assign_false);
         reset_op->setState(init);
         start_state = new State("Start_State");
         reset_op->setNextState(start_state);
@@ -718,9 +734,9 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::vector<eventID> hv;
 
     eventID read = {0,"read"};
-    eventID write_0 = {14,"write_0"};
-    eventID write_1 = {20,"write_1"};
-    eventID write_2 = {26,"write_2"};
+    eventID write_0 = {15,"write_0"};
+    eventID write_1 = {22,"write_1"};
+    eventID write_2 = {29,"write_2"};
 //    //no function calls
 //    permutations.push_back(hv);
     //only read call

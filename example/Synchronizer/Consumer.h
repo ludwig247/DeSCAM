@@ -5,7 +5,7 @@
 SC_MODULE(Consumer){
   sc_port<Synchronizer_in_if<int>> inp;
 
-  int value[3];
+  std::array<int,NUMBER_OF_SENDERS> value;
   float random;
   float limit = 0.75;
   int value_old = 0;
@@ -19,8 +19,8 @@ SC_MODULE(Consumer){
               random = ((float) rand()) / (float) RAND_MAX;
           }
           std::cout << "At " << sc_time_stamp() << " Consumer tries to read" << endl;
-          inp->read(value);
-          sc_assert((2*value[0] == value[1]) && (3*value[0] == value[2]));
+          inp->read(&value);
+          sc_assert((2*value.at(0) == value.at(1)) && (3*value.at(0) == value.at(2)));
           std::cout << "At " << sc_time_stamp() << " Consumer received: " << value[0] << ", " << value[1] << ", " << value[2] << endl;
 //          insert_state();
       }

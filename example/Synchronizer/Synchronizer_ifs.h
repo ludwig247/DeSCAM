@@ -5,11 +5,13 @@
 #ifndef DESCAM_SYNCHRONIZER_IFS_H
 #define DESCAM_SYNCHRONIZER_IFS_H
 
+#define NUMBER_OF_SENDERS 3
+
 template<typename T>
 class Synchronizer_in_if : virtual public sc_interface
 {
 public:
-    virtual void read(T * out) = 0;
+    virtual void read(std::array<T,NUMBER_OF_SENDERS> * out) = 0;
 };
 
 
