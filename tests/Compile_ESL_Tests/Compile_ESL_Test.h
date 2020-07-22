@@ -81,10 +81,7 @@ public:
         return ::testing::AssertionFailure() << "compilation of " << s->Name << " failed";}
 }
 
-std::string printer(Param &s){
-for (auto &i : s.Errors)
-return i;
-}
+
 
 INSTANTIATE_TEST_CASE_P(
         Basic,
@@ -96,12 +93,17 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(CompileESL, CompileTestBasic){
 
-    Param compiled = GetParam();
+    Param compilation = GetParam();
 
-EXPECT_TRUE(compiled.Success)<<(compiled)<<std::endl<< "Errors: "<<printer(compiled);
 
-if(GetParam().Success) std::cout << "Compilation of "<<GetParam().Name << " succeeded"<< std::endl;
+EXPECT_TRUE(compilation.Success)<<compilation;
 
+    for (auto &i : compilation.Errors)
+        std::cout << "Error: "<< i <<std::endl;
+
+
+if(GetParam().Success) std::cout << "Compilation of "<<compilation.Name << " succeeded"<< std::endl;
+else std::cout<< "Compilation of " << compilation.Name<< " failed";
 
 
 }

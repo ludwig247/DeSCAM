@@ -1,5 +1,7 @@
 
 macro (add_example)
+    add_custom_command(OUTPUT dir_gen
+            COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/NewExample.cmake)
     set(MACRO_ARG ${ARGN})
     list(LENGTH MACRO_ARG NUM_MACRO_ARG)
 #    message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -19,10 +21,8 @@ macro (add_example)
         else() #if new example: creates new directory tree for example and required CMakeLists
             message(WARNING "Given example directory ${FIRST_ARG} does not exist, add_example() will create a new example directory tree")
             set(EXAMPLE_NAME "${FIRST_ARG}_Simulation")
-            file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/RTL/properties)
-            file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/CMakeLists.txt "file(GLOB ENV_SRC CONFIGURE_DEPENDS *.cpp *.hpp *.h)")
-            file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/CMakeLists.txt "add_subdirectory(ESL)")
-            file(APPEND ./CMakeLists.txt "add_subdirectory(${FIRST_ARG})\n")
+            add_custom_command(OUTPUT dir_gen
+            COMMAND cmake -P NewExample.cmake)
             configure_file ( #Creates new example header-file
                 "./add_example/template_h.h.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/${FIRST_ARG}.h" @ONLY)

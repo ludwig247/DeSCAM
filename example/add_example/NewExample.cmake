@@ -1,0 +1,7 @@
+include(AddExample.cmake)
+message(STATUS "This is : ${CMAKE_CURRENT_SOURCE_DIR}")
+get_directory_property(FIRST_ARG DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEFINITION FIRST_ARG)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/RTL/properties)
+file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/ESL/env/CMakeLists.txt "file(GLOB ENV_SRC CONFIGURE_DEPENDS *.cpp *.hpp *.h)")
+file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}/CMakeLists.txt "add_subdirectory(ESL)")
+file(APPEND ./CMakeLists.txt "add_subdirectory(${FIRST_ARG})\n")
