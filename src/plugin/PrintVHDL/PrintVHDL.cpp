@@ -312,7 +312,7 @@ void PrintVHDL::ports(std::stringstream &ss) {
             if (port->getDataType()->isCompoundType() && bitwidth != 32) {
                 for (const auto &subvar: port->getDataType()->getSubVarMap()) {
 
-                    name = name + "_" + port->getName() + "_" + subvar.first;
+                    name = channelit->first + "_port" + "_" + subvar.first;
                     type = getDataTypeWrapper_Port(subvar.second);
                     insertPortVariable(ss, name, direction, type);
                 }
@@ -561,6 +561,15 @@ std::string PrintVHDL::getDataTypeWrapper_Port(const SCAM::DataType *dataType) {
             ss << "(" << bitwidth-1 << " downto 0)";
         }
         return ss.str();
+    } else if (dataType->isEnumType()){
+        if(dataType->getEnumValueMap().size() > pow(2, bitwidth)) {
+            ss << "unsigned";
+            if(bitwidth > 1){
+                ss << "(" << bitwidth-1 << " downto 0)";
+            }
+            return ss.str();
+        }
+    } else if (dataType->isArrayType()) {
     }
     return dataType->getName();
 
