@@ -16,7 +16,7 @@ add_example(Whishbone)
 #add_example(example_test)
 #add_example(does_not_make_sense; A_Test; nonsense)
 
-
+message(STATUS "${CMAKE_SOURCE_DIR}")
 
 add_subdirectory(Bus)
 #add_subdirectory(Framer)
