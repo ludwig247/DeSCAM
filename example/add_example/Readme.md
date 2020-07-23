@@ -8,7 +8,7 @@ The AddExample-macro provides the user with features that eases the adding of a 
 which builds to test if all examples builds successfully and produces a report in the format of a json-script.
 * Creating a new template directory tree including required CMakeLists.txt-files 
 when adding new example.
-
+* Automatic comment out or uncomment add_subdirectory in [CMakeLists.txt](../CMakeLists.txt) according to if the respective add_example is activated or not
 
 ***Important remarks:***
 The directory tree of the example should look like this:
@@ -39,6 +39,6 @@ specifying name, description and example directory.
 Note that if the name of the example directory is not specified, 
 the macro will assume that the name of the directory is the same as the name of the example.
 
-Add_Example automatically adds "add_subdirectory()" for the new example to the [CMakeLists.txt](../CMakeLists.txt) in the parent "example"-directory
+Add_example automatically adds "add_subdirectory()" for the new example to the [CMakeLists.txt](../CMakeLists.txt) in the parent "example"-directory
 for Cmake to recognize the build-target.
-Every time the add_example
+CMake will comment out/uncomment the add_subdirectory() according to if the add_example for the example is commented out or not.

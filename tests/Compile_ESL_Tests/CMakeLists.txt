@@ -5,7 +5,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ${LLVM_CXX_FLAGS} ")
 
 set(EXAMPLE_NAMES "")
 
-#execute_process(COMMAND "${CMAKE_COMMAND}" "${CMAKE_SOURCE_DIR}/cmake-build-debug" WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 file(MAKE_DIRECTORY ./json_output_files/ ./error_files/)
 add_custom_target(Compile_ESL_Test_Run ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake
                     DEPENDS ${CMAKE_SOURCE_DIR}/example/CMakeLists.txt WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} VERBATIM)
