@@ -1,5 +1,4 @@
 include(add_example/AddExample.cmake)
-add_subdirectory(add_example)
 # Add a new example, it's description and it's directory using macro "add_example".
 #	example: add_example(PrintMYStyle; PrintITL; MYStyleDirectory)
 #
@@ -19,11 +18,12 @@ add_example(FPI; Print_ITL_Tests)
 #add_example(does_not_make_sense; A_Test; nonsense)
 #
 #
-#add_subdirectory(Bus)
+add_subdirectory(add_example)
+add_subdirectory(Bus)
 #add_subdirectory(Framer)
 #add_subdirectory(SingleMasterMultiSlave)
-#add_subdirectory(FPI)
-#add_subdirectory(FIFO)
+add_subdirectory(FPI)
+add_subdirectory(FIFO)
 #add_subdirectory(tests)
 #add_subdirectory(Whishbone)
 #add_subdirectory(I2C)
@@ -31,3 +31,5 @@ add_example(FPI; Print_ITL_Tests)
 #add_subdirectory(operation-pipeline)
 #add_subdirectory(UART_NORDIC)
 #add_subdirectory(RISCV_Test_ELF)
+#add_subdirectory(nonsense)
+#add_subdirectory(example_test)
