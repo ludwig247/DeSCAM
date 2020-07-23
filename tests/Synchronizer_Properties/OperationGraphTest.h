@@ -55,7 +55,8 @@ public:
     std::vector<Operation*> operationsWrite_0;
     std::vector<Operation*> operationsWrite_1;
     std::vector<Operation*> operationsWrite_2;
-
+    std::vector<eventID> startnodes;
+    std::vector<eventID> endnodes;
     Operation *reset_op;
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
@@ -337,11 +338,11 @@ public:
         //already exists
 
         //CFG nodes Read
-        auto check_cnt_0 = new CfgNode(cnt_less_NOS);
+        auto check_cnt_0 = new CfgNode(if_cnt_less_NOS);
         auto wait_writer_0 = new CfgNode(writer_wait);
-        auto check_cnt_1 = new CfgNode(cnt_less_NOS);
+        auto check_cnt_1 = new CfgNode(if_cnt_less_NOS);
         auto wait_writer_1 = new CfgNode(writer_wait);
-        auto check_cnt_2 = new CfgNode(cnt_less_NOS);
+        auto check_cnt_2 = new CfgNode(if_cnt_less_NOS);
         auto wait_writer_2 = new CfgNode(writer_wait);
         auto unset_flags_0 = new CfgNode(flags_0_assign_false);
         auto unset_flags_1 = new CfgNode(flags_1_assign_false);
@@ -407,8 +408,8 @@ public:
         controlFlowMap.insert(std::make_pair(read_notify->getId(),read_notify));
         controlFlowMap.insert(std::make_pair(return_read->getId(),return_read));
 
-        //Print CFG for Read
-        std::cout << printCFG(controlFlowMapRead) << std::endl;
+//        //Print CFG for Read
+//        std::cout << printCFG(controlFlowMapRead) << std::endl;
 
         //CFG nodes Write id=0
         auto check_flags_id_0 = new CfgNode(if_flags_0);
@@ -514,10 +515,10 @@ public:
         controlFlowMap.insert(std::make_pair(write_notify_2->getId(),write_notify_2));
         controlFlowMap.insert(std::make_pair(return_write_2->getId(),return_write_2));
 
-        //Print CFG Write
-        std::cout << printCFG(controlFlowMapWrite_0) << std::endl;
-        std::cout << printCFG(controlFlowMapWrite_1) << std::endl;
-        std::cout << printCFG(controlFlowMapWrite_2) << std::endl;
+//        //Print CFG Write
+//        std::cout << printCFG(controlFlowMapWrite_0) << std::endl;
+//        std::cout << printCFG(controlFlowMapWrite_1) << std::endl;
+//        std::cout << printCFG(controlFlowMapWrite_2) << std::endl;
 
 
         init = new State("init");
@@ -533,6 +534,25 @@ public:
         start_state = new State("Start_State");
         reset_op->setNextState(start_state);
         reset_op->setReset(true);
+
+        eventID temp = {0, "reader_sync"};
+        startnodes.push_back(temp);
+        temp = {15,"writer_0_sync"};
+        startnodes.push_back(temp);
+        temp = {22,"writer_1_sync"};
+        startnodes.push_back(temp);
+        temp = {29,"writer_2_sync"};
+        startnodes.push_back(temp);
+
+        temp = {14,"reader_notify"};
+        endnodes.push_back(temp);
+        temp = {21,"writer_0_notify"};
+        endnodes.push_back(temp);
+        temp = {28,"writer_1_notify"};
+        endnodes.push_back(temp);
+        temp = {35,"writer_2_notify"};
+        endnodes.push_back(temp);
+
     }
 
     virtual void TearDown() {}
@@ -883,26 +903,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     for(auto op: this->operationsFinal) {
         rOperations->sortOperation(op);
     }
-
-    std::vector<eventID> startnodes;
-    eventID temp = {0, "reader_sync"};
-    startnodes.push_back(temp);
-    temp = {14,"writer_0_sync"};
-    startnodes.push_back(temp);
-    temp = {20,"writer_1_sync"};
-    startnodes.push_back(temp);
-    temp = {26,"writer_2_sync"};
-    startnodes.push_back(temp);
-
-    std::vector<eventID> endnodes;
-    temp = {13,"reader_notify"};
-    endnodes.push_back(temp);
-    temp = {19,"writer_0_notify"};
-    endnodes.push_back(temp);
-    temp = {25,"writer_1_notify"};
-    endnodes.push_back(temp);
-    temp = {31,"writer_2_notify"};
-    endnodes.push_back(temp);
 
     std::vector<std::string> portnames;
     portnames.push_back("out");
