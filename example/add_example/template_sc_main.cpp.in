@@ -1,4 +1,4 @@
-#include"../@FIRST_ARG@@THIRD_ARG@.h"
+#include"../@FIRST_ARG@.h"
 
 
 int sc_main(int, char **){
