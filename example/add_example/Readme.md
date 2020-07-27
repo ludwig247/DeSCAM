@@ -8,7 +8,8 @@ The AddExample-macro provides the user with features that eases the adding of a 
 which builds to test if all examples builds successfully and produces a report in the format of a json-script.
 * Creating a new template directory tree including required CMakeLists.txt-files 
 when adding new example.
-* Automatic comment out or uncomment add_subdirectory in [CMakeLists.txt](../CMakeLists.txt) according to if the respective add_example is activated or not
+* Automatic comment out or uncomment add_subdirectory in [CMakeLists.txt](../CMakeLists.txt) according to if the respective add_example is activated or not.
+* ***Reminder:*** Always reload CMake twice after uncommenting an add_example-macro. This is for CMake to notice the change in the add_subdirectory-list.
 
 ***Important remarks:***
 The directory tree of the example should look like this:
