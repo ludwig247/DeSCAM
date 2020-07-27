@@ -63,10 +63,10 @@ add_plugin_option(PrintSkeleton; vhdl; "Prints a VHDL skeleton")
 add_plugin_option(PrintSkeleton; sv; "Prints a SystemVerilog skeleton")
 
 
-add_plugin_option_int(PrintVHDL; b8; "Prints 8 bit ports")
-add_plugin_option_int(PrintVHDL; b16; "Prints 16 bit ports")
-add_plugin_option_int(PrintVHDL; b4; "Prints 4 bit ports")
-add_plugin_option_int(PrintVHDL; b1; "Prints 1 bit ports")
+add_plugin_option(PrintVHDL; b8; "Prints 8 bit ports")
+add_plugin_option(PrintVHDL; b16; "Prints 16 bit ports")
+add_plugin_option(PrintVHDL; b4; "Prints 4 bit ports")
+add_plugin_option(PrintVHDL; b1; "Prints 1 bit ports")
 #add_plugin_option(PrintHLS; sco; "[Single Cycle Operations] Generates HLS file allowing only single cycle operations")
 #add_plugin_option(PrintHLS; mco; "[Multi Cycle Operations] Generates HLS file allowing multi cycle operations")
 

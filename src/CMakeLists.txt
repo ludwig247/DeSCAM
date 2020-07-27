@@ -10,7 +10,6 @@ set (OPTIMIZE_OPTIONS_DESCRIPTIONS, "")
 include(AddPlugin.cmake)
 include(AddPluginOption.cmake)
 include(AddOptimizeOption.cmake)
-include(AddPluginOptionInt.cmake)
 
 # add Backend directory first in order to get all added plugins and options by the users
 add_subdirectory(plugin)
