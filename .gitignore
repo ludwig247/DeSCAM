@@ -3,7 +3,7 @@
 !.gitignore
 *~
 build/*
-cmake-build-debug/*
+*cmake-build-debug
 build_dbg/*
 backup/*
 bin/*
