@@ -15,6 +15,8 @@
 #include <ExprVisitor.h>
 #include <PropertyFactory.h>
 #include <ValidOperations.h>
+#include <z3++.h>
+#include <ExprTranslator.h>
 
 
 #include "gmock/gmock.h"
@@ -221,6 +223,23 @@ public:
             }
         }
     }
+    bool isUnreachable(const std::vector<SCAM::Expr *> &assumptionList) {
+        z3::context context;
+        z3::solver solver(context);
+        ExprTranslator translator(&context);
+        //Idea: check for satisfiability of assumptions_of_operation & assumption_of_ternary
+        //If unsat -> always false
+        //Translate each expression with the ExprtTranslator and add to solver
+        for (auto condition: assumptionList) {
+            solver.add(translator.translate(condition));
+        }
+        // Check for SAT if unsat -> erase path
+        if ((solver.check() == z3::unsat)) {
+            //expr->setTrivialFalse();
+            return true;
+        }
+        return false;
+    }
     virtual void SetUp() {
         //create variables and datatypes
         auto buffer_array = new DataType("int_32");
@@ -231,6 +250,9 @@ public:
         auto flag_array = new DataType("bool");
         flag_array->addArray(DataTypes::getDataType("bool"),3);
         auto flags = new Variable("flags", flag_array);
+        auto var_0 = new Variable("0",flag_array);
+        auto var_1 = new Variable("1",flag_array);
+        auto var_2 = new Variable("2",flag_array);
         auto out = new Port("out",new Interface("blocking","out"),buffer_array);
         auto val_0 = new Port("val_0",new Interface("blocking","in"), DataTypes::getDataType("int"));
         auto val_1 = new Port("val_1",new Interface("blocking","in"), DataTypes::getDataType("int"));
@@ -244,6 +266,9 @@ public:
         module->addPort(val_0);
         module->addPort(val_1);
         module->addPort(val_2);
+        module->addVariable(var_0);
+        module->addVariable(var_1);
+        module->addVariable(var_2);
 
         //Read Statements
         //while(cnt < NUMBER_OF_SENDERS) unrolled
@@ -253,9 +278,10 @@ public:
         //wait(writer_notify)
         auto writer_wait = new Wait("writer_notify");
 
-        auto flags_0 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(0));
-        auto flags_1 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(1));
-        auto flags_2 = new ArrayOperand(new VariableOperand(flags),new IntegerValue(2));
+        auto flags_0 = new VariableOperand(flags->getSubVar("0"));;
+        auto flags_1 = new VariableOperand(flags->getSubVar("1"));;
+        auto flags_2 = new VariableOperand(flags->getSubVar("2"));;
+
         //for(int i=0; i<number_of_senders; i++) unrolled
         //flags.at(i) = false;
         auto false_value = new BoolValue(false);
@@ -521,7 +547,7 @@ public:
 //        std::cout << printCFG(controlFlowMapWrite_2) << std::endl;
 
 
-        init = new State("init");
+        init = new State("reset");
         init->setInit();
 
         //Generate Reset Operation
@@ -531,7 +557,7 @@ public:
         reset_op->addStatement(flags_1_assign_false);
         reset_op->addStatement(flags_2_assign_false);
         reset_op->setState(init);
-        start_state = new State("Start_State");
+        start_state = new State("start_state");
         reset_op->setNextState(start_state);
         reset_op->setReset(true);
 
@@ -904,6 +930,111 @@ TEST_F(OperationGraphTest, ExtractPaths){
         rOperations->sortOperation(op);
     }
 
+//    //Debug
+//    int num = 0;
+//    for(auto p:finalPaths){
+//        std::cout << "Path " << num << ": ";
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//        num++;
+//    }
+
+
+    //Optimize operations
+    for(int i=0; i<operationsFinal.size();i++){
+        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
+            operationsFinalOpt.push_back(operationsFinal.at(i));
+            finalPathsOpt.push_back(finalPaths.at(i));
+        }
+    }
+
+//    //Debug
+//    num = 0;
+//    for(auto p:finalPathsOpt){
+//        std::cout << "Path " << num << ": ";
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//        num++;
+//    }
+
+    for(auto op:operationsFinalOpt){
+        op->getState()->addOutgoingOperation(op);
+        op->getNextState()->addIncomingOperation(op);
+    }
+
+
+    //add reset operation
+    rOperations->sortOperation(reset_op);
+    operationsFinalOpt.push_back(reset_op);
+    std::vector<int> int_vec;
+    std::vector<SCAM::Stmt*> stmt_vec;
+    pathIDStmt dummy = {int_vec,stmt_vec};
+    finalPathsOpt.push_back(dummy);
+    reset_op->getState()->addOutgoingOperation(reset_op);
+    reset_op->getNextState()->addIncomingOperation(reset_op);
+
+    //wait operation
+    auto wait_op = new Operation();
+    rOperations->sortOperation(wait_op);
+    operationsFinalOpt.push_back(wait_op);
+    finalPathsOpt.push_back(dummy);
+    wait_op->setState(start_state);
+    wait_op->setNextState(start_state);
+    wait_op->getState()->addOutgoingOperation(wait_op);
+    wait_op->getNextState()->addIncomingOperation(wait_op);
+
+    //Debug
+    for(auto op: operationsFinalOpt){
+        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
+        for(auto assump: op->getAssumptionsList()){
+            std::cout << *assump << std::endl;
+        }
+        std::cout << std::endl;
+        std::cout << "Commitments Operation" << op->getId() <<std::endl;
+        for(auto commit: op->getCommitmentsList()){
+            std::cout << *commit << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+//    //Generate Property Graph
+//    std::stringstream ss;
+//    for(auto op: operationsFinalOpt){
+//        //Convert commitments to Relationals
+//        std::vector<SCAM::Expr*> commitments;
+//        commitments.clear();
+//        for(auto comm: op->getCommitmentsList()){
+//            //Create Relational from lhs and rhs of commitment
+//            auto relational = new Relational(comm->getLhs(),"==",comm->getRhs());
+//            commitments.push_back(relational);
+//        }
+//        for(auto succ_op: operationsFinalOpt){
+//            if(!succ_op->getState()->isInit()){
+//                auto all_assumptions = new std::vector<SCAM::Expr*>;
+//                all_assumptions->insert(all_assumptions->end(),commitments.begin(),commitments.end());
+//                for(auto assump: succ_op->getAssumptionsList()){
+//                    all_assumptions->push_back(assump);
+//                }
+//                if(!isUnreachable(*all_assumptions)){
+//                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
+//                    ss << " -> ";
+//                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
+//                    ss << ";" << std::endl;
+//                }
+//                all_assumptions->clear();
+//            }
+//        }
+//
+//    }
+    std::ofstream myfile;
+//    myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/PropertyGraph.gfv");
+//    myfile << ss.str();
+//    myfile.close();
+
     std::vector<std::string> portnames;
     portnames.push_back("out");
     portnames.push_back("val_0");
@@ -915,13 +1046,13 @@ TEST_F(OperationGraphTest, ExtractPaths){
     bool addnoti[startnodes.size()];
 
     //Add sync and notify signals
-    for(int i=0;i<operationsFinal.size();i++){
-        auto op = operationsFinal.at(i);
+    for(int i=0;i<operationsFinalOpt.size();i++){
+        auto op = operationsFinalOpt.at(i);
         for(int j=0;j<startnodes.size();j++){
             addsync[j] = false;
             addnoti[j] = false;
         }
-        for(auto id: finalPaths.at(i).idList){
+        for(auto id: finalPathsOpt.at(i).idList){
             for(int j=0; j<startnodes.size();j++){
                 if(id==startnodes.at(j).id){
                     addsync[j]=true;
@@ -951,61 +1082,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
     }
 
-    //Debug
-    int num = 1;
-    for(auto p:finalPaths){
-        std::cout << "Path " << num << ": ";
-        for(auto id:p.idList){
-            std::cout<<id<<"\t";
-        }
-        std::cout<< std::endl;
-        num++;
-    }
-
-
-    //Optimize operations
-    for(int i=0; i<operationsFinal.size();i++){
-        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
-            operationsFinalOpt.push_back(operationsFinal.at(i));
-            finalPathsOpt.push_back(finalPaths.at(i));
-        }
-    }
-
-    //Debug
-    num = 1;
-    for(auto p:finalPathsOpt){
-        std::cout << "Path " << num << ": ";
-        for(auto id:p.idList){
-            std::cout<<id<<"\t";
-        }
-        std::cout<< std::endl;
-        num++;
-    }
-
-    for(auto op:operationsFinalOpt){
-        op->getState()->addOutgoingOperation(op);
-        op->getNextState()->addIncomingOperation(op);
-    }
-    rOperations->sortOperation(reset_op);
-    //add reset operation
-    operationsFinalOpt.push_back(reset_op);
-    reset_op->getState()->addOutgoingOperation(reset_op);
-    reset_op->getNextState()->addIncomingOperation(reset_op);
-
-    //Debug
-    for(auto op: operationsFinalOpt){
-        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
-        for(auto assump: op->getAssumptionsList()){
-            std::cout << *assump << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Commitments Operation" << op->getId() <<std::endl;
-        for(auto commit: op->getCommitmentsList()){
-            std::cout << *commit << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
     std::map<int,State*> stateMap;
     stateMap.insert(std::make_pair(init->getStateId(),init ));
     stateMap.insert(std::make_pair(start_state->getStateId(),start_state));
@@ -1016,8 +1092,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     module->setPropertySuite(propertyFactory.getPropertySuite());
     PrintITL printITL;
     auto map = printITL.printModule(module);
-    //std::cout << std::endl << map.at("TestModule.vhi") << std::endl;
-    std::ofstream myfile;
     myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/Synchronizer.vhi");
     myfile << map.at("Synchronizer.vhi") << std::endl;
     myfile.close();

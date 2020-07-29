@@ -23,7 +23,8 @@ SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> sta
     }
 }
 
-SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module) :
+SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module)
+        :
         isStateVar(false),
         newExpr(nullptr),
         module(module),
@@ -63,7 +64,7 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
     for (auto stmt: operation->getStatementsList()) {
         stmt->accept(*this);
     }
-    this->isWaitOperation=false;
+    this->isWaitOperation = false;
     operation->setAssumptionsList(this->assumptionsList);
     /// Setting operation commitmentList
 
@@ -71,7 +72,8 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
         if (this->variableAssignmentMap.find(var.first) != this->variableAssignmentMap.end()) {
             operation->addCommitment(new Assignment(var.second, this->variableAssignmentMap.at(var.first)));
         } else {
-            if (std::find(this->dpSignalsList.begin(), this->dpSignalsList.end(), var.first) == this->dpSignalsList.end()) /// variable is NOT a port signal
+            if (std::find(this->dpSignalsList.begin(), this->dpSignalsList.end(), var.first) ==
+                this->dpSignalsList.end()) /// variable is NOT a port signal
                 operation->addCommitment(new Assignment(var.second, var.second));
         }
     }
@@ -98,13 +100,15 @@ void SCAM::ReconstructOperations::sortOperation(SCAM::Operation *operation) {
 
 }
 
-std::vector<SCAM::Expr *> SCAM::ReconstructOperations::extractConditions(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) {
+std::vector<SCAM::Expr *>
+SCAM::ReconstructOperations::extractConditions(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) {
     ReconstructOperations *pOp = new ReconstructOperations(std::move(statementsList), module);
     return pOp->assumptionsList;
 }
 
 
-SCAM::Return *SCAM::ReconstructOperations::getReturnValue(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) {
+SCAM::Return *
+SCAM::ReconstructOperations::getReturnValue(std::vector<SCAM::Stmt *> statementsList, SCAM::Module *module) {
     ReconstructOperations pOp(std::move(statementsList), module);
     return pOp.returnValue;
 }
@@ -126,13 +130,14 @@ void SCAM::ReconstructOperations::reset() {
 // Visitor functions
 namespace SCAM {
     void SCAM::ReconstructOperations::visit(SCAM::VariableOperand &node) {
-        if(node.getVariable()->isConstant()){
+        if (node.getVariable()->isConstant()) {
             this->newExpr = &node;
-        }else if (node.getDataType()->isCompoundType()) {
+        } else if (node.getDataType()->isCompoundType()) {
             std::map<std::string, Expr *> selectList;
             for (auto subVar: node.getVariable()->getSubVarList()) {
                 auto *subVarOp = new VariableOperand(subVar);
-                selectList.insert(std::make_pair(subVar->getName(), this->find_or_add_variable(subVar->getFullName(), subVarOp)));
+                selectList.insert(
+                        std::make_pair(subVar->getName(), this->find_or_add_variable(subVar->getFullName(), subVarOp)));
             }
             this->newExpr = new CompoundExpr(selectList, node.getDataType());
 
@@ -140,7 +145,8 @@ namespace SCAM {
             std::map<std::string, Expr *> selectList;
             for (auto subVar: node.getVariable()->getSubVarList()) {
                 auto *subVarOp = new VariableOperand(subVar);
-                selectList.insert(std::make_pair(subVar->getName(), this->find_or_add_variable(subVar->getFullName(), subVarOp)));
+                selectList.insert(
+                        std::make_pair(subVar->getName(), this->find_or_add_variable(subVar->getFullName(), subVarOp)));
             }
             this->newExpr = new ArrayExpr(selectList, node.getDataType());
             //throw std::runtime_error("HELLO");
@@ -198,7 +204,8 @@ namespace SCAM {
                     this->variableAssignmentMap.at(subvar_name) = val;
                 } else if (auto variableOperand = NodePeekVisitor::nodePeekVariableOperand(node.getRhs())) {
                     auto subVar = new VariableOperand(variableOperand->getVariable()->getSubVar(sub.first));
-                    this->variableAssignmentMap.at(subvar_name) = find_or_add_variable(subVar->getOperandName(), subVar);
+                    this->variableAssignmentMap.at(subvar_name) = find_or_add_variable(subVar->getOperandName(),
+                                                                                       subVar);
                 } else {
                     throw std::runtime_error("ReconstructOperations::Assignment: Unsure3");
                 }
@@ -238,7 +245,8 @@ namespace SCAM {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
             } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
 
-        } else throw std::runtime_error("ReconstructOperations::UnaryExpr: Unknown unary operator " + node.getOperation());
+        } else
+            throw std::runtime_error("ReconstructOperations::UnaryExpr: Unknown unary operator " + node.getOperation());
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::While &node) {
@@ -258,7 +266,8 @@ namespace SCAM {
             for (auto subVar :  node.getVariableOperand()->getVariable()->getSubVarList()) {
                 std::string name = subVar->getFullName();
                 this->find_or_add_variable(name, new VariableOperand(subVar));
-                this->variableAssignmentMap[name] = new DataSignalOperand(node.getPort()->getDataSignal()->getSubVar(subVar->getName()));
+                this->variableAssignmentMap[name] = new DataSignalOperand(
+                        node.getPort()->getDataSignal()->getSubVar(subVar->getName()));
             }
             //Assign dataSignal to variable
         } else {
@@ -277,9 +286,9 @@ namespace SCAM {
 
     void SCAM::ReconstructOperations::visit(SCAM::Write &node) {
 
-        if(this->isWaitOperation) {
+        if (this->isWaitOperation) {
             auto portOp = new DataSignalOperand(node.getPort()->getDataSignal());
-            find_or_add_variable(portOp->getOperandName(),portOp);
+            find_or_add_variable(portOp->getOperandName(), portOp);
             return;
         }
 
@@ -295,22 +304,26 @@ namespace SCAM {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
                         this->variableAssignmentMap[subSig->getFullName()] = value;
                     }
-                }else if(auto arrayExpr = NodePeekVisitor::nodePeekArrayExpr(this->newExpr)){
+                } else if (auto arrayExpr = NodePeekVisitor::nodePeekArrayExpr(this->newExpr)) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
-                        this->variableAssignmentMap[subSig->getFullName()] = arrayExpr->getValueMap().at(subSig->getName());
+                        this->variableAssignmentMap[subSig->getFullName()] = arrayExpr->getValueMap().at(
+                                subSig->getName());
                     }
-                }else {
+                } else {
                     auto var = this->module->getVariable(ExprVisitor::getOperand(this->newExpr)->getOperandName());
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
-                        find_or_add_variable(var->getSubVar(subSig->getName())->getFullName(), new VariableOperand(var->getSubVar(subSig->getName())));
+                        find_or_add_variable(var->getSubVar(subSig->getName())->getFullName(),
+                                             new VariableOperand(var->getSubVar(subSig->getName())));
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
-                        this->variableAssignmentMap[subSig->getFullName()] = this->variableAssignmentMap[var->getSubVar(subSig->getName())->getFullName()];
+                        this->variableAssignmentMap[subSig->getFullName()] = this->variableAssignmentMap[var->getSubVar(
+                                subSig->getName())->getFullName()];
                     }
                 }
                 //Simple var
             } else {
-                find_or_add_variable(node.getPort()->getDataSignal()->getName(), new DataSignalOperand(node.getPort()->getDataSignal()));
+                find_or_add_variable(node.getPort()->getDataSignal()->getName(),
+                                     new DataSignalOperand(node.getPort()->getDataSignal()));
                 this->variableAssignmentMap[node.getPort()->getDataSignal()->getName()] = this->newExpr;
             }
             //Case for write(value)
@@ -319,14 +332,18 @@ namespace SCAM {
                 if (auto *compoundExpr = dynamic_cast<CompoundExpr *>(this->newExpr)) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
-                        this->variableAssignmentMap[subSig->getFullName()] = compoundExpr->getValueMap().at(subSig->getName());
+                        this->variableAssignmentMap[subSig->getFullName()] = compoundExpr->getValueMap().at(
+                                subSig->getName());
                     }
                 } else if (auto *compoundValue = dynamic_cast<CompoundValue *>(this->newExpr)) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
-                        this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(subSig->getName());
+                        this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(
+                                subSig->getName());
                     }
-                } else  throw std::runtime_error("ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
+                } else
+                    throw std::runtime_error(
+                            "ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
             } else if (this->newExpr->getDataType()->isArrayType()) {
                 if (auto arrayExpr = NodePeekVisitor::nodePeekArrayExpr((this->newExpr))) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
@@ -335,14 +352,18 @@ namespace SCAM {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
                         this->variableAssignmentMap[subSig->getFullName()] = value;
                     }
-                }else if (auto *compoundValue = dynamic_cast<CompoundValue *>(this->newExpr)) {
+                } else if (auto *compoundValue = dynamic_cast<CompoundValue *>(this->newExpr)) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig));
-                        this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(subSig->getName());
+                        this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(
+                                subSig->getName());
                     }
-                } else throw std::runtime_error("ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
+                } else
+                    throw std::runtime_error(
+                            "ReconstructOperations::Write: Could not dynamically cast value as CompoundExpr or CompoundValue");
             } else {
-                find_or_add_variable(node.getPort()->getDataSignal()->getName(), new DataSignalOperand(node.getPort()->getDataSignal()));
+                find_or_add_variable(node.getPort()->getDataSignal()->getName(),
+                                     new DataSignalOperand(node.getPort()->getDataSignal()));
                 this->variableAssignmentMap[node.getPort()->getDataSignal()->getName()] = this->newExpr;// this is the correct assignment, right?
             }
         }
@@ -455,7 +476,8 @@ namespace SCAM {
                 if (NodePeekVisitor::nodePeekCompoundExpr(this->newExpr) != nullptr) {
                     auto *comExpr = NodePeekVisitor::nodePeekCompoundExpr(this->newExpr);
                     for (const auto &subVar : comExpr->getValueMap()) {
-                        SCAM::Parameter *newParam = new SCAM::Parameter(PrintStmt::toString(subVar.second), (SCAM::DataType *) subVar.second->getDataType());
+                        SCAM::Parameter *newParam = new SCAM::Parameter(PrintStmt::toString(subVar.second),
+                                                                        (SCAM::DataType *) subVar.second->getDataType());
                         newParamMap.insert(std::make_pair(newParam->getName(), newParam));
                         newParamValueMap.insert(std::make_pair(newParam->getName(), subVar.second));
                     }
@@ -464,7 +486,8 @@ namespace SCAM {
             } else if (param.second->getDataType()->isArrayType()) {
                 throw std::runtime_error("NOT IMPLEMENTED");
             } else {
-                SCAM::Parameter *newParam = new SCAM::Parameter(param.first, (SCAM::DataType *) param.second->getDataType());
+                SCAM::Parameter *newParam = new SCAM::Parameter(param.first,
+                                                                (SCAM::DataType *) param.second->getDataType());
                 newParamMap.insert(std::make_pair(newParam->getName(), newParam));
                 newParamValueMap.insert(std::make_pair(newParam->getName(), this->newExpr));
             }
@@ -473,7 +496,8 @@ namespace SCAM {
         if (newParamMap.size() == node.getFunction()->getParamMap().size()) {
             this->newExpr = new FunctionOperand(node.getFunction(), newParamValueMap);
         } else {
-            Function *newFun = new Function(node.getFunction()->getName(), node.getFunction()->getReturnType(), newParamMap);
+            Function *newFun = new Function(node.getFunction()->getName(), node.getFunction()->getReturnType(),
+                                            newParamMap);
             newFun->setReturnValueConditionList(node.getFunction()->getReturnValueConditionList());
             this->newExpr = new FunctionOperand(newFun, newParamValueMap);
         }
@@ -486,7 +510,7 @@ namespace SCAM {
         node.getIdx()->accept(*this);
 
         auto sig = reconstructArrayVar(node.getArrayOperand());
-        if(sig){
+        if (sig) {
             this->newExpr = new ArrayOperand(new DataSignalOperand(sig), this->newExpr);
             return;
         }
@@ -517,7 +541,7 @@ namespace SCAM {
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::Return &node) {
-        if(node.getReturnValue() != nullptr) {
+        if (node.getReturnValue() != nullptr) {
             node.getReturnValue()->accept(*this);
             if (this->returnValue != nullptr) throw std::runtime_error("Current path has two return values");
             this->returnValue = new Return(this->newExpr);
@@ -539,24 +563,24 @@ namespace SCAM {
       */
         //Step 1: find all entries in the variableAssignmentMap related to this array
         std::map<std::string, SCAM::Expr *> arrayAssignemntMap;
-        for(auto element: operand->getDataType()->getSubVarMap()){
-            std::string name = operand->getOperandName()+"["+element.first+"]";
-            if(this->variableAssignmentMap.find(name) != this->variableAssignmentMap.end()){
+        for (auto element: operand->getDataType()->getSubVarMap()) {
+            std::string name = operand->getOperandName() + "[" + element.first + "]";
+            if (this->variableAssignmentMap.find(name) != this->variableAssignmentMap.end()) {
                 arrayAssignemntMap.insert(*this->variableAssignmentMap.find(name));
             }
         }
 
         //Step 2: For now we expect the assignment to be a ArrayOperand, if not exit and return original variable
-        DataSignal * check = nullptr;
+        DataSignal *check = nullptr;
         bool isFirstIteratioin = true;
-        for(auto element: arrayAssignemntMap){
+        for (auto element: arrayAssignemntMap) {
             auto signal = NodePeekVisitor::nodePeekDataSignalOperand(element.second);
-            if(signal){
-                if(isFirstIteratioin){
+            if (signal) {
+                if (isFirstIteratioin) {
                     isFirstIteratioin = false;
                     check = signal->getDataSignal()->getParent();
-                }else{
-                    if(check != signal->getDataSignal()->getParent()){
+                } else {
+                    if (check != signal->getDataSignal()->getParent()) {
                         return nullptr;
                     }
                     check = signal->getDataSignal()->getParent();
@@ -567,21 +591,22 @@ namespace SCAM {
     }
 
 
-    void ReconstructOperations::simplifyTernary( SCAM::Operation * operation ) {
-            for(auto assign: operation->getCommitmentList()){
-                assign->accept(*this);
-            }
+    void ReconstructOperations::simplifyTernary(SCAM::Operation *operation) {
+        for (auto assign: operation->getCommitmentList()) {
+            assign->accept(*this);
+        }
 
-          std::vector<Assignment*> newCommList;
-          for (const auto &var : this->variableMap) {
+        std::vector<Assignment *> newCommList;
+        for (const auto &var : this->variableMap) {
             if (this->variableAssignmentMap.find(var.first) != this->variableAssignmentMap.end()) {
                 newCommList.push_back(new Assignment(var.second, this->variableAssignmentMap.at(var.first)));
             } else {
-                if (std::find(this->dpSignalsList.begin(), this->dpSignalsList.end(), var.first) == this->dpSignalsList.end()) /// variable is NOT a port signal
+                if (std::find(this->dpSignalsList.begin(), this->dpSignalsList.end(), var.first) ==
+                    this->dpSignalsList.end()) /// variable is NOT a port signal
                     newCommList.push_back(new Assignment(var.second, var.second));
             }
         }
-          operation->setCommitmentsList(newCommList);
+        operation->setCommitmentsList(newCommList);
 
     }
 
