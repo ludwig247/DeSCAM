@@ -1,0 +1,2 @@
+/import/lab/users/riva/DeSCAM/example/RISCV_isa_array/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/import/lab/users/riva/DeSCAM/example/RISCV_isa_array/cmake-build-debug/CMakeFiles/edit_cache.dir
