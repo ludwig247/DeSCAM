@@ -1,0 +1,116 @@
+digraph Spurious {  graph [rankdir=TD];
+state_0[ label = "------"];
+state_1[ label = "section = run"];
+state_2[ label = "fromMemoryData = 0"];
+state_3[ label = "memoryAccess = 0"];
+state_4[ label = "nextphase = SEC_DE"];
+state_5[ label = "phase = SEC_DE"];
+state_6[ label = "regfile = 0"];
+state_7[ label = "regfileWrite = 0"];
+state_8[ label = "nextphase = SEC_IF"];
+state_9[ label = "while (true)"];
+state_10[ label = "phase = nextphase"];
+state_11[ label = "if ((phase == SEC_IF))"];
+state_12[ label = "toMemoryPort.write(memoryAccess)"];
+state_13[ label = "fromMemoryPort.read(fromMemoryData)"];
+state_14[ label = "nextphase = SEC_DE"];
+state_15[ label = "------"];
+state_16[ label = "if ((phase == SEC_DE))"];
+state_17[ label = "nextphase = SEC_EX"];
+state_18[ label = "if ((phase == SEC_EX))"];
+state_19[ label = "nextphase = SEC_DE"];
+state_20[ label = "if ((phase == SEC_ME))"];
+state_21[ label = "if ((fromMemoryData == 3))"];
+state_22[ label = "toMemoryPort.write(memoryAccess)"];
+state_23[ label = "fromMemoryPort.read(fromMemoryData)"];
+state_24[ label = "nextphase = SEC_WB"];
+state_25[ label = "if ((fromMemoryData == 35))"];
+state_26[ label = "toMemoryPort.write(memoryAccess)"];
+state_27[ label = "if ((phase == SEC_WB))"];
+state_28[ label = "toRegsPort.write(regfileWrite)"];
+state_29[ label = "nextphase = SEC_IF"];
+
+state_0 -> state_1;
+state_1 -> state_2;
+state_2 -> state_3;
+state_3 -> state_4;
+state_4 -> state_5;
+state_5 -> state_6;
+state_6 -> state_7;
+state_7 -> state_8;
+state_8 -> state_9;
+state_9 -> state_10;
+state_10 -> state_11;
+state_11 -> state_12[label = "yes"];
+state_11 -> state_16[label = "no"];
+state_12 -> state_13;
+state_13 -> state_14;
+state_14 -> state_15;
+state_15 -> state_9;
+state_16 -> state_17[label = "yes"];
+state_16 -> state_18[label = "no"];
+state_17 -> state_15;
+state_18 -> state_19[label = "yes"];
+state_18 -> state_20[label = "no"];
+state_19 -> state_15;
+state_20 -> state_21[label = "yes"];
+state_20 -> state_27[label = "no"];
+state_21 -> state_22[label = "yes"];
+state_21 -> state_25[label = "no"];
+state_22 -> state_23;
+state_23 -> state_24;
+state_24 -> state_15;
+state_25 -> state_26[label = "yes"];
+state_25 -> state_24[label = "no"];
+state_26 -> state_24;
+state_27 -> state_28[label = "yes"];
+state_27 -> state_15[label = "no"];
+state_28 -> state_29;
+state_29 -> state_15;
+
+subgraph cluster_0 {
+	style=filled; color=slategray;
+	state_0;
+}
+subgraph cluster_1 {
+	style=filled; color=slategray;
+	state_12;
+}
+subgraph cluster_2 {
+	style=filled; color=slategray;
+	state_13;
+}
+subgraph cluster_3 {
+	style=filled; color=slategray;
+	state_22;
+}
+subgraph cluster_4 {
+	style=filled; color=slategray;
+	state_23;
+}
+subgraph cluster_5 {
+style=filled; color=slategray;
+state_26;
+}
+state_13 -> state_14[label = "1", color=red, penwidth=3.0];
+state_14 -> state_15[label = "2", color=red, penwidth=3.0];
+state_15 -> state_9[label = "3", color=red, penwidth=3.0];
+state_9 -> state_10[label = "4", color=red, penwidth=3.0];
+state_10 -> state_11[label = "5", color=red, penwidth=3.0];
+state_11 -> state_16[label = "6", color=red, penwidth=3.0];
+state_16 -> state_17[label = "7", color=red, penwidth=3.0];
+state_17 -> state_15[label = "8", color=red, penwidth=3.0];
+state_15 -> state_9[label = "9", color=red, penwidth=3.0];
+state_9 -> state_10[label = "10", color=red, penwidth=3.0];
+state_10 -> state_11[label = "11", color=red, penwidth=3.0];
+state_11 -> state_16[label = "12", color=red, penwidth=3.0];
+state_16 -> state_18[label = "13", color=red, penwidth=3.0];
+state_18 -> state_19[label = "14", color=red, penwidth=3.0];
+state_19 -> state_15[label = "15", color=red, penwidth=3.0];
+state_15 -> state_9[label = "16", color=red, penwidth=3.0];
+state_9 -> state_10[label = "17", color=red, penwidth=3.0];
+state_10 -> state_11[label = "18", color=red, penwidth=3.0];
+state_11 -> state_16[label = "19", color=red, penwidth=3.0];
+state_16 -> state_17[label = "20", color=red, penwidth=3.0];
+state_17 -> state_15[label = "21", color=red, penwidth=3.0];
+}
