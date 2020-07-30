@@ -250,9 +250,6 @@ public:
         auto flag_array = new DataType("bool");
         flag_array->addArray(DataTypes::getDataType("bool"),3);
         auto flags = new Variable("flags", flag_array);
-        auto var_0 = new Variable("0",flag_array);
-        auto var_1 = new Variable("1",flag_array);
-        auto var_2 = new Variable("2",flag_array);
         auto out = new Port("out",new Interface("blocking","out"),buffer_array);
         auto val_0 = new Port("val_0",new Interface("blocking","in"), DataTypes::getDataType("int"));
         auto val_1 = new Port("val_1",new Interface("blocking","in"), DataTypes::getDataType("int"));
@@ -266,10 +263,12 @@ public:
         module->addPort(val_0);
         module->addPort(val_1);
         module->addPort(val_2);
-        module->addVariable(var_0);
-        module->addVariable(var_1);
-        module->addVariable(var_2);
-
+        for(auto subVar:flags->getSubVarList()){
+            module->addVariable(subVar);
+        }
+//        for(auto subVar:buffer->getSubVarList()){
+//            module->addVariable(subVar);
+//        }
         //Read Statements
         //while(cnt < NUMBER_OF_SENDERS) unrolled
         auto cnt_less_NOS = new Relational(new VariableOperand(cnt),"<",number_of_senders);
@@ -295,15 +294,15 @@ public:
         //for(int i=0; i<number_of_senders; i++) unrolled
         //out.at(0)=buffer.at(0)
         auto out_0 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(0));
-        auto buffer_0 = new ArrayOperand(new VariableOperand(buffer),new IntegerValue(0));
+        auto buffer_0 = new VariableOperand(buffer->getSubVar("0"));
         auto out_0_assign_buffer_0 = new Assignment(out_0,buffer_0);
         //out.at(1)=buffer.at(1)
         auto out_1 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(1));
-        auto buffer_1 = new ArrayOperand(new VariableOperand(buffer),new IntegerValue(1));
+        auto buffer_1 = new VariableOperand(buffer->getSubVar("1"));
         auto out_1_assign_buffer_1 = new Assignment(out_1,buffer_1);
         //out.at(2)=buffer.at(2)
         auto out_2 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(2));
-        auto buffer_2 = new ArrayOperand(new VariableOperand(buffer),new IntegerValue(2));
+        auto buffer_2 = new VariableOperand(buffer->getSubVar("2"));
         auto out_2_assign_buffer_2 = new Assignment(out_2,buffer_2);
         //reader_notify.notify()
         auto notify_reader = new Notify("reader_notify");
@@ -987,22 +986,22 @@ TEST_F(OperationGraphTest, ExtractPaths){
     wait_op->getState()->addOutgoingOperation(wait_op);
     wait_op->getNextState()->addIncomingOperation(wait_op);
 
-    //Debug
-    for(auto op: operationsFinalOpt){
-        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
-        for(auto assump: op->getAssumptionsList()){
-            std::cout << *assump << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Commitments Operation" << op->getId() <<std::endl;
-        for(auto commit: op->getCommitmentsList()){
-            std::cout << *commit << std::endl;
-        }
-        std::cout << std::endl;
-    }
+//    //Debug
+//    for(auto op: operationsFinalOpt){
+//        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
+//        for(auto assump: op->getAssumptionsList()){
+//            std::cout << *assump << std::endl;
+//        }
+//        std::cout << std::endl;
+//        std::cout << "Commitments Operation" << op->getId() <<std::endl;
+//        for(auto commit: op->getCommitmentsList()){
+//            std::cout << *commit << std::endl;
+//        }
+//        std::cout << std::endl;
+//    }
 
-//    //Generate Property Graph
-//    std::stringstream ss;
+    //Generate Property Graph
+    std::stringstream ss;
 //    for(auto op: operationsFinalOpt){
 //        //Convert commitments to Relationals
 //        std::vector<SCAM::Expr*> commitments;
@@ -1031,9 +1030,9 @@ TEST_F(OperationGraphTest, ExtractPaths){
 //
 //    }
     std::ofstream myfile;
-//    myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/PropertyGraph.gfv");
-//    myfile << ss.str();
-//    myfile.close();
+    myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/PropertyGraph.gfv");
+    myfile << ss.str();
+    myfile.close();
 
     std::vector<std::string> portnames;
     portnames.push_back("out");

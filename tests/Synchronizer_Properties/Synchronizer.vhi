@@ -1,22 +1,22 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro out_sync : boolean := true end macro;
-macro val_0_sync : boolean := true end macro;
-macro val_1_sync : boolean := true end macro;
-macro val_2_sync : boolean := true end macro;
-macro out_notify : boolean := true end  macro;
-macro val_0_notify : boolean := true end  macro;
-macro val_1_notify : boolean := true end  macro;
-macro val_2_notify : boolean := true end  macro;
+macro out_sync : boolean := consumer_sync end macro;
+macro val_0_sync : boolean := producer_0_sync end macro;
+macro val_1_sync : boolean := producer_1_sync end macro;
+macro val_2_sync : boolean := producer_2_sync end macro;
+macro out_notify : boolean := consumer_notify end  macro;
+macro val_0_notify : boolean := producer_0_notify end  macro;
+macro val_1_notify : boolean := producer_1_notify end  macro;
+macro val_2_notify : boolean := producer_2_notify end  macro;
 
 
 -- DP SIGNALS --
-macro out_sig : int_32 :={resize(0,32), resize(0,32), resize(0,32)} end macro;
-macro out_sig_0 : signed :=resize(0,32) end macro;
-macro out_sig_1 : signed :=resize(0,32) end macro;
-macro out_sig_2 : signed :=resize(0,32) end macro;
-macro val_0_sig : signed :=resize(0,32) end macro;
-macro val_1_sig : signed :=resize(0,32) end macro;
-macro val_2_sig : signed :=resize(0,32) end macro;
+macro out_sig_0 : signed :=consumer(31 downto 0) end macro;
+macro out_sig_1 : signed :=consumer(63 downto 32) end macro;
+macro out_sig_2 : signed :=consumer(95 downto 64) end macro;
+macro out_sig : signed := out_sig_2 & out_sig_1 & out_sig_0 end macro;
+macro val_0_sig : signed :=producer_0 end macro;
+macro val_1_sig : signed :=producer_1 end macro;
+macro val_2_sig : signed :=producer_2 end macro;
 
 
 -- CONSTRAINTS --
@@ -24,13 +24,16 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro buffer : int_32 :={resize(0,32), resize(0,32), resize(0,32)} end macro;
-macro cnt : unsigned :=resize(0,32) end macro;
-macro flags : boolean :=false end macro;
-
+macro buffer : int_array := buf end macro;
+--macro flags : bool_array := flags end macro;
+--macro number_of_senders : unsigned :=resize(0,32) end macro;
+macro cnt_0 : unsigned := (flags(0)=true) ? resize(1,32) : resize(0,32) end macro;
+macro cnt_1 : unsigned := (flags(1)=true) ? resize(1,32) : resize(0,32) end macro;
+macro cnt_2 : unsigned := (flags(2)=true) ? resize(1,32) : resize(0,32) end macro;
+macro cnt : unsigned := cnt_0 + cnt_1 + cnt_2 end macro;
 
 -- STATES --
-macro start_state : boolean := true end macro;
+macro Start_State : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -43,20 +46,13 @@ prove:
 	 at t: buffer(resize(1,32)) = buffer(resize(1,32));
 	 at t: buffer(resize(2,32)) = buffer(resize(2,32));
 	 at t: cnt = resize(0,32);
-	 at t: flags(resize(0,32)) = false;
-	 at t: flags(resize(1,32)) = false;
-	 at t: flags(resize(2,32)) = false;
+	 at t: flags(0) = false;
+	 at t: flags(1) = false;
+	 at t: flags(2) = false;
 	 at t: out_sig(resize(0,32)) = out_sig(resize(0,32));
 	 at t: out_sig(resize(1,32)) = out_sig(resize(1,32));
 	 at t: out_sig(resize(2,32)) = out_sig(resize(2,32));
-	 at t: val_0_sig = val_0_sig;
-	 at t: val_1_sig = val_1_sig;
-	 at t: val_2_sig = val_2_sig;
 	 at t: out_notify = false;
-	 at t: val_0_notify = false;
-	 at t: val_1_notify = false;
-	 at t: val_2_notify = false;
-	 at t: out_notify = true;
 	 at t: val_0_notify = false;
 	 at t: val_1_notify = false;
 	 at t: val_2_notify = false;
@@ -70,7 +66,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -78,8 +75,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: flags(2);
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -91,15 +88,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -119,8 +113,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: flags(2);
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -132,16 +126,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -156,7 +147,7 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -164,8 +155,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: not(flags(2));
 	at t: (((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -177,15 +168,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -205,8 +193,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: not(flags(2));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -219,145 +207,16 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
 	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_117 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: not(val_1_sync);
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_118 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(2,32)));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: not(val_1_sync);
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_119 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: not(val_1_sync);
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
 end property;
 
 
@@ -375,8 +234,8 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(false);
+	at t: not(false);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -386,16 +245,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = ((0 + 1)+1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -410,15 +266,17 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: flags(1);
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -429,15 +287,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -452,15 +307,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -471,15 +327,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -494,15 +347,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -513,15 +367,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -536,15 +387,15 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -555,15 +406,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -578,7 +426,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -586,8 +436,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: flags(1);
+	at t: flags(2);
 	at t: out_sync;
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -598,15 +448,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -621,7 +468,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -629,8 +477,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: not(val_0_sync);
@@ -642,15 +490,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -670,8 +515,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -683,16 +528,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -707,7 +549,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -715,8 +558,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: not(val_0_sync);
@@ -728,15 +571,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -756,8 +596,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -769,16 +609,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -793,7 +630,7 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -801,8 +638,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: (((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: not(val_0_sync);
@@ -814,15 +651,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -842,8 +676,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -856,145 +690,16 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
 	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_146 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: not(val_0_sync);
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_147 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
-	at t: out_sync;
-	at t: not(val_0_sync);
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_148 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: not(val_0_sync);
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
 end property;
 
 
@@ -1012,8 +717,8 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(false);
+	at t: not(false);
 	at t: out_sync;
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -1023,16 +728,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = ((0 + 1)+1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1047,16 +749,18 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: flags(1);
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1067,15 +771,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -1090,16 +791,17 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1110,15 +812,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -1133,16 +832,17 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1153,15 +853,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1176,16 +873,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1196,15 +893,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1219,16 +913,17 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: flags(1);
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1239,15 +934,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1262,16 +954,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1282,15 +974,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1305,16 +994,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1325,15 +1014,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1353,9 +1039,9 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1366,15 +1052,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1389,7 +1072,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1397,9 +1082,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: flags(1);
+	at t: flags(2);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -1410,15 +1095,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -1433,7 +1115,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1441,9 +1124,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -1455,15 +1138,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -1483,9 +1163,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1497,16 +1177,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1521,7 +1198,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1529,9 +1207,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -1543,15 +1221,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1571,9 +1246,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1585,16 +1260,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1609,7 +1281,7 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1617,9 +1289,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: (((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -1631,15 +1303,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1659,9 +1328,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1673,16 +1342,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1697,7 +1363,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1705,9 +1372,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: flags(1);
+	at t: flags(2);
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -1719,15 +1386,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1747,9 +1411,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: flags(1);
+	at t: flags(2);
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1761,16 +1425,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = false;
 	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
 	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
 	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1785,7 +1446,7 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1793,9 +1454,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: (((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -1807,15 +1468,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1835,9 +1493,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: flags(1);
+	at t: not(flags(2));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1849,16 +1507,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1873,7 +1528,7 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -1881,9 +1536,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: (((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -1895,15 +1550,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1923,9 +1575,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: not(flags(1));
+	at t: flags(2);
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1937,16 +1589,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1966,9 +1615,9 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: not(flags(1));
+	at t: not(flags(2));
 	at t: not(((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -1981,15 +1630,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2004,7 +1650,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -2022,319 +1670,15 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_203 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_204 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_205 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_206 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
-	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_207 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_208 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: not(flags(resize(2,32)));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_209 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
-	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = true;
 	at t_end: val_2_notify = false;
 end property;
 
@@ -2353,9 +1697,9 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(false);
+	at t: not(false);
+	at t: not(false);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -2365,20 +1709,56 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (((0 + 1)(31 downto 0) + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (((0 + 1) + 1) + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
 	at t_end: val_2_notify = true;
+end property;
+
+
+property start_state_211 is
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	buffer_at_t = buffer@t,
+	cnt_at_t = cnt@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
+	out_sig_at_t = out_sig@t,
+	val_0_sig_at_t = val_0_sig@t,
+	val_1_sig_at_t = val_1_sig@t,
+	val_2_sig_at_t = val_2_sig@t;
+assume:
+	at t: start_state;
+	at t: not(out_sync);
+	at t: not(val_0_sync);
+	at t: not(val_1_sync);
+	at t: not(val_2_sync);
+prove:
+	at t_end: start_state;
+	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
+	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
+	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
+	at t_end: cnt = cnt_at_t;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
+	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
+	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
+	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
+	at t_end: out_notify = false;
+	at t_end: val_0_notify = false;
+	at t_end: val_1_notify = false;
+	at t_end: val_2_notify = false;
 end property;
 
 
@@ -2406,15 +1786,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2429,14 +1806,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
+	at t: flags(0);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -2447,15 +1826,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2470,14 +1846,15 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
+	at t: not(flags(0));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -2488,15 +1865,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2511,7 +1885,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -2519,7 +1895,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
+	at t: flags(0);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -2530,15 +1906,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2553,7 +1926,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -2561,7 +1935,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
+	at t: not(flags(0));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -2573,15 +1947,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2601,7 +1972,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
+	at t: not(flags(0));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -2614,58 +1985,14 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_35 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: not(val_1_sync);
-	at t: not(val_2_sync);
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
 	at t_end: val_2_notify = false;
 end property;
@@ -2685,7 +2012,7 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
+	at t: not(false);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -2695,16 +2022,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2719,14 +2043,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(1,32));
+	at t: flags(1);
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -2737,15 +2063,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2760,14 +2083,15 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(1,32)));
+	at t: not(flags(1));
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -2778,15 +2102,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2801,7 +2122,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -2809,7 +2132,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(1,32));
+	at t: flags(1);
 	at t: out_sync;
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -2820,15 +2143,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2843,7 +2163,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -2851,7 +2172,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(1,32)));
+	at t: not(flags(1));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: not(val_0_sync);
@@ -2863,15 +2184,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2891,7 +2209,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(1,32)));
+	at t: not(flags(1));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -2904,59 +2222,15 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_48 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(1,32));
-	at t: out_sync;
-	at t: not(val_0_sync);
-	at t: val_1_sync;
-	at t: not(val_2_sync);
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
 	at t_end: val_2_notify = false;
 end property;
 
@@ -2975,7 +2249,7 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(1,32)));
+	at t: not(false);
 	at t: out_sync;
 	at t: not(val_0_sync);
 	at t: val_1_sync;
@@ -2985,16 +2259,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -3009,15 +2280,17 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
+	at t: flags(0);
+	at t: flags(1);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -3028,15 +2301,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3051,15 +2321,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
+	at t: flags(0);
+	at t: not(flags(1));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -3070,15 +2341,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -3093,15 +2361,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
+	at t: not(flags(0));
+	at t: flags(1);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -3112,15 +2381,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -3135,15 +2401,15 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
+	at t: not(flags(0));
+	at t: not(flags(1));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -3154,15 +2420,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -3177,7 +2440,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -3185,8 +2450,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
+	at t: flags(0);
+	at t: flags(1);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -3197,15 +2462,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3220,7 +2482,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -3228,8 +2491,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
+	at t: flags(0);
+	at t: not(flags(1));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -3241,15 +2504,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -3269,8 +2529,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
+	at t: flags(0);
+	at t: not(flags(1));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -3282,16 +2542,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -3306,7 +2563,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -3314,8 +2572,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
+	at t: not(flags(0));
+	at t: flags(1);
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -3327,15 +2585,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -3355,8 +2610,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
+	at t: not(flags(0));
+	at t: flags(1);
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -3368,16 +2623,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -3392,7 +2644,7 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -3400,8 +2652,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
+	at t: not(flags(0));
+	at t: not(flags(1));
 	at t: (((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -3413,15 +2665,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -3441,8 +2690,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
+	at t: not(flags(0));
+	at t: not(flags(1));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not((((cnt + resize(1,32))(31 downto 0) + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -3455,144 +2704,15 @@ prove:
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer(0);
+	at t_end: out_sig(63 downto 32) = buffer(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_75 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: flags(resize(1,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: not(val_2_sync);
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_76 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(1,32)));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: not(val_2_sync);
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
-end property;
-
-
-property start_state_77 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(1,32));
-	at t: out_sync;
-	at t: val_0_sync;
-	at t: val_1_sync;
-	at t: not(val_2_sync);
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = false;
 	at t_end: val_2_notify = false;
 end property;
 
@@ -3611,8 +2731,8 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(1,32)));
+	at t: not(false);
+	at t: not(false);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: val_1_sync;
@@ -3622,16 +2742,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = true;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = ((0 + 1)+1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = true;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -3646,14 +2763,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(2,32));
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: not(val_1_sync);
@@ -3664,15 +2783,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3687,14 +2803,15 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: not(val_0_sync);
 	at t: not(val_1_sync);
@@ -3705,15 +2822,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3728,7 +2842,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -3736,7 +2852,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(2,32));
+	at t: flags(2);
 	at t: out_sync;
 	at t: not(val_0_sync);
 	at t: not(val_1_sync);
@@ -3747,15 +2863,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3770,7 +2883,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -3778,7 +2892,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(2));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: not(val_0_sync);
@@ -3790,15 +2904,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3818,7 +2929,7 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(2));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -3831,60 +2942,16 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
 	at t_end: val_2_notify = true;
-end property;
-
-
-property start_state_90 is
-dependencies: no_reset;
-for timepoints:
-	t_end = t+1;
-freeze:
-	buffer_at_t = buffer@t,
-	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t,
-	val_2_sig_at_t = val_2_sig@t;
-assume:
-	at t: start_state;
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: not((cnt < resize(3,32)));
-	at t: flags(resize(2,32));
-	at t: out_sync;
-	at t: not(val_0_sync);
-	at t: not(val_1_sync);
-	at t: val_2_sync;
-prove:
-	at t_end: start_state;
-	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
-	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
-	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
-	at t_end: cnt = 0;
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
-	at t_end: out_notify = true;
-	at t_end: val_0_notify = false;
-	at t_end: val_1_notify = false;
-	at t_end: val_2_notify = false;
 end property;
 
 
@@ -3902,7 +2969,7 @@ assume:
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
 	at t: not((cnt < resize(3,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(false);
 	at t: out_sync;
 	at t: not(val_0_sync);
 	at t: not(val_1_sync);
@@ -3912,16 +2979,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = buffer_at_t(0);
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = false;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = false;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer_at_t(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3936,15 +3000,17 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -3955,15 +3021,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3978,15 +3041,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -3997,15 +3061,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -4020,15 +3081,16 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: flags(resize(2,32));
+	at t: not(flags(0));
+	at t: flags(2);
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -4039,15 +3101,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -4062,15 +3121,15 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: not(flags(resize(0,32)));
-	at t: not(flags(resize(2,32)));
+	at t: not(flags(0));
+	at t: not(flags(2));
 	at t: not(out_sync);
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -4081,15 +3140,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = ((cnt_at_t + 1)(31 downto 0) + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -4104,7 +3160,9 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
+	flags_2_at_t = flags(2)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -4112,8 +3170,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: flags(resize(2,32));
+	at t: flags(0);
+	at t: flags(2);
 	at t: out_sync;
 	at t: val_0_sync;
 	at t: not(val_1_sync);
@@ -4124,15 +3182,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = buffer_at_t(2);
 	at t_end: cnt = cnt_at_t;
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = flags_at_t(2);
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = flags_2_at_t;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -4147,7 +3202,8 @@ for timepoints:
 freeze:
 	buffer_at_t = buffer@t,
 	cnt_at_t = cnt@t,
-	flags_at_t = flags@t,
+	flags_0_at_t = flags(0)@t,
+	flags_1_at_t = flags(1)@t,
 	out_sig_at_t = out_sig@t,
 	val_0_sig_at_t = val_0_sig@t,
 	val_1_sig_at_t = val_1_sig@t,
@@ -4155,8 +3211,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: not(flags(2));
 	at t: ((cnt + resize(1,32))(31 downto 0) < resize(3,32));
 	at t: out_sync;
 	at t: val_0_sync;
@@ -4168,15 +3224,12 @@ prove:
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
 	at t_end: cnt = (cnt_at_t + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = flags_at_t(0);
-	at t_end: flags(resize(1,32)) = flags_at_t(1);
-	at t_end: flags(resize(2,32)) = true;
+	at t_end: flags(0) = flags_0_at_t;
+	at t_end: flags(1) = flags_1_at_t;
+	at t_end: flags(2) = true;
 	at t_end: out_sig(resize(0,32)) = out_sig_at_t(0);
 	at t_end: out_sig(resize(1,32)) = out_sig_at_t(1);
 	at t_end: out_sig(resize(2,32)) = out_sig_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -4196,8 +3249,8 @@ freeze:
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
-	at t: flags(resize(0,32));
-	at t: not(flags(resize(2,32)));
+	at t: flags(0);
+	at t: not(flags(2));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: not(((cnt + resize(1,32))(31 downto 0) < resize(3,32)));
 	at t: out_sync;
@@ -4209,16 +3262,13 @@ prove:
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
 	at t_end: buffer(resize(1,32)) = buffer_at_t(1);
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
-	at t_end: flags(resize(0,32)) = true;
-	at t_end: flags(resize(1,32)) = false;
-	at t_end: flags(resize(2,32)) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_at_t(0);
-	at t_end: out_sig(resize(1,32)) = buffer_at_t(1);
-	at t_end: out_sig(resize(2,32)) = buffer_at_t(2);
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: cnt = (0 + 1);
+	at t_end: flags(0) = true;
+	at t_end: flags(1) = false;
+	at t_end: flags(2) = false;
+	at t_end: out_sig(31 downto 0) = buffer_at_t(0);
+	at t_end: out_sig(63 downto 32) = buffer_at_t(1);
+	at t_end: out_sig(95 downto 64) = buffer(2);
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
