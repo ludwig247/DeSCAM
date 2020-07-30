@@ -266,9 +266,9 @@ public:
         for(auto subVar:flags->getSubVarList()){
             module->addVariable(subVar);
         }
-//        for(auto subVar:buffer->getSubVarList()){
-//            module->addVariable(subVar);
-//        }
+        for(auto subVar:buffer->getSubVarList()){
+            module->addVariable(subVar);
+        }
         //Read Statements
         //while(cnt < NUMBER_OF_SENDERS) unrolled
         auto cnt_less_NOS = new Relational(new VariableOperand(cnt),"<",number_of_senders);
@@ -628,7 +628,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     }
 
     //Get Assumptions and Commitments
-    auto rOperations = new ReconstructOperations();
+    auto rOperations = new ReconstructOperations(module);
     for(auto op: this->operationsRead) {
         rOperations->sortOperation(op);
     }
@@ -1002,7 +1002,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
 
     //Generate Property Graph
     std::stringstream ss;
-//    for(auto op: operationsFinalOpt){
+    for(auto op: operationsFinalOpt){
 //        //Convert commitments to Relationals
 //        std::vector<SCAM::Expr*> commitments;
 //        commitments.clear();
@@ -1011,8 +1011,23 @@ TEST_F(OperationGraphTest, ExtractPaths){
 //            auto relational = new Relational(comm->getLhs(),"==",comm->getRhs());
 //            commitments.push_back(relational);
 //        }
-//        for(auto succ_op: operationsFinalOpt){
-//            if(!succ_op->getState()->isInit()){
+        std::vector<SCAM::Stmt*> stmtList_dummy;
+        stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
+
+        for(auto succ_op: operationsFinalOpt){
+            if(!succ_op->getState()->isInit()){
+                std::vector<SCAM::Stmt*> comb_stmts;
+                comb_stmts.insert(comb_stmts.end(),stmtList_dummy.begin(),stmtList_dummy.end());
+                comb_stmts.insert(comb_stmts.end(),succ_op->getStatementsList().begin(),succ_op->getStatementsList().end());
+                auto dummy_op = new Operation();
+                dummy_op->setStatementsList(comb_stmts);
+                rOperations->sortOperation(dummy_op);
+                if(ValidOperations::isOperationReachable(dummy_op)){
+                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
+                    ss << " -> ";
+                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
+                    ss << ";" << std::endl;
+                }
 //                auto all_assumptions = new std::vector<SCAM::Expr*>;
 //                all_assumptions->insert(all_assumptions->end(),commitments.begin(),commitments.end());
 //                for(auto assump: succ_op->getAssumptionsList()){
@@ -1025,10 +1040,12 @@ TEST_F(OperationGraphTest, ExtractPaths){
 //                    ss << ";" << std::endl;
 //                }
 //                all_assumptions->clear();
-//            }
-//        }
-//
-//    }
+                comb_stmts.clear();
+            }
+        }
+        stmtList_dummy.clear();
+    }
+
     std::ofstream myfile;
     myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/PropertyGraph.gfv");
     myfile << ss.str();

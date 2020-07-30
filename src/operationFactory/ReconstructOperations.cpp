@@ -23,6 +23,37 @@ SCAM::ReconstructOperations::ReconstructOperations(std::vector<SCAM::Stmt *> sta
     }
 }
 
+
+SCAM::ReconstructOperations::ReconstructOperations(SCAM::Module *module):
+        isStateVar(false),
+        newExpr(nullptr),
+        module(module),
+        statesMap(std::move(statesMap)) {
+
+    /// Collect module DP signals to avoid adding them to the operation commitmentList if not assigned
+    // DP SIGNALS
+    for (auto port: module->getPorts()) {
+        if (port.second->getDataType()->isVoid()) continue;
+        if (port.second->getInterface()->isShared()) continue;
+
+        if (port.second->getDataType()->isCompoundType()) {
+            this->dpSignalsList.push_back(port.first + "_sig");
+            for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
+                std::string name = port.first + "_sig." + subVar.first;
+                this->dpSignalsList.push_back(name);
+
+            }
+        } else if (port.second->getDataType()->isArrayType()) {
+            for (const auto &subVar: port.second->getDataType()->getSubVarMap()) {
+                std::string name = port.first + "_sig[" + subVar.first + "]";
+                this->dpSignalsList.push_back(name);
+            }
+        } else {
+            std::string name = port.first + "_sig";
+            this->dpSignalsList.push_back(name);
+        }
+    }
+}
 SCAM::ReconstructOperations::ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module)
         :
         isStateVar(false),

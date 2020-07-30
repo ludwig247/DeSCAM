@@ -41,7 +41,7 @@ namespace SCAM {
     }
 
     void Module::addVariable(Variable *variable) {
-        this->variableMap.insert(std::make_pair(variable->getName(), variable));
+        this->variableMap.insert(std::make_pair(variable->getFullName(), variable));
     }
 
     FSM *Module::getFSM() const {

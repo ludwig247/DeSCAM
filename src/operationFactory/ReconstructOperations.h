@@ -44,6 +44,7 @@ namespace SCAM {
     class ReconstructOperations : public SCAM::StmtAbstractVisitor {
     public:
         ReconstructOperations() = default;
+        explicit ReconstructOperations(SCAM::Module *module);
         ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module);
         ReconstructOperations(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
         void sortOperation(SCAM::Operation *operation);
