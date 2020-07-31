@@ -169,9 +169,9 @@ public:
                     for(auto p:path.idList){
                         //if node is a notify statement
                         Notify* notify = NodePeekVisitor::nodePeekNotify(controlFlowMap.at(p)->getStmt());
-                        if(notify)
-                        {
-                            for(int i=0; i< blockedFunctions.size();i++){
+                        if(notify){
+                            int size = blockedFunctions.size();
+                            for(int i=0; i < size;i++){
                                 //check if function is existent in blockedFunctions
                                 for(auto iter=blockedFunctions.begin(); iter!=blockedFunctions.end(); ++iter)
                                 {
@@ -555,6 +555,12 @@ public:
         reset_op->addStatement(flags_0_assign_false);
         reset_op->addStatement(flags_1_assign_false);
         reset_op->addStatement(flags_2_assign_false);
+        auto buffer_0_assign_0 = new Assignment(buffer_0,new IntegerValue(0));
+        auto buffer_1_assign_0 = new Assignment(buffer_1,new IntegerValue(0));
+        auto buffer_2_assign_0 = new Assignment(buffer_2,new IntegerValue(0));
+        reset_op->addStatement(buffer_0_assign_0);
+        reset_op->addStatement(buffer_1_assign_0);
+        reset_op->addStatement(buffer_2_assign_0);
         reset_op->setState(init);
         start_state = new State("start_state");
         reset_op->setNextState(start_state);
@@ -929,16 +935,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
         rOperations->sortOperation(op);
     }
 
-//    //Debug
-//    int num = 0;
-//    for(auto p:finalPaths){
-//        std::cout << "Path " << num << ": ";
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//        num++;
-//    }
+    //Debug
+    int num = 0;
+    for(auto p:finalPaths){
+        std::cout << "Path " << num << ": ";
+        for(auto id:p.idList){
+            std::cout<<id<<"\t";
+        }
+        std::cout<< std::endl;
+        num++;
+    }
 
 
     //Optimize operations
@@ -949,16 +955,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
     }
 
-//    //Debug
-//    num = 0;
-//    for(auto p:finalPathsOpt){
-//        std::cout << "Path " << num << ": ";
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//        num++;
-//    }
+    //Debug
+    num = 0;
+    for(auto p:finalPathsOpt){
+        std::cout << "Path " << num << ": ";
+        for(auto id:p.idList){
+            std::cout<<id<<"\t";
+        }
+        std::cout<< std::endl;
+        num++;
+    }
 
     for(auto op:operationsFinalOpt){
         op->getState()->addOutgoingOperation(op);

@@ -1,22 +1,22 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro out_sync : boolean := true end macro;
-macro val_0_sync : boolean := true end macro;
-macro val_1_sync : boolean := true end macro;
-macro val_2_sync : boolean := true end macro;
-macro out_notify : boolean := true end  macro;
-macro val_0_notify : boolean := true end  macro;
-macro val_1_notify : boolean := true end  macro;
-macro val_2_notify : boolean := true end  macro;
+macro out_sync : boolean := consumer_sync end macro;
+macro val_0_sync : boolean := producer_0_sync end macro;
+macro val_1_sync : boolean := producer_1_sync end macro;
+macro val_2_sync : boolean := producer_2_sync end macro;
+macro out_notify : boolean := consumer_notify end  macro;
+macro val_0_notify : boolean := producer_0_notify end  macro;
+macro val_1_notify : boolean := producer_1_notify end  macro;
+macro val_2_notify : boolean := producer_2_notify end  macro;
 
 
 -- DP SIGNALS --
-macro out_sig : int_32 :={resize(0,32), resize(0,32), resize(0,32)} end macro;
-macro out_sig_0 : signed :=resize(0,32) end macro;
-macro out_sig_1 : signed :=resize(0,32) end macro;
-macro out_sig_2 : signed :=resize(0,32) end macro;
-macro val_0_sig : signed :=resize(0,32) end macro;
-macro val_1_sig : signed :=resize(0,32) end macro;
-macro val_2_sig : signed :=resize(0,32) end macro;
+macro out_sig_0 : signed :=consumer(31 downto 0) end macro;
+macro out_sig_1 : signed :=consumer(63 downto 32) end macro;
+macro out_sig_2 : signed :=consumer(95 downto 64) end macro;
+macro out_sig : signed := out_sig_2 & out_sig_1 & out_sig_0 end macro;
+macro val_0_sig : signed :=producer_0 end macro;
+macro val_1_sig : signed :=producer_1 end macro;
+macro val_2_sig : signed :=producer_2 end macro;
 
 
 -- CONSTRAINTS --
@@ -24,13 +24,16 @@ constraint no_reset := rst = '0'; end constraint;
 
 
 -- VISIBLE REGISTERS --
-macro buffer : int_32 :={resize(0,32), resize(0,32), resize(0,32)} end macro;
-macro cnt : unsigned :=resize(0,32) end macro;
-macro flags : boolean :=false end macro;
-
+macro buffer : int_array := buf end macro;
+--macro flags : bool_array := flags end macro;
+--macro number_of_senders : unsigned :=resize(0,32) end macro;
+macro cnt_0 : unsigned := (flags(0)=true) ? resize(1,32) : resize(0,32) end macro;
+macro cnt_1 : unsigned := (flags(1)=true) ? resize(1,32) : resize(0,32) end macro;
+macro cnt_2 : unsigned := (flags(2)=true) ? resize(1,32) : resize(0,32) end macro;
+macro cnt : unsigned := cnt_0 + cnt_1 + cnt_2 end macro;
 
 -- STATES --
-macro start_state : boolean := true end macro;
+macro Start_State : boolean := true end macro;
 
 
 -- OPERATIONS --
@@ -39,18 +42,14 @@ assume:
 	 reset_sequence;
 prove:
 	 at t: start_state;
-	 at t: buffer(0) = buffer(0);
-	 at t: buffer(1) = buffer(1);
-	 at t: buffer(2) = buffer(2);
+	 at t: buffer(0) = resize(0,32);
+	 at t: buffer(1) = resize(0,32);
+	 at t: buffer(2) = resize(0,32);
 	 at t: cnt = resize(0,32);
 	 at t: flags(0) = false;
 	 at t: flags(1) = false;
 	 at t: flags(2) = false;
 	 at t: out_notify = false;
-	 at t: val_0_notify = false;
-	 at t: val_1_notify = false;
-	 at t: val_2_notify = false;
-	 at t: out_notify = true;
 	 at t: val_0_notify = false;
 	 at t: val_1_notify = false;
 	 at t: val_2_notify = false;
@@ -87,7 +86,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -120,15 +118,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = buffer_1_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -165,8 +161,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -202,11 +196,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -240,15 +232,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = buffer_1_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
+	at t_end: cnt = ((0 + 1) + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -320,7 +310,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -356,7 +345,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -391,8 +379,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -467,7 +453,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -500,15 +485,13 @@ prove:
 	at t_end: buffer(0) = buffer_0_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -546,7 +529,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -579,15 +561,13 @@ prove:
 	at t_end: buffer(0) = buffer_0_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -624,8 +604,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -661,11 +639,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -699,15 +675,13 @@ prove:
 	at t_end: buffer(0) = buffer_0_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
+	at t_end: cnt = ((0 + 1) + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -781,7 +755,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -818,7 +791,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -854,8 +826,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -892,7 +862,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -928,8 +897,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -965,8 +932,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1001,9 +966,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1080,7 +1042,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -1096,6 +1057,7 @@ freeze:
 	buffer_0_at_t = buffer(0)@t,
 	buffer_1_at_t = buffer(1)@t,
 	val_0_sig_at_t = val_0_sig@t,
+	val_1_sig_at_t = val_1_sig@t,
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
@@ -1112,20 +1074,18 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: buffer(0) = val_0_sig_at_t;
-	at t_end: buffer(1) = buffer_1_at_t;
+	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = ((0 + 1) + 1);
 	at t_end: flags(0) = true;
-	at t_end: flags(1) = false;
+	at t_end: flags(1) = true;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
-	at t_end: val_1_notify = false;
+	at t_end: val_1_notify = true;
 	at t_end: val_2_notify = true;
 end property;
 
@@ -1161,7 +1121,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1177,7 +1136,8 @@ freeze:
 	buffer_0_at_t = buffer(0)@t,
 	buffer_2_at_t = buffer(2)@t,
 	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t;
+	val_1_sig_at_t = val_1_sig@t,
+	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
@@ -1194,20 +1154,18 @@ prove:
 	at t_end: start_state;
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
-	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: buffer(2) = val_2_sig_at_t;
+	at t_end: cnt = ((0 + 1) + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = false;
-	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
+	at t_end: val_2_notify = true;
 end property;
 
 
@@ -1241,8 +1199,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -1276,16 +1232,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1324,7 +1277,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1340,7 +1292,8 @@ freeze:
 	buffer_1_at_t = buffer(1)@t,
 	buffer_2_at_t = buffer(2)@t,
 	val_0_sig_at_t = val_0_sig@t,
-	val_1_sig_at_t = val_1_sig@t;
+	val_1_sig_at_t = val_1_sig@t,
+	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
 	at t: (cnt < resize(3,32));
@@ -1357,20 +1310,18 @@ prove:
 	at t_end: start_state;
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
-	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: buffer(2) = val_2_sig_at_t;
+	at t_end: cnt = ((0 + 1) + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = true;
-	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: flags(2) = true;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
-	at t_end: val_2_notify = false;
+	at t_end: val_2_notify = true;
 end property;
 
 
@@ -1404,8 +1355,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1439,16 +1388,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1486,8 +1432,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1521,16 +1465,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1567,12 +1508,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1643,16 +1581,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (((0 + 1)(31 downto 0) + 1)(31 downto 0) + 1)(31 downto 0);
+	at t_end: cnt = (((0 + 1) + 1) + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -1720,9 +1655,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -1792,7 +1727,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1865,7 +1799,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1900,10 +1833,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -1935,14 +1867,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = buffer_1_at_t;
 	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2012,7 +1943,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2085,7 +2015,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2120,10 +2049,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2155,14 +2083,13 @@ prove:
 	at t_end: buffer(0) = buffer_0_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2234,7 +2161,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2270,7 +2196,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2305,8 +2230,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2381,7 +2304,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = true;
@@ -2414,15 +2336,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2460,7 +2380,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2493,15 +2412,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2538,8 +2455,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2575,11 +2490,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = val_0_sig_at_t;
-	at t_end: out_sig(resize(1,32)) = val_1_sig_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: out_sig(31 downto  0) = val_0_sig_at_t;
+	at t_end: out_sig(63 downto 32) = val_1_sig_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2613,15 +2526,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = val_1_sig_at_t;
 	at t_end: buffer(2) = buffer_2_at_t;
-	at t_end: cnt = ((0 + 1)(31 downto 0) + 1)(31 downto 0);
+	at t_end: cnt = ((0 + 1) + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = true;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_1_sig = val_1_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = true;
@@ -2691,7 +2602,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2764,7 +2674,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2799,10 +2708,9 @@ prove:
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2834,14 +2742,13 @@ prove:
 	at t_end: buffer(0) = buffer_0_at_t;
 	at t_end: buffer(1) = buffer_1_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = false;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = true;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = buffer_2_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = buffer_2_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2913,7 +2820,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -2949,7 +2855,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = flags_2_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -2984,8 +2889,6 @@ prove:
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
@@ -3060,7 +2963,6 @@ prove:
 	at t_end: flags(0) = flags_0_at_t;
 	at t_end: flags(1) = flags_1_at_t;
 	at t_end: flags(2) = true;
-	at t_end: val_2_sig = val_2_sig_at_t;
 	at t_end: out_notify = false;
 	at t_end: val_0_notify = false;
 	at t_end: val_1_notify = false;
@@ -3093,15 +2995,13 @@ prove:
 	at t_end: buffer(0) = val_0_sig_at_t;
 	at t_end: buffer(1) = buffer_1_at_t;
 	at t_end: buffer(2) = val_2_sig_at_t;
-	at t_end: cnt = (0 + 1)(31 downto 0);
+	at t_end: cnt = (0 + 1);
 	at t_end: flags(0) = true;
 	at t_end: flags(1) = false;
 	at t_end: flags(2) = false;
-	at t_end: out_sig(resize(0,32)) = buffer_0_at_t;
-	at t_end: out_sig(resize(1,32)) = buffer_1_at_t;
-	at t_end: out_sig(resize(2,32)) = val_2_sig_at_t;
-	at t_end: val_0_sig = val_0_sig_at_t;
-	at t_end: val_2_sig = val_2_sig_at_t;
+	at t_end: out_sig(31 downto  0) = buffer_0_at_t;
+	at t_end: out_sig(63 downto 32) = buffer_1_at_t;
+	at t_end: out_sig(95 downto 64) = val_2_sig_at_t;
 	at t_end: out_notify = true;
 	at t_end: val_0_notify = true;
 	at t_end: val_1_notify = false;
