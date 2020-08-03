@@ -1,4 +1,4 @@
-## Required pre-installed packages
+## Required pre-installed packages Ubuntu 18.04
 
 * **git (?)**
     * sudo apt-get git

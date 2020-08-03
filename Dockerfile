@@ -33,15 +33,6 @@ RUN mkdir /root/DeSCAM/tests
 #3) Copy all required contents to create the AppImage
 # Disclaimer: only needed files are copied for size optmization
 # ------------------------------------------------------------------------------
-#Trial
-#################################################
-#COPY AppImage/AppRun /root/DeSCAM/
-#COPY AppImage/DeSCAM-icon.png /root/DeSCAM/
-#COPY AppImage/DeSCAM.desktop /root/DeSCAM/
-#COPY AppImage/appimagetool-x86_64.AppImage /root/
-#COPY linuxdeployqt-6-x86_64.AppImage /root/
-#################################################
-
 COPY AppImage  /root/AppImage/
 COPY install  /root/DeSCAM/install/
 COPY src  /root/DeSCAM/src/
