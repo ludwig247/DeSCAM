@@ -6,7 +6,7 @@ function showhelp() {
 
 function setup() {
 	mkdir -p tempenv/{chroot,persist,files,dev/pts}
-
+	#Create Chroot Basic FileSystem Layout
 	mknod -m 622 tempenv/dev/console c 5 1
 	mknod -m 666 tempenv/dev/null c 1 3
 	mknod -m 666 tempenv/dev/zero c 1 5
@@ -28,7 +28,7 @@ function verifysetup() {
 }
 
 function start() {
-	echo "Starting.."
+	echo "Verifying Setup.."
 	if ! verifysetup; then
 		echo "Environment wasn't set up."
 		return 1
@@ -40,7 +40,7 @@ function start() {
 	mount --bind tempenv/dev tempenv/chroot/dev
 	echo "Step 3.."
 	mount --bind /dev/pts tempenv/chroot/dev/pts
-	echo "Step 4.."
+	echo "Step 4.. Running Installer"
 	set +e
 	chroot tempenv/chroot /root/installer
 	echo "Step 5.."

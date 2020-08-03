@@ -24,21 +24,39 @@ jobs:
       ROOT_DIR: "/"
     steps:
       - uses: actions/checkout@v1
-      - name: Docker Build
-        run: docker build --tag myimage:1.0 .
-      - name: Docker Run
-        run: docker run --publish 8000:8080 -it --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
-      - name: Docker Check
-        run: docker ps -a
-      - name: Run Master
-        run: docker exec MyUbuntu "/root/master"
-      - name: Copy Image back
-        run: docker cp MyUbuntu:/root/DeSCAM_v .
-      - name: Check path
-        run: pwd && ls -l
-      - name: Stop Container
-        run: docker stop MyUbuntu
-# 	TEST ON UBUNTU 16
+# DEFAULT WORKFLOW
+      - name: Build System Generation
+        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+      - name: Build DESCAM
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
+      - name: Build Tests
+        run: |
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
+      - name: Run Tests
+        run: |
+          $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
+          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
+      - name: Clean up
+        run: |
+          rm -rf $GITHUB_WORKSPACE/build/3rdParty
+          rm -rf $GITHUB_WORKSPACE/install/tmp
+## APPIMAGE WORKFLOW
+#      - name: Docker Build
+#        run: docker build --tag myimage:1.0 .
+#      - name: Docker Run
+#        run: docker run --publish 8000:8080 -it --detach --name MyUbuntu --privileged --cap-add=SYS_ADMIN --device /dev/fuse myimage:1.0
+#      - name: Docker Check
+#        run: docker ps -a
+#      - name: Run Master
+#        run: docker exec MyUbuntu "/root/master"
+#      - name: Copy Image back
+#        run: docker cp MyUbuntu:/root/DeSCAM_v .
+#      - name: Check path
+#        run: pwd && ls -l
+#      - name: Stop Container
+#        run: docker stop MyUbuntu
+## 	TEST ON UBUNTU 16
 #      - name: Docker Build Ubuntu16
 #        run: docker build --file ./images/ubuntu16_df --tag mytest2:1.0 .
 #      - name: Docker Run Ubuntu16
@@ -49,39 +67,40 @@ jobs:
 #        run: docker exec MyUbuntu16 "/root/ubuntu16_script"
 #      - name: Stop Container Ubuntu16
 #        run: docker stop MyUbuntu16
-# 	TEST ON UBUNTU 18
-      - name: Docker Build Ubuntu18
-        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
-      - name: Docker Run Ubuntu18
-        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
-      - name: Docker Check Ubuntu18
-        run: docker ps -a
-      - name: Run Test Ubuntu18
-        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
-      - name: Stop Container Ubuntu18
-        run: docker stop MyUbuntu18
-# 	TEST ON CENTOS 8
-      - name: Docker Build CentOS8 
-        run: docker build --file ./images/centos8_df --tag mytest3:1.0 .
-      - name: Docker Run CentOS8
-        run: docker run --publish 8000:8080 --detach --name MyCentos8 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest3:1.0
-      - name: Docker Check CentOS8
-        run: docker ps -a
-      - name: Run Test CentOS8
-        run: docker exec MyCentos8 "/root/centos8_script"
-      - name: Stop Container CentOS8
-        run: docker stop MyCentos8
-# 	TEST ON CENTOS 7
-      - name: Docker Build CentOS7 
-        run: docker build --file ./images/centos7_df --tag mytest4:1.0 .
-      - name: Docker Run CentOS7
-        run: docker run --publish 8000:8080 --detach --name MyCentos7 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest4:1.0
-      - name: Docker Check CentOS7
-        run: docker ps -a
-      - name: Run Test CentOS7
-        run: docker exec MyCentos7 "/root/centos7_script"
-      - name: Stop Container CentOS7
-        run: docker stop MyCentos7
+## 	TEST ON UBUNTU 18
+#      - name: Docker Build Ubuntu18
+#        run: docker build --file ./images/ubuntu18_df --tag mytest1:1.0 .
+#      - name: Docker Run Ubuntu18
+#        run: docker run --publish 8000:8080 --detach --name MyUbuntu18 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest1:1.0
+#      - name: Docker Check Ubuntu18
+#        run: docker ps -a
+#      - name: Run Test Ubuntu18
+#        run: docker exec MyUbuntu18 "/root/ubuntu18_script"
+#      - name: Stop Container Ubuntu18
+#        run: docker stop MyUbuntu18
+## 	TEST ON CENTOS 8
+#      - name: Docker Build CentOS8 
+#        run: docker build --file ./images/centos8_df --tag mytest3:1.0 .
+#      - name: Docker Run CentOS8
+#        run: docker run --publish 8000:8080 --detach --name MyCentos8 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest3:1.0
+#      - name: Docker Check CentOS8
+#        run: docker ps -a
+#      - name: Run Test CentOS8
+#        run: docker exec MyCentos8 "/root/centos8_script"
+#      - name: Stop Container CentOS8
+#        run: docker stop MyCentos8
+## 	TEST ON CENTOS 7
+#      - name: Docker Build CentOS7 
+#        run: docker build --file ./images/centos7_df --tag mytest4:1.0 .
+#      - name: Docker Run CentOS7
+#        run: docker run --publish 8000:8080 --detach --name MyCentos7 --privileged --cap-add=SYS_ADMIN --device /dev/fuse mytest4:1.0
+#      - name: Docker Check CentOS7
+#        run: docker ps -a
+#      - name: Run Test CentOS7
+#        run: docker exec MyCentos7 "/root/centos7_script"
+#      - name: Stop Container CentOS7
+#        run: docker stop MyCentos7
+##     RELEASE AND PUBLISH
 #      - name: Create Release
 #        id: create_release
 #        uses: actions/create-release@v1
@@ -109,35 +128,3 @@ jobs:
 #          asset_path: ./DeSCAM_v
 #          asset_name: DeSCAM_beta
 #          asset_content_type: application/octet-stream
-
-
-#      - name: Build System Generation
-#        run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
-      #- name: Build SYSTEMC
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j4
-      #- name: Build GTEST
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j4
-      #- name: Build Z3
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j4
-      #- name: Build LLVM/CLANG
-      #  run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j4
-#      - name: Build DESCAM
-#        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
-#      - name: Build Tests
-#        run: |
-#          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
-#          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
-#      - name: Run Tests
-#        run: |
-#          $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
-#          $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
-#      - name: Clean up
-#        run: |
-#          rm -rf $GITHUB_WORKSPACE/build/3rdParty
-#          rm -rf $GITHUB_WORKSPACE/install/tmp
-#      - name: AppImage Creation
-#        run: $GITHUB_WORKSPACE/linuxdeployqt-6-x86_64.AppImage $GITHUB_WORKSPACE/bin/DESCAM -appimage # -executable=$GITHUB_WORKSPACE/
-#      - name: AppImage Elaboration
-#        uses: ./
-     
-
