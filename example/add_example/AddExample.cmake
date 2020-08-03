@@ -22,7 +22,6 @@ macro (add_example)
         list(GET MACRO_ARG 0 FIRST_ARG)
 #        list(GET MACRO_ARG 1 SECOND_ARG)
         list(GET MACRO_ARG 2 THIRD_ARG)
-
         if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}")
             if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${THIRD_ARG}/ESL")
                 file(GLOB EXAMPLE_H "${THIRD_ARG}/ESL/*.h")

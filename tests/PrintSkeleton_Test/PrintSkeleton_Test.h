@@ -28,20 +28,20 @@ static std::vector<SCAM::Module *> parameter() {
 
 class PrintSkeleton_Test : public ::testing::TestWithParam<SCAM::Module *> {
 public:
-    PrintSkeleton_Test() {
-
-    }
+//    PrintSkeleton_Test() {
+//
+//    }
     static void SetUpTestCase() {
     }
 
     static void TearDownTestCase() {
     }
 
-    virtual void SetUp() override {
-    }
-
-    virtual void TearDown() {
-    }
+//    virtual void SetUp() override {
+//    }
+//
+//    virtual void TearDown() {
+//    }
 };
 
 

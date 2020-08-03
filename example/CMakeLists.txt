@@ -5,7 +5,7 @@ include(add_example/AddExample.cmake)
 # Note: If example directory is not specified, it'll be assumed that plugin directory has the same name as the example itself.
 #
 #
-#add_example(Bus; Print_ITL_Tests )
+add_example(Bus; Print_ITL_Tests )
 #add_example(FIFO; Print_ITL_Tests)
 add_example(FPI; Print_ITL_Tests)
 #add_example(I2C; Print_ITL_Tests)
@@ -21,7 +21,7 @@ add_example(Paper; Print_ITL_Tests)
 update_list()
 #
 #
-#add_subdirectory(Bus)
+add_subdirectory(Bus)
 #add_subdirectory(Framer)
 #add_subdirectory(SingleMasterMultiSlave)
 add_subdirectory(FPI)
