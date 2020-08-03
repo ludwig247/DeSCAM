@@ -935,16 +935,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
         rOperations->sortOperation(op);
     }
 
-    //Debug
-    int num = 0;
-    for(auto p:finalPaths){
-        std::cout << "Path " << num << ": ";
-        for(auto id:p.idList){
-            std::cout<<id<<"\t";
-        }
-        std::cout<< std::endl;
-        num++;
-    }
+//    //Debug
+//    int num = 0;
+//    for(auto p:finalPaths){
+//        std::cout << "Path " << num << ": ";
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//        num++;
+//    }
 
 
     //Optimize operations
@@ -955,16 +955,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
     }
 
-    //Debug
-    num = 0;
-    for(auto p:finalPathsOpt){
-        std::cout << "Path " << num << ": ";
-        for(auto id:p.idList){
-            std::cout<<id<<"\t";
-        }
-        std::cout<< std::endl;
-        num++;
-    }
+//    //Debug
+//    num = 0;
+//    for(auto p:finalPathsOpt){
+//        std::cout << "Path " << num << ": ";
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//        num++;
+//    }
 
     for(auto op:operationsFinalOpt){
         op->getState()->addOutgoingOperation(op);
@@ -1009,14 +1009,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Generate Property Graph
     std::stringstream ss;
     for(auto op: operationsFinalOpt){
-//        //Convert commitments to Relationals
-//        std::vector<SCAM::Expr*> commitments;
-//        commitments.clear();
-//        for(auto comm: op->getCommitmentsList()){
-//            //Create Relational from lhs and rhs of commitment
-//            auto relational = new Relational(comm->getLhs(),"==",comm->getRhs());
-//            commitments.push_back(relational);
-//        }
         std::vector<SCAM::Stmt*> stmtList_dummy;
         stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
 
@@ -1034,18 +1026,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
                     ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
                     ss << ";" << std::endl;
                 }
-//                auto all_assumptions = new std::vector<SCAM::Expr*>;
-//                all_assumptions->insert(all_assumptions->end(),commitments.begin(),commitments.end());
-//                for(auto assump: succ_op->getAssumptionsList()){
-//                    all_assumptions->push_back(assump);
-//                }
-//                if(!isUnreachable(*all_assumptions)){
-//                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
-//                    ss << " -> ";
-//                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
-//                    ss << ";" << std::endl;
-//                }
-//                all_assumptions->clear();
                 comb_stmts.clear();
             }
         }
