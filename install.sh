@@ -12,7 +12,6 @@ function run_tests {
 	cd $SELF_DIR/bin
         ./PrintITL_Test_Run
         ./PrintSkeleton_Test_Run
-
 }
 
 function delete_artifacts {
@@ -64,6 +63,7 @@ if cat /etc/os-release | agrep -q 'Ubuntu;18.04'; then
     build_DeSCAM
     delete_artifacts
     save_envvariables
+    run_tests
 elif cat /etc/os-release | agrep -q 'Ubuntu;16.04'; then
     echo Installing on Ubuntu 16.04
     apt-get -y update
