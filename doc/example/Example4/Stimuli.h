@@ -34,11 +34,11 @@ struct Stimuli : public sc_module {
 
             var = (rand()%2)==1;
             std::cout << "#1" << std::endl;
-            slave_out2->nb_write(false);
+            slave_out2->slave_write(false);
             std::cout << "#2" << std::endl;
-            slave_out1->nb_write(var);
+            slave_out1->slave_write(var);
             std::cout << "#3" << std::endl;
-            succ = report_in->nb_read(result);
+            report_in->slave_read(result, succ);
             std::cout << "Succ:" << succ << "Result" << result << std::endl;
 
             if(succ && result){
