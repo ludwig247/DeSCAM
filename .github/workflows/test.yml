@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - development
-      - master_branch 
     tags:
       - v1.*
 
