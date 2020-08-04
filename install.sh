@@ -3,7 +3,16 @@
 function build_DeSCAM {
 	mkdir build && cd build
 	cmake ../
-        cmake --build . --target SCAM -- -j 4
+        cmake --build . --target SCAM -- -j 8
+        cmake --build . --target PrintITL_Test_Run -- -j 8
+        cmake --build . --target PrintSkeleton_Test_Run -- -j 8
+}
+
+function run_tests {
+	cd $SELF_DIR/bin
+        ./PrintITL_Test_Run
+        ./PrintSkeleton_Test_Run
+
 }
 
 function delete_artifacts {
@@ -65,6 +74,7 @@ elif cat /etc/os-release | agrep -q 'Ubuntu;16.04'; then
     build_DeSCAM
     delete_artifacts
     save_envvariables
+    run_tests
 else
     echo No Supported OS found!
 fi
