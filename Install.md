@@ -1,7 +1,9 @@
 ## Required pre-installed packages Ubuntu 18.04
 
-* **git (?)**
+* **git**
     * sudo apt-get git
+* **agrep**
+    * sudo apt-get agrep
 * **cmake** 
     * sudo apt-get cmake       
 * **gcc**
@@ -28,3 +30,10 @@ gtest   |   1.8.0
 systemc |   2.3.1
 z3      |   4.8.6
 llvm    |   -
+
+
+## Installation 
+
+Run the install.sh script within the root folder. 
+
+
