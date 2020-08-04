@@ -49,6 +49,13 @@ example/RISCV_synthesis/riscv_tailoring/BREG/generated/
 example/RISCV_synthesis/riscv_tailoring/BREG/work/
 example/RISCV_synthesis/riscv_tailoring/formal_verification/work/
 example/RISCV_synthesis/riscv_tailoring/synthesis_flow/work/
-example/exampleheaders.h
-tests/testheaders.h
-/tests/Print_ITL_Tests/TestCases/tests.h
+/tests/Print_ITL_Tests/tests.h
+/tests/Print_ITL_Tests/functionality_tests.h
+/tests/PrintSkeleton_Test/TestCases/tests.h
+/tests/Compile_ESL_Tests/error.txt
+/tests/Compile_ESL_Tests/error_file
+/tests/Compile_ESL_Tests/error.json
+/tests/Compile_ESL_Tests/JSON.cmake
+/tests/Compile_ESL_Tests/error_files/
+/tests/Compile_ESL_Tests/json_output_files/
+/tests/Compile_ESL_Tests/tests.txt
