@@ -17,7 +17,7 @@
 #include <toPPA/CommToCommNew.h>
 
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class TestModule2: public ::testing::Test{
 public:
@@ -30,7 +30,7 @@ public:
         Port * port = new Port("output",anInterface,DataTypes::getDataType("int"));
         module->addPort(port);
         //Variable
-        SCAM::Variable * variable= new Variable("unsigned_var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
+        DESCAM::Variable * variable= new Variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
         module->addVariable(variable);
         //Sections
         DataType *sections = new DataType(module->getName() + "_SECTIONS");
@@ -41,7 +41,7 @@ public:
 
         std::vector<Stmt*> stmtlist;
         //Comm: port->write(13)
-        SCAM::Write  * write = new Write(port,new IntegerValue(13));
+        DESCAM::Write  * write = new Write(port,new IntegerValue(13));
         stmtlist.push_back(write);
         //Assignment: unsigned_var = -3 + 10;
         VariableOperand * variableOperand = new VariableOperand(variable);
@@ -71,7 +71,7 @@ public:
     }
 
     virtual void TearDown() {}
-    SCAM::Module * module;
+    DESCAM::Module * module;
     std::map<std::string,std::vector<Stmt*> > sectionMap;
     std::map<std::string,std::vector<Path*> > sectionPathMap;
     std::map<int, State *> stateMap;

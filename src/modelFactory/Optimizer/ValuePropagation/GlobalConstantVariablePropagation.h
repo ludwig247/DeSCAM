@@ -14,7 +14,7 @@
 #include "Optimizer/Utilities/PropagateConstantValue.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Propagates the initial value of constant global variables
@@ -30,21 +30,21 @@ namespace SCAM {
      */
 
 
-    class GlobalConstantVariablePropagation : public SCAM::StmtAbstractVisitor {
+    class GlobalConstantVariablePropagation : public StmtAbstractVisitor {
 
     public:
         GlobalConstantVariablePropagation() = delete;
 
-        GlobalConstantVariablePropagation(const std::map<int, SCAM::CfgNode *> &CFG, const std::map<std::string, Variable*>& globalVariableMap);
+        GlobalConstantVariablePropagation(const std::map<int, CfgNode *> &CFG, const std::map<std::string, Variable*>& globalVariableMap);
 
         ~GlobalConstantVariablePropagation() = default;
 
-        const std::map<int, SCAM::CfgNode *> &getCFG() const;
+        const std::map<int, CfgNode *> &getCFG() const;
 
     private:
         int currentNodeId;
         Expr *newExpr;
-        std::map<int, SCAM::CfgNode *> CFG;
+        std::map<int, CfgNode *> CFG;
         std::map<std::string, Variable*> globalVariableMap;
 
         //visitors
@@ -94,7 +94,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

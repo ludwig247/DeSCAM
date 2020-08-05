@@ -11,12 +11,12 @@
 #include <Stmts/VariableOperand.h>
 //#include <Stmts/NBWrite.h>
 
-namespace SCAM {
+namespace DESCAM {
     class CreateInitSection2 {
     public:
         CreateInitSection2() = default;
 
-        static std::vector<Stmt *> createInitSection2(const SCAM::Module *module);
+        static std::vector<Stmt *> createInitSection2(const DESCAM::Module *module);
     };
 }
 

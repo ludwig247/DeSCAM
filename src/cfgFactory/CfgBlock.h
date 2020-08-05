@@ -10,7 +10,7 @@
 #include <string>
 #include <sstream>
 
-namespace SCAM {
+namespace DESCAM {
     class CfgBlock {
     public:
 
@@ -45,13 +45,13 @@ namespace SCAM {
         int getClangBlockID();
 
         //Statements
-        void addStmt(SCAM::Stmt *);
-        void setStmtList(const std::vector<SCAM::Stmt *>& newStmtList);
-        std::vector<SCAM::Stmt *> getStmtList(); //! Returns the list of SCAM Stmts
+        void addStmt(DESCAM::Stmt *);
+        void setStmtList(const std::vector<DESCAM::Stmt *>& newStmtList);
+        std::vector<DESCAM::Stmt *> getStmtList(); //! Returns the list of DESCAM Stmts
         //Terminators: are conditional statements: if,while,for
-        void setTerminator(SCAM::Stmt *terminator);
+        void setTerminator(DESCAM::Stmt *terminator);
 
-        SCAM::Stmt *getTerminator(); //! suspension AST terminator
+        DESCAM::Stmt *getTerminator(); //! suspension AST terminator
         bool hasTerminator();
 
         bool hasIf();
@@ -66,10 +66,10 @@ namespace SCAM {
 
         int blockID; //! Unique block ID in SuspensionCFG
         int cfgBlockID; //! Block ID in the clang::CFG
-        SCAM::Stmt *terminator; //! Terminator with SuspensionAST representation
+        DESCAM::Stmt *terminator; //! Terminator with SuspensionAST representation
         std::vector<CfgBlock *> successorList;
         std::vector<CfgBlock *> predecessorList;
-        std::vector<SCAM::Stmt *> stmtList;
+        std::vector<DESCAM::Stmt *> stmtList;
 
     };
 }

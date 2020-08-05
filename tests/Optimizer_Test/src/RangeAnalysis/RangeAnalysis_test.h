@@ -8,7 +8,7 @@
 
 #include "Optimizer_Test/src/CreateModel.h"
 
-class RangeAnalysis_Test : public ::testing::TestWithParam<SCAM::Model *> {
+class RangeAnalysis_Test : public ::testing::TestWithParam<DESCAM::Model *> {
 public:
     void SetUp() override {};
 
@@ -23,8 +23,8 @@ TEST_P(RangeAnalysis_Test, inferring_bitwidths) {
         for (auto module: model->getModules()) {
             ASSERT_FALSE(module.second->getCFG().empty()) << "before analyzing variables bitwidths, CFG of module "
                                                           << module.second->getName() << " is empty!.\n";
-            SCAM::FindReadVariables findReadVariables(module.second->getCFG());
-            SCAM::FunctionsOptimizer functionOptimizer(module.second->getCFG(),module.second,
+            DESCAM::FindReadVariables findReadVariables(module.second->getCFG());
+            DESCAM::FunctionsOptimizer functionOptimizer(module.second->getCFG(),module.second,
                                                        model,findReadVariables.getReadVariablesSet());
 
             module.second->setCFG(functionOptimizer.getCFG());
@@ -32,7 +32,7 @@ TEST_P(RangeAnalysis_Test, inferring_bitwidths) {
                                         << "After Optimizations, CFG of module "
                                         << module.second->getName()
                                         << " is empty\n";
-            SCAM::RangeAndBitWidthAnalysis rangeAndBitWidthAnalysis(module.second);
+            DESCAM::RangeAndBitWidthAnalysis rangeAndBitWidthAnalysis(module.second);
 
             std::stringstream ss;
             ss << "Variables bitwidths map:\n";

@@ -7,7 +7,7 @@
 
 #include <PrintStmt.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class ChiselSVAConditionVisitor : public PrintStmt {
     public:

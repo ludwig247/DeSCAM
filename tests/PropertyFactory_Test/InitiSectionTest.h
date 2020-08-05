@@ -12,7 +12,7 @@
 #include <toPPA/CreateInitSection.h>
 #include <Stmts/UnsignedValue.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class TestModule: public ::testing::Test{
 public:
@@ -20,12 +20,12 @@ public:
     }
 
     virtual void SetUp() {
-        //SCAM::Variable variable("unsigned_var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
+        //DESCAM::Variable variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
         //module.addVariable(&variable);
     }
 
     virtual void TearDown() {}
-    SCAM::Module module;
+    DESCAM::Module module;
 };
 
 TEST_F(TestModule,CreateInitSection){

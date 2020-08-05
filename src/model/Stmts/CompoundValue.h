@@ -7,11 +7,11 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class CompoundValue : public ConstValue {
     public:
-        CompoundValue(const std::vector<ConstValue *> &values, const DataType *dataType);
+        CompoundValue(const std::vector<ConstValue *> &values, const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         const std::map<std::string, ConstValue *> &getValues() const;

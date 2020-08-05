@@ -2,88 +2,91 @@
 // Created by ludwig on 22.09.15.
 //
 
-#include <assert.h>
 #include "Interface.h"
+#include "DescamException.h"
 
-SCAM::Interface::Interface() :
+DESCAM::Interface::Interface() :
         _direction("UNKNOWN"),
         _interface("UNKNOWN"),
         AbstractNode("UNKNOWN") {
 }
 
-SCAM::Interface::Interface(std::string interfaceName, std::string direction) :
+DESCAM::Interface::Interface(std::string interfaceName, std::string direction, LocationInfo locationInfo) :
         _direction(direction),
         _interface(interfaceName),
-        AbstractNode(interfaceName) {
-    assert(_direction == "in" || direction == "out");
-    assert(_interface == "blocking" || _interface == "shared" || _interface == "master" || _interface == "slave");
+        AbstractNode(interfaceName,locationInfo) {
+    if(!(_direction == "in" || direction == "out"))
+        throw DescamException("Interface direction can only be either 'in' or 'out'",locationInfo);
+    if(!(_interface == "blocking" || _interface == "shared" || _interface == "master" || _interface == "slave")){
+        throw DescamException("Interface can only be 'blocking', 'shared', 'master, or 'slave'",locationInfo);
+    }
 }
 
-SCAM::Interface::~Interface() {
+DESCAM::Interface::~Interface() {
 
 }
 
-void SCAM::Interface::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::Interface::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-std::string SCAM::Interface::getDirection() {
+std::string DESCAM::Interface::getDirection() {
     return this->_direction;
 }
 
-bool SCAM::Interface::isMasterIn() const {
+bool DESCAM::Interface::isMasterIn() const {
     if (this->_interface == "master" && this->_direction == "in") return true;
     return false;
 }
 
-bool SCAM::Interface::isMasterOut() const {
+bool DESCAM::Interface::isMasterOut() const {
     if (this->_interface == "master" && this->_direction == "out") return true;
     return false;
 }
 
-bool SCAM::Interface::isShared() const {
+bool DESCAM::Interface::isShared() const {
     if (this->_interface == "shared") return true;
     return false;
 }
 
-bool SCAM::Interface::isInput() const {
+bool DESCAM::Interface::isInput() const {
     return this->_direction == "in";
 }
 
-bool SCAM::Interface::isOutput() const {
+bool DESCAM::Interface::isOutput() const {
     return this->_direction == "out";
 }
 
-bool SCAM::Interface::isSlaveIn() const {
+bool DESCAM::Interface::isSlaveIn() const {
     if (this->_interface == "slave" && this->_direction == "in") return true;
     return false;
 }
 
-bool SCAM::Interface::isSlaveOut() const {
+bool DESCAM::Interface::isSlaveOut() const {
     if (this->_interface == "slave" && this->_direction == "out") return true;
     return false;
 }
 
-bool SCAM::Interface::isSlave() const {
+bool DESCAM::Interface::isSlave() const {
     return this->isSlaveOut() || this->isSlaveIn();
 }
 
-bool SCAM::Interface::isMaster() const {
+bool DESCAM::Interface::isMaster() const {
     return this->isMasterIn() || this->isMasterOut();
 }
 
-bool SCAM::Interface::isBlocking() const {
+bool DESCAM::Interface::isBlocking() const {
     if (this->_interface == "blocking") return true;
     return false;
 }
 
-bool SCAM::Interface::isBlockingIn() const {
+bool DESCAM::Interface::isBlockingIn() const {
     if (this->_interface == "blocking" && this->_direction == "in") return true;
     return false;
 }
 
-bool SCAM::Interface::isBlockingOut() const {
+bool DESCAM::Interface::isBlockingOut() const {
     if (this->_interface == "blocking" && this->_direction == "out") return true;
     return false;
 }

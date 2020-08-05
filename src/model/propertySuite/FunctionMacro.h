@@ -7,7 +7,7 @@
 
 #include "AbstractMacro.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class FunctionMacro : public AbstractMacro {
 

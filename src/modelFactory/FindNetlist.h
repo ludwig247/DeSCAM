@@ -4,7 +4,7 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
 
     /*!
      * \brief Searches within sc_main for binding of ports

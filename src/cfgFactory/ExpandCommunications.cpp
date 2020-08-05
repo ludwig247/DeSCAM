@@ -6,9 +6,9 @@
 #include <PrintStmt.h>
 #include "OperationMiscellaneous/FindCommunication2.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    ExpandCommunications::ExpandCommunications(const std::map<int, SCAM::CFGNode2 *> &controlFlowMap, const std::map<std::string, Port *> &modulePorts) {
+    ExpandCommunications::ExpandCommunications(const std::map<int, DESCAM::CFGNode2 *> &controlFlowMap, const std::map<std::string, Port *> &modulePorts) {
         assert(controlFlowMap.at(0)->getSuccessorList().size() == 1);
         assert(controlFlowMap.at(0)->getSuccessorList().at(0) = controlFlowMap.at(1));
 
@@ -47,7 +47,7 @@ namespace SCAM {
             if (node->second->getStmt() == nullptr) {
                 this->cfg.insert(std::make_pair(node->second->getId(), node->second));
             } else {
-                SCAM::FindCommunication2 findComm;
+                DESCAM::FindCommunication2 findComm;
                 node->second->getStmt()->accept(findComm);
                 if (findComm.isWrite() && (findComm.isBlockingInterface() && !findComm.isNonBlockingAccess())) { //FIXME: in future, isNonBlockingAccess() is not needed
                     /**
@@ -70,7 +70,7 @@ namespace SCAM {
                      *          goto writeComm
                      *
                      */
-                    std::vector<SCAM::CFGNode2 *> commGroup;
+                    std::vector<DESCAM::CFGNode2 *> commGroup;
                     auto varOp = new VariableOperand(new Variable(findComm.getPort()->getDataSignal()->getName(), findComm.getPort()->getDataSignal()->getDataType()));
                     auto writeNode = new CFGNode2(new Assignment(varOp, findComm.getWriteValue()));
                     /**
@@ -143,7 +143,7 @@ namespace SCAM {
                      *      readerPort->read(val)
                      *
                      */
-                    std::vector<SCAM::CFGNode2 *> commGroup;
+                    std::vector<DESCAM::CFGNode2 *> commGroup;
                     auto notifyNode = new CFGNode2(new Assignment(findComm.getPort()->getNotify(), new BoolValue(true)));
                     notifyNode->replaceId(node->second->getId());
                     auto waitNode = new CFGNode2(new Wait());
@@ -191,7 +191,7 @@ namespace SCAM {
                      *          writerPort_notify = true
                      *          writerPort_visited = true
                      */
-                    std::vector<SCAM::CFGNode2 *> commGroup;
+                    std::vector<DESCAM::CFGNode2 *> commGroup;
                     auto commVisitOp = new VariableOperand(new Variable(findComm.getPort()->getName() + "_visit", DataTypes::getDataType("bool")));
                     auto varOp = new VariableOperand(new Variable(findComm.getPort()->getDataSignal()->getName(), findComm.getPort()->getDataSignal()->getDataType()));
 
@@ -248,7 +248,7 @@ namespace SCAM {
                      *          val = readerPort_data
                      *          readerPort_visit = true
                      */
-                    std::vector<SCAM::CFGNode2 *> commGroup;
+                    std::vector<DESCAM::CFGNode2 *> commGroup;
                     auto commVisitOp = new VariableOperand(new Variable(findComm.getPort()->getName() + "_visit", DataTypes::getDataType("bool")));
                     auto varOp = new VariableOperand(new Variable(findComm.getPort()->getDataSignal()->getName(), findComm.getPort()->getDataSignal()->getDataType()));
 
@@ -299,14 +299,14 @@ namespace SCAM {
 //            std::cout  << n.second->print();
 //        }
 
-//        throw std::runtime_error(" YOOOOO ");
+//        TERMINATE(" YOOOOO ");
     }
 
     const std::map<int, CFGNode2 *> &ExpandCommunications::getCFG() const {
         return this->cfg;
     }
 
-    const std::multimap<std::string, std::vector<SCAM::CFGNode2 *>> &ExpandCommunications::getCommGroups() const {
+    const std::multimap<std::string, std::vector<DESCAM::CFGNode2 *>> &ExpandCommunications::getCommGroups() const {
         return this->commGroups;
     }
 

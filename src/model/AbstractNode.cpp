@@ -4,16 +4,14 @@
 
 #include "AbstractNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     AbstractNode::AbstractNode() : name("undefined") {
 
     }
 
-    AbstractNode::AbstractNode(std::string name) : name(name) {
-
+    AbstractNode::AbstractNode(std::string name,LocationInfo locationInfo) : name(name), locationInfo(locationInfo) {
     }
-
 
     std::string AbstractNode::getName() const {
         return this->name;

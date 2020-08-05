@@ -6,11 +6,11 @@
 #include "Optimizer/Debug.h"
 #include "FindVariablesAndFunctionsInStatement.h"
 
-SCAM::FindReadVariables::FindReadVariables(const std::map<int, CfgNode *> &CFG) : CFG(CFG) {
+DESCAM::FindReadVariables::FindReadVariables(const std::map<int, CfgNode *> &CFG) : CFG(CFG) {
 
     for (auto node: CFG) {
         if (auto statement = node.second->getStmt()) {
-            if (auto readStmt = dynamic_cast<SCAM::Read *>(statement)) {
+            if (auto readStmt = dynamic_cast<DESCAM::Read *>(statement)) {
                 //variable operand
                 if (readStmt->getVariableOperand()->getVariable()->isSubVar()) {
                     auto parentVar = readStmt->getVariableOperand()->getVariable()->getParent();
@@ -43,7 +43,7 @@ SCAM::FindReadVariables::FindReadVariables(const std::map<int, CfgNode *> &CFG) 
                         this->readVariablesSet.insert(readStmt->getStatusOperand()->getVariable()->getFullName());
                     }
                 }
-            } else if (auto writeStmt = dynamic_cast<SCAM::Write *>(statement)) {
+            } else if (auto writeStmt = dynamic_cast<DESCAM::Write *>(statement)) {
                 //status operand
                 if (writeStmt->getStatusOperand()) {
                     if (writeStmt->getStatusOperand()->getVariable()->isSubVar()) {
@@ -73,7 +73,7 @@ SCAM::FindReadVariables::FindReadVariables(const std::map<int, CfgNode *> &CFG) 
 #endif
 }
 
-const std::set<std::string> &SCAM::FindReadVariables::getReadVariablesSet() const {
+const std::set<std::string> &DESCAM::FindReadVariables::getReadVariablesSet() const {
     return this->readVariablesSet;
 }
 

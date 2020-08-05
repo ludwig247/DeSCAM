@@ -299,45 +299,45 @@ namespace yy {
         /// An auxiliary type to compute the largest semantic type.
         union union_type {
             // sections
-            char dummy1[sizeof(std::map<std::string, std::vector<SCAM::Stmt *>>)];
+            char dummy1[sizeof(std::map<std::string, std::vector<DESCAM::Stmt *>>)];
 
             // statements
             // statement
             // assign_statement
             // opt_else
-            char dummy2[sizeof(std::vector<SCAM::Stmt *>)];
+            char dummy2[sizeof(std::vector<DESCAM::Stmt *>)];
 
             // datatype
-            char dummy3[sizeof(SCAM::DataType *)];
+            char dummy3[sizeof(DESCAM::DataType *)];
 
             // expr
-            char dummy4[sizeof(SCAM::Expr *)];
+            char dummy4[sizeof(DESCAM::Expr *)];
 
             // if_statement
-            char dummy5[sizeof(SCAM::ITE *)];
+            char dummy5[sizeof(DESCAM::ITE *)];
 
             // nb_read_statement
             // get_statement
-            char dummy6[sizeof(SCAM::NBRead *)];
+            char dummy6[sizeof(DESCAM::NBRead *)];
 
             // nb_write_statement
             // set_statement
-            char dummy7[sizeof(SCAM::NBWrite *)];
+            char dummy7[sizeof(DESCAM::NBWrite *)];
 
             // port_decl
-            char dummy8[sizeof(SCAM::Port *)];
+            char dummy8[sizeof(DESCAM::Port *)];
 
             // read_statement
             // req_statement
-            char dummy9[sizeof(SCAM::Read *)];
+            char dummy9[sizeof(DESCAM::Read *)];
 
             // var_ref
             // var_ref_parent
             // var_ref_child
-            char dummy10[sizeof(SCAM::VariableOperand *)];
+            char dummy10[sizeof(DESCAM::VariableOperand *)];
 
             // write_statement
-            char dummy11[sizeof(SCAM::Write *)];
+            char dummy11[sizeof(DESCAM::Write *)];
 
             // "boolean value"
             char dummy12[sizeof(bool)];
@@ -346,7 +346,7 @@ namespace yy {
             char dummy13[sizeof(int)];
 
             // var_list_comma
-            char dummy14[sizeof(std::map<std::string, SCAM::Variable *>)];
+            char dummy14[sizeof(std::map<std::string, DESCAM::Variable *>)];
 
             // "identifier"
             // name_header
@@ -358,7 +358,7 @@ namespace yy {
 
             // opt_init
             // expr_list_comma
-            char dummy16[sizeof(std::vector<SCAM::Expr *>)];
+            char dummy16[sizeof(std::vector<DESCAM::Expr *>)];
 
             // name_list_comma
             char dummy17[sizeof(std::vector<std::string>)];
@@ -488,37 +488,37 @@ namespace yy {
 
             basic_symbol(typename Base::kind_type t, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const std::map<std::string, std::vector<SCAM::Stmt *>> v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const std::map<std::string, std::vector<DESCAM::Stmt *>> v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const std::vector<SCAM::Stmt *> v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const std::vector<DESCAM::Stmt *> v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::DataType *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::DataType *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::Expr *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::Expr *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::ITE *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::ITE *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::NBRead *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::NBRead *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::NBWrite *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::NBWrite *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::Port *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::Port *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::Read *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::Read *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::VariableOperand *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::VariableOperand *v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const SCAM::Write *v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const DESCAM::Write *v, const location_type &l);
 
             basic_symbol(typename Base::kind_type t, const bool v, const location_type &l);
 
             basic_symbol(typename Base::kind_type t, const int v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const std::map<std::string, SCAM::Variable *> v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const std::map<std::string, DESCAM::Variable *> v, const location_type &l);
 
             basic_symbol(typename Base::kind_type t, const std::string v, const location_type &l);
 
-            basic_symbol(typename Base::kind_type t, const std::vector<SCAM::Expr *> v, const location_type &l);
+            basic_symbol(typename Base::kind_type t, const std::vector<DESCAM::Expr *> v, const location_type &l);
 
             basic_symbol(typename Base::kind_type t, const std::vector<std::string> v, const location_type &l);
 
@@ -1159,55 +1159,55 @@ namespace yy {
             : Base(other), value(), location(other.location) {
         switch (other.type_get()) {
             case 95: // sections
-                value.copy<std::map<std::string, std::vector<SCAM::Stmt *>>>(other.value);
+                value.copy<std::map<std::string, std::vector<DESCAM::Stmt *>>>(other.value);
                 break;
 
             case 109: // statements
             case 110: // statement
             case 111: // assign_statement
             case 120: // opt_else
-                value.copy<std::vector<SCAM::Stmt *> >(other.value);
+                value.copy<std::vector<DESCAM::Stmt *> >(other.value);
                 break;
 
             case 104: // datatype
-                value.copy<SCAM::DataType *>(other.value);
+                value.copy<DESCAM::DataType *>(other.value);
                 break;
 
             case 123: // expr
-                value.copy<SCAM::Expr *>(other.value);
+                value.copy<DESCAM::Expr *>(other.value);
                 break;
 
             case 119: // if_statement
-                value.copy<SCAM::ITE *>(other.value);
+                value.copy<DESCAM::ITE *>(other.value);
                 break;
 
             case 113: // nb_read_statement
             case 116: // get_statement
-                value.copy<SCAM::NBRead *>(other.value);
+                value.copy<DESCAM::NBRead *>(other.value);
                 break;
 
             case 115: // nb_write_statement
             case 117: // set_statement
-                value.copy<SCAM::NBWrite *>(other.value);
+                value.copy<DESCAM::NBWrite *>(other.value);
                 break;
 
             case 101: // port_decl
-                value.copy<SCAM::Port *>(other.value);
+                value.copy<DESCAM::Port *>(other.value);
                 break;
 
             case 112: // read_statement
             case 118: // req_statement
-                value.copy<SCAM::Read *>(other.value);
+                value.copy<DESCAM::Read *>(other.value);
                 break;
 
             case 106: // var_ref
             case 107: // var_ref_parent
             case 108: // var_ref_child
-                value.copy<SCAM::VariableOperand *>(other.value);
+                value.copy<DESCAM::VariableOperand *>(other.value);
                 break;
 
             case 114: // write_statement
-                value.copy<SCAM::Write *>(other.value);
+                value.copy<DESCAM::Write *>(other.value);
                 break;
 
             case 5: // "boolean value"
@@ -1219,7 +1219,7 @@ namespace yy {
                 break;
 
             case 103: // var_list_comma
-                value.copy<std::map<std::string, SCAM::Variable *> >(other.value);
+                value.copy<std::map<std::string, DESCAM::Variable *> >(other.value);
                 break;
 
             case 3: // "identifier"
@@ -1233,7 +1233,7 @@ namespace yy {
 
             case 91: // opt_init
             case 121: // expr_list_comma
-                value.copy<std::vector<SCAM::Expr *> >(other.value);
+                value.copy<std::vector<DESCAM::Expr *> >(other.value);
                 break;
 
             case 102: // name_list_comma
@@ -1254,55 +1254,55 @@ namespace yy {
         (void) v;
         switch (this->type_get()) {
             case 95: // sections
-                value.copy<std::map<std::string, std::vector<SCAM::Stmt *>>>(v);
+                value.copy<std::map<std::string, std::vector<DESCAM::Stmt *>>>(v);
                 break;
 
             case 109: // statements
             case 110: // statement
             case 111: // assign_statement
             case 120: // opt_else
-                value.copy<std::vector<SCAM::Stmt *> >(v);
+                value.copy<std::vector<DESCAM::Stmt *> >(v);
                 break;
 
             case 104: // datatype
-                value.copy<SCAM::DataType *>(v);
+                value.copy<DESCAM::DataType *>(v);
                 break;
 
             case 123: // expr
-                value.copy<SCAM::Expr *>(v);
+                value.copy<DESCAM::Expr *>(v);
                 break;
 
             case 119: // if_statement
-                value.copy<SCAM::ITE *>(v);
+                value.copy<DESCAM::ITE *>(v);
                 break;
 
             case 113: // nb_read_statement
             case 116: // get_statement
-                value.copy<SCAM::NBRead *>(v);
+                value.copy<DESCAM::NBRead *>(v);
                 break;
 
             case 115: // nb_write_statement
             case 117: // set_statement
-                value.copy<SCAM::NBWrite *>(v);
+                value.copy<DESCAM::NBWrite *>(v);
                 break;
 
             case 101: // port_decl
-                value.copy<SCAM::Port *>(v);
+                value.copy<DESCAM::Port *>(v);
                 break;
 
             case 112: // read_statement
             case 118: // req_statement
-                value.copy<SCAM::Read *>(v);
+                value.copy<DESCAM::Read *>(v);
                 break;
 
             case 106: // var_ref
             case 107: // var_ref_parent
             case 108: // var_ref_child
-                value.copy<SCAM::VariableOperand *>(v);
+                value.copy<DESCAM::VariableOperand *>(v);
                 break;
 
             case 114: // write_statement
-                value.copy<SCAM::Write *>(v);
+                value.copy<DESCAM::Write *>(v);
                 break;
 
             case 5: // "boolean value"
@@ -1314,7 +1314,7 @@ namespace yy {
                 break;
 
             case 103: // var_list_comma
-                value.copy<std::map<std::string, SCAM::Variable *> >(v);
+                value.copy<std::map<std::string, DESCAM::Variable *> >(v);
                 break;
 
             case 3: // "identifier"
@@ -1328,7 +1328,7 @@ namespace yy {
 
             case 91: // opt_init
             case 121: // expr_list_comma
-                value.copy<std::vector<SCAM::Expr *> >(v);
+                value.copy<std::vector<DESCAM::Expr *> >(v);
                 break;
 
             case 102: // name_list_comma
@@ -1348,47 +1348,47 @@ namespace yy {
             : Base(t), value(), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::map<std::string, std::vector<SCAM::Stmt *>> v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::map<std::string, std::vector<DESCAM::Stmt *>> v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::vector<SCAM::Stmt *> v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::vector<DESCAM::Stmt *> v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::DataType *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::DataType *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::Expr *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::Expr *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::ITE *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::ITE *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::NBRead *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::NBRead *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::NBWrite *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::NBWrite *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::Port *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::Port *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::Read *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::Read *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::VariableOperand *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::VariableOperand *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const SCAM::Write *v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const DESCAM::Write *v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
@@ -1400,7 +1400,7 @@ namespace yy {
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::map<std::string, SCAM::Variable *> v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::map<std::string, DESCAM::Variable *> v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
@@ -1408,7 +1408,7 @@ namespace yy {
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
-    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::vector<SCAM::Expr *> v, const location_type &l)
+    aml_parser::basic_symbol<Base>::basic_symbol(typename Base::kind_type t, const std::vector<DESCAM::Expr *> v, const location_type &l)
             : Base(t), value(v), location(l) {}
 
     template<typename Base>
@@ -1438,55 +1438,55 @@ namespace yy {
         // Type destructor.
         switch (yytype) {
             case 95: // sections
-                value.template destroy<std::map<std::string, std::vector<SCAM::Stmt *>>>();
+                value.template destroy<std::map<std::string, std::vector<DESCAM::Stmt *>>>();
                 break;
 
             case 109: // statements
             case 110: // statement
             case 111: // assign_statement
             case 120: // opt_else
-                value.template destroy<std::vector<SCAM::Stmt *> >();
+                value.template destroy<std::vector<DESCAM::Stmt *> >();
                 break;
 
             case 104: // datatype
-                value.template destroy<SCAM::DataType *>();
+                value.template destroy<DESCAM::DataType *>();
                 break;
 
             case 123: // expr
-                value.template destroy<SCAM::Expr *>();
+                value.template destroy<DESCAM::Expr *>();
                 break;
 
             case 119: // if_statement
-                value.template destroy<SCAM::ITE *>();
+                value.template destroy<DESCAM::ITE *>();
                 break;
 
             case 113: // nb_read_statement
             case 116: // get_statement
-                value.template destroy<SCAM::NBRead *>();
+                value.template destroy<DESCAM::NBRead *>();
                 break;
 
             case 115: // nb_write_statement
             case 117: // set_statement
-                value.template destroy<SCAM::NBWrite *>();
+                value.template destroy<DESCAM::NBWrite *>();
                 break;
 
             case 101: // port_decl
-                value.template destroy<SCAM::Port *>();
+                value.template destroy<DESCAM::Port *>();
                 break;
 
             case 112: // read_statement
             case 118: // req_statement
-                value.template destroy<SCAM::Read *>();
+                value.template destroy<DESCAM::Read *>();
                 break;
 
             case 106: // var_ref
             case 107: // var_ref_parent
             case 108: // var_ref_child
-                value.template destroy<SCAM::VariableOperand *>();
+                value.template destroy<DESCAM::VariableOperand *>();
                 break;
 
             case 114: // write_statement
-                value.template destroy<SCAM::Write *>();
+                value.template destroy<DESCAM::Write *>();
                 break;
 
             case 5: // "boolean value"
@@ -1498,7 +1498,7 @@ namespace yy {
                 break;
 
             case 103: // var_list_comma
-                value.template destroy<std::map<std::string, SCAM::Variable *> >();
+                value.template destroy<std::map<std::string, DESCAM::Variable *> >();
                 break;
 
             case 3: // "identifier"
@@ -1512,7 +1512,7 @@ namespace yy {
 
             case 91: // opt_init
             case 121: // expr_list_comma
-                value.template destroy<std::vector<SCAM::Expr *> >();
+                value.template destroy<std::vector<DESCAM::Expr *> >();
                 break;
 
             case 102: // name_list_comma
@@ -1540,55 +1540,55 @@ namespace yy {
         super_type::move(s);
         switch (this->type_get()) {
             case 95: // sections
-                value.move<std::map<std::string, std::vector<SCAM::Stmt *>>>(s.value);
+                value.move<std::map<std::string, std::vector<DESCAM::Stmt *>>>(s.value);
                 break;
 
             case 109: // statements
             case 110: // statement
             case 111: // assign_statement
             case 120: // opt_else
-                value.move<std::vector<SCAM::Stmt *> >(s.value);
+                value.move<std::vector<DESCAM::Stmt *> >(s.value);
                 break;
 
             case 104: // datatype
-                value.move<SCAM::DataType *>(s.value);
+                value.move<DESCAM::DataType *>(s.value);
                 break;
 
             case 123: // expr
-                value.move<SCAM::Expr *>(s.value);
+                value.move<DESCAM::Expr *>(s.value);
                 break;
 
             case 119: // if_statement
-                value.move<SCAM::ITE *>(s.value);
+                value.move<DESCAM::ITE *>(s.value);
                 break;
 
             case 113: // nb_read_statement
             case 116: // get_statement
-                value.move<SCAM::NBRead *>(s.value);
+                value.move<DESCAM::NBRead *>(s.value);
                 break;
 
             case 115: // nb_write_statement
             case 117: // set_statement
-                value.move<SCAM::NBWrite *>(s.value);
+                value.move<DESCAM::NBWrite *>(s.value);
                 break;
 
             case 101: // port_decl
-                value.move<SCAM::Port *>(s.value);
+                value.move<DESCAM::Port *>(s.value);
                 break;
 
             case 112: // read_statement
             case 118: // req_statement
-                value.move<SCAM::Read *>(s.value);
+                value.move<DESCAM::Read *>(s.value);
                 break;
 
             case 106: // var_ref
             case 107: // var_ref_parent
             case 108: // var_ref_child
-                value.move<SCAM::VariableOperand *>(s.value);
+                value.move<DESCAM::VariableOperand *>(s.value);
                 break;
 
             case 114: // write_statement
-                value.move<SCAM::Write *>(s.value);
+                value.move<DESCAM::Write *>(s.value);
                 break;
 
             case 5: // "boolean value"
@@ -1600,7 +1600,7 @@ namespace yy {
                 break;
 
             case 103: // var_list_comma
-                value.move<std::map<std::string, SCAM::Variable *> >(s.value);
+                value.move<std::map<std::string, DESCAM::Variable *> >(s.value);
                 break;
 
             case 3: // "identifier"
@@ -1614,7 +1614,7 @@ namespace yy {
 
             case 91: // opt_init
             case 121: // expr_list_comma
-                value.move<std::vector<SCAM::Expr *> >(s.value);
+                value.move<std::vector<DESCAM::Expr *> >(s.value);
                 break;
 
             case 102: // name_list_comma

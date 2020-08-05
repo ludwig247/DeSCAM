@@ -4,7 +4,7 @@
 
 #include "PropertyConstraint.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor

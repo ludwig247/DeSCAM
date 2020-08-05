@@ -4,9 +4,9 @@
 
 #include "PrintReset.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace DESCAM::HLSPlugin::HLS;
 
-PrintReset::PrintReset(SCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
+PrintReset::PrintReset(DESCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
     stmt(stmt),
     indentSize(indentSize),
     indentOffset(indentOffset),

@@ -9,12 +9,12 @@
 #include "CfgBlock.h"
 #include "Behavior/CfgNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 
     class CreateRealCFG {
     public:
-        explicit CreateRealCFG(const std::map<int, SCAM::CfgBlock *> &controlFlowMap);
+        explicit CreateRealCFG(const std::map<int, DESCAM::CfgBlock *> &controlFlowMap);
 
         CreateRealCFG() = delete;
 
@@ -23,7 +23,7 @@ namespace SCAM {
         virtual ~CreateRealCFG() = default;
 
     private:
-        std::map<int, SCAM::CfgNode *> cfg;
+        std::map<int, DESCAM::CfgNode *> cfg;
     };
 
 

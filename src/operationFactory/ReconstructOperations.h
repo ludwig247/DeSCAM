@@ -12,7 +12,7 @@
 #include "Behavior/Operation.h"
 #include "Behavior/State.h"
 
-namespace SCAM {
+namespace DESCAM {
 /**
  * \brief Propagates assignments through the stmtlist
  *
@@ -41,103 +41,103 @@ namespace SCAM {
  * assignment. If there is a new assignment for a variable it is stored in the variableValue map.
  */
 
-    class ReconstructOperations : public SCAM::StmtAbstractVisitor {
+    class ReconstructOperations : public DESCAM::StmtAbstractVisitor {
     public:
         ReconstructOperations() = default;
-        ReconstructOperations(std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module);
-        ReconstructOperations(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
-        void sortOperation(SCAM::Operation *operation);
+        ReconstructOperations(std::map<std::string, DESCAM::State *> statesMap, DESCAM::Module *module);
+        ReconstructOperations(std::vector<DESCAM::Stmt*> statementsList, DESCAM::Module * module);
+        void sortOperation(DESCAM::Operation *operation);
 
-        void simplifyTernary(SCAM::Operation * operation);
+        void simplifyTernary(DESCAM::Operation * operation);
 
-        static std::vector<SCAM::Expr *> extractConditions(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
-        static Return * getReturnValue(std::vector<SCAM::Stmt*> statementsList, SCAM::Module * module);
+        static std::vector<DESCAM::Expr *> extractConditions(std::vector<DESCAM::Stmt*> statementsList, DESCAM::Module * module);
+        static Return * getReturnValue(std::vector<DESCAM::Stmt*> statementsList, DESCAM::Module * module);
         ~ReconstructOperations() = default;
 
-        void visit(SCAM::VariableOperand &node) override;
+        void visit(DESCAM::VariableOperand &node) override;
 
-        void visit(SCAM::IntegerValue &node) override;
+        void visit(DESCAM::IntegerValue &node) override;
 
-        void visit(SCAM::UnsignedValue &node) override;
+        void visit(DESCAM::UnsignedValue &node) override;
 
-        void visit(SCAM::BoolValue &node) override;
+        void visit(DESCAM::BoolValue &node) override;
 
-        void visit(SCAM::EnumValue &node) override;
+        void visit(DESCAM::EnumValue &node) override;
 
-        void visit(SCAM::CompoundValue &node) override;
+        void visit(DESCAM::CompoundValue &node) override;
 
-        void visit(SCAM::PortOperand &node) override;
+        void visit(DESCAM::PortOperand &node) override;
 
-        void visit(SCAM::Assignment &node) override;
+        void visit(DESCAM::Assignment &node) override;
 
-        void visit(SCAM::UnaryExpr &node) override;
+        void visit(DESCAM::UnaryExpr &node) override;
 
-        void visit(SCAM::While &node) override;
+        void visit(DESCAM::While &node) override;
 
-        void visit(SCAM::If &node) override;
+        void visit(DESCAM::If &node) override;
 
-        void visit(SCAM::Read &node) override;
+        void visit(DESCAM::Read &node) override;
 
-        void visit(SCAM::Write &node) override;
+        void visit(DESCAM::Write &node) override;
 
-        void visit(SCAM::SectionOperand &node) override;
+        void visit(DESCAM::SectionOperand &node) override;
 
-        void visit(SCAM::SectionValue &node) override;
+        void visit(DESCAM::SectionValue &node) override;
 
-        void visit(SCAM::ITE &node) override;
+        void visit(DESCAM::ITE &node) override;
 
-        void visit(SCAM::Arithmetic &node) override;
+        void visit(DESCAM::Arithmetic &node) override;
 
-        void visit(SCAM::Logical &node) override;
+        void visit(DESCAM::Logical &node) override;
 
-        void visit(SCAM::Relational &node) override;
+        void visit(DESCAM::Relational &node) override;
 
-        void visit(SCAM::Bitwise &node) override;
+        void visit(DESCAM::Bitwise &node) override;
 
-        void visit(SCAM::SyncSignal &node) override;
+        void visit(DESCAM::SyncSignal &node) override;
 
-        void visit(SCAM::DataSignalOperand &node) override;
+        void visit(DESCAM::DataSignalOperand &node) override;
 
-        void visit(SCAM::Cast &node) override;
+        void visit(DESCAM::Cast &node) override;
 
-        void visit(SCAM::FunctionOperand &node) override;
+        void visit(DESCAM::FunctionOperand &node) override;
 
-        void visit(SCAM::ArrayOperand &node) override;
+        void visit(DESCAM::ArrayOperand &node) override;
 
-        void visit(SCAM::CompoundExpr &node) override;
+        void visit(DESCAM::CompoundExpr &node) override;
 
-        void visit(SCAM::ParamOperand &node) override;
+        void visit(DESCAM::ParamOperand &node) override;
 
-        void visit(SCAM::Return &node) override;
+        void visit(DESCAM::Return &node) override;
 
-        void visit(SCAM::Notify &node) override;
+        void visit(DESCAM::Notify &node) override;
 
-        void visit(SCAM::Wait &node) override;
+        void visit(DESCAM::Wait &node) override;
 
-        void visit(SCAM::Peek &node) override;
+        void visit(DESCAM::Peek &node) override;
 
         void visit(ArrayExpr &node) override;
 
-        void visit(SCAM::TimePointOperand &node) override;
+        void visit(DESCAM::TimePointOperand &node) override;
 
-        void visit(SCAM::Ternary &node) override;
+        void visit(DESCAM::Ternary &node) override;
 
 
     private:
-        std::map<std::string, SCAM::Expr *> variableAssignmentMap; //! Contains the current pointer to the value of a variable
-        std::map<std::string, SCAM::Expr *> variableMap; //! Contains an entry for each variable_name,Variable*
-        SCAM::Expr *find_or_add_variable(const std::string& varName, SCAM::Expr *expr);
+        std::map<std::string, DESCAM::Expr *> variableAssignmentMap; //! Contains the current pointer to the value of a variable
+        std::map<std::string, DESCAM::Expr *> variableMap; //! Contains an entry for each variable_name,Variable*
+        DESCAM::Expr *find_or_add_variable(const std::string& varName, DESCAM::Expr *expr);
 
         void reset();
         bool isStateVar ;
-        SCAM::Expr *newExpr;
+        DESCAM::Expr *newExpr;
 
         std::vector<Expr *> assumptionsList;
         std::vector<Assignment *> commitmentsList;
 
-        std::map<std::string, SCAM::State *> statesMap;
+        std::map<std::string, DESCAM::State *> statesMap;
         std::vector<std::string> dpSignalsList;
-        SCAM::Module *module = nullptr;
+        DESCAM::Module *module = nullptr;
         Return *returnValue = nullptr;
 
         DataSignal *reconstructArrayVar(Operand *operand);

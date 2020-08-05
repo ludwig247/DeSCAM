@@ -12,52 +12,52 @@
 #include "PrintStmt.h"
 #include "Stmts_all.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class ExprVisitor : public StmtAbstractVisitor {
     public:
 
-        static bool isConstVal(SCAM::Expr *expr);
+        static bool isConstVal(DESCAM::Expr *expr);
 
-        static bool isBitwise(SCAM::Expr *expr);
+        static bool isBitwise(DESCAM::Expr *expr);
 
-        static bool isVar(SCAM::Expr *expr);
+        static bool isVar(DESCAM::Expr *expr);
 
-        static bool isParameter(SCAM::Expr *expr);
+        static bool isParameter(DESCAM::Expr *expr);
 
-        static bool isTernary(Expr *expr);
+        static bool isTernary(DESCAM::Expr *expr);
 
-        static std::set<Operand *> getUsedOperands(SCAM::Expr *expr);
+        static std::set<Operand *> getUsedOperands(DESCAM::Expr *expr);
 
-        static std::set<Variable *> getUsedVariables(SCAM::Expr *expr);
+        static std::set<Variable *> getUsedVariables(DESCAM::Expr *expr);
 
-        static std::set<Port *> getUsedPorts(SCAM::Expr *expr);
+        static std::set<Port *> getUsedPorts(DESCAM::Expr *expr);
 
-        static std::set<SyncSignal *> getUsedSynchSignals(SCAM::Expr *expr);
+        static std::set<SyncSignal *> getUsedSynchSignals(DESCAM::Expr *expr);
 
-        static std::set<Ternary*> getUsedTernaryOperators(SCAM::Expr * expr);
+        static std::set<Ternary*> getUsedTernaryOperators(DESCAM::Expr * expr);
 
-        static std::set<DataSignal *> getUsedDataSignals(SCAM::Expr *expr);
+        static std::set<DataSignal *> getUsedDataSignals(DESCAM::Expr *expr);
 
-        static std::set<ArrayOperand *> getUsedArrayOperands(SCAM::Expr *expr);
+        static std::set<ArrayOperand *> getUsedArrayOperands(DESCAM::Expr *expr);
 
-        static std::set<SCAM::Function *> getUsedFunction(SCAM::Expr *expr);
+        static std::set<DESCAM::Function *> getUsedFunction(DESCAM::Expr *expr);
 
-        static Operand *getOperand(SCAM::Expr *expr);
+        static Operand *getOperand(DESCAM::Expr *expr);
 
         void visit(class ArrayExpr &node) override;
 
 
 
     private:
-        ExprVisitor(SCAM::Expr *expr);
+        ExprVisitor(DESCAM::Expr *expr);
 
         bool bitwise;
         bool constVal;
         bool var;
         bool parameter;
         bool compare = false;
-        SCAM::Expr *expr;
+        DESCAM::Expr *expr;
 
         std::set<Operand *> usedOperands;
         std::set<SyncSignal *> usedSynchSignal;
@@ -117,7 +117,7 @@ namespace SCAM {
 
         virtual void visit(struct Cast &node);
 
-        virtual void visit(SCAM::FunctionOperand &node);
+        virtual void visit(DESCAM::FunctionOperand &node);
 
         virtual void visit(class ArrayOperand &node);
 

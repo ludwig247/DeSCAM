@@ -6,13 +6,16 @@
 #include <cassert>
 #include "Module.h"
 #include "Model.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-namespace SCAM {
 
-    Module::Module(std::string name) :
+namespace DESCAM {
+
+    Module::Module(std::string name, LocationInfo locationInfo) :
             fsm(new FSM(this)),
             propertySuite(nullptr),
-            AbstractNode(name) {
+            AbstractNode(name,locationInfo) {
 
     }
 
@@ -26,7 +29,7 @@ namespace SCAM {
 
     Port *Module::getPort(const std::string &n) const {
         if (this->ports.find(n) == this->ports.end()) {
-            throw std::runtime_error("Module.cpp getPort called with \"" + n + "\", not a port name");
+            TERMINATE("Module.cpp getPort called with \"" + n + "\", not a port name");
         }
         return this->ports.find(n)->second;
     }
@@ -69,7 +72,7 @@ namespace SCAM {
                 Variable *parent = this->getVariable(parent_name);
                 return parent->getSubVar(child_name);
             } else {
-                throw std::runtime_error("Module.cpp getVariable called with \"" + n + "\", not a variable name");
+                TERMINATE("Module.cpp getVariable called with \"" + n + "\", not a variable name");
             }
         } else if (!isCompound && isArray) {
             std::string::size_type start = n.find('[');
@@ -81,14 +84,14 @@ namespace SCAM {
                 auto parent = this->getVariable(varName);
                 return parent->getSubVar(index);
             } else {
-                throw std::runtime_error("Module.cpp getVariable called with \"" + n + "\", not a variable name");
+                TERMINATE("Module.cpp getVariable called with \"" + n + "\", not a variable name");
             }
         } else {
             //n is a regular top level name
             if (this->variableMap.find(n) != this->variableMap.end()) {
                 return (this->variableMap.find(n)->second);
             } else {
-                throw std::runtime_error("Module.cpp getVariable called with \"" + n + "\", not a variable name");
+                TERMINATE("Module.cpp getVariable called with \"" + n + "\", not a variable name");
                 return nullptr;
             }
 
@@ -147,7 +150,7 @@ namespace SCAM {
         } else {
             if (this->variableMap.find(variable->getName()) != this->variableMap.end()) {
                 this->variableMap.erase(variable->getName());
-            } else throw std::runtime_error("Variable " + variable->getFullName() + " not part of module " + this->getName());
+            } else TERMINATE("Variable " + variable->getFullName() + " not part of module " + this->getName());
         }
 
     }
@@ -163,7 +166,7 @@ namespace SCAM {
 
     Function *Module::getFunction(std::string name) {
         if (functionMap.find(name) == functionMap.end()) {
-            throw std::runtime_error("Function " + name + " is not part of module " + this->getName());
+            TERMINATE("Function " + name + " is not part of module " + this->getName());
         } else return functionMap.find(name)->second;
     }
 
@@ -171,35 +174,35 @@ namespace SCAM {
         return functionMap.find(name) != functionMap.end();
     }
 
-    PropertySuite *Module::getPropertySuite() const {
+    std::shared_ptr<PropertySuite> Module::getPropertySuite() const {
         return propertySuite;
     }
 
-    void Module::setPropertySuite(PropertySuite *propertySuite) {
+    void Module::setPropertySuite(std::shared_ptr<PropertySuite> propertySuite) {
         Module::propertySuite = propertySuite;
     }
 
-    std::map<int, SCAM::CfgNode *> Module::getCFG() const {
+    std::map<int, DESCAM::CfgNode *> Module::getCFG() const {
         return this->cfg;
     }
 
-    std::multimap<std::string, std::vector<SCAM::CfgNode *>> Module::getcommGroups() const {
+    std::multimap<std::string, std::vector<DESCAM::CfgNode *>> Module::getcommGroups() const {
         return this->commGroups;
     }
 
-//    std::map<int, SCAM::CfgNode *> Module::getCFG_Original() const {
+//    std::map<int, DESCAM::CfgNode *> Module::getCFG_Original() const {
 //        return this->cfg_Original;
 //    }
 //
-//    std::map<int, SCAM::CfgNode *> Module::getCFG_Implicit() const {
+//    std::map<int, DESCAM::CfgNode *> Module::getCFG_Implicit() const {
 //        return this->cfg_Implicit;
 //    }
 
-    void Module::setCFG(std::map<int, SCAM::CfgNode *> cfg_arg) {
+    void Module::setCFG(std::map<int, DESCAM::CfgNode *> cfg_arg) {
         this->cfg = std::move(cfg_arg);
     }
 
-    void Module::setCFG(std::map<int, SCAM::CfgNode *> cfg_arg, std::multimap<std::string, std::vector<SCAM::CfgNode *>> commGroups_arg) {
+    void Module::setCFG(std::map<int, DESCAM::CfgNode *> cfg_arg, std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups_arg) {
         this->cfg = std::move(cfg_arg);
         this->commGroups = std::move(commGroups_arg);
     }
@@ -212,11 +215,11 @@ namespace SCAM {
         Module::variableMap = variableMap;
     }
 
-//    void Module::setCFG_Original(std::map<int, SCAM::CfgNode *> blockCFG) {
+//    void Module::setCFG_Original(std::map<int, DESCAM::CfgNode *> blockCFG) {
 //        this->cfg_Original = std::move(blockCFG);
 //    }
 //
-//    void Module::setCFG_Implicit(std::map<int, SCAM::CfgNode *> blockCFG) {
+//    void Module::setCFG_Implicit(std::map<int, DESCAM::CfgNode *> blockCFG) {
 //        this->cfg_Implicit = std::move(blockCFG);
 //    }
 }

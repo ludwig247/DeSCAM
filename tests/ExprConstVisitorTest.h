@@ -13,93 +13,93 @@
 
 
 TEST(ExprConstVisitor, BoolValue) {
-    SCAM::BoolValue * boolValue = new SCAM::BoolValue(true);
-    ASSERT_TRUE(SCAM::ExprVisitor::isConstVal(boolValue));
+    DESCAM::BoolValue * boolValue = new DESCAM::BoolValue(true);
+    ASSERT_TRUE(DESCAM::ExprVisitor::isConstVal(boolValue));
 
-    boolValue = new SCAM::BoolValue(false);
-    ASSERT_TRUE(SCAM::ExprVisitor::isConstVal(boolValue));
+    boolValue = new DESCAM::BoolValue(false);
+    ASSERT_TRUE(DESCAM::ExprVisitor::isConstVal(boolValue));
 }
 TEST(ExprConstVisitor, IntegerValue) {
-    SCAM::IntegerValue * integerValue = new SCAM::IntegerValue(1337);
-    ASSERT_TRUE(SCAM::ExprVisitor::isConstVal(integerValue));
+    DESCAM::IntegerValue * integerValue = new DESCAM::IntegerValue(1337);
+    ASSERT_TRUE(DESCAM::ExprVisitor::isConstVal(integerValue));
 }
 TEST(ExprConstVisitor, EnumValue) {
-    SCAM::DataType * type = new SCAM::DataType("enumType");
+    DESCAM::DataType * type = new DESCAM::DataType("enumType");
     type->addEnumValue("test");
-    SCAM::EnumValue * enumVal = new SCAM::EnumValue("test", type);
-    ASSERT_TRUE(SCAM::ExprVisitor::isConstVal(enumVal));
+    DESCAM::EnumValue * enumVal = new DESCAM::EnumValue("test", type);
+    ASSERT_TRUE(DESCAM::ExprVisitor::isConstVal(enumVal));
 }
 
 TEST(ExprConstVisitor, ArithmeticVariable) {
-    SCAM::IntegerValue * integerValue1 = new SCAM::IntegerValue(1);
-    SCAM::Variable * var = new SCAM::Variable("foobar",SCAM::DataTypes::getDataType("int"),integerValue1);
-    SCAM::VariableOperand * varOp = new SCAM::VariableOperand(var);
-    ASSERT_FALSE(SCAM::ExprVisitor::isConstVal(varOp));
-    std::set<SCAM::Variable*> usedVar;
+    DESCAM::IntegerValue * integerValue1 = new DESCAM::IntegerValue(1);
+    DESCAM::Variable * var = new DESCAM::Variable("foobar",DESCAM::DataTypes::getDataType("int"),integerValue1);
+    DESCAM::VariableOperand * varOp = new DESCAM::VariableOperand(var);
+    ASSERT_FALSE(DESCAM::ExprVisitor::isConstVal(varOp));
+    std::set<DESCAM::Variable*> usedVar;
     usedVar.insert(var);
-    ASSERT_EQ(usedVar,SCAM::ExprVisitor::getUsedVariables(varOp));
+    ASSERT_EQ(usedVar,DESCAM::ExprVisitor::getUsedVariables(varOp));
 
 }
 
 TEST(ExprConstVisitor, ArithmeticInteger) {
-    SCAM::IntegerValue * integerValue1 = new SCAM::IntegerValue(1);
-    SCAM::IntegerValue * integerValue2 = new SCAM::IntegerValue(1);
-    SCAM::Arithmetic * arithmetic = new SCAM::Arithmetic(integerValue1,"+",integerValue2);
+    DESCAM::IntegerValue * integerValue1 = new DESCAM::IntegerValue(1);
+    DESCAM::IntegerValue * integerValue2 = new DESCAM::IntegerValue(1);
+    DESCAM::Arithmetic * arithmetic = new DESCAM::Arithmetic(integerValue1,"+",integerValue2);
 
-    ASSERT_TRUE(SCAM::ExprVisitor::isConstVal(arithmetic));
+    ASSERT_TRUE(DESCAM::ExprVisitor::isConstVal(arithmetic));
 }
 
 TEST(ExprConstVisitor, ArithmeticVariable1) {
-    SCAM::IntegerValue * integerValue1 = new SCAM::IntegerValue(1);
-    SCAM::Variable * var = new SCAM::Variable("foobar",SCAM::DataTypes::getDataType("int"),integerValue1);
-    SCAM::Arithmetic * arithmetic = new SCAM::Arithmetic(integerValue1,"+",new SCAM::VariableOperand(var));
+    DESCAM::IntegerValue * integerValue1 = new DESCAM::IntegerValue(1);
+    DESCAM::Variable * var = new DESCAM::Variable("foobar",DESCAM::DataTypes::getDataType("int"),integerValue1);
+    DESCAM::Arithmetic * arithmetic = new DESCAM::Arithmetic(integerValue1,"+",new DESCAM::VariableOperand(var));
 
 
-    ASSERT_FALSE(SCAM::ExprVisitor::isConstVal(arithmetic));
-    std::set<SCAM::Variable*> usedVar;
+    ASSERT_FALSE(DESCAM::ExprVisitor::isConstVal(arithmetic));
+    std::set<DESCAM::Variable*> usedVar;
     usedVar.insert(var);
-    ASSERT_EQ(usedVar,SCAM::ExprVisitor::getUsedVariables(arithmetic));
+    ASSERT_EQ(usedVar,DESCAM::ExprVisitor::getUsedVariables(arithmetic));
 }
 
 TEST(ExprConstVisitor, ArithmeticVariable2) {
-    SCAM::IntegerValue * integerValue1 = new SCAM::IntegerValue(1);
-    SCAM::Variable * var = new SCAM::Variable("foobar",SCAM::DataTypes::getDataType("int"),integerValue1);
-    SCAM::Arithmetic * arithmetic = new SCAM::Arithmetic(new SCAM::VariableOperand(var),"+",integerValue1);
+    DESCAM::IntegerValue * integerValue1 = new DESCAM::IntegerValue(1);
+    DESCAM::Variable * var = new DESCAM::Variable("foobar",DESCAM::DataTypes::getDataType("int"),integerValue1);
+    DESCAM::Arithmetic * arithmetic = new DESCAM::Arithmetic(new DESCAM::VariableOperand(var),"+",integerValue1);
 
 
-    ASSERT_FALSE(SCAM::ExprVisitor::isConstVal(arithmetic));
-    std::set<SCAM::Variable*> usedVar;
+    ASSERT_FALSE(DESCAM::ExprVisitor::isConstVal(arithmetic));
+    std::set<DESCAM::Variable*> usedVar;
     usedVar.insert(var);
-    ASSERT_EQ(usedVar,SCAM::ExprVisitor::getUsedVariables(arithmetic));
+    ASSERT_EQ(usedVar,DESCAM::ExprVisitor::getUsedVariables(arithmetic));
 
 }
 
 TEST(ExprConstVisitor, ArithmeticVariable3) {
-    SCAM::IntegerValue * integerValue1 = new SCAM::IntegerValue(1);
-    SCAM::Variable * var1 = new SCAM::Variable("foo",SCAM::DataTypes::getDataType("int"),integerValue1);
-    SCAM::Variable * var2 = new SCAM::Variable("bar",SCAM::DataTypes::getDataType("int"),integerValue1);
-    SCAM::Arithmetic * arithmetic1 = new SCAM::Arithmetic(new SCAM::VariableOperand(var1),"+",integerValue1);
-    SCAM::Arithmetic * arithmetic2 = new SCAM::Arithmetic(arithmetic1,"+",new SCAM::VariableOperand(var2));
+    DESCAM::IntegerValue * integerValue1 = new DESCAM::IntegerValue(1);
+    DESCAM::Variable * var1 = new DESCAM::Variable("foo",DESCAM::DataTypes::getDataType("int"),integerValue1);
+    DESCAM::Variable * var2 = new DESCAM::Variable("bar",DESCAM::DataTypes::getDataType("int"),integerValue1);
+    DESCAM::Arithmetic * arithmetic1 = new DESCAM::Arithmetic(new DESCAM::VariableOperand(var1),"+",integerValue1);
+    DESCAM::Arithmetic * arithmetic2 = new DESCAM::Arithmetic(arithmetic1,"+",new DESCAM::VariableOperand(var2));
 
 
-    ASSERT_FALSE(SCAM::ExprVisitor::isConstVal(arithmetic2));
-    std::set<SCAM::Variable*> usedVar;
+    ASSERT_FALSE(DESCAM::ExprVisitor::isConstVal(arithmetic2));
+    std::set<DESCAM::Variable*> usedVar;
     usedVar.insert(var1);
     usedVar.insert(var2);
-    ASSERT_EQ(usedVar,SCAM::ExprVisitor::getUsedVariables(arithmetic2));
+    ASSERT_EQ(usedVar,DESCAM::ExprVisitor::getUsedVariables(arithmetic2));
 }
 
 
 TEST(ExprConstVisitor, ArithmeticVariable4) {
-    SCAM::IntegerValue * integerValue1 = new SCAM::IntegerValue(1);
-    SCAM::Variable * var1 = new SCAM::Variable("foo",SCAM::DataTypes::getDataType("int"),integerValue1);
-    SCAM::Arithmetic * arithmetic1 = new SCAM::Arithmetic(new SCAM::VariableOperand(var1),"+",integerValue1);
-    SCAM::Arithmetic * arithmetic2 = new SCAM::Arithmetic(arithmetic1,"+",new SCAM::VariableOperand(var1));
+    DESCAM::IntegerValue * integerValue1 = new DESCAM::IntegerValue(1);
+    DESCAM::Variable * var1 = new DESCAM::Variable("foo",DESCAM::DataTypes::getDataType("int"),integerValue1);
+    DESCAM::Arithmetic * arithmetic1 = new DESCAM::Arithmetic(new DESCAM::VariableOperand(var1),"+",integerValue1);
+    DESCAM::Arithmetic * arithmetic2 = new DESCAM::Arithmetic(arithmetic1,"+",new DESCAM::VariableOperand(var1));
 ;
-    ASSERT_FALSE(SCAM::ExprVisitor::isConstVal(arithmetic2));
-    std::set<SCAM::Variable*> usedVar;
+    ASSERT_FALSE(DESCAM::ExprVisitor::isConstVal(arithmetic2));
+    std::set<DESCAM::Variable*> usedVar;
     usedVar.insert(var1);
-    ASSERT_EQ(usedVar,SCAM::ExprVisitor::getUsedVariables(arithmetic2));
+    ASSERT_EQ(usedVar,DESCAM::ExprVisitor::getUsedVariables(arithmetic2));
 }
 
 

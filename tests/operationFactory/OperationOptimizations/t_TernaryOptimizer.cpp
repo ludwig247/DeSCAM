@@ -8,152 +8,152 @@
 
 
 TEST_F(t_TernaryOptimizer, SyncSignalTrue) {
-    std::vector<SCAM::Expr *> assumptionList;
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
-    SCAM::Expr *expr = new SCAM::SyncSignal(&port);
+    std::vector<DESCAM::Expr *> assumptionList;
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
+    DESCAM::Expr *expr = new DESCAM::SyncSignal(&port);
 
     assumptionList.push_back(expr);
-    SCAM::TernaryOptimizer ternaryOptimizer(expr, assumptionList, t_TernaryOptimizer::module);
-    ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(true));
+    DESCAM::TernaryOptimizer ternaryOptimizer(expr, assumptionList, t_TernaryOptimizer::module);
+    ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(true));
 }
 
 TEST_F(t_TernaryOptimizer, SyncSignalFalse) {
-    std::vector<SCAM::Expr *> assumptionList;
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
-    SCAM::Expr *expr = new SCAM::SyncSignal(&port);
+    std::vector<DESCAM::Expr *> assumptionList;
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
+    DESCAM::Expr *expr = new DESCAM::SyncSignal(&port);
 
-    assumptionList.push_back(new SCAM::UnaryExpr("not", expr));
-    SCAM::TernaryOptimizer ternaryOptimizer(expr, assumptionList, t_TernaryOptimizer::module);
-    ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(false)) << *ternaryOptimizer.getExpr() << "!=false";
+    assumptionList.push_back(new DESCAM::UnaryExpr("not", expr));
+    DESCAM::TernaryOptimizer ternaryOptimizer(expr, assumptionList, t_TernaryOptimizer::module);
+    ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(false)) << *ternaryOptimizer.getExpr() << "!=false";
 }
 
 TEST_F(t_TernaryOptimizer, SyncSignalNoChange) {
-    std::vector<SCAM::Expr *> assumptionList;
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
-    SCAM::Expr *expr = new SCAM::SyncSignal(&port);
+    std::vector<DESCAM::Expr *> assumptionList;
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
+    DESCAM::Expr *expr = new DESCAM::SyncSignal(&port);
 
-    SCAM::TernaryOptimizer ternaryOptimizer(expr, assumptionList, t_TernaryOptimizer::module);
+    DESCAM::TernaryOptimizer ternaryOptimizer(expr, assumptionList, t_TernaryOptimizer::module);
     ASSERT_EQ(*ternaryOptimizer.getExpr(), *expr) << *ternaryOptimizer.getExpr() << "!=false";
 }
 
 TEST_F(t_TernaryOptimizer, LogicalWithTrue) {
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
-    auto var = new SCAM::Variable("test_var", SCAM::DataTypes::getDataType("int"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
+    auto var = new DESCAM::Variable("test_var", DESCAM::DataTypes::getDataType("int"));
     t_TernaryOptimizer::module->addVariable(var);
 
-    auto rhs = SCAM::SyncSignal(&port);
-    auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), ">=", new SCAM::IntegerValue(4));
+    auto rhs = DESCAM::SyncSignal(&port);
+    auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), ">=", new DESCAM::IntegerValue(4));
 
-    std::vector<SCAM::Expr *> assumptionList;
+    std::vector<DESCAM::Expr *> assumptionList;
     assumptionList.push_back(&rhs);
 
     { //AND
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
         ASSERT_EQ(*ternaryOptimizer.getExpr(), lhs) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
 
     { //OR
-        SCAM::Logical logical(&lhs, "or", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(true)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        DESCAM::Logical logical(&lhs, "or", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(true)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
 }
 
 TEST_F(t_TernaryOptimizer, LogicalWithFalse) {
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
-    SCAM::Variable *var = new SCAM::Variable("test_var", SCAM::DataTypes::getDataType("int"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
+    DESCAM::Variable *var = new DESCAM::Variable("test_var", DESCAM::DataTypes::getDataType("int"));
     t_TernaryOptimizer::module->addVariable(var);
 
-    auto rhs = SCAM::SyncSignal(&port);
-    auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), ">=", new SCAM::IntegerValue(4));
+    auto rhs = DESCAM::SyncSignal(&port);
+    auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), ">=", new DESCAM::IntegerValue(4));
 
-    std::vector<SCAM::Expr *> assumptionList;
-    assumptionList.push_back(new SCAM::UnaryExpr("not", &rhs));
+    std::vector<DESCAM::Expr *> assumptionList;
+    assumptionList.push_back(new DESCAM::UnaryExpr("not", &rhs));
 
     { //AND
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
 
     { //OR
-        SCAM::Logical logical(&lhs, "or", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
+        DESCAM::Logical logical(&lhs, "or", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
         ASSERT_EQ(*ternaryOptimizer.getExpr(), lhs) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
 }
 
 TEST_F(t_TernaryOptimizer, LogicalContradiction) {
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
-    auto *var = new SCAM::Variable("test_var", SCAM::DataTypes::getDataType("int"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
+    auto *var = new DESCAM::Variable("test_var", DESCAM::DataTypes::getDataType("int"));
     t_TernaryOptimizer::module->addVariable(var);
 
 
-    auto rhs = SCAM::Relational(new SCAM::VariableOperand(var), "<", new SCAM::IntegerValue(3));
+    auto rhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "<", new DESCAM::IntegerValue(3));
 
-    std::vector<SCAM::Expr *> assumptionList;
-    assumptionList.push_back(new SCAM::UnaryExpr("not", &rhs));
+    std::vector<DESCAM::Expr *> assumptionList;
+    assumptionList.push_back(new DESCAM::UnaryExpr("not", &rhs));
 
     { //AND
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), ">", new SCAM::IntegerValue(4));
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), ">", new DESCAM::IntegerValue(4));
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
     { //AND
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), "<=", new SCAM::IntegerValue(1));
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "<=", new DESCAM::IntegerValue(1));
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
         ASSERT_EQ(*ternaryOptimizer.getExpr(), lhs) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
     { //OR
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), ">=", new SCAM::IntegerValue(3));
-        SCAM::Logical logical(&lhs, "or", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(true)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), ">=", new DESCAM::IntegerValue(3));
+        DESCAM::Logical logical(&lhs, "or", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, assumptionList, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(true)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
 }
 
 TEST_F(t_TernaryOptimizer, LogicalWithEnum) {
-    auto enum_type = new SCAM::DataType("enum_type");
+    auto enum_type = new DESCAM::DataType("enum_type");
     enum_type->addEnumValue("a");
     enum_type->addEnumValue("b");
     enum_type->addEnumValue("c");
-    SCAM::DataTypes::addLocalDataType("test_module", enum_type);
+    DESCAM::DataTypes::addLocalDataType("test_module", enum_type);
 
-    auto *var = new SCAM::Variable("test_var", enum_type);
+    auto *var = new DESCAM::Variable("test_var", enum_type);
     t_TernaryOptimizer::module->addVariable(var);
 
-    auto rhs = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("a", enum_type));
+    auto rhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("a", enum_type));
 
-    std::vector<SCAM::Expr *> assumptionList;
-    assumptionList.push_back(new SCAM::UnaryExpr("not", &rhs));
+    std::vector<DESCAM::Expr *> assumptionList;
+    assumptionList.push_back(new DESCAM::UnaryExpr("not", &rhs));
 
     { //AND
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("b", enum_type));
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("b", enum_type));
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
     { //AND
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("c", enum_type));
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("c", enum_type));
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(false)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
     { //AND
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("a", enum_type));
-        SCAM::Logical logical(&lhs, "and", &rhs);
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("a", enum_type));
+        DESCAM::Logical logical(&lhs, "and", &rhs);
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
         ASSERT_EQ(*ternaryOptimizer.getExpr(), lhs) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
     { //OR
-        auto subexpr = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("b", enum_type));
-        auto lhs = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("c", enum_type));
-        SCAM::Logical logical(&lhs, "or", new SCAM::Logical(&rhs, "or", &subexpr));
-        SCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
-        ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(true)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
+        auto subexpr = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("b", enum_type));
+        auto lhs = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("c", enum_type));
+        DESCAM::Logical logical(&lhs, "or", new DESCAM::Logical(&rhs, "or", &subexpr));
+        DESCAM::TernaryOptimizer ternaryOptimizer(&logical, t_TernaryOptimizer::module);
+        ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(true)) << "\n Optimizing: " << logical << "\n Result:" << *ternaryOptimizer.getExpr();
     }
 }
 
@@ -165,33 +165,33 @@ TEST_F(t_TernaryOptimizer, LogicCascading) {
      * x = (sync and ( var == a ) and ( sync and ( var == b))
      * => x = false;
      */
-    if (!SCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
-        auto enum_type = new SCAM::DataType("enum_type");
+    if (!DESCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
+        auto enum_type = new DESCAM::DataType("enum_type");
         enum_type->addEnumValue("a");
         enum_type->addEnumValue("b");
         enum_type->addEnumValue("c");
-        SCAM::DataTypes::addLocalDataType("test_module", enum_type);
+        DESCAM::DataTypes::addLocalDataType("test_module", enum_type);
     }
-    auto enum_type = SCAM::DataTypes::getLocalDataType("test_module", "enum_type");
+    auto enum_type = DESCAM::DataTypes::getLocalDataType("test_module", "enum_type");
 
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
     t_TernaryOptimizer::module->addPort(&port);
     auto sync = port.getSynchSignal();
-    auto *var = new SCAM::Variable("test_var", enum_type);
+    auto *var = new DESCAM::Variable("test_var", enum_type);
     t_TernaryOptimizer::module->addVariable(var);
 
-    auto expr1 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("a", enum_type));
-    auto expr2 = SCAM::Logical(sync, "and", &expr1);
-    auto expr3 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("b", enum_type));
-    auto expr4 = SCAM::Logical(sync, "and", &expr3);
-    auto expr5 = SCAM::Logical(&expr4, "and", &expr2);
+    auto expr1 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("a", enum_type));
+    auto expr2 = DESCAM::Logical(sync, "and", &expr1);
+    auto expr3 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("b", enum_type));
+    auto expr4 = DESCAM::Logical(sync, "and", &expr3);
+    auto expr5 = DESCAM::Logical(&expr4, "and", &expr2);
 
 
-    std::vector<SCAM::Expr *> assumptionList;
+    std::vector<DESCAM::Expr *> assumptionList;
     assumptionList.push_back(sync);
-    SCAM::TernaryOptimizer ternaryOptimizer(&expr5, assumptionList, t_TernaryOptimizer::module);
-    //SCAM::TernaryOptimizer ternaryOptimizer2(ternaryOptimizer.getExpr(),  t_TernaryOptimizer::module);
-    ASSERT_EQ(*ternaryOptimizer.getExpr(), SCAM::BoolValue(false)) << "\n Optimizing: " << expr5 << "\n Result:" << *ternaryOptimizer.getExpr();
+    DESCAM::TernaryOptimizer ternaryOptimizer(&expr5, assumptionList, t_TernaryOptimizer::module);
+    //DESCAM::TernaryOptimizer ternaryOptimizer2(ternaryOptimizer.getExpr(),  t_TernaryOptimizer::module);
+    ASSERT_EQ(*ternaryOptimizer.getExpr(), DESCAM::BoolValue(false)) << "\n Optimizing: " << expr5 << "\n Result:" << *ternaryOptimizer.getExpr();
 
 }
 TEST_F(t_TernaryOptimizer, LogicCascading2) {
@@ -201,37 +201,37 @@ TEST_F(t_TernaryOptimizer, LogicCascading2) {
      * x = (sync and ( var == a ) and ( sync and ( var == b))
      * => x = false;
      */
-    if (!SCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
-        auto enum_type = new SCAM::DataType("enum_type");
+    if (!DESCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
+        auto enum_type = new DESCAM::DataType("enum_type");
         enum_type->addEnumValue("a");
         enum_type->addEnumValue("b");
         enum_type->addEnumValue("c");
-        SCAM::DataTypes::addLocalDataType("test_module", enum_type);
+        DESCAM::DataTypes::addLocalDataType("test_module", enum_type);
     }
-    auto enum_type = SCAM::DataTypes::getLocalDataType("test_module", "enum_type");
+    auto enum_type = DESCAM::DataTypes::getLocalDataType("test_module", "enum_type");
 
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
     t_TernaryOptimizer::module->addPort(&port);
     auto sync = port.getSynchSignal();
-    auto data = new SCAM::DataSignalOperand(port.getDataSignal());
-    auto *var = new SCAM::Variable("test_var", enum_type);
+    auto data = new DESCAM::DataSignalOperand(port.getDataSignal());
+    auto *var = new DESCAM::Variable("test_var", enum_type);
     t_TernaryOptimizer::module->addVariable(var);
 
-    auto expr1 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("a", enum_type));
-    auto expr2 = SCAM::Logical(sync, "and", &expr1);
-    auto expr3 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("b", enum_type));
-    auto expr4 = SCAM::Logical(sync, "and", &expr3);
-    auto expr5 = SCAM::Logical(&expr4, "or", &expr2);
-    auto expr6 = SCAM::Logical(&expr5, "and", data);
+    auto expr1 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("a", enum_type));
+    auto expr2 = DESCAM::Logical(sync, "and", &expr1);
+    auto expr3 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("b", enum_type));
+    auto expr4 = DESCAM::Logical(sync, "and", &expr3);
+    auto expr5 = DESCAM::Logical(&expr4, "or", &expr2);
+    auto expr6 = DESCAM::Logical(&expr5, "and", data);
 
-    std::vector<SCAM::Expr *> assumptionList;
+    std::vector<DESCAM::Expr *> assumptionList;
     assumptionList.push_back(sync);
-    SCAM::TernaryOptimizer ternaryOptimizer(&expr6, assumptionList, t_TernaryOptimizer::module);
+    DESCAM::TernaryOptimizer ternaryOptimizer(&expr6, assumptionList, t_TernaryOptimizer::module);
 
-    auto res1 = SCAM::Logical(&expr3, "or", &expr1);
-    auto res2 = SCAM::Logical(&res1, "and", data);
+    auto res1 = DESCAM::Logical(&expr3, "or", &expr1);
+    auto res2 = DESCAM::Logical(&res1, "and", data);
 
-    //SCAM::TernaryOptimizer ternaryOptimizer2(ternaryOptimizer.getExpr(),  t_TernaryOptimizer::module);
+    //DESCAM::TernaryOptimizer ternaryOptimizer2(ternaryOptimizer.getExpr(),  t_TernaryOptimizer::module);
     ASSERT_EQ(*ternaryOptimizer.getExpr(), res2) << "\n Optimizing: " << expr6 << "\n Result:" << *ternaryOptimizer.getExpr();
 }
 
@@ -242,44 +242,44 @@ TEST_F(t_TernaryOptimizer, LogicCascading3) {
      * x = (sync and ( var == a ) and ( sync and ( var == b))
      * => x = false;
      */
-    if (!SCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
-        auto enum_type = new SCAM::DataType("enum_type");
+    if (!DESCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
+        auto enum_type = new DESCAM::DataType("enum_type");
         enum_type->addEnumValue("a");
         enum_type->addEnumValue("b");
         enum_type->addEnumValue("c");
-        SCAM::DataTypes::addLocalDataType("test_module", enum_type);
+        DESCAM::DataTypes::addLocalDataType("test_module", enum_type);
     }
-    auto enum_type = SCAM::DataTypes::getLocalDataType("test_module", "enum_type");
+    auto enum_type = DESCAM::DataTypes::getLocalDataType("test_module", "enum_type");
 
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
     t_TernaryOptimizer::module->addPort(&port);
     auto sync = port.getSynchSignal();
-    auto data = new SCAM::DataSignalOperand(port.getDataSignal());
-    auto *var = new SCAM::Variable("test_var", enum_type);
-    auto *var2 = new SCAM::Variable("test_var2", SCAM::DataTypes::getDataType("int"));
+    auto data = new DESCAM::DataSignalOperand(port.getDataSignal());
+    auto *var = new DESCAM::Variable("test_var", enum_type);
+    auto *var2 = new DESCAM::Variable("test_var2", DESCAM::DataTypes::getDataType("int"));
     t_TernaryOptimizer::module->addVariable(var);
     t_TernaryOptimizer::module->addVariable(var2);
-    auto varOp = new SCAM::VariableOperand(var2);
+    auto varOp = new DESCAM::VariableOperand(var2);
 
-    auto expr1 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("a", enum_type));
-    auto expr2 = SCAM::Logical(sync, "and", &expr1);
-    auto expr3 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("b", enum_type));
-    auto expr4 = SCAM::Logical(sync, "and", &expr3);
-    auto expr5 = SCAM::Logical(&expr4, "or", &expr2);
-    auto expr6 = SCAM::Logical(&expr5, "and", new SCAM::Logical(sync, "and", data));
-    auto expr7 = SCAM::Relational(varOp,">=",new SCAM::IntegerValue(3));
-    auto expr8 = SCAM::Logical(&expr6, "and", new SCAM::Logical(sync, "and",&expr7));
-    //auto expr8 = SCAM::Logical(&expr7, "and", new SCAM::Logical(sync, "and", data));
+    auto expr1 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("a", enum_type));
+    auto expr2 = DESCAM::Logical(sync, "and", &expr1);
+    auto expr3 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("b", enum_type));
+    auto expr4 = DESCAM::Logical(sync, "and", &expr3);
+    auto expr5 = DESCAM::Logical(&expr4, "or", &expr2);
+    auto expr6 = DESCAM::Logical(&expr5, "and", new DESCAM::Logical(sync, "and", data));
+    auto expr7 = DESCAM::Relational(varOp,">=",new DESCAM::IntegerValue(3));
+    auto expr8 = DESCAM::Logical(&expr6, "and", new DESCAM::Logical(sync, "and",&expr7));
+    //auto expr8 = DESCAM::Logical(&expr7, "and", new DESCAM::Logical(sync, "and", data));
 
-    std::vector<SCAM::Expr *> assumptionList;
+    std::vector<DESCAM::Expr *> assumptionList;
     assumptionList.push_back(sync);
-    SCAM::TernaryOptimizer ternaryOptimizer(&expr8, assumptionList, t_TernaryOptimizer::module);
+    DESCAM::TernaryOptimizer ternaryOptimizer(&expr8, assumptionList, t_TernaryOptimizer::module);
 
-    auto res1 = SCAM::Logical(&expr3, "or", &expr1);
-    auto res2 = SCAM::Logical(&res1, "and", data);
-    auto res3 = SCAM::Logical(&res2, "and", &expr7);
+    auto res1 = DESCAM::Logical(&expr3, "or", &expr1);
+    auto res2 = DESCAM::Logical(&res1, "and", data);
+    auto res3 = DESCAM::Logical(&res2, "and", &expr7);
 
-    //SCAM::TernaryOptimizer ternaryOptimizer2(ternaryOptimizer.getExpr(),  t_TernaryOptimizer::module);
+    //DESCAM::TernaryOptimizer ternaryOptimizer2(ternaryOptimizer.getExpr(),  t_TernaryOptimizer::module);
     ASSERT_EQ(*ternaryOptimizer.getExpr(), res3) << "\n Optimizing: " << expr8 << "\n Result:" << *ternaryOptimizer.getExpr();
 }
 
@@ -291,28 +291,28 @@ TEST_F(t_TernaryOptimizer, LogicCascadingNoChange) {
      * x = (sync and ( var == a ) and ( sync and ( var == b))
      * => x = false;
      */
-    if (!SCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
-        auto enum_type = new SCAM::DataType("enum_type");
+    if (!DESCAM::DataTypes::isLocalDataType("enum_type", "test_module")) {
+        auto enum_type = new DESCAM::DataType("enum_type");
         enum_type->addEnumValue("a");
         enum_type->addEnumValue("b");
         enum_type->addEnumValue("c");
-        SCAM::DataTypes::addLocalDataType("test_module", enum_type);
+        DESCAM::DataTypes::addLocalDataType("test_module", enum_type);
     }
-    auto enum_type = SCAM::DataTypes::getLocalDataType("test_module", "enum_type");
+    auto enum_type = DESCAM::DataTypes::getLocalDataType("test_module", "enum_type");
 
-    SCAM::Port port("test", new SCAM::Interface("blocking", "in"), SCAM::DataTypes::getDataType("bool"));
+    DESCAM::Port port("test", new DESCAM::Interface("blocking", "in"), DESCAM::DataTypes::getDataType("bool"));
     t_TernaryOptimizer::module->addPort(&port);
     auto sync = port.getSynchSignal();
-    auto *var = new SCAM::Variable("test_var", enum_type);
+    auto *var = new DESCAM::Variable("test_var", enum_type);
     t_TernaryOptimizer::module->addVariable(var);
 
-    auto expr1 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("a", enum_type));
-    auto expr2 = SCAM::Logical(sync, "and", &expr1);
-    auto expr3 = SCAM::Relational(new SCAM::VariableOperand(var), "==", new SCAM::EnumValue("b", enum_type));
-    auto expr4 = SCAM::Logical(sync, "and", &expr3);
-    auto expr5 = SCAM::Logical(&expr4, "or", &expr2);
+    auto expr1 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("a", enum_type));
+    auto expr2 = DESCAM::Logical(sync, "and", &expr1);
+    auto expr3 = DESCAM::Relational(new DESCAM::VariableOperand(var), "==", new DESCAM::EnumValue("b", enum_type));
+    auto expr4 = DESCAM::Logical(sync, "and", &expr3);
+    auto expr5 = DESCAM::Logical(&expr4, "or", &expr2);
 
-    SCAM::TernaryOptimizer ternaryOptimizer(&expr5,t_TernaryOptimizer::module);
+    DESCAM::TernaryOptimizer ternaryOptimizer(&expr5,t_TernaryOptimizer::module);
 
     ASSERT_EQ(*ternaryOptimizer.getExpr(), expr5) << "\n Optimizing: " << expr5 << "\n Result:" << *ternaryOptimizer.getExpr();
 
@@ -325,9 +325,9 @@ void t_TernaryOptimizer::SetUp() {
 void t_TernaryOptimizer::TearDown() {
 }
 
-t_TernaryOptimizer::t_TernaryOptimizer() : module(new SCAM::Module("test_module")) {
-    auto model = new SCAM::Model("top");
-    SCAM::ModelGlobal::setModel(model);
+t_TernaryOptimizer::t_TernaryOptimizer() : module(new DESCAM::Module("test_module")) {
+    auto model = new DESCAM::Model("top");
+    DESCAM::ModelGlobal::setModel(model);
 
     model->addModule(this->module);
 }

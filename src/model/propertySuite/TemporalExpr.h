@@ -9,7 +9,7 @@
 #include <Stmt.h>
 #include <Timepoint.h>
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief statement of type ->  at t: xyz = 3 or during[t_start,t_end]: xyz = 3
      *

@@ -7,10 +7,10 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Relational : public Expr {
     public:
-        Relational(Expr *lhs, std::string operation, Expr *rhs);
+        Relational(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs();

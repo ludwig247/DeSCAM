@@ -9,13 +9,13 @@
 #include <DataType.h>
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Parameter : public VariableTemplate<Parameter> {
     public:
         Parameter() = delete;
 
-        Parameter(std::string name, DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr);
+        Parameter(std::string name, DataType *dataType, ConstValue *initialValue = nullptr, VariableTemplate *parent = nullptr, LocationInfo locationInfo = LocationInfo());
 
         virtual ~Parameter() = default;
 

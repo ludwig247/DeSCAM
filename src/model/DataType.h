@@ -9,7 +9,7 @@
 #include <cassert>
 #include "AbstractNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 
 /** \brief Represents DataTypes built-in-type(int,bool,...), compound-type or Enum-type
@@ -44,8 +44,8 @@ namespace SCAM {
 
     class DataType : public AbstractNode {
     public:
-        DataType(std::string name) :
-                AbstractNode(name) {};
+        DataType(std::string name, LocationInfo locationInfo = LocationInfo()) :
+                AbstractNode(name, locationInfo) {};
 
         //Adder
         void addSubVar(std::string subVarName, DataType *subVarType);
@@ -88,7 +88,7 @@ namespace SCAM {
     private:
         int arraySize = 0;
         DataType *arrayType = nullptr;
-        std::map<std::string, SCAM::DataType *> subVarMap; //! Contains an entry <subVarName,subVarType>
+        std::map<std::string, DESCAM::DataType *> subVarMap; //! Contains an entry <subVarName,subVarType>
         std::map<std::string, int> enumValueMap; //! Contains an entry <elementName,int> for every possible value
     };
 

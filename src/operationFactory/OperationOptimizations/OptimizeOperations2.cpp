@@ -6,9 +6,9 @@
 #include <ModelGlobal.h>
 #include "OptimizeOperations2.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    SCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<SCAM::Operation *> &operationsList, SCAM::Module *module){
+    DESCAM::OptimizeOperations2::OptimizeOperations2(const std::vector<DESCAM::Operation *> &operationsList, DESCAM::Module *module){
         // mark all variables for removal initially
 
         //local vars
@@ -97,7 +97,7 @@ namespace SCAM {
         }
     }
 
-    const std::map<std::string, Variable*> SCAM::OptimizeOperations2::getNewVarMap() const {
+    const std::map<std::string, Variable*> DESCAM::OptimizeOperations2::getNewVarMap() const {
         return this->varMap;
     }
 

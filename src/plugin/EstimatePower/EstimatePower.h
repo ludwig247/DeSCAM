@@ -22,7 +22,7 @@ public:
 private:
     void visit(Model &node);
 
-    void visit(SCAM::Module &node);
+    void visit(DESCAM::Module &node);
 
     void visit(ModuleInstance &node);
 

@@ -8,10 +8,10 @@
 #include <string>
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class CompoundExpr : public Expr {
     public:
-        CompoundExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType);
+        CompoundExpr(std::map<std::string, DESCAM::Expr *> valueMap, const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~CompoundExpr();
 
@@ -22,7 +22,7 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const;
 
     private:
-        std::map<std::string, SCAM::Expr *> valueMap;
+        std::map<std::string, DESCAM::Expr *> valueMap;
     };
 
 

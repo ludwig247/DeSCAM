@@ -12,7 +12,7 @@
 #include "Behavior/State.h"
 #include "Behavior/Operation.h"
 
-namespace SCAM{
+namespace DESCAM{
 class TernaryOptimizer: public RecursiveVisitor {
 public:
     TernaryOptimizer() = delete;
@@ -78,7 +78,7 @@ private:
 
     virtual void visit(struct Cast &node);
 
-    virtual void visit(struct SCAM::FunctionOperand &node);
+    virtual void visit(struct DESCAM::FunctionOperand &node);
 
     virtual void visit(struct ArrayOperand &node);
 
@@ -101,8 +101,8 @@ private:
     Expr *  expr = nullptr;
     Stmt * stmt = nullptr;
 
-    bool isTrue(SCAM::Expr *expr) const;
-    bool isFalse(SCAM::Expr *expr) const;
+    bool isTrue(DESCAM::Expr *expr) const;
+    bool isFalse(DESCAM::Expr *expr) const;
 
     std::vector<Expr*> assumptionList;
 

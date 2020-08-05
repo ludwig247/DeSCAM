@@ -21,41 +21,41 @@
 #include <OperationFactory.h>
 #include "TernaryOptimizer.h"
 
-SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, SCAM::Module *module) :
+DESCAM::TernaryOptimizer::TernaryOptimizer(DESCAM::Stmt *stmt, DESCAM::Module *module) :
         module(module) {
     stmt->accept(*this);
 }
 
 
-void SCAM::TernaryOptimizer::visit(struct VariableOperand &node) {
+void DESCAM::TernaryOptimizer::visit(struct VariableOperand &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct IntegerValue &node) {
+void DESCAM::TernaryOptimizer::visit(struct IntegerValue &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct UnsignedValue &node) {
+void DESCAM::TernaryOptimizer::visit(struct UnsignedValue &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct BoolValue &node) {
+void DESCAM::TernaryOptimizer::visit(struct BoolValue &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct EnumValue &node) {
+void DESCAM::TernaryOptimizer::visit(struct EnumValue &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::CompoundValue &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::CompoundValue &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct PortOperand &node) {
+void DESCAM::TernaryOptimizer::visit(struct PortOperand &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct Assignment &node) {
+void DESCAM::TernaryOptimizer::visit(struct Assignment &node) {
     node.getRhs()->accept(*this);
     auto rhs = this->expr;
 
@@ -65,53 +65,53 @@ void SCAM::TernaryOptimizer::visit(struct Assignment &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->stmt = &node;
     } else {
-        this->stmt = new Assignment(lhs, rhs);
+        this->stmt = new Assignment(lhs, rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::TernaryOptimizer::visit(struct UnaryExpr &node) {
+void DESCAM::TernaryOptimizer::visit(struct UnaryExpr &node) {
     node.getExpr()->accept(*this);
     auto unaryExpr = this->expr;
 
     if ((*node.getExpr() == *unaryExpr)) {
         this->expr = &node;
     } else if (isTrue(unaryExpr) || isFalse(unaryExpr)) {
-        SCAM::ConditionOptimizer2 conditionOptimizer2({new UnaryExpr(node.getOperation(), unaryExpr)}, this->module);
+        DESCAM::ConditionOptimizer2 conditionOptimizer2({new UnaryExpr(node.getOperation(), unaryExpr,node.getStmtInfo())}, this->module);
         if (conditionOptimizer2.getNewConditionList().empty()) {
             this->expr = new BoolValue(true);
         } else if (conditionOptimizer2.getNewConditionList().size() == 1) this->expr = conditionOptimizer2.getNewConditionList().back();
-        else this->expr = new UnaryExpr(node.getOperation(), unaryExpr);
+        else this->expr = new UnaryExpr(node.getOperation(), unaryExpr,node.getStmtInfo());
 
     } else {
-        this->expr = new UnaryExpr(node.getOperation(), unaryExpr);
+        this->expr = new UnaryExpr(node.getOperation(), unaryExpr,node.getStmtInfo());
     }
 }
 
-void SCAM::TernaryOptimizer::visit(struct While &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct While &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(struct If &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct If &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(struct SectionOperand &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct SectionOperand &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(struct SectionValue &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct SectionValue &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(struct ITE &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct ITE &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(struct Branch &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct Branch &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
+void DESCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
     node.getRhs()->accept(*this);
     auto rhs = this->expr;
 
@@ -121,11 +121,11 @@ void SCAM::TernaryOptimizer::visit(struct Arithmetic &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Arithmetic(lhs, node.getOperation(), rhs);
+        this->expr = new Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::TernaryOptimizer::visit(struct Logical &node) {
+void DESCAM::TernaryOptimizer::visit(struct Logical &node) {
     node.getLhs()->accept(*this);
     auto lhs = this->expr;
 
@@ -135,9 +135,9 @@ void SCAM::TernaryOptimizer::visit(struct Logical &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Logical(lhs, node.getOperation(), rhs);
+        this->expr = new Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
-    SCAM::ConditionOptimizer2 conditionOptimizer2({this->expr}, this->module);
+    DESCAM::ConditionOptimizer2 conditionOptimizer2({this->expr}, this->module);
     if (conditionOptimizer2.getNewConditionList().empty()) {
         this->expr = new BoolValue(true);
     } else if (conditionOptimizer2.getNewConditionList().size() == 1) {
@@ -145,23 +145,23 @@ void SCAM::TernaryOptimizer::visit(struct Logical &node) {
     } else {
         auto ele1 = conditionOptimizer2.getNewConditionList().at(0);
         auto ele2 = conditionOptimizer2.getNewConditionList().at(1);
-        this->expr = new Logical(ele1, "and", ele2);
+        this->expr = new Logical(ele1, "and", ele2,node.getStmtInfo());
         for (int i = 2; i < conditionOptimizer2.getNewConditionList().size(); i++) {
             auto element = conditionOptimizer2.getNewConditionList().at(i);
-            this->expr = new Logical(this->expr, "and", element);
+            this->expr = new Logical(this->expr, "and", element,node.getStmtInfo());
         }
     }
 }
 
-bool SCAM::TernaryOptimizer::isTrue(SCAM::Expr *expr) const {
-    return *expr == SCAM::BoolValue(true);
+bool DESCAM::TernaryOptimizer::isTrue(DESCAM::Expr *expr) const {
+    return *expr == DESCAM::BoolValue(true);
 }
 
-bool SCAM::TernaryOptimizer::isFalse(SCAM::Expr *expr) const {
-    return *expr == SCAM::BoolValue(false);
+bool DESCAM::TernaryOptimizer::isFalse(DESCAM::Expr *expr) const {
+    return *expr == DESCAM::BoolValue(false);
 }
 
-void SCAM::TernaryOptimizer::visit(struct Relational &node) {
+void DESCAM::TernaryOptimizer::visit(struct Relational &node) {
     node.getRhs()->accept(*this);
     auto rhs = this->expr;
 
@@ -171,12 +171,12 @@ void SCAM::TernaryOptimizer::visit(struct Relational &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Relational(lhs, node.getOperation(), rhs);
+        this->expr = new Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
 
-void SCAM::TernaryOptimizer::visit(struct Bitwise &node) {
+void DESCAM::TernaryOptimizer::visit(struct Bitwise &node) {
     node.getRhs()->accept(*this);
     auto rhs = this->expr;
 
@@ -186,54 +186,54 @@ void SCAM::TernaryOptimizer::visit(struct Bitwise &node) {
     if ((*node.getRhs() == *rhs) && (*node.getLhs() == *lhs)) {
         this->expr = &node;
     } else {
-        this->expr = new Bitwise(lhs, node.getOperation(), rhs);
+        this->expr = new Bitwise(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::TernaryOptimizer::visit(struct Cast &node) {
+void DESCAM::TernaryOptimizer::visit(struct Cast &node) {
     node.getSubExpr()->accept(*this);
     auto unaryExpr = this->expr;
 
     if ((*node.getSubExpr() == *unaryExpr)) {
         this->expr = &node;
     } else {
-        this->expr = new Cast(unaryExpr, node.getDataType());
+        this->expr = new Cast(unaryExpr, node.getDataType(),node.getStmtInfo());
     }
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::ArrayOperand &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     auto idx = this->expr;
 
     if ((*node.getIdx() == *idx)) {
         this->expr = &node;
     } else {
-        this->expr = new ArrayOperand(node.getArrayOperand(), idx);
+        this->expr = new ArrayOperand(node.getArrayOperand(), idx,node.getStmtInfo());
     }
 }
 
 
-void SCAM::TernaryOptimizer::visit(struct Read &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct Read &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::Wait &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(DESCAM::Wait &node) {
+    TERMINATE("not implemented");
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::Peek &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::Peek &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct Write &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::TernaryOptimizer::visit(struct Write &node) {
+    TERMINATE("not implemented");
 }
 
-SCAM::Stmt *SCAM::TernaryOptimizer::getStmt() const {
+DESCAM::Stmt *DESCAM::TernaryOptimizer::getStmt() const {
     return stmt;
 }
 
-void SCAM::TernaryOptimizer::visit(struct SyncSignal &node) {
+void DESCAM::TernaryOptimizer::visit(struct SyncSignal &node) {
     if (isTrivialTrue(assumptionList, &node)) {
         this->expr = new BoolValue(true);
     } else if (isTrivialFalse(assumptionList, &node)) {
@@ -241,12 +241,12 @@ void SCAM::TernaryOptimizer::visit(struct SyncSignal &node) {
     } else this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct DataSignalOperand &node) {
+void DESCAM::TernaryOptimizer::visit(struct DataSignalOperand &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::FunctionOperand &node) {
-    std::map<std::string, SCAM::Expr *> newParamMap;
+void DESCAM::TernaryOptimizer::visit(DESCAM::FunctionOperand &node) {
+    std::map<std::string, DESCAM::Expr *> newParamMap;
     for (auto &&param : node.getParamValueMap()) {
         param.second->accept(*this);
         newParamMap.insert(std::make_pair(param.first, this->expr));
@@ -255,7 +255,7 @@ void SCAM::TernaryOptimizer::visit(SCAM::FunctionOperand &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::ArrayExpr &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::ArrayExpr &node) {
     //TODO
     std::cout << "-W- " << node << " not optmized" << std::endl;
     for (auto select: node.getValueMap()) {
@@ -264,7 +264,7 @@ void SCAM::TernaryOptimizer::visit(SCAM::ArrayExpr &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::CompoundExpr &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::CompoundExpr &node) {
     std::cout << "-W- " << node << " not optmized" << std::endl;
     for (auto select: node.getValueMap()) {
         select.second->accept(*this);
@@ -272,25 +272,25 @@ void SCAM::TernaryOptimizer::visit(SCAM::CompoundExpr &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::ParamOperand &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::ParamOperand &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::Return &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::Return &node) {
     std::cout << "-W- " << node << " not optmized" << std::endl;
     node.getReturnValue()->accept(*this);
     this->stmt = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::Notify &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::Notify &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(struct TimePointOperand &node) {
+void DESCAM::TernaryOptimizer::visit(struct TimePointOperand &node) {
     this->expr = &node;
 }
 
-void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
+void DESCAM::TernaryOptimizer::visit(DESCAM::Ternary &node) {
     node.getTrueExpr()->accept(*this);
     auto trueExpr = this->expr;
     node.getFalseExpr()->accept(*this);
@@ -309,16 +309,16 @@ void SCAM::TernaryOptimizer::visit(SCAM::Ternary &node) {
         if (*node.getTrueExpr() == *trueExpr && *node.getFalseExpr() == *falseExpr && *node.getCondition() == *condExpr) {
             this->expr = &node;
         } else {
-            this->expr = new Ternary(condExpr, trueExpr, falseExpr);
+            this->expr = new Ternary(condExpr, trueExpr, falseExpr,node.getStmtInfo());
         }
     }
 }
 
-SCAM::Expr *SCAM::TernaryOptimizer::getExpr() const {
+DESCAM::Expr *DESCAM::TernaryOptimizer::getExpr() const {
     return expr;
 }
 
-SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, std::vector<Expr *> assumptionList, Module *module) :
+DESCAM::TernaryOptimizer::TernaryOptimizer(DESCAM::Stmt *stmt, std::vector<Expr *> assumptionList, Module *module) :
         module(module),
         assumptionList(assumptionList) {
     stmt->accept(*this);
@@ -331,7 +331,7 @@ SCAM::TernaryOptimizer::TernaryOptimizer(SCAM::Stmt *stmt, std::vector<Expr *> a
  * @param expr
  * @return returns if a statement is true or not
  */
-bool SCAM::TernaryOptimizer::isTrivialTrue(const std::vector<Expr *> &assumptionList, Expr *expr) {
+bool DESCAM::TernaryOptimizer::isTrivialTrue(const std::vector<Expr *> &assumptionList, Expr *expr) {
     z3::context context;
     z3::solver solver(context);
     ExprTranslator translator(&context);
@@ -351,7 +351,7 @@ bool SCAM::TernaryOptimizer::isTrivialTrue(const std::vector<Expr *> &assumption
     return false;
 }
 
-bool SCAM::TernaryOptimizer::isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr) {
+bool DESCAM::TernaryOptimizer::isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr) {
     z3::context context;
     z3::solver solver(context);
     ExprTranslator translator(&context);

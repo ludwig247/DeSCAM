@@ -8,6 +8,9 @@
 #include "Config.h"
 #include "ConditionVisitorSVA.h"
 #include "DatapathVisitorSVA.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
+
 
 std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     this->model = node;
@@ -25,7 +28,7 @@ std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintSVA::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintSVA::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -127,7 +130,7 @@ std::string PrintSVA::functions() {
         ss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto j = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";
@@ -178,7 +181,7 @@ std::string PrintSVA::dataTypes() {
 }
 
 std::string PrintSVA::signals() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "\n// SYNC AND NOTIFY SIGNALS (1-cycle macros) //\n";
@@ -202,7 +205,7 @@ std::string PrintSVA::signals() {
 }
 
 std::string PrintSVA::registers() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
@@ -223,7 +226,7 @@ std::string PrintSVA::registers() {
 }
 
 std::string PrintSVA::states() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// STATES //\n";
     for (auto state: ps->getStates()) {
@@ -284,7 +287,7 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
 }
 
 std::string PrintSVA::reset_operation() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
        << "\treset_sequence |->\n";
@@ -303,7 +306,7 @@ std::string PrintSVA::reset_operation() {
 
 std::string PrintSVA::operations() {
 
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 
@@ -391,7 +394,7 @@ std::string PrintSVA::globalFunctions() {
         globss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto j = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             globss << "\t";

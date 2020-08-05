@@ -10,13 +10,13 @@
  * @brief Computes all possible return values dependent on the inputs
  * @param controlFlowMap
  */
-SCAM::FunctionFactory::FunctionFactory(const std::map<int, CfgBlock *> &controlFlowMap, Function *function, SCAM::Module *module) {
+DESCAM::FunctionFactory::FunctionFactory(const std::map<int, CfgBlock *> &controlFlowMap, Function *function, DESCAM::Module *module) {
     //Add a terminal node to the blockCFG
-    auto cfgMapNew = SCAM::CfgUtilities::addTerminalNodeForFunctions(controlFlowMap);
+    auto cfgMapNew = DESCAM::CfgUtilities::addTerminalNodeForFunctions(controlFlowMap);
     //Find for each if the start end endnode
-    auto startEndMap = SCAM::CfgUtilities::getStartEndMap(cfgMapNew);
+    auto startEndMap = DESCAM::CfgUtilities::getStartEndMap(cfgMapNew);
     //Find for each path start-end the visited nodes
-    auto pathNodeMap = SCAM::CfgUtilities::getPathNodes(startEndMap);
+    auto pathNodeMap = DESCAM::CfgUtilities::getPathNodes(startEndMap);
 
     //Flatten the graph back to linear code
     FlattenWhile flattenWhile(cfgMapNew.at(0), cfgMapNew.at(-1), startEndMap, pathNodeMap);
@@ -29,7 +29,7 @@ SCAM::FunctionFactory::FunctionFactory(const std::map<int, CfgBlock *> &controlF
 
     //A path is described by the trigger conditions and the return value
     //The return value condition map stores the return value and the trigger conditions for this value, which rely on the parameters
-    std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *> > > returnValueConditionList; //! Stores the return value for each possible sequence of inputs
+    std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *> > > returnValueConditionList; //! Stores the return value for each possible sequence of inputs
 
     for (auto &&path : pathsToReturn.getPathList()) {
         auto returnValue = ReconstructOperations::getReturnValue(path->getStmtList(),module);
@@ -45,6 +45,6 @@ SCAM::FunctionFactory::FunctionFactory(const std::map<int, CfgBlock *> &controlF
     function->setReturnValueConditionList(returnValueConditionList);
 }
 
-const std::vector<SCAM::Stmt *> &SCAM::FunctionFactory::getStmtList() const {
+const std::vector<DESCAM::Stmt *> &DESCAM::FunctionFactory::getStmtList() const {
     return stmtList;
 }

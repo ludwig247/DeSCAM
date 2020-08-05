@@ -14,8 +14,8 @@
  * The optimized function is also added to the module
  */
 
-SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM::Module *module,
-                                             SCAM::Model *model,
+DESCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, DESCAM::Module *module,
+                                             DESCAM::Model *model,
                                              std::set<std::string> variablesThatHaveReadSet) : CFG(std::move(
         CFG)), module(module), model(model), globalVariableMap(model->getGlobalVariableMap()), hasFunction(false), newStmt(nullptr),
                                                                                                newExpr(nullptr),
@@ -30,7 +30,7 @@ SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM:
     if (module->getFunctionMap().empty() && model->getGlobalFunctionMap().empty()) return;
 
     //Finding all variable values
-    SCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
+    DESCAM::FindVariablesValues valuesFinder(this->CFG, this->variablesThatHaveReadSet);
     this->allVarValuesMap = valuesFinder.getVariableValuesMap();
 
     for (auto node : this->CFG) {
@@ -41,8 +41,8 @@ SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM:
             stmt->accept(*this);
             if (this->newStmt && hasFunction) {
 #ifdef DEBUG_FUNCTIONS_OPTIMIZER
-                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
-                std::cout << SCAM::PrintStmt::toString(this->newStmt) << std::endl;
+                std::cout << DESCAM::PrintStmt::toString(stmt) << std::endl;
+                std::cout << DESCAM::PrintStmt::toString(this->newStmt) << std::endl;
 #endif
                 this->CFG.at(node.first)->setStmt(this->newStmt);
                 hasFunction = false;
@@ -55,7 +55,7 @@ SCAM::FunctionsOptimizer::FunctionsOptimizer(std::map<int, CfgNode *> CFG, SCAM:
 }
 
 
-void SCAM::FunctionsOptimizer::visit(SCAM::Assignment &node) {
+void DESCAM::FunctionsOptimizer::visit(DESCAM::Assignment &node) {
     //LHS
     Expr *lhs = node.getLhs();
     node.getLhs()->accept(*this);
@@ -72,44 +72,44 @@ void SCAM::FunctionsOptimizer::visit(SCAM::Assignment &node) {
         return;
     }
     //Create new stmt
-    if (hasFunction) {
-        this->newStmt = new SCAM::Assignment(lhs, rhs);
+    if (!(*lhs==*node.getLhs())||!(*rhs==*node.getRhs())) {
+        this->newStmt = new DESCAM::Assignment(lhs, rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class UnaryExpr &node) {
+void DESCAM::FunctionsOptimizer::visit(class UnaryExpr &node) {
     node.getExpr()->accept(*this);
     if (this->newExpr && hasFunction) {
         if (node.getOperation() == "not") {
-            this->newExpr = new UnaryExpr("not", this->newExpr);
+            this->newExpr = new UnaryExpr("not", this->newExpr,node.getStmtInfo());
         } else if (node.getOperation() == "~") {
-            this->newExpr = new UnaryExpr("~", this->newExpr);
+            this->newExpr = new UnaryExpr("~", this->newExpr,node.getStmtInfo());
         } else if (node.getOperation() == "-") {
             if (node.getExpr()->getDataType()->isUnsigned()) {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1),node.getStmtInfo());
             } else {
-                this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1));
+                this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
             }
-        } else throw std::runtime_error("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(SCAM::If &node) {
+void DESCAM::FunctionsOptimizer::visit(DESCAM::If &node) {
     node.getConditionStmt()->accept(*this);
     if (this->newExpr && hasFunction) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
-        this->newStmt = new If(this->newExpr);
+        this->newStmt = new If(this->newExpr,node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class Write &node) {
+void DESCAM::FunctionsOptimizer::visit(class Write &node) {
     node.getValue()->accept(*this);
     if (this->newExpr && hasFunction) {
-        this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand());
+        this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand(),node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class Arithmetic &node) {
+void DESCAM::FunctionsOptimizer::visit(class Arithmetic &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -126,12 +126,12 @@ void SCAM::FunctionsOptimizer::visit(class Arithmetic &node) {
         return;
     }
     //Create new stmt
-    if (hasFunction) {
-        this->newExpr = new SCAM::Arithmetic(lhs, node.getOperation(), rhs);
+    if (!(*lhs==*node.getLhs())||!(*rhs==*node.getRhs())) {
+        this->newExpr = new DESCAM::Arithmetic(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class Logical &node) {
+void DESCAM::FunctionsOptimizer::visit(class Logical &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -148,12 +148,12 @@ void SCAM::FunctionsOptimizer::visit(class Logical &node) {
         return;
     }
     //Create new stmt
-    if (hasFunction) {
-        this->newExpr = new SCAM::Logical(lhs, node.getOperation(), rhs);
+    if (!(*lhs==*node.getLhs())||!(*rhs==*node.getRhs())) {
+        this->newExpr = new DESCAM::Logical(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class Relational &node) {
+void DESCAM::FunctionsOptimizer::visit(class Relational &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -170,12 +170,12 @@ void SCAM::FunctionsOptimizer::visit(class Relational &node) {
         return;
     }
     //Create new stmt
-    if (hasFunction) {
-        this->newExpr = new SCAM::Relational(lhs, node.getOperation(), rhs);
+    if (!(*lhs==*node.getLhs())||!(*rhs==*node.getRhs())) {
+        this->newExpr = new DESCAM::Relational(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class Bitwise &node) {
+void DESCAM::FunctionsOptimizer::visit(class Bitwise &node) {
     //LHS
     this->newExpr = nullptr;
     Expr *lhs = node.getLhs();
@@ -192,19 +192,19 @@ void SCAM::FunctionsOptimizer::visit(class Bitwise &node) {
         return;
     }
     //Create new stmt
-    if (hasFunction) {
-        this->newExpr = new SCAM::Bitwise(lhs, node.getOperation(), rhs);
+    if (!(*lhs==*node.getLhs())||!(*rhs==*node.getRhs())) {
+        this->newExpr = new DESCAM::Bitwise(lhs, node.getOperation(), rhs,node.getStmtInfo());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class Cast &node) {
+void DESCAM::FunctionsOptimizer::visit(class Cast &node) {
     node.getSubExpr()->accept(*this);
     if (this->newExpr && hasFunction) {
         this->newExpr = new Cast(this->newExpr, node.getDataType());
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
+void DESCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     if (node.getFunction()->getName().find("_opt") != std::string::npos) return;
     hasFunction = true;
     //check if already optimized a function with the same paramterslist
@@ -214,9 +214,9 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
         return;
     }
     //optimize argument list
-    std::map<std::string, SCAM::Expr *> newParamValueMap;
+    std::map<std::string, DESCAM::Expr *> newParamValueMap;
     for (const auto &param : node.getParamValueMap()) {
-        if (auto funOp = SCAM::NodePeekVisitor::nodePeekFunctionOperand(param.second)) {
+        if (auto funOp = DESCAM::NodePeekVisitor::nodePeekFunctionOperand(param.second)) {
             this->newExpr = nullptr;
             funOp->accept(*this);
             if (this->newExpr) {
@@ -232,11 +232,11 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     std::cout<< function->getName() << std::endl;
     std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
     for (auto pair :function->getReturnValueConditionList()) {
-        std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+        std::cout << "return value for this path " << DESCAM::PrintStmt::toString(pair.first->getReturnValue())
                   << std::endl;
         std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
         for (auto stmt : pair.second) {
-            std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            std::cout << DESCAM::PrintStmt::toString(stmt) << std::endl;
         }
     }
 
@@ -249,11 +249,11 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     std::cout << std::endl;
        std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
        for (auto pair :function->getReturnValueConditionList()) {
-           std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+           std::cout << "return value for this path " << DESCAM::PrintStmt::toString(pair.first->getReturnValue())
                      << std::endl;
            std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
            for (auto stmt : pair.second) {
-               std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+               std::cout << DESCAM::PrintStmt::toString(stmt) << std::endl;
            }
        }
 
@@ -267,11 +267,11 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     std::cout << std::endl;
     std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
     for (auto pair :function->getReturnValueConditionList()) {
-        std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+        std::cout << "return value for this path " << DESCAM::PrintStmt::toString(pair.first->getReturnValue())
                   << std::endl;
         std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
         for (auto stmt : pair.second) {
-            std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+            std::cout << DESCAM::PrintStmt::toString(stmt) << std::endl;
         }
     }
 
@@ -285,11 +285,11 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     std::cout << std::endl;
         std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
         for (auto pair :function->getReturnValueConditionList()) {
-            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+            std::cout << "return value for this path " << DESCAM::PrintStmt::toString(pair.first->getReturnValue())
                       << std::endl;
             std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
             for (auto stmt : pair.second) {
-                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+                std::cout << DESCAM::PrintStmt::toString(stmt) << std::endl;
             }
         }
 
@@ -302,11 +302,11 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     std::cout << std::endl;
         std::cout << "return value condition list size is " << function->getReturnValueConditionList().size() << std::endl;
         for (auto pair :function->getReturnValueConditionList()) {
-            std::cout << "return value for this path " << SCAM::PrintStmt::toString(pair.first->getReturnValue())
+            std::cout << "return value for this path " << DESCAM::PrintStmt::toString(pair.first->getReturnValue())
                       << std::endl;
             std::cout << "return type of return is " << pair.first->getReturnValue()->getDataType()->getName() << std::endl;
             for (auto stmt : pair.second) {
-                std::cout << SCAM::PrintStmt::toString(stmt) << std::endl;
+                std::cout << DESCAM::PrintStmt::toString(stmt) << std::endl;
             }
         }
 
@@ -328,7 +328,7 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
             this->newExpr = nullptr;
             pair.first->getReturnValue()->accept(*this);
             if (this->newExpr) {
-                auto newReturn = new Return(this->newExpr);
+                auto newReturn = new Return(this->newExpr,pair.first->getStmtInfo());
                 newReturnValueConditionList.emplace_back(newReturn, newConditionVector);
             } else { newReturnValueConditionList.emplace_back(pair.first, newConditionVector); }
         } else {
@@ -352,7 +352,7 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
 
     } else {//create new function and add it to the module
         function->setName(createFuncName(node.getOperandName()));
-        this->newExpr = new SCAM::FunctionOperand(function, newParamValueMap);
+        this->newExpr = new DESCAM::FunctionOperand(function, newParamValueMap,node.getStmtInfo());
         auto moduleFunctionMap = this->module->getFunctionMap();
         if(moduleFunctionMap.find(node.getOperandName())!=moduleFunctionMap.end()) {
             this->module->addFunction(function);
@@ -363,12 +363,12 @@ void SCAM::FunctionsOptimizer::visit(class FunctionOperand &node) {
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(SCAM::ArrayOperand &node) {
+void DESCAM::FunctionsOptimizer::visit(DESCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
 }
 
-void SCAM::FunctionsOptimizer::visit(SCAM::CompoundExpr &node) {
-    std::map<std::string, SCAM::Expr *> newValMap;
+void DESCAM::FunctionsOptimizer::visit(DESCAM::CompoundExpr &node) {
+    std::map<std::string, DESCAM::Expr *> newValMap;
     bool valueMapChanged = false;
     for (auto val : node.getValueMap()) {
         this->newExpr = nullptr;
@@ -379,14 +379,14 @@ void SCAM::FunctionsOptimizer::visit(SCAM::CompoundExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (valueMapChanged) {
-        this->newExpr = new SCAM::CompoundExpr(newValMap, node.getDataType());
+        this->newExpr = new DESCAM::CompoundExpr(newValMap, node.getDataType(),node.getStmtInfo());
     } else {
         this->newExpr = nullptr;
     }
 }
 
-void SCAM::FunctionsOptimizer::visit(SCAM::ArrayExpr &node) {
-    std::map<std::string, SCAM::Expr *> newValMap;
+void DESCAM::FunctionsOptimizer::visit(DESCAM::ArrayExpr &node) {
+    std::map<std::string, DESCAM::Expr *> newValMap;
     bool valueMapChanged = false;
     for (auto val : node.getValueMap()) {
         this->newExpr = nullptr;
@@ -397,18 +397,18 @@ void SCAM::FunctionsOptimizer::visit(SCAM::ArrayExpr &node) {
         } else { newValMap.insert(val); }
     }
     if (valueMapChanged) {
-        this->newExpr = new SCAM::ArrayExpr(newValMap, node.getDataType());
+        this->newExpr = new DESCAM::ArrayExpr(newValMap, node.getDataType(),node.getStmtInfo());
     } else {
         this->newExpr = nullptr;
     }
 }
 
 
-const std::map<int, SCAM::CfgNode *> &SCAM::FunctionsOptimizer::getCFG() const {
+const std::map<int, DESCAM::CfgNode *> &DESCAM::FunctionsOptimizer::getCFG() const {
     return this->CFG;
 }
 
-std::string SCAM::FunctionsOptimizer::createFuncName(std::string funcOpName) {
+std::string DESCAM::FunctionsOptimizer::createFuncName(std::string funcOpName) {
     std::string newName;
     if (this->functionUseMap.find(funcOpName) == this->functionUseMap.end()) {
         this->functionUseMap.insert(std::make_pair(funcOpName, 1));
@@ -421,9 +421,9 @@ std::string SCAM::FunctionsOptimizer::createFuncName(std::string funcOpName) {
     return newName;
 }
 
-SCAM::Expr *
-SCAM::FunctionsOptimizer::isAlreadyOptimizedFunction(std::string operandName,
-                                                     const std::map<std::string, SCAM::Expr *> &paramValueMap) {
+DESCAM::Expr *
+DESCAM::FunctionsOptimizer::isAlreadyOptimizedFunction(std::string operandName,
+                                                     const std::map<std::string, DESCAM::Expr *> &paramValueMap) {
     for (const auto &pair  : oldFuncOpOptimizedFuncPairsMap) {
         if (pair.first->getOperandName() == operandName) {
             bool foundOptFunction = true;
@@ -441,7 +441,27 @@ SCAM::FunctionsOptimizer::isAlreadyOptimizedFunction(std::string operandName,
     return nullptr;
 }
 
-bool SCAM::FunctionsOptimizer::noOptimizationAchieved(
+
+void DESCAM::FunctionsOptimizer::visit(DESCAM::Ternary &node) {
+    this->newExpr = nullptr;
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    node.getCondition()->accept(*this);
+    if (this->newExpr) condition = this->newExpr;
+    this->newExpr = nullptr;
+    node.getTrueExpr()->accept(*this);
+    if (this->newExpr) trueExpr = this->newExpr;
+    this->newExpr = nullptr;
+    node.getFalseExpr()->accept(*this);
+    if (this->newExpr) falseExpr = this->newExpr;
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new DESCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
+}
+
+
+bool DESCAM::FunctionsOptimizer::noOptimizationAchieved(
         const std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector1,
         std::vector<std::pair<Return *, std::vector<Expr *>>> &returnValConditionListPairVector2) {
     if (returnValConditionListPairVector1.size() != returnValConditionListPairVector2.size()) return false;
@@ -460,10 +480,6 @@ bool SCAM::FunctionsOptimizer::noOptimizationAchieved(
         pairItr++;
     }
     return true;
-}
-
-void SCAM::FunctionsOptimizer::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
 }
 
 

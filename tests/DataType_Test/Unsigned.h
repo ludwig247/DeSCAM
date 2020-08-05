@@ -12,7 +12,7 @@ class Unsigned : public ::testing::Test {
 protected:
     Unsigned():
             dataType("unsigned"),
-            dataTypeMap(SCAM::DataTypes::getDataTypeMap()){
+            dataTypeMap(DESCAM::DataTypes::getDataTypeMap()){
     }
 
     virtual void SetUp() {
@@ -21,8 +21,8 @@ protected:
 
      virtual void TearDown() {}
 
-    SCAM::DataType dataType;
-    std::map<std::string, SCAM::DataType *> dataTypeMap;
+    DESCAM::DataType dataType;
+    std::map<std::string, DESCAM::DataType *> dataTypeMap;
 };
 
 
@@ -43,10 +43,10 @@ TEST_F(Unsigned,isNotAnythingElse){
 }
 
 TEST_F(Unsigned,isDataType){
-        ASSERT_TRUE(SCAM::DataTypes::isDataType("unsigned"));
+        ASSERT_TRUE(DESCAM::DataTypes::isDataType("unsigned"));
 }
 TEST_F(Unsigned,getUnsignedDataType){
-    ASSERT_NO_THROW(SCAM::DataTypes::getDataType("unsigned"));
+    ASSERT_NO_THROW(DESCAM::DataTypes::getDataType("unsigned"));
 }
 
 #endif //PROJECT_UNSIGNED_H

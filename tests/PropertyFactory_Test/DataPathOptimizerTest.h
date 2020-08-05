@@ -19,7 +19,7 @@
 #include <toPPA/DataPathOptimizer.h>
 #include <PrintStmt.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 class DataPathOptimizer_Test: public ::testing::Test{
 public:
     DataPathOptimizer_Test():module(new Module("TestModule")){
@@ -38,14 +38,14 @@ public:
         module->addPort(new Port("input_unsigned2",anInterface2,DataTypes::getDataType("unsigned")));
         module->addPort(new Port("input_compound",anInterface2,DataTypes::getDataType("compound")));
 
-        module->addVariable(new Variable("compound_var",SCAM::DataTypes::getDataType("compound"),SCAM::DataTypes::getDataType("compound")->getDefaultVal()));
-        module->addVariable(new Variable("unsigned_var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
-        module->addVariable(new Variable("unsigned_var2",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
-        module->addVariable(new Variable("integer_var",SCAM::DataTypes::getDataType("int"),new IntegerValue(0)));
+        module->addVariable(new Variable("compound_var",DESCAM::DataTypes::getDataType("compound"),DESCAM::DataTypes::getDataType("compound")->getDefaultVal()));
+        module->addVariable(new Variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
+        module->addVariable(new Variable("unsigned_var2",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
+        module->addVariable(new Variable("integer_var",DESCAM::DataTypes::getDataType("int"),new IntegerValue(0)));
     }
 
     virtual void TearDown() {}
-    SCAM::Module * module;
+    DESCAM::Module * module;
 
 };
 

@@ -6,7 +6,7 @@
 #include "PrintMonitor.h"
 //#include "Synthesize/VHDLPrintVisitor.h"
 
-SCAM::PrintMonitor::PrintMonitor(SCAM::Module *module) :
+DESCAM::PrintMonitor::PrintMonitor(DESCAM::Module *module) :
         module(module) {
     opcnt = 0;
     //Use the optimized version of the statemap
@@ -19,17 +19,17 @@ SCAM::PrintMonitor::PrintMonitor(SCAM::Module *module) :
     }
 }
 
-SCAM::PrintMonitor::~PrintMonitor() {
+DESCAM::PrintMonitor::~PrintMonitor() {
 
 }
 
-std::string SCAM::PrintMonitor::print() {
+std::string DESCAM::PrintMonitor::print() {
     this->ss << monitor_pkg(module) << std::endl;
     this->ss << monitor() << std::endl;;
     return ss.str();
 }
 
-std::string SCAM::PrintMonitor::monitor() {
+std::string DESCAM::PrintMonitor::monitor() {
     std::stringstream monitor;
     monitor << "library ieee ;\n";
     monitor << "use ieee.std_logic_1164.all;\n";
@@ -113,7 +113,7 @@ std::string SCAM::PrintMonitor::monitor() {
 }
 
 
-std::string SCAM::PrintMonitor::monitor_pkg(SCAM::Module *module) {
+std::string DESCAM::PrintMonitor::monitor_pkg(DESCAM::Module *module) {
 
     std::stringstream package_head;
     package_head << "library ieee ;\n";
@@ -154,8 +154,8 @@ std::string SCAM::PrintMonitor::monitor_pkg(SCAM::Module *module) {
 
 }
 
-void SCAM::PrintMonitor::optimize() {
-    //std::map<SCAM::Operation2 *, SCAM::Path *> operation_path_map = this->module->getFSM()->getOperationPathMap();
+void DESCAM::PrintMonitor::optimize() {
+    //std::map<DESCAM::Operation2 *, DESCAM::Path *> operation_path_map = this->module->getFSM()->getOperationPathMap();
 
 
     this->stateMap = module->getFSM()->getStateMap();
@@ -163,7 +163,7 @@ void SCAM::PrintMonitor::optimize() {
 
 }
 
-std::string SCAM::PrintMonitor::printAssumptions(const std::vector<Expr *> &exprList) {
+std::string DESCAM::PrintMonitor::printAssumptions(const std::vector<Expr *> &exprList) {
     std::stringstream assumptions;
     if (exprList.empty()) return "true";
     for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {

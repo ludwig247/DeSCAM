@@ -94,7 +94,7 @@ if [ -d $output/VHDLwithHLS ]; then rm -Rf $output/VHDLwithHLS; fi
 
 mkdir -p $output
 
-# Start SCAM tool and generated files for HLS and Properties
+# Start DESCAM tool and generated files for HLS and Properties
 echo -e "${BLUE}Generating High Level Synthesis and ITL files${DEFAULT}"
 ($DESCAM_BIN -f $input -o $output -PrintHLS --$hls_option -PrintITL --hls-$hls_option && echo -e "${GREEN}Generated High Level Synthesis and ITL files${DEFAULT}") || (echo -e "${RED}Error generating High Level Synthesis and ITL files${DEFAULT}" && exit 1) ;
 

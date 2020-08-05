@@ -6,7 +6,7 @@
 
 #include "PrintBitOperations.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 PrintBitOperations::PrintBitOperations(Stmt *stmt)
 {

@@ -18,12 +18,12 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
-    std::map<std::string, std::string> printModule(SCAM::Module *node);
+    std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
 private:
     std::stringstream ss;
     Model *model;
-    SCAM::Module *module;
+    DESCAM::Module *module;
 
     ////////////////
     std::string Text_ipc();

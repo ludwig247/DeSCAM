@@ -5,8 +5,8 @@
 #include "FlattenIf.h"
 
 
-SCAM::FlattenIf::FlattenIf(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode, std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap,
-                           std::map<SCAM::CfgBlock *, std::set<int>> &pathNodeMap) :
+DESCAM::FlattenIf::FlattenIf(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endNode, std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap,
+                           std::map<DESCAM::CfgBlock *, std::set<int>> &pathNodeMap) :
         startNode(startNode),
         endNode(endNode),
         ite(nullptr),
@@ -14,23 +14,23 @@ SCAM::FlattenIf::FlattenIf(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode, s
         startEndMap(startEndMap),
         pathNodeMap(pathNodeMap) {
 
-    SCAM::If *stmt = dynamic_cast<SCAM::If *>(startNode->getTerminator());
+    DESCAM::If *stmt = dynamic_cast<DESCAM::If *>(startNode->getTerminator());
     this->ite = new ITE(stmt->getConditionStmt());
 
     //Find all elements on the true path
     //std::cout << "NODE[" << startNode->getBlockID() << "]" << std::endl;
     //std::cout << "TRUE" << std::endl;
-    SCAM::CfgBlock *truePath = startNode->getSuccessorList()[0];
+    DESCAM::CfgBlock *truePath = startNode->getSuccessorList()[0];
     this->core((truePath));
     //Find all elements on the false path
     this->pass = 1;
     //std::cout << "FALSE" << std::endl;
-    SCAM::CfgBlock *falsePath = startNode->getSuccessorList()[1];
+    DESCAM::CfgBlock *falsePath = startNode->getSuccessorList()[1];
     this->core(falsePath);
 }
 
 
-void SCAM::FlattenIf::core(SCAM::CfgBlock *node) {
+void DESCAM::FlattenIf::core(DESCAM::CfgBlock *node) {
     //Is node on path between
     if (pathNodeMap[startNode].find(node->getBlockID()) == pathNodeMap[startNode].end()) {
         std::cout << startNode->getBlockID() << ": " << node->getBlockID() << std::endl;
@@ -45,7 +45,7 @@ void SCAM::FlattenIf::core(SCAM::CfgBlock *node) {
         }
         //Check for a branching
         if (node->hasIf()) {
-            //Build SCAM:ite for this if-block
+            //Build DESCAM:ite for this if-block
             FlattenIf cascadeITE = FlattenIf(node, startEndMap[node], this->startEndMap, this->pathNodeMap);
             if (pass == 0) this->ite->addIfList(cascadeITE.getITE());
             if (pass == 1) this->ite->addElseList(cascadeITE.getITE());
@@ -64,6 +64,6 @@ void SCAM::FlattenIf::core(SCAM::CfgBlock *node) {
     }
 }
 
-SCAM::ITE *SCAM::FlattenIf::getITE() {
+DESCAM::ITE *DESCAM::FlattenIf::getITE() {
     return this->ite;
 }
