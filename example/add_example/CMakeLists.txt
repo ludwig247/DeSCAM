@@ -6,8 +6,8 @@ include(AddExample.cmake)
 #
 #
 add_example(Bus; Print_ITL_Tests )
-add_example(FIFO; Print_ITL_Tests)
-add_example(FPI; Print_ITL_Tests)
+#add_example(FIFO; Print_ITL_Tests)
+#add_example(FPI; Print_ITL_Tests)
 #add_example(I2C; Print_ITL_Tests)
 #add_example(Framer; Print_ITL_Tests)
 add_example(Paper; Print_ITL_Tests)

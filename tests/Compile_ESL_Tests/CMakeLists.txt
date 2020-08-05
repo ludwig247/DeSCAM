@@ -17,15 +17,18 @@ target_link_libraries(Compile_ESL_tests PRIVATE ${CMAKE_SOURCE_DIR}/lib/libgtest
                         ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
 
 
-add_custom_command( TARGET Compile_ESL_tests PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake
-                    BYPRODUCTS ./json_output_files/error_compilation.json
+add_dependencies(Compile_ESL_tests Compile_ESL_Test_Run)
+add_custom_target(Compile_ESL_Test_Run
+        ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake
                     DEPENDS add_subdirectories
+                            ${CMAKE_SOURCE_DIR}/example/add_example/CMakeLists.txt
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     VERBATIM)
 
 add_custom_command(OUTPUT add_subdirectories #Reruns CMake to include newly added examples
-                    COMMAND make rebuild_cache
-                    )
+        COMMAND make rebuild_cache
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake
+        )
+
 
 
