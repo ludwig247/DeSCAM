@@ -8,7 +8,7 @@
 using namespace sc_dt;
 
 enum phases{
-    IDLE, RUN
+    IDLE, RUN_C1, RUN_C2, RUN_C3, RUN_OUT
 };
 
 

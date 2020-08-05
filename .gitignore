@@ -64,5 +64,15 @@ example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.mti
 
 #FFT
 example/FFT/SEQ/DeSCAM_parse
+example/FFT/SEQ/RTL/Simulation
 example/FFT/PIPELINE/DeSCAM_parse
+
+#FIR-Filter
+example/FIR-Filter/SEQ/DeSCAM_parse
+example/FIR-Filter/SEQ/RTL/Simulation
+example/FIR-Filter/PIPELINE/DeSCAM_parse
+example/FIR-Filter/PIPELINE/RTL/Simulation
+
+
+
 

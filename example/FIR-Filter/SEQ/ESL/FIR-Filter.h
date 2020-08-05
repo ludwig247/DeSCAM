@@ -53,39 +53,37 @@ struct FIR : public sc_module {
             if (phase_algorithm == IDLE) {
 
                 data_in->read(data_algorithm, "data_in");
-                phase_algorithm = RUN;
+                phase_algorithm = RUN_C1;
                 acc = 0;
                 i = N - 1;
 
-            } else {
+            } else if(phase_algorithm == RUN_C1) {
 
-                insert_state("Calculation");
+                insert_state("C1");
+                shiftreg[2] = shiftreg[1];
+                acc += (shiftreg[2] * coef[2]);
+                phase_algorithm = RUN_C2;
 
-                if(i >= 0){
+            } else if(phase_algorithm == RUN_C2) {
 
-                    if (i==2){
-                        shiftreg[2] = shiftreg[1];
-                        acc += shiftreg[2] * coef[2];
-                    }
-                    else if (i==1){
-                        shiftreg[1] = shiftreg[0];
-                        acc += shiftreg[1] * coef[1];
-                    }
-                    else if (i==0){
-                        acc += data_algorithm * coef[0];
-                        shiftreg[0] = data_algorithm;
-                    }
+                insert_state("C2");
+                shiftreg[1] = shiftreg[0];
+                acc += shiftreg[1] * coef[1];
+                phase_algorithm = RUN_C3;
 
-                        /*shiftreg[i] = shiftreg[i - 1];
-                        acc += shiftreg[i] * coef[i];*/
+            } else if(phase_algorithm == RUN_C3) {
 
-                    --i;
+                insert_state("C3");
+                acc += data_algorithm * coef[0];
+                shiftreg[0] = data_algorithm;
+                coef[2] = coef[1];
+                coef[1] = coef[0];
+                coef[0] = acc;
+                phase_algorithm = RUN_OUT;
 
-                }else{
-                    data_out->write(acc,"data_out");
-                    phase_algorithm = IDLE;
-                }
-
+            }else{
+                data_out->write(acc,"data_out");
+                phase_algorithm = IDLE;
             }
 
         }

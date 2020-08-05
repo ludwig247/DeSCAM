@@ -51,9 +51,9 @@ struct Testbench : public sc_module {
 
             if (cnt < ARRAY_SIZE) {
 
-                cout << data_testbench[cnt] << endl;
+                cout << "Data in: " << data_testbench[cnt] << endl;
 
-                cout << "data sent" << endl;
+                //cout << "data sent" << endl;
 
 
                 data_out->write(data_testbench[cnt]);
@@ -61,7 +61,7 @@ struct Testbench : public sc_module {
                 data_in->read(data_testbench[cnt]);
 
 
-                cout << data_testbench[cnt] << endl;
+                cout << "Data out: " << data_testbench[cnt] << endl;
 
                 cnt++;
 

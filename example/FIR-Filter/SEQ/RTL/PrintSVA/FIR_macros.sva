@@ -40,9 +40,6 @@ endfunction
 function int data_algorithm;
 	data_algorithm = FIR.data_algorithm_signal;
 endfunction
-function int i;
-	i = FIR.i_signal;
-endfunction
 function phases phase_algorithm;
 	phase_algorithm = FIR.phase_algorithm_signal;
 endfunction
@@ -74,6 +71,33 @@ function data_out_3;
 	data_out_3 = ((FIR.data_in_notify == false)
 		&& (FIR.data_out_notify == true)
 		&& (FIR.phase_algorithm_signal == RUN));
+endfunction
+
+// STATES //
+function data_in_1;
+	data_in_1 = ((FIR.data_in_notify == true)
+		&& (FIR.data_out_notify == false)
+		&& (FIR.phase_algorithm_signal == IDLE));
+endfunction
+function C1_2;
+	C1_2 = ((FIR.data_in_notify == false)
+		&& (FIR.data_out_notify == false)
+		&& (FIR.phase_algorithm_signal == RUN_C1));
+endfunction
+function C2_3;
+	C2_3 = ((FIR.data_in_notify == false)
+		&& (FIR.data_out_notify == false)
+		&& (FIR.phase_algorithm_signal == RUN_C2));
+endfunction
+function C3_4;
+	C3_4 = ((FIR.data_in_notify == false)
+		&& (FIR.data_out_notify == false)
+		&& (FIR.phase_algorithm_signal == RUN_C3));
+endfunction
+function data_out_5;
+	data_out_5 = ((FIR.data_in_notify == false)
+		&& (FIR.data_out_notify == true)
+		&& (FIR.phase_algorithm_signal == RUN_OUT));
 endfunction
 
 
