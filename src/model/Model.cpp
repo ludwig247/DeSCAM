@@ -80,4 +80,11 @@ namespace SCAM {
         return globalFunctionMap;
     }
 
+    void Model::clear(){
+        this->moduleMap.clear();
+        this->globalVariableMap.clear();
+        this->globalFunctionMap.clear();
+        this->moduleInstanceMap.clear();
+        DataTypes::reset();
+    }
 }

@@ -26,11 +26,12 @@
 #include "clang/Parse/Parser.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
+#include "ModelFactory.h"
+
 
 
 using namespace clang::driver;
 using namespace clang::tooling;
-
 
 
 
@@ -55,9 +56,26 @@ template < typename A > class PluginAction
 public:
 	PluginAction (int argc, const char **argv) {
 
-		CommonOptionsParser OptionsParser (argc, argv);
+        std::vector<std::string> arg;
 
-		ClangTool Tool (OptionsParser.getCompilations (), OptionsParser.getSourcePathList ());
+     //Ensures that only the specified file paths given as arguments in command line are passed to CLang at a time
+        for(int i=1; i < argc ; i++) {
+            if(!(std::string(argv[i]) == "--")){
+                arg.push_back(argv[i]);
+//                std::cout << "ARG: " << arg[i-1] << std::endl;
+            }
+            else break;
+        };
+
+        CommonOptionsParser OptionsParser (argc, argv);
+
+        //Print to screen file paths given to compiler through CommonOptionsParser
+//        for(auto src: OptionsParser.getSourcePathList()){
+//            std::cout << "OP:" << src << std::endl;
+//        }
+
+
+		ClangTool Tool (OptionsParser.getCompilations (), arg);
 
 		std::string output;
 		llvm::raw_string_ostream ss(output);
@@ -72,6 +90,7 @@ public:
 
 	};
 
+//    ~PluginAction(){std::cout<<"delte,delete"<<std::endl;};
 
 private:
 

@@ -10,7 +10,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../Interfaces)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
-add_executable(RISCV sc_main.cpp Decoder.h CPU_Interfaces.h ALU.h cpath.h regs.h Utilities.h Memory.h Progam_tests.h)
+add_executable(RISCV_Simulation sc_main.cpp Decoder.h CPU_Interfaces.h ALU.h cpath.h regs.h Utilities.h Memory.h Progam_tests.h)
 
-target_link_libraries(RISCV systemc pthread)
+target_link_libraries(RISCV_Simulation systemc pthread)
 

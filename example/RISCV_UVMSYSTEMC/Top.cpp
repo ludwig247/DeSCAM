@@ -13,7 +13,7 @@
 #include <uvm>
 
 #include "vip_components/vip_if.h"
-#include "../RISCV_ISA/ESL/Core.h"
+#include "../RISCV_ISA/ESL/env/Core_old.h"
 #include "Tests/Single_Type_Tests/Single_Type_Tests.h"
 #include "Tests/test_init.h"
 //#include "dut.h"

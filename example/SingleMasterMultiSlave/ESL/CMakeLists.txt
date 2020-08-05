@@ -1,5 +1,3 @@
-
-
 cmake_minimum_required(VERSION 2.8)
 project(TCAD_bus C CXX)
 
@@ -15,7 +13,7 @@ include_directories(Interfaces)
 
 FILE(GLOB R_SRC *.cpp *.hpp *.h)
 
-add_executable(TCAD_bus ${R_SRC} Compound.h
+add_executable(TCAD_bus_Simulation ${R_SRC} Compound.h
         Temp_detector.h
         Timer.h
         uProcessor.h
@@ -24,4 +22,4 @@ add_executable(TCAD_bus ${R_SRC} Compound.h
         Buffer.h
         ADC_out.h
         ADC_in.h )
-target_link_libraries(TCAD_bus systemc)
+target_link_libraries(TCAD_bus_Simulation systemc)
