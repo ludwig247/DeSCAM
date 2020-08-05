@@ -7,11 +7,13 @@ set(EXAMPLE_NAMES "")
 
 file(MAKE_DIRECTORY ./json_output_files/ ./error_files/)
 add_custom_target(Compile_ESL_Test_Run ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake
-                    DEPENDS add_subdirectories WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} VERBATIM)
+                  DEPENDS add_subdirectories
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} VERBATIM)
+
 add_custom_command( OUTPUT add_subdirectories #Reruns CMake to include newly added examples
             COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" ${CMAKE_SOURCE_DIR})
 
-get_directory_property(EXAMPLE_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/example/ DEFINITION EXAMPLE_NAMES_LIST)
+get_directory_property(EXAMPLE_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/example/add_example/ DEFINITION EXAMPLE_NAMES_LIST)
 
 
 configure_file (
