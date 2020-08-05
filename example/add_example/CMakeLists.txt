@@ -19,18 +19,5 @@ add_example(Paper; Print_ITL_Tests)
 #
 # Updates the list of add_subdirectory according to the add_example macros activated
 update_list()
-#
-# NOTE: DO NOT UNCOMMENT HERE
-#add_subdirectory(Bus)
-#add_subdirectory(Framer)
-#add_subdirectory(SingleMasterMultiSlave)
-#add_subdirectory(FPI)
-#add_subdirectory(FIFO)
-#add_subdirectory(tests)
-#add_subdirectory(Whishbone)
-#add_subdirectory(I2C)
-#add_subdirectory(Comm_Test_newInterfaces)
-#add_subdirectory(operation-pipeline)
-#add_subdirectory(UART_NORDIC)
-#add_subdirectory(RISCV_Test_ELF)
-#add_subdirectory(example_test)
+
+
