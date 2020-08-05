@@ -110,7 +110,8 @@ string (REGEX REPLACE ";" "" EXAMPLE_SUB_LIST "${EXAMPLE_SUB_LIST}")
 
 #   Remakes the CMakeLists.txt, updating the add_subdirectory-list
 configure_file (
-        "templates/CMakeLists.txt.in"
+#        "./add_example/templates/CMakeLists.txt.in"
+        "./templates/CMakeLists.txt.in"
         "${CMAKE_SOURCE_DIR}/example/CMakeLists.txt" @ONLY)
 
 endmacro(update_list)
