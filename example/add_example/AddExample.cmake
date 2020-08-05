@@ -1,9 +1,11 @@
 macro (add_example)
     set(MACRO_ARG ${ARGN})
     list(LENGTH MACRO_ARG NUM_MACRO_ARG)
+    set(test ${NUM_MACRO_ARG} LESS_EQUAL 2)
+
     if(${NUM_MACRO_ARG} LESS 1 OR ${NUM_MACRO_ARG} GREATER 3)
         message(FATAL_ERROR "wrong use of \"add_example\"!!!! You need to give at least the name of your example.")
-    elseif(${NUM_MACRO_ARG} LESS_EQUAL 2)
+    elseif(${NUM_MACRO_ARG} LESS 3)
         list(GET MACRO_ARG 0 FIRST_ARG)
 #        list(GET MACRO_ARG 1 SECOND_ARG)
         if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${FIRST_ARG}")
