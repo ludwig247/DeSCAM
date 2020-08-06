@@ -229,14 +229,18 @@ void PrintCondition::visit(Arithmetic &node) {
         NodePeekVisitor nodePeekRhs(node.getRhs());
         if (nodePeekLhs.isConstTypeNode() || nodePeekRhs.isConstTypeNode()) {
             if (nodePeekLhs.nodePeekUnsignedValue() && (nodePeekLhs.nodePeekUnsignedValue()->getValue() == 2)) {
+                this->ss << "(";
                 node.getRhs()->accept(*this);
                 this->ss << " + ";
                 node.getRhs()->accept(*this);
+                this->ss << ")";
             } else if (nodePeekRhs.nodePeekUnsignedValue() &&
                     (nodePeekRhs.nodePeekUnsignedValue()->getValue() == 2)) {
+                this->ss << "(";
                 node.getLhs()->accept(*this);
                 this->ss << " + ";
                 node.getLhs()->accept(*this);
+                this->ss << ")";
             } else
             if (nodePeekLhs.nodePeekUnsignedValue() &&
                     Utilities::isPowerOfTwo(nodePeekLhs.nodePeekUnsignedValue()->getValue())) {
@@ -273,16 +277,21 @@ void PrintCondition::visit(Arithmetic &node) {
                 this->ss << Utilities::bitPosition(nodePeekRhs.nodePeekIntegerValue()->getValue());
                 this->ss << ")";
             } else {
+                this->ss << "(";
                 node.getLhs()->accept(*this);
                 this->ss << " * ";
                 node.getRhs()->accept(*this);
+                this->ss << ")";
             }
         } else {
+            this->ss << "(";
             node.getLhs()->accept(*this);
             this->ss << " * ";
             node.getRhs()->accept(*this);
+            this->ss << ")";
         }
     } else {
+        this->ss << "(";
         node.getLhs()->accept(*this);
         if (node.getOperation() == "%") {
             this->ss << " rem ";
@@ -290,6 +299,7 @@ void PrintCondition::visit(Arithmetic &node) {
             this->ss << " " << node.getOperation() << " ";
         }
         node.getRhs()->accept(*this);
+        this->ss << ")";
     }
     if (!subArithmeticOp) {
         arithmeticOp = false;
@@ -315,6 +325,7 @@ void PrintCondition::visit(Relational &node) {
         firstBit = sliceOp->getFirstBit();
         lastBit = sliceOp->getLastBit();
     }
+    this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
         this->ss << " = ";
@@ -324,6 +335,7 @@ void PrintCondition::visit(Relational &node) {
         this->ss << " " << node.getOperation() << " ";
     }
     node.getRhs()->accept(*this);
+    this->ss << ")";
     slice = false;
 }
 
