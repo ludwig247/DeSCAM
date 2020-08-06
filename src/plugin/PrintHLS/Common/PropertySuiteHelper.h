@@ -8,24 +8,24 @@
 #include "PropertySuite.h"
 #include "PropertyHelper.h"
 
-namespace SCAM { namespace HLSPlugin {
+namespace DESCAM { namespace HLSPlugin {
 
 class PropertySuiteHelper : public PropertySuite {
 
 public:
     explicit PropertySuiteHelper(PropertySuite const& propertySuite);
 
-    std::vector<PropertyHelper *> getWaitProperties() const;
-    std::vector<PropertyHelper *> getOperationProperties() const;
-    std::vector<Assignment *> getNotifyStatements(Property *property) const;
+    std::vector<std::shared_ptr<PropertyHelper>> getWaitProperties() const;
+    std::vector<std::shared_ptr<PropertyHelper>> getOperationProperties() const;
+    std::vector<Assignment *> getNotifyStatements(std::shared_ptr<Property> property) const;
     std::vector<Assignment *> getResetStatements();
 
 private:
     void addWaitProperties();
     void addOperationProperties();
 
-    std::vector<PropertyHelper *> waitProperties = {};
-    std::vector<PropertyHelper *> operationProperties = {};
+    std::vector<std::shared_ptr<PropertyHelper>> waitProperties = {};
+    std::vector<std::shared_ptr<PropertyHelper>> operationProperties = {};
 };
 
 }}

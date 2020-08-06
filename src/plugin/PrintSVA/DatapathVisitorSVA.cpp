@@ -3,8 +3,11 @@
 //
 
 #include "DatapathVisitorSVA.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::VariableOperand &node) {
+
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::VariableOperand &node) {
     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
     } else {
@@ -13,22 +16,22 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::VariableOperand &node) {
     if(!node.getVariable()->isConstant()) this->ss << "_0";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::IntegerValue &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::IntegerValue &node) {
     this->ss << node.getValue();
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::UnsignedValue &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::UnsignedValue &node) {
     this->ss << node.getValue();
 }
 
-void SCAM::DatapathVisitorSVA::visit(BoolValue &node) {
+void DESCAM::DatapathVisitorSVA::visit(BoolValue &node) {
     if (node.getValue())
         this->ss << "1";
     else
         this->ss << "0";
 }
 
-void SCAM::DatapathVisitorSVA::visit(EnumValue &node) {
+void DESCAM::DatapathVisitorSVA::visit(EnumValue &node) {
 /*    std::locale loc;
     std::string str = node.getEnumValue();
     for (char i : str)
@@ -36,7 +39,7 @@ void SCAM::DatapathVisitorSVA::visit(EnumValue &node) {
     this->ss << node.getEnumValue();
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::Assignment &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::Assignment &node) {
     if (node.getLhs() != nullptr) {
         node.getLhs()->accept(*this);
     }
@@ -47,7 +50,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Assignment &node) {
     }
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::Arithmetic &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     this->ss << " " + node.getOperation() << " ";
@@ -55,7 +58,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Arithmetic &node) {
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitorSVA::visit(Logical &node) {
+void DESCAM::DatapathVisitorSVA::visit(Logical &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
 
@@ -79,7 +82,7 @@ void SCAM::DatapathVisitorSVA::visit(Logical &node) {
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::Relational &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -91,7 +94,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Relational &node) {
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::Bitwise &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::Bitwise &node) {
 
     if (node.getOperation() == "<<") {
         this->ss << "(";
@@ -114,13 +117,13 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::Bitwise &node) {
             this->ss << " | ";
         } else if (node.getOperation() == "^") {
             this->ss << " ^ ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
 }
 
-void SCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
+void DESCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
     if (node.getOperation() == "not") {
         this->ss << "!";
     } else  {
@@ -132,29 +135,29 @@ void SCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::SyncSignal &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::SyncSignal &node) {
     this->ss << node.getPort()->getName() << "_sync";
     this->ss << "_0";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::DataSignalOperand &node) {
     PrintStmt::toString(&node);
     this->ss << node.getDataSignal()->getPort()->getName() << "_sig";
     if (node.getDataSignal()->isSubVar()) this->ss << "_" + node.getDataSignal()->getName();
     this->ss << "_0";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::Cast &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "int unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "int signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundExpr &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::CompoundExpr &node) {
     useParenthesesFlag = true;
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
@@ -163,7 +166,7 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundExpr &node) {
     }
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundValue &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::CompoundValue &node) {
     useParenthesesFlag = true;
     for (auto iterator = node.getValues().begin(); iterator != node.getValues().end(); ++iterator) {
         (*iterator).second->accept(*this);
@@ -171,12 +174,12 @@ void SCAM::DatapathVisitorSVA::visit(SCAM::CompoundValue &node) {
     }
 }
 
-std::string SCAM::DatapathVisitorSVA::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::DatapathVisitorSVA::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     DatapathVisitorSVA printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::DatapathVisitorSVA::visit(SCAM::Ternary &node) {
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::Ternary &node) {
     this->ss << "(";
     node.getCondition()->accept(*this);
     this->ss << "?";

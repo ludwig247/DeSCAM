@@ -1,9 +1,14 @@
 #include <iostream>
 #include <clang/AST/PrettyPrinter.h>
+#include <clang/Lex/Lexer.h>
+#include <GlobalUtilities.h>
 #include "FindPorts.h"
 #include "FindNewDatatype.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-namespace SCAM {
+
+namespace DESCAM {
     /*!
     * \brief Methods that checks wheter a subString is contained in a given String
      */
@@ -18,9 +23,10 @@ namespace SCAM {
     }
 
     //Constructor
-    FindPorts::FindPorts(clang::CXXRecordDecl *recordDecl, const clang::ASTContext &context) :
+    FindPorts::FindPorts(clang::CXXRecordDecl *recordDecl, const clang::ASTContext &context, clang::CompilerInstance &ci) :
             context(context),
-            pass(0) {
+            pass(0),
+            ci(ci){
         TraverseDecl(recordDecl);
         //recordDecl->dump();
     }
@@ -76,8 +82,9 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
                 else if (portTemplates.at(0) == "shared_out") {
                     this->outSharedPortMap.insert(std::make_pair(fieldDecl->getNameAsString(), portTemplates.at(1)));
                 }else{
-                    throw std::runtime_error("Unknown interface: " + portTemplates.at(0));
+                    TERMINATE("Unknown interface: " + portTemplates.at(0));
                 }
+                this->portLocationInfoMap.insert(std::make_pair(fieldDecl->getNameAsString(),DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl,ci)));
             }
         }
         return true;
@@ -101,9 +108,9 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
                 if(templateArgument.getKind() ==  clang::TemplateArgument::ArgKind::Expression){
                     clang::Expr * expr = templateArgument.getAsExpr();
                     if (const clang::IntegerLiteral * value = llvm::dyn_cast<clang::IntegerLiteral>(expr)) {
-                        //if(this->portTemplates.at(0) != "sc_uint") throw std::runtime_error("Type: " + this->portTemplates.at(0) + " is not allowed");
+                        //if(this->portTemplates.at(0) != "sc_uint") TERMINATE("Type: " + this->portTemplates.at(0) + " is not allowed");
                         this->portTemplates.push_back(std::to_string(value->getValue().getSExtValue()));
-                    }else throw std::runtime_error("Expr is not an integer");
+                    }else TERMINATE("Expr is not an integer");
                 }else{
                     this->recursiveTemplateVisitor(templateArgument.getAsType());
                 }
@@ -148,6 +155,10 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
 
     const std::map<std::string, std::string> &FindPorts::getMasterOutPortMap() const {
         return masterOutPortMap;
+    }
+
+    const std::map<std::string, DESCAM::LocationInfo> &FindPorts::getLocationInfoMap() const {
+        return this->portLocationInfoMap;
     }
 
 }

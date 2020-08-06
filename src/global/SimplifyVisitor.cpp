@@ -6,8 +6,11 @@
 #include "SimplifyVisitor.h"
 #include "NodePeekVisitor.h"
 #include "StmtNodeAlloc.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-namespace SCAM {
+
+namespace DESCAM {
 
     SimplifyVisitor::SimplifyVisitor(Stmt *node) : nodePointer(node) {
         Stmt *tempNodePointer;
@@ -91,7 +94,7 @@ namespace SCAM {
                 } else if (node.getOperation() == "%") {
                     result = lhs % rhs;
                 } else {
-                    throw std::runtime_error("Arithmetic: unimplemented operator");
+                    TERMINATE("Arithmetic: unimplemented operator");
                 }
                 UnsignedValue newUnsignedValueNode(result);
                 StmtNodeAlloc stmtNodeAlloc(newUnsignedValueNode, false);
@@ -112,7 +115,7 @@ namespace SCAM {
                 } else if (node.getOperation() == "%") {
                     result = lhs % rhs;
                 } else {
-                    throw std::runtime_error("Arithmetic: unimplemented operator");
+                    TERMINATE("Arithmetic: unimplemented operator");
                 }
                 IntegerValue newIntegerValueNode(result);
                 StmtNodeAlloc stmtNodeAlloc(newIntegerValueNode, false);
@@ -208,7 +211,7 @@ namespace SCAM {
             // Check if unimplemented optimization cases ever happen
             if (ExprVisitor::isConstVal((Expr *) simplifyVisitorLhs.getSimplifiedNode()) &&
                 ExprVisitor::isConstVal((Expr *) simplifyVisitorRhs.getSimplifiedNode())) {
-                throw std::runtime_error("Potential optimization case found for SimplifyVisitor in Arithmetic");
+                TERMINATE("Potential optimization case found for SimplifyVisitor in Arithmetic");
             }
 
             if (simplifyVisitorLhs.isNodeSimplified() || simplifyVisitorRhs.isNodeSimplified()) {
@@ -247,7 +250,7 @@ namespace SCAM {
                 } else if (node.getOperation() == "^") {
                     result = lhs ^ rhs;
                 } else {
-                    throw std::runtime_error("Bitwise: unimplemented operator");
+                    TERMINATE("Bitwise: unimplemented operator");
                 }
                 UnsignedValue newUnsignedValueNode(result);
                 StmtNodeAlloc stmtNodeAlloc(newUnsignedValueNode, false);
@@ -268,7 +271,7 @@ namespace SCAM {
                 } else if (node.getOperation() == "^") {
                     result = lhs ^ rhs;
                 } else {
-                    throw std::runtime_error("Bitwise: unimplemented operator");
+                    TERMINATE("Bitwise: unimplemented operator");
                 }
                 IntegerValue newIntegerValueNode(result);
                 StmtNodeAlloc stmtNodeAlloc(newIntegerValueNode, false);
@@ -291,7 +294,7 @@ namespace SCAM {
                 // (var << neg_val) or (var >> neg_val)
                 Bitwise bitwise((Expr *) simplifyVisitorLhs.getSimplifiedNode(), node.getOperation(),
                                 (Expr *) simplifyVisitorRhs.getSimplifiedNode());
-                throw std::runtime_error("Potential optimization case found for SimplifyVisitor in Bitwise:\n" +
+                TERMINATE("Potential optimization case found for SimplifyVisitor in Bitwise:\n" +
                                          PrintStmt::toString(&bitwise));
             }
         } else if ((node.getOperation() == "|") || (node.getOperation() == "&")) {
@@ -314,7 +317,7 @@ namespace SCAM {
                 ExprVisitor::isConstVal((Expr *) simplifyVisitorRhs.getSimplifiedNode())) {
                 Bitwise bitwise((Expr *) simplifyVisitorLhs.getSimplifiedNode(), node.getOperation(),
                                 (Expr *) simplifyVisitorRhs.getSimplifiedNode());
-                throw std::runtime_error("Potential optimization case found for SimplifyVisitor in Bitwise:\n" +
+                TERMINATE("Potential optimization case found for SimplifyVisitor in Bitwise:\n" +
                                          PrintStmt::toString(&bitwise));
             }
 
@@ -475,17 +478,17 @@ namespace SCAM {
     }
 
     void SimplifyVisitor::visit(class ArrayOperand &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     void SimplifyVisitor::visit(class CompoundExpr &node) {
 
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
         //TODO: need to implement
     }
 
     void SimplifyVisitor::visit(class ParamOperand &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     void SimplifyVisitor::visit(class Return &node) {
@@ -649,33 +652,33 @@ namespace SCAM {
     }
 
     void SimplifyVisitor::visit(class Notify &node) {
-        throw std::runtime_error("not implemented");
+        TERMINATE("not implemented");
 
     }
 
     void SimplifyVisitor::visit(class Wait &node) {
-        throw std::runtime_error("not implemented");
+        TERMINATE("not implemented");
 
     }
 
     void SimplifyVisitor::visit(class Peek &node) {
-        throw std::runtime_error("SimplifyVisitor::visit: Peek-not implemented");
+        TERMINATE("SimplifyVisitor::visit: Peek-not implemented");
     }
 
     void SimplifyVisitor::visit(class ArrayExpr &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     If *SimplifyVisitor::simplifyNode(CompoundExpr &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     If *SimplifyVisitor::simplifyNode(ArrayExpr &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     Ternary *SimplifyVisitor::simplifyNode(Ternary &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
 

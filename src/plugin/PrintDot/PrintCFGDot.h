@@ -18,7 +18,7 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
-    static std::string printCFG_Spurious(std::map<int, SCAM::CfgNode *> cfg, std::vector<SCAM::CfgNode *> importantStates, std::vector<SCAM::CfgNode *> spuriousPath);
+    static std::string printCFG_Spurious(std::map<int, DESCAM::CfgNode *> cfg, std::vector<DESCAM::CfgNode *> importantStates, std::vector<DESCAM::CfgNode *> spuriousPath);
 
 private:
     std::stringstream ss;

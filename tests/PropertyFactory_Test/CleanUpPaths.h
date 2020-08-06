@@ -16,7 +16,7 @@
 #include <PrintStmt.h>
 #include <CleanUpPaths.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 class CleanUpPaths_Test: public ::testing::Test{
 public:
     CleanUpPaths_Test():module(new Module("TestModule")){
@@ -34,14 +34,14 @@ public:
         Interface * anInterface2 = new Interface("blocking","in");
         Port * port2 = new Port("input_compound",anInterface2,DataTypes::getDataType("compound"));
         module->addPort(port2);
-        module->addVariable(new Variable("compound_var",SCAM::DataTypes::getDataType("compound"),SCAM::DataTypes::getDataType("compound")->getDefaultVal()));
-        module->addVariable(new Variable("unsigned_var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
-        module->addVariable(new Variable("unsigned_var2",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
-        module->addVariable(new Variable("integer_var",SCAM::DataTypes::getDataType("int"),new IntegerValue(0)));
+        module->addVariable(new Variable("compound_var",DESCAM::DataTypes::getDataType("compound"),DESCAM::DataTypes::getDataType("compound")->getDefaultVal()));
+        module->addVariable(new Variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
+        module->addVariable(new Variable("unsigned_var2",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
+        module->addVariable(new Variable("integer_var",DESCAM::DataTypes::getDataType("int"),new IntegerValue(0)));
     }
 
     virtual void TearDown() {}
-    SCAM::Module * module;
+    DESCAM::Module * module;
 
 };
 

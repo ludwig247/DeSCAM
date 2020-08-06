@@ -8,7 +8,7 @@
 #include <sstream>
 #include "Model.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class PrintMonitor {
     public:
@@ -24,7 +24,7 @@ namespace SCAM {
         std::vector<std::string> csm_states;
         std::vector<Operation2 *> operations;
         std::map<int, State2 *> stateMap;
-        std::map<std::string, SCAM::Variable *> stateVarMap;
+        std::map<std::string, DESCAM::Variable *> stateVarMap;
         std::stringstream ss;
 
         std::string printAssumptions(const std::vector<Expr *> &exprList);

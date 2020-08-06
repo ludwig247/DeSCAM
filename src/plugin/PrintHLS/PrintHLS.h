@@ -27,7 +27,7 @@ public:
     std::map<std::string, std::string> printModel(Model* model) override;
 
 private:
-    using hlsOptionEnum = SCAM::HLSPlugin::HLSOption;
+    using hlsOptionEnum = DESCAM::HLSPlugin::HLSOption;
 
     hlsOptionEnum hlsOption = hlsOptionEnum::MCO;;
 };

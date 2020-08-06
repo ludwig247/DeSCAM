@@ -10,13 +10,13 @@
 #include "Module.h"
 #include "ModuleInstance.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Model : public AbstractNode {
     public:
         Model();
 
-        Model(std::string name);
+        Model(std::string name, LocationInfo locationInfo = LocationInfo());
 
         virtual ~Model();
 

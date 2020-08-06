@@ -9,14 +9,14 @@
 #include "Operand.h"
 #include "Timepoint.h"
 
-namespace SCAM {
+namespace DESCAM {
     /**
      * \brief Points to a TimeExpr
      *
      */
     class TimePointOperand : public Operand {
     public:
-        explicit TimePointOperand(Timepoint * timepoint);
+        explicit TimePointOperand(Timepoint * timepoint, LocationInfo stmtLocationInfo = LocationInfo());
 
         Timepoint *getTimepoint() const;
 

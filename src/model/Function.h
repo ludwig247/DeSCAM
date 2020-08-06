@@ -11,10 +11,10 @@
 #include "AbstractNode.h"
 #include "DataType.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Function : public AbstractNode {
     public:
-        Function(std::string name, DataType *returnType, const std::map<std::string, Parameter *> &paramMap);
+        Function(std::string name, DataType *returnType, const std::map<std::string, Parameter *> &paramMap, LocationInfo = LocationInfo());
 
         Function(Function *function);
 
@@ -37,7 +37,7 @@ namespace SCAM {
         virtual void accept(AbstractVisitor &visitor);
 
     private:
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *> > > returnValueConditionList; //! Stores the return value for each possible sequence of inputs
+        std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *> > > returnValueConditionList; //! Stores the return value for each possible sequence of inputs
         DataType *returnType;
         std::vector<Stmt *> stmtList;
         std::map<std::string, Parameter *> paramMap;

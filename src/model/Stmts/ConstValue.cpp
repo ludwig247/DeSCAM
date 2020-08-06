@@ -4,6 +4,6 @@
 
 #include "ConstValue.h"
 
-SCAM::ConstValue::ConstValue(const SCAM::DataType *dataType) : Expr(dataType) {
+DESCAM::ConstValue::ConstValue(const DESCAM::DataType *dataType) : Expr(dataType) {
 
 }

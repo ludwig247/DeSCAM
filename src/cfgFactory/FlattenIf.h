@@ -12,7 +12,7 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
 
 /**
  * \brief Creates a new ITE-object
@@ -82,20 +82,20 @@ namespace SCAM {
     class FlattenIf {
 
     public:
-        FlattenIf(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode, std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap,
-                  std::map<SCAM::CfgBlock *, std::set<int>> &pathNodeMap);
+        FlattenIf(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endNode, std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap,
+                  std::map<DESCAM::CfgBlock *, std::set<int>> &pathNodeMap);
 
-        SCAM::ITE *getITE();
+        DESCAM::ITE *getITE();
 
-        void core(SCAM::CfgBlock *node);
+        void core(DESCAM::CfgBlock *node);
 
     private:
-        SCAM::CfgBlock *startNode;
-        SCAM::CfgBlock *endNode;
-        SCAM::ITE *ite; //! if-then-else as single scam::stmt
+        DESCAM::CfgBlock *startNode;
+        DESCAM::CfgBlock *endNode;
+        DESCAM::ITE *ite; //! if-then-else as single DESCAM::stmt
         int pass; //! True path: pass == 0 , Else path pass == 1
-        std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap; //! Map containg the exit node for each ite block
-        std::map<SCAM::CfgBlock *, std::set<int>> &pathNodeMap; //! Map containg an entry for each node between start and end
+        std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap; //! Map containg the exit node for each ite block
+        std::map<DESCAM::CfgBlock *, std::set<int>> &pathNodeMap; //! Map containg an entry for each node between start and end
 
     };
 

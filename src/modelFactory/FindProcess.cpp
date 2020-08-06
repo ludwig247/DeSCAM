@@ -3,8 +3,11 @@
 //
 
 #include "FindProcess.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-SCAM::FindProcess::FindProcess(clang::CXXRecordDecl* recordDecl):
+
+DESCAM::FindProcess::FindProcess(clang::CXXRecordDecl* recordDecl):
         recordDecl(recordDecl),
         processType(PROCESS_TYPE ::NONE),
         _constructorStmt (NULL),
@@ -32,7 +35,7 @@ SCAM::FindProcess::FindProcess(clang::CXXRecordDecl* recordDecl):
 
 }
 
-SCAM::FindProcess::~FindProcess() {
+DESCAM::FindProcess::~FindProcess() {
 
 }
 
@@ -40,7 +43,7 @@ SCAM::FindProcess::~FindProcess() {
  * 	Find the constructor definition, and the Stmts* that has the code for it.
  * 	set the _constructorStmt pointer.
  * 	*/
-bool SCAM::FindProcess::VisitCXXMethodDecl(clang::CXXMethodDecl *md) {
+bool DESCAM::FindProcess::VisitCXXMethodDecl(clang::CXXMethodDecl *md) {
 
     //Track all methods
     otherFunctions.push_back (md);
@@ -76,7 +79,7 @@ bool SCAM::FindProcess::VisitCXXMethodDecl(clang::CXXMethodDecl *md) {
 /*!
  * \brief second visitor that is called
  */
-bool SCAM::FindProcess::VisitMemberExpr(clang::MemberExpr *e) {
+bool DESCAM::FindProcess::VisitMemberExpr(clang::MemberExpr *e) {
     switch (_pass){
         case 2:{
             std::string	memberName = e->getMemberDecl ()->getNameAsString ();
@@ -99,13 +102,13 @@ bool SCAM::FindProcess::VisitMemberExpr(clang::MemberExpr *e) {
 /*!
  * \brief The third visitor that is called
  */
-bool SCAM::FindProcess::VisitStringLiteral(clang::StringLiteral *s){
+bool DESCAM::FindProcess::VisitStringLiteral(clang::StringLiteral *s){
     switch (_pass){
         case 2:{
             //Create new entry for process
             std::string processName = s->getString();
-            auto innerEntry = std::pair<clang::CXXMethodDecl*, SCAM::PROCESS_TYPE>(nullptr, processType);
-            auto entry = std::pair<std::string, std::pair<clang::CXXMethodDecl*, SCAM::PROCESS_TYPE> >(processName,innerEntry);
+            auto innerEntry = std::pair<clang::CXXMethodDecl*, DESCAM::PROCESS_TYPE>(nullptr, processType);
+            auto entry = std::pair<std::string, std::pair<clang::CXXMethodDecl*, DESCAM::PROCESS_TYPE> >(processName,innerEntry);
 
             /// Create the object to handle multiple entry functions.
             if (processType != 0){
@@ -119,22 +122,22 @@ bool SCAM::FindProcess::VisitStringLiteral(clang::StringLiteral *s){
 }
 
 
-const std::map<std::string, std::pair<clang::CXXMethodDecl *, SCAM::PROCESS_TYPE>> & SCAM::FindProcess::getProcessMap() {
+const std::map<std::string, std::pair<clang::CXXMethodDecl *, DESCAM::PROCESS_TYPE>> & DESCAM::FindProcess::getProcessMap() {
     return this->processMap;
 }
 
-bool SCAM::FindProcess::isValidProcess() const {
+bool DESCAM::FindProcess::isValidProcess() const {
     if(this->processMap.size() == 1){
         auto process = (*this->processMap.begin());
-        if(process.second.second == SCAM::PROCESS_TYPE::THREAD){
+        if(process.second.second == DESCAM::PROCESS_TYPE::THREAD){
             return true;
-        }else throw std::runtime_error("Process: "+process.first+ " is not an SC_THREAD");
-    }else throw std::runtime_error(" Multiple proccess defined. Only one allowed");
+        }else TERMINATE("Process: "+process.first+ " is not an SC_THREAD");
+    }else TERMINATE(" Multiple proccess defined. Only one allowed");
 }
 
 
-clang::CXXMethodDecl* SCAM::FindProcess::getProcess() const {
+clang::CXXMethodDecl* DESCAM::FindProcess::getProcess() const {
     if(this->processMap.size() == 1){
         return this->processMap.begin()->second.first;
-    }else throw std::runtime_error(" Zero or >2 proccesses defined. Exactly one process is required");
+    }else TERMINATE(" Zero or >2 proccesses defined. Exactly one process is required");
 }

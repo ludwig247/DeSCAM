@@ -18,17 +18,17 @@
 #include <NodePeekVisitor.h>
 
 
-namespace SCAM{
+namespace DESCAM{
 
     /**
      * \brief: This class encapsulate the entire process of analyzing the module's CFG and generating the operational properties.
      *
      * \input:
-     *          - SCAM::Module * module;
-     *          - std::map<int, SCAM::CfgNode *> cfg;
+     *          - DESCAM::Module * module;
+     *          - std::map<int, DESCAM::CfgNode *> cfg;
      * \output:
-     *          - std::vector<std::vector<SCAM::CfgNode *> > operations;
-     *          - std::map<std::string, SCAM::State2 *> statesMap;
+     *          - std::vector<std::vector<DESCAM::CfgNode *> > operations;
+     *          - std::map<std::string, DESCAM::State2 *> statesMap;
      *
      * Steps:
      *      1- Check sanity:
@@ -50,34 +50,34 @@ namespace SCAM{
 
     class FindOperations {
     public:
-        explicit FindOperations(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module * module);
+        explicit FindOperations(std::map<int, DESCAM::CfgNode *> controlFlowMap, DESCAM::Module * module);
 
         virtual ~FindOperations() = default;
 
-        const std::map<std::string, SCAM::State *> &getStatesMap() const;
-        const std::vector<std::vector<SCAM::CfgNode *> >& getOperations() const;
+        const std::map<std::string, DESCAM::State *> &getStatesMap() const;
+        const std::vector<std::vector<DESCAM::CfgNode *> >& getOperations() const;
 
     private:
-        std::map<int, SCAM::CfgNode *> cfg;
-        SCAM::CfgNode * whileNode;
-        std::vector<SCAM::CfgNode *> importantStates;
-        std::vector<std::vector<SCAM::CfgNode *> > operations;
-        std::map<std::string, SCAM::State *> statesMap;
-        SCAM::Module * module;
-        std::map<SCAM::Port *, bool> slaveInOrder;
-        std::map<SCAM::Port *, bool> slaveOutOrder;
+        std::map<int, DESCAM::CfgNode *> cfg;
+        DESCAM::CfgNode * whileNode;
+        std::vector<DESCAM::CfgNode *> importantStates;
+        std::vector<std::vector<DESCAM::CfgNode *> > operations;
+        std::map<std::string, DESCAM::State *> statesMap;
+        DESCAM::Module * module;
+        std::map<DESCAM::Port *, bool> slaveInOrder;
+        std::map<DESCAM::Port *, bool> slaveOutOrder;
 
         bool new_important_state;
         bool slaveModule;
         void checkSanity();
         void findInitialImportantStates();
         void processCFG();
-        void processSpurious(std::vector<SCAM::CfgNode *> spuriousPath);
-        void processSpuriousSlave(const std::vector<SCAM::CfgNode *>& spuriousPath);
-        std::string printCFG_Spurious(std::vector<SCAM::CfgNode *> spuriousPath);
+        void processSpurious(std::vector<DESCAM::CfgNode *> spuriousPath);
+        void processSpuriousSlave(const std::vector<DESCAM::CfgNode *>& spuriousPath);
+        std::string printCFG_Spurious(std::vector<DESCAM::CfgNode *> spuriousPath);
         void checkForMasters();
         void checkForSlaves();
-        bool checkSlavesOrder(const std::vector<SCAM::CfgNode *>& pathSlaves);
+        bool checkSlavesOrder(const std::vector<DESCAM::CfgNode *>& pathSlaves);
     };
 
 }

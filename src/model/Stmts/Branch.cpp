@@ -5,7 +5,7 @@
 #include <PrintStmt.h>
 #include "Branch.h"
 
-std::ostream &SCAM::Branch::print(std::ostream &ostream) const {
+std::ostream &DESCAM::Branch::print(std::ostream &ostream) const {
     ostream << PrintStmt::toString(this);
     return ostream;
 }

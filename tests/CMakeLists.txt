@@ -10,7 +10,7 @@ add_subdirectory(Stmts_Test)
 add_subdirectory(Optimizer_Test)
 
 add_subdirectory(operationFactory)
-
+add_subdirectory(global)
 
 #find_file(
 #        TEST_FILE

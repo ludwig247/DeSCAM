@@ -5,49 +5,49 @@
 
 #include "Communication.h"
 
-SCAM::Communication::Communication(Port *port, bool is_non_blocking_access) :
+DESCAM::Communication::Communication(Port *port, bool is_non_blocking_access) :
         port(port),
         is_non_blocking_access(is_non_blocking_access) {
 
 }
 
-bool SCAM::Communication::isRead() const {
+bool DESCAM::Communication::isRead() const {
     return port->getInterface()->getDirection() == "in";
 }
 
-bool SCAM::Communication::isWrite() const {
+bool DESCAM::Communication::isWrite() const {
     return port->getInterface()->getDirection() == "out";
 }
 
-bool SCAM::Communication::isBlocking() const {
+bool DESCAM::Communication::isBlocking() const {
     return port->getInterface()->getName() == "blocking";
 }
 
-SCAM::Port *SCAM::Communication::getPort() const {
+DESCAM::Port *DESCAM::Communication::getPort() const {
     return port;
 }
 
-bool SCAM::Communication::isShared() const {
+bool DESCAM::Communication::isShared() const {
     return port->getInterface()->getName() == "shared";
 }
 
-bool SCAM::Communication::isMaster() const {
+bool DESCAM::Communication::isMaster() const {
     return port->getInterface()->getName() == "master";
 }
 
 
-bool SCAM::Communication::isSlave() const {
+bool DESCAM::Communication::isSlave() const {
     return port->getInterface()->getName() == "slave";
 }
 
-bool SCAM::Communication::isNonBlockingAccess() const {
+bool DESCAM::Communication::isNonBlockingAccess() const {
     return is_non_blocking_access;
 }
 
-const std::string &SCAM::Communication::getStateName() const {
+const std::string &DESCAM::Communication::getStateName() const {
     return stateName;
 }
 
-void SCAM::Communication::setStateName(const std::string &stateName) {
+void DESCAM::Communication::setStateName(const std::string &stateName) {
     Communication::stateName = stateName;
 }

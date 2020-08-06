@@ -13,7 +13,7 @@
 #include "DataType.h"
 #include "Variable.h"
 
-namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper{
+namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper{
 
     class Utilities {
     public:

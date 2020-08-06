@@ -9,21 +9,21 @@
 #include <map>
 #include "CfgBlock.h"
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief Class that enumarates all paths between start and endnode
      */
     class EnumartePathsVisitor {
     public:
-        EnumartePathsVisitor(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode);
+        EnumartePathsVisitor(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endNode);
 
         const std::set<int> &getNodeList() const;
 
-        void core(SCAM::CfgBlock *node, std::set<int> path);
+        void core(DESCAM::CfgBlock *node, std::set<int> path);
 
     private:
-        SCAM::CfgBlock *startNode;
-        SCAM::CfgBlock *endNode;
+        DESCAM::CfgBlock *startNode;
+        DESCAM::CfgBlock *endNode;
         int pathCnt;
 
         std::set<int> visitedNodes;

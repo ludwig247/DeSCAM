@@ -15,7 +15,7 @@
 #include "SyncSignal.h"
 #include "Notify.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class PropertyMacro : public AbstractMacro {
 

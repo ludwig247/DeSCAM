@@ -12,7 +12,7 @@
 #include "PluginFactory.h"
 #include "PropertySuiteHelper.h"
 
-namespace SCAM { namespace HLSPlugin {
+namespace DESCAM { namespace HLSPlugin {
 
     struct optional {
         bool valid = false;
@@ -22,7 +22,7 @@ namespace SCAM { namespace HLSPlugin {
     class OptimizerHLS {
 
     public:
-        OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper, Module* module);
+        OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module);
         ~OptimizerHLS() = default;
 
         bool hasOutputReg(DataSignal* dataSignal);

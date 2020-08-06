@@ -4,7 +4,7 @@
 
 #include "AbstractMacro.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor

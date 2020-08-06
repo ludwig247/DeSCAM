@@ -7,7 +7,7 @@
 
 #include <clang/AST/Type.h>
 
-namespace SCAM{
+namespace DESCAM{
 
 
     /*!

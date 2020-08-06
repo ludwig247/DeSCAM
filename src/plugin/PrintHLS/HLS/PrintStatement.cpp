@@ -5,7 +5,7 @@
 #include "PrintStatement.h"
 #include "NodePeekVisitor.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace DESCAM::HLSPlugin::HLS;
 
 PrintStatement::PrintStatement(
         Stmt *stmt,

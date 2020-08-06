@@ -11,7 +11,7 @@
 #include "Behavior/Operation.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief Class contains the finite state machine of a module
      */
@@ -24,9 +24,9 @@ namespace SCAM {
         virtual ~FSM();
 
         //SectionMap
-        void setSectionMap(std::map<std::string, std::vector<SCAM::Stmt *>> sectionMap);
+        void setSectionMap(std::map<std::string, std::vector<DESCAM::Stmt *>> sectionMap);
 
-        const std::map<std::string, std::vector<SCAM::Stmt *>> &getSectionMap();
+        const std::map<std::string, std::vector<DESCAM::Stmt *>> &getSectionMap();
 
         //Sections
         Variable *getSectionVariable() const; //TODO delete
@@ -55,7 +55,7 @@ namespace SCAM {
         Variable *sectionVariable; //! Section that is currently executed
         Variable *nextSectionVariable; //! Section that is executed next
 
-        std::map<std::string, std::vector<SCAM::Stmt *>> sectionMap; //!Sections: a section exists for each state of the FSM with the stmts within the section
+        std::map<std::string, std::vector<DESCAM::Stmt *>> sectionMap; //!Sections: a section exists for each state of the FSM with the stmts within the section
         std::map<int, State *> stateMap; //! Stores a map of the abstract states and the connecting operations
         std::map<Operation *, Path *> operationPathMap;
     };

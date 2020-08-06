@@ -17,7 +17,7 @@
 #include <Stmts/DataSignalOperand.h>
 
 
-using namespace SCAM;
+using namespace DESCAM;
 class OperationState_Test: public ::testing::Test{
 public:
     OperationState_Test(){
@@ -61,14 +61,14 @@ public:
 
         //Now we need to create the operations
         //Common to all operations
-        SCAM::SyncSignal * syncSignal= new SyncSignal(blocking_input);
+        DESCAM::SyncSignal * syncSignal= new SyncSignal(blocking_input);
         Variable * val= new Variable("val",DataTypes::getDataType("int"),DataTypes::getDataType("int")->getDefaultVal());
         VariableOperand * variableOperand = new VariableOperand(val);
 
         //Blocking_input if synch is high -> transition to state2
         op_read_to_master= new Operation(state,state2); //state and nextstate
         //Assumption: sync
-        SCAM::Relational * synch = new Relational(syncSignal,"==",new BoolValue(true));
+        DESCAM::Relational * synch = new Relational(syncSignal,"==",new BoolValue(true));
         op_read_to_master->addAssumption(synch);
         //Commitment: val = val;
         //Now we need a variable, each variable has a name, datatype and initialvalue
@@ -82,7 +82,7 @@ public:
         op_wait= new Operation(state,state); //state and nextstate
         op_wait->setWait(true);
         //Assumption: !sync
-        SCAM::Relational  * notSynch= new Relational(syncSignal,"==",new BoolValue(false));
+        DESCAM::Relational  * notSynch= new Relational(syncSignal,"==",new BoolValue(false));
         op_wait->addAssumption(notSynch);
         //Commitment: val = val;
         //Now we need a variable, each variable has a name, datatype and initialvalue
@@ -105,7 +105,7 @@ public:
     virtual void TearDown() {}
     Port * master_output;
     Port * blocking_input;
-    SCAM::Expr * writeValue;
+    DESCAM::Expr * writeValue;
     State * state;
     State * state2;
     Operation * op_wait;

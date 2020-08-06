@@ -5,8 +5,11 @@
 #include "HLS.h"
 #include "NodePeekVisitor.h"
 #include "PrintFunction.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+
+using namespace DESCAM::HLSPlugin::HLS;
 
 HLS::HLS(
         HLSOption hlsOption,
@@ -212,7 +215,7 @@ void HLS::registerVariables()
     }
 
     for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
-        auto resetValue = getResetValue(notifySignal);
+        auto resetValue = getResetValue(notifySignal.get());
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue.valid ? resetValue.value : "false") << ";\n";
     }
@@ -428,7 +431,7 @@ void HLS::visit(Function& node)
     }
     this->ss << ") {\n";
     if (node.getReturnValueConditionList().empty()) {
-        throw std::runtime_error("No return value for function "+node.getName());
+        TERMINATE("No return value for function "+node.getName());
     }
     auto numberOfBranches = node.getReturnValueConditionList().size();
     for (auto& returnValue : node.getReturnValueConditionList()) {

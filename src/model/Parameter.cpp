@@ -4,16 +4,16 @@
 
 #include "Parameter.h"
 
-//SCAM::DataType *SCAM::Parameter::getDataType() const {
+//DESCAM::DataType *DESCAM::Parameter::getDataType() const {
 //    return dataType;
 //}
 
-void SCAM::Parameter::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::Parameter::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-SCAM::Parameter::Parameter(std::string name, SCAM::DataType *dataType, SCAM::ConstValue *initialValue,
-                           SCAM::VariableTemplate<SCAM::Parameter> *parent) : VariableTemplate(name, dataType, initialValue, parent) {
+DESCAM::Parameter::Parameter(std::string name, DESCAM::DataType *dataType, DESCAM::ConstValue *initialValue,
+                           DESCAM::VariableTemplate<DESCAM::Parameter> *parent, LocationInfo locationInfo) : VariableTemplate(name, dataType, initialValue, parent, locationInfo) {
 
 }
 
