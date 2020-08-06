@@ -60,6 +60,7 @@ endfunction(create_directory)
 
 macro(update_list)
 #    message(STATUS "LIST: ${EXAMPLE_NAMES_LIST}")
+
     set(CMAKELISTS "${CMAKE_SOURCE_DIR}/example/add_subdirectory.cmake")
     file(STRINGS "${CMAKELISTS}" ADDED_EXAMPLES)
 

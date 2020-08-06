@@ -23,11 +23,11 @@ endforeach()
 string(REGEX REPLACE "^;" "" INCLUDE_HEADER ${INCLUDE_HEADER})
 configure_file (
         "${CMAKE_SOURCE_DIR}/example/add_example/templates/tests.h.in"
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests.list"
 )
 
 file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/*.h")
 #message(STATUS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)
 list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)
 string(REPLACE ";" "\n" FUNC_TESTS "${FUNC_TESTS}")
-file(WRITE functionality_tests.h "${FUNC_TESTS}")
+file(WRITE functionality_tests.list "${FUNC_TESTS}")
