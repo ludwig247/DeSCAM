@@ -2,7 +2,7 @@ project(PrintITL_Test_Run C CXX)
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_executable(PrintITL_Test_Run tests.cpp TestCases/ModulesTernary.h)
+add_executable(PrintITL_Test_Run tests.cpp)
 target_compile_options(PrintITL_Test_Run PRIVATE -fPIC -O2 )
 
 #TODO: factory should not be included
