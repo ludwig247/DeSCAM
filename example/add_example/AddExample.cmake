@@ -106,7 +106,7 @@ macro(update_list)
         endif()
     endforeach()
 
-string(REGEX REPLACE "^;" "" MODIFIED ${MODIFIED})
+#string(REGEX REPLACE "^;" "" MODIFIED ${MODIFIED})
 #message(STATUS "This is: \n" "${MODIFIED}")
 
 #   Remakes the CMakeLists.txt, updating the add_subdirectory-list
