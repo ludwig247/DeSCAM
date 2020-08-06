@@ -7,7 +7,7 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-#include "CPU_Interfaces.h"
+#include "env/CPU_Interfaces.h"
 
 #include "../../RISCV_commons/Utilities.h"
 #include "../../RISCV_commons/Memory_Interfaces.h"
