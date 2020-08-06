@@ -4,7 +4,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 ${LLVM_CXX_FLAGS} ")
 file(MAKE_DIRECTORY ./json_output_files/ ./error_files/)
 
-get_directory_property(EXAMPLE_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/example/add_example/
+
+get_directory_property(EXAMPLE_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/example/
+
                         DEFINITION EXAMPLE_NAMES_LIST)
 
 configure_file (
