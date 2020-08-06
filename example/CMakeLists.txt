@@ -1,3 +1,2 @@
-add_subdirectory(add_example)
-add_subdirectory(Bus)
-
+include(Example.cmake)
+include(add_subdirectory.cmake)
