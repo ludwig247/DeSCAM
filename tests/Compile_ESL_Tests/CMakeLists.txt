@@ -21,7 +21,7 @@ add_dependencies(Compile_ESL_tests Compile_ESL_Test_Run)
 add_custom_target(Compile_ESL_Test_Run
         ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/JSON.cmake
                     DEPENDS add_subdirectories
-                            ${CMAKE_SOURCE_DIR}/example/add_example/CMakeLists.txt
+                            ${CMAKE_SOURCE_DIR}/example/add_subdirectory.cmake
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     VERBATIM)
 
