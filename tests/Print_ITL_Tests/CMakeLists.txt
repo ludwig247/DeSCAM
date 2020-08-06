@@ -23,7 +23,7 @@ endforeach()
 
 configure_file (
         "${CMAKE_SOURCE_DIR}/example/add_example/templates/tests.h.in"
-        "tests.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests.h"
 )
 
 file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/*.h")
