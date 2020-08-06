@@ -1,4 +1,4 @@
-project(PrintITL_Test_Run C CXX)
+project(PrintITL_Test_Run CXX)
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
