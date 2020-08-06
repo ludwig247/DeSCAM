@@ -67,9 +67,58 @@ constraint no_unaligned_case :=
     cpu1/if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/out_addr_o[1]  == 0;
 end constraint;
 
+constraint data_gnt_rvalid :=
+    (!cpu1/data_gnt_i || cpu1/data_gnt_i && !cpu1/data_rvalid_i) &&
+    (!cpu2/data_gnt_i || cpu2/data_gnt_i && !cpu2/data_rvalid_i);
+end constraint;
+
 constraint instr_mem:=
     (!cpu1/instr_req_o || (cpu1/instr_req_o && cpu1/instr_gnt_i && next(cpu1/instr_rvalid_i))) &&
     (!cpu2/instr_req_o || (cpu2/instr_req_o && cpu2/instr_gnt_i && next(cpu2/instr_rvalid_i)));
+end constraint;
+
+constraint no_data_misaligned:=
+    cpu1/data_misaligned == 0 &&
+    cpu2/data_misaligned == 0;
+end constraint;
+
+macro unsigned max_wait_dmem := 2 ; end macro;
+
+constraint data_gnt:=
+    (!cpu1/data_gnt_i || cpu1/data_gnt_i && foreach i in 1 .. max_wait_dmem: !next(cpu1/data_gnt_i,i); end foreach) &&
+    (!cpu2/data_gnt_i || cpu2/data_gnt_i && foreach i in 1 .. max_wait_dmem: !next(cpu2/data_gnt_i,i); end foreach);
+end constraint;
+
+constraint bounded_wait_dmem_gnt_1 := disable iff: !rst_ni;
+    if (cpu1/data_req_o)
+        exists i in 0..(max_wait_dmem-1):
+            next(cpu1/data_gnt_i,i);
+        end exists
+    endif;
+end constraint;
+
+constraint bounded_wait_dmem_gnt_2 := disable iff: !rst_ni;
+    if (cpu2/data_req_o)
+        exists i in 0..(max_wait_dmem-1):
+            next(cpu2/data_gnt_i,i);
+        end exists
+    endif;
+end constraint;
+
+constraint bounded_wait_dmem_1 := disable iff: !rst_ni;
+    if (cpu1/data_gnt_i)
+        exists i in 1..(max_wait_dmem):
+            next(cpu1/data_rvalid_i,i);
+        end exists
+    endif;
+end constraint;
+
+constraint bounded_wait_dmem_2 := disable iff: !rst_ni;
+    if (cpu2/data_gnt_i)
+        exists i in 1..(max_wait_dmem):
+            next(cpu2/data_rvalid_i,i);
+        end exists
+    endif;
 end constraint;
 
 // Avoid that fetched instructions are loaded into ID stage after an arbitrary time interval.

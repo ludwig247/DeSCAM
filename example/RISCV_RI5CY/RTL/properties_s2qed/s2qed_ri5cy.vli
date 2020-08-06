@@ -1,5 +1,5 @@
-macro boolean INSTR_RESTRICTION (unsigned instr_imem) :=
-	instr_imem[6:0] == 7'h33 &&                                     //opcode 
+macro boolean INSTR_ADD (unsigned instr_imem) :=
+	instr_imem[6:0] == 7'h33 &&                                    //opcode 
 	(instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4) &&       //rd
 	instr_imem[14:12] == 3'h0 &&                                   //func3
 	instr_imem[19:15] <= 5'd4 &&                                   //rs1
@@ -9,19 +9,48 @@ end macro;
 
 constraint CPU2_allowed_instr :=
 	!((getInstrType(cpu2/instr_rdata_i) == instr_unknown));
-	//getEncType(cpu2/instr_rdata_i) == enc_r &&
-	//INSTR_RESTRICTION(cpu2/instr_rdata_i);
 end constraint;
 
-property S2QED_ARITH;
+constraint CPU1_reg_restriction := 
+	case (getEncType(cpu1/instr_rdata_i))
+        enc_b, 
+		enc_s:		cpu1/instr_rdata_i[19:15] <= 5'd4 && cpu1/instr_rdata_i[24:20] <= 5'd4; 		//rs1 and rs2
+		enc_i_i,
+		enc_i_j,
+		enc_i_l:	cpu1/instr_rdata_i[19:15] <= 5'd4 && cpu1/instr_rdata_i[11:7] <= 5'd4; 			//rs1 and rd
+		enc_j,
+		enc_u:		cpu1/instr_rdata_i[11:7] <= 5'd4;												//rd
+		enc_r:		cpu1/instr_rdata_i[19:15] <= 5'd4 && cpu1/instr_rdata_i[24:20] <= 5'd4 && cpu1/instr_rdata_i[11:7] <= 5'd4;			
+        default:    false;
+    endcase;
+end constraint;
+
+constraint CPU2_reg_restriction := 
+	case (getEncType(cpu2/instr_rdata_i))
+        enc_b, 
+		enc_s:		cpu2/instr_rdata_i[19:15] <= 5'd4 && cpu2/instr_rdata_i[24:20] <= 5'd4; 		//rs1 and rs2
+		enc_i_i,
+		enc_i_j,
+		enc_i_l:	cpu2/instr_rdata_i[19:15] <= 5'd4 && cpu2/instr_rdata_i[11:7] <= 5'd4; 			//rs1 and rd
+		enc_j,
+		enc_u:		cpu2/instr_rdata_i[11:7] <= 5'd4;												//rd
+		enc_r:		cpu2/instr_rdata_i[19:15] <= 5'd4 && cpu2/instr_rdata_i[24:20] <= 5'd4 && cpu2/instr_rdata_i[11:7] <= 5'd4;			
+        default:    false;
+    endcase;
+end constraint;
+
+
+property S2QED_ADD;//2h40
 dependencies: 
     no_reset,
     in_out_constraints,
     no_unaligned_case,
 	no_hwlp_case,
 	instr_mem,
+	CPU1_reg_restriction,
+	CPU2_reg_restriction,
 	CPU2_no_prefetching,
-	CPU2_allowed_instr; 
+	CPU2_allowed_instr;
 for timepoints:
 	t_if_i1 = t,
 	t_idex_i1 = t_if_i1+1,
@@ -30,16 +59,19 @@ for timepoints:
 
 	t_if_i2 = t,
 	//t_idex_i2 = t_if_i2+1..5 waits_for (cpu2/data_req_o==0 || cpu2/data_rvalid_i),
-	t_idex_i2 = t_if_i2+1..5 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_idex_i2 = t_if_i2+1..2 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
 	t_wb_i2 = t_idex_i2+1,
 	t_done_i2 = t_wb_i2+1;
 freeze:
+	//PC register
+	cpu1_pcIf_at_t_idex_1 = cpu1/pc_if@t_idex_i1,
+
 	//Flushing
     cpu1_flush_sig_at_t_idex_i1 = cpu1_flush_sig@t_idex_i1,
 
     //regfile
     regfile_i1_at_t_wb_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_wb_i1,
-    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
 
 	//----------------
 	// rd_at_t = getRdAddr(cpu1/instr_rdata_i)@t,
@@ -48,25 +80,27 @@ freeze:
 	// rs2_at_t = getRs2Addr(instr_at_t)@t,
 	// oper1_at_t_id = REGISTER_CPU1(rs1_at_t)@t_idex_i1,
 	// oper2_at_t_id = REGISTER_CPU1(rs2_at_t)@t_idex_i1;
-
-
 assume:
 	// constraints on CPU1
 	at t_if_i1: start_state;
     at t_idex_i1: empty_pipeline;
 
+	during [t_if_i1 + 1, t_done_i1]: cpu1/instr_rdata_i == 32'h13; //NOP's after t
+
     // same instruction for IUV
 	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
-    at t: getEncType(cpu1/instr_rdata_i) == enc_r;
+	at t: INSTR_ADD(cpu1/instr_rdata_i);
+    //at t: getEncType(cpu1/instr_rdata_i) == enc_r;
 	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
 
 	// QED consistent registers
 	//at t_wb_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_wb_i1;
 	at t_wb_i2: foreach r in 0..31: 
-					(REGISTER_CPU1(r) == REGISTER_CPU2(r) || (cpu2/regfile_we_wb && cpu2/regfile_waddr_fw_wb_o == resize(r,6))); 
+					(regfile_i1_at_t_wb_i1[r] == REGISTER_CPU2(r) || (cpu2/regfile_we_wb && cpu2/regfile_waddr_fw_wb_o == resize(r,6))); 
 				end foreach;
 	at t_wb_i2: foreach r in 0..31: 
-					(!cpu2/regfile_we_wb || (cpu2/regfile_we_wb && cpu2/regfile_wdata == REGISTER_CPU1(r))); 
+					(!cpu2/regfile_we_wb || (cpu2/regfile_we_wb && cpu2/regfile_wdata == regfile_i1_at_t_wb_i1[r])); 
 				end foreach;
 
 	//Flushing
@@ -81,10 +115,18 @@ assume:
 
 
 	//------------------
-	//at t: INSTR_RESTRICTION(cpu1/instr_rdata_i);
-	//at t: getEncType(cpu2/instr_rdata_id) == enc_i_l;
+	// at t: INSTR_ADD(cpu1/instr_rdata_i);
+	// at t: getEncType(cpu2/instr_rdata_id) == enc_i_l;
+	// during[t+1, t_done_i2]: (INSTR_ADD(cpu2/instr_rdata_i) || INSTR_LW(cpu2/instr_rdata_i));
+	// at t-1: (INSTR_ADD(cpu2/instr_rdata_i) || INSTR_LW(cpu2/instr_rdata_i));
+	// at t_idex_i2: cpu2/regfile_alu_waddr_fw == 5'h1;
+	// at t_idex_i2: cpu2/regfile_alu_we_fw == 1;
+	// at t_idex_i2: cpu2/regfile_alu_wdata_fw == 32'h1;
+
 	
 prove:
+	// PC register
+	at t_idex_i2: cpu2/pc_if == cpu1_pcIf_at_t_idex_1;
 	// general registers
 	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
 	//at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem[rd_at_t] == regfile_i1_at_t_done_i1[rd_at_t];
