@@ -22,6 +22,10 @@
 * **libtinfo**
     * sudo apt-get libtinfo-dev 
   
+## Installation 
+Run the install.sh script within the root folder. 
+Make sure all the mentioned package are available. 
+
 ## Packages installed by DeSCAM
 
 Package |   Version
@@ -30,10 +34,3 @@ gtest   |   1.8.0
 systemc |   2.3.1
 z3      |   4.8.6
 llvm    |   3.5.4
-
-
-## Installation 
-
-Run the install.sh script within the root folder. 
-
-
