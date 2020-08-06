@@ -3,12 +3,9 @@
 //
 
 #include "DatapathVisitorSVA.h"
-#include "FatalError.h"
-#include "Logger/Logger.h"
-
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::VariableOperand &node) {
-    if (node.getVariable()->isSubVar()) {
+     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
     } else {
         this->ss << node.getVariable()->getName();
@@ -117,7 +114,7 @@ void DESCAM::DatapathVisitorSVA::visit(DESCAM::Bitwise &node) {
             this->ss << " | ";
         } else if (node.getOperation() == "^") {
             this->ss << " ^ ";
-        } else TERMINATE("Should not get here");
+        } else throw std::runtime_error("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
@@ -152,7 +149,7 @@ void DESCAM::DatapathVisitorSVA::visit(DESCAM::Cast &node) {
         this->ss << "int unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "int signed(";
-    } else TERMINATE("Unsupported type for cast");
+    } else throw std::runtime_error("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }
@@ -186,5 +183,14 @@ void DESCAM::DatapathVisitorSVA::visit(DESCAM::Ternary &node) {
     node.getTrueExpr()->accept(*this);
     this->ss << ":";
     node.getFalseExpr()->accept(*this);
+    this->ss << ")";
+}
+
+void DESCAM::DatapathVisitorSVA::visit(DESCAM::ArrayOperand &node) {
+    useParenthesesFlag = true;
+    this->ss << node.getArrayOperand()->getOperandName();
+    this->ss << "_0";
+    this->ss << "(";
+    node.getIdx()->accept(*this);
     this->ss << ")";
 }

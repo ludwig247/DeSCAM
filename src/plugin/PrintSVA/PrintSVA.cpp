@@ -8,17 +8,14 @@
 #include "Config.h"
 #include "ConditionVisitorSVA.h"
 #include "DatapathVisitorSVA.h"
-#include "FatalError.h"
-#include "Logger/Logger.h"
-
 
 std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     this->model = node;
     pluginOutput.insert(std::make_pair("ipc.sva", Text_ipc()));
-
     for (auto &module: node->getModules()) {
         this->module = module.second;
-        pluginOutput.insert(std::make_pair(module.first + ".sva", Text_body()));
+        pluginOutput.insert(std::make_pair(module.first + ".sva", properties()));
+        pluginOutput.insert(std::make_pair(module.first + "_macros.sva", macros()));
         pluginOutput.insert(std::make_pair(module.first + "_functions.sva", functions()));
     }
 
@@ -31,12 +28,10 @@ std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
 std::map<std::string, std::string> PrintSVA::printModule(DESCAM::Module *node) {
 
     this->module = node;
-
-    pluginOutput.insert(std::make_pair(node->getName() + ".sva", Text_body()));
+    pluginOutput.insert(std::make_pair(node->getName() + ".sva", properties()));
     std::string funString = functions();
     if (funString != "")
         pluginOutput.insert(std::make_pair(node->getName() + "_functions.sva", funString));
-
     return pluginOutput;
 }
 
@@ -80,7 +75,15 @@ std::string PrintSVA::Text_ipc() {
     return result.str();
 }
 
-std::string PrintSVA::Text_body() {
+std::string PrintSVA::macros() {
+    std::stringstream result;
+    result
+            << signals() << registers() << states() << "\n\n";
+    return result.str();
+}
+
+
+std::string PrintSVA::properties() {
     std::stringstream result;
     result
             << dataTypes() << "\n"
@@ -93,7 +96,7 @@ std::string PrintSVA::Text_body() {
             << "input reset;\n\n"
             << "//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT\n"
             << "default clocking default_clk @(posedge " << this->module->getName() << ".clk); endclocking\n"
-            << signals() << registers() << states() << "\n\n"
+            << "`include \"" << this->module->getName() << "_macros.sva\"\n\n"
             << "////////////////////////////////////\n"
             << "//////////// Operations ////////////\n"
             << "////////////////////////////////////\n"
@@ -130,7 +133,7 @@ std::string PrintSVA::functions() {
         ss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            TERMINATE(" No return value for function " + function.first + "()");
+            throw std::runtime_error(" No return value for function " + function.first + "()");
         auto j = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";
@@ -181,7 +184,7 @@ std::string PrintSVA::dataTypes() {
 }
 
 std::string PrintSVA::signals() {
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<PropertySuite>  ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "\n// SYNC AND NOTIFY SIGNALS (1-cycle macros) //\n";
@@ -205,13 +208,13 @@ std::string PrintSVA::signals() {
 }
 
 std::string PrintSVA::registers() {
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// VISIBLE REGISTERS //\n";
     for (auto vr: ps->getVisibleRegisters()) {
-        bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        //bool skip = vr->isSubVar() && vr->getParentDataType()->isArrayType();
+        bool skip = false;
         if (!skip) {
-
             ss << "function " << convertDataType(vr->getDataType()) << " " << vr->getFullName("_") << ";\n";
             if (vr->isCompoundType()) ss << "//";
             ss << "\t" << vr->getFullName("_");
@@ -226,7 +229,7 @@ std::string PrintSVA::registers() {
 }
 
 std::string PrintSVA::states() {
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "\n// STATES //\n";
     for (auto state: ps->getStates()) {
@@ -287,7 +290,7 @@ std::string PrintSVA::temporalExpr(TemporalExpr *temporalExpr) {
 }
 
 std::string PrintSVA::reset_operation() {
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
     ss << "property reset_p;\n"
        << "\treset_sequence |->\n";
@@ -306,20 +309,26 @@ std::string PrintSVA::reset_operation() {
 
 std::string PrintSVA::operations() {
 
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+
+    std::shared_ptr<PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 
     // Operations
     for (auto op : ps->getProperties()) {
         ss << "property " << op->getName() << "_p(o);\n";
-
+        if(op->getName() == "data_in_1_1") {
+            std::cout << "yes" << std::endl;
+        }
         if (!op->getFreezeSignals().empty()) {
             for (auto f : op->getFreezeSignals()) {
+                std::cout << f.first->getFullName("_") << std::endl;
                 ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
             }
             for (auto f : op->getFreezeSignals()) {
-                ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
+                if(f.first->isSubVar() && f.first->getParentDataType()->isArrayType()){
+                    ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getParentName() << "("  << f.first->getSubVarName() <<")) and\n";
+                }else ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
             }
         }
 
@@ -394,7 +403,7 @@ std::string PrintSVA::globalFunctions() {
         globss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            TERMINATE(" No return value for function " + function.first + "()");
+            throw std::runtime_error(" No return value for function " + function.first + "()");
         auto j = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             globss << "\t";
