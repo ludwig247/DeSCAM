@@ -93,8 +93,8 @@ class ITLTestExamples : public ITLTest {};
 class ITLTestFunctionality : public ITLTest {};
 
 INSTANTIATE_TEST_CASE_P(
-        DISABLED_Examples,
-//        Examples,
+//        DISABLED_Examples,
+        Examples,
         ITLTestExamples,
         testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/tests.h")),
         ITLTest::PrintToStringParamName()
