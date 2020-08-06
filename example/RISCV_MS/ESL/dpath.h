@@ -8,7 +8,7 @@
 #include "systemc.h"
 
 #include "Interfaces.h"
-#include "CPU_Interfaces.h"
+#include "env/CPU_Interfaces.h"
 #include "Defines.h"
 
 struct Dpath : public sc_module {
