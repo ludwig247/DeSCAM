@@ -22,7 +22,6 @@ set(AST_FILES
 
 add_library(Model SHARED ${AST_FILES})
 
-
 add_subdirectory(propertySuite)
 add_subdirectory(Behavior)
 add_subdirectory(Stmts)

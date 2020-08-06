@@ -9,7 +9,6 @@
 #include <sstream>
 
 #include "Model.h"
-
 #include "CommandLineParameter.h"
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"

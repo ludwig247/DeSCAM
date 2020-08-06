@@ -6,9 +6,11 @@
 #define PROJECT_OPERATIONSTATE_TEST_H
 
 #include <gtest/gtest.h>
-#include <operationGraph/State.h>
+//#include <operationGraph/State.h>
+#include <State.h>
 #include <Stmts/BoolValue.h>
-#include <operationGraph/Operation.h>
+//#include <operationGraph/Operation.h>
+#include <Operation.h>
 #include <Stmts/Relational.h>
 #include <Stmts/SyncSignal.h>
 #include <Stmts/VariableOperand.h>
@@ -137,13 +139,13 @@ TEST_F(OperationState_Test,OperationReadToMaster){
     ASSERT_TRUE(!op_master_to_blocking->isWait());
 }
 
-
-TEST_F(OperationState_Test,PrintStateMap){
+//No such Functions
+/*TEST_F(OperationState_Test,PrintStateMap){
     //NO tests her
     std::cout << state->printOutgoingOperations() << std::endl;
     std::cout << state2->printOutgoingOperations() << std::endl;
 
     ASSERT_TRUE(true);
-}
+}*/
 
 #endif //PROJECT_OPERATIONSTATE_TEST_H
