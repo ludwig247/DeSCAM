@@ -45,7 +45,7 @@ std::string SynthesisScripts::synthesisScript() {
     ss << "set_part  {xcvu9p-flga2104-2-i}\n";
     ss << "create_clock -period 20\n\n";
     ss << "# Insert directives\n";
-    ss << "source directives/" << moduleName << "_directives.tcl" << "\n\n";
+    ss << "source ./" << moduleName << "_directives.tcl" << "\n\n";
     ss << "# Synthesis\n";
     ss << "csynth_design\n\n";
     ss << "exit";
