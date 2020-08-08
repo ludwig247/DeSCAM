@@ -218,7 +218,7 @@ std::string VHDLWrapper::printArchitecture() {
     ss << "library ieee;\n";
     ss << "use ieee.std_logic_1164.all;\n";
     ss << "use ieee.numeric_std.all;\n";
-    ss << "use work.operations;\n";
+    ss << "use work." + moduleName + "_operations;\n";
     ss << "use work." + moduleName + "_types.all;\n\n";
 
     entity(ss);
