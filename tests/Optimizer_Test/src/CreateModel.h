@@ -15,26 +15,26 @@
 #include <Optimizer/Optimizer.h>
 
 
-static std::vector<SCAM::Module *> createModules(std::string file_path) {
+static std::vector<DESCAM::Module *> createModules(std::string file_path) {
 
-    SCAM::ModelGlobal::createModel(2, std::string(SCAM_HOME"/bin/SCAM ").c_str(), file_path.c_str());
+    DESCAM::ModelGlobal::createModel(2, "DESCAM", file_path.c_str(),true);
 
-    std::vector<SCAM::Module *> modulesVector;
-    for (const auto &module: SCAM::ModelGlobal::getModel()->getModules()) {
+    std::vector<DESCAM::Module *> modulesVector;
+    for (const auto &module: DESCAM::ModelGlobal::getModel()->getModules()) {
         modulesVector.push_back(module.second);
     }
     return modulesVector;
 }
 
-static std::vector<SCAM::Model *>
-createModel(std::string file_path, const std::set<std::string> &optimizeOptionsSet = {}) {
+static std::vector<DESCAM::Model *>
+createModel(std::string file_path, const std::set<std::string> &optimizeOptionsSet = {}, bool isWrapper = true) {
     if (!optimizeOptionsSet.empty()) {
         CommandLineParameter::setOptimizeOptionsSet(optimizeOptionsSet);
     }
-    SCAM::ModelGlobal::createModel(2, std::string(SCAM_HOME"/bin/SCAM ").c_str(), file_path.c_str());
+    DESCAM::ModelGlobal::createModel(2, "DESCAM", file_path.c_str(), isWrapper);
 
-    std::vector<SCAM::Model *> model;
-    model.push_back(SCAM::ModelGlobal::getModel());
+    std::vector<DESCAM::Model *> model;
+    model.push_back(DESCAM::ModelGlobal::getModel());
     return model;
 }
 

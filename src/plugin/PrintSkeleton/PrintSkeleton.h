@@ -20,16 +20,16 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
-    std::pair<std::string, std::string> printModule(SCAM::Module *module);
+    std::pair<std::string, std::string> printModule(DESCAM::Module *module);
 
 
     std::pair<std::string, std::string> printGlobalTypes(Model *node);
 
-    std::pair<std::string, std::string> printLocalTypes(SCAM::Module *module);
+    std::pair<std::string, std::string> printLocalTypes(DESCAM::Module *module);
 
 private:
     //std::stringstream ss;
-    SCAM::Module *module;
+    DESCAM::Module *module;
     enum {
         VHDL, SV
     } language;
@@ -49,11 +49,11 @@ private:
 
     void printPackageHeader(std::stringstream &ss, const std::string &packageName);
 
-    void printEnumType(std::stringstream &ss, const SCAM::DataType *enumType);
+    void printEnumType(std::stringstream &ss, const DESCAM::DataType *enumType);
 
-    void printCompoundType(std::stringstream &ss, const SCAM::DataType *compoundType);
+    void printCompoundType(std::stringstream &ss, const DESCAM::DataType *compoundType);
 
-    void printArrayType(std::stringstream &ss, const SCAM::DataType *arrayType);
+    void printArrayType(std::stringstream &ss, const DESCAM::DataType *arrayType);
 
     void printPackageFooter(std::stringstream &ss, const std::string &packageName);
 
@@ -75,7 +75,7 @@ private:
 
     std::string getDirectionWrapper(const std::string &direction);
 
-    std::string getDataTypeWrapper(const SCAM::DataType *dataType);
+    std::string getDataTypeWrapper(const DESCAM::DataType *dataType);
 
     std::string booleanWrapper(bool value);
 

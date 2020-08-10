@@ -13,7 +13,7 @@
 #include <PrintStmt.h>
 #include "z3++.h"
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class ExprTranslator_Test : public ::testing::Test {
 protected:
@@ -65,54 +65,54 @@ protected:
     virtual void TearDown() {}
     Port * port;
     UnsignedValue *unsignedValue;
-    SCAM::Assignment *unsignedAssignment;
-    SCAM::Arithmetic *unsignedAdd;
-    SCAM::Arithmetic *unsignedDiv;
-    SCAM::VariableOperand *unsignedVariableOperand;
+    DESCAM::Assignment *unsignedAssignment;
+    DESCAM::Arithmetic *unsignedAdd;
+    DESCAM::Arithmetic *unsignedDiv;
+    DESCAM::VariableOperand *unsignedVariableOperand;
     z3::context context;
     ExprTranslator exprTranslator;
 };
 
 TEST_F(ExprTranslator_Test, TranslateUnsignedValue) {
     z3::expr expr = exprTranslator.translate(unsignedValue);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
 
 TEST_F(ExprTranslator_Test, TranslateUnsignedVariable) {
     z3::expr expr = exprTranslator.translate(unsignedVariableOperand);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
 
 TEST_F(ExprTranslator_Test, TranslateUnsignedAdd) {
     z3::expr expr = exprTranslator.translate(unsignedAdd);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
 
 TEST_F(ExprTranslator_Test, TranslateUnsignedAdd_Const) {
     z3::expr expr = exprTranslator.translate(new Arithmetic(unsignedValue, "+", unsignedValue));
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
 
 TEST_F(ExprTranslator_Test, TranslateUnsignedDiv) {
     z3::expr expr = exprTranslator.translate(unsignedDiv);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
 
 TEST_F(ExprTranslator_Test, TranslateUnsignedAssignment) {
     z3::expr expr = exprTranslator.translate(unsignedAssignment->getRhs());
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
 
 TEST_F(ExprTranslator_Test, ReminderSimple) {
     Arithmetic * unsignedRem = new Arithmetic(unsignedValue, "%", unsignedValue);
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(1337 % 1337)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -121,7 +121,7 @@ TEST_F(ExprTranslator_Test, ReminderAdd) {
     Arithmetic * test = new Arithmetic(new UnsignedValue(3),"+",new UnsignedValue(1));
     Arithmetic * unsignedRem = new Arithmetic(test, "%", new UnsignedValue(2));
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("((3 + 1) % 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -129,7 +129,7 @@ TEST_F(ExprTranslator_Test, ReminderAdd) {
 TEST_F(ExprTranslator_Test, ReminderAdd2) {
     Arithmetic * unsignedRem = new Arithmetic(unsignedVariableOperand, "%", new UnsignedValue(2));
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(unsigned_var % 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -138,7 +138,7 @@ TEST_F(ExprTranslator_Test, ReminderSub) {
     Arithmetic * test = new Arithmetic(new UnsignedValue(3),"-",new UnsignedValue(1));
     Arithmetic * unsignedRem = new Arithmetic(test, "%", new UnsignedValue(2));
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("((3 - 1) % 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -148,7 +148,7 @@ TEST_F(ExprTranslator_Test, ReminderMul) {
     Arithmetic * test = new Arithmetic(new UnsignedValue(3),"*",new UnsignedValue(1));
     Arithmetic * unsignedRem = new Arithmetic(test, "%", new UnsignedValue(2));
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("((3 * 1) % 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -157,7 +157,7 @@ TEST_F(ExprTranslator_Test, ReminderDiv) {
     Arithmetic * test = new Arithmetic(new UnsignedValue(3),"/",new UnsignedValue(1));
     Arithmetic * unsignedRem = new Arithmetic(test, "%", new UnsignedValue(2));
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("((3 / 1) % 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -167,7 +167,7 @@ TEST_F(ExprTranslator_Test, SignedReminderDiv) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("signed_var"));
     Arithmetic * unsignedRem = new Arithmetic(new IntegerValue(-3), "%", variableOperand );
     z3::expr expr = exprTranslator.translate(unsignedRem);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(-3 % signed_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("int")) << newExpr->getDataType()->getName() << " != int";
 }
@@ -177,7 +177,7 @@ TEST_F(ExprTranslator_Test, BitwiseAnd) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("signed_var"));
     Bitwise * bitwise = new Bitwise(new IntegerValue(3), "&", new IntegerValue(0) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(3 & 0)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("int")) << newExpr->getDataType()->getName() << " != int";
 }
@@ -186,7 +186,7 @@ TEST_F(ExprTranslator_Test, BitwiseOr) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("signed_var"));
     Bitwise * bitwise = new Bitwise(new IntegerValue(3), "|", new IntegerValue(0) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(3 | 0)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("int")) << newExpr->getDataType()->getName() << " != int";
 }
@@ -194,7 +194,7 @@ TEST_F(ExprTranslator_Test, BitwiseOr2) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(new UnsignedValue(3), "|", new UnsignedValue(0) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(3 | 0)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -204,7 +204,7 @@ TEST_F(ExprTranslator_Test, ShiftLoglicLef) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(new UnsignedValue(4), "<<", new UnsignedValue(2) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(4 << 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -214,7 +214,7 @@ TEST_F(ExprTranslator_Test, ShiftLoglicLef2) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(variableOperand, "<<", new UnsignedValue(2) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(unsigned_var << 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -223,7 +223,7 @@ TEST_F(ExprTranslator_Test, ShiftLoglicLef3) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(new UnsignedValue(4), "<<", variableOperand );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(4 << unsigned_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -232,7 +232,7 @@ TEST_F(ExprTranslator_Test, ShiftLoglicRight) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(new UnsignedValue(2), ">>", new UnsignedValue(4) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(2 >> 4)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -241,7 +241,7 @@ TEST_F(ExprTranslator_Test, ShiftLoglicRight2) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(variableOperand, ">>", new UnsignedValue(2) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(unsigned_var >> 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -250,7 +250,7 @@ TEST_F(ExprTranslator_Test, ShiftLoglicRight3) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Bitwise * bitwise = new Bitwise(new UnsignedValue(4), ">>", variableOperand );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(4 >> unsigned_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != UnsignedValue";
 }
@@ -285,7 +285,7 @@ TEST_F(ExprTranslator_Test, ShiftRightArithmetic) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("signed_var"));
     Bitwise * bitwise = new Bitwise(variableOperand, ">>", new IntegerValue(2) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(signed_var >> 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("int")) << newExpr->getDataType()->getName() << " != int";
 }
@@ -295,7 +295,7 @@ TEST_F(ExprTranslator_Test, Xor) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("signed_var"));
     Bitwise * bitwise = new Bitwise(variableOperand, "^", new IntegerValue(2) );
     z3::expr expr = exprTranslator.translate(bitwise);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(signed_var ^ 2)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("int")) << newExpr->getDataType()->getName() << " != int";
 }
@@ -304,7 +304,7 @@ TEST_F(ExprTranslator_Test, Multi) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("signed_var"));
     Arithmetic * arithmetic = new Arithmetic(new IntegerValue(-1), "*", variableOperand );
     z3::expr expr = exprTranslator.translate(arithmetic);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(-1 * signed_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("int")) << newExpr->getDataType()->getName() << " != int";
 }
@@ -317,7 +317,7 @@ TEST_F(ExprTranslator_Test, BitwiseWith0) {
     Arithmetic * arithmetic = new Arithmetic(bitwise, "-", new UnsignedValue(1) );
 
     z3::expr expr = exprTranslator.translate(arithmetic);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("((1 << 1) - 1)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("unsigned")) << newExpr->getDataType()->getName() << " != unsigned";
 }
@@ -327,7 +327,7 @@ TEST_F(ExprTranslator_Test, unsignedGreaterThen) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Relational * relational = new Relational(new UnsignedValue(0),">",variableOperand);
     z3::expr expr = exprTranslator.translate(relational);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(0 > unsigned_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("bool")) << newExpr->getDataType()->getName() << " != bool";
 }
@@ -336,7 +336,7 @@ TEST_F(ExprTranslator_Test, unsignedGreaterEqThen) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Relational * relational = new Relational(new UnsignedValue(0),">=",variableOperand);
     z3::expr expr = exprTranslator.translate(relational);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(0 >= unsigned_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("bool")) << newExpr->getDataType()->getName() << " != bool";
 }
@@ -345,7 +345,7 @@ TEST_F(ExprTranslator_Test, unsignedLessThen) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Relational * relational = new Relational(new UnsignedValue(0),"<",variableOperand);
     z3::expr expr = exprTranslator.translate(relational);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(0 < unsigned_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("bool")) << newExpr->getDataType()->getName() << " != bool";
 }
@@ -354,7 +354,7 @@ TEST_F(ExprTranslator_Test, unsignedLessEqThen) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("unsigned_var"));
     Relational * relational = new Relational(new UnsignedValue(0),"<=",variableOperand);
     z3::expr expr = exprTranslator.translate(relational);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("(0 <= unsigned_var)",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), DataTypes::getDataType("bool")) << newExpr->getDataType()->getName() << " != bool";
 }
@@ -362,7 +362,7 @@ TEST_F(ExprTranslator_Test, unsignedLessEqThen) {
 TEST_F(ExprTranslator_Test, array1) {
     VariableOperand * variableOperand = new VariableOperand(module.getVariable("arrayVar")->getSubVar("0"));
     z3::expr expr = exprTranslator.translate(variableOperand);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
     ASSERT_EQ("arrayVar[0]",PrintStmt::toString(newExpr));
     ASSERT_EQ(newExpr->getDataType(), variableOperand->getDataType()) << newExpr->getDataType()->getName() << " != " << variableOperand->getDataType()->getName();
 }
@@ -372,7 +372,7 @@ TEST_F(ExprTranslator_Test, array2) {
     VariableOperand * variableOperand2 = new VariableOperand(module.getVariable("arrayVar")->getSubVar("0"));
     Relational * relational = new Relational(variableOperand,"<=",variableOperand2);
     z3::expr expr = exprTranslator.translate(relational);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
 
     ASSERT_TRUE((*relational) == (*newExpr));
     ASSERT_EQ(newExpr->getDataType(), relational->getDataType()) << newExpr->getDataType()->getName() << " != " << relational->getDataType()->getName();
@@ -383,7 +383,7 @@ TEST_F(ExprTranslator_Test, array3) {
     VariableOperand * variableOperand2 = new VariableOperand(module.getVariable("arrayVar")->getSubVar("0"));
     Relational * relational = new Relational(variableOperand,"<=",variableOperand2);
     z3::expr expr = exprTranslator.translate(relational);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
 
     ASSERT_TRUE((*relational) == (*newExpr));
     ASSERT_EQ(newExpr->getDataType(), relational->getDataType()) << newExpr->getDataType()->getName() << " != " << relational->getDataType()->getName();
@@ -400,7 +400,7 @@ TEST_F(ExprTranslator_Test, CompareOperatorTerminal) {
     //Terminal true ? x : y -> return x
     auto compare = new Ternary(boolTrue,valTrue, valFalse);
     z3::expr expr = exprTranslator.translate(compare);
-    SCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
+    DESCAM::Expr *newExpr = exprTranslator.translate(expr, &module);
 
     std::cout << *newExpr << std::endl;
 

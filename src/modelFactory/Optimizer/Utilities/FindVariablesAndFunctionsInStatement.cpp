@@ -5,31 +5,31 @@
 #include "FindVariablesAndFunctionsInStatement.h"
 
 
-SCAM::FindVariablesAndFunctionsInStatement::FindVariablesAndFunctionsInStatement(SCAM::Stmt *stmt,const std::set<std::string>& readVariablesSet) : hasFunction(false), hasReadVariables(false),isVariableFromFunctionParameters(false), isVariableFromFunctionBody(false), readVariablesSet(readVariablesSet) {
+DESCAM::FindVariablesAndFunctionsInStatement::FindVariablesAndFunctionsInStatement(DESCAM::Stmt *stmt,const std::set<std::string>& readVariablesSet) : hasFunction(false), hasReadVariables(false),isVariableFromFunctionParameters(false), isVariableFromFunctionBody(false), readVariablesSet(readVariablesSet) {
     if (stmt) {
         stmt->accept(*this);
     }
 }
 
-SCAM::FindVariablesAndFunctionsInStatement::FindVariablesAndFunctionsInStatement(SCAM::Expr *expr,const std::set<std::string>& readVariablesSet) : hasFunction(false), hasReadVariables(false),isVariableFromFunctionParameters(false), isVariableFromFunctionBody(false) {
+DESCAM::FindVariablesAndFunctionsInStatement::FindVariablesAndFunctionsInStatement(DESCAM::Expr *expr,const std::set<std::string>& readVariablesSet) : hasFunction(false), hasReadVariables(false),isVariableFromFunctionParameters(false), isVariableFromFunctionBody(false) {
     if (expr) {
         expr->accept(*this);
     }
 }
 
-const std::set<std::string> &SCAM::FindVariablesAndFunctionsInStatement::getVariablesInStmtSet() const {
+const std::set<std::string> &DESCAM::FindVariablesAndFunctionsInStatement::getVariablesInStmtSet() const {
     return this->variablesInStmtSet;
 }
 
-bool SCAM::FindVariablesAndFunctionsInStatement::hasFunctions() {
+bool DESCAM::FindVariablesAndFunctionsInStatement::hasFunctions() {
     return this->hasFunction;
 }
 
-const std::map<std::string, SCAM::FunctionOperand *> &SCAM::FindVariablesAndFunctionsInStatement::getFunctionsInStmtMap() const {
+const std::map<std::string, DESCAM::FunctionOperand *> &DESCAM::FindVariablesAndFunctionsInStatement::getFunctionsInStmtMap() const {
     return this->functionsInStmtMap;
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::VariableOperand &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::VariableOperand &node) {
     if(!this->isVariableFromFunctionBody) {
         this->variablesInStmtSet.insert(node.getVariable()->getFullName());
         this->varOpInStmtSet.insert(&node);
@@ -40,54 +40,54 @@ void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::VariableOperand &no
     }
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Assignment &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Assignment &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::UnaryExpr &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::UnaryExpr &node) {
     node.getExpr()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::If &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::If &node) {
     node.getConditionStmt()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Read &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Read &node) {
     node.getVariableOperand()->accept(*this);
     node.getStatusOperand()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Write &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Write &node) {
     node.getValue()->accept(*this);
     node.getStatusOperand()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Arithmetic &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Arithmetic &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Logical &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Logical &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Relational &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Relational &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Bitwise &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Bitwise &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Cast &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Cast &node) {
     node.getSubExpr()->accept(*this);
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::FunctionOperand &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::FunctionOperand &node) {
     this->hasFunction = true;
     this->functionsInStmtMap.insert(std::make_pair(node.getFunction()->getName(), &node));
     this->isVariableFromFunctionParameters = true;
@@ -102,32 +102,32 @@ void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::FunctionOperand &no
     this->isVariableFromFunctionBody = false;
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::ArrayOperand &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::ArrayOperand &node) {
     node.getIdx()->accept(*this);
     this->variablesInStmtSet.insert(node.getArrayOperand()->getOperandName());
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::CompoundExpr &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::CompoundExpr &node) {
     for (auto subVar: node.getValueMap()) {
         subVar.second->accept(*this);
     }
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::ArrayExpr &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::ArrayExpr &node) {
     for (auto subVar: node.getValueMap()) {
         subVar.second->accept(*this);
     }
 }
 
-const std::set<SCAM::VariableOperand *> &SCAM::FindVariablesAndFunctionsInStatement::getVarOpInStmtSet() const {
+const std::set<DESCAM::VariableOperand *> &DESCAM::FindVariablesAndFunctionsInStatement::getVarOpInStmtSet() const {
     return this->varOpInStmtSet;
 }
 
-bool SCAM::FindVariablesAndFunctionsInStatement::hasReadVariable() {
+bool DESCAM::FindVariablesAndFunctionsInStatement::hasReadVariable() {
     return this->hasReadVariables;
 }
 
-void SCAM::FindVariablesAndFunctionsInStatement::visit(SCAM::Ternary &node) {
+void DESCAM::FindVariablesAndFunctionsInStatement::visit(DESCAM::Ternary &node) {
     node.getCondition()->accept(*this);
     node.getTrueExpr()->accept(*this);
     node.getFalseExpr()->accept(*this);

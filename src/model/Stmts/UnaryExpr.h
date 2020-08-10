@@ -9,10 +9,10 @@
 #include "Expr.h"
 #include <string>
 
-namespace SCAM {
-    class UnaryExpr : public SCAM::Expr {
+namespace DESCAM {
+    class UnaryExpr : public DESCAM::Expr {
     public:
-        UnaryExpr(std::string operation, Expr *stmt);
+        UnaryExpr(std::string operation, Expr *stmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getExpr();

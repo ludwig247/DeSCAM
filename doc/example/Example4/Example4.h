@@ -41,14 +41,14 @@ struct Example4 : public sc_module {
         while (true) {
             section = nextsection;
             if(section == idle){
-                report_out->write(false);
-                succ = value_in->nb_read(var);
+                report_out->master_write(false);
+                value_in->try_read(var, succ);
                 nextsection = reading;
             }
             if(section == reading) {
-                if(var == 0) master_in1->read(value);
+                if(var == 0) master_in1->master_read(value);
                 if(value == true){
-                    report_out->write(true);
+                    report_out->master_write(true);
                 }
                 nextsection = idle;
             }

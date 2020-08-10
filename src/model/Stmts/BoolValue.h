@@ -7,11 +7,11 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class BoolValue : public ConstValue {
     public:
-        BoolValue(bool value);
+        BoolValue(bool value, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         bool getValue();

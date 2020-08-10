@@ -7,7 +7,7 @@ PYTHON3="python3" #NO SLASH AT THE END
 
 #DELETE install files
 rm -rf $SCAM_HOME/install/tmp
-
+rm -rf $SCAM_HOME/build
 echo -e "\e[30;48;5;82mDone!\e[0m";
 
 

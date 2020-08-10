@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "State.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     int State::state_cnt = 0;
 
@@ -37,7 +37,7 @@ namespace SCAM {
         return this->incomingOperationsList;
     }
 
-    SCAM::Port *State::getCommunicationPort() const {
+    DESCAM::Port *State::getCommunicationPort() const {
         if (this->commStmt != nullptr)
             return this->commStmt->getPort();
         return nullptr;
@@ -57,24 +57,24 @@ namespace SCAM {
         this->wait = true;
     }
 
-    void State::setCommunicationStmt(SCAM::Communication *commStmt_arg) {
+    void State::setCommunicationStmt(DESCAM::Communication *commStmt_arg) {
         this->commStmt = commStmt_arg;
     }
 
     //ADDERS
-    void State::addIncomingOperation(SCAM::Operation *incomingOperation) {
+    void State::addIncomingOperation(DESCAM::Operation *incomingOperation) {
         this->incomingOperationsList.push_back(incomingOperation);
     }
 
-    void State::addOutgoingOperation(SCAM::Operation *outgoingOperation) {
+    void State::addOutgoingOperation(DESCAM::Operation *outgoingOperation) {
         this->outgoingOperationsList.push_back(outgoingOperation);
     }
 
-    void State::removeIncomingOperation(SCAM::Operation *incomingOperation) {
+    void State::removeIncomingOperation(DESCAM::Operation *incomingOperation) {
         this->incomingOperationsList.erase(std::find(this->incomingOperationsList.begin(), this->incomingOperationsList.end(), incomingOperation));
     }
 
-    void State::removeOutgoingOperation(SCAM::Operation *outgoingOperation) {
+    void State::removeOutgoingOperation(DESCAM::Operation *outgoingOperation) {
         this->outgoingOperationsList.erase(std::find(this->outgoingOperationsList.begin(), this->outgoingOperationsList.end(), outgoingOperation));
     }
 

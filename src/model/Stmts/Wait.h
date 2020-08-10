@@ -7,10 +7,10 @@
 
 #include "Stmt.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Wait : public Stmt {
     public:
-        Wait();
+        Wait(LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Wait() = default;
 

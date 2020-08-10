@@ -8,7 +8,7 @@
 
 #include "Optimizer_Test/src/CreateModel.h"
 
-class FindCFGPaths_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class FindCFGPaths_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -20,7 +20,7 @@ INSTANTIATE_TEST_CASE_P(Basic, FindCFGPaths_Test, ::testing::ValuesIn(createModu
 TEST_P(FindCFGPaths_Test, find_paths) {
     auto module = GetParam();
     int entryNode = 0;
-    SCAM::FindCfgPaths findCfgPaths(module->getCFG(), entryNode);
+    DESCAM::FindCfgPaths findCfgPaths(module->getCFG(), entryNode);
     ASSERT_FALSE(findCfgPaths.getPathsMap().empty()) << "Paths map for module " << module->getName() << " is empty\n";
 
     std::stringstream paths;

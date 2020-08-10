@@ -5,12 +5,14 @@
 #include <iostream>
 #include "FindInterface.h"
 #include "ModelFactory.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 //Constructor
 /*!
  * \brief portTemplateList = { sc_port, sc_fifo_in, bool } extract port describition from list
  */
-SCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateList):
+DESCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateList):
         blocking(false){
     _direction="unkown";
     _interface="unkown";
@@ -24,7 +26,7 @@ SCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateL
         _interface="sc_out";
     }
     else  if(portTemplateList.front() == "sc_port"){
-        if(portTemplateList.size() != 3) throw std::runtime_error("Too few or too many portTemplates Arguments");
+        if(portTemplateList.size() != 3) TERMINATE("Too few or too many portTemplates Arguments");
         if(portTemplateList.at(1) == "sc_fifo_in_if"){
             _direction="in";
             _interface="sc_fifo_in_if";
@@ -43,17 +45,17 @@ SCAM::FindInterface::FindInterface(const std::vector<std::string> &portTemplateL
 }
 
 //Destructor
-SCAM::FindInterface::~FindInterface() {
+DESCAM::FindInterface::~FindInterface() {
 }
 
 
 //GETTER
 //TODO: Add error in case of wrong statement
-std::string SCAM::FindInterface::getDirection() {
+std::string DESCAM::FindInterface::getDirection() {
     return _direction;
 }
 
-std::string SCAM::FindInterface::getInterface() {
+std::string DESCAM::FindInterface::getInterface() {
     return _interface;
 }
 

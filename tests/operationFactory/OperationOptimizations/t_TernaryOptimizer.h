@@ -19,7 +19,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    SCAM::Module * module = nullptr;
+    DESCAM::Module * module = nullptr;
 };
 
 

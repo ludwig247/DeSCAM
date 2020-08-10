@@ -3,19 +3,22 @@
 //
 
 #include "Peek.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::Peek::Peek(SCAM::Port *port) :
+DESCAM::Peek::Peek(DESCAM::Port *port, LocationInfo stmtLocationInfo) :
         Expr(DataTypes::getDataType("bool")),
         Communication(port, true) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-void SCAM::Peek::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Peek::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-bool SCAM::Peek::operator==(const Stmt &other) const {
+bool DESCAM::Peek::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekSyncSignal(const_cast<Stmt *>(&other)) == nullptr) return false; //TODO
     auto thisPtr = (Peek *) this;

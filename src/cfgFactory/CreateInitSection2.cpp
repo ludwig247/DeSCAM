@@ -7,9 +7,9 @@
 #include "CreateInitSection2.h"
 
 
-std::vector<SCAM::Stmt *> SCAM::CreateInitSection2::createInitSection2(const SCAM::Module *module) {
+std::vector<DESCAM::Stmt *> DESCAM::CreateInitSection2::createInitSection2(const DESCAM::Module *module) {
     //Create empty StmtList
-    std::vector<SCAM::Stmt *> initList;
+    std::vector<DESCAM::Stmt *> initList;
 
     //Add nextSection assignement;
     auto nextSectionVariable = module->getFSM()->getNextSectionVariable();

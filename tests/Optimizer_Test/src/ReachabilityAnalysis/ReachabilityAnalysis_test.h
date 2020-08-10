@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class ReachabilityAnalysis_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class ReachabilityAnalysis_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -21,15 +21,15 @@ INSTANTIATE_TEST_CASE_P(Basic, ReachabilityAnalysis_Test, ::testing::ValuesIn(cr
 TEST_P(ReachabilityAnalysis_Test, deleting_unreachable_paths) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
-    SCAM::FindReadVariables findReadVariables(module->getCFG());
-    SCAM::LivenessAnalysis livenessAnalysis(module->getCFG(),module->getVariableMap());
-    SCAM::ReachabilityAnalysis reachabilityAnalysis(livenessAnalysis.getCFG(),findReadVariables.getReadVariablesSet());
+    DESCAM::FindReadVariables findReadVariables(module->getCFG());
+    DESCAM::LivenessAnalysis livenessAnalysis(module->getCFG(),module->getVariableMap());
+    DESCAM::ReachabilityAnalysis reachabilityAnalysis(livenessAnalysis.getCFG(),findReadVariables.getReadVariablesSet());
     ASSERT_FALSE(reachabilityAnalysis.getCFG().empty())
                                 << "After reachability analysis, CFG of module " << module->getName()
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(reachabilityAnalysis.getCFG());
+    std::string CFG_str = DESCAM::GlobalUtilities::printCFG(reachabilityAnalysis.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/ReachabilityAnalysis/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

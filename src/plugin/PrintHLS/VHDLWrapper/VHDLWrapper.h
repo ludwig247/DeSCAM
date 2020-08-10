@@ -13,7 +13,7 @@
 #include "PluginFactory.h"
 #include "SignalFactory.h"
 
-namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
+namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
             class VHDLWrapper {
             public:

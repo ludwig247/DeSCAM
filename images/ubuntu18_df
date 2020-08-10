@@ -1,0 +1,22 @@
+FROM ubuntu:18.04
+ENV SHELL /bin/bash
+RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
+RUN source ~/.profile
+RUN export GPG_TTY=$(tty)
+RUN apt-get update
+RUN apt --assume-yes install git
+RUN apt-get --assume-yes install curl
+RUN apt-get --assume-yes install fuse
+RUN apt-get --assume-yes install unionfs-fuse
+RUN curl -L https://git.io/get_helm.sh | bash
+
+RUN mkdir /root/test
+RUN mkdir /root/outputs
+COPY AppImage/test  /root/test/
+COPY DeSCAM_v  /root/
+COPY images/ubuntu18_script  /root/
+
+WORKDIR /apps
+ENTRYPOINT tail -f /dev/null
+CMD [ "/bin/bash" ]
+

@@ -9,7 +9,7 @@
 #include <set>
 #include "CfgBlock.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class CfgUtilities {
     public:
@@ -17,11 +17,11 @@ namespace SCAM {
 
         virtual ~CfgUtilities() = default;
 
-        static std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> getStartEndMap(const std::map<int, CfgBlock *> &cfgMap);
+        static std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> getStartEndMap(const std::map<int, CfgBlock *> &cfgMap);
 
-        static std::map<int, SCAM::CfgBlock *> addTerminalNodeForFunctions(const std::map<int, CfgBlock *> &cfgMap);
+        static std::map<int, DESCAM::CfgBlock *> addTerminalNodeForFunctions(const std::map<int, CfgBlock *> &cfgMap);
 
-        static std::map<SCAM::CfgBlock *, std::set<int>> getPathNodes(const std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap);
+        static std::map<DESCAM::CfgBlock *, std::set<int>> getPathNodes(const std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap);
 
     private:
 

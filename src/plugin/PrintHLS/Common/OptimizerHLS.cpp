@@ -11,9 +11,9 @@
 #include "PropertySuiteHelper.h"
 #include "PropertyHelper.h"
 
-using namespace SCAM::HLSPlugin;
+using namespace DESCAM::HLSPlugin;
 
-OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper>& propertyHelper, Module* module) :
+OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module) :
         propertySuiteHelper(propertyHelper),
         module(module),
         registerToOutputMap(),
@@ -94,7 +94,7 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
     // we can map Variable -> DataSignal
     auto compareAssignments = [this](DataSignal* output) -> std::set<Variable*> {
 
-        auto getOutputReg = [this](Property* operationProperty, Expr* expr, std::set<Variable*> &vars) -> void {
+        auto getOutputReg = [this](std::shared_ptr<Property> operationProperty, Expr* expr, std::set<Variable*> &vars) -> void {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
                     Variable* var = (dynamic_cast<VariableOperand*>(commitment->getLhs()))->getVariable();

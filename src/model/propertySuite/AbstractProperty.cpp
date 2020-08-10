@@ -4,7 +4,7 @@
 
 #include "AbstractProperty.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor
@@ -71,15 +71,15 @@ namespace SCAM {
     //                            Freeze-Functions
     // ------------------------------------------------------------------------------
 
-    void AbstractProperty::addFreezeSignal(SCAM::PropertyMacro *freezeSignal) {
+    void AbstractProperty::addFreezeSignal(DESCAM::PropertyMacro *freezeSignal) {
         this->freezeSignals.insert(std::make_pair(freezeSignal->getFullName(),freezeSignal));
     }
 
-    const std::map<std::string, SCAM::PropertyMacro*> &AbstractProperty::getFreezeSignals() const {
+    const std::map<std::string, DESCAM::PropertyMacro*> &AbstractProperty::getFreezeSignals() const {
         return freezeSignals;
     }
 
-    void AbstractProperty::setFreezeSignals(const std::map<std::string, SCAM::PropertyMacro *> &freezeSignals) {
+    void AbstractProperty::setFreezeSignals(const std::map<std::string, DESCAM::PropertyMacro *> &freezeSignals) {
         this->freezeSignals = freezeSignals;
     }
 
@@ -91,7 +91,7 @@ namespace SCAM {
         this->assumptionList.push_back(assumption);
     }
 
-    const std::vector<SCAM::Expr *> &AbstractProperty::getAssumptionList() const {
+    const std::vector<DESCAM::Expr *> &AbstractProperty::getAssumptionList() const {
         return assumptionList;
     }
 
@@ -103,11 +103,11 @@ namespace SCAM {
     //                            Commitment-Functions
     // ------------------------------------------------------------------------------
 
-    void AbstractProperty::addCommitment(SCAM::Assignment *stmt) {
+    void AbstractProperty::addCommitment(DESCAM::Assignment *stmt) {
         this->commitmentList.push_back(stmt);
     }
 
-    const std::vector<SCAM::Assignment *> &AbstractProperty::getCommitmentList() const {
+    const std::vector<DESCAM::Assignment *> &AbstractProperty::getCommitmentList() const {
         return commitmentList;
     }
 

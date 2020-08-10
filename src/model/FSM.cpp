@@ -5,9 +5,12 @@
 #include <Stmts/EnumValue.h>
 #include "FSM.h"
 #include "Module.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
-SCAM::FSM::FSM(Module *module) :
+
+DESCAM::FSM::FSM(Module *module) :
         module(module),
         sectionVariable(nullptr),
         nextSectionVariable(nullptr) {
@@ -15,48 +18,48 @@ SCAM::FSM::FSM(Module *module) :
 
 }
 
-void SCAM::FSM::accept(SCAM::AbstractVisitor &visitor) {
+void DESCAM::FSM::accept(DESCAM::AbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
 
-void SCAM::FSM::setSectionMap(std::map<std::string, std::vector<SCAM::Stmt *>> sectionMap) {
+void DESCAM::FSM::setSectionMap(std::map<std::string, std::vector<DESCAM::Stmt *>> sectionMap) {
     this->sectionMap = sectionMap;
 }
 
-const std::map<std::string, std::vector<SCAM::Stmt *>> &SCAM::FSM::getSectionMap() {
-    if (sectionVariable == nullptr) throw std::runtime_error("SectionVariable is not set");// {
-        //std::map<std::string, std::vector<SCAM::Stmt *>> a = {"init", };
+const std::map<std::string, std::vector<DESCAM::Stmt *>> &DESCAM::FSM::getSectionMap() {
+    if (sectionVariable == nullptr) TERMINATE("SectionVariable is not set");// {
+        //std::map<std::string, std::vector<DESCAM::Stmt *>> a = {"init", };
     //}//
     return this->sectionMap;
 }
 
-const std::map<int, SCAM::State *> &SCAM::FSM::getStateMap() const {
+const std::map<int, DESCAM::State *> &DESCAM::FSM::getStateMap() const {
     return stateMap;
 }
 
-void SCAM::FSM::setStateMap(const std::map<int, SCAM::State *> &stateMap) {
+void DESCAM::FSM::setStateMap(const std::map<int, DESCAM::State *> &stateMap) {
     FSM::stateMap.clear();
     FSM::stateMap = stateMap;
 }
 
-SCAM::Variable *SCAM::FSM::getSectionVariable() const {
+DESCAM::Variable *DESCAM::FSM::getSectionVariable() const {
     return sectionVariable;
 }
 
-SCAM::Variable *SCAM::FSM::getNextSectionVariable() const {
+DESCAM::Variable *DESCAM::FSM::getNextSectionVariable() const {
     return nextSectionVariable;
 }
 
 
-std::string SCAM::FSM::getInitialSection() {
-    if (sectionVariable == nullptr) throw std::runtime_error("sectionVariable is not set");
+std::string DESCAM::FSM::getInitialSection() {
+    if (sectionVariable == nullptr) TERMINATE("sectionVariable is not set");
     return this->sectionVariable->getInitialValue()->getValueAsString();
 }
 
 
-std::vector<std::string> SCAM::FSM::getSectionList() {
-    if (sectionVariable == nullptr) throw std::runtime_error("sectionVariable is not set");
+std::vector<std::string> DESCAM::FSM::getSectionList() {
+    if (sectionVariable == nullptr) TERMINATE("sectionVariable is not set");
     std::vector<std::string> sectionList;
     for (auto section:this->sectionVariable->getDataType()->getEnumValueMap()) {
         sectionList.push_back(section.first);
@@ -64,36 +67,36 @@ std::vector<std::string> SCAM::FSM::getSectionList() {
     return sectionList;
 }
 
-void SCAM::FSM::setSections(DataType *sectionType, std::string initialSection) {
-    if (!sectionType->isEnumType()) throw std::runtime_error("Section Type is wrong: not an enumType");
-    if (sectionType->getName() != this->module->getName() + "_SECTIONS") throw std::runtime_error(this->module->getName() + ": Wrong section type " + sectionType->getName());
-    if (sectionType->getEnumValueMap().find(initialSection) == sectionType->getEnumValueMap().end()) throw std::runtime_error("InitalState is not part of sectionMap");
+void DESCAM::FSM::setSections(DataType *sectionType, std::string initialSection) {
+    if (!sectionType->isEnumType()) TERMINATE("Section Type is wrong: not an enumType");
+    if (sectionType->getName() != this->module->getName() + "_SECTIONS") TERMINATE(this->module->getName() + ": Wrong section type " + sectionType->getName());
+    if (sectionType->getEnumValueMap().find(initialSection) == sectionType->getEnumValueMap().end()) TERMINATE("InitalState is not part of sectionMap");
 
-    this->sectionVariable = new Variable("section", sectionType, new SCAM::EnumValue(initialSection, sectionType)); //default init;
+    this->sectionVariable = new Variable("section", sectionType, new DESCAM::EnumValue(initialSection, sectionType)); //default init;
     this->nextSectionVariable = new Variable("section", sectionType, new EnumValue(initialSection, sectionType)); //default init;
 
 
 }
 
-SCAM::FSM::~FSM() {
+DESCAM::FSM::~FSM() {
     for (auto state : stateMap) {
         delete state.second;
     }
 }
 
-SCAM::Module *SCAM::FSM::getModule() const {
+DESCAM::Module *DESCAM::FSM::getModule() const {
     return module;
 }
 
-SCAM::FSM::FSM() {
-    throw std::runtime_error("Unallowed use of constructior SCAM::FSM()");
+DESCAM::FSM::FSM() {
+    TERMINATE("Unallowed use of constructior DESCAM::FSM()");
 
 }
 
-const std::map<SCAM::Operation *, SCAM::Path *> &SCAM::FSM::getOperationPathMap() const {
+const std::map<DESCAM::Operation *, DESCAM::Path *> &DESCAM::FSM::getOperationPathMap() const {
     return operationPathMap;
 }
 
-void SCAM::FSM::setOperationPathMap(const std::map<SCAM::Operation *, SCAM::Path *> &operationPathMap) {
+void DESCAM::FSM::setOperationPathMap(const std::map<DESCAM::Operation *, DESCAM::Path *> &operationPathMap) {
     FSM::operationPathMap = operationPathMap;
 }

@@ -26,7 +26,7 @@ struct Stimuli : public sc_module {
     //operationGraph
     void fsm() {
         while (true) {
-            ret = slave_in1->nb_read(var);
+            slave_in1->slave_read(ret, var);
             if(var && ret){
                 std::cout << "Received true after " << sc_delta_count() << " delta cycles" << std::endl;
                 std::cout << "Stopping execution" << std::endl;

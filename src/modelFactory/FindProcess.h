@@ -13,7 +13,7 @@
 #include "enums.h"
 
 
-namespace SCAM{
+namespace DESCAM{
     /*!
      * \brief Class searches for process declartions within a sc_module
      *

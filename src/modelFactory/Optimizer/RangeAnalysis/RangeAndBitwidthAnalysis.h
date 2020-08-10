@@ -13,41 +13,41 @@
 #include "ModelGlobal.h"
 #include "VariablesRangeAnalysis.h"
 #include "Optimizer/Utilities/FindVariablesValues.h"
-#include <Optimizer/Utilities/OptUtilities.h>
+#include <GlobalUtilities.h>
 #include <ctgmath>
 #include <utility>
 
 #include <set>
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Analyzes variables and output ports bitwidth
         * \author: mi-alkoudsi
         * \inputs:
-        *       - SCAM::Module *module
+        *       - DESCAM::Module *module
         * \outputs:
         *       - std::map<std::string, int> variablesBitwidthMap
-        *       - std::map<SCAM::Port, int> outputPortsBitwidthMap
+        *       - std::map<DESCAM::Port, int> outputPortsBitwidthMap
         */
     class RangeAndBitWidthAnalysis : public StmtAbstractVisitor {
     public:
         RangeAndBitWidthAnalysis() = delete;
 
-        explicit RangeAndBitWidthAnalysis(SCAM::Module *module);
+        explicit RangeAndBitWidthAnalysis(Module *module);
 
         ~RangeAndBitWidthAnalysis() = default;
 
         const std::map<std::string, int> &getVariableBitWidthMap() const;
 
-        const std::map<SCAM::Port *, int> &getPortsBitWidthMap() const;
+        const std::map<Port *, int> &getPortsBitWidthMap() const;
 
     private:
-        SCAM::Module *module;
-        std::map<int, SCAM::CfgNode *> CFG;
+        Module *module;
+        std::map<int, CfgNode *> CFG;
         std::set<std::string> variablesThatHaveReadSet;
-        std::map<std::string, std::set<SCAM::Expr *>> variablesValuesMap;
+        std::map<std::string, std::set<Expr *>> variablesValuesMap;
         std::map<std::string, int> variableBitWidthMap;
-        std::map<SCAM::Port *, int> writePortBitWidthMap;
+        std::map<Port *, int> writePortBitWidthMap;
         std::map<std::string, std::string> nameFullNameMap;
         int propagatedBitWidth;
         void initializeBitWidthMap();
@@ -100,7 +100,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

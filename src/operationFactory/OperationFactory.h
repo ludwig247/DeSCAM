@@ -11,14 +11,14 @@
 #include "Behavior/State.h"
 #include "Behavior/Operation.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /**
      * \brief: This class encapsulate the entire process of analyzing the module's CFG and generating the operational properties.
      *
      * \input:
-     *          - SCAM::Module * module;
-     *          - std::map<int, SCAM::CfgNode *> cfg;
+     *          - DESCAM::Module * module;
+     *          - std::map<int, DESCAM::CfgNode *> cfg;
      * \output:
      *          - PropertySuite * propertySuite;
      *
@@ -46,15 +46,15 @@ namespace SCAM {
      */
     class OperationFactory {
     public:
-        OperationFactory(std::map<int, SCAM::CfgNode *> controlFlowMap, SCAM::Module * module);
+        OperationFactory(std::map<int, DESCAM::CfgNode *> controlFlowMap, DESCAM::Module * module);
         ~OperationFactory() = default;
 
     private:
-        SCAM::Module * module;
-        std::map<int, SCAM::CfgNode *> cfg;
-        std::vector<std::vector<SCAM::CfgNode *> > rawOperations;
-        std::map<std::string, SCAM::State *> statesMap;
-        std::vector<SCAM::Operation*> operations;
+        DESCAM::Module * module;
+        std::map<int, DESCAM::CfgNode *> cfg;
+        std::vector<std::vector<DESCAM::CfgNode *> > rawOperations;
+        std::map<std::string, DESCAM::State *> statesMap;
+        std::vector<DESCAM::Operation*> operations;
         std::map<std::string, Variable*> varMap;
 
         void findOperations();

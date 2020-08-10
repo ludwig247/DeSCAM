@@ -4,9 +4,11 @@
 
 #include <iostream>
 #include "FindSections.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
-SCAM::FindSections::FindSections(clang::CXXRecordDecl *recordDecl):
+DESCAM::FindSections::FindSections(clang::CXXRecordDecl *recordDecl):
         pass(0),
         hasSectionEnum(false),
         hasSectionVar(false),
@@ -15,7 +17,7 @@ SCAM::FindSections::FindSections(clang::CXXRecordDecl *recordDecl):
     TraverseDecl(recordDecl);
 }
 
-bool SCAM::FindSections::VisitEnumDecl(clang::EnumDecl *enumDecl) {
+bool DESCAM::FindSections::VisitEnumDecl(clang::EnumDecl *enumDecl) {
     //Check wheter Enum State-Enum: If not throw error -> not other Enums are allowed
     if(enumDecl->getNameAsString() == "Sections"){
 
@@ -25,7 +27,7 @@ bool SCAM::FindSections::VisitEnumDecl(clang::EnumDecl *enumDecl) {
             clang::EnumConstantDecl* enumConstantDecl = *bit;
             std::string name = enumConstantDecl->getNameAsString();
             if(name == "init"){
-                throw std::runtime_error("Init is a reserved Keyword, please use a differnt name for this section");
+                TERMINATE("Init is a reserved Keyword, please use a differnt name for this section");
             }
             this->sectionList.push_back(name);
         }
@@ -34,19 +36,19 @@ bool SCAM::FindSections::VisitEnumDecl(clang::EnumDecl *enumDecl) {
 }
 
 
-bool SCAM::FindSections::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
+bool DESCAM::FindSections::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
     //If field is builtin-> add else make sure its tracked such that we don't miss any values
     //States enum
     if(fieldDecl->getType()->isEnumeralType()){
         std::string name = fieldDecl->getNameAsString();
         std::string type = fieldDecl->getType().getAsString();
         //States state; Only state and nextstate as enum names and States as Type are allowed
-        if(name == "section" && SCAM::containsSubstring(type,"Sections")){
+        if(name == "section" && DESCAM::containsSubstring(type,"Sections")){
             this->hasSectionVar = true;
             this->sectionVar = std::pair<std::string,clang::FieldDecl*>(name,fieldDecl);
             //llvm::errs() << "\n StateVar found\n";
         }
-        if(name == "nextsection" && SCAM::containsSubstring(type,"Sections")){
+        if(name == "nextsection" && DESCAM::containsSubstring(type,"Sections")){
             this->hasNextSectionVar = true;
             //llvm::errs() << "\n nextSectionVar found\n";
             this->nextSectionVar = std::pair<std::string,clang::FieldDecl*>(name,fieldDecl);
@@ -57,11 +59,11 @@ bool SCAM::FindSections::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
 }
 
 
-std::vector<std::string> SCAM::FindSections::getSectionList() {
+std::vector<std::string> DESCAM::FindSections::getSectionList() {
     return this->sectionList;
 }
 
-bool SCAM::FindSections::hasSections() {
+bool DESCAM::FindSections::hasSections() {
 
     //No sections defined
     if(!this->hasSectionEnum && !this->hasSectionVar && !this->hasNextSectionVar){
@@ -84,15 +86,15 @@ bool SCAM::FindSections::hasSections() {
     return  false;
 }
 
-std::pair<std::string, clang::FieldDecl *> SCAM::FindSections::getStateVar() {
+std::pair<std::string, clang::FieldDecl *> DESCAM::FindSections::getStateVar() {
     return this->sectionVar;
 }
 
-std::pair<std::string, clang::FieldDecl *> SCAM::FindSections::getNextStateVar() {
+std::pair<std::string, clang::FieldDecl *> DESCAM::FindSections::getNextStateVar() {
     return this->nextSectionVar;
 }
 
-bool SCAM::FindSections::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
+bool DESCAM::FindSections::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
 
     //Only one Constructor allowed
     if(pass==0){
@@ -118,12 +120,12 @@ bool SCAM::FindSections::VisitCXXConstructorDecl(clang::CXXConstructorDecl *cons
     return true;
 }
 
-bool SCAM::FindSections::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
+bool DESCAM::FindSections::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
     if(pass==1){
         std::string value = declRefExpr->getDecl()->getNameAsString();
         this->initialSection = value;
         if(initialSection != "" && value != this->initialSection){
-            llvm::errs() << "\n-I- SCAM::FindStates::VisitDeclRefExpr: section and nextsection are not initialized with the same value\n";
+            llvm::errs() << "\n-I- DESCAM::FindStates::VisitDeclRefExpr: section and nextsection are not initialized with the same value\n";
         }
         return false;
     }
@@ -131,7 +133,7 @@ bool SCAM::FindSections::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 
 }
 
-std::string SCAM::FindSections::getInitialState() {
+std::string DESCAM::FindSections::getInitialState() {
     return this->initialSection;
 }
 

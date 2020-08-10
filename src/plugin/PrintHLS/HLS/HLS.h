@@ -14,7 +14,7 @@
 #include "PrintReset.h"
 #include "Utilities.h"
 
-namespace SCAM { namespace HLSPlugin { namespace  HLS {
+namespace DESCAM { namespace HLSPlugin { namespace  HLS {
 
     struct optional {
         bool valid = false;

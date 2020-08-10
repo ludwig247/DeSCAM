@@ -11,7 +11,7 @@
 #include "Behavior/CfgNode.h"
 #include "Model.h"
 
-SCAM::CreateRealCFG::CreateRealCFG(const std::map<int, SCAM::CfgBlock *> &controlFlowMap) {
+DESCAM::CreateRealCFG::CreateRealCFG(const std::map<int, DESCAM::CfgBlock *> &controlFlowMap) {
 
     auto entry = controlFlowMap.at(0);
     assert(entry->getPredecessorList().empty() && "Not an entry node");
@@ -91,11 +91,11 @@ SCAM::CreateRealCFG::CreateRealCFG(const std::map<int, SCAM::CfgBlock *> &contro
 //        std::cout << "BLOCK ID" << node.first << ": " << "ID:" << node.second << std::endl;
 //    }
 //
-//    throw std::runtime_error("STOP");
+//    TERMINATE("STOP");
 
 
 }
 
-const std::map<int, SCAM::CfgNode *> &SCAM::CreateRealCFG::getCFG() const {
+const std::map<int, DESCAM::CfgNode *> &DESCAM::CreateRealCFG::getCFG() const {
     return cfg;
 }

@@ -3,22 +3,24 @@
 //
 
 #include "While.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::While::While(SCAM::Expr *conditionStmt) :
+DESCAM::While::While(DESCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) :
         conditionStmt(conditionStmt) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-SCAM::Expr *SCAM::While::getConditionStmt() const {
+DESCAM::Expr *DESCAM::While::getConditionStmt() const {
     return this->conditionStmt;
 }
 
-void SCAM::While::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::While::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::While::operator==(const Stmt &other) const {
+bool DESCAM::While::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekWhile(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (While *) this;

@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class LocalVariablePropagation_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class LocalVariablePropagation_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -22,13 +22,13 @@ TEST_P(LocalVariablePropagation_Test, propagate_locally_constant_values) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
 
-    SCAM::LocalValuePropagation localValuePropagation(module->getCFG());
+    DESCAM::LocalValuePropagation localValuePropagation(module->getCFG());
     ASSERT_FALSE(localValuePropagation.getCFG().empty())
                                 << "After local value propagation, CFG of module " << module->getName()
                                 << " is empty\n";
 
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(localValuePropagation.getCFG());
+    std::string CFG_str = DESCAM::GlobalUtilities::printCFG(localValuePropagation.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/LocalValuePropagation/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

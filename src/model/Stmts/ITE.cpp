@@ -3,43 +3,44 @@
 //
 
 #include "ITE.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::ITE::ITE(SCAM::Expr *conditionStmt) : If(conditionStmt) {
-
+DESCAM::ITE::ITE(DESCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo) : If(conditionStmt, std::move(stmtLocationInfo)) {
 }
 
-void SCAM::ITE::addIfList(SCAM::Stmt *stmt) {
+void DESCAM::ITE::addIfList(DESCAM::Stmt *stmt) {
     this->ifList.push_back(stmt);
 
 }
 
-void SCAM::ITE::addElseList(SCAM::Stmt *stmt) {
+void DESCAM::ITE::addElseList(DESCAM::Stmt *stmt) {
     this->elseList.push_back(stmt);
 }
 
-void SCAM::ITE::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::ITE::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
 
-void SCAM::ITE::setIfList(const std::vector<SCAM::Stmt *> &ifList) {
+void DESCAM::ITE::setIfList(const std::vector<DESCAM::Stmt *> &ifList) {
     ITE::ifList = ifList;
 }
 
-void SCAM::ITE::setElseList(const std::vector<SCAM::Stmt *> &elseList) {
+void DESCAM::ITE::setElseList(const std::vector<DESCAM::Stmt *> &elseList) {
     ITE::elseList = elseList;
 }
 
-const std::vector<SCAM::Stmt *> &SCAM::ITE::getIfList() const {
+const std::vector<DESCAM::Stmt *> &DESCAM::ITE::getIfList() const {
     return ifList;
 }
 
-const std::vector<SCAM::Stmt *> &SCAM::ITE::getElseList() const {
+const std::vector<DESCAM::Stmt *> &DESCAM::ITE::getElseList() const {
     return elseList;
 }
 
-bool SCAM::ITE::operator==(const Stmt &other) const {
+bool DESCAM::ITE::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekITE(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (ITE *) this;

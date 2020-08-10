@@ -4,20 +4,21 @@
 
 #include "TimePointOperand.h"
 
-SCAM::TimePointOperand::TimePointOperand(Timepoint *timepoint) :
+DESCAM::TimePointOperand::TimePointOperand(Timepoint *timepoint, LocationInfo stmtLocationInfo) :
         timepoint(timepoint), Operand(timepoint->getDataType()) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 
 }
 
-void SCAM::TimePointOperand::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::TimePointOperand::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-std::string SCAM::TimePointOperand::getOperandName() const {
+std::string DESCAM::TimePointOperand::getOperandName() const {
     return this->timepoint->getName();
 }
 
-bool SCAM::TimePointOperand::operator==(const Stmt &other) const {
+bool DESCAM::TimePointOperand::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekTimePointOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (TimePointOperand *) this;
@@ -25,6 +26,6 @@ bool SCAM::TimePointOperand::operator==(const Stmt &other) const {
     return (thisPtr->timepoint == otherPtr->timepoint);
 }
 
-SCAM::Timepoint *SCAM::TimePointOperand::getTimepoint() const {
+DESCAM::Timepoint *DESCAM::TimePointOperand::getTimepoint() const {
     return timepoint;
 }

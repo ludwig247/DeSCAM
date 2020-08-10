@@ -8,7 +8,7 @@
 #include "If.h"
 #include <vector>
 
-namespace SCAM {
+namespace DESCAM {
 
 /*
  * \brief class is only used for conversion to AML, might be removed later
@@ -16,27 +16,29 @@ namespace SCAM {
  */
     class ITE : public If {
     public:
-        explicit ITE(Expr *conditionStmt);
+        ITE(Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
 
-        void addIfList(SCAM::Stmt *);
+        void addIfList(DESCAM::Stmt *);
 
-        void addElseList(SCAM::Stmt *);
+        void addElseList(DESCAM::Stmt *);
 
         void setIfList(const std::vector<Stmt *> &ifList);
 
         void setElseList(const std::vector<Stmt *> &elseList);
 
+
         const std::vector<Stmt *> &getIfList() const;
 
         const std::vector<Stmt *> &getElseList() const;
 
-        void accept(SCAM::StmtAbstractVisitor &visitor) override ;
 
-        bool operator==(const Stmt &other) const override;
+        virtual void accept(DESCAM::StmtAbstractVisitor &visitor);
+
+        virtual bool operator==(const Stmt &other) const;
 
     private:
-        std::vector<SCAM::Stmt *> ifList; //! List containing each entry for each element that is within the if block
-        std::vector<SCAM::Stmt *> elseList; //! List containing an entry for each element that is within the else block
+        std::vector<DESCAM::Stmt *> ifList; //! List containing each entry for each element that is within the if block
+        std::vector<DESCAM::Stmt *> elseList; //! List containing an entry for each element that is within the else block
     };
 }
 

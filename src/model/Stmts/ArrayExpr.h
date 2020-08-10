@@ -9,16 +9,16 @@
 #include <map>
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class ArrayExpr : public Expr {
     public:
         ArrayExpr() = delete;
-        ArrayExpr(std::map<std::string, SCAM::Expr *> valueMap, const DataType *dataType);
+        ArrayExpr(std::map<std::string, DESCAM::Expr *> valueMap, const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
         virtual ~ArrayExpr() = default;
 
 
-        const std::map<std::string, SCAM::Expr *> &getValueMap() const;
+        const std::map<std::string, DESCAM::Expr *> &getValueMap() const;
 
         virtual void accept(StmtAbstractVisitor &visitor);
 
@@ -26,7 +26,7 @@ namespace SCAM {
 
     private:
 
-        std::map<std::string, SCAM::Expr *> valueMap; //! <index,value>
+        std::map<std::string, DESCAM::Expr *> valueMap; //! <index,value>
     };
 };
 

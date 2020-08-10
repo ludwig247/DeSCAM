@@ -6,10 +6,10 @@
 
 #include "PropertyHelper.h"
 
-using namespace SCAM::HLSPlugin;
+using namespace DESCAM::HLSPlugin;
 
-PropertyHelper::PropertyHelper(const SCAM::Property& property) :
-    Property(property)
+PropertyHelper::PropertyHelper(std::shared_ptr<Property> property) :
+    Property(*property)
 {
 }
 
@@ -18,7 +18,7 @@ void PropertyHelper::setModifiedCommitmentList(std::vector<Assignment *> &&commi
     modifiedCommitmentList = std::move(commitmentList);
 }
 
-std::vector<SCAM::Assignment *> PropertyHelper::getModifiedCommitmentList()
+std::vector<DESCAM::Assignment *> PropertyHelper::getModifiedCommitmentList()
 {
     return modifiedCommitmentList;
 }

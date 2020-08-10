@@ -13,7 +13,7 @@
 #include <fstream>//for writing on files
 #include <cxxabi.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     inline void createFile(const std::string &pluginName, const std::string &fileName, const std::string &fileText, const std::string &dir) {
         std::cout << " " << pluginName << ": " << fileName << " generated in " << dir << std::endl;

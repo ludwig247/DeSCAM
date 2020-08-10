@@ -5,8 +5,11 @@
 
 #include "StmtNodeAlloc.h"
 #include "SimplifyVisitor.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-namespace SCAM {
+
+namespace DESCAM {
 
     // Expr node tables
     std::vector<VariableOperand *> StmtNodeAlloc::allocTableVariableOperand;
@@ -600,7 +603,7 @@ namespace SCAM {
     }
 
     void StmtNodeAlloc::visit(class ArrayOperand &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
 //        for (auto lookup_it : allocTableSubSelect) {
 //            if (*lookup_it == node) {
 //                this->allocNodeAddress = lookup_it;
@@ -626,12 +629,12 @@ namespace SCAM {
 
 
     Ternary *StmtNodeAlloc::allocNode(Ternary &node, bool simplifyNode) {
-        throw std::runtime_error("StmtNodeAlloc::visit: Ternary not implemented");
+        TERMINATE("StmtNodeAlloc::visit: Ternary not implemented");
     }
 
 
     void StmtNodeAlloc::visit(class ArrayExpr &node) {
-            throw std::runtime_error("Not implemented");
+            TERMINATE("Not implemented");
     }
 
     void StmtNodeAlloc::visit(class ParamOperand &node) {
@@ -660,34 +663,34 @@ namespace SCAM {
     }
 
     void StmtNodeAlloc::visit(class Notify &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
 
     }
 
     Wait *StmtNodeAlloc::allocNode(Wait &node, bool simplifyNode) {
         //TODO: implement StmtNodeAlloc
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     void StmtNodeAlloc::visit(class Wait &node) {
-        throw std::runtime_error("Not implemented");
+        TERMINATE("Not implemented");
     }
 
     Peek *StmtNodeAlloc::allocNode(Peek &node, bool simplifyNode) {
         //TODO: implement StmtNodeAlloc
-        throw std::runtime_error("StmtNodeAlloc::allocNode: Peek not implemented");
+        TERMINATE("StmtNodeAlloc::allocNode: Peek not implemented");
     }
 
     void StmtNodeAlloc::visit(class Peek &node) {
-        throw std::runtime_error("StmtNodeAlloc::visit: Peek not implemented");
+        TERMINATE("StmtNodeAlloc::visit: Peek not implemented");
     }
 
     ArrayExpr *StmtNodeAlloc::allocNode(ArrayExpr &node, bool simplifyNode) {
-        throw std::runtime_error("StmtNodeAlloc::visit: ArrayExpr not implemented");
+        TERMINATE("StmtNodeAlloc::visit: ArrayExpr not implemented");
     }
 
     void StmtNodeAlloc::visit(class Ternary &node) {
-        throw std::runtime_error("StmtNodeAlloc::visit: Ternary not implemented");
+        TERMINATE("StmtNodeAlloc::visit: Ternary not implemented");
     }
 
 

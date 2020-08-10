@@ -8,8 +8,11 @@
 #include "Utilities.h"
 #include "VHDLWrapper.h"
 #include "PrintFunction.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 std::string VHDLWrapper::printTypes() {
     std::stringstream typeStream;
@@ -184,7 +187,7 @@ void VHDLWrapper::functions(std::stringstream &ss) {
         ss << "\tbegin\n";
 
         if (func->getReturnValueConditionList().empty())
-            throw std::runtime_error("No return value for function " + func->getName() + "()");
+            TERMINATE("No return value for function " + func->getName() + "()");
 
         auto returnValueConditionList = func->getReturnValueConditionList();
         for (auto retValData = returnValueConditionList.begin(); retValData != returnValueConditionList.end(); retValData++) {

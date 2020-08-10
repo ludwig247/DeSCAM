@@ -11,7 +11,7 @@
 #include <PrintStmt.h>
 #include <SimplifyVisitor.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class SimplifyVisitor_Test : public ::testing::Test {
 protected:

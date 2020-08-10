@@ -9,7 +9,7 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
     bool containsSubstring(std::string, std::string);
 
 
