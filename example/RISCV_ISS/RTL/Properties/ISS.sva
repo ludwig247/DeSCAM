@@ -1,0 +1,597 @@
+// DATA TYPES //
+typedef enum {ALU_ADD, ALU_AND, ALU_COPY1, ALU_OR, ALU_SLL, ALU_SLT, ALU_SLTU, ALU_SRA, ALU_SRL, ALU_SUB, ALU_X, ALU_XOR} ALUfuncType;
+typedef enum {ENC_B, ENC_ERR, ENC_I_I, ENC_I_J, ENC_I_L, ENC_J, ENC_R, ENC_S, ENC_U} EncType;
+typedef enum {INSTR_ADD, INSTR_ADDI, INSTR_AND, INSTR_ANDI, INSTR_AUIPC, INSTR_BEQ, INSTR_BGE, INSTR_BGEU, INSTR_BLT, INSTR_BLTU, INSTR_BNE, INSTR_JAL, INSTR_JALR, INSTR_LB, INSTR_LBU, INSTR_LH, INSTR_LHU, INSTR_LUI, INSTR_LW, INSTR_OR, INSTR_ORI, INSTR_SB, INSTR_SH, INSTR_SLL, INSTR_SLLI, INSTR_SLT, INSTR_SLTI, INSTR_SLTU, INSTR_SLTUI, INSTR_SRA, INSTR_SRAI, INSTR_SRL, INSTR_SRLI, INSTR_SUB, INSTR_SW, INSTR_UNKNOWN, INSTR_XOR, INSTR_XORI} InstrType;
+typedef enum {ME_RD, ME_WR, ME_X} ME_AccessType;
+//typedef enum {MT_B, MT_BU, MT_H, MT_HU, MT_W, MT_X} ME_MaskType; //Conflicted with the ME_MaskType declared in top_level_types (global_types file)
+
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "ISS_functions.sva"
+
+import top_level_types::*;
+
+module ISS_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge ISS.clk); endclocking
+`include "ISS_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+!reset ##1 reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 Fetch_Req_1() and
+	t##0 pcReg() == 0 and
+	t##0 regfileWrite_dst() == 0 and
+	t##0 regfileWrite_dstData() == 0 and
+	t##0 toMemoryPort_sig_addrIn() == 0 and
+	t##0 toMemoryPort_sig_dataIn() == 0 and
+	t##0 toMemoryPort_sig_mask() == mt_w and
+	t##0 toMemoryPort_sig_req() == ME_RD and
+	t##0 fromMemoryPort_notify() == 0 and
+	t##0 toMemoryPort_notify() == 1 and
+	t##0 toRegsPort_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property Fetch_Read_Instr_2_10_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_R)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_B)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_S)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_U)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_J)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_I_I)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_I_L)) and
+	t##0 !((getEncType(fromMemoryPort_sig_loadedData()) == ENC_I_J))
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == pcReg_0 and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == pcReg_0 and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Fetch_Read_Instr_2_10_a: assert property (disable iff (reset) Fetch_Read_Instr_2_10_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_2_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ unsigned_32 fromRegsPort_sig_0;
+ bit[31:0] pcReg_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(fromRegsPort_sig_0, fromRegsPort_sig()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_R)
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (4 + pcReg_0) and
+	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 regfileWrite_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]) and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	t_end(o)##0 toRegsPort_sig_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 toRegsPort_sig_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]) and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+	t_end(o)##0 toRegsPort_notify() == 1;
+endproperty;
+Fetch_Read_Instr_2_2_a: assert property (disable iff (reset) Fetch_Read_Instr_2_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_3_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ unsigned_32 fromRegsPort_sig_0;
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(fromRegsPort_sig_0, fromRegsPort_sig()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_B)
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]),fromMemoryPort_sig_loadedData_0,pcReg_0) and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == branchPCcalculation(getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]),fromMemoryPort_sig_loadedData_0,pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Fetch_Read_Instr_2_3_a: assert property (disable iff (reset) Fetch_Read_Instr_2_3_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_4_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ unsigned_32 fromRegsPort_sig_0;
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(fromRegsPort_sig_0, fromRegsPort_sig()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_S)
+implies
+	t_end(o)##0 Store_1_3() and
+	t_end(o)##0 pcReg() == pcReg_0 and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == getALUresult(ALU_ADD,fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],getImmediate(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == getImmediate(fromMemoryPort_sig_loadedData_0) and
+	t_end(o)##0 toMemoryPort_sig_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_WR and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Fetch_Read_Instr_2_4_a: assert property (disable iff (reset) Fetch_Read_Instr_2_4_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_5_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ bit[31:0] pcReg_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_U)
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (4 + pcReg_0) and
+	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 regfileWrite_dstData() == getEncUALUresult(fromMemoryPort_sig_loadedData_0,pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	t_end(o)##0 toRegsPort_sig_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 toRegsPort_sig_dstData() == getEncUALUresult(fromMemoryPort_sig_loadedData_0,pcReg_0) and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+	t_end(o)##0 toRegsPort_notify() == 1;
+endproperty;
+Fetch_Read_Instr_2_5_a: assert property (disable iff (reset) Fetch_Read_Instr_2_5_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_6_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ bit[31:0] pcReg_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_J)
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (pcReg_0 + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 regfileWrite_dstData() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (pcReg_0 + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	t_end(o)##0 toRegsPort_sig_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 toRegsPort_sig_dstData() == (4 + pcReg_0) and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+	t_end(o)##0 toRegsPort_notify() == 1;
+endproperty;
+Fetch_Read_Instr_2_6_a: assert property (disable iff (reset) Fetch_Read_Instr_2_6_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_7_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ unsigned_32 fromRegsPort_sig_0;
+ bit[31:0] pcReg_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(fromRegsPort_sig_0, fromRegsPort_sig()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_I_I)
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (4 + pcReg_0) and
+	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 regfileWrite_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]) and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	t_end(o)##0 toRegsPort_sig_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 toRegsPort_sig_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]) and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+	t_end(o)##0 toRegsPort_notify() == 1;
+endproperty;
+Fetch_Read_Instr_2_7_a: assert property (disable iff (reset) Fetch_Read_Instr_2_7_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_8_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ unsigned_32 fromRegsPort_sig_0;
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(fromRegsPort_sig_0, fromRegsPort_sig()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_I_L)
+implies
+	t_end(o)##0 Load_Req_5() and
+	t_end(o)##0 pcReg() == pcReg_0 and
+	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == getALUresult(ALU_ADD,fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],getImmediate(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Fetch_Read_Instr_2_8_a: assert property (disable iff (reset) Fetch_Read_Instr_2_8_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Read_Instr_2_9_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ unsigned_32 fromRegsPort_sig_0;
+ bit[31:0] pcReg_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(fromRegsPort_sig_0, fromRegsPort_sig()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 fromMemoryPort_sync() and
+	t##0 (getEncType(fromMemoryPort_sig_loadedData()) == ENC_I_J)
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)] + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
+	t_end(o)##0 regfileWrite_dstData() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)] + getImmediate(fromMemoryPort_sig_loadedData_0)) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+	t_end(o)##0 toRegsPort_notify() == 1;
+endproperty;
+Fetch_Read_Instr_2_9_a: assert property (disable iff (reset) Fetch_Read_Instr_2_9_p(1)); //ASSIGN t_end offset here
+
+
+
+property Fetch_Req_1_1_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Fetch_Req_1() and
+	t##0 toMemoryPort_sync()
+implies
+	t_end(o)##0 Fetch_Read_Instr_2() and
+	t_end(o)##0 pcReg() == pcReg_0 and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	during_o (t, 1, t_end(o), -1, fromMemoryPort_notify() == 0) and
+	t_end(o)##0 fromMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Fetch_Req_1_1_a: assert property (disable iff (reset) Fetch_Req_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property Load_Req_5_13_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Load_Req_5() and
+	t##0 toMemoryPort_sync()
+implies
+	t_end(o)##0 Load_done_6() and
+	t_end(o)##0 pcReg() == pcReg_0 and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	during_o (t, 1, t_end(o), -1, fromMemoryPort_notify() == 0) and
+	t_end(o)##0 fromMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Load_Req_5_13_a: assert property (disable iff (reset) Load_Req_5_13_p(1)); //ASSIGN t_end offset here
+
+
+
+property Load_done_6_14_p(o);
+ bit[31:0] fromMemoryPort_sig_loadedData_0;
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+	t ##0 hold(fromMemoryPort_sig_loadedData_0, fromMemoryPort_sig_loadedData()) and
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t##0 Load_done_6() and
+	t##0 fromMemoryPort_sync()
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (4 + pcReg_0) and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == fromMemoryPort_sig_loadedData_0 and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	t_end(o)##0 toRegsPort_sig_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 toRegsPort_sig_dstData() == fromMemoryPort_sig_loadedData_0 and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, toRegsPort_notify() == 0) and
+	t_end(o)##0 toRegsPort_notify() == 1;
+endproperty;
+Load_done_6_14_a: assert property (disable iff (reset) Load_done_6_14_p(1)); //ASSIGN t_end offset here
+
+
+
+property Store1_done_4_12_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Store1_done_4() and
+	t##0 fromMemoryPort_sync()
+implies
+	t_end(o)##0 Fetch_Req_1() and
+	t_end(o)##0 pcReg() == (4 + pcReg_0) and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t_end(o)##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
+	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
+	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
+	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
+	t_end(o)##0 toMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Store1_done_4_12_a: assert property (disable iff (reset) Store1_done_4_12_p(1)); //ASSIGN t_end offset here
+
+
+
+property Store_1_3_11_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Store_1_3() and
+	t##0 toMemoryPort_sync()
+implies
+	t_end(o)##0 Store1_done_4() and
+	t_end(o)##0 pcReg() == pcReg_0 and
+	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
+	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	during_o (t, 1, t_end(o), -1, fromMemoryPort_notify() == 0) and
+	t_end(o)##0 fromMemoryPort_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, toMemoryPort_notify() == 0) and
+	during_o (t, 1, t_end(o), 0, toRegsPort_notify() == 0);
+endproperty;
+Store_1_3_11_a: assert property (disable iff (reset) Store_1_3_11_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_Fetch_Read_Instr_2_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Fetch_Read_Instr_2() and
+	t##0 !(fromMemoryPort_sync())
+implies
+	t##1 Fetch_Read_Instr_2() and
+	t##1 pcReg() == pcReg_0 and
+	t##1 regfileWrite_dst() == regfileWrite_dst_0 and
+	t##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t##1 fromMemoryPort_notify() == 1 and
+	t##1 toMemoryPort_notify() == 0 and
+	t##1 toRegsPort_notify() == 0;
+endproperty;
+wait_Fetch_Read_Instr_2_a: assert property (disable iff (reset) wait_Fetch_Read_Instr_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_Fetch_Req_1_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+ bit[31:0] toMemoryPort_sig_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t ##0 hold(toMemoryPort_sig_0, toMemoryPort_sig()) and
+	t##0 Fetch_Req_1() and
+	t##0 !(toMemoryPort_sync())
+implies
+	t##1 Fetch_Req_1() and
+	t##1 pcReg() == pcReg_0 and
+	t##1 regfileWrite_dst() == regfileWrite_dst_0 and
+	t##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t##1 toMemoryPort_sig() == toMemoryPort_sig_0 and
+	t##1 fromMemoryPort_notify() == 0 and
+	t##1 toMemoryPort_notify() == 1 and
+	t##1 toRegsPort_notify() == 0;
+endproperty;
+wait_Fetch_Req_1_a: assert property (disable iff (reset) wait_Fetch_Req_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_Load_Req_5_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+ bit[31:0] toMemoryPort_sig_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t ##0 hold(toMemoryPort_sig_0, toMemoryPort_sig()) and
+	t##0 Load_Req_5() and
+	t##0 !(toMemoryPort_sync())
+implies
+	t##1 Load_Req_5() and
+	t##1 pcReg() == pcReg_0 and
+	t##1 regfileWrite_dst() == regfileWrite_dst_0 and
+	t##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t##1 toMemoryPort_sig() == toMemoryPort_sig_0 and
+	t##1 fromMemoryPort_notify() == 0 and
+	t##1 toMemoryPort_notify() == 1 and
+	t##1 toRegsPort_notify() == 0;
+endproperty;
+wait_Load_Req_5_a: assert property (disable iff (reset) wait_Load_Req_5_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_Load_done_6_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Load_done_6() and
+	t##0 !(fromMemoryPort_sync())
+implies
+	t##1 Load_done_6() and
+	t##1 pcReg() == pcReg_0 and
+	t##1 regfileWrite_dst() == regfileWrite_dst_0 and
+	t##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t##1 fromMemoryPort_notify() == 1 and
+	t##1 toMemoryPort_notify() == 0 and
+	t##1 toRegsPort_notify() == 0;
+endproperty;
+wait_Load_done_6_a: assert property (disable iff (reset) wait_Load_done_6_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_Store1_done_4_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t##0 Store1_done_4() and
+	t##0 !(fromMemoryPort_sync())
+implies
+	t##1 Store1_done_4() and
+	t##1 pcReg() == pcReg_0 and
+	t##1 regfileWrite_dst() == regfileWrite_dst_0 and
+	t##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t##1 fromMemoryPort_notify() == 1 and
+	t##1 toMemoryPort_notify() == 0 and
+	t##1 toRegsPort_notify() == 0;
+endproperty;
+wait_Store1_done_4_a: assert property (disable iff (reset) wait_Store1_done_4_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_Store_1_3_p(o);
+ bit[31:0] pcReg_0;
+ bit[31:0] regfileWrite_dst_0;
+ bit[31:0] regfileWrite_dstData_0;
+ bit[31:0] toMemoryPort_sig_0;
+	t ##0 hold(pcReg_0, pcReg()) and
+	t ##0 hold(regfileWrite_dst_0, regfileWrite_dst()) and
+	t ##0 hold(regfileWrite_dstData_0, regfileWrite_dstData()) and
+	t ##0 hold(toMemoryPort_sig_0, toMemoryPort_sig()) and
+	t##0 Store_1_3() and
+	t##0 !(toMemoryPort_sync())
+implies
+	t##1 Store_1_3() and
+	t##1 pcReg() == pcReg_0 and
+	t##1 regfileWrite_dst() == regfileWrite_dst_0 and
+	t##1 regfileWrite_dstData() == regfileWrite_dstData_0 and
+	t##1 toMemoryPort_sig() == toMemoryPort_sig_0 and
+	t##1 fromMemoryPort_notify() == 0 and
+	t##1 toMemoryPort_notify() == 1 and
+	t##1 toRegsPort_notify() == 0;
+endproperty;
+wait_Store_1_3_a: assert property (disable iff (reset) wait_Store_1_3_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind ISS ISS_verification inst (.*, .reset(rst));

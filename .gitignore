@@ -4,6 +4,7 @@
 *~
 build/*
 *cmake-build-debug
+*CMakeFiles
 build_dbg/*
 backup/*
 bin/*
