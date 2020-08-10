@@ -11,4 +11,5 @@ To simulate assembly programs, specify the corresponding HEX file in the Memory 
  - **_CPU.sv_**: Toplevel file, combining the ISS and the register file.
  - **_Memory.sv_**: Memory module, holding both the program and process data.
  - **_CPU_tb.sv_**: Toplevel file, combining the CPU with the memory.
+ - **_Load_Properties_** TCL file which automatically loads the design and the properties and checks all properties.
 
