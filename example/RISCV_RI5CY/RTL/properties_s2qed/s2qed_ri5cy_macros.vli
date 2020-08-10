@@ -29,6 +29,12 @@ macro boolean CPU2_STALL :=
     cpu2/halt_if
 end macro;
 
+// JUMP instructions execute at t_id even if there is a lsu stall
+macro boolean CPU2_STALL_FOR_JUMP := 
+    cpu2/perf_jr_stall | 
+    cpu2/halt_if
+end macro;
+
 macro boolean CPU2_NO_FLUSH_STATE := 
     !(cpu2/id_stage_i/controller_i/ctrl_fsm_cs == FLUSH_EX)
 end macro;
@@ -82,7 +88,7 @@ constraint no_data_misaligned:=
     cpu2/data_misaligned == 0;
 end constraint;
 
-macro unsigned max_wait_dmem := 2 ; end macro;
+macro unsigned max_wait_dmem := 3 ; end macro;
 
 constraint data_gnt:=
     (!cpu1/data_gnt_i || cpu1/data_gnt_i && foreach i in 1 .. max_wait_dmem: !next(cpu1/data_gnt_i,i); end foreach) &&

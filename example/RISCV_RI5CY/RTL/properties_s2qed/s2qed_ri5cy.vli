@@ -12,7 +12,25 @@ macro boolean INSTR_LW (unsigned instr_imem) :=
 	(instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4) &&       	//rd
 	instr_imem[14:12] == 3'h2 &&                                	//func3
 	instr_imem[19:15] <= 5'd4   	                             	//rs1
-	// instr_imem[31:20] == 12'h10                                  //imm
+end macro;
+
+macro boolean INSTR_SW (unsigned instr_imem) :=
+	instr_imem[6:0] == 7'h23 &&                                     //opcode 
+	instr_imem[14:12] == 3'h2 &&                                	//func3
+	instr_imem[19:15] <= 5'd4 &&                                   	//rs1
+	instr_imem[24:20] <= 5'd4	                                   	//rs2
+end macro;
+
+macro boolean INSTR_BEQ (unsigned instr_imem) :=
+	instr_imem[6:0] == 7'h63 &&                                     //opcode 
+	instr_imem[14:12] == 3'h0 &&                                	//func3
+	instr_imem[19:15] <= 5'd4 &&                                   	//rs1
+	instr_imem[24:20] <= 5'd4	                                   	//rs2
+end macro;
+
+macro boolean INSTR_JAL (unsigned instr_imem) :=
+	instr_imem[6:0] == 7'h6f &&                                    //opcode 
+	(instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4)	       //rd
 end macro;
 
 constraint CPU2_allowed_instr :=
@@ -51,7 +69,7 @@ macro boolean DATA_MEM_CONCISTENCY(unsigned addr_1, addr_2, data_1, data_2) :=
 	(addr_1 == addr_2) ? (data_1 == data_2) : true;
 end macro;
 
-property S2QED_ADD;//2h40
+property S2QED_ADD;
 dependencies: 
     no_reset,
     in_out_constraints,
@@ -69,8 +87,7 @@ for timepoints:
 	t_done_i1 = t_wb_i1+1,
 
 	t_if_i2 = t,
-	//t_idex_i2 = t_if_i2+1..5 waits_for (cpu2/data_req_o==0 || cpu2/data_rvalid_i),
-	t_idex_i2 = t_if_i2+1..2 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_idex_i2 = t_if_i2+1..5 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
 	t_wb_i2 = t_idex_i2+1,
 	t_done_i2 = t_wb_i2+1;
 freeze:
@@ -83,14 +100,6 @@ freeze:
     //regfile
     regfile_i1_at_t_wb_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_wb_i1,
     regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
-
-	//----------------
-	// rd_at_t = getRdAddr(cpu1/instr_rdata_i)@t,
-	// instr_at_t = cpu1/instr_rdata_i@t,
-	// rs1_at_t = getRs1Addr(instr_at_t)@t,
-	// rs2_at_t = getRs2Addr(instr_at_t)@t,
-	// oper1_at_t_id = REGISTER_CPU1(rs1_at_t)@t_idex_i1,
-	// oper2_at_t_id = REGISTER_CPU1(rs2_at_t)@t_idex_i1;
 assume:
 	// constraints on CPU1
 	at t_if_i1: start_state;
@@ -101,12 +110,10 @@ assume:
     // same instruction for IUV
 	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
 	at t: INSTR_ADD(cpu1/instr_rdata_i);
-    //at t: getEncType(cpu1/instr_rdata_i) == enc_r;
 	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
 	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
 
 	// QED consistent registers
-	//at t_wb_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_wb_i1;
 	at t_wb_i2: foreach r in 0..31: 
 					(regfile_i1_at_t_wb_i1[r] == REGISTER_CPU2(r) || (cpu2/regfile_we_wb && cpu2/regfile_waddr_fw_wb_o == resize(r,6))); 
 				end foreach;
@@ -116,42 +123,20 @@ assume:
 
 	//Flushing
     at t_idex_i2: !cpu1_flush_sig_at_t_idex_i1;
-    //at t_idex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
 	during [t_if_i2, t_idex_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
 	during [t_if_i2, t_idex_i2]: CPU2_NO_FLUSH_STATE;
 
 	//I/O should be the same (no stalling)
-	//at t: (cpu2/data_req_o==0 || cpu2/data_rvalid_i);
 	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
 
-
-	//------------------
-	// at t: INSTR_ADD(cpu1/instr_rdata_i);
-	// at t: getEncType(cpu2/instr_rdata_id) == enc_i_l;
-	// during[t+1, t_done_i2]: (INSTR_ADD(cpu2/instr_rdata_i) || INSTR_LW(cpu2/instr_rdata_i));
-	// at t-1: (INSTR_ADD(cpu2/instr_rdata_i) || INSTR_LW(cpu2/instr_rdata_i));
-	// at t_idex_i2: cpu2/regfile_alu_waddr_fw == 5'h1;
-	// at t_idex_i2: cpu2/regfile_alu_we_fw == 1;
-	// at t_idex_i2: cpu2/regfile_alu_wdata_fw == 32'h1;
-
-	
 prove:
 	// PC register
 	at t_idex_i2: cpu2/pc_if == cpu1_pcIf_at_t_idex_1;
 	// general registers
 	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
-	//at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem[rd_at_t] == regfile_i1_at_t_done_i1[rd_at_t];
-	
-	//--------------------
-	// at t_wb_i1: cpu1/regfile_alu_waddr_fw == getRdAddr(instr_at_t);
-	// at t_wb_i1: cpu1/regfile_alu_we_fw == 1;
-	// at t_wb_i1: cpu1/regfile_alu_wdata_fw == getALUresult(getALUfunc(getInstrType(instr_at_t)),oper1_at_t_id, oper2_at_t_id);
-	// //WB to REGFILE
-	// at t_done_i1: REGISTER_CPU1(getRdAddr(instr_at_t)) == getALUresult(getALUfunc(getInstrType(instr_at_t)),oper1_at_t_id, oper2_at_t_id);
-
 end property;
 
-property S2QED_LOAD; //bound 3 - 5h50m47s
+property S2QED_LOAD;
 dependencies: 
     no_reset,
     in_out_constraints,
@@ -178,7 +163,7 @@ for timepoints:
 	t_done_i1 = t_wb_i1+1,
 
 	t_if_i2 = t,
-	t_id_i2 = t_if_i2+1..4 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_id_i2 = t_if_i2+1..3 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
 	t_ex_i2 = t_id_i2+1,
 	t_gnt_i2 = t_id_i2+1..max_wait_dmem waits_for complete (cpu2/data_gnt_i),
     t_wb_i2 = t_gnt_i2+1..max_wait_dmem waits_for complete (cpu2/data_rvalid_i),
@@ -226,31 +211,337 @@ assume:
 
 	//Flushing
     at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
-    //at t_id_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
 	during [t_if_i2, t_id_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
 	during [t_if_i2, t_id_i2]: CPU2_NO_FLUSH_STATE;
 
 	//I/O should be the same (no stalling)
-	//at t: (cpu2/data_req_o==0 || cpu2/data_rvalid_i);
 	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
-
-
-	// //------------------
-	// at t_id_i2: cpu2/regfile_alu_waddr_fw == 5'h1;
-	// at t_id_i2: cpu2/regfile_alu_we_fw == 1;
-	// at t_id_i2: cpu2/regfile_alu_wdata_fw == 32'hffff_f844; //32'hffff_f844
-	// at t_id_i2: cpu2/regfile_alu_wdata_fw != REGISTER_CPU2(1);
-	// at t_id_i2: cpu2/id_stage_i/operand_a_fw_mux_sel == 2'b01;
 
 prove:
 	// PC register
 	at t_id_i2: cpu2/pc_if == cpu1_pcIf_at_t_id_1;
 	// general registers
 	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+end property;
 
-	//--------------------420
-	// at t_id_i2: (cpu2/regfile_alu_we_fw == 1 && cpu2/regfile_alu_waddr_fw == 5'h1) ? cpu2/regfile_alu_wdata_fw == 32'h1 : true;
-	// at t_id_i2: cpu2/regfile_alu_we_fw == 1 && cpu2/regfile_alu_waddr_fw == 5'h1 && cpu2/regfile_alu_wdata_fw != 32'h0;
-	// at t_wb_i2: addr_o_at_t_ex_1 != addr_o_at_t_ex_2;
-	// at t_gnt_i2 + 1: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_gnt_i1;
+property S2QED_STORE;
+dependencies: 
+    no_reset,
+    in_out_constraints,
+    no_unaligned_case,
+	no_hwlp_case,
+	instr_mem,
+	CPU1_reg_restriction,
+	CPU2_reg_restriction,
+	CPU2_no_prefetching,
+	CPU2_allowed_instr,
+	//data_memory constraints for both cpus
+	no_data_misaligned,
+	data_gnt,
+	bounded_wait_dmem_gnt_1,
+	bounded_wait_dmem_gnt_2,
+	bounded_wait_dmem_1,
+	bounded_wait_dmem_2;
+for timepoints:
+	t_if_i1 = t,
+	t_id_i1 = t_if_i1+1,
+	t_ex_i1 = t_id_i1+1,
+	t_gnt_i1 = t_id_i1+1..max_wait_dmem waits_for complete (cpu1/data_gnt_i),
+	t_done_i1 = t_gnt_i1+1,
+
+	t_if_i2 = t,
+	t_id_i2 = t_if_i2+1..3 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_ex_i2 = t_id_i2+1,
+	t_gnt_i2 = t_id_i2+1..max_wait_dmem waits_for complete (cpu2/data_gnt_i),
+	t_done_i2 = t_gnt_i2+1;
+freeze:
+	//PC register
+	cpu1_pcIf_at_t_id_1 = cpu1/pc_if@t_id_i1,
+
+	//Flushing
+    cpu1_flush_sig_at_t_id_i1 = cpu1_flush_sig@t_id_i1,
+
+	// Data Memory Output
+	data_req_at_ex_i1 = cpu1/data_req_o@t_ex_i1,
+	data_we_at_ex_i1 = cpu1/data_we_o@t_ex_i1,
+	data_addr_at_ex_i1 = cpu1/data_addr_o@t_ex_i1,
+	data_wdata_at_ex_i1 = cpu1/data_wdata_o@t_ex_i1,
+
+    //regfile
+	regfile_i1_at_t_ex_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_ex_i1,
+	regfile_i1_at_t_ex_p_1_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_ex_i1+1,
+	regfile_i1_at_t_gnt_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_gnt_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+
+assume:
+	// constraints on CPU1
+	at t_if_i1: start_state;
+    at t_id_i1: empty_pipeline;
+
+	during [t_if_i1 + 1, t_done_i1]: cpu1/instr_rdata_i == 32'h13; //NOP's after t
+
+    // same instruction for IUV
+	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
+	at t: INSTR_SW(cpu1/instr_rdata_i);
+	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
+
+	// // QED consistent registers
+	at t_gnt_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_gnt_i1;
+	at t_gnt_i2: !cpu2/regfile_alu_we_fw || (cpu2/regfile_alu_wdata_fw == regfile_i1_at_t_done_i1[cpu2/regfile_alu_waddr_fw]);
+
+	//Flushing
+    at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: CPU2_NO_FLUSH_STATE;
+
+	//I/O should be the same (no stalling)
+	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
+
+prove:
+	// PC register
+	at t_id_i2: cpu2/pc_if == cpu1_pcIf_at_t_id_1;
+
+	// Data Memory Output
+	at t_ex_i2: cpu2/data_req_o == data_req_at_ex_i1;
+	at t_ex_i2: cpu2/data_we_o == data_we_at_ex_i1;
+	at t_ex_i2: cpu2/data_addr_o == data_addr_at_ex_i1;
+	at t_ex_i2: cpu2/data_wdata_o == data_wdata_at_ex_i1;
+
+	// general registers
+	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+end property;
+
+property S2QED_BRANCH_TAKEN;
+dependencies: 
+    no_reset,
+    in_out_constraints,
+    no_unaligned_case,
+	no_hwlp_case,
+	instr_mem,
+	CPU1_reg_restriction,
+	CPU2_reg_restriction,
+	CPU2_no_prefetching,
+	CPU2_allowed_instr;
+for timepoints:
+	t_if_i1 = t,
+	t_id_i1 = t_if_i1+1,
+	t_ex_i1 = t_id_i1+1,
+	t_done_i1 = t_ex_i1+1,
+
+	t_if_i2 = t,
+	t_id_i2 = t_if_i2+1..5 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_ex_i2 = t_id_i2+1,
+	t_done_i2 = t_ex_i2+1;
+freeze:
+	//PC register
+	cpu1_pcIf_at_t_id_1 = cpu1/pc_if@t_id_i1,
+	cpu1_pcIf_at_t_done_1 = cpu1/pc_if@t_done_i1,
+
+	//Flushing
+    cpu1_flush_sig_at_t_id_i1 = cpu1_flush_sig@t_id_i1,
+	cpu1_flush_sig_at_t_ex_i1 = cpu1_flush_sig@t_ex_i1,
+
+	// Instruction Memory
+	instr_addr_at_t_ex_i1 = cpu1/instr_addr_o@t_ex_i1,
+
+    //regfile
+	regfile_i1_at_t_ex_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_ex_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+
+assume:
+	// constraints on CPU1
+	at t_if_i1: start_state;
+    at t_id_i1: empty_pipeline;
+
+	during [t_if_i1 + 1, t_done_i1]: cpu1/instr_rdata_i == 32'h13; //NOP's after t
+
+    // same instruction for IUV
+	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
+	at t: INSTR_BEQ(cpu1/instr_rdata_i);
+	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
+
+	//branch taken
+	at t_ex_i1: cpu1/branch_decision == 1;
+
+	// QED Conscistency
+	at t_ex_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_ex_i1;
+	at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+
+	//Flushing
+    at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: CPU2_NO_FLUSH_STATE;
+
+	//I/O should be the same (no stalling)
+	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
+
+prove:
+	// PC register
+	at t_id_i2: cpu2/pc_if == cpu1_pcIf_at_t_id_1;
+	at t_done_i2: cpu2/pc_if == cpu1_pcIf_at_t_done_1;
+
+	// Branch Result
+	at t_ex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_ex_i1;
+
+	// Instr Memory Output
+	at t_ex_i2: cpu2/instr_addr_o == instr_addr_at_t_ex_i1;
+
+	// general registers
+	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+end property;
+
+property S2QED_BRANCH_NOT_TAKEN;
+dependencies: 
+    no_reset,
+    in_out_constraints,
+    no_unaligned_case,
+	no_hwlp_case,
+	instr_mem,
+	CPU1_reg_restriction,
+	CPU2_reg_restriction,
+	CPU2_no_prefetching,
+	CPU2_allowed_instr;
+for timepoints:
+	t_if_i1 = t,
+	t_id_i1 = t_if_i1+1,
+	t_ex_i1 = t_id_i1+1,
+	t_done_i1 = t_ex_i1+1,
+
+	t_if_i2 = t,
+	t_id_i2 = t_if_i2+1..5 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_ex_i2 = t_id_i2+1,
+	t_done_i2 = t_ex_i2+1;
+freeze:
+	//PC register
+	cpu1_pcIf_at_t_id_1 = cpu1/pc_if@t_id_i1,
+	cpu1_pcIf_at_t_done_1 = cpu1/pc_if@t_done_i1,
+
+	//Flushing
+    cpu1_flush_sig_at_t_id_i1 = cpu1_flush_sig@t_id_i1,
+	cpu1_flush_sig_at_t_ex_i1 = cpu1_flush_sig@t_ex_i1,
+
+	// Instruction Memory
+	instr_addr_at_t_ex_i1 = cpu1/instr_addr_o@t_ex_i1,
+
+    //regfile
+	regfile_i1_at_t_ex_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_ex_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+
+assume:
+	// constraints on CPU1
+	at t_if_i1: start_state;
+    at t_id_i1: empty_pipeline;
+
+	during [t_if_i1 + 1, t_done_i1]: cpu1/instr_rdata_i == 32'h13; //NOP's after t
+
+    // same instruction for IUV
+	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
+	at t: INSTR_BEQ(cpu1/instr_rdata_i);
+	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
+
+	//branch taken
+	at t_ex_i1: cpu1/branch_decision == 0;
+
+	// QED Conscistency
+	at t_ex_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_ex_i1;
+	at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+
+	//Flushing
+    at t_id_i2: !cpu1_flush_sig_at_t_id_i1;;
+	during [t_if_i2, t_id_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: CPU2_NO_FLUSH_STATE;
+
+	//I/O should be the same (no stalling)
+	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
+
+prove:
+	// PC register
+	at t_id_i2: cpu2/pc_if == cpu1_pcIf_at_t_id_1;
+
+	// Branch Result
+	at t_ex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_ex_i1;
+
+	// general registers
+	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+end property;
+
+property S2QED_JUMP;
+dependencies: 
+    no_reset,
+    in_out_constraints,
+    no_unaligned_case,
+	no_hwlp_case,
+	instr_mem,
+	CPU1_reg_restriction,
+	CPU2_reg_restriction,
+	CPU2_no_prefetching,
+	CPU2_allowed_instr,
+	no_data_misaligned;
+for timepoints:
+	t_if_i1 = t,
+	t_id_i1 = t_if_i1+1,
+	t_ex_i1 = t_id_i1+1,
+	t_done_i1 = t_ex_i1+1,
+
+	t_if_i2 = t,
+	// The stall for jump instructions should not include lsu stall as they 
+	// execute even if there is a wait on the LSU and id_ready is 0. 
+	// id_ready also can not be part of the wait for same reason
+	t_id_i2 = t_if_i2+1..5 waits_for (CPU2_STALL_FOR_JUMP == 0),
+	t_ex_i2 = t_id_i2+1,
+	t_done_i2 = t_ex_i2+1;
+freeze:
+	//PC register
+	cpu1_pcIf_at_t_id_1 = cpu1/pc_if@t_id_i1,
+
+	//Flushing
+    cpu1_flush_sig_at_t_id_i1 = cpu1_flush_sig@t_id_i1,
+
+	// Instruction Memory
+	instr_addr_at_t_id_i1 = cpu1/instr_addr_o@t_id_i1,
+
+    //regfile
+	regfile_i1_at_t_ex_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_ex_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+
+assume:
+	// constraints on CPU1
+	at t_if_i1: start_state;
+    at t_id_i1: empty_pipeline;
+
+	during [t_if_i1 + 1, t_done_i1]: cpu1/instr_rdata_i == 32'h13; //NOP's after t
+
+    // same instruction for IUV
+	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
+	at t: INSTR_JAL(cpu1/instr_rdata_i);
+	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
+
+
+	// QED Conscistency
+	at t_ex_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_ex_i1;
+	at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+
+	//Flushing
+    at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
+	during [t_if_i2, t_id_i2]: CPU2_NO_FLUSH_STATE;
+
+	//I/O should be the same (no stalling)
+	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
+	at t_id_i2: cpu2/id_ready == 1; // Since id_ready is removed from wait, it had to be assumed here
+
+
+prove:
+	// PC register
+	at t_id_i2: cpu2/pc_if == cpu1_pcIf_at_t_id_1;
+
+	// Instr Memory Output
+	at t_id_i2: cpu2/instr_addr_o == instr_addr_at_t_id_i1;
+
+	// general registers
+	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
 end property;
