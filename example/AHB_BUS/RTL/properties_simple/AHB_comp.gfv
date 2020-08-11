@@ -1,0 +1,58 @@
+completeness AHB;
+
+disable iff: rst;
+
+inputs:
+	clk,
+	rst,
+	master_in0,
+	master_in0_sync,
+	master_in1,
+	master_in1_sync,
+	master_in2,
+	master_in2_sync,
+	master_in3,
+	master_in3_sync,
+	slave_in0,
+	master_out0_sync,
+	master_out1_sync,
+	master_out2_sync,
+	master_out3_sync,
+	slave_in0_sync,
+	slave_out0_sync,
+	slave_out1_sync,
+	slave_out2_sync;
+
+determination_requirements:
+	if (master_out0_notify) determined(master_out0) endif;
+	determined(master_out0_notify);
+	if (master_out1_notify) determined(master_out1) endif;
+	determined(master_out1_notify);
+	if (master_out2_notify) determined(master_out2) endif;
+	determined(master_out2_notify);
+	if (master_out3_notify) determined(master_out3) endif;
+	determined(master_out3_notify);
+
+	determined(slave_in0_notify);
+	//determined(slave_in1_notify);
+	//determined(slave_in2_notify);
+
+	determined(slave_out0_notify);
+	//determined(slave_out1_notify);
+	//determined(slave_out2_notify);
+	//if (slave_out3_notify) determined(slave_out0) endif;
+
+reset_property: reset;
+
+property_graph:
+simple_ops :=  master3_to_slave0_simple, master2_to_slave0_simple, master1_to_slave0_simple, master0_to_slave0_simple;
+complex_ops := master3_to_slave0, master2_to_slave0, master1_to_slave0, master0_to_slave0;
+reset -> simple_ops;
+reset -> wait;
+wait->simple_ops;
+wait->wait;
+simple_ops->complex_ops;
+complex_ops->complex_ops;
+
+end completeness;
+
