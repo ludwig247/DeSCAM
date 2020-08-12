@@ -6,7 +6,7 @@
 #define SCAM_FIFO_HPP
 
 template<typename T>
-FIFO<T>::FIFO (const char *name, unsigned int size) :
+Regfile<T>::Regfile (const char *name, unsigned int size) :
         sc_prim_channel(name),
         fifo_size(size),
         state(EMPTY),
@@ -18,7 +18,7 @@ FIFO<T>::FIFO (const char *name, unsigned int size) :
 
 
 template<typename T>
-void FIFO<T>::read(T &out) {
+void Regfile<T>::read(T &out) {
     if (state == EMPTY) {
         wait(writer_notify);
     }
@@ -33,7 +33,7 @@ void FIFO<T>::read(T &out) {
 }
 
 template<typename T>
-void FIFO<T>::write(const T &val) {
+void Regfile<T>::write(const T &val) {
     if(state == FULL){
         wait(reader_notify);
     }

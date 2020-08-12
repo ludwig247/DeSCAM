@@ -9,11 +9,11 @@
 #include "FIFO_ifs.h"
 
 template<typename T>
-class FIFO : public sc_prim_channel,
-                     virtual public FIFO_in_if<T>,          //
+class Regfile : public sc_prim_channel,
+                virtual public FIFO_in_if<T>,          //
                      virtual public FIFO_out_if<T> {        //
 public:
-    FIFO(const char *name, unsigned int size);
+    Regfile(const char *name, unsigned int size);
 
     // Consumer reads Value from FIFO (blocking)
     void read(T &out);

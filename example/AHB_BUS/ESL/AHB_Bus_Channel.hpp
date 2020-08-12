@@ -10,11 +10,16 @@ AHB_Bus_Channel::AHB_Bus_Channel (const char *name) :
         sc_prim_channel(name),
         state(MASTER_REQ),
         master_id(10),
-        slave_id(10)
-        {}
+        slave_id(10),
+        fromReset(true)
+        {
+        }
 
 
 void AHB_Bus_Channel::write_master(const bus_req_t &val, int id) {
+    if(fromReset){
+        wait(dummy_master);
+    }
     while(state != MASTER_REQ){
         wait(master_read_notify);
     }
@@ -32,6 +37,9 @@ void AHB_Bus_Channel::write_master(const bus_req_t &val, int id) {
             }
             req.hwdata = val.hwdata;
             req.haddr = val.haddr;
+            master_dummy.notify();
+            wait(dummy_master);
+            if(master_id != id) continue;
             state = SLAVE_REQ;
             master_write_notify.notify();
             return;
@@ -95,6 +103,14 @@ void AHB_Bus_Channel::read_master(bus_resp_t &out, int id) {
         else{
             wait(slave_write_notify);
         }
+    }
+}
+
+void AHB_Bus_Channel::dummyFunc(){
+    while(true){
+        fromReset = false;
+        dummy_master.notify();
+        wait(master_dummy);
     }
 }
 

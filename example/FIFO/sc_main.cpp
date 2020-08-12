@@ -5,7 +5,7 @@
 
 int sc_main(int argc, char *argv[]){
   Producer P1("Producer");
-  FIFO<int> channel("FIFO_Shared", 3);
+  Regfile<int> channel("FIFO_Shared", 3);
   Consumer C1("Consumer");
 
   P1.out.bind(channel);

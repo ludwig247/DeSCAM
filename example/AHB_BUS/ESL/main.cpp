@@ -9,6 +9,7 @@
 #include "AHB_Bus_Channel.h"
 #include "Master.h"
 #include "Slave.h"
+#include "Initializer_Dummy.h"
 
 int sc_main(int, char **)  {
 //    Mdummy m0("master_0");
@@ -65,6 +66,7 @@ int sc_main(int, char **)  {
     Slave S1("Slave1");
     Slave S2("Slave2");
     Slave S3("Slave3");
+    Initializer_Dummy I("Initializer");
     M0.master_out.bind(Bus);
     M0.master_in.bind(Bus);
     M1.master_out.bind(Bus);
@@ -81,6 +83,7 @@ int sc_main(int, char **)  {
     S2.slave_in.bind(Bus);
     S3.slave_out.bind(Bus);
     S3.slave_in.bind(Bus);
+    I.init_out.bind(Bus);
     sc_start(10,SC_PS);
     return 0;
 }
