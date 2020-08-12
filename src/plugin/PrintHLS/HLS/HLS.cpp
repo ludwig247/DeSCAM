@@ -34,9 +34,11 @@ std::map<std::string, std::string> HLS::printModule() {
     dataTypes();
     pluginOutput.insert(std::make_pair(moduleName + "_data_Types.h", ss.str()));
 
-    ss.str("");
-    functions();
-    pluginOutput.insert(std::make_pair(moduleName + "_functions.h", ss.str()));
+    if (!currentModule->getFunctionMap().empty()) {
+        ss.str("");
+        functions();
+        pluginOutput.insert(std::make_pair(moduleName + "_functions.h", ss.str()));
+    }
 
     ss.str("");
     operations();
@@ -48,7 +50,9 @@ std::map<std::string, std::string> HLS::printModule() {
 void HLS::operations()
 {
     ss << "#include \"ap_int.h\"\n";
-    ss << "#include \"" << moduleName << "_functions.h\"\n";
+    if (!currentModule->getFunctionMap().empty()) {
+        ss << "#include \"" << moduleName << "_functions.h\"\n";
+    }
     ss << "#include \"" << moduleName << "_data_Types.h\"\n\n";
 
     ss << "void " << moduleName << "_operations(\n";
