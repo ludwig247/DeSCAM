@@ -21,6 +21,8 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper{
 
         static int bitPosition(long int n);
 
+        static std::string intToBinary(unsigned int n, unsigned int size);
+
         static std::string typeToString(StmtType type);
         static std::string subTypeBitwiseToString(SubTypeBitwise type);
         static SubTypeBitwise getSubTypeBitwise(const std::string &name);

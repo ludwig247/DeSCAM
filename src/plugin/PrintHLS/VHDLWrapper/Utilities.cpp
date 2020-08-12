@@ -1,5 +1,6 @@
 #include "Utilities.h"
 #include <assert.h>
+#include <algorithm>
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
@@ -20,6 +21,20 @@ int Utilities::bitPosition(long int n) {
             n >>= 1;
         }
     }
+}
+
+std::string Utilities::intToBinary(unsigned int n, unsigned int size) {
+
+    std::string res;
+
+    for (int i=0; i<size; i++){
+        res += std::to_string(n%2);
+        n = n / 2;
+    }
+
+    std::reverse(res.begin(), res.end());
+
+    return res;
 }
 
 std::string Utilities::typeToString(StmtType type) {

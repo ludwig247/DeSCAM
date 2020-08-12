@@ -28,9 +28,9 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 std::string moduleName;
                 std::shared_ptr<OptimizerHLS> optimizer;
                 std::unique_ptr<SignalFactory> signalFactory;
+                std::string operationEnum();
 
                 virtual std::string printTypes();
-                virtual std::string operationEnum() = 0;
                 virtual std::string printArchitecture();
 
                 virtual void entity(std::stringstream &ss) = 0;

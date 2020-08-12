@@ -28,7 +28,6 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
             std::map<std::string, std::string> printModule() override ;
 
         private:
-            std::string operationEnum() override ;
 
             void entity(std::stringstream& ss) override ;
             void signals(std::stringstream& ss) override ;

@@ -471,8 +471,9 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
 
     auto printModuleInputVars = [&ss](Variable* var, std::string const& prefix, std::string const& suffix) {
         ss << "\t\t\t\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
-           << (var->isEnumType() ?
-               SignalFactory::enumToVector(var) :
+           << (
+//               var->isEnumType() ?
+//               SignalFactory::enumToVector(var) :
                SignalFactory::getName(var, Style::DOT))
            << ";\n";
     };
@@ -515,21 +516,4 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
        << "\t\t\tend if;\n"
        << "\t\tend if;\n"
        << "\tend process;\n\n";
-}
-
-std::string VHDLWrapperMCO::operationEnum()
-{
-    std::stringstream ss;
-    ss << "\t-- Operations\n"
-       << "\ttype " << propertySuiteHelper->getName() << "_operation_t is (";
-    auto operations = propertySuiteHelper->getOperationProperties();
-    for (auto operation = operations.begin(); operation != operations.end(); ++ operation) {
-        ss << "op_" << (*operation)->getName();
-        if (std::next(operation) != operations.end()) {
-            ss << ", ";
-        }
-    }
-    ss << ");\n\n";
-
-    return ss.str();
 }

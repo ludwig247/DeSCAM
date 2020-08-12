@@ -332,8 +332,8 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
         for (const auto& var : vars) {
             ss << "\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
                << (
-                       var->isEnumType() ?
-                       SignalFactory::enumToVector(var) :
+                       //var->isEnumType() ?
+                       //SignalFactory::enumToVector(var) :
                        SignalFactory::getName(var, Style::DOT))
                << ";\n";
         }
@@ -367,19 +367,6 @@ void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
        << "\tend process;\n\n";
 }
 
-std::string VHDLWrapperSCO::operationEnum()
-{
-    std::stringstream ss;
-    ss << "\t-- Operations\n"
-       << "\ttype " << propertySuiteHelper->getName() << "_operation_t is (";
-    auto operations = propertySuiteHelper->getOperationProperties();
-    for (auto op : operations) {
-        ss << "op_" << op->getName() << ", ";
-    }
-    ss << "op_state_wait);\n\n";
-
-    return ss.str();
-}
 
 bool VHDLWrapperSCO::emptyModule()
 {

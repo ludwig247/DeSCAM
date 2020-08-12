@@ -319,3 +319,26 @@ void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
     }
     ss << "\n";
 }
+
+std::string VHDLWrapper::operationEnum()
+{
+    int vectorSize = ceil(log2(propertySuiteHelper->getOperationProperties().size()));
+    if (vectorSize == 0) {
+        vectorSize++;
+    };
+    std::string opTypeName = propertySuiteHelper->getName() + "_operation_t";
+
+    std::stringstream ss;
+    ss << "\t-- Operations\n"
+       << "\tsubtype " << opTypeName << " is std_logic_vector("
+       << std::to_string(vectorSize - 1) << " downto 0);\n";
+    auto operations = propertySuiteHelper->getOperationProperties();
+    int i = 0;
+    for (auto op : operations) {
+        ss << "\tconstant op_" << op->getName() << " : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n";
+        i++;
+    }
+    ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n\n";
+
+    return ss.str();
+}
