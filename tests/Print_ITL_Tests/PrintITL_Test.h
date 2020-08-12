@@ -96,7 +96,7 @@ INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Examples,
         Examples,
         ITLTestExamples,
-        testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/tests.h")),
+        testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/tests.list")),
         ITLTest::PrintToStringParamName()
                 );
 
@@ -104,7 +104,7 @@ INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Functionality,
         Functionality,
         ITLTestFunctionality,
-        testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/functionality_tests.h")),
+        testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/functionality_tests.list")),
         ITLTest::PrintToStringParamName()
         );
 
