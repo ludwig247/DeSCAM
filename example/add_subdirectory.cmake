@@ -10,4 +10,5 @@ add_subdirectory(Whishbone)
 #add_subdirectory(operation-pipeline)
 #add_subdirectory(UART_NORDIC)
 #add_subdirectory(RISCV_Test_ELF)
+add_subdirectory(RISCV_RI5CY)
 
