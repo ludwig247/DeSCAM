@@ -29,7 +29,6 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
         private:
 
-            void entity(std::stringstream& ss) override ;
             void signals(std::stringstream& ss) override ;
             void component(std::stringstream& ss) override ;
             void componentInst(std::stringstream& ss) override ;

@@ -33,34 +33,6 @@ std::map<std::string, std::string> VHDLWrapperSCO::printModule() {
     return pluginOutput;
 }
 
-void VHDLWrapperSCO::entity(std::stringstream &ss) {
-    // Print Entity
-    ss << "entity " + propertySuiteHelper->getName() + "_module is\n";
-    ss << "port(\n";
-
-    auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
-        for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); ++dataSignal) {
-            ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
-               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
-            if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
-                ss << ";\n";
-            }
-        }
-    };
-    printPortSignals(signalFactory->getInputs(), false);
-    printPortSignals(signalFactory->getOutputs(), false);
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
-        ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
-    }
-    for (const auto syncSignal : propertySuiteHelper->getSyncSignals()) {
-        ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
-    }
-    printPortSignals(signalFactory->getControlSignals(), true);
-
-    ss << "\n);\n";
-    ss << "end " + propertySuiteHelper->getName() << "_module;\n\n";
-}
-
 // Print Signals
 void VHDLWrapperSCO::signals(std::stringstream &ss) {
     auto printVars = [&ss](
