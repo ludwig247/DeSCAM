@@ -33,6 +33,11 @@ macro boolean INSTR_JAL (unsigned instr_imem) :=
 	(instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4)	       //rd
 end macro;
 
+macro boolean INSTR_UI (unsigned instr_imem) :=
+	(instr_imem[6:0] == 7'h37 || instr_imem[6:0] == 7'h17) &&      //opcode 
+	(instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4)	       //rd
+end macro;
+
 constraint CPU2_allowed_instr :=
 	!((getInstrType(cpu2/instr_rdata_i) == instr_unknown));
 end constraint;
@@ -180,15 +185,20 @@ freeze:
     regfile_i1_at_t_wb_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_wb_i1,
     regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1,
 
+	//Destination Register
+	rd = getRdAddr(cpu1/instr_rdata_i)@t,
+
 	//write back from ALU
-	alu_waddr_wb_at_t_wb_1 = cpu1/regfile_alu_waddr_fw@t_wb_i1,
-	alu_we_wb_at_t_wb_1 = cpu1/regfile_alu_we_fw@t_wb_i1,
-	alu_wdata_wb_at_t_wb_1 = cpu1/regfile_alu_wdata_fw@t_wb_i1,
+	alu_we_wb_at_t_wb_2 = cpu2/regfile_alu_we_fw@t_wb_i2,
+	alu_addr_wb_at_t_wb_2 = cpu2/regfile_alu_waddr_fw@t_wb_i2,
 
 	//Data memormy
+	data_req_at_ex_i1 = cpu1/data_req_o@t_ex_i1,
 	addr_o_at_t_ex_1 = cpu1/data_addr_o@t_ex_i1,
 	addr_o_at_t_ex_2 = cpu2/data_addr_o@t_ex_i2,
 	rdata_at_t_wb_1 = cpu1/data_rdata_i@t_wb_i1;
+
+
 assume:
 	// constraints on CPU1
 	at t_if_i1: start_state;
@@ -204,7 +214,7 @@ assume:
 
 	// QED consistent registers
 	at t_gnt_i2 + 1: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_gnt_i1;
-	at t_wb_i2: !cpu2/regfile_alu_we_fw || (cpu2/regfile_alu_we_fw && cpu2/regfile_alu_wdata_fw == regfile_i1_at_t_wb_i1[cpu2/regfile_alu_waddr_fw]);
+	// at t_wb_i2: !cpu2/regfile_alu_we_fw || (cpu2/regfile_alu_wdata_fw == regfile_i1_at_t_wb_i1[cpu2/regfile_alu_waddr_fw]);
 
 	//Data memory input consistency
 	at t_wb_i2: DATA_MEM_CONCISTENCY(addr_o_at_t_ex_1, addr_o_at_t_ex_2, rdata_at_t_wb_1, cpu2/data_rdata_i);
@@ -220,8 +230,14 @@ assume:
 prove:
 	// PC register
 	at t_id_i2: cpu2/pc_if == cpu1_pcIf_at_t_id_1;
+
+	//data Mem outputs
+	at t_ex_i2: cpu2/data_addr_o == addr_o_at_t_ex_1;
+    at t_ex_i2: cpu2/data_req_o == data_req_at_ex_i1;
+
 	// general registers
-	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+	// at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+	at t_done_i2: (alu_we_wb_at_t_wb_2 && alu_addr_wb_at_t_wb_2 == rd) ? 1 : cpu2/id_stage_i/registers_i/riscv_register_file_i/mem[rd] == regfile_i1_at_t_done_i1[rd];
 end property;
 
 property S2QED_STORE;
@@ -288,7 +304,7 @@ assume:
 
 	// // QED consistent registers
 	at t_gnt_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_gnt_i1;
-	at t_gnt_i2: !cpu2/regfile_alu_we_fw || (cpu2/regfile_alu_wdata_fw == regfile_i1_at_t_done_i1[cpu2/regfile_alu_waddr_fw]);
+	// at t_gnt_i2: !cpu2/regfile_alu_we_fw || (cpu2/regfile_alu_wdata_fw == regfile_i1_at_t_done_i1[cpu2/regfile_alu_waddr_fw]);
 
 	//Flushing
     at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
@@ -309,7 +325,7 @@ prove:
 	at t_ex_i2: cpu2/data_wdata_o == data_wdata_at_ex_i1;
 
 	// general registers
-	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+	// at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
 end property;
 
 property S2QED_BRANCH_TAKEN;
@@ -367,7 +383,7 @@ assume:
 
 	// QED Conscistency
 	at t_ex_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_ex_i1;
-	at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+	// at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
 
 	//Flushing
     at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
@@ -389,7 +405,7 @@ prove:
 	at t_ex_i2: cpu2/instr_addr_o == instr_addr_at_t_ex_i1;
 
 	// general registers
-	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+	// at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
 end property;
 
 property S2QED_BRANCH_NOT_TAKEN;
@@ -447,10 +463,10 @@ assume:
 
 	// QED Conscistency
 	at t_ex_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_ex_i1;
-	at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+	// at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
 
 	//Flushing
-    at t_id_i2: !cpu1_flush_sig_at_t_id_i1;;
+    at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
 	during [t_if_i2, t_id_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_id_i1;
 	during [t_if_i2, t_id_i2]: CPU2_NO_FLUSH_STATE;
 
@@ -465,7 +481,7 @@ prove:
 	at t_ex_i2: cpu2_flush_sig == cpu1_flush_sig_at_t_ex_i1;
 
 	// general registers
-	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+	// at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
 end property;
 
 property S2QED_JUMP;
@@ -523,7 +539,13 @@ assume:
 
 	// QED Conscistency
 	at t_ex_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_ex_i1;
-	at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+	// at t_ex_i2: !cpu2/regfile_we_wb || (cpu2/regfile_wdata == regfile_i1_at_t_done_i1[cpu2/regfile_waddr_fw_wb_o]);
+	at t_ex_i2: foreach r in 0..31: 
+					(regfile_i1_at_t_ex_i1[r] == REGISTER_CPU2(r) || (cpu2/regfile_we_wb && cpu2/regfile_waddr_fw_wb_o == resize(r,6))); 
+				end foreach;
+	at t_ex_i2: foreach r in 0..31: 
+					(!cpu2/regfile_we_wb || (cpu2/regfile_we_wb && cpu2/regfile_wdata == regfile_i1_at_t_ex_i1[r])); 
+				end foreach;
 
 	//Flushing
     at t_id_i2: !cpu1_flush_sig_at_t_id_i1;
@@ -542,6 +564,73 @@ prove:
 	// Instr Memory Output
 	at t_id_i2: cpu2/instr_addr_o == instr_addr_at_t_id_i1;
 
+	// general registers
+	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
+end property;
+
+property S2QED_UI;
+dependencies: 
+    no_reset,
+    in_out_constraints,
+    no_unaligned_case,
+	no_hwlp_case,
+	instr_mem,
+	CPU1_reg_restriction,
+	CPU2_reg_restriction,
+	CPU2_no_prefetching,
+	CPU2_allowed_instr;
+for timepoints:
+	t_if_i1 = t,
+	t_idex_i1 = t_if_i1+1,
+	t_wb_i1 = t_idex_i1+1,
+	t_done_i1 = t_wb_i1+1,
+
+	t_if_i2 = t,
+	t_idex_i2 = t_if_i2+1..5 waits_for (CPU2_STALL == 0 && cpu2/id_ready == 1),
+	t_wb_i2 = t_idex_i2+1,
+	t_done_i2 = t_wb_i2+1;
+freeze:
+	//PC register
+	cpu1_pcIf_at_t_idex_1 = cpu1/pc_if@t_idex_i1,
+
+	//Flushing
+    cpu1_flush_sig_at_t_idex_i1 = cpu1_flush_sig@t_idex_i1,
+
+    //regfile
+    regfile_i1_at_t_wb_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_wb_i1,
+    regfile_i1_at_t_done_i1 = cpu1/id_stage_i/registers_i/riscv_register_file_i/mem@t_done_i1;
+assume:
+	// constraints on CPU1
+	at t_if_i1: start_state;
+    at t_idex_i1: empty_pipeline;
+
+	during [t_if_i1 + 1, t_done_i1]: cpu1/instr_rdata_i == 32'h13; //NOP's after t
+
+    // same instruction for IUV
+	at t: !((getInstrType(cpu1/instr_rdata_i) == instr_unknown)); 
+	at t: INSTR_UI(cpu1/instr_rdata_i);
+	at t: cpu1/instr_rdata_i == cpu2/instr_rdata_i;
+	at t: cpu1/instr_addr_o == cpu2/instr_addr_o;
+
+	// QED consistent registers
+	at t_wb_i2: foreach r in 0..31: 
+					(regfile_i1_at_t_wb_i1[r] == REGISTER_CPU2(r) || (cpu2/regfile_we_wb && cpu2/regfile_waddr_fw_wb_o == resize(r,6))); 
+				end foreach;
+	at t_wb_i2: foreach r in 0..31: 
+					(!cpu2/regfile_we_wb || (cpu2/regfile_we_wb && cpu2/regfile_wdata == regfile_i1_at_t_wb_i1[r])); 
+				end foreach;
+
+	//Flushing
+    at t_idex_i2: !cpu1_flush_sig_at_t_idex_i1;
+	during [t_if_i2, t_idex_i2]: cpu2_flush_sig == cpu1_flush_sig_at_t_idex_i1;
+	during [t_if_i2, t_idex_i2]: CPU2_NO_FLUSH_STATE;
+
+	//I/O should be the same (no stalling)
+	at t: CPU2_STALL == 0 && cpu2/id_ready == 1 && cpu2/if_stage_i/if_ready == 1;
+
+prove:
+	// PC register
+	at t_idex_i2: cpu2/pc_if == cpu1_pcIf_at_t_idex_1;
 	// general registers
 	at t_done_i2: cpu2/id_stage_i/registers_i/riscv_register_file_i/mem == regfile_i1_at_t_done_i1;
 end property;
