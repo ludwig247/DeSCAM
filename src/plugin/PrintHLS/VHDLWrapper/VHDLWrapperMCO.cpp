@@ -366,7 +366,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
             SignalRegister = SignalFactory::getName(reg, Style::DOT);
             SignalReset = getResetValue(reg);
         }
-        ss << "\tprocess(clk ,rst)\n"
+        ss << "\tprocess(clk, rst)\n"
            << "\tbegin\n"
            << "\t\tif (rst = '1') then\n"
            << "\t\t\tin_" << SignalFactory::getName(reg, Style::UL) << " <= " << SignalReset << ";\n"
