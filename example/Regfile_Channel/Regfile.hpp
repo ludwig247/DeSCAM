@@ -6,17 +6,24 @@ Regfile::Regfile (const char *name) :
 }
 
 
-void Regfile::read(int &out, int address) {
-    if(address < 32){
-        out = regs_array.at(address);
-    }
+void Regfile::read(std::array<int,32> &out) {
+    out = regs;
     return;
 }
 
 void Regfile::write(const int &val, int address) {
-    if(address > 0 && address < 32){
-        regs_array.at(address) = val;
+    assert(address < 32);
+    write_dummy_notify.notify();
+    wait(dummy_write_notify);
+    for(int i=0; i<32; i++) {
+        regs.at(i) = address == i ? val : regs.at(i);
     }
     return;
+}
+void Regfile::dummyFunc(){
+    while(true){
+        dummy_write_notify.notify();
+        wait(write_dummy_notify);
+    }
 }
 

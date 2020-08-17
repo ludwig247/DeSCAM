@@ -37,8 +37,8 @@ SC_MODULE(Master){
             if(bus_resp.hresp == ok_resp) {
                 assert(bus_resp.hrdata == bus_req.hwdata && "Response has returned to the wrong master!");
             }
-
-            if(std::rand()%2 == 0) insert_state();
+            wait(std::rand()%3, SC_PS);
+            //if(std::rand()%2 == 0) insert_state();
         }
     }
 

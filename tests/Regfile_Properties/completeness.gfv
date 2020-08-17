@@ -1,0 +1,24 @@
+completeness Regfile;
+disable iff:(rst);
+inputs: rst, clk, Control_to_Regs_data, Control_to_Regs_address, Control_sync;
+
+determination_requirements:
+  determined(Regs_to_Control);
+  determined(Control_notify);
+
+reset_property:
+  reset;
+property_graph:
+start_state_6 -> start_state_6;
+start_state_6 -> start_state_10;
+start_state_6 -> start_state_12;
+start_state_10 -> start_state_6;
+start_state_10 -> start_state_10;
+start_state_10 -> start_state_12;
+start_state_12 -> start_state_6;
+start_state_12 -> start_state_10;
+start_state_12 -> start_state_12;
+reset -> start_state_6;
+reset -> start_state_10;
+reset -> start_state_12;
+end completeness;

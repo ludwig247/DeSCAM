@@ -20,7 +20,7 @@ void AHB_Bus_Channel::write_master(const bus_req_t &val, int id) {
     if(fromReset){
         wait(dummy_master);
     }
-    while(state != MASTER_REQ){
+    if(state != MASTER_REQ){
         wait(master_read_notify);
     }
     while(true) {
@@ -51,7 +51,7 @@ void AHB_Bus_Channel::write_master(const bus_req_t &val, int id) {
 }
 
 void AHB_Bus_Channel::read_slave(bus_req_t &out, int id) {
-    while(state != SLAVE_REQ){
+    if(state != SLAVE_REQ){
         wait(master_write_notify);
     }
     while(true) {
@@ -69,7 +69,7 @@ void AHB_Bus_Channel::read_slave(bus_req_t &out, int id) {
 }
 
 void AHB_Bus_Channel::write_slave(const bus_resp_t &val, int id) {
-    while(state != SLAVE_RESP){
+    if(state != SLAVE_RESP){
         wait(slave_read_notify);
     }
     while(true) {
@@ -87,7 +87,7 @@ void AHB_Bus_Channel::write_slave(const bus_resp_t &val, int id) {
 }
 
 void AHB_Bus_Channel::read_master(bus_resp_t &out, int id) {
-    while(state != MASTER_RESP){
+    if(state != MASTER_RESP){
         wait(slave_write_notify);
     }
     while(true){
@@ -107,8 +107,8 @@ void AHB_Bus_Channel::read_master(bus_resp_t &out, int id) {
 }
 
 void AHB_Bus_Channel::dummyFunc(){
+    fromReset = false;
     while(true){
-        fromReset = false;
         dummy_master.notify();
         wait(master_dummy);
     }
