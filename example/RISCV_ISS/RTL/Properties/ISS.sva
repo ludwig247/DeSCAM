@@ -164,7 +164,7 @@ implies
 	t_end(o)##0 regfileWrite_dst() == regfileWrite_dst_0 and
 	t_end(o)##0 regfileWrite_dstData() == regfileWrite_dstData_0 and
 	t_end(o)##0 toMemoryPort_sig_addrIn() == getALUresult(ALU_ADD,fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],getImmediate(fromMemoryPort_sig_loadedData_0)) and
-	t_end(o)##0 toMemoryPort_sig_dataIn() == getImmediate(fromMemoryPort_sig_loadedData_0) and
+	t_end(o)##0 toMemoryPort_sig_dataIn() == fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)] and
 	t_end(o)##0 toMemoryPort_sig_mask() == getMemoryMask(getInstrType(fromMemoryPort_sig_loadedData_0)) and
 	t_end(o)##0 toMemoryPort_sig_req() == ME_WR and
 	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
@@ -248,13 +248,13 @@ implies
 	t_end(o)##0 Fetch_Req_1() and
 	t_end(o)##0 pcReg() == (4 + pcReg_0) and
 	t_end(o)##0 regfileWrite_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
-	t_end(o)##0 regfileWrite_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]) and
+	t_end(o)##0 regfileWrite_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],getImmediate(fromMemoryPort_sig_loadedData_0)) and
 	t_end(o)##0 toMemoryPort_sig_addrIn() == (4 + pcReg_0) and
 	t_end(o)##0 toMemoryPort_sig_dataIn() == 0 and
 	t_end(o)##0 toMemoryPort_sig_mask() == mt_w and
 	t_end(o)##0 toMemoryPort_sig_req() == ME_RD and
 	t_end(o)##0 toRegsPort_sig_dst() == ((fromMemoryPort_sig_loadedData_0>>7) & 31) and
-	t_end(o)##0 toRegsPort_sig_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>20) & 31)]) and
+	t_end(o)##0 toRegsPort_sig_dstData() == getALUresult(getALUfunc(getInstrType(fromMemoryPort_sig_loadedData_0)),fromRegsPort_sig_0[((fromMemoryPort_sig_loadedData_0>>15) & 31)],getImmediate(fromMemoryPort_sig_loadedData_0)) and
 	during_o (t, 1, t_end(o), 0, fromMemoryPort_notify() == 0) and
 	during_o (t, 1, t_end(o), -1, toMemoryPort_notify() == 0) and
 	t_end(o)##0 toMemoryPort_notify() == 1 and

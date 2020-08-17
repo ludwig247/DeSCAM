@@ -88,7 +88,7 @@ package iss_types;
 			if (funct3 == 'h00) begin
 				return instr_addi;
 			end
-			else if (funct3 == 3'h01) begin
+			else if (funct3 == 'h01) begin
 				return instr_slli;
 			end
 			else if (funct3 == 'h02) begin

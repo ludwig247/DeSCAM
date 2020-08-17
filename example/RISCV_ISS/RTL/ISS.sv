@@ -1,3 +1,8 @@
+//
+//Created by Luis Rivas on 15/06/2020
+//RTL implemntation of a RISCV ISA
+
+
 import top_level_types::*;
 import iss_types::*;
 
@@ -58,7 +63,8 @@ module ISS (
 						encodedInstr = fromMemoryPort.loadeddata;
 						opcode = get_enc_type(encodedInstr);
 						aluOp1 = fromRegsPort[encodedInstr[19:15]]; //rs1 = encodedInstr[19:15]
-						aluOp2 = fromRegsPort[encodedInstr[24:20]]; //rs2 = encodedInstr[24:20]
+						if (opcode == enc_i_i || opcode == enc_s || opcode == enc_i_l) aluOp2 = get_immediate(encodedInstr);
+						else aluOp2 = fromRegsPort[encodedInstr[24:20]]; //rs2 = encodedInstr[24:20]
 						aluResult = get_alu_result(get_alu_funct(get_instr_type(encodedInstr)), aluOp1, aluOp2);
 
 						if (opcode == enc_r || opcode == enc_i_i) begin
@@ -70,7 +76,6 @@ module ISS (
 							phase <= fetch_ph;	
 						end	
 						else if (opcode == enc_s || opcode == enc_i_l) begin	
-							aluOp2 = get_immediate(encodedInstr);
 							aluResult = get_alu_result(alu_add, aluOp1, aluOp2);
 							toMemoryPort.mask <= get_memory_mask(get_instr_type(encodedInstr));
 							toMemoryPort.addrin <= aluResult;
@@ -78,7 +83,7 @@ module ISS (
 
 							if(opcode == enc_s) begin
 								toMemoryPort.req <= me_wr;
-								toMemoryPort.datain <= aluOp2;
+								toMemoryPort.datain <= fromRegsPort[encodedInstr[24:20]];
 							end
 							else begin	
 								toMemoryPort.datain <= 1'b0;

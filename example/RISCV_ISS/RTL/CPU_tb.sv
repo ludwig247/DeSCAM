@@ -13,25 +13,25 @@ module CPU_tb();
 	wire CtlToMem_port_notify;
 
 	CPU IF_CPU(
-		clk,
-		rst,
-		MemToCtl_port,
-		MemToCtl_port_sync,
-		MemToCtl_port_notify,
-		CtlToMem_port,
-		CtlToMem_port_sync,
-		CtlToMem_port_notify
+		.clk(clk),
+		.rst(rst),
+		.fromMemoryPort(MemToCtl_port),
+		.fromMemoryPort_sync(MemToCtl_port_notify),
+		.fromMemoryPort_notify(MemToCtl_port_sync),
+		.toMemoryPort(CtlToMem_port),
+		.toMemoryPort_sync(CtlToMem_port_sync),
+		.toMemoryPort_notify(CtlToMem_port_notify)
 	);
 
 	Memory IF_Memory(
-		clk,
-		rst,
-		MemToCtl_port,
-		MemToCtl_port_sync,
-		MemToCtl_port_notify,
-		CtlToMem_port,
-		CtlToMem_port_sync,
-		CtlToMem_port_notify
+		.clk(clk),
+		.rst(rst),
+		.CtlToMem_port(CtlToMem_port),
+		.CtlToMem_port_sync(CtlToMem_port_notify),
+		.CtlToMem_port_notify(CtlToMem_port_sync),
+		.MemToCtl_port(MemToCtl_port),
+		.MemToCtl_port_sync(MemToCtl_port_sync),
+		.MemToCtl_port_notify(MemToCtl_port_notify)
 	);
 
 	always
@@ -42,8 +42,8 @@ module CPU_tb();
 		rst = 1'b1;
 		#20 rst = 1'b0;
 		#40;
-		wait (MemToCtl_port.loadedData == 1048691);
+		wait (MemToCtl_port.loadeddata == 1048691);
 		$display("Simulation ended");
-		$stop;
+		$finish;
 	end
 endmodule

@@ -16,25 +16,25 @@ module CPU (
 	unsigned_32 fromRegsPort;
 
 	ISS IF_ISS(
-		clk, 
-		rst, 
-		fromMemoryPort, 
-		fromMemoryPort_sync, 
-		fromMemoryPort_notify,
-		fromRegsPort,
-		toMemoryPort,
-		toMemoryPort_sync,
-		toMemoryPort_notify,
-		toRegsPort,
-		toRegsPort_notify
+		.clk(clk), 
+		.rst(rst), 
+		.fromMemoryPort(fromMemoryPort), 
+		.fromMemoryPort_sync(fromMemoryPort_sync), 
+		.fromMemoryPort_notify(fromMemoryPort_notify),
+		.fromRegsPort(fromRegsPort),
+		.toMemoryPort(toMemoryPort),
+		.toMemoryPort_sync(toMemoryPort_sync),
+		.toMemoryPort_notify(toMemoryPort_notify),
+		.toRegsPort(toRegsPort),
+		.toRegsPort_notify(toRegsPort_notify)
 	);
 
 	regs_ISS IF_Reg(
-		clk,
-		rst,
-		toRegsPort,
-		toRegsPort_notify,
-		fromRegsPort
+		.clk(clk), 
+		.rst(rst),
+		.CtlToRegs_port(toRegsPort),
+		.CtlToRegs_port_sync(toRegsPort_notify),
+		.RegsToCtl_port(fromRegsPort)
 	);
 endmodule
 	

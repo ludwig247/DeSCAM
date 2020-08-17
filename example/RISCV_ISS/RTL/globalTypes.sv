@@ -1,5 +1,5 @@
-﻿package top_level_types;
-
+package top_level_types;
+	import top_level_types::*;
 	typedef enum logic [3:0] {
 		alu_add,
 		alu_and,
@@ -101,12 +101,13 @@
 
 	typedef bit[31:0] unsigned_32 [0:31];
 
-	const integer MEM_SIZE = 65536;
+	parameter unsigned MEM_SIZE = 65536;
 
 	typedef enum logic {
 		mem_req, 
 		mem_done
 	} MemSections;
 
-	typedef  logic[7:0] mem_type [0:MEM_SIZE-1];
+	typedef  logic[7:0] mem8_type [0:MEM_SIZE-1];
+	typedef  logic[31:0] mem32_type [0:MEM_SIZE-1];
 endpackage

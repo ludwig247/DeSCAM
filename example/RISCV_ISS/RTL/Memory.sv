@@ -11,14 +11,31 @@ module Memory (
 	output logic CtlToMem_port_notify
 	);
 	
-	mem_type ram;
+	function mem8_type InitMemFromHex(string FilePath);
+		int j;
+		mem8_type ram;
+		mem32_type temp;
+	
+		j = 0;
+		$readmemh(FilePath, temp);
+		for(int i = 0; i <= $size(ram); i++) begin
+			ram[j+3] = temp[i][31:24];
+			ram[j+2] = temp[i][23:16];
+			ram[j+1] = temp[i][15:8];
+			ram[j] = temp[i][7:0];
+			j += 4;
+		end
+		return ram;
+	endfunction: InitMemFromHex;
+
+	mem8_type ram;
 	MemSections section;
 
 	always_ff @(posedge clk, posedge rst) begin
 		logic[7:0] byte_temp;
 
 		if (rst) begin
-			$readmemh("/import/lab/users/riva/DeSCAM/example/RISCV_Test/Programs/test_1.hex", ram);
+			ram = InitMemFromHex("/import/lab/users/riva/DeSCAM/example/RISCV_Test/Programs/BubbleSort.hex");
 			section <= mem_req;
 			MemToCtl_port.loadeddata <= 32'b0;
 			CtlToMem_port_notify <= 1'b1;
@@ -50,15 +67,16 @@ module Memory (
 							end	
 							//Read Word
 							else if ((CtlToMem_port.addrin < MEM_SIZE-3) && (CtlToMem_port.mask == mt_w)) begin
-								MemToCtl_port.loadeddata <= {ram[CtlToMem_port.addrin + 3], 
-												ram[CtlToMem_port.addrin + 2],
+								MemToCtl_port.loadeddata <= {ram[CtlToMem_port.addrin + 3],
+												ram[CtlToMem_port.addrin + 2], 
 												ram[CtlToMem_port.addrin + 1],
-												ram[CtlToMem_port.addrin]};
+												ram[CtlToMem_port.addrin]
+												};
 							end
 							//Read Byte Unsigned
 							else if ((CtlToMem_port.addrin < MEM_SIZE) && (CtlToMem_port.mask == mt_bu)) begin
 								byte_temp = ram[CtlToMem_port.addrin];
-								MemToCtl_port.loadeddata <= {24'h000000, & byte_temp};
+								MemToCtl_port.loadeddata <= {24'h000000, byte_temp};
 							end
 							//Read Halfword Unsigned
 							else if ((CtlToMem_port.addrin < MEM_SIZE-1) && (CtlToMem_port.mask == mt_hu)) begin
