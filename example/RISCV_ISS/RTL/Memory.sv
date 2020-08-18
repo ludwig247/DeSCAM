@@ -96,7 +96,7 @@ module Memory (
 							//Write Word
 							else if ((CtlToMem_port.addrin < MEM_SIZE-3) && (CtlToMem_port.mask == mt_w)) begin
 								ram[CtlToMem_port.addrin + 3] <= CtlToMem_port.datain[31:24];
-								ram[CtlToMem_port.addrin + 2] <= CtlToMem_port.datain[23:6];
+								ram[CtlToMem_port.addrin + 2] <= CtlToMem_port.datain[23:16];
 								ram[CtlToMem_port.addrin + 1] <= CtlToMem_port.datain[15:8];
 								ram[CtlToMem_port.addrin]     <= CtlToMem_port.datain[7:0];
 							end
