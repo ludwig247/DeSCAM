@@ -10,6 +10,9 @@
 
 #include <ModelGlobal.h>
 #include <fstream>
+#include <algorithm>
+#include <vector>
+
 
 #include <PrintITL/PrintITL.h>
 
@@ -39,7 +42,10 @@ static std::vector<Param> parameter(const char* header_list) {
             if(std::string::npos != period) test_name.erase(period);
             header_includes.push_back(Param());
             header_includes[i].FilePath = line;
-            header_includes[i].Name = test_name;
+//            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
+//                header_includes[i].Name = line;
+
+                header_includes[i].Name = test_name;
             i++;
         }
     }
@@ -109,7 +115,10 @@ INSTANTIATE_TEST_CASE_P(
         );
 
 TEST_P(ITLTestExamples, Examples) {
-
+//    std::set<std::string> test_param_names;
+//    GTEST_CHECK_(test_param_names.count(param_name) == 0)
+//                << "Duplicate parameterized test name '" << param_name
+//                << "', in " << file << " line " << line << std::endl;
     ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     SCAM::Module * module = result.back();
