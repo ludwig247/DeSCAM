@@ -56,6 +56,8 @@ public:
     std::map<int,State*> StateMap;
     State* start_state;
     State* init;
+    std::vector<std::vector<eventID>>permutations;
+
 
 
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
@@ -210,6 +212,25 @@ public:
                 return;
             }
         }
+    }
+    void computePermutations(std::vector<eventID> functionVec){
+        static std::vector<eventID> currentPerm;
+        if(functionVec.size()>0){
+            for(eventID func: functionVec){
+                auto reduced_functions = functionVec;
+                //only allow ordered permutations
+                int compare_id = currentPerm.size()>0 ? currentPerm.back().id : -1;
+                if(func.id> compare_id){
+                    //if a new function can be added, push currentPerm to permutations
+                    currentPerm.push_back(func);
+                    permutations.push_back(currentPerm);
+                    reduced_functions.erase(reduced_functions.begin());
+                    computePermutations(reduced_functions);
+                    currentPerm.pop_back();
+                }
+            }
+        }
+        return;
     }
     virtual void SetUp() {
         //create variables and datatypes
@@ -667,7 +688,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Generate final FSM
     std::vector<eventID> blockedFunctions;
     std::vector<eventID> readyQueue;
-    std::vector<std::vector<eventID>>permutations;
     std::vector<eventID> hv;
 
 //    //no function calls
@@ -686,6 +706,17 @@ TEST_F(OperationGraphTest, ExtractPaths){
     hv.push_back(read);
     hv.push_back(write);
     permutations.push_back(hv);
+
+    auto perm_compare = permutations;
+
+    std::vector<eventID> functions;
+    functions.push_back(read);
+    functions.push_back(write);
+
+    permutations.clear();
+
+    computePermutations(functions);
+
 
     //construct a vector of all paths by pushing the paths from Read and Write to allPaths
     for(int i=0; i<pathsReadIDs.size();i++){

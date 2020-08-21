@@ -635,13 +635,14 @@ public:
         reset_op->setNextState(start_state);
         reset_op->setReset(true);
 
-        eventID temp = {1, "reader_sync"};
-        startnodes.push_back(temp);
+        eventID temp;
+//        temp = {1, "reader_sync"};
+//        startnodes.push_back(temp);
         temp = {3,"writer_sync"};
         startnodes.push_back(temp);
 
-        temp = {2,"reader_notify"};
-        endnodes.push_back(temp);
+//        temp = {2,"reader_notify"};
+//        endnodes.push_back(temp);
         temp = {37,"writer_notify"};
         endnodes.push_back(temp);
 
@@ -804,23 +805,23 @@ TEST_F(OperationGraphTest, ExtractPaths){
     eventID dummy = {38,"dummy"};
 //    //no function calls
 //    permutations.push_back(hv);
-    //only read call
-    hv.push_back(read);
-    permutations.push_back(hv);
-    hv.clear();
-    //only write call
-    hv.push_back(write);
-    permutations.push_back(hv);
-    hv.clear();
-    //read and write call
-    hv.push_back(read);
-    hv.push_back(write);
-    permutations.push_back(hv);
-    hv.clear();
-    //only dummy call
-    hv.push_back(dummy);
-    permutations.push_back(hv);
-    hv.clear();
+//    //only read call
+//    hv.push_back(read);
+//    permutations.push_back(hv);
+//    hv.clear();
+//    //only write call
+//    hv.push_back(write);
+//    permutations.push_back(hv);
+//    hv.clear();
+//    //read and write call
+//    hv.push_back(read);
+//    hv.push_back(write);
+//    permutations.push_back(hv);
+//    hv.clear();
+//    //only dummy call
+//    hv.push_back(dummy);
+//    permutations.push_back(hv);
+//    hv.clear();
     //read and dummy call
     hv.push_back(read);
     hv.push_back(dummy);
@@ -872,7 +873,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     for(auto i:CfgIdToStateDummy){
         CfgIdToState.insert(i);
     }
-
 
     //Generate final Operations
     //Iterate over all paths and set State, nextState and statementList
@@ -1001,7 +1001,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     myfile.close();
 
     std::vector<std::string> portnames;
-    portnames.push_back("out");
+    //portnames.push_back("out");
     portnames.push_back("val");
 
 

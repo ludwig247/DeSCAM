@@ -93,7 +93,7 @@ void AHB_Bus_Channel::read_master(bus_resp_t &out, int id) {
     while(true){
         if(master_id == id){
             out.hrdata = resp.hrdata;
-            out.hresp = ok_resp;
+            out.hresp = resp.hresp;
             state = MASTER_REQ;
             master_id = 10;
             slave_id = 10;

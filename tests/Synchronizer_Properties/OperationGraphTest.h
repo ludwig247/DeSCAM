@@ -68,6 +68,8 @@ public:
     std::map<int,State*> StateMap;
     State* start_state;
     State* init;
+    std::vector<std::vector<eventID>>permutations;
+
 
 
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
@@ -239,6 +241,25 @@ public:
             return true;
         }
         return false;
+    }
+    void computePermutations(std::vector<eventID> functionVec){
+        static std::vector<eventID> currentPerm;
+        if(functionVec.size()>0){
+            for(eventID func: functionVec){
+                auto reduced_functions = functionVec;
+                //only allow ordered permutations
+                int compare_id = currentPerm.size()>0 ? currentPerm.back().id : -1;
+                if(func.id> compare_id){
+                    //if a new function can be added, push currentPerm to permutations
+                    currentPerm.push_back(func);
+                    permutations.push_back(currentPerm);
+                    reduced_functions.erase(reduced_functions.begin());
+                    computePermutations(reduced_functions);
+                    currentPerm.pop_back();
+                }
+            }
+        }
+        return;
     }
     virtual void SetUp() {
         //create variables and datatypes
@@ -781,93 +802,20 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Generate final FSM
     std::vector<eventID> blockedFunctions;
     std::vector<eventID> readyQueue;
-    std::vector<std::vector<eventID>>permutations;
     std::vector<eventID> hv;
 
     eventID read = {0,"read"};
     eventID write_0 = {15,"write_0"};
     eventID write_1 = {22,"write_1"};
     eventID write_2 = {29,"write_2"};
-//    //no function calls
-//    permutations.push_back(hv);
-    //only read call
-    hv.push_back(read);
-    permutations.push_back(hv);
-    hv.clear();
-    //only write_0 call
-    hv.push_back(write_0);
-    permutations.push_back(hv);
-    hv.clear();
-    //read and write_0 call
-    hv.push_back(read);
-    hv.push_back(write_0);
-    permutations.push_back(hv);
-    hv.clear();
-    //only write_1 call
-    hv.push_back(write_1);
-    permutations.push_back(hv);
-    hv.clear();
-    //read and write_1 call
-    hv.push_back(read);
-    hv.push_back(write_1);
-    permutations.push_back(hv);
-    hv.clear();
-    //write_0 and write_1 call
-    hv.push_back(write_0);
-    hv.push_back(write_1);
-    permutations.push_back(hv);
-    hv.clear();
-    //read, write_0 and write_1 call
-    hv.push_back(read);
-    hv.push_back(write_0);
-    hv.push_back(write_1);
-    permutations.push_back(hv);
-    hv.clear();
-    //only write_2 call
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //read and write_2 call
-    hv.push_back(read);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //write_0 and write_2 call
-    hv.push_back(write_0);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //read,write_0 and write_2 call
-    hv.push_back(read);
-    hv.push_back(write_0);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //write_1 and write_2 call
-    hv.push_back(write_1);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //read,write_1 and write_2 call
-    hv.push_back(read);
-    hv.push_back(write_1);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //write_0, write_1 and write_2 call
-    hv.push_back(write_0);
-    hv.push_back(write_1);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
-    //read,write_0, write_1 and write_2 call
-    hv.push_back(read);
-    hv.push_back(write_0);
-    hv.push_back(write_1);
-    hv.push_back(write_2);
-    permutations.push_back(hv);
-    hv.clear();
 
+    std::vector<eventID> functions;
+    functions.push_back(read);
+    functions.push_back(write_0);
+    functions.push_back(write_1);
+    functions.push_back(write_2);
+
+    computePermutations(functions);
 
     //construct a vector of all paths by pushing the paths from Read and Write to allPaths
     for(int i=0; i<pathsReadIDs.size();i++){

@@ -9,16 +9,16 @@ determination_requirements:
 reset_property:
   reset;
 property_graph:
-start_state_6 -> start_state_6;
-start_state_6 -> start_state_10;
-start_state_6 -> start_state_12;
-start_state_10 -> start_state_6;
+//start_state_6 -> start_state_6;
+//start_state_6 -> start_state_10;
+//start_state_6 -> start_state_12;
+//start_state_10 -> start_state_6;
 start_state_10 -> start_state_10;
 start_state_10 -> start_state_12;
-start_state_12 -> start_state_6;
+//start_state_12 -> start_state_6;
 start_state_12 -> start_state_10;
 start_state_12 -> start_state_12;
-reset -> start_state_6;
+//reset -> start_state_6;
 reset -> start_state_10;
 reset -> start_state_12;
 end completeness;
