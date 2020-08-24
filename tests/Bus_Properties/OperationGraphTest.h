@@ -26,7 +26,7 @@ using namespace SCAM;
 
 class OperationGraphTest: public ::testing::Test{
 public:
-    OperationGraphTest():module(new SCAM::Module("Regfile")){
+    OperationGraphTest():module(new SCAM::Module("Bus")){
     }
 
     struct pathIDStmt{
@@ -100,28 +100,6 @@ public:
     std::vector<std::vector<SCAM::Stmt*>> pathsDummy;
     std::vector<std::vector<int>> pathsDummyIDs;
 
-    std::vector<Operation*> operationsMasterWrite0;
-    std::vector<Operation*> operationsMasterWrite1;
-    std::vector<Operation*> operationsMasterWrite2;
-    std::vector<Operation*> operationsMasterWrite3;
-
-    std::vector<Operation*> operationsSlaveRead0;
-    std::vector<Operation*> operationsSlaveRead1;
-    std::vector<Operation*> operationsSlaveRead2;
-    std::vector<Operation*> operationsSlaveRead3;
-
-    std::vector<Operation*> operationsSlaveWrite0;
-    std::vector<Operation*> operationsSlaveWrite1;
-    std::vector<Operation*> operationsSlaveWrite2;
-    std::vector<Operation*> operationsSlaveWrite3;
-
-    std::vector<Operation*> operationsMasterRead0;
-    std::vector<Operation*> operationsMasterRead1;
-    std::vector<Operation*> operationsMasterRead2;
-    std::vector<Operation*> operationsMasterRead3;
-
-    std::vector<Operation*> operationsDummy;
-
     std::vector<eventID> startnodes;
     std::vector<eventID> endnodes;
 
@@ -150,12 +128,12 @@ public:
             auto stmt = sus->getStmt();
             ss << "\t\t" << PrintStmt::toString(stmt) << "\n";
 
-            ss << "\t\tPred: ";
+            ss << "\tPred: ";
             for (auto pred: sus->getPredecessorList()) {
                 ss << "[ID" << pred->getId() << "], ";
             }
             ss << "\n";;
-            ss << "\t\tSucc: ";
+            ss << "\tSucc: ";
             for (auto succ: sus->getSuccessorList()) {
                 ss << "[ID" << succ->getId() << "], ";
             }
@@ -1481,6 +1459,56 @@ public:
         notify_dummy_master->addSuccessor(wait_for_master_dummy);
         wait_for_master_dummy->addSuccessor(notify_dummy_master);
 
+        //Add all Nodes to controlFlowMap
+        for(auto node: controlFlowMapMasterWrite0){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterWrite1){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterWrite2){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterWrite3){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveRead0){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveRead1){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveRead2){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveRead3){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveWrite0){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveWrite1){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveWrite2){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapSlaveWrite3){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterRead0){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterRead1){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterRead2){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+        for(auto node: controlFlowMapMasterRead3){
+            controlFlowMap.insert(std::make_pair(node.first,node.second));
+        }
+
         //Print CFG for MasterWrite
         std::cout << printCFG(controlFlowMapMasterWrite0) << std::endl;
         std::cout << printCFG(controlFlowMapMasterWrite1) << std::endl;
@@ -1602,800 +1630,187 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::map<int, CfgNode *> importantStatesMasterWrite0;
     findImportantStates(controlFlowMapMasterWrite0,&importantStatesMasterWrite0);
 
-    //Find operations MasterWrite0
+    //Find paths MasterWrite0
     auto start_MasterWrite0 = controlFlowMapMasterWrite0.begin()->second;
     findPathsfromNode(start_MasterWrite0,&pathsMasterWrite0,&pathsMasterWrite0IDs);
     for(auto const& node : importantStatesMasterWrite0) {
         findPathsfromNode(node.second,&pathsMasterWrite0,&pathsMasterWrite0IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterWrite0
-    std::map<int,State*> CfgIdToStateMasterWrite0;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterWrite0IDs.begin(); path != pathsMasterWrite0IDs.end(); path++){
-        if(CfgIdToStateMasterWrite0.find(path->front()) == CfgIdToStateMasterWrite0.end()){
-            CfgIdToStateMasterWrite0.insert(std::make_pair(path->front(),new State(controlFlowMapMasterWrite0.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterWrite0.find(path->back()) == CfgIdToStateMasterWrite0.end()){
-            CfgIdToStateMasterWrite0.insert(std::make_pair(path->back(), new State(controlFlowMapMasterWrite0.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterWrite0
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterWrite0IDs.begin(); path != pathsMasterWrite0IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterWrite0.at(path->front()));
-        op->setNextState(CfgIdToStateMasterWrite0.at(path->back()));
-        operationsMasterWrite0.push_back(op);
-    }
-    int cnt = 0;
-    std::vector<SCAM::Stmt*> statementList;
-    for(auto op: operationsMasterWrite0) {
-        for (auto stmt: pathsMasterWrite0.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    auto rOperations = new ReconstructOperations(module);
-    for(auto op: this->operationsMasterWrite0) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterWrite1
     std::map<int, CfgNode *> importantStatesMasterWrite1;
     findImportantStates(controlFlowMapMasterWrite1,&importantStatesMasterWrite1);
 
-    //Find operations MasterWrite1
+    //Find paths MasterWrite1
     auto start_MasterWrite1 = controlFlowMapMasterWrite1.begin()->second;
     findPathsfromNode(start_MasterWrite1,&pathsMasterWrite1,&pathsMasterWrite1IDs);
     for(auto const& node : importantStatesMasterWrite1) {
         findPathsfromNode(node.second,&pathsMasterWrite1,&pathsMasterWrite1IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterWrite1
-    std::map<int,State*> CfgIdToStateMasterWrite1;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterWrite1IDs.begin(); path != pathsMasterWrite1IDs.end(); path++){
-        if(CfgIdToStateMasterWrite1.find(path->front()) == CfgIdToStateMasterWrite1.end()){
-            CfgIdToStateMasterWrite1.insert(std::make_pair(path->front(),new State(controlFlowMapMasterWrite1.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterWrite1.find(path->back()) == CfgIdToStateMasterWrite1.end()){
-            CfgIdToStateMasterWrite1.insert(std::make_pair(path->back(), new State(controlFlowMapMasterWrite1.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterWrite1
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterWrite1IDs.begin(); path != pathsMasterWrite1IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterWrite1.at(path->front()));
-        op->setNextState(CfgIdToStateMasterWrite1.at(path->back()));
-        operationsMasterWrite1.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterWrite1) {
-        for (auto stmt: pathsMasterWrite1.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterWrite1) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterWrite2
     std::map<int, CfgNode *> importantStatesMasterWrite2;
     findImportantStates(controlFlowMapMasterWrite2,&importantStatesMasterWrite2);
 
-    //Find operations MasterWrite2
+    //Find paths MasterWrite2
     auto start_MasterWrite2 = controlFlowMapMasterWrite2.begin()->second;
     findPathsfromNode(start_MasterWrite2,&pathsMasterWrite2,&pathsMasterWrite2IDs);
     for(auto const& node : importantStatesMasterWrite2) {
         findPathsfromNode(node.second,&pathsMasterWrite2,&pathsMasterWrite2IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterWrite2
-    std::map<int,State*> CfgIdToStateMasterWrite2;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterWrite2IDs.begin(); path != pathsMasterWrite2IDs.end(); path++){
-        if(CfgIdToStateMasterWrite2.find(path->front()) == CfgIdToStateMasterWrite2.end()){
-            CfgIdToStateMasterWrite2.insert(std::make_pair(path->front(),new State(controlFlowMapMasterWrite2.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterWrite2.find(path->back()) == CfgIdToStateMasterWrite2.end()){
-            CfgIdToStateMasterWrite2.insert(std::make_pair(path->back(), new State(controlFlowMapMasterWrite2.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterWrite2
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterWrite2IDs.begin(); path != pathsMasterWrite2IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterWrite2.at(path->front()));
-        op->setNextState(CfgIdToStateMasterWrite2.at(path->back()));
-        operationsMasterWrite2.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterWrite2) {
-        for (auto stmt: pathsMasterWrite2.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterWrite2) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterWrite3
     std::map<int, CfgNode *> importantStatesMasterWrite3;
     findImportantStates(controlFlowMapMasterWrite3,&importantStatesMasterWrite3);
 
-    //Find operations MasterWrite3
+    //Find paths MasterWrite3
     auto start_MasterWrite3 = controlFlowMapMasterWrite3.begin()->second;
     findPathsfromNode(start_MasterWrite3,&pathsMasterWrite3,&pathsMasterWrite3IDs);
     for(auto const& node : importantStatesMasterWrite3) {
         findPathsfromNode(node.second,&pathsMasterWrite3,&pathsMasterWrite3IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterWrite3
-    std::map<int,State*> CfgIdToStateMasterWrite3;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterWrite3IDs.begin(); path != pathsMasterWrite3IDs.end(); path++){
-        if(CfgIdToStateMasterWrite3.find(path->front()) == CfgIdToStateMasterWrite3.end()){
-            CfgIdToStateMasterWrite3.insert(std::make_pair(path->front(),new State(controlFlowMapMasterWrite3.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterWrite3.find(path->back()) == CfgIdToStateMasterWrite3.end()){
-            CfgIdToStateMasterWrite3.insert(std::make_pair(path->back(), new State(controlFlowMapMasterWrite3.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterWrite3
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterWrite3IDs.begin(); path != pathsMasterWrite3IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterWrite3.at(path->front()));
-        op->setNextState(CfgIdToStateMasterWrite3.at(path->back()));
-        operationsMasterWrite3.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterWrite3) {
-        for (auto stmt: pathsMasterWrite3.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterWrite3) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveRead0
     std::map<int, CfgNode *> importantStatesSlaveRead0;
     findImportantStates(controlFlowMapSlaveRead0,&importantStatesSlaveRead0);
 
-    //Find operations SlaveRead0
+    //Find paths SlaveRead0
     auto start_SlaveRead0 = controlFlowMapSlaveRead0.begin()->second;
     findPathsfromNode(start_SlaveRead0,&pathsSlaveRead0,&pathsSlaveRead0IDs);
     for(auto const& node : importantStatesSlaveRead0) {
         findPathsfromNode(node.second,&pathsSlaveRead0,&pathsSlaveRead0IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveRead0
-    std::map<int,State*> CfgIdToStateSlaveRead0;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveRead0IDs.begin(); path != pathsSlaveRead0IDs.end(); path++){
-        if(CfgIdToStateSlaveRead0.find(path->front()) == CfgIdToStateSlaveRead0.end()){
-            CfgIdToStateSlaveRead0.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveRead0.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveRead0.find(path->back()) == CfgIdToStateSlaveRead0.end()){
-            CfgIdToStateSlaveRead0.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveRead0.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveRead0
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveRead0IDs.begin(); path != pathsSlaveRead0IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveRead0.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveRead0.at(path->back()));
-        operationsSlaveRead0.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveRead0) {
-        for (auto stmt: pathsSlaveRead0.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveRead0) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveRead1
     std::map<int, CfgNode *> importantStatesSlaveRead1;
     findImportantStates(controlFlowMapSlaveRead1,&importantStatesSlaveRead1);
 
-    //Find operations SlaveRead1
+    //Find paths SlaveRead1
     auto start_SlaveRead1 = controlFlowMapSlaveRead1.begin()->second;
     findPathsfromNode(start_SlaveRead1,&pathsSlaveRead1,&pathsSlaveRead1IDs);
     for(auto const& node : importantStatesSlaveRead1) {
         findPathsfromNode(node.second,&pathsSlaveRead1,&pathsSlaveRead1IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveRead1
-    std::map<int,State*> CfgIdToStateSlaveRead1;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveRead1IDs.begin(); path != pathsSlaveRead1IDs.end(); path++){
-        if(CfgIdToStateSlaveRead1.find(path->front()) == CfgIdToStateSlaveRead1.end()){
-            CfgIdToStateSlaveRead1.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveRead1.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveRead1.find(path->back()) == CfgIdToStateSlaveRead1.end()){
-            CfgIdToStateSlaveRead1.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveRead1.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveRead1
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveRead1IDs.begin(); path != pathsSlaveRead1IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveRead1.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveRead1.at(path->back()));
-        operationsSlaveRead1.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveRead1) {
-        for (auto stmt: pathsSlaveRead1.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveRead1) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveRead2
     std::map<int, CfgNode *> importantStatesSlaveRead2;
     findImportantStates(controlFlowMapSlaveRead2,&importantStatesSlaveRead2);
 
-    //Find operations SlaveRead2
+    //Find paths SlaveRead2
     auto start_SlaveRead2 = controlFlowMapSlaveRead2.begin()->second;
     findPathsfromNode(start_SlaveRead2,&pathsSlaveRead2,&pathsSlaveRead2IDs);
     for(auto const& node : importantStatesSlaveRead2) {
         findPathsfromNode(node.second,&pathsSlaveRead2,&pathsSlaveRead2IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveRead2
-    std::map<int,State*> CfgIdToStateSlaveRead2;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveRead2IDs.begin(); path != pathsSlaveRead2IDs.end(); path++){
-        if(CfgIdToStateSlaveRead2.find(path->front()) == CfgIdToStateSlaveRead2.end()){
-            CfgIdToStateSlaveRead2.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveRead2.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveRead2.find(path->back()) == CfgIdToStateSlaveRead2.end()){
-            CfgIdToStateSlaveRead2.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveRead2.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveRead2
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveRead2IDs.begin(); path != pathsSlaveRead2IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveRead2.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveRead2.at(path->back()));
-        operationsSlaveRead2.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveRead2) {
-        for (auto stmt: pathsSlaveRead2.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveRead2) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveRead3
     std::map<int, CfgNode *> importantStatesSlaveRead3;
     findImportantStates(controlFlowMapSlaveRead3,&importantStatesSlaveRead3);
 
-    //Find operations SlaveRead3
+    //Find paths SlaveRead3
     auto start_SlaveRead3 = controlFlowMapSlaveRead3.begin()->second;
     findPathsfromNode(start_SlaveRead3,&pathsSlaveRead3,&pathsSlaveRead3IDs);
     for(auto const& node : importantStatesSlaveRead3) {
         findPathsfromNode(node.second,&pathsSlaveRead3,&pathsSlaveRead3IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveRead3
-    std::map<int,State*> CfgIdToStateSlaveRead3;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveRead3IDs.begin(); path != pathsSlaveRead3IDs.end(); path++){
-        if(CfgIdToStateSlaveRead3.find(path->front()) == CfgIdToStateSlaveRead3.end()){
-            CfgIdToStateSlaveRead3.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveRead3.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveRead3.find(path->back()) == CfgIdToStateSlaveRead3.end()){
-            CfgIdToStateSlaveRead3.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveRead3.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveRead3
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveRead3IDs.begin(); path != pathsSlaveRead3IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveRead3.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveRead3.at(path->back()));
-        operationsSlaveRead3.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveRead3) {
-        for (auto stmt: pathsSlaveRead3.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveRead3) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveWrite0
     std::map<int, CfgNode *> importantStatesSlaveWrite0;
     findImportantStates(controlFlowMapSlaveWrite0,&importantStatesSlaveWrite0);
 
-    //Find operations SlaveWrite0
+    //Find paths SlaveWrite0
     auto start_SlaveWrite0 = controlFlowMapSlaveWrite0.begin()->second;
     findPathsfromNode(start_SlaveWrite0,&pathsSlaveWrite0,&pathsSlaveWrite0IDs);
     for(auto const& node : importantStatesSlaveWrite0) {
         findPathsfromNode(node.second,&pathsSlaveWrite0,&pathsSlaveWrite0IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveWrite0
-    std::map<int,State*> CfgIdToStateSlaveWrite0;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveWrite0IDs.begin(); path != pathsSlaveWrite0IDs.end(); path++){
-        if(CfgIdToStateSlaveWrite0.find(path->front()) == CfgIdToStateSlaveWrite0.end()){
-            CfgIdToStateSlaveWrite0.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveWrite0.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveWrite0.find(path->back()) == CfgIdToStateSlaveWrite0.end()){
-            CfgIdToStateSlaveWrite0.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveWrite0.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveWrite0
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveWrite0IDs.begin(); path != pathsSlaveWrite0IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveWrite0.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveWrite0.at(path->back()));
-        operationsSlaveWrite0.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveWrite0) {
-        for (auto stmt: pathsSlaveWrite0.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveWrite0) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveWrite1
     std::map<int, CfgNode *> importantStatesSlaveWrite1;
     findImportantStates(controlFlowMapSlaveWrite1,&importantStatesSlaveWrite1);
 
-    //Find operations SlaveWrite1
+    //Find paths SlaveWrite1
     auto start_SlaveWrite1 = controlFlowMapSlaveWrite1.begin()->second;
     findPathsfromNode(start_SlaveWrite1,&pathsSlaveWrite1,&pathsSlaveWrite1IDs);
     for(auto const& node : importantStatesSlaveWrite1) {
         findPathsfromNode(node.second,&pathsSlaveWrite1,&pathsSlaveWrite1IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveWrite1
-    std::map<int,State*> CfgIdToStateSlaveWrite1;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveWrite1IDs.begin(); path != pathsSlaveWrite1IDs.end(); path++){
-        if(CfgIdToStateSlaveWrite1.find(path->front()) == CfgIdToStateSlaveWrite1.end()){
-            CfgIdToStateSlaveWrite1.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveWrite1.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveWrite1.find(path->back()) == CfgIdToStateSlaveWrite1.end()){
-            CfgIdToStateSlaveWrite1.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveWrite1.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveWrite1
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveWrite1IDs.begin(); path != pathsSlaveWrite1IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveWrite1.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveWrite1.at(path->back()));
-        operationsSlaveWrite1.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveWrite1) {
-        for (auto stmt: pathsSlaveWrite1.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveWrite1) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveWrite2
     std::map<int, CfgNode *> importantStatesSlaveWrite2;
     findImportantStates(controlFlowMapSlaveWrite2,&importantStatesSlaveWrite2);
 
-    //Find operations SlaveWrite2
+    //Find paths SlaveWrite2
     auto start_SlaveWrite2 = controlFlowMapSlaveWrite2.begin()->second;
     findPathsfromNode(start_SlaveWrite2,&pathsSlaveWrite2,&pathsSlaveWrite2IDs);
     for(auto const& node : importantStatesSlaveWrite2) {
         findPathsfromNode(node.second,&pathsSlaveWrite2,&pathsSlaveWrite2IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveWrite2
-    std::map<int,State*> CfgIdToStateSlaveWrite2;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveWrite2IDs.begin(); path != pathsSlaveWrite2IDs.end(); path++){
-        if(CfgIdToStateSlaveWrite2.find(path->front()) == CfgIdToStateSlaveWrite2.end()){
-            CfgIdToStateSlaveWrite2.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveWrite2.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveWrite2.find(path->back()) == CfgIdToStateSlaveWrite2.end()){
-            CfgIdToStateSlaveWrite2.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveWrite2.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveWrite2
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveWrite2IDs.begin(); path != pathsSlaveWrite2IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveWrite2.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveWrite2.at(path->back()));
-        operationsSlaveWrite2.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveWrite2) {
-        for (auto stmt: pathsSlaveWrite2.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveWrite2) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states SlaveWrite3
     std::map<int, CfgNode *> importantStatesSlaveWrite3;
     findImportantStates(controlFlowMapSlaveWrite3,&importantStatesSlaveWrite3);
 
-    //Find operations SlaveWrite3
+    //Find paths SlaveWrite3
     auto start_SlaveWrite3 = controlFlowMapSlaveWrite3.begin()->second;
     findPathsfromNode(start_SlaveWrite3,&pathsSlaveWrite3,&pathsSlaveWrite3IDs);
     for(auto const& node : importantStatesSlaveWrite3) {
         findPathsfromNode(node.second,&pathsSlaveWrite3,&pathsSlaveWrite3IDs);
     }
 
-    //Create a map from CfgNode Id to State SlaveWrite3
-    std::map<int,State*> CfgIdToStateSlaveWrite3;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsSlaveWrite3IDs.begin(); path != pathsSlaveWrite3IDs.end(); path++){
-        if(CfgIdToStateSlaveWrite3.find(path->front()) == CfgIdToStateSlaveWrite3.end()){
-            CfgIdToStateSlaveWrite3.insert(std::make_pair(path->front(),new State(controlFlowMapSlaveWrite3.at(path->front())->getName())));
-        }
-        if(CfgIdToStateSlaveWrite3.find(path->back()) == CfgIdToStateSlaveWrite3.end()){
-            CfgIdToStateSlaveWrite3.insert(std::make_pair(path->back(), new State(controlFlowMapSlaveWrite3.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations SlaveWrite3
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsSlaveWrite3IDs.begin(); path != pathsSlaveWrite3IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateSlaveWrite3.at(path->front()));
-        op->setNextState(CfgIdToStateSlaveWrite3.at(path->back()));
-        operationsSlaveWrite3.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsSlaveWrite3) {
-        for (auto stmt: pathsSlaveWrite3.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsSlaveWrite3) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterRead0
     std::map<int, CfgNode *> importantStatesMasterRead0;
     findImportantStates(controlFlowMapMasterRead0,&importantStatesMasterRead0);
 
-    //Find operations MasterRead0
+    //Find paths MasterRead0
     auto start_MasterRead0 = controlFlowMapMasterRead0.begin()->second;
     findPathsfromNode(start_MasterRead0,&pathsMasterRead0,&pathsMasterRead0IDs);
     for(auto const& node : importantStatesMasterRead0) {
         findPathsfromNode(node.second,&pathsMasterRead0,&pathsMasterRead0IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterRead0
-    std::map<int,State*> CfgIdToStateMasterRead0;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterRead0IDs.begin(); path != pathsMasterRead0IDs.end(); path++){
-        if(CfgIdToStateMasterRead0.find(path->front()) == CfgIdToStateMasterRead0.end()){
-            CfgIdToStateMasterRead0.insert(std::make_pair(path->front(),new State(controlFlowMapMasterRead0.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterRead0.find(path->back()) == CfgIdToStateMasterRead0.end()){
-            CfgIdToStateMasterRead0.insert(std::make_pair(path->back(), new State(controlFlowMapMasterRead0.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterRead0
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterRead0IDs.begin(); path != pathsMasterRead0IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterRead0.at(path->front()));
-        op->setNextState(CfgIdToStateMasterRead0.at(path->back()));
-        operationsMasterRead0.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterRead0) {
-        for (auto stmt: pathsMasterRead0.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterRead0) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterRead1
     std::map<int, CfgNode *> importantStatesMasterRead1;
     findImportantStates(controlFlowMapMasterRead1,&importantStatesMasterRead1);
 
-    //Find operations MasterRead1
+    //Find paths MasterRead1
     auto start_MasterRead1 = controlFlowMapMasterRead1.begin()->second;
     findPathsfromNode(start_MasterRead1,&pathsMasterRead1,&pathsMasterRead1IDs);
     for(auto const& node : importantStatesMasterRead1) {
         findPathsfromNode(node.second,&pathsMasterRead1,&pathsMasterRead1IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterRead1
-    std::map<int,State*> CfgIdToStateMasterRead1;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterRead1IDs.begin(); path != pathsMasterRead1IDs.end(); path++){
-        if(CfgIdToStateMasterRead1.find(path->front()) == CfgIdToStateMasterRead1.end()){
-            CfgIdToStateMasterRead1.insert(std::make_pair(path->front(),new State(controlFlowMapMasterRead1.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterRead1.find(path->back()) == CfgIdToStateMasterRead1.end()){
-            CfgIdToStateMasterRead1.insert(std::make_pair(path->back(), new State(controlFlowMapMasterRead1.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterRead1
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterRead1IDs.begin(); path != pathsMasterRead1IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterRead1.at(path->front()));
-        op->setNextState(CfgIdToStateMasterRead1.at(path->back()));
-        operationsMasterRead1.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterRead1) {
-        for (auto stmt: pathsMasterRead1.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterRead1) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterRead2
     std::map<int, CfgNode *> importantStatesMasterRead2;
     findImportantStates(controlFlowMapMasterRead2,&importantStatesMasterRead2);
 
-    //Find operations MasterRead2
+    //Find paths MasterRead2
     auto start_MasterRead2 = controlFlowMapMasterRead2.begin()->second;
     findPathsfromNode(start_MasterRead2,&pathsMasterRead2,&pathsMasterRead2IDs);
     for(auto const& node : importantStatesMasterRead2) {
         findPathsfromNode(node.second,&pathsMasterRead2,&pathsMasterRead2IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterRead2
-    std::map<int,State*> CfgIdToStateMasterRead2;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterRead2IDs.begin(); path != pathsMasterRead2IDs.end(); path++){
-        if(CfgIdToStateMasterRead2.find(path->front()) == CfgIdToStateMasterRead2.end()){
-            CfgIdToStateMasterRead2.insert(std::make_pair(path->front(),new State(controlFlowMapMasterRead2.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterRead2.find(path->back()) == CfgIdToStateMasterRead2.end()){
-            CfgIdToStateMasterRead2.insert(std::make_pair(path->back(), new State(controlFlowMapMasterRead2.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterRead2
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterRead2IDs.begin(); path != pathsMasterRead2IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterRead2.at(path->front()));
-        op->setNextState(CfgIdToStateMasterRead2.at(path->back()));
-        operationsMasterRead2.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterRead2) {
-        for (auto stmt: pathsMasterRead2.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterRead2) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states MasterRead3
     std::map<int, CfgNode *> importantStatesMasterRead3;
     findImportantStates(controlFlowMapMasterRead3,&importantStatesMasterRead3);
 
-    //Find operations MasterRead3
+    //Find paths MasterRead3
     auto start_MasterRead3 = controlFlowMapMasterRead3.begin()->second;
     findPathsfromNode(start_MasterRead3,&pathsMasterRead3,&pathsMasterRead3IDs);
     for(auto const& node : importantStatesMasterRead3) {
         findPathsfromNode(node.second,&pathsMasterRead3,&pathsMasterRead3IDs);
     }
 
-    //Create a map from CfgNode Id to State MasterRead3
-    std::map<int,State*> CfgIdToStateMasterRead3;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsMasterRead3IDs.begin(); path != pathsMasterRead3IDs.end(); path++){
-        if(CfgIdToStateMasterRead3.find(path->front()) == CfgIdToStateMasterRead3.end()){
-            CfgIdToStateMasterRead3.insert(std::make_pair(path->front(),new State(controlFlowMapMasterRead3.at(path->front())->getName())));
-        }
-        if(CfgIdToStateMasterRead3.find(path->back()) == CfgIdToStateMasterRead3.end()){
-            CfgIdToStateMasterRead3.insert(std::make_pair(path->back(), new State(controlFlowMapMasterRead3.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations MasterRead3
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsMasterRead3IDs.begin(); path != pathsMasterRead3IDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateMasterRead3.at(path->front()));
-        op->setNextState(CfgIdToStateMasterRead3.at(path->back()));
-        operationsMasterRead3.push_back(op);
-    }
-    cnt = 0;
-
-    for(auto op: operationsMasterRead3) {
-        for (auto stmt: pathsMasterRead3.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    for(auto op: this->operationsMasterRead3) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states Dummy
     std::map<int, CfgNode *> importantStatesDummy;
     findImportantStates(controlFlowMapDummy,&importantStatesDummy);
 
-    //Find operations Dummy
+    //Find paths Dummy
     auto start_dummy = controlFlowMapDummy.begin()->second;
     findPathsfromNode(start_dummy,&pathsDummy,&pathsDummyIDs);
     for(auto const& node : importantStatesDummy) {
         findPathsfromNode(node.second,&pathsDummy,&pathsDummyIDs);
-    }
-
-    //Create a map from CfgNode Id to State Dummy
-    std::map<int,State*> CfgIdToStateDummy;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsDummyIDs.begin(); path != pathsDummyIDs.end(); path++){
-        if(CfgIdToStateDummy.find(path->front()) == CfgIdToStateDummy.end()){
-            CfgIdToStateDummy.insert(std::make_pair(path->front(),new State(controlFlowMapDummy.at(path->front())->getName())));
-        }
-        if(CfgIdToStateDummy.find(path->back()) == CfgIdToStateDummy.end()){
-            CfgIdToStateDummy.insert(std::make_pair(path->back(), new State(controlFlowMapDummy.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations Dummy
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsDummyIDs.begin(); path != pathsDummyIDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateDummy.at(path->front()));
-        op->setNextState(CfgIdToStateDummy.at(path->back()));
-        statementList.clear();
-
-        operationsDummy.push_back(op);
-    }
-    cnt = 0;
-    for(auto op: operationsDummy) {
-        for (auto stmt: pathsDummy.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    for(auto op: this->operationsDummy) {
-        rOperations->sortOperation(op);
     }
 
     //Generate final FSM
@@ -2403,27 +1818,30 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::vector<eventID> readyQueue;
     std::vector<eventID> hv;
 
-    eventID MasterWrite0 = {1,"MasterWrite0"};
-    eventID MasterWrite1 = {1,"MasterWrite1"};
-    eventID MasterWrite2 = {1,"MasterWrite2"};
-    eventID MasterWrite3 = {1,"MasterWrite3"};
-    eventID SlaveRead0 = {1,"SlaveRead0"};
-    eventID SlaveRead1 = {1,"SlaveRead1"};
-    eventID SlaveRead2 = {1,"SlaveRead2"};
-    eventID SlaveRead3 = {1,"SlaveRead3"};
-    eventID SlaveWrite0 = {1,"SlaveWrite0"};
-    eventID SlaveWrite1 = {1,"SlaveWrite1"};
-    eventID SlaveWrite2 = {1,"SlaveWrite2"};
-    eventID SlaveWrite3 = {1,"SlaveWrite3"};
-    eventID MasterRead0 = {1,"MasterRead0"};
-    eventID MasterRead1 = {1,"MasterRead1"};
-    eventID MasterRead2 = {1,"MasterRead2"};
-    eventID MasterRead3 = {1,"MasterRead3"};
-    eventID dummy = {38,"dummy"};
+    //Define all possible functions and their starting nodes
+    eventID MasterWrite0 = {4,"MasterWrite0"};
+    eventID MasterWrite1 = {27,"MasterWrite1"};
+    eventID MasterWrite2 = {50,"MasterWrite2"};
+    eventID MasterWrite3 = {73,"MasterWrite3"};
+    eventID SlaveRead0 = {96,"SlaveRead0"};
+    eventID SlaveRead1 = {105,"SlaveRead1"};
+    eventID SlaveRead2 = {114,"SlaveRead2"};
+    eventID SlaveRead3 = {123,"SlaveRead3"};
+    eventID SlaveWrite0 = {132,"SlaveWrite0"};
+    eventID SlaveWrite1 = {141,"SlaveWrite1"};
+    eventID SlaveWrite2 = {150,"SlaveWrite2"};
+    eventID SlaveWrite3 = {159,"SlaveWrite3"};
+    eventID MasterRead0 = {168,"MasterRead0"};
+    eventID MasterRead1 = {179,"MasterRead1"};
+    eventID MasterRead2 = {190,"MasterRead2"};
+    eventID MasterRead3 = {201,"MasterRead3"};
+    eventID dummy = {212,"dummy"};
 
+    //vector of all functions that are always ready to execute
     std::vector<eventID> always_ready;
     always_ready.push_back(dummy);
 
+    //Vector of all functions that can be called from modules
     std::vector<eventID> functions;
     functions.push_back(MasterWrite0);
     functions.push_back(MasterWrite1);
@@ -2442,8 +1860,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
     functions.push_back(MasterRead2);
     functions.push_back(MasterRead3);
 
+    //compute all possible permutations and store them in variable permutations
     computePermutations(functions);
 
+    //add all functions from always_ready to all permuations
+    for(auto readyFunc : always_ready){
+        for(auto perm: permutations){
+            perm.push_back(readyFunc);
+        }
+    }
+    std::cout << permutations.size() << std::endl;
     //construct a vector of all paths by pushing all paths to allPaths
     for(int i=0; i<pathsMasterWrite0IDs.size();i++){
         pathIDStmt p = {pathsMasterWrite0IDs.at(i),pathsMasterWrite0.at(i)};
@@ -2513,16 +1939,17 @@ TEST_F(OperationGraphTest, ExtractPaths){
         pathIDStmt p = {pathsDummyIDs.at(i),pathsDummy.at(i)};
         allPaths.push_back(p);
     }
-
-    pathIDStmt currentPath;
-
-    // generate all Paths combining all CFGs
+int i = 0;
+    // generate all Paths combining all CFGs and store them in variable finalPaths
     for(auto perm: permutations){
+        //set ready queue to current permutation and clear blocked queue
         readyQueue = perm;
         blockedFunctions.clear();
+        std::cout << i++ << std::endl;
         combinePaths(readyQueue,blockedFunctions);
     }
 
+    std::cout<< allPaths.size() <<std::endl;
     //Generate final Operations
     //Iterate over all paths and set State, nextState and statementList
     for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
@@ -2533,7 +1960,8 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
         operationsFinal.push_back(op);
     }
-    cnt = 0;
+    int cnt = 0;
+    std::vector<SCAM::Stmt*> statementList;
     for(auto op: operationsFinal) {
         for (auto stmt: finalPaths.at(cnt).stmtList) {
             statementList.push_back(stmt);
@@ -2543,11 +1971,12 @@ TEST_F(OperationGraphTest, ExtractPaths){
         statementList.clear();
     }
 
+    auto rOperations = new ReconstructOperations(module);
     for(auto op: this->operationsFinal) {
         rOperations->sortOperation(op);
     }
 
-    //Debug
+    //Debug: Print finalPaths
     int num = 0;
     for(auto p:finalPaths){
         std::cout << "Path " << num << ": ";
@@ -2558,8 +1987,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
         num++;
     }
 
-
-    //Optimize operations
+    //Optimize operations: only keep reachable operations and their paths
     for(int i=0; i<operationsFinal.size();i++){
         if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
             operationsFinalOpt.push_back(operationsFinal.at(i));
@@ -2567,7 +1995,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
     }
 
-    //Debug
+    //Debug: Print finalPathsOpt
     num = 0;
     for(auto p:finalPathsOpt){
         std::cout << "Path " << num << ": ";
@@ -2578,15 +2006,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
         num++;
     }
 
+    //Set Incoming and Outgoing Operations
     for(auto op:operationsFinalOpt){
         op->getState()->addOutgoingOperation(op);
         op->getNextState()->addIncomingOperation(op);
     }
 
-
     //add reset operation
     rOperations->sortOperation(reset_op);
     operationsFinalOpt.push_back(reset_op);
+    //Create empty path for reset operation
     std::vector<int> int_vec;
     std::vector<SCAM::Stmt*> stmt_vec;
     pathIDStmt temp = {int_vec,stmt_vec};
@@ -2598,13 +2027,14 @@ TEST_F(OperationGraphTest, ExtractPaths){
     auto wait_op = new Operation();
     rOperations->sortOperation(wait_op);
     operationsFinalOpt.push_back(wait_op);
+    //create empty path for wait operation
     finalPathsOpt.push_back(temp);
     wait_op->setState(start_state);
     wait_op->setNextState(start_state);
     wait_op->getState()->addOutgoingOperation(wait_op);
     wait_op->getNextState()->addIncomingOperation(wait_op);
 
-    //Debug
+    //Debug: Print Assumptions and Commitments for operationsFinalOpt
     for(auto op: operationsFinalOpt){
         std::cout << "Assumptions Operation " << op->getId() <<std::endl;
         for(auto assump: op->getAssumptionsList()){
@@ -2621,18 +2051,23 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Generate Property Graph
     std::stringstream ss;
     for(auto op: operationsFinalOpt){
+        //Store statementList of predecessor operation in stmtList_dummy
         std::vector<SCAM::Stmt*> stmtList_dummy;
         stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
 
         for(auto succ_op: operationsFinalOpt){
             if(!succ_op->getState()->isInit()){
                 std::vector<SCAM::Stmt*> comb_stmts;
+                //Add statementList of predecessor operation to comb_stmts
                 comb_stmts.insert(comb_stmts.end(),stmtList_dummy.begin(),stmtList_dummy.end());
+                //Add statementList of successor operation to comb_stmts
                 comb_stmts.insert(comb_stmts.end(),succ_op->getStatementsList().begin(),succ_op->getStatementsList().end());
+                //Create a dummy Operation and check if it is reachable
                 auto dummy_op = new Operation();
                 dummy_op->setStatementsList(comb_stmts);
                 rOperations->sortOperation(dummy_op);
                 if(ValidOperations::isOperationReachable(dummy_op)){
+                    //If dummy operation is reachable, create a string: predecessor->successor
                     ss << op->getState()->getName() + "_" + std::to_string(op->getId());
                     ss << " -> ";
                     ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
@@ -2643,38 +2078,44 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
         stmtList_dummy.clear();
     }
-
+    //Print PropertyGraph into a file
     std::ofstream myfile;
     myfile.open(SCAM_HOME"/tests/Regfile_Properties/PropertyGraph.gfv");
     myfile << ss.str();
     myfile.close();
 
+    //Define portnames for notify and sync signals
     std::vector<std::string> portnames;
-    //portnames.push_back("out");
-    portnames.push_back("val");
-
-
+    auto portMap = module->getPorts();
+    for(auto port: portMap){
+        portnames.push_back(port.second->getName());
+    }
+    //Arrays that state if sync or notify needs to be added
     bool addsync[startnodes.size()];
     bool addnoti[startnodes.size()];
 
     //Add sync and notify signals
     for(int i=0;i<operationsFinalOpt.size();i++){
         auto op = operationsFinalOpt.at(i);
+        //Sync and Notify are unset by default
         for(int j=0;j<startnodes.size();j++){
             addsync[j] = false;
             addnoti[j] = false;
         }
         for(auto id: finalPathsOpt.at(i).idList){
             for(int j=0; j<startnodes.size();j++){
+                //If the startnode of a function is contained in the path, add the sync of that function
                 if(id==startnodes.at(j).id){
                     addsync[j]=true;
                 }
+                //If the endnode of a function is contained in the path, add the notify of that function
                 if(id==endnodes.at(j).id){
                     addnoti[j]=true;
                 }
             }
         }
         for(int j=0; j<startnodes.size();j++){
+            //Add Sync and Notify to Assumptions/Commitments
             auto sync = new SyncSignal(module->getPort(portnames.at(j)));
             auto noti = new Notify(module->getPort(portnames.at(j)));
             if(addsync[j]){
@@ -2694,18 +2135,20 @@ TEST_F(OperationGraphTest, ExtractPaths){
         }
     }
 
+    //Statemap consists of a initial state Init and one state start_state
     std::map<int,State*> stateMap;
     stateMap.insert(std::make_pair(init->getStateId(),init ));
     stateMap.insert(std::make_pair(start_state->getStateId(),start_state));
-
     module->getFSM()->setStateMap(stateMap);
 
+    //Create PropertySuite
     PropertyFactory propertyFactory(module);
     module->setPropertySuite(propertyFactory.getPropertySuite());
+    //Print ITL Properties to file
     PrintITL printITL;
     auto map = printITL.printModule(module);
-    myfile.open(SCAM_HOME"/tests/Regfile_Properties/Regfile_generated.vhi");
-    myfile << map.at("Regfile.vhi") << std::endl;
+    myfile.open(SCAM_HOME"/tests/Regfile_Properties/" + module->getName() + "_generated.vhi");
+    myfile << map.at(module->getName() + ".vhi") << std::endl;
     myfile.close();
 }
 
