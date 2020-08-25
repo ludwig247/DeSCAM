@@ -7,11 +7,11 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Logical : public Expr {
     public:
-        Logical(Expr *lhs, std::string operation, Expr *rhs);
+        Logical(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs();

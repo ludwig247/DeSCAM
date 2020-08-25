@@ -8,19 +8,21 @@
 #include "Branch.h"
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class If : public Branch {
     public:
-        explicit If(SCAM::Expr * conditionStmt);
+        If(DESCAM::Expr *conditionStmt, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         bool hasElseStmt();
 
-        SCAM::Expr * getConditionStmt() const override;
+        DESCAM::Expr *getConditionStmt() const;
 
         //ACCEPT
-        void accept(StmtAbstractVisitor &visitor) override;
-        virtual bool operator==(const Stmt &other) const override ;
+        virtual void accept(StmtAbstractVisitor &visitor);
+
+        virtual bool operator==(const Stmt &other) const;
+
 
     protected:
         Expr *conditionStmt;

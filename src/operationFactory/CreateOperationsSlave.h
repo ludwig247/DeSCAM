@@ -12,99 +12,99 @@
 #include "Behavior/Operation.h"
 #include "Behavior/State.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    class CreateOperationsSlave : public SCAM::StmtAbstractVisitor {
+    class CreateOperationsSlave : public DESCAM::StmtAbstractVisitor {
     public:
 
-        CreateOperationsSlave(const std::vector<std::vector<SCAM::CfgNode *> > &rawOperations, std::map<std::string, SCAM::State *> statesMap, SCAM::Module *module);
+        CreateOperationsSlave(const std::vector<std::vector<DESCAM::CfgNode *> > &rawOperations, std::map<std::string, DESCAM::State *> statesMap, DESCAM::Module *module);
 
         virtual ~CreateOperationsSlave() = default;
 
-        const std::vector<SCAM::Operation *> &getOperationsList() const;
+        const std::vector<DESCAM::Operation *> &getOperationsList() const;
 
-        const std::map<std::string, SCAM::State *> &getStatesMap() const;
+        const std::map<std::string, DESCAM::State *> &getStatesMap() const;
 
-        void visit(SCAM::VariableOperand &node) override;
+        void visit(DESCAM::VariableOperand &node) override;
 
-        void visit(SCAM::IntegerValue &node) override;
+        void visit(DESCAM::IntegerValue &node) override;
 
-        void visit(SCAM::UnsignedValue &node) override;
+        void visit(DESCAM::UnsignedValue &node) override;
 
-        void visit(SCAM::BoolValue &node) override;
+        void visit(DESCAM::BoolValue &node) override;
 
-        void visit(SCAM::EnumValue &node) override;
+        void visit(DESCAM::EnumValue &node) override;
 
-        void visit(SCAM::CompoundValue &node) override;
+        void visit(DESCAM::CompoundValue &node) override;
 
-        void visit(SCAM::PortOperand &node) override;
+        void visit(DESCAM::PortOperand &node) override;
 
-        void visit(SCAM::Assignment &node) override;
+        void visit(DESCAM::Assignment &node) override;
 
-        void visit(SCAM::UnaryExpr &node) override;
+        void visit(DESCAM::UnaryExpr &node) override;
 
-        void visit(SCAM::While &node) override;
+        void visit(DESCAM::While &node) override;
 
-        void visit(SCAM::If &node) override;
+        void visit(DESCAM::If &node) override;
 
-        void visit(SCAM::Read &node) override;
+        void visit(DESCAM::Read &node) override;
 
-        void visit(SCAM::Write &node) override;
+        void visit(DESCAM::Write &node) override;
 
-        void visit(SCAM::SectionOperand &node) override;
+        void visit(DESCAM::SectionOperand &node) override;
 
-        void visit(SCAM::SectionValue &node) override;
+        void visit(DESCAM::SectionValue &node) override;
 
-        void visit(SCAM::ITE &node) override;
+        void visit(DESCAM::ITE &node) override;
 
-        void visit(SCAM::Arithmetic &node) override;
+        void visit(DESCAM::Arithmetic &node) override;
 
-        void visit(SCAM::Logical &node) override;
+        void visit(DESCAM::Logical &node) override;
 
-        void visit(SCAM::Relational &node) override;
+        void visit(DESCAM::Relational &node) override;
 
-        void visit(SCAM::Bitwise &node) override;
+        void visit(DESCAM::Bitwise &node) override;
 
-        void visit(SCAM::SyncSignal &node) override;
+        void visit(DESCAM::SyncSignal &node) override;
 
-        void visit(SCAM::DataSignalOperand &node) override;
+        void visit(DESCAM::DataSignalOperand &node) override;
 
-        void visit(SCAM::Cast &node) override;
+        void visit(DESCAM::Cast &node) override;
 
-        void visit(SCAM::FunctionOperand &node) override;
+        void visit(DESCAM::FunctionOperand &node) override;
 
-        void visit(SCAM::ArrayOperand &node) override;
+        void visit(DESCAM::ArrayOperand &node) override;
 
-        void visit(SCAM::CompoundExpr &node) override;
+        void visit(DESCAM::CompoundExpr &node) override;
 
         void visit(struct ArrayExpr &node) override;
 
-        void visit(SCAM::ParamOperand &node) override;
+        void visit(DESCAM::ParamOperand &node) override;
 
-        void visit(SCAM::Return &node) override;
+        void visit(DESCAM::Return &node) override;
 
-        void visit(SCAM::Notify &node) override;
+        void visit(DESCAM::Notify &node) override;
 
-        void visit(SCAM::Wait &node) override;
+        void visit(DESCAM::Wait &node) override;
 
-        void visit(SCAM::Peek &node) override;
+        void visit(DESCAM::Peek &node) override;
 
-        void visit(SCAM::TimePointOperand &node) override;
-        void visit(SCAM::Ternary &node) override;
+        void visit(DESCAM::TimePointOperand &node) override;
+        void visit(DESCAM::Ternary &node) override;
     private:
-        void extendRawOperation(const std::vector<SCAM::CfgNode *> &rawOperation);
-        void addStates(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation);
-        void addStatementsList(const std::vector<SCAM::CfgNode *> &rawOperation, Operation *operation);
-        std::vector<std::vector<SCAM::CfgNode *>> rawOperationsExtended;
-        std::vector<SCAM::Stmt *> statementsList;
-        SCAM::Expr *newExpr;
+        void extendRawOperation(const std::vector<DESCAM::CfgNode *> &rawOperation);
+        void addStates(const std::vector<DESCAM::CfgNode *> &rawOperation, Operation *operation);
+        void addStatementsList(const std::vector<DESCAM::CfgNode *> &rawOperation, Operation *operation);
+        std::vector<std::vector<DESCAM::CfgNode *>> rawOperationsExtended;
+        std::vector<DESCAM::Stmt *> statementsList;
+        DESCAM::Expr *newExpr;
         bool firstStatement;
         bool lastStatement;
         bool condition;
 
-        std::vector<SCAM::Operation *> operationsList;
-        std::map<std::string, SCAM::State *> statesMap;
-        SCAM::Module *module;
+        std::vector<DESCAM::Operation *> operationsList;
+        std::map<std::string, DESCAM::State *> statesMap;
+        DESCAM::Module *module;
     };
 }
 

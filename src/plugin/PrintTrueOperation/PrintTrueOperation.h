@@ -22,7 +22,7 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
-    std::map<std::string, std::string> printModule(SCAM::Module *node);
+    std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
     std::string print();
 
@@ -44,7 +44,7 @@ private:
     std::string pipelined();
 
 //        std::string hideConstants();
-    SCAM::Module *module;
+    DESCAM::Module *module;
     std::vector<std::vector<Operation *>> cycleMap;
 
     std::string generatTrueOp(std::vector<Operation *> &cycle);

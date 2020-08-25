@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <string>
 
-namespace SCAM {
+namespace DESCAM {
 
     class ChiselConditionVisitor : public PrintStmt {
     public:

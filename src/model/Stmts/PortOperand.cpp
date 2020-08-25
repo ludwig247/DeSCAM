@@ -3,26 +3,28 @@
 //
 
 #include "PortOperand.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::PortOperand::PortOperand(SCAM::Port *port) : port(port), Operand(port->getDataType()) {
-
+DESCAM::PortOperand::PortOperand(DESCAM::Port *port, LocationInfo stmtLocationInfo) : port(port), Operand(port->getDataType()) {
+this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-SCAM::Port *SCAM::PortOperand::getPort() {
+DESCAM::Port *DESCAM::PortOperand::getPort() {
     return this->port;
 }
 
 
-void SCAM::PortOperand::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::PortOperand::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-std::string SCAM::PortOperand::getOperandName() const {
+std::string DESCAM::PortOperand::getOperandName() const {
     return this->port->getName();
 }
 
-bool SCAM::PortOperand::operator==(const Stmt &other) const {
+bool DESCAM::PortOperand::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekPortOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (PortOperand *) this;

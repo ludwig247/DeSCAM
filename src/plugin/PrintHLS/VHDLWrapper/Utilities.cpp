@@ -1,7 +1,7 @@
 #include "Utilities.h"
 #include <assert.h>
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 bool Utilities::isPowerOfTwo(long int n) {
     if ((n < 1) || (n & n - 1))
@@ -72,7 +72,7 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
     }
 }
 
-SCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
+DESCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
     if (name == "&") {
         return SubTypeBitwise::BITWISE_AND;
     } else if (name == "|") {

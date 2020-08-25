@@ -5,14 +5,14 @@
 #include "TemporalExpr.h"
 
 
-SCAM::TemporalExpr::TemporalExpr(Expr *timepoint, Stmt *statement) :
+DESCAM::TemporalExpr::TemporalExpr(Expr *timepoint, Stmt *statement) :
     statement(statement) {
     type = Type::AT;
     timepointList.push_back(timepoint);
 
 }
 
-SCAM::TemporalExpr::TemporalExpr(Expr *t_start, Expr *t_end, Stmt *statement) :
+DESCAM::TemporalExpr::TemporalExpr(Expr *t_start, Expr *t_end, Stmt *statement) :
     statement(statement) {
     type = Type::DURING;
     timepointList.push_back(t_start);
@@ -20,30 +20,30 @@ SCAM::TemporalExpr::TemporalExpr(Expr *t_start, Expr *t_end, Stmt *statement) :
 
 }
 
-SCAM::TemporalExpr::Type SCAM::TemporalExpr::getType() const {
+DESCAM::TemporalExpr::Type DESCAM::TemporalExpr::getType() const {
     return type;
 }
 
-SCAM::Stmt *SCAM::TemporalExpr::getStatement() const {
+DESCAM::Stmt *DESCAM::TemporalExpr::getStatement() const {
     return statement;
 }
 
-const std::vector<SCAM::Expr *> &SCAM::TemporalExpr::getTimepointList() const {
+const std::vector<DESCAM::Expr *> &DESCAM::TemporalExpr::getTimepointList() const {
     return timepointList;
 }
 
-bool SCAM::TemporalExpr::isAt() {
+bool DESCAM::TemporalExpr::isAt() {
     return (type == Type::AT);
 }
 
-bool SCAM::TemporalExpr::isDuring() {
+bool DESCAM::TemporalExpr::isDuring() {
     return (type == Type::DURING);
 }
 
-const std::string &SCAM::TemporalExpr::getFreezeAt() const {
+const std::string &DESCAM::TemporalExpr::getFreezeAt() const {
     return freezeAt;
 }
 
-void SCAM::TemporalExpr::setFreezeAt(const std::string &freezeAt) {
+void DESCAM::TemporalExpr::setFreezeAt(const std::string &freezeAt) {
     TemporalExpr::freezeAt = freezeAt;
 }

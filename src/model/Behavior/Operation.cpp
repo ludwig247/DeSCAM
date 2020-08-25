@@ -5,93 +5,93 @@
 #include <PrintStmt.h>
 #include "Operation.h"
 
-namespace SCAM {
-    int SCAM::Operation::operations_cnt = 0;
+namespace DESCAM {
+    int DESCAM::Operation::operations_cnt = 0;
 
-    SCAM::Operation::Operation() :
+    DESCAM::Operation::Operation() :
             resetOperation(false),
             waitOperation(false),
             state(nullptr),
             nextState(nullptr),
             id(Operation::operations_cnt++) {}
 
-    SCAM::Operation::~Operation() = default;
+    DESCAM::Operation::~Operation() = default;
 
     // Getter
-    bool SCAM::Operation::IsReset() {
+    bool DESCAM::Operation::IsReset() {
         return this->resetOperation;
     }
 
-    bool SCAM::Operation::IsWait() const{
+    bool DESCAM::Operation::IsWait() const{
         return this->waitOperation;
     }
 
-    const std::vector<SCAM::Stmt *> &SCAM::Operation::getStatementsList() const {
+    const std::vector<DESCAM::Stmt *> &DESCAM::Operation::getStatementsList() const {
         return this->statementsList;
     }
 
-    const std::vector<Expr *> &SCAM::Operation::getAssumptionsList() const {
+    const std::vector<Expr *> &DESCAM::Operation::getAssumptionsList() const {
         return this->assumptionList;
     }
 
-    const std::vector<Assignment *> &SCAM::Operation::getCommitmentsList() const {
+    const std::vector<Assignment *> &DESCAM::Operation::getCommitmentsList() const {
         return this->commitmentList;
     }
 
-    const std::vector<SCAM::Assignment *> &Operation::getCommitmentList() const {
+    const std::vector<DESCAM::Assignment *> &Operation::getCommitmentList() const {
         return commitmentList;
     }
 
-    SCAM::State *SCAM::Operation::getState() const {
+    DESCAM::State *DESCAM::Operation::getState() const {
         return this->state;
     }
 
-    SCAM::State *SCAM::Operation::getNextState() const {
+    DESCAM::State *DESCAM::Operation::getNextState() const {
         return this->nextState;
     }
 
-    int SCAM::Operation::getId() const {
+    int DESCAM::Operation::getId() const {
         return id;
     }
 
     // Setter
-    void SCAM::Operation::setStatementsList(std::vector<SCAM::Stmt *> statementsList_arg) {
+    void DESCAM::Operation::setStatementsList(std::vector<DESCAM::Stmt *> statementsList_arg) {
         this->statementsList = std::move(statementsList_arg);
     }
 
-    void SCAM::Operation::setAssumptionsList(std::vector<SCAM::Expr *> assumptionsList) {
+    void DESCAM::Operation::setAssumptionsList(std::vector<DESCAM::Expr *> assumptionsList) {
         this->assumptionList = std::move(assumptionsList);
     }
 
-    void SCAM::Operation::setCommitmentsList(std::vector<Assignment *> commitmentsList) {
+    void DESCAM::Operation::setCommitmentsList(std::vector<Assignment *> commitmentsList) {
         this->commitmentList = std::move(commitmentsList);
     }
 
-    void SCAM::Operation::setState(SCAM::State *state_arg) {
+    void DESCAM::Operation::setState(DESCAM::State *state_arg) {
         this->state = state_arg;
     }
 
-    void SCAM::Operation::setNextState(SCAM::State *nextState_arg) {
+    void DESCAM::Operation::setNextState(DESCAM::State *nextState_arg) {
         this->nextState = nextState_arg;
     }
 
-    void SCAM::Operation::setReset(bool reset) {
+    void DESCAM::Operation::setReset(bool reset) {
         this->resetOperation = reset;
     }
 
-    void SCAM::Operation::setWait(bool wait) {
+    void DESCAM::Operation::setWait(bool wait) {
         this->waitOperation = wait;
     }
 
-    void SCAM::Operation::addStatement(SCAM::Stmt *stmt) {
+    void DESCAM::Operation::addStatement(DESCAM::Stmt *stmt) {
         this->statementsList.push_back(stmt);
     }
 
-    void SCAM::Operation::addAssumption(SCAM::Expr *assumption) {
+    void DESCAM::Operation::addAssumption(DESCAM::Expr *assumption) {
         this->assumptionList.push_back(assumption);
     }
 
-    void SCAM::Operation::addCommitment(SCAM::Assignment *commitment) {
+    void DESCAM::Operation::addCommitment(DESCAM::Assignment *commitment) {
         this->commitmentList.push_back(commitment);
     }
 

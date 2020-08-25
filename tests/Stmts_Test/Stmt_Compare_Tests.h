@@ -12,7 +12,7 @@
 #include <Stmts/UnsignedValue.h>
 #include <PrintStmt.h>
 
-namespace SCAM{
+namespace DESCAM{
 
 class StmtCompareTest : public ::testing::Test {
 protected:
@@ -35,7 +35,7 @@ protected:
 TEST_F(StmtCompareTest,simple){
     ASSERT_FALSE(*x==*y);
     ASSERT_TRUE(*x==*x2) << PrintStmt::toString(x) << " == " << PrintStmt::toString(x2);
-    auto val = new SCAM::UnsignedValue(10);
+    auto val = new DESCAM::UnsignedValue(10);
     auto arith = new Arithmetic(x,"+",val);
     auto arith2 = new Arithmetic(x2,"+",val);
     ASSERT_TRUE(*arith==*arith2);

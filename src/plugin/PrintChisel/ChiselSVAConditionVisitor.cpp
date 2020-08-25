@@ -5,7 +5,7 @@
 #include "ChiselSVAConditionVisitor.h"
 
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::VariableOperand &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::VariableOperand &node) {
     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
     } else {
@@ -14,17 +14,17 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::VariableOperand &node) {
     this->ss << "()";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::SyncSignal &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::SyncSignal &node) {
     this->ss << node.getPort()->getName() << "_sync";
     this->ss << "()";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Notify &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify";
     this->ss << "()";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         this->ss << node.getDataSignal()->getParent()->getName() << "_" << node.getDataSignal()->getName();
     } else {
@@ -33,7 +33,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::DataSignalOperand &node) {
     this->ss << "()";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Relational &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -45,7 +45,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Relational &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Arithmetic &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     this->ss << " " + node.getOperation() << " ";
@@ -53,7 +53,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Arithmetic &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Bitwise &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Bitwise &node) {
     if (node.getOperation() == "<<") {
         this->ss << "(";
         node.getLhs()->accept(*this);
@@ -75,35 +75,35 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Bitwise &node) {
             this->ss << " | ";
         } else if (node.getOperation() == "^") {
             this->ss << " ^ ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::UnsignedValue &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::UnsignedValue &node) {
     this->ss << node.getValue();
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::IntegerValue &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::IntegerValue &node) {
     this->ss << node.getValue();
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Cast &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "unsigned'(32'(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed'(32'(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << "))";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Return &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::ITE &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::ITE &node) {
     /*
      * if (print condition) {
      *   print stmts
@@ -144,7 +144,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::ITE &node) {
 
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Assignment &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(DESCAM::Assignment &node) {
     if (node.getLhs() != nullptr)
         node.getLhs()->accept(*this);
 
@@ -154,7 +154,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(SCAM::Assignment &node) {
 }
 
 
-void SCAM::ChiselSVAConditionVisitor::visit(struct CompoundExpr &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(struct CompoundExpr &node) {
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
         begin->second->accept(*this);
@@ -163,21 +163,21 @@ void SCAM::ChiselSVAConditionVisitor::visit(struct CompoundExpr &node) {
 }
 
 
-void SCAM::ChiselSVAConditionVisitor::visit(BoolValue &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(BoolValue &node) {
     if (node.getValue())
         this->ss << "1";
     else
         this->ss << "0";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(EnumValue &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(EnumValue &node) {
     std::locale loc;
     std::string str = node.getEnumValue();
     for (char i : str)
         this->ss << std::tolower(i, loc);
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(Logical &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(Logical &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
 
@@ -201,7 +201,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(Logical &node) {
     this->ss << ")";
 }
 
-void SCAM::ChiselSVAConditionVisitor::visit(UnaryExpr &node) {
+void DESCAM::ChiselSVAConditionVisitor::visit(UnaryExpr &node) {
     if (node.getOperation() == "not") {
         this->ss << "!";
     } else if (node.getOperation() == "-") {
@@ -213,7 +213,7 @@ void SCAM::ChiselSVAConditionVisitor::visit(UnaryExpr &node) {
 }
 
 
-std::string SCAM::ChiselSVAConditionVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::ChiselSVAConditionVisitor::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     ChiselSVAConditionVisitor printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }

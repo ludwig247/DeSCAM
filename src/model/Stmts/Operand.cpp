@@ -3,6 +3,8 @@
 //
 #include "Operand.h"
 
-SCAM::Operand::Operand(const DataType *type) : Expr(type) {
+#include <utility>
 
+DESCAM::Operand::Operand(const DataType *type, LocationInfo stmtLocationInfo) : Expr(type) {
+this->stmtLocationInfo = std::move(stmtLocationInfo);
 }

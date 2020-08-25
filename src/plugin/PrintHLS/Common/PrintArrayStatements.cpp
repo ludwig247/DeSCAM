@@ -4,7 +4,7 @@
 
 #include "PrintArrayStatements.h"
 
-using namespace SCAM::HLSPlugin;
+using namespace DESCAM::HLSPlugin;
 
 PrintArrayStatements::PrintArrayStatements(Expr *expr, Port* port) :
     port(port)
@@ -12,7 +12,7 @@ PrintArrayStatements::PrintArrayStatements(Expr *expr, Port* port) :
     expr->accept(*this);
 }
 
-std::list<SCAM::Expr *> PrintArrayStatements::getArrayExprs(SCAM::Expr *expr, Port* port) {
+std::list<DESCAM::Expr *> PrintArrayStatements::getArrayExprs(DESCAM::Expr *expr, Port* port) {
     PrintArrayStatements printArrayStatements(expr, port);
     return printArrayStatements.arrayExprs;
 }
@@ -57,13 +57,13 @@ void PrintArrayStatements::visit(ArrayOperand &node) {
     }
 }
 
-void PrintArrayStatements::visit(SCAM::Assignment& node)
+void PrintArrayStatements::visit(DESCAM::Assignment& node)
 {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void PrintArrayStatements::visit(SCAM::DataSignalOperand& node)
+void PrintArrayStatements::visit(DESCAM::DataSignalOperand& node)
 {
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {

@@ -15,14 +15,14 @@
 #include "ReconstructOperations.h"
 #include <map>
 
-namespace SCAM{
+namespace DESCAM{
     /***
      * \bref Builds a function from a CFG
      *
      */
 class FunctionFactory {
 public:
-    FunctionFactory(const std::map<int, CfgBlock *> &controlFlowMap, Function *function, SCAM::Module *module);
+    FunctionFactory(const std::map<int, CfgBlock *> &controlFlowMap, Function *function, DESCAM::Module *module);
 
     virtual ~FunctionFactory() = default;
 

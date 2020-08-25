@@ -4,7 +4,7 @@
 
 #include "clang/AST/RecursiveASTVisitor.h"
 
-namespace SCAM {
+namespace DESCAM {
     /*!
      * \brief Finds the sc_main within a TranslationUnit
      */

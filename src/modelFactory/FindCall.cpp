@@ -1,7 +1,7 @@
 #include <iostream>
 #include "FindCall.h"
 
-namespace SCAM {
+namespace DESCAM {
     FindCall::FindCall(clang::Stmt* stmt):
             pass(0),
             methodName(""),

@@ -9,21 +9,21 @@
 #include <PropertyMacro.h>
 #include "Behavior/CfgNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class ExpandCommunications {
     public:
-        explicit ExpandCommunications(const std::map<int, SCAM::CFGNode2 *> &controlFlowMap, const std::map<std::string, Port *> &modulePorts);
+        explicit ExpandCommunications(const std::map<int, DESCAM::CFGNode2 *> &controlFlowMap, const std::map<std::string, Port *> &modulePorts);
 
         ~ExpandCommunications() = default;
 
         const std::map<int, CFGNode2 *> &getCFG() const;
 
-        const std::multimap<std::string, std::vector<SCAM::CFGNode2 *>> &getCommGroups() const;
+        const std::multimap<std::string, std::vector<DESCAM::CFGNode2 *>> &getCommGroups() const;
 
     private:
-        std::map<int, SCAM::CFGNode2 *> cfg;
-        std::multimap<std::string, std::vector<SCAM::CFGNode2 *>> commGroups;
+        std::map<int, DESCAM::CFGNode2 *> cfg;
+        std::multimap<std::string, std::vector<DESCAM::CFGNode2 *>> commGroups;
     };
 
 }

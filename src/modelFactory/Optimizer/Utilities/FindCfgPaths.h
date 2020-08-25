@@ -13,7 +13,7 @@
 #include <utility>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: Finds all possible paths in the node CFG from one given node to the other
         * \author:mi-alkoudsi
@@ -64,7 +64,7 @@ namespace SCAM {
         std::map<int, std::vector<int>> nodeAndAllPathsReachingItMap;
         bool pathEmpty;
 
-        void removeBackwardsUntilIf(SCAM::CfgPath *Path);
+        void removeBackwardsUntilIf(CfgPath *Path);
 
     };
 }

@@ -38,7 +38,7 @@ std::map<std::string, std::string> PrintSkeleton::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::pair<std::string, std::string> PrintSkeleton::printModule(SCAM::Module *module) {
+std::pair<std::string, std::string> PrintSkeleton::printModule(DESCAM::Module *module) {
     setLanguage();
 
     globalPackageName = ModelGlobal::getModel()->getName();
@@ -56,7 +56,7 @@ std::pair<std::string, std::string> PrintSkeleton::printModule(SCAM::Module *mod
     return std::make_pair(module->getName() + getFilenameExtention(), result.str());
 }
 
-std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(SCAM::Module *module) {
+std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(DESCAM::Module *module) {
     setLanguage();
     globalPackageName = ModelGlobal::getModel()->getName();
     this->module = module;
@@ -66,7 +66,7 @@ std::pair<std::string, std::string> PrintSkeleton::printLocalTypes(SCAM::Module 
     return std::make_pair(localPackageName + "_types" + getFilenameExtention(), generateLocalTypes());
 }
 
-std::pair<std::string, std::string> PrintSkeleton::printGlobalTypes(SCAM::Model *model) {
+std::pair<std::string, std::string> PrintSkeleton::printGlobalTypes(DESCAM::Model *model) {
     setLanguage();
     globalPackageName = model->getName();
 
@@ -182,7 +182,7 @@ std::string PrintSkeleton::generateHDLSkeleton() {
 
 }
 
-void PrintSkeleton::printEnumType(std::stringstream &ss, const SCAM::DataType *enumType) {
+void PrintSkeleton::printEnumType(std::stringstream &ss, const DESCAM::DataType *enumType) {
     if (language == VHDL) {
         ss << "type " + enumType->getName() << " is (";
         for (auto iterator = enumType->getEnumValueMap().begin();
@@ -215,7 +215,7 @@ void PrintSkeleton::printEnumType(std::stringstream &ss, const SCAM::DataType *e
     }
 }
 
-void PrintSkeleton::printCompoundType(std::stringstream &ss, const SCAM::DataType *compoundType) {
+void PrintSkeleton::printCompoundType(std::stringstream &ss, const DESCAM::DataType *compoundType) {
     if (language == VHDL) {
         ss << "type " + compoundType->getName() << " is record\n";
         for (auto subVar: compoundType->getSubVarMap()) {
@@ -231,7 +231,7 @@ void PrintSkeleton::printCompoundType(std::stringstream &ss, const SCAM::DataTyp
     }
 }
 
-void PrintSkeleton::printArrayType(std::stringstream &ss, const SCAM::DataType *arrayType) {
+void PrintSkeleton::printArrayType(std::stringstream &ss, const DESCAM::DataType *arrayType) {
     if (language == VHDL) {
         ss << "type " + arrayType->getName() << " is array(" << arrayType->getArraySize() - 1 << " downto 0) of ";
         ss << arrayType->getArrayType()->getName() << ";\n";
@@ -413,7 +413,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                             variable.first + "_signal",
                                             arrayDefaultValue,
                                             nonblockingIndentationLevel);
-            } else throw std::runtime_error("not implemented");
+            } else TERMINATE("not implemented");
 
 
         } else if (variable.second->isArrayElement() && variable.second->getName() == "0") {
@@ -429,7 +429,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                             variable.second->getParent()->getFullName() + "_signal",
                                             arrayDefaultValue,
                                             nonblockingIndentationLevel);
-            } else throw std::runtime_error("not implemented");
+            } else TERMINATE("not implemented");
 
         } else {
             std::string name = variable.first + "_signal";
@@ -591,7 +591,7 @@ std::string PrintSkeleton::getDirectionWrapper(const std::string &in) {
     }
 }
 
-std::string PrintSkeleton::getDataTypeWrapper(const SCAM::DataType *dataType) {
+std::string PrintSkeleton::getDataTypeWrapper(const DESCAM::DataType *dataType) {
     if (language == SV) {
         if (dataType->isInteger()) {
             return "integer";

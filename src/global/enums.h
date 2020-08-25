@@ -17,7 +17,7 @@
 #include <string>
 
 
-namespace SCAM {
+namespace DESCAM {
     enum PROCESS_TYPE {
         NONE, THREAD, CTHREAD, METHOD
     };

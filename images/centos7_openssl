@@ -1,0 +1,23 @@
+#!/bin/bash
+yum group install 'Development Tools'
+yum install perl-core zlib-devel -y
+yum install -y wget
+yum install -y tar 
+cd /usr/local/src/
+wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
+tar -xf openssl-1.0.2o.tar.gz
+cd openssl-1.0.2o
+cd /usr/local/src/openssl-1.0.2o
+./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
+make
+make test
+make install
+cd /etc/ld.so.conf.d/
+echo "/usr/local/ssl/lib" > openssl-1.0.2o.conf
+ldconfig -v
+#mv /bin/openssl /bin/openssl.BEKUP
+export OPENSSL_PATH="/usr/local/ssl/bin"
+export PATH=$PATH:$OPENSSL_PATH
+which openssl
+openssl version -a
+curl -L https://git.io/get_helm.sh | bash

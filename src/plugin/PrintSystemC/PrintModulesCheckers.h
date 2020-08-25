@@ -39,7 +39,7 @@ private:
     unsigned int indentSize = 2;
     std::stringstream ss;
 
-    void visit(SCAM::Module &node);
+    void visit(DESCAM::Module &node);
 
     void visit(Port &node);
 
@@ -52,9 +52,9 @@ private:
 
     std::string Text_DataTypesEXT();
 
-    void Text_Checker(SCAM::Module *node);
+    void Text_Checker(DESCAM::Module *node);
 
-    void Text_SCMain(SCAM::Module *node);
+    void Text_SCMain(DESCAM::Module *node);
 
     void printSpace(unsigned int size);
 };

@@ -3,23 +3,25 @@
 //
 
 #include "SectionOperand.h"
+
+#include <utility>
 #include "NodePeekVisitor.h"
 
-SCAM::SectionOperand::SectionOperand(SCAM::Variable *sectionVariable) :
+DESCAM::SectionOperand::SectionOperand(DESCAM::Variable *sectionVariable, LocationInfo stmtLocationInfo) :
         sectionVariable(sectionVariable),
         Expr(sectionVariable->getDataType()) {
-
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-std::string SCAM::SectionOperand::getName() {
+std::string DESCAM::SectionOperand::getName() {
     return this->sectionVariable->getName();
 }
 
-void SCAM::SectionOperand::accept(StmtAbstractVisitor &visitor) {
+void DESCAM::SectionOperand::accept(StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-bool SCAM::SectionOperand::operator==(const Stmt &other) const {
+bool DESCAM::SectionOperand::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekSectionOperand(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (SectionOperand *) this;
@@ -27,6 +29,6 @@ bool SCAM::SectionOperand::operator==(const Stmt &other) const {
     return (thisPtr->sectionVariable == otherPtr->sectionVariable);
 }
 
-SCAM::Variable *SCAM::SectionOperand::getSectionVariable() const {
+DESCAM::Variable *DESCAM::SectionOperand::getSectionVariable() const {
     return sectionVariable;
 }

@@ -8,11 +8,11 @@
 
 #include "PortOperand.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class SyncSignal : public Expr {
     public:
-        SyncSignal(SCAM::Port *port);
+        SyncSignal(DESCAM::Port *port, LocationInfo stmtLocationInfo = LocationInfo());
 
         Port *getPort() const;
 

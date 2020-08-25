@@ -4,11 +4,7 @@
 # Getting started with Property-Driven Development (PDD)
 
 1) Installing the tool 
-    * Use a linux of your choice 
-    * Recommended is Ubuntu 14.04+ 
-    * Edit the script in install/install_new.sh (see comments in file) 
-    * Run the script to install
-    * If the installation worked correctly, you should find a binary "DESCAM" in bin/
+    * Read the Install.md
 
 2) Understand the SystemC-PPA with the example in <path-to-root>/HowTo/GettingStarted/ESL/
     1) Compile the example: <br>
@@ -20,7 +16,7 @@
     `./GettingStarted`
     
     3) The files MasterDummy, SlaveDummy and main.cpp are meant to model the environment, they are the testbench.
-    What we want to implement is the design in Bus.h. Get yourself familiar with the SystemC subset
+    What we want to implement is the design in Switch.h. Get yourself familiar with the SystemC subset
     
 3) Read the manual in doc/manual. The manual should teach you the fundamental ideas of PDD.     
     

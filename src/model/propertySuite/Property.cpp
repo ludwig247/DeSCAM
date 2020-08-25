@@ -3,24 +3,25 @@
 //
 
 #include "Property.h"
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include <utility>
 #include <Behavior/Operation.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor
     // ------------------------------------------------------------------------------
 
-    Property::Property(std::string name, const SCAM::Operation * operation) :
+    Property::Property(std::string name, const DESCAM::Operation * operation) :
             name(name){
             this->operationList.push_back(operation);
             assert(operation != nullptr && "Passing an operation that is null");
     }
 
 
-    Property::Property(std::string name, std::vector<const SCAM::Operation *> operationList):
+    Property::Property(std::string name, std::vector<const DESCAM::Operation *> operationList):
         name(name),
         operationList(operationList){
         assert(!operationList.empty() && "Passing an empty list of operations");
@@ -38,11 +39,11 @@ namespace SCAM {
     //                           Constraint-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addConstraint(PropertyConstraint * constraint){
+    void Property::addConstraint(std::shared_ptr<PropertyConstraint> constraint){
         this->constraints.push_back(constraint);
     }
 
-    const std::vector<PropertyConstraint *> &Property::getConstraints() const {
+    const std::vector<std::shared_ptr<PropertyConstraint>> &Property::getConstraints() const {
         return constraints;
     }
 
@@ -63,11 +64,11 @@ namespace SCAM {
     //                            Freeze-Functions
     // ------------------------------------------------------------------------------
 
-    void Property::addFreezeSignal(SCAM::PropertyMacro *freezeSignal, Timepoint* timePoint) {
+    void Property::addFreezeSignal(std::shared_ptr<DESCAM::PropertyMacro> freezeSignal, Timepoint* timePoint) {
         this->freezeSignals.insert(std::make_pair(freezeSignal, timePoint));
     }
 
-    const std::map<PropertyMacro *, Timepoint *,pointer_comparator<PropertyMacro*>> &Property::getFreezeSignals() const {
+    const std::map<std::shared_ptr<PropertyMacro> , Timepoint *,pointer_comparator<std::shared_ptr<PropertyMacro>>> &Property::getFreezeSignals() const {
         return freezeSignals;
     }
 
@@ -92,13 +93,13 @@ namespace SCAM {
 
     }
 
-    const std::vector<SCAM::TemporalExpr*> &Property::getCommitmentList() const {
+    const std::vector<DESCAM::TemporalExpr*> &Property::getCommitmentList() const {
         return commitmentList;
     }
 
     const Operation *Property::getOperation() const {
         if(operationList.size() > 1){
-            throw std::runtime_error("Property is build from more then 1 operation. Please use getOperations()");
+            TERMINATE("Property is build from more then 1 operation. Please use getOperations()");
         }
         return operationList.front();
     }
@@ -106,5 +107,4 @@ namespace SCAM {
     const std::vector<std::pair<Timepoint *, Expr *>> &Property::getTimePointsOrdered() const {
         return timePointsOrdered;
     }
-
 }

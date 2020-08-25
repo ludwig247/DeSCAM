@@ -10,9 +10,9 @@
 #include "PrintStmt.h"
 #include "Utilities.h"
 
-namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
+namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-    using namespace SCAM::HLSPlugin::VHDLWrapper;
+    using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
     struct Node {
         StmtType type = StmtType::UNKNOWN;

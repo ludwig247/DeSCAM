@@ -7,15 +7,15 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
 /*!
  * \brief Class representing a state of FSM
  */
     class SectionValue : public ConstValue {
     public:
-        SectionValue(std::string value, const DataType *type);
+        SectionValue(std::string value, const DataType *type, LocationInfo stmtLocationInfo = LocationInfo());
 
-        SectionValue(const ConstValue *value);
+        SectionValue(const ConstValue *value, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual void accept(StmtAbstractVisitor &visitor);
 

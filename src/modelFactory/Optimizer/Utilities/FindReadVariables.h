@@ -10,12 +10,12 @@
 #include "Behavior/CfgNode.h"
 #include <set>
 
-namespace SCAM {
+namespace DESCAM {
 /***
    * \brief: Finds variables assigned by read and write(statusOperand) statements
    * \author: mi-alkoudsi
    * \inputs:
-   *    - std::map<int, SCAM::CfgNode *> cfg;
+   *    - std::map<int, DESCAM::CfgNode *> cfg;
    * \outputs:
    *    - std::set<std::string> readVariablesSet;
    */

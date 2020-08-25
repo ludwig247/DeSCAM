@@ -17,16 +17,16 @@
 #include "PrintStmt.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
    /***
    * \brief: Propagates parameters values from the parameter list to their use inside the body of the function
    * \author:mi-alkoudsi
    * \inputs:
-   *       - std::map<std::string, SCAM::Expr *> paramValMap;
-   *       - std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
+   *       - std::map<std::string, DESCAM::Expr *> paramValMap;
+   *       - std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> returnValueConditionList;
    * \outputs:
-   *       - std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> optimizedReturnValueConditionList;
+   *       - std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *>>> optimizedReturnValueConditionList;
    */
 
     class ParamValuePropagation : public StmtAbstractVisitor {
@@ -37,19 +37,19 @@ namespace SCAM {
         ParamValuePropagation() = delete;
 
         ParamValuePropagation(
-                              std::map<std::string, SCAM::Expr *> paramValMap,
+                              std::map<std::string, Expr *> paramValMap,
                               const std::map<std::string, Variable *> &globalVariableMap,
-                              std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList);
+                              std::vector<std::pair<Return *, std::vector<Expr *>>> returnValueConditionList);
 
         ~ParamValuePropagation() = default;
 
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> getReturnValueConditionList() const;
+        std::vector<std::pair<Return *, std::vector<Expr *>>> getReturnValueConditionList() const;
 
     private:
-        std::map<std::string, SCAM::Expr *> paramValMap;
-        std::vector<std::pair<SCAM::Return *, std::vector<SCAM::Expr *>>> returnValueConditionList;
+        std::map<std::string, Expr *> paramValMap;
+        std::vector<std::pair<Return *, std::vector<Expr *>>> returnValueConditionList;
         std::map<std::string, Variable *> globalVariableMap;
-        SCAM::Expr *newExpr;
+        Expr *newExpr;
 
         //visitors
         void visit(struct VariableOperand &node) override;
@@ -98,7 +98,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 
