@@ -1,17 +1,15 @@
 #include "Utilities.h"
-#include <assert.h>
+#include <cassert>
 #include <algorithm>
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 bool Utilities::isPowerOfTwo(long int n) {
-    if ((n < 1) || (n & n - 1))
-        return false;
-    return true;
+    return !((n < 1) || (n & n - 1));
 }
 
 int Utilities::bitPosition(long int n) {
-    assert(isPowerOfTwo(n) == true);
+    assert(isPowerOfTwo(n));
     int count = 0;
     while (n > 0) {
         if (n & 1)
