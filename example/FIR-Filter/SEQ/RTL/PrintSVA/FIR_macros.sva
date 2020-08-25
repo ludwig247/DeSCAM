@@ -57,7 +57,7 @@ function int shiftreg_2;
 endfunction
 
 // STATES //
-function data_in_1;
+/*function data_in_1;
 	data_in_1 = ((FIR.data_in_notify == true)
 		&& (FIR.data_out_notify == false)
 		&& (FIR.phase_algorithm_signal == IDLE));
@@ -71,7 +71,7 @@ function data_out_3;
 	data_out_3 = ((FIR.data_in_notify == false)
 		&& (FIR.data_out_notify == true)
 		&& (FIR.phase_algorithm_signal == RUN));
-endfunction
+endfunction*/
 
 // STATES //
 function data_in_1;

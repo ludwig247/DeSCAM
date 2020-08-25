@@ -6,14 +6,14 @@ use work.FIR_types.all;
 
 entity FIR is
 port(	
-	clk:		in std_logic;
-	rst:		in std_logic;
+	clk:			in std_logic;
+	rst:			in std_logic;
 	data_in:		in signed(31 downto 0);
 	data_in_sync:		in bool;
 	data_in_notify:		out bool;
 	data_out:		out signed(31 downto 0);
 	data_out_sync:		in bool;
-	data_out_notify:		out bool
+	data_out_notify:	out bool
 );
 end FIR;
 
@@ -62,28 +62,25 @@ begin
 				acc_signal <= to_signed(0, 32);
 				phase_algorithm_signal <= RUN_C1;
 
+				shiftreg_signal(2) <= shiftreg_signal(1);
+				shiftreg_signal(1) <= shiftreg_signal(0);
+				shiftreg_signal(0) <= data_in;
 
 			elsif (phase_algorithm_signal = RUN_C1 and data_out_notify_sig = false) then --STATE_C1
 
-				shiftreg_signal(2) <= shiftreg_signal(1);
-				--acc_signal <= acc_signal + resize(shiftreg_signal(1) * coef_signal(2), acc_signal'length);
-				acc_signal_var64 := acc_signal + (shiftreg_signal(1) * coef_signal(2));
+				acc_signal_var64 := acc_signal + (shiftreg_signal(2) * coef_signal(2));
 				acc_signal <= acc_signal_var64(31 downto 0);
 				phase_algorithm_signal <= RUN_C2;
 
 			elsif (phase_algorithm_signal = RUN_C2 and data_out_notify_sig = false) then --STATE_C2
 
-				shiftreg_signal(1) <= shiftreg_signal(0);
-				acc_signal_var64 := acc_signal + (shiftreg_signal(0) * coef_signal(1));
+				acc_signal_var64 := acc_signal + (shiftreg_signal(1) * coef_signal(1));
 				acc_signal <= acc_signal_var64(31 downto 0);
 				phase_algorithm_signal <= RUN_C3;
 
 			elsif (phase_algorithm_signal = RUN_C3 and data_out_notify_sig = false) then --STATE_C3
 
-				shiftreg_signal(0) <= data_algorithm_signal;
-				acc_signal_var64 := acc_signal + (data_algorithm_signal * coef_signal(0));
-				--acc_signal_var := acc_signal_var64(31 downto 0);
-				--acc_signal <= acc_signal_var;
+				acc_signal_var64 := acc_signal + (shiftreg_signal(0) * coef_signal(0));
 				acc_signal <= acc_signal_var64(31 downto 0);
 
 				data_out <= acc_signal_var64(31 downto 0);

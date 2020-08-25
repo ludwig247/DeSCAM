@@ -1,2 +1,2 @@
 ﻿add_subdirectory(SEQ)
-#add_subdirectory(PIPELINE)
+add_subdirectory(PIPELINE)

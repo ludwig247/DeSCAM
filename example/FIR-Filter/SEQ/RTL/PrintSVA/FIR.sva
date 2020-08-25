@@ -1,5 +1,5 @@
 // DATA TYPES //
-typedef enum {IDLE, OUT, RUN_C1, RUN_C2, RUN_C3} phases;
+typedef enum {IDLE, RUN_C1, RUN_C2, RUN_C3, RUN_OUT} phases;
 
 `define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
 
@@ -121,7 +121,9 @@ property C3_4_4_p(o);
 	t ##0 hold(data_algorithm_0, data_algorithm()) and
 	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
 	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
-	t##0 C3_4()
+	t##0 C3_4() and
+	t ##0 data_algorithm_0 > 0 and
+	t ##0 data_algorithm_0 < 8
 implies
 	t_end(o)##0 data_out_5() and
 	t_end(o)##0 acc() == (acc_0 + (coef_0_0 * data_algorithm_0)) and
