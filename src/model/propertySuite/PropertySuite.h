@@ -79,10 +79,14 @@ namespace DESCAM {
 
         void setResetProperty(std::shared_ptr<Property> resetProperty);
 
-        // OperationProperties
+        // Properties
         void addProperty(std::shared_ptr<Property> property);
 
         const std::vector<std::shared_ptr<Property>> &getProperties() const;
+
+        const std::vector<std::shared_ptr<Property>> &getOperationProperties() const;
+
+        const std::vector<std::shared_ptr<Property>> &getWaitProperties() const;
 
         // StateMap
         //std::set<PropertyMacro*> getPredecessorStates(PropertyMacro* state);
@@ -108,6 +112,9 @@ namespace DESCAM {
 
         std::shared_ptr<Property> resetProperty;
         std::vector<std::shared_ptr<Property>> propertyList;
+
+        std::vector<std::shared_ptr<Property>> operationPropertyList;
+        std::vector<std::shared_ptr<Property>> waitPropertyList;
 
         //std::map<PropertyMacro*, std::set<PropertyMacro*>> predecessorStates;
         //std::map<PropertyMacro*, std::set<PropertyMacro*>> successorStates;
