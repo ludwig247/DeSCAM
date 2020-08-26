@@ -1,0 +1,87 @@
+function bit[15:0] data1_in;
+	//Integer
+	data1_in[15] = Test.data1_in[7];
+	data1_in[14] = Test.data1_in[6];
+	data1_in[13] = Test.data1_in[5];
+	data1_in[12] = Test.data1_in[4];
+	data1_in[11] = Test.data1_in[3];
+	data1_in[10] = Test.data1_in[2];
+	data1_in[9] = Test.data1_in[1];
+	data1_in[8] = Test.data1_in[0];
+	
+	//Fraction
+	data1_in[7] = Test.data1_in[-1];
+	data1_in[6] = Test.data1_in[-2];
+	data1_in[5] = Test.data1_in[-3];
+	data1_in[4] = Test.data1_in[-4];
+	data1_in[3] = Test.data1_in[-5];
+	data1_in[2] = Test.data1_in[-6];
+	data1_in[1] = Test.data1_in[-7];
+	data1_in[0] = Test.data1_in[-8];
+endfunction
+
+function bit[15:0] data2_in;
+	//Integer
+	data2_in[15] = Test.data2_in[7];
+	data2_in[14] = Test.data2_in[6];
+	data2_in[13] = Test.data2_in[5];
+	data2_in[12] = Test.data2_in[4];
+	data2_in[11] = Test.data2_in[3];
+	data2_in[10] = Test.data2_in[2];
+	data2_in[9] = Test.data2_in[1];
+	data2_in[8] = Test.data2_in[0];
+	
+	//Fraction
+	data2_in[7] = Test.data2_in[-1];
+	data2_in[6] = Test.data2_in[-2];
+	data2_in[5] = Test.data2_in[-3];
+	data2_in[4] = Test.data2_in[-4];
+	data2_in[3] = Test.data2_in[-5];
+	data2_in[2] = Test.data2_in[-6];
+	data2_in[1] = Test.data2_in[-7];
+	data2_in[0] = Test.data2_in[-8];
+endfunction
+
+function bit[15:0] data_out;
+	//Integer
+	data_out[15] = Test.data_out[7];
+	data_out[14] = Test.data_out[6];
+	data_out[13] = Test.data_out[5];
+	data_out[12] = Test.data_out[4];
+	data_out[11] = Test.data_out[3];
+	data_out[10] = Test.data_out[2];
+	data_out[9] = Test.data_out[1];
+	data_out[8] = Test.data_out[0];
+	
+	//Fraction
+	data_out[7] = Test.data_out[-1];
+	data_out[6] = Test.data_out[-2];
+	data_out[5] = Test.data_out[-3];
+	data_out[4] = Test.data_out[-4];
+	data_out[3] = Test.data_out[-5];
+	data_out[2] = Test.data_out[-6];
+	data_out[1] = Test.data_out[-7];
+	data_out[0] = Test.data_out[-8];
+endfunction
+
+function bit[15:0] add_fixed(bit[15:0] a, bit[15:0] b);
+
+	bit[7:0] a_upper = a[15:8];
+	bit[7:0] b_upper = b[15:8];
+	bit[7:0] a_lower = a[7:0];
+	bit[7:0] b_lower = b[7:0];
+	bit[8:0] intermediate_upper;
+	bit[8:0] intermediate_lower;
+	
+	intermediate_lower = a_lower + b_lower;
+	intermediate_upper = a_upper + b_upper;
+
+	/*if(intermediate_lower[8] == 1)
+		intermediate_upper = 0;
+	end if;*/
+
+	add_fixed[15:8] = intermediate_upper;
+	add_fixed[7:0] = intermediate_lower;
+
+
+endfunction
