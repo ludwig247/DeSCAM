@@ -44,48 +44,45 @@ Variable* OptimizerHLS::getCorrespondingRegister(DataSignal* dataSignal) {
     }
 }
 
-void OptimizerHLS::removeRedundantConditions()
-{
-    for (auto &function : module->getFunctionMap()) {
-        auto branches = function.second->getReturnValueConditionList();
-        for (auto branch = branches.begin(); std::next(branch) != branches.end(); ++branch) {
-            auto conditionList = branch->second;
-            for (auto otherBranches = std::next(branch); otherBranches != branches.end(); ++otherBranches) {
-                auto otherConditionList = otherBranches->second;
-                for (auto &cond : otherConditionList) {
-                    if (NodePeekVisitor::nodePeekUnaryExpr(cond) != nullptr) {
-                        cond = (dynamic_cast<UnaryExpr * >(cond))->getExpr();
-                    }
-                }
-                bool allFound = true;
-                for (auto cond : conditionList) {
-                    bool found = false;
-                    for (auto otherCond : otherConditionList) {
-                        if (*cond == *otherCond) {
-                            found = true;
+/*
+ * Iterates over all return values of a function, removing redundant conditions of previous branches
+ *
+ * TODO: Have this functionality implemented inside the FunctionFactory
+ */
+void OptimizerHLS::removeRedundantConditions() {
+
+    for (auto & function : propertySuiteHelper->getFunctions()) {
+
+        // Create a local modifiable copy
+        auto branches = function->getReturnValueConditionList();
+
+        // Iterate over all pairs of branches
+        for (auto branch = branches.begin(); std::next(branch) != branches.end(); branch++) {
+            auto const & conditionList = branch->second;
+            for (auto otherBranch = std::next(branch); otherBranch != branches.end(); otherBranch++) {
+                auto & otherConditionList = otherBranch->second;
+
+                for (auto const & cond : conditionList) {
+                    for (auto const & otherCond : otherConditionList) {
+
+                        // Check, if the condition is negated
+                        if (NodePeekVisitor::nodePeekUnaryExpr(otherCond) != nullptr) {
+                            auto const otherCondExpr = NodePeekVisitor::nodePeekUnaryExpr(otherCond)->getExpr();
+
+                            // Remove condition, if it is already covered by previous branches
+                            if (*cond == *otherCondExpr) {
+                                otherConditionList.erase(std::find(otherConditionList.begin(), otherConditionList.end(), otherCond));
+                            }
+
                         }
-                    }
-                    if (!found) {
-                        allFound = false;
+
                     }
                 }
-                if (allFound) {
-                    for (const auto &cond : conditionList) {
-                        (otherBranches->second).erase(std::remove_if(
-                                (otherBranches->second).begin(),
-                                (otherBranches->second).end(),
-                                [&cond](Expr *expr) {
-                                    if (NodePeekVisitor::nodePeekUnaryExpr(expr) != nullptr) {
-                                        return (*cond == *((dynamic_cast<UnaryExpr * >(expr))->getExpr()));
-                                    }
-                                    return false;
-                                }), (otherBranches->second).end()
-                        );
-                    }
-                }
+
             }
         }
-        function.second->setReturnValueConditionList(branches);
+        
+        function->setReturnValueConditionList(branches);
     }
 }
 
@@ -297,16 +294,26 @@ void OptimizerHLS::findOperationModuleSignals() {
     std::set<Variable *> assumptionVariables;
     for (const auto& property : propertySuiteHelper->getOperationProperties()) {
         for (const auto& commitment : property->getModifiedCommitmentList()) {
-            const auto out = ExprVisitor::getUsedDataSignals(commitment->getLhs());
+
+            //auto a = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
+            auto a = commitment;
+
+            if (a == nullptr) {
+                continue;
+            }
+
+            //std::cout << PrintStmt::toString(a->getLhs()) << "   " << PrintStmt::toString(a->getRhs()) << std::endl;
+
+            const auto out = ExprVisitor::getUsedDataSignals(a->getLhs());
             outputs.insert(out.begin(), out.end());
 
-            const auto in = ExprVisitor::getUsedDataSignals(commitment->getRhs());
+            const auto in = ExprVisitor::getUsedDataSignals(a->getRhs());
             inputs.insert(in.begin(), in.end());
 
-            auto lhsVariables = ExprVisitor::getUsedVariables(commitment->getLhs());
+            auto lhsVariables = ExprVisitor::getUsedVariables(a->getLhs());
             internalRegisterOut.insert(lhsVariables.begin(), lhsVariables.end());
 
-            auto rhsVariables = ExprVisitor::getUsedVariables(commitment->getRhs());
+            auto rhsVariables = ExprVisitor::getUsedVariables(a->getRhs());
             internalRegisterIn.insert(rhsVariables.begin(), rhsVariables.end());
         }
         for (const auto& assumption : property->getOperation()->getAssumptionsList()) {
