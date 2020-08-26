@@ -70,8 +70,7 @@ static std::vector<Param> parameter(const char* header_list) {
 class PrintSkeleton_Test : public ::testing::TestWithParam<Param>  {
 public:
     std::vector<SCAM::Module *> result;
-    SCAM::Module * module = result.back();
-
+    SCAM::Module * module;
     struct PrintToStringParamName
     {
         template <class ParamType>
@@ -153,6 +152,7 @@ public:
             result.push_back(module.second);
         }
         std::cout << "Number of modules: " << result.size() << std::endl;
+        module = result.back();
     }
 
     void TearDown() {
