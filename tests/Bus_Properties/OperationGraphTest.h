@@ -261,9 +261,53 @@ public:
                     blockedFunctions = savedBlocked;
                 }
             }
-            else{
+            else {
                 //End of path reached
-                finalPaths.push_back(currentPath);
+                //Create Operation and compare commitments with all other commitments
+                auto op = new Operation();
+                if (currentPath.idList.size() > 0){
+                    //Create new Operation
+                    op->setState(start_state);
+                    op->setNextState(start_state);
+                    std::vector<SCAM::Stmt*> statementList;
+                    for(auto stmt :currentPath.stmtList){
+                        statementList.push_back(stmt);
+                    }
+                    op->setStatementsList(statementList);
+                    auto rOperations = new ReconstructOperations(module);
+                    rOperations->sortOperation(op);
+                    //Compare commitments
+                    bool was_merged = false;
+                    for(auto comp_op: operationsFinalOpt){
+                        if(comp_op->getCommitmentsList().size()==op->getCommitmentsList().size()){
+                            bool equal_commits = true;
+                            for(int i=0; i< op->getCommitmentsList().size();i++){
+                                if(!(comp_op->getCommitmentsList().at(i)==op->getCommitmentsList().at(i))){
+                                    //if one commitment is not different stop;
+                                    equal_commits = false;
+                                    break;
+                                }
+                            }
+                            //if all commitments are equal, merge the AssumptionLists of both operations
+                            if(equal_commits){
+                               //Merge
+                               auto assump_list = op->getAssumptionsList();
+                               for(auto assump:assump_list){
+                                   comp_op->addAssumption(assump);
+                               }
+                               was_merged = true;
+                               break;
+                            }
+                        }
+                    }
+                    //If the operation wasn't merged it is a relevant new one, so store it
+                    if(!was_merged){
+                        //if operation is reachable add it to operationsFinalOpt
+                        if(ValidOperations::isOperationReachable(op)){
+                            operationsFinalOpt.push_back(op);
+                        }
+                    }
+                }
                 return;
             }
         }
@@ -419,6 +463,8 @@ public:
 
         //Slave 0
         auto val_0_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
+        assert(bus_req_master_0->getDataSignal()->getPort());
+        assert(bus_req_master_0->getDataSignal()->getSubVar("haddr")->getPort());
         auto val_1_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
         auto val_2_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
         auto val_3_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
@@ -1509,32 +1555,32 @@ public:
             controlFlowMap.insert(std::make_pair(node.first,node.second));
         }
 
-        //Print CFG for MasterWrite
-        std::cout << printCFG(controlFlowMapMasterWrite0) << std::endl;
-        std::cout << printCFG(controlFlowMapMasterWrite1) << std::endl;
-        std::cout << printCFG(controlFlowMapMasterWrite2) << std::endl;
-        std::cout << printCFG(controlFlowMapMasterWrite3) << std::endl;
-
-        //Print CFG for SlaveRead
-        std::cout << printCFG(controlFlowMapSlaveRead0) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveRead1) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveRead2) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveRead3) << std::endl;
-
-        //Print CFG for SlaveWrite
-        std::cout << printCFG(controlFlowMapSlaveWrite0) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveWrite1) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveWrite2) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveWrite3) << std::endl;
-
-        //Print CFG for MasterRead
-        std::cout << printCFG(controlFlowMapMasterRead0) << std::endl;
-        std::cout << printCFG(controlFlowMapMasterRead1) << std::endl;
-        std::cout << printCFG(controlFlowMapMasterRead2) << std::endl;
-        std::cout << printCFG(controlFlowMapMasterRead3) << std::endl;
-
-        //Print CFG Dummy
-        std::cout << printCFG(controlFlowMapDummy) << std::endl;
+//        //Print CFG for MasterWrite
+//        std::cout << printCFG(controlFlowMapMasterWrite0) << std::endl;
+//        std::cout << printCFG(controlFlowMapMasterWrite1) << std::endl;
+//        std::cout << printCFG(controlFlowMapMasterWrite2) << std::endl;
+//        std::cout << printCFG(controlFlowMapMasterWrite3) << std::endl;
+//
+//        //Print CFG for SlaveRead
+//        std::cout << printCFG(controlFlowMapSlaveRead0) << std::endl;
+//        std::cout << printCFG(controlFlowMapSlaveRead1) << std::endl;
+//        std::cout << printCFG(controlFlowMapSlaveRead2) << std::endl;
+//        std::cout << printCFG(controlFlowMapSlaveRead3) << std::endl;
+//
+//        //Print CFG for SlaveWrite
+//        std::cout << printCFG(controlFlowMapSlaveWrite0) << std::endl;
+//        std::cout << printCFG(controlFlowMapSlaveWrite1) << std::endl;
+//        std::cout << printCFG(controlFlowMapSlaveWrite2) << std::endl;
+//        std::cout << printCFG(controlFlowMapSlaveWrite3) << std::endl;
+//
+//        //Print CFG for MasterRead
+//        std::cout << printCFG(controlFlowMapMasterRead0) << std::endl;
+//        std::cout << printCFG(controlFlowMapMasterRead1) << std::endl;
+//        std::cout << printCFG(controlFlowMapMasterRead2) << std::endl;
+//        std::cout << printCFG(controlFlowMapMasterRead3) << std::endl;
+//
+//        //Print CFG Dummy
+//        std::cout << printCFG(controlFlowMapDummy) << std::endl;
 
         init = new State("reset");
         init->setInit();
@@ -1869,7 +1915,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
             perm.push_back(readyFunc);
         }
     }
-    std::cout << permutations.size() << std::endl;
     //construct a vector of all paths by pushing all paths to allPaths
     for(int i=0; i<pathsMasterWrite0IDs.size();i++){
         pathIDStmt p = {pathsMasterWrite0IDs.at(i),pathsMasterWrite0.at(i)};
@@ -1939,72 +1984,71 @@ TEST_F(OperationGraphTest, ExtractPaths){
         pathIDStmt p = {pathsDummyIDs.at(i),pathsDummy.at(i)};
         allPaths.push_back(p);
     }
-int i = 0;
+    int i = 0;
     // generate all Paths combining all CFGs and store them in variable finalPaths
     for(auto perm: permutations){
         //set ready queue to current permutation and clear blocked queue
         readyQueue = perm;
         blockedFunctions.clear();
-        std::cout << i++ << std::endl;
         combinePaths(readyQueue,blockedFunctions);
+        std::cout << operationsFinalOpt.size() << std::endl;
     }
 
-    std::cout<< allPaths.size() <<std::endl;
-    //Generate final Operations
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
-        auto op = new Operation();
-        if(path->idList.size()>0){
-        op->setState(start_state);
-        op->setNextState(start_state);
-        }
-        operationsFinal.push_back(op);
-    }
+//    //Generate final Operations
+//    //Iterate over all paths and set State, nextState and statementList
+//    for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
+//        auto op = new Operation();
+//        if(path->idList.size()>0){
+//        op->setState(start_state);
+//        op->setNextState(start_state);
+//        }
+//        operationsFinal.push_back(op);
+//    }
     int cnt = 0;
     std::vector<SCAM::Stmt*> statementList;
-    for(auto op: operationsFinal) {
-        for (auto stmt: finalPaths.at(cnt).stmtList) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
+//    for(auto op: operationsFinal) {
+//        for (auto stmt: finalPaths.at(cnt).stmtList) {
+//            statementList.push_back(stmt);
+//        }
+//        op->setStatementsList(statementList);
+//        cnt++;
+//        statementList.clear();
+//    }
+//
     auto rOperations = new ReconstructOperations(module);
-    for(auto op: this->operationsFinal) {
-        rOperations->sortOperation(op);
-    }
+//    for(auto op: this->operationsFinal) {
+//        rOperations->sortOperation(op);
+//    }
 
-    //Debug: Print finalPaths
+//    //Debug: Print finalPaths
     int num = 0;
-    for(auto p:finalPaths){
-        std::cout << "Path " << num << ": ";
-        for(auto id:p.idList){
-            std::cout<<id<<"\t";
-        }
-        std::cout<< std::endl;
-        num++;
-    }
+//    for(auto p:finalPaths){
+//        std::cout << "Path " << num << ": ";
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//        num++;
+//    }
 
-    //Optimize operations: only keep reachable operations and their paths
-    for(int i=0; i<operationsFinal.size();i++){
-        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
-            operationsFinalOpt.push_back(operationsFinal.at(i));
-            finalPathsOpt.push_back(finalPaths.at(i));
-        }
-    }
+//    //Optimize operations: only keep reachable operations and their paths
+//    for(int i=0; i<operationsFinal.size();i++){
+//        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
+//            operationsFinalOpt.push_back(operationsFinal.at(i));
+//            finalPathsOpt.push_back(finalPaths.at(i));
+//        }
+//    }
 
-    //Debug: Print finalPathsOpt
-    num = 0;
-    for(auto p:finalPathsOpt){
-        std::cout << "Path " << num << ": ";
-        for(auto id:p.idList){
-            std::cout<<id<<"\t";
-        }
-        std::cout<< std::endl;
-        num++;
-    }
+//    //Debug: Print finalPathsOpt
+//    num = 0;
+//    for(auto p:finalPathsOpt){
+//        std::cout << "Path " << num << ": ";
+//        for(auto id:p.idList){
+//            std::cout<<id<<"\t";
+//        }
+//        std::cout<< std::endl;
+//        num++;
+//    }
 
     //Set Incoming and Outgoing Operations
     for(auto op:operationsFinalOpt){

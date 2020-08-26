@@ -481,7 +481,8 @@ namespace SCAM {
     }
 
     void SCAM::ReconstructOperations::visit(SCAM::DataSignalOperand &node) {
-        if (node.getPort()->hasSubVar()) {
+        //if (node.getPort()->hasSubVar()) { <- falsch falls DataSignalOperand subSig ist
+        if (node.getDataSignal()->isCompoundType() && node.getDataSignal()->isArrayElement()) {
             for (auto subSig: node.getDataSignal()->getSubVarList()) {
                 auto *subSigOp = new DataSignalOperand(subSig);
                 this->find_or_add_variable(subSig->getFullName(), subSigOp);

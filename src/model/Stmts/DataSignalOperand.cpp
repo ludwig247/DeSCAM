@@ -33,5 +33,6 @@ bool SCAM::DataSignalOperand::operator==(const Stmt &other) const {
 }
 
 SCAM::Port *SCAM::DataSignalOperand::getPort() const {
+    assert(this->dataSignal->getPort());
     return this->dataSignal->getPort();
 }
