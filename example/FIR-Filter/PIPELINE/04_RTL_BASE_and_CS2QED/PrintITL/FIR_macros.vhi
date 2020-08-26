@@ -1,10 +1,10 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro p1_data_in_sync : boolean := p1_inst/data_in_sync end macro;
-macro p1_data_out_sync : boolean := p1_inst/data_out_sync end macro;
+macro p1_data_in_sync : boolean := p1_inst/data_in_sync  end macro;
+macro p1_data_out_sync : boolean := p1_inst/data_out_sync  end macro;
 macro p1_data_in_notify : boolean := p1_inst/data_in_notify end  macro;
-macro p1_data_out_notify : boolean := p1_inst/data_out_notify end  macro;
+macro p1_data_out_notify : boolean := p1_inst/data_out_notify  end  macro;
 
-macro p2_data_in_sync : boolean := p2_inst/data_in_sync end macro;
+macro p2_data_in_sync : boolean := p2_inst/data_in_sync  end macro;
 macro p2_data_out_sync : boolean := p2_inst/data_out_sync end macro;
 macro p2_data_in_notify : boolean := p2_inst/data_in_notify end  macro;
 macro p2_data_out_notify : boolean := p2_inst/data_out_notify end  macro;
@@ -39,6 +39,15 @@ macro p2_coef : signed := p2_inst/coef_signal end macro;
 macro p2_data_algorithm : signed := p2_inst/data_algorithm_signal end macro;
 macro p2_shiftreg : int_3 := p2_inst/shiftreg_signal end macro;
 
+
+
+constraint liveness := disable iff: not(reset_n);
+    if (notify) then
+        exists i in 0..(max_wait-1):
+            next(sync,i);
+        end exists;
+    end if;
+end constraint;
 
 -- STATES --
 macro data_in_1 : boolean := (p1_data_in_notify = true)
