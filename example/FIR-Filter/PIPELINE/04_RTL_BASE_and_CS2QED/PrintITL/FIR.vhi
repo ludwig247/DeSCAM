@@ -93,21 +93,26 @@ for timepoints:
 	t_C3_4_i1 = t_C2_3_i1+1..1 waits_for p1_data_in_sync,
 	t_data_out_5_i1 = t_C3_4_i1+1..1 waits_for p1_data_in_sync,
 	t_data_out_5_wait_i1 = t_data_out_5_i1+0..0 waits_for p1_data_in_sync,
-	t_end_i1 = t_data_out_5_wait_i1+1,
+	t_end_i1 = t_data_out_5_wait_i1+1..1 waits_for p1_data_in_sync,
 
 	-- relaxed instance
 	t_data_in_1_i2 = t,
-	t_data_in_1_wait_i2 = t_data_in_1_i2+0..0 waits_for p2_data_in_sync,
-	t_C1_2_i2 = t_data_in_1_wait_i2+1..1 waits_for p2_data_in_sync,
-	t_C2_3_i2 = t_C1_2_i2+1..1 waits_for p2_data_in_sync,
-	t_C3_4_i2 = t_C2_3_i2+1..1 waits_for p2_data_in_sync,
-	t_data_out_5_i2 = t_C3_4_i2+1..1 waits_for p2_data_in_sync,
-	t_data_out_5_wait_i2 = t_data_out_5_i2+0..0 waits_for p2_data_in_sync,
-	t_end_i2 = t_data_out_5_wait_i2+1;
+	t_data_in_1_wait_i2 = t_data_in_1_i2+0..5 waits_for p2_data_in_sync,
+	t_C1_2_i2 = t_data_in_1_wait_i2+1..5 waits_for p2_data_in_sync,
+	t_C2_3_i2 = t_C1_2_i2+1..5 waits_for p2_data_in_sync,
+	t_C3_4_i2 = t_C2_3_i2+1..5 waits_for p2_data_in_sync,
+	t_data_out_5_i2 = t_C3_4_i2+1..5 waits_for p2_data_in_sync,
+	t_data_out_5_wait_i2 = t_data_out_5_i2+0..5 waits_for p2_data_in_sync,
+	t_end_i2 = t_data_out_5_wait_i2+1..5 waits_for p2_data_in_sync;
 freeze:	
-	data_in_sig_at_t_data_in_1_wait_i2 = p1_data_in_sig@t_data_in_1_wait_i2,
-	shiftreg_0_at_t_data_in_1_wait_i2 = p1_shiftreg(0)@t_data_in_1_wait_i2,
-	shiftreg_1_at_t_data_in_1_wait_i2 = p1_shiftreg(1)@t_data_in_1_wait_i2;
+	shiftreg_0_at_t_C1_2_i1 = p1_shiftreg(0)@t_C1_2_i1,
+	shiftreg_1_at_t_C1_2_i1 = p1_shiftreg(1)@t_C1_2_i1,
+	shiftreg_2_at_t_C1_2_i1 = p1_shiftreg(2)@t_C1_2_i1,
+
+	coef_at_t_C3_4_i1 = p1_coef@t_C3_4_i1,
+	coef_at_t_data_out_5_i1 = p1_coef@t_data_out_5_i1,
+
+	data_out_at_t_data_out_5_i1 = p1_data_out_sig@t_data_out_5_i1;
 	
 assume:
 	-- shiftreg
@@ -123,25 +128,25 @@ assume:
 	at t: p1_shiftreg(1) = p2_shiftreg(1);
 	at t: p1_shiftreg(2) = p2_shiftreg(2);
 	-- input identical
-	at t: p1_inst/data_in = p2_inst/data_in;
+	at t: p1_data_in_sig = p2_data_in_sig;
 
 	-- coef identical in stage 4 (C3)
-	at t_C3_4_i2: p1_coef = p2_coef;
+	at t_C3_4_i2: p2_coef = coef_at_t_C3_4_i1;
 
 
 prove:
 	-- shiftreg	
 	-- shifted values + new value must be identical in both pipelines
-	at t_C1_2_i2: p1_shiftreg(0) = p2_shiftreg(0);
-	at t_C1_2_i2: p1_shiftreg(1) = p2_shiftreg(1);
-	at t_C1_2_i2: p1_shiftreg(2) = p2_shiftreg(2);
+	at t_C1_2_i2: p2_shiftreg(0) = shiftreg_0_at_t_C1_2_i1;
+	at t_C1_2_i2: p2_shiftreg(1) = shiftreg_1_at_t_C1_2_i1;
+	at t_C1_2_i2: p2_shiftreg(2) = shiftreg_2_at_t_C1_2_i1;
 
 	-- coef
 	-- shifted values + new value must be identical in both pipelines
-	at t_data_out_5_i2: p1_coef = p2_coef;
+	at t_data_out_5_i2: p2_coef = coef_at_t_data_out_5_i1;
 
 	-- output
-	at t_data_out_5_i2: p1_inst/data_out = p2_inst/data_out;
+	at t_data_out_5_i2: p2_data_out_sig = data_out_at_t_data_out_5_i1;
 
 end property;
 
