@@ -10,7 +10,7 @@
 #include <set>
 
 #include "PluginFactory.h"
-#include "PropertySuiteHelper.h"
+#include "PropertySuite.h"
 
 namespace DESCAM { namespace HLSPlugin {
 
@@ -22,7 +22,8 @@ namespace DESCAM { namespace HLSPlugin {
     class OptimizerHLS {
 
     public:
-        OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module);
+        //OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module);
+        OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module* module);
         ~OptimizerHLS() = default;
 
         bool hasOutputReg(DataSignal* dataSignal);
@@ -43,8 +44,13 @@ namespace DESCAM { namespace HLSPlugin {
         inline std::map<Variable *, DataSignal *> getOutputRegisterMap() const;
         inline std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal *dataSignal) const;
 
+        std::vector<Assignment *> getNotifyStatements(std::shared_ptr<Property> property) const;
+
+        std::vector<Assignment *> getResetStatements();
+
     private:
-        std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
+        //std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
+        std::shared_ptr<PropertySuite> propertySuite;
         Module* module;
 
         std::set<DataSignal *> outputs;
@@ -59,12 +65,18 @@ namespace DESCAM { namespace HLSPlugin {
         std::map<DataSignal *, std::vector<DataSignal *>> moduleToTopSignalMap;
         std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
 
+        std::map<std::shared_ptr<Property>, std::vector<Assignment*>> simplifiedCommitments;
+    public:
+        const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
+
+    private:
+
         std::map<Port *, std::list<Expr *>> arrayPorts;
 
         void findVariables();
         void findOperationModuleSignals();
 
-        void modifyCommitmentLists();
+        void simplifyCommitments();
         bool isSelfAssignments(Assignment *assignment);
         bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
 

@@ -20,7 +20,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
             VHDLWrapperSCO(
                     Module* module,
                     const std::string &moduleName,
-                    std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+                    std::shared_ptr<PropertySuite> propertySuite,
                     std::shared_ptr<OptimizerHLS>& optimizer
             );
             ~VHDLWrapperSCO() = default;

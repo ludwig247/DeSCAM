@@ -27,7 +27,7 @@ namespace DESCAM { namespace HLSPlugin { namespace  HLS {
                 HLSOption hlsOption,
                 Module* module,
                 const std::string &moduleName,
-                std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+                std::shared_ptr<PropertySuite>& propertySuite,
                 std::shared_ptr<OptimizerHLS>& optimizer
         );
         ~HLS() override = default;
@@ -41,7 +41,7 @@ namespace DESCAM { namespace HLSPlugin { namespace  HLS {
         std::string moduleName;
         Module* currentModule;
         std::shared_ptr<OptimizerHLS> optimizer;
-        std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
+        std::shared_ptr<PropertySuite> propertySuite;
 
         void dataTypes();
         void functions();

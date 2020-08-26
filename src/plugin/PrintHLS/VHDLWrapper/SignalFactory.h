@@ -25,7 +25,7 @@ class SignalFactory {
 
 public:
     SignalFactory(
-            std::shared_ptr<PropertySuiteHelper>& propertyHelper,
+            std::shared_ptr<PropertySuite>& propertySuite,
             Module *module,
             std::shared_ptr<OptimizerHLS>& optimizer,
             bool useWaitOp
@@ -66,7 +66,7 @@ public:
 
 private:
 
-    std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
+    std::shared_ptr<PropertySuite> propertySuite;
     Module *module;
     std::shared_ptr<OptimizerHLS> optimizer;
     bool useWaitOp;

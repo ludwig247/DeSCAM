@@ -29,20 +29,20 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
 
         moduleNames << moduleName << "\n";
 
-        auto propertySuiteHelper = std::make_shared<PropertySuiteHelper>(*module.second->getPropertySuite());
-        auto optimizer = std::make_shared<OptimizerHLS>(propertySuiteHelper, module.second);
+        auto propertySuite = std::make_shared<PropertySuite>(*module.second->getPropertySuite());
+        auto optimizer = std::make_shared<OptimizerHLS>(propertySuite, module.second);
 
         if (hlsOption == HLSOption::SCO) {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperSCO>(currentModule, moduleName, propertySuiteHelper, optimizer);
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperSCO>(currentModule, moduleName, propertySuite, optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         } else {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMCO>(currentModule, moduleName, propertySuiteHelper, optimizer);
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMCO>(currentModule, moduleName, propertySuite, optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         }
 
-        auto hls = std::make_unique<HLS::HLS>(hlsOption, currentModule, moduleName, propertySuiteHelper, optimizer);
+        auto hls = std::make_unique<HLS::HLS>(hlsOption, currentModule, moduleName, propertySuite, optimizer);
         auto hlsModel = hls->printModule();
         pluginOutput.insert(hlsModel.begin(), hlsModel.end());
 

@@ -3,8 +3,6 @@ add_library(PrintHLS SHARED
 
         Common/OptimizerHLS.cpp
         Common/PrintArrayStatements.cpp
-        Common/PropertyHelper.cpp
-        Common/PropertySuiteHelper.cpp
         Common/Constants.h
 
         HLS/HLS.cpp
