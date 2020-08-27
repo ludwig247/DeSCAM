@@ -90,7 +90,6 @@ public:
 
 	};
 
-//    ~PluginAction(){std::cout<<"delte,delete"<<std::endl;};
 
 private:
 

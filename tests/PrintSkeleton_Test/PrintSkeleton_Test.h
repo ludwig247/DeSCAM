@@ -38,38 +38,92 @@ static std::vector<SCAM::Module *> parameter() {
 
 static std::vector<Param> parameter(const char* header_list) {
 
-    std::vector<Param> header_includes;
+    std::vector<Param> includes;
     int i = 0;
 
     for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
-            header_includes.push_back(Param());
+            includes.push_back(Param());
 //            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
 //                header_includes[i].Name = line;
-            header_includes[i].Name = module.second->getName();
-        std::cout<< "gets called" << header_includes[i].Name << std::endl;
+            includes[i].Name = module.second->getName();
+        std::cout<< "gets called" << includes[i].Name << std::endl;
 
-            header_includes[i].result = (module.second);
+            includes[i].result = (module.second);
 
-            std::cout << "Number of modules: " << header_includes[i].result << std::endl;
+//            std::cout << "Number of modules: " << includes[i].result << std::endl;
         i++;
 
     }
 
-    return header_includes;
+    std::vector<const char *> commandLineArugmentsVector;
+
+    //Binary
+    std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
+    commandLineArugmentsVector.push_back(bin.c_str());
+
+    //SRC-File to be analyzed
+    std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
+    commandLineArugmentsVector.push_back(file_path.c_str());
+
+    //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+    const char *commandLineArgumentsArray[commandLineArugmentsVector.size()];
+    for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
+        commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
+    }
+    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+
+
+    for(auto module: ModelGlobal::getModel()->getModules()){
+        {
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+            PrintSkeleton printSkeleton;
+            auto result = printSkeleton.printModule(module.second);
+            std::ofstream moduleString;
+            moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
+            moduleString << result.second;
+            moduleString.close();
+
+            result = printSkeleton.printLocalTypes(module.second);
+            std::ofstream functionString;
+            functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
+            functionString << result.second;
+            functionString.close();
+        }
+
+        {
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
+            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
+
+            PrintSkeleton printSkeleton;
+            auto result = printSkeleton.printModule(module.second);
+            std::ofstream moduleString;
+            moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
+            moduleString << result.second;
+            moduleString.close();
+
+            result = printSkeleton.printLocalTypes(module.second);
+            std::ofstream functionString;
+            functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
+            functionString << result.second;
+            functionString.close();
+        }
+    }
+    return includes;
 }
 
 
 class PrintSkeleton_Test : public ::testing::TestWithParam<Param>  {
 public:
-    std::vector<SCAM::Module *> result;
-    SCAM::Module * module;
+//    std::vector<SCAM::Module *> result;
+//    SCAM::Module * module;
 //    struct PrintToStringParamName
 //    {
 //        template <class ParamType>
 //        std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
 //        {
 //            auto Parameter = static_cast<Param>(info.param);
-//            return Parameter.Name;
+//            return &Parameter.Name;
 //        }
 //    };
 
