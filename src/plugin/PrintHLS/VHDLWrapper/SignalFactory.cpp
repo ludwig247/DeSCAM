@@ -22,12 +22,12 @@ static const std::set<std::tuple<std::string, std::string, std::string>> CONTROL
 };
 
 SignalFactory::SignalFactory(
-        std::shared_ptr<PropertySuiteHelper>& propertyHelper,
+        std::shared_ptr<PropertySuite>& propertySuite,
         Module* module,
         std::shared_ptr<OptimizerHLS>& optimizer,
         bool useWaitState
 ) :
-        propertySuiteHelper(propertyHelper),
+        propertySuite(propertySuite),
         module(module),
         optimizer(optimizer),
         useWaitOp(useWaitState)
@@ -44,8 +44,8 @@ SignalFactory::SignalFactory(
 }
 
 void SignalFactory::setOperationSelector() {
-    auto operationSelectorType = new DataType(propertySuiteHelper->getName() + "_operation_t");
-    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
+    auto operationSelectorType = new DataType(propertySuite->getName() + "_operation_t");
+    for (const auto& property : propertySuite->getOperationProperties()) {
         operationSelectorType->addEnumValue(property->getName());
     }
     if (useWaitOp) {
@@ -80,12 +80,12 @@ void SignalFactory::setControlSignals() {
 }
 
 void SignalFactory::setMonitorSignals() {
-    auto stateType = new DataType(propertySuiteHelper->getName() + "_state_t");
-    for (const auto& state : propertySuiteHelper->getStates()) {
+    auto stateType = new DataType(propertySuite->getName() + "_state_t");
+    for (const auto& state : propertySuite->getStates()) {
         stateType->addEnumValue(state->getName());
     }
-    auto operationType = new DataType(propertySuiteHelper->getName() + "_operation_t");
-    for (const auto& operation : propertySuiteHelper->getOperationProperties()) {
+    auto operationType = new DataType(propertySuite->getName() + "_operation_t");
+    for (const auto& operation : propertySuite->getOperationProperties()) {
         operationType->addEnumValue(operation->getName());
     }
     monitorSignals.insert(new Variable("active_state", stateType));

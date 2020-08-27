@@ -13,11 +13,11 @@ using namespace DESCAM::HLSPlugin::VHDLWrapper;
 VHDLWrapperMCO::VHDLWrapperMCO(
         Module* module,
         const std::string &moduleName,
-        std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+        std::shared_ptr<PropertySuite> propertySuite,
         std::shared_ptr<OptimizerHLS>& optimizer
 )
 {
-    this->propertySuiteHelper = propertySuiteHelper;
+    this->propertySuite = propertySuite;
     this->currentModule = module;
     this->moduleName = moduleName;
     this->optimizer = optimizer;
@@ -26,7 +26,7 @@ VHDLWrapperMCO::VHDLWrapperMCO(
 
 std::map<std::string, std::string> VHDLWrapperMCO::printModule() {
     std::map<std::string, std::string> pluginOutput;
-    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, false);
+    signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, optimizer, false);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -79,11 +79,11 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
     ss << "\n\t-- Module Outputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
             Style::UL, "_out", true, true);
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
     }
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
     }
 
@@ -133,7 +133,7 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
     printComponentVars(signalFactory->getInternalRegisterIn(), "in", false);
     printComponentVars(signalFactory->getInternalRegisterOut(), "out", true);
 
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
         ss << "\t\t" << notifySignal->getName() << "_ap_vld: out std_logic;\n";
     }
@@ -187,7 +187,7 @@ void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
     printComponentInstVars(signalFactory->getInternalRegisterIn(), "in_", false);
     printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_", true);
 
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
         ss << "\t\t" << notifySignal->getName() << "_ap_vld  => " << notifySignal->getName() << "_vld,\n";
     }
@@ -348,7 +348,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << "\tend process;\n\n";
     }
 
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tprocess(" << notifySignal->getName() << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (" << notifySignal->getName() << "_vld = '1') then\n"
@@ -401,7 +401,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
     ss << "\tprocess(rst, done_sig, idle_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& commitment : propertySuiteHelper->getResetProperty()->getCommitmentList()) {
+    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
         std::string assignment = PrintResetNotify::toString(commitment->getStatement());
         if (!assignment.empty()) {
             ss << "\t\t\t" << assignment;
@@ -409,7 +409,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
     }
     ss << "\t\telse\n"
        << "\t\t\tif (done_sig = '1') then\n";
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_reg;\n";
     }
     ss << "\t\t\telsif (idle_sig = '1') then\n";
@@ -419,7 +419,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
         }
     }
     ss << "\t\t\telse\n";
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= '0';\n";
     }
     ss << "\t\t\tend if;\n"
@@ -456,7 +456,7 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
        << "\t\t\tstart_sig <= '0';\n"
-       << "\t\t\tactive_state <= st_" << propertySuiteHelper->getResetProperty()->getOperation()->getNextState()->getName() << ";\n"
+       << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getOperation()->getNextState()->getName() << ";\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
        << "\t\t\tif ((idle_sig = '1' or ready_sig = '1') and wait_state = '0') then\n"
        << "\t\t\t\tstart_sig <= '1';\n"

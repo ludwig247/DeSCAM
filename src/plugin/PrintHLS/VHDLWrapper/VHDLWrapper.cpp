@@ -26,8 +26,8 @@ std::string VHDLWrapper::printTypes() {
 
     // State enumeration
     typeStream << "\t -- States\n"
-               << "\ttype " + propertySuiteHelper->getName() << "_state_t is (";
-    auto states = propertySuiteHelper->getStates();
+               << "\ttype " + propertySuite->getName() << "_state_t is (";
+    auto states = propertySuite->getStates();
     for (auto state = states.begin(); state != states.end(); ++state) {
         typeStream << "st_" << (*state)->getName();
         if (std::next(state) != states.end()) {
@@ -53,10 +53,10 @@ std::string VHDLWrapper::printTypes() {
         }
     };
 
-    for (const auto& reg : propertySuiteHelper->getVisibleRegisters()) {
+    for (const auto& reg : propertySuite->getVisibleRegisters()) {
         fillTypeSets(reg->getDataType());
     }
-    for (const auto& func : propertySuiteHelper->getFunctions()) {
+    for (const auto& func : propertySuite->getFunctions()) {
         fillTypeSets(func->getReturnType());
     }
     for (auto &port : currentModule->getPorts()) {
@@ -127,7 +127,7 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
 
 void VHDLWrapper::functions(std::stringstream &ss) {
     std::set<Function *> usedFunctions;
-    for (const auto& property : propertySuiteHelper->getOperationProperties()) {
+    for (const auto& property : propertySuite->getOperationProperties()) {
         for (const auto& assumption : property->getOperation()->getAssumptionsList()) {
             const auto& funcSet = ExprVisitor::getUsedFunction(assumption);
             usedFunctions.insert(funcSet.begin(), funcSet.end());
@@ -226,7 +226,7 @@ std::string VHDLWrapper::printArchitecture() {
 
     entity(ss);
 
-    ss << "architecture " << propertySuiteHelper->getName() << "_arch of " << propertySuiteHelper->getName() << "_module is\n";
+    ss << "architecture " << propertySuite->getName() << "_arch of " << propertySuite->getName() << "_module is\n";
 
     signals(ss);
     functions(ss);
@@ -240,7 +240,7 @@ std::string VHDLWrapper::printArchitecture() {
     printConstantOutputs(ss);
     controlProcess(ss);
 
-    ss << "end " << propertySuiteHelper->getName() << "_arch;\n";
+    ss << "end " << propertySuite->getName() << "_arch;\n";
 
     return ss.str();
 }
@@ -252,7 +252,7 @@ std::string VHDLWrapper::sensitivityList() {
     std::set<DataSignal* > sensListDataSignals;
     std::set<Variable* > sensListVars;
 
-    const auto& operationProperties = propertySuiteHelper->getOperationProperties();
+    const auto& operationProperties = propertySuite->getOperationProperties();
     for (auto operationProperty : operationProperties) {
         for (const auto& assumption : operationProperty->getOperation()->getAssumptionsList()) {
             auto syncSignals = ExprVisitor::getUsedSynchSignals(assumption);
@@ -287,7 +287,7 @@ std::string VHDLWrapper::sensitivityList() {
 
 std::string VHDLWrapper::getResetValue(Variable* variable)
 {
-    for (const auto& statement : propertySuiteHelper->getResetStatements()) {
+    for (const auto& statement : optimizer->getResetStatements()) {
         auto printResetValue = PrintResetSignal(statement, variable->getName());
         if (printResetValue.toString()) {
             return PrintFunction::toString(statement->getRhs());
@@ -298,7 +298,7 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
 
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 {
-    for (const auto& statement : propertySuiteHelper->getResetStatements()) {
+    for (const auto& statement : optimizer->getResetStatements()) {
         auto printResetValue = PrintResetSignal(statement, dataSignal->getFullName());
         if (printResetValue.toString()) {
             return PrintFunction::toString(statement->getRhs());
@@ -322,17 +322,17 @@ void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
 
 std::string VHDLWrapper::operationEnum()
 {
-    int vectorSize = ceil(log2(propertySuiteHelper->getOperationProperties().size()));
+    int vectorSize = ceil(log2(propertySuite->getOperationProperties().size()));
     if (vectorSize == 0) {
         vectorSize++;
     };
-    std::string opTypeName = propertySuiteHelper->getName() + "_operation_t";
+    std::string opTypeName = propertySuite->getName() + "_operation_t";
 
     std::stringstream ss;
     ss << "\t-- Operations\n"
        << "\tsubtype " << opTypeName << " is std_logic_vector("
        << std::to_string(vectorSize - 1) << " downto 0);\n";
-    auto operations = propertySuiteHelper->getOperationProperties();
+    auto operations = propertySuite->getOperationProperties();
     int i = 0;
     for (auto op : operations) {
         ss << "\tconstant op_" << op->getName() << " : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n";
@@ -345,7 +345,7 @@ std::string VHDLWrapper::operationEnum()
 
 void VHDLWrapper::entity(std::stringstream &ss) {
     // Print Entity
-    ss << "entity " << propertySuiteHelper->getName() << "_module is\n";
+    ss << "entity " << propertySuite->getName() << "_module is\n";
     ss << "port(\n";
 
     auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
@@ -359,14 +359,14 @@ void VHDLWrapper::entity(std::stringstream &ss) {
     };
     printPortSignals(signalFactory->getInputs(), false);
     printPortSignals(signalFactory->getOutputs(), false);
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
     }
-    for (const auto syncSignal : propertySuiteHelper->getSyncSignals()) {
+    for (const auto syncSignal : propertySuite->getSyncSignals()) {
         ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
     }
     printPortSignals(signalFactory->getControlSignals(), true);
 
     ss << "\n);\n";
-    ss << "end " + propertySuiteHelper->getName() << "_module;\n\n";
+    ss << "end " + propertySuite->getName() << "_module;\n\n";
 }

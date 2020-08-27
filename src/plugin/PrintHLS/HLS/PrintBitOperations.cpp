@@ -222,6 +222,9 @@ bool PrintBitOperations::sliceWithoutShift(Node *node) {
 }
 
 bool PrintBitOperations::shiftWithConstant(Node *node) {
+
+    return false;
+
     if (node->type == StmtType::BITWISE) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
             std::set<StmtType > types;
@@ -256,18 +259,22 @@ std::string PrintBitOperations::getString(Node *node) {
 
     int offset = 0;
     if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
-        for (auto &child : node->child) {
-            if (child->type == StmtType::UNSIGNED_VALUE) {
+        //TODO: Re-implement bit slicing?
+        auto lhs = node->child[0];
+        auto rhs = node->child[1];
+
+    //    for (auto &child : node->child) {
+            if (rhs->type == StmtType::UNSIGNED_VALUE) {
                 offset = (node->subType == SubTypeBitwise::RIGHT_SHIFT) ?
-                         static_cast<int>(child->value) :
-                         -static_cast<int>(child->value);
+                         static_cast<int>(rhs->value) :
+                         -static_cast<int>(rhs->value);
             }
-        }
-        for (auto &child : node->child) {
-            if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND || child->type == StmtType::DATA_SIGNAL_OPERAND) {
-                ss << child->name << ".range(31, " << offset << ")";
+     //   }
+    //    for (auto &child : node->child) {
+            if (lhs->type == StmtType::VARIABLE_OPERAND || lhs->type == StmtType::PARAM_OPERAND || lhs->type == StmtType::DATA_SIGNAL_OPERAND) {
+                ss << lhs->name << ".range(31, " << offset << ")";
             }
-        }
+    //    }
     } else {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {

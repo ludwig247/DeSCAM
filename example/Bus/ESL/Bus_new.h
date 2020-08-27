@@ -14,7 +14,7 @@ struct Bus_new : public sc_module {
     //In-port
     blocking_in<bus_req_t> master_in;
     blocking_in<bus_resp_t> slave_in0;
-    blocking_in<bus_resp_t> slave_in1
+    blocking_in<bus_resp_t> slave_in1;
     blocking_in<bus_resp_t> slave_in2;
     blocking_in<bus_resp_t> slave_in3;
 

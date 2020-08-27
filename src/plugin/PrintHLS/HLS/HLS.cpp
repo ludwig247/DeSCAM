@@ -15,12 +15,12 @@ HLS::HLS(
         HLSOption hlsOption,
         Module* module,
         const std::string &moduleName,
-        std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+        std::shared_ptr<PropertySuite>& propertySuite,
         std::shared_ptr<OptimizerHLS>& optimizer
 ) :
         ss(""),
         moduleName(moduleName),
-        propertySuiteHelper(propertySuiteHelper),
+        propertySuite(propertySuite),
         currentModule(module),
         optimizer(optimizer),
         hlsOption(hlsOption)
@@ -69,13 +69,13 @@ void HLS::operations()
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
-    for (auto operationProperty : propertySuiteHelper->getOperationProperties()) {
+    for (auto operationProperty : propertySuite->getOperationProperties()) {
         const std::string& operationName = operationProperty->getName();
         ss << "\tcase " << operationName << ":\n";
-        for (auto commitment : operationProperty->getModifiedCommitmentList()) {
+        for (auto commitment : optimizer->getSimplifiedCommitments().at(operationProperty)) {
             ss << PrintStatement::toString(commitment, optimizer, hlsOption, 2, 2);
         }
-        for (const auto& notifyStmt : propertySuiteHelper->getNotifyStatements(operationProperty)) {
+        for (const auto& notifyStmt : optimizer->getNotifyStatements(operationProperty)) {
             ss << PrintStatement::toString(notifyStmt, optimizer, hlsOption, 2, 2);
         }
         ss << "\t\tbreak;\n";
@@ -163,7 +163,7 @@ void HLS::interface()
     }
 
     // Notify Signals
-    for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
     }
 
@@ -178,7 +178,7 @@ void HLS::writeToOutput()
     for (const auto reg : Utilities::getParents(optimizer->getInternalRegisterOut())) {
         ss << "\tout_" << reg->getName() << " = " << reg->getName() << "_reg;\n";
     }
-    for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << " = " << notifySignal->getName() << "_reg;\n";
     }
 }
@@ -218,7 +218,7 @@ void HLS::registerVariables()
         ss << " = " << getVariableReset(reg) << ";\n";
     }
 
-    for (auto notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (auto notifySignal : propertySuite->getNotifySignals()) {
         auto resetValue = getResetValue(notifySignal.get());
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue.valid ? resetValue.value : "false") << ";\n";
@@ -268,9 +268,9 @@ void HLS::dataTypes()
     // enum of states
     ss << "// States\n"
        << "enum state {";
-    for (auto state = propertySuiteHelper->getStates().begin(); state!=propertySuiteHelper->getStates().end(); ++state) {
+    for (auto state = propertySuite->getStates().begin(); state!=propertySuite->getStates().end(); ++state) {
         ss << (*state)->getName();
-        if (std::next(state)!=propertySuiteHelper->getStates().end()) {
+        if (std::next(state)!=propertySuite->getStates().end()) {
             ss << ", ";
         }
     }
@@ -279,7 +279,7 @@ void HLS::dataTypes()
     // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    const auto& operationProperties = propertySuiteHelper->getOperationProperties();
+    const auto& operationProperties = propertySuite->getOperationProperties();
     for (auto property = operationProperties.begin(); property != operationProperties.end(); ++property) {
         ss << (*property)->getName();
         if (std::next(property) != operationProperties.end()) {
@@ -303,10 +303,10 @@ void HLS::dataTypes()
         }
     };
 
-    for (const auto& reg : propertySuiteHelper->getVisibleRegisters()) {
+    for (const auto& reg : propertySuite->getVisibleRegisters()) {
         addDataType((DataType*) (reg->getDataType()));
     }
-    for (const auto& func : propertySuiteHelper->getFunctions()) {
+    for (const auto& func : propertySuite->getFunctions()) {
         addDataType(func->getReturnType());
     }
     for (auto& port : currentModule->getPorts()) {
@@ -541,7 +541,16 @@ std::string HLS::getVariableReset(Variable* variable)
 template<typename T>
 optional HLS::getResetValue(T* signal)
 {
-    for (const auto& commitment : propertySuiteHelper->getResetStatements()) {
+    std::vector<DESCAM::Assignment *> assignmentList;
+    auto temporalExprs = propertySuite->getResetProperty()->getCommitmentList();
+    for (auto temporalExpr : temporalExprs) {
+        if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
+            auto statement = dynamic_cast<Assignment *>(temporalExpr->getStatement());
+            assignmentList.push_back(statement);
+        }
+    }
+
+    for (const auto& commitment : assignmentList) {
         auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
         if (printResetValue.hasReset()) {
             return {true, PrintStatement::toString(commitment->getRhs())};

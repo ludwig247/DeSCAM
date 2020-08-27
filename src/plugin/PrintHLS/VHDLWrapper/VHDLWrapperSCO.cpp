@@ -12,11 +12,11 @@ using namespace DESCAM::HLSPlugin::VHDLWrapper;
 VHDLWrapperSCO::VHDLWrapperSCO(
         Module* module,
         const std::string &moduleName,
-        std::shared_ptr<PropertySuiteHelper>& propertySuiteHelper,
+        std::shared_ptr<PropertySuite> propertySuite,
         std::shared_ptr<OptimizerHLS>& optimizer
 )
 {
-    this->propertySuiteHelper = propertySuiteHelper;
+    this->propertySuite = propertySuite;
     this->currentModule = module;
     this->moduleName = moduleName;
     this->optimizer = optimizer;
@@ -25,7 +25,7 @@ VHDLWrapperSCO::VHDLWrapperSCO(
 
 std::map<std::string, std::string> VHDLWrapperSCO::printModule() {
     std::map<std::string, std::string> pluginOutput;
-    signalFactory = std::make_unique<SignalFactory>(propertySuiteHelper, currentModule, optimizer, true);
+    signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, optimizer, true);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -71,7 +71,7 @@ void VHDLWrapperSCO::signals(std::stringstream &ss) {
     ss << "\n\t-- Module Outputs\n";
     printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
             Style::UL, "_out", true);
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
     }
 
@@ -114,7 +114,7 @@ void VHDLWrapperSCO::component(std::stringstream& ss) {
     printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "");
     printComponentVars(signalFactory->getInternalRegisterOut(), "out");
 
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
     }
 
@@ -160,7 +160,7 @@ void VHDLWrapperSCO::componentInst(std::stringstream& ss) {
     printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
     printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");
 
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
     }
 
@@ -283,7 +283,7 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
     }
 
     ss << "\n\t-- Notify Signals\n";
-    for (const auto& notifySignal : propertySuiteHelper->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_out;\n";
     }
 
@@ -332,7 +332,7 @@ void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
        << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
-       << "\t\t\tactive_state <= st_" << propertySuiteHelper->getResetProperty()->getOperation()->getNextState()->getName() << ";\n"
+       << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getOperation()->getNextState()->getName() << ";\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
        << "\t\t\tactive_state <= next_state;\n"
        << "\t\tend if;\n"
@@ -342,5 +342,5 @@ void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
 
 bool VHDLWrapperSCO::emptyModule()
 {
-    return optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() && propertySuiteHelper->getNotifySignals().empty();
+    return optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() && propertySuite->getNotifySignals().empty();
 }

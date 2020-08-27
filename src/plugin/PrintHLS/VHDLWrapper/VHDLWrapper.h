@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-#include "PropertySuiteHelper.h"
+#include "PropertySuite.h"
 #include "OptimizerHLS.h"
 #include "PluginFactory.h"
 #include "SignalFactory.h"
@@ -23,7 +23,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 virtual std::map<std::string, std::string> printModule() = 0 ;
 
             protected:
-                std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
+                std::shared_ptr<PropertySuite> propertySuite;
                 Module* currentModule;
                 std::string moduleName;
                 std::shared_ptr<OptimizerHLS> optimizer;
