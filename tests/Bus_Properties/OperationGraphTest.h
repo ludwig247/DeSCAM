@@ -193,6 +193,7 @@ public:
     }
     void combinePaths(std::vector<eventID> readyQueue, std::vector<eventID> blockedFunctions) {
         static pathIDStmt currentPath;
+        bool equal_commits;
 
         //Try out all paths
         for(auto path: allPaths){
@@ -276,35 +277,37 @@ public:
                     op->setStatementsList(statementList);
                     auto rOperations = new ReconstructOperations(module);
                     rOperations->sortOperation(op);
-                    //Compare commitments
-                    bool was_merged = false;
-                    for(auto comp_op: operationsFinalOpt){
-                        if(comp_op->getCommitmentsList().size()==op->getCommitmentsList().size()){
-                            bool equal_commits = true;
-                            for(int i=0; i< op->getCommitmentsList().size();i++){
-                                if(!(comp_op->getCommitmentsList().at(i)==op->getCommitmentsList().at(i))){
-                                    //if one commitment is not different stop;
-                                    equal_commits = false;
-                                    break;
+                    if(ValidOperations::isOperationReachable(op)){
+                        //Compare commitments
+                        bool was_merged = false;
+                        for(auto comp_op: operationsFinalOpt){
+                            if(comp_op->getCommitmentsList().size()==op->getCommitmentsList().size()){
+                                equal_commits = true;
+                                for(int i=0; i< op->getCommitmentsList().size();i++){
+                                    if(!(*comp_op->getCommitmentsList().at(i)==*op->getCommitmentsList().at(i))){
+                                        //if one pair of commitments is not equal: stop
+                                        equal_commits = false;
+                                        break;
+                                    }
+                                }
+                                //if all commitments are equal, merge the AssumptionLists of both operations
+                                if(equal_commits){
+                                   //Merge
+                                   auto assump_list = op->getAssumptionsList();
+                                   for(auto assump:assump_list){
+                                       comp_op->addAssumption(assump);
+                                   }
+                                   was_merged = true;
+                                   break;
                                 }
                             }
-                            //if all commitments are equal, merge the AssumptionLists of both operations
-                            if(equal_commits){
-                               //Merge
-                               auto assump_list = op->getAssumptionsList();
-                               for(auto assump:assump_list){
-                                   comp_op->addAssumption(assump);
-                               }
-                               was_merged = true;
-                               break;
-                            }
                         }
-                    }
-                    //If the operation wasn't merged it is a relevant new one, so store it
-                    if(!was_merged){
-                        //if operation is reachable add it to operationsFinalOpt
-                        if(ValidOperations::isOperationReachable(op)){
-                            operationsFinalOpt.push_back(op);
+                        //If the operation wasn't merged it is a relevant new one, so store it
+                        if(!was_merged){
+                            //if operation is reachable add it to operationsFinalOpt
+                            if(ValidOperations::isOperationReachable(op)){
+                                operationsFinalOpt.push_back(op);
+                            }
                         }
                     }
                 }
@@ -1991,7 +1994,9 @@ TEST_F(OperationGraphTest, ExtractPaths){
         readyQueue = perm;
         blockedFunctions.clear();
         combinePaths(readyQueue,blockedFunctions);
+        i++;
         std::cout << operationsFinalOpt.size() << std::endl;
+        //if(i>2) break;
     }
 
 //    //Generate final Operations
