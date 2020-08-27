@@ -24,7 +24,7 @@ struct Param
     friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
         return os << bar.FilePath;}
 };
-std::vector<Param> example_headers, funct_headers;
+
 
 
 static std::vector<Param> parameter(const char* header_list) {
@@ -65,7 +65,7 @@ static std::vector<Param> parameter(const char* header_list) {
                 includes[i].FilePath = line;
                 includes[i].result = (model.second);
                 includes[i].Name = model.second->getName();
-                std::cout<< "gets called " << includes[i].Name << std::endl;
+//                std::cout<< "gets called " << includes[i].Name << std::endl;
                 i++;
             }
         }
@@ -79,7 +79,6 @@ static std::vector<Param> parameter(const char* header_list) {
 class ITLTest : public ::testing::TestWithParam<Param> {
 
 public:
-    std::vector<SCAM::Module *> result;
     struct PrintToStringParamName
     {
         template <class ParamType>
@@ -100,6 +99,8 @@ public:
 class ITLTestExamples : public ITLTest {};
 
 class ITLTestFunctionality : public ITLTest {};
+
+std::vector<Param> example_headers, funct_headers;
 
 INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Examples,
@@ -124,7 +125,6 @@ TEST_P(ITLTestExamples, Examples) {
 //                << "', in " << file << " line " << line << std::endl;
     ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
-//    SCAM::Module * module = result.back();
     printITL.printModule(GetParam().result);
     printITL.print();
     ASSERT_NO_THROW(printITL.print());
@@ -152,7 +152,6 @@ TEST_P(ITLTestExamples, Examples) {
 TEST_P(ITLTestFunctionality, Functionality) {
     ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
-//    SCAM::Module * module = result.back();
     printITL.printModule(GetParam().result);
     printITL.print();
     ASSERT_NO_THROW(printITL.print());

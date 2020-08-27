@@ -101,40 +101,36 @@ static std::vector<Param> parameter(const char* header_list) {
                     functionString << result.second;
                     functionString.close();
                 }
-            }
-
-
-            for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
                 includes.push_back(Param());
 //            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
 //                header_includes[i].Name = line;
                 includes[i].Name = module.second->getName();
-                std::cout << "gets called" << includes[i].Name << std::endl;
+//                std::cout << "gets called" << includes[i].Name << std::endl;
 
                 includes[i].result = (module.second);
 
-//            std::cout << "Number of modules: " << includes[i].result << std::endl;
-                i++;
 
+                i++;
             }
+
 //        }
 //    }
     ifs.close();
+            std::cout << "Number of modules: " << includes.size() << std::endl;
     return includes;
 }
 
 
 class PrintSkeleton_Test : public ::testing::TestWithParam<Param>  {
 public:
-//    std::vector<SCAM::Module *> result;
-//    SCAM::Module * module;
+
 //    struct PrintToStringParamName
 //    {
 //        template <class ParamType>
 //        std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
 //        {
 //            auto Parameter = static_cast<Param>(info.param);
-//            return &Parameter.Name;
+//            return Parameter.Name;
 //        }
 //    };
 
