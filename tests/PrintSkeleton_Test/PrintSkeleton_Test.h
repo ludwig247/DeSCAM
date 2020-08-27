@@ -40,75 +40,86 @@ static std::vector<Param> parameter(const char* header_list) {
 
     std::vector<Param> includes;
     int i = 0;
+    std::ifstream ifs(header_list);
 
-    for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
-            includes.push_back(Param());
+    std::string line;
+
+
+//    while (std::getline(ifs, line)) {
+//        if (line.size() > 0 && !(line.find("//") == 0)) {
+            std::vector<const char *> commandLineArugmentsVector;
+
+            //Binary
+            std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
+            commandLineArugmentsVector.push_back(bin.c_str());
+
+            //SRC-File to be analyzed
+//            std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
+            commandLineArugmentsVector.push_back(header_list);
+
+            //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+            const char *commandLineArgumentsArray[commandLineArugmentsVector.size()];
+            for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
+                commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
+            }
+            SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],
+                                           commandLineArgumentsArray[1]);
+
+
+            for (auto module: ModelGlobal::getModel()->getModules()) {
+                {
+                    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
+                    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+                    PrintSkeleton printSkeleton;
+                    auto result = printSkeleton.printModule(module.second);
+                    std::ofstream moduleString;
+                    moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
+                    moduleString << result.second;
+                    moduleString.close();
+
+                    result = printSkeleton.printLocalTypes(module.second);
+                    std::ofstream functionString;
+                    functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
+                    functionString << result.second;
+                    functionString.close();
+                }
+
+                {
+                    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
+                    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
+
+                    PrintSkeleton printSkeleton;
+                    auto result = printSkeleton.printModule(module.second);
+                    std::ofstream moduleString;
+                    moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
+                    moduleString << result.second;
+                    moduleString.close();
+
+                    result = printSkeleton.printLocalTypes(module.second);
+                    std::ofstream functionString;
+                    functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
+                    functionString << result.second;
+                    functionString.close();
+                }
+            }
+
+
+            for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
+                includes.push_back(Param());
 //            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
 //                header_includes[i].Name = line;
-            includes[i].Name = module.second->getName();
-        std::cout<< "gets called" << includes[i].Name << std::endl;
+                includes[i].Name = module.second->getName();
+                std::cout << "gets called" << includes[i].Name << std::endl;
 
-            includes[i].result = (module.second);
+                includes[i].result = (module.second);
 
 //            std::cout << "Number of modules: " << includes[i].result << std::endl;
-        i++;
+                i++;
 
-    }
-
-    std::vector<const char *> commandLineArugmentsVector;
-
-    //Binary
-    std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
-    commandLineArugmentsVector.push_back(bin.c_str());
-
-    //SRC-File to be analyzed
-    std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
-    commandLineArugmentsVector.push_back(file_path.c_str());
-
-    //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-    const char *commandLineArgumentsArray[commandLineArugmentsVector.size()];
-    for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
-        commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
-    }
-    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
-
-
-    for(auto module: ModelGlobal::getModel()->getModules()){
-        {
-            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
-            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
-            PrintSkeleton printSkeleton;
-            auto result = printSkeleton.printModule(module.second);
-            std::ofstream moduleString;
-            moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
-            moduleString << result.second;
-            moduleString.close();
-
-            result = printSkeleton.printLocalTypes(module.second);
-            std::ofstream functionString;
-            functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/vhdl/" + result.first);
-            functionString << result.second;
-            functionString.close();
-        }
-
-        {
-            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
-            CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
-
-            PrintSkeleton printSkeleton;
-            auto result = printSkeleton.printModule(module.second);
-            std::ofstream moduleString;
-            moduleString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
-            moduleString << result.second;
-            moduleString.close();
-
-            result = printSkeleton.printLocalTypes(module.second);
-            std::ofstream functionString;
-            functionString.open(SCAM_HOME"/tests/PrintSkeleton_Test/unsorted/sv/" + result.first);
-            functionString << result.second;
-            functionString.close();
-        }
-    }
+            }
+//        }
+//    }
+    ifs.close();
     return includes;
 }
 
@@ -142,10 +153,10 @@ public:
     }
 };
 
-
+std::vector<Param> test_includes;
 
 INSTANTIATE_TEST_CASE_P(Basic, PrintSkeleton_Test,
-        ::testing::ValuesIn(parameter(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h")),
+        ::testing::ValuesIn(test_includes),
         ::testing::PrintToStringParamName());
 
 
@@ -203,7 +214,7 @@ TEST_P(PrintSkeleton_Test, LocalTypesVHDL) {
     ASSERT_NE(GetParam().result, nullptr) << "Module not found";
     std::cout << "Instance: " << GetParam().Name << std::endl;
     std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + GetParam().Name + "_types.vhdl");
-    ASSERT_TRUE(bool(ifs)) << "Can't open file" << SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + module->getName() + "_types.vhdl";
+    ASSERT_TRUE(bool(ifs)) << "Can't open file" << SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + GetParam().Name + "_types.vhdl";
 
     std::stringstream buffer;
     std::string content((std::istreambuf_iterator<char>(ifs)),

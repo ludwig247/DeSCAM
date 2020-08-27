@@ -22,7 +22,7 @@ struct Param
     std::string Name;
     SCAM::Module * result;
     friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-        return os << bar.Name;}
+        return os << bar.FilePath;}
 };
 std::vector<Param> example_headers, funct_headers;
 
@@ -102,8 +102,8 @@ class ITLTestExamples : public ITLTest {};
 class ITLTestFunctionality : public ITLTest {};
 
 INSTANTIATE_TEST_CASE_P(
-        DISABLED_Examples,
-//        Examples,
+//        DISABLED_Examples,
+        Examples,
         ITLTestExamples,
         testing::ValuesIn(example_headers),
         ITLTest::PrintToStringParamName()
