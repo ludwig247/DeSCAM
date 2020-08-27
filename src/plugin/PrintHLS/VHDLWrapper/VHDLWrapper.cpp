@@ -14,8 +14,13 @@
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
+/*
+ * Main print function for module_types.vhd package
+ */
 std::string VHDLWrapper::printTypes() {
+
     std::stringstream typeStream;
+
     typeStream << "-- External data type definition package\n";
     typeStream << "library ieee;\n";
     typeStream << "use ieee.std_logic_1164.all;\n";
@@ -27,7 +32,7 @@ std::string VHDLWrapper::printTypes() {
     // State enumeration
     typeStream << "\t -- States\n"
                << "\ttype " + propertySuite->getName() << "_state_t is (";
-    auto states = propertySuite->getStates();
+    const auto& states = propertySuite->getStates();
     for (auto state = states.begin(); state != states.end(); ++state) {
         typeStream << "st_" << (*state)->getName();
         if (std::next(state) != states.end()) {
@@ -36,8 +41,9 @@ std::string VHDLWrapper::printTypes() {
     }
     typeStream << ");\n\n";
 
-    typeStream << operationEnum();
+    operationEnum(typeStream);
 
+    // Find all used data types and sort them
     std::set<const DataType *> enumTypes;
     std::set<const DataType *> compoundTypes;
     std::set<const DataType *> arrayTypes;
@@ -47,8 +53,7 @@ std::string VHDLWrapper::printTypes() {
             enumTypes.insert(dataType);
         } else if (dataType->isCompoundType()) {
             compoundTypes.insert(dataType);
-        }
-        else if (dataType->isArrayType()) {
+        } else if (dataType->isArrayType()) {
             arrayTypes.insert(dataType);
         }
     };
@@ -59,7 +64,7 @@ std::string VHDLWrapper::printTypes() {
     for (const auto& func : propertySuite->getFunctions()) {
         fillTypeSets(func->getReturnType());
     }
-    for (auto &port : currentModule->getPorts()) {
+    for (const auto &port : currentModule->getPorts()) {
         if (port.second->isCompoundType()) {
             for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
                 fillTypeSets(subVar->getDataType());
@@ -71,35 +76,60 @@ std::string VHDLWrapper::printTypes() {
         fillTypeSets(var.second->getDataType());
     }
 
+    // Print data types
     typeStream << "\t-- Enum Types\n";
     for (const auto& type : enumTypes) {
         typeStream << printDataTypes(type);
     }
 
-    typeStream << "\n"
-               << "\t-- Compound Types\n";
+    typeStream << "\n\t-- Compound Types\n";
     for (const auto& type : compoundTypes) {
         typeStream << printDataTypes(type);
     }
 
-    typeStream << "\n"
-               << "\t-- Array Types\n";
+    typeStream << "\n\t-- Array Types\n";
     for (const auto& type : arrayTypes) {
         typeStream << printDataTypes(type);
     }
 
-    typeStream << "\n"
-               << "\t-- Constants\n";
+    typeStream << "\n\t-- Constants\n";
     for (const auto& var : Utilities::getParents(optimizer->getConstantVariables())) {
         typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
                    << " := " << getResetValue(var) << ";\n";
     }
 
-    typeStream << "\n"
-               << "end package " + moduleName << "_types;";
+    typeStream << "\nend package " + moduleName << "_types;";
+
     return typeStream.str();
 }
 
+/*
+ * Prints operation subtype for types package
+ */
+void VHDLWrapper::operationEnum(std::stringstream &ss)
+{
+    // Calculate bit vector size for operation enum
+    int vectorSize = ceil(log2(propertySuite->getOperationProperties().size()));
+    if (vectorSize == 0) {
+        vectorSize++;
+    }
+    std::string opTypeName = propertySuite->getName() + "_operation_t";
+
+    ss << "\t-- Operations\n"
+       << "\tsubtype " << opTypeName << " is std_logic_vector("
+       << std::to_string(vectorSize - 1) << " downto 0);\n";
+    const auto& operations = propertySuite->getOperationProperties();
+    int i = 0;
+    for (const auto& op : operations) {
+        ss << "\tconstant op_" << op->getName() << " : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n";
+        i++;
+    }
+    ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n\n";
+}
+
+/*
+ * Prints the given data type in VHDL formatting
+ */
 std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
@@ -107,7 +137,7 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
         dataTypeStream << "\ttype " << SignalFactory::convertDataType(dataType->getName()) << " is (";
         for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
             dataTypeStream << enumVal->first;
-            if (enumVal != --dataType->getEnumValueMap().end()) dataTypeStream << ", ";
+            if (std::next(enumVal) != dataType->getEnumValueMap().end()) dataTypeStream << ", ";
         }
         dataTypeStream << ");\n";
     } else if (dataType->isCompoundType()) {
@@ -125,96 +155,11 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
     return dataTypeStream.str();
 }
 
-void VHDLWrapper::functions(std::stringstream &ss) {
-    std::set<Function *> usedFunctions;
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        for (const auto& assumption : property->getOperation()->getAssumptionsList()) {
-            const auto& funcSet = ExprVisitor::getUsedFunction(assumption);
-            usedFunctions.insert(funcSet.begin(), funcSet.end());
-        }
-    }
-
-    if (usedFunctions.empty()) {
-        return;
-    }
-
-    ss << "\n\t-- Functions\n";
-    for (const auto& func : usedFunctions) {
-        ss << "\tfunction " + func->getName() << "(";
-
-        const auto& parameterMap = func->getParamMap();
-        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
-            if (parameter->second->isCompoundType()) {
-                auto subVarList = parameter->second->getSubVarList();
-                for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
-                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
-                    if (std::next(subVar) != subVarList.end()) {
-                        ss << "; ";
-                    }
-                }
-            } else {
-                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
-            }
-            if (std::next(parameter) != parameterMap.end()) {
-                ss << "; ";
-            }
-        }
-        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << ";\n";
-    }
-    ss << "\n";
-
-    for (const auto& func : usedFunctions) {
-        ss << "\tfunction " + func->getName() << "(";
-
-        auto parameterMap = func->getParamMap();
-        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
-            if (parameter->second->isCompoundType()) {
-                auto subVarList = parameter->second->getSubVarList();
-                for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
-                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
-                    if (std::next(subVar) != subVarList.end()) {
-                        ss << "; ";
-                    }
-                }
-            } else {
-                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
-            }
-            if (std::next(parameter) != parameterMap.end()) {
-                ss << "; ";
-            }
-        }
-        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << " is\n";
-        ss << "\tbegin\n";
-
-        if (func->getReturnValueConditionList().empty())
-            TERMINATE("No return value for function " + func->getName() + "()");
-
-        auto returnValueConditionList = func->getReturnValueConditionList();
-        for (auto retValData = returnValueConditionList.begin(); retValData != returnValueConditionList.end(); retValData++) {
-            ss << "\t\t";
-            if (retValData == --returnValueConditionList.end()) {
-                if (returnValueConditionList.size() != 1)
-                    ss << "else ";
-            } else {
-                if (retValData == returnValueConditionList.begin()) {
-                    ss << "if ";
-                } else {
-                    ss << "elsif ";
-                }
-                for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
-                    ss << PrintFunction::toString(*cond);
-                    if (cond != --retValData->second.end()) ss << " and ";
-                }
-                ss << " then ";
-            }
-            ss << PrintFunction::toString(retValData->first) << ";\n";
-        }
-        if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
-        ss << "\tend " + func->getName() + ";\n\n";
-    }
-}
-
+/*
+ * Main print function for VHDL wrapper
+ */
 std::string VHDLWrapper::printArchitecture() {
+
     std::stringstream ss;
 
     // Print Include
@@ -245,17 +190,166 @@ std::string VHDLWrapper::printArchitecture() {
     return ss.str();
 }
 
+/*
+ * Prints VHDL entity declaration
+ */
+void VHDLWrapper::entity(std::stringstream &ss) {
+
+    ss << "entity " << propertySuite->getName() << "_module is\n";
+    ss << "port(\n";
+
+    auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
+        for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); dataSignal++) {
+            ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
+               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
+            if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
+                ss << ";\n";
+            }
+        }
+    };
+    printPortSignals(signalFactory->getInputs(), false);
+    printPortSignals(signalFactory->getOutputs(), false);
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+        ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
+    }
+    for (const auto& syncSignal : propertySuite->getSyncSignals()) {
+        ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
+    }
+    printPortSignals(signalFactory->getControlSignals(), true);
+
+    ss << "\n);\n";
+    ss << "end " + propertySuite->getName() << "_module;\n\n";
+}
+
+/*
+ * Prints VHDL functions
+ */
+void VHDLWrapper::functions(std::stringstream &ss) {
+
+    // Find used functions
+    std::set<Function *> usedFunctions;
+    for (const auto& property : propertySuite->getOperationProperties()) {
+        for (const auto& assumption : property->getOperation()->getAssumptionsList()) {
+            const auto& funcSet = ExprVisitor::getUsedFunction(assumption);
+            usedFunctions.insert(funcSet.begin(), funcSet.end());
+        }
+    }
+
+    if (usedFunctions.empty()) {
+        return;
+    }
+
+    ss << "\n\t-- Functions\n";
+
+    // Print function prototype
+    for (const auto& func : usedFunctions) {
+        ss << "\tfunction " + func->getName() << "(";
+
+        const auto& parameterMap = func->getParamMap();
+        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
+            if (parameter->second->isCompoundType()) {
+                const auto& subVarList = parameter->second->getSubVarList();
+                for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); subVar++) {
+                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    if (std::next(subVar) != subVarList.end()) {
+                        ss << "; ";
+                    }
+                }
+            } else {
+                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
+            }
+            if (std::next(parameter) != parameterMap.end()) {
+                ss << "; ";
+            }
+        }
+        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << ";\n";
+    }
+    ss << "\n";
+
+    // Print function definition
+    for (const auto& func : usedFunctions) {
+        ss << "\tfunction " + func->getName() << "(";
+
+        const auto& parameterMap = func->getParamMap();
+        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); parameter++) {
+            if (parameter->second->isCompoundType()) {
+                const auto& subVarList = parameter->second->getSubVarList();
+                for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); subVar++) {
+                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    if (std::next(subVar) != subVarList.end()) {
+                        ss << "; ";
+                    }
+                }
+            } else {
+                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
+            }
+            if (std::next(parameter) != parameterMap.end()) {
+                ss << "; ";
+            }
+        }
+        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << " is\n";
+        ss << "\tbegin\n";
+
+        if (func->getReturnValueConditionList().empty())
+            TERMINATE("No return value for function " + func->getName() + "()")
+
+        const auto& returnValueConditionList = func->getReturnValueConditionList();
+        for (auto retValData = returnValueConditionList.begin(); retValData != returnValueConditionList.end(); retValData++) {
+            ss << "\t\t";
+            if (retValData == --returnValueConditionList.end()) {
+                if (returnValueConditionList.size() != 1)
+                    ss << "else ";
+            } else {
+                if (retValData == returnValueConditionList.begin()) {
+                    ss << "if ";
+                } else {
+                    ss << "elsif ";
+                }
+                for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
+                    ss << PrintFunction::toString(*cond);
+                    if (std::next(cond) != retValData->second.end()) {
+                        ss << " and ";
+                    }
+                }
+                ss << " then ";
+            }
+            ss << PrintFunction::toString(retValData->first) << ";\n";
+        }
+        if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
+        ss << "\tend " + func->getName() + ";\n\n";
+    }
+}
+
+/*
+ * Prints constant outputs based on optimization
+ */
+void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
+{
+    auto constantOutputs = optimizer->getConstantOutputs();
+    if (constantOutputs.empty()) {
+        return;
+    }
+    ss << "\t-- Constant outputs\n";
+    for (const auto& out : constantOutputs) {
+        ss << "\t" << out->getFullName() << " <= " << getResetValue(out) << ";\n";
+    }
+    ss << "\n";
+}
+
+/*
+ * Prints out sensitivity list for the monitor process
+ */
 std::string VHDLWrapper::sensitivityList() {
     std::stringstream sensitivityListStream;
 
-    std::set<SyncSignal* > sensListSyncSignals;
-    std::set<DataSignal* > sensListDataSignals;
-    std::set<Variable* > sensListVars;
+    std::set<SyncSignal *> sensListSyncSignals;
+    std::set<DataSignal *> sensListDataSignals;
+    std::set<Variable *> sensListVars;
 
     const auto& operationProperties = propertySuite->getOperationProperties();
-    for (auto operationProperty : operationProperties) {
+    for (const auto& operationProperty : operationProperties) {
         for (const auto& assumption : operationProperty->getOperation()->getAssumptionsList()) {
-            auto syncSignals = ExprVisitor::getUsedSynchSignals(assumption);
+            const auto& syncSignals = ExprVisitor::getUsedSynchSignals(assumption);
             sensListSyncSignals.insert(syncSignals.begin(), syncSignals.end());
 
             const auto& dataSignals = ExprVisitor::getUsedDataSignals(assumption);
@@ -285,6 +379,10 @@ std::string VHDLWrapper::sensitivityList() {
     return sensitivityListStream.str();
 }
 
+/*
+ * Returns reset value for given Variable
+ * Used for reset process
+ */
 std::string VHDLWrapper::getResetValue(Variable* variable)
 {
     for (const auto& statement : optimizer->getResetStatements()) {
@@ -296,6 +394,10 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
     return PrintFunction::toString(variable->getInitialValue());
 }
 
+/*
+ * Returns reset value for given DataSignal
+ * Used for reset process
+ */
 std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
 {
     for (const auto& statement : optimizer->getResetStatements()) {
@@ -305,68 +407,4 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
         }
     }
     return PrintFunction::toString(dataSignal->getInitialValue());
-}
-
-void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
-{
-    auto constantOutputs = optimizer->getConstantOutputs();
-    if (constantOutputs.empty()) {
-        return;
-    }
-    ss << "\t-- Constant outputs\n";
-    for (const auto& out : constantOutputs) {
-        ss << "\t" << out->getFullName() << " <= " << getResetValue(out) << ";\n";
-    }
-    ss << "\n";
-}
-
-std::string VHDLWrapper::operationEnum()
-{
-    int vectorSize = ceil(log2(propertySuite->getOperationProperties().size()));
-    if (vectorSize == 0) {
-        vectorSize++;
-    };
-    std::string opTypeName = propertySuite->getName() + "_operation_t";
-
-    std::stringstream ss;
-    ss << "\t-- Operations\n"
-       << "\tsubtype " << opTypeName << " is std_logic_vector("
-       << std::to_string(vectorSize - 1) << " downto 0);\n";
-    auto operations = propertySuite->getOperationProperties();
-    int i = 0;
-    for (auto op : operations) {
-        ss << "\tconstant op_" << op->getName() << " : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n";
-        i++;
-    }
-    ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n\n";
-
-    return ss.str();
-}
-
-void VHDLWrapper::entity(std::stringstream &ss) {
-    // Print Entity
-    ss << "entity " << propertySuite->getName() << "_module is\n";
-    ss << "port(\n";
-
-    auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
-        for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); ++dataSignal) {
-            ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
-               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
-            if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
-                ss << ";\n";
-            }
-        }
-    };
-    printPortSignals(signalFactory->getInputs(), false);
-    printPortSignals(signalFactory->getOutputs(), false);
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t" << notifySignal->getName() << ": out std_logic;\n";
-    }
-    for (const auto syncSignal : propertySuite->getSyncSignals()) {
-        ss << "\t" << syncSignal->getName() << ": in std_logic;\n";
-    }
-    printPortSignals(signalFactory->getControlSignals(), true);
-
-    ss << "\n);\n";
-    ss << "end " + propertySuite->getName() << "_module;\n\n";
 }

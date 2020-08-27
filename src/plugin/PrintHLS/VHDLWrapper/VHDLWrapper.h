@@ -23,32 +23,34 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 virtual std::map<std::string, std::string> printModule() = 0 ;
 
             protected:
+
                 std::shared_ptr<PropertySuite> propertySuite;
                 Module* currentModule;
                 std::string moduleName;
                 std::shared_ptr<OptimizerHLS> optimizer;
                 std::unique_ptr<SignalFactory> signalFactory;
 
+                // Print functions for VHDL type package
+                std::string printTypes();
+                void operationEnum(std::stringstream &ss);
+                std::string printDataTypes(const DataType *dataType);
 
-                std::string operationEnum();
+                // Print functions for VHDL wrapper
+                std::string printArchitecture();
                 void entity(std::stringstream &ss);
+                void functions(std::stringstream &ss);
+                void printConstantOutputs(std::stringstream &ss);
 
-                virtual std::string printTypes();
-                virtual std::string printArchitecture();
+                std::string sensitivityList();
+                std::string getResetValue(Variable *variable);
+                std::string getResetValue(DataSignal *dataSignal);
 
                 virtual void signals(std::stringstream &ss) = 0;
-                virtual void functions(std::stringstream &ss);
                 virtual void component(std::stringstream &ss) = 0;
                 virtual void componentInst(std::stringstream &ss) = 0;
                 virtual void monitor(std::stringstream &ss) = 0;
                 virtual void moduleOutputHandling(std::stringstream &ss) = 0;
                 virtual void controlProcess(std::stringstream &ss) = 0;
-                virtual void printConstantOutputs(std::stringstream &ss);
-
-                virtual std::string getResetValue(Variable *variable);
-                virtual std::string getResetValue(DataSignal *dataSignal);
-                virtual std::string printDataTypes(const DataType *dataType);
-                virtual std::string sensitivityList();
             };
 
 }}}
