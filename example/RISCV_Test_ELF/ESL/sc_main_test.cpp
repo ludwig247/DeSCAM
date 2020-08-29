@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include "../../RISCV_ISA/PowerEstimator.cpp"
 
 //#define USE_ELF 1
 // USE_ELF = 1 -> This configuration sets the acceptable input programs types to elf.
@@ -17,6 +18,7 @@ int sc_main(int argc, char *argv[]) {
     if (argc == 2) {
         Core_test *test_object = new Core_test(argc, argv);
         test_object->perform_test();
+        PowerEstimator::getInstance().displayResults("Co.isa",argv[1]);
         return 0;
     } else {
         std::cout << "You must specify the elf file path as the first argument Terminating..." << endl;

@@ -14,7 +14,7 @@ add_subdirectory(FIR-Filter)
 #add_subdirectory(Comm_Test_newInterfaces)
 #add_subdirectory(operation-pipeline)
 #add_subdirectory(UART_NORDIC)
-#add_subdirectory(RISCV_Test_ELF)
+add_subdirectory(RISCV_Test_ELF)
 
 #include(AddExample.cmake)
 
