@@ -249,7 +249,7 @@ void PrintCondition::visit(Arithmetic &node) {
                 this->ss << "shift_left(";
                 node.getRhs()->accept(*this);
                 this->ss << ", ";
-                this->ss << Utilities::bitPosition(nodePeekLhs.nodePeekUnsignedValue()->getValue());
+                this->ss << Utilities::firstSetBitIndex(nodePeekLhs.nodePeekUnsignedValue()->getValue());
                 this->ss << ")";
             } else if (nodePeekLhs.nodePeekIntegerValue() &&
                     (nodePeekLhs.nodePeekIntegerValue()->getValue() > 0) &&
@@ -258,7 +258,7 @@ void PrintCondition::visit(Arithmetic &node) {
                 this->ss << "shift_left(";
                 node.getRhs()->accept(*this);
                 this->ss << ", ";
-                this->ss << Utilities::bitPosition(nodePeekLhs.nodePeekIntegerValue()->getValue());
+                this->ss << Utilities::firstSetBitIndex(nodePeekLhs.nodePeekIntegerValue()->getValue());
                 this->ss << ")";
             } else if (nodePeekRhs.nodePeekUnsignedValue() &&
                     Utilities::isPowerOfTwo(nodePeekRhs.nodePeekUnsignedValue()->getValue())) {
@@ -266,7 +266,7 @@ void PrintCondition::visit(Arithmetic &node) {
                 this->ss << "shift_left(";
                 node.getLhs()->accept(*this);
                 this->ss << ", ";
-                this->ss << Utilities::bitPosition(nodePeekRhs.nodePeekIntegerValue()->getValue());
+                this->ss << Utilities::firstSetBitIndex(nodePeekRhs.nodePeekIntegerValue()->getValue());
                 this->ss << ")";
             } else if (nodePeekRhs.nodePeekIntegerValue() &&
                     (nodePeekRhs.nodePeekIntegerValue()->getValue() > 0) &&
@@ -275,7 +275,7 @@ void PrintCondition::visit(Arithmetic &node) {
                 this->ss << "shift_left(";
                 node.getLhs()->accept(*this);
                 this->ss << ", ";
-                this->ss << Utilities::bitPosition(nodePeekRhs.nodePeekIntegerValue()->getValue());
+                this->ss << Utilities::firstSetBitIndex(nodePeekRhs.nodePeekIntegerValue()->getValue());
                 this->ss << ")";
             } else {
                 this->ss << "(";

@@ -4,34 +4,41 @@
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
-bool Utilities::isPowerOfTwo(long int n) {
-    return !((n < 1) || (n & n - 1));
+/*
+ * Returns True, if the given number n is a power of two
+ */
+bool Utilities::isPowerOfTwo(long unsigned int n) {
+    return !((n < 1) || (n & (n - 1)));
 }
 
-int Utilities::bitPosition(long int n) {
-    assert(isPowerOfTwo(n));
-    int count = 0;
-    while (n > 0) {
-        if (n & 1)
-            return count;
-        else {
-            count++;
-            n >>= 1;
-        }
+/*
+ * Returns the index of the foremost set bit in a given number n
+ *
+ * If no bit is set (n = 0), zero is returned
+ */
+unsigned int Utilities::firstSetBitIndex(long unsigned int n) {
+    unsigned int count = 0;
+    while (n > 1) {
+        count++;
+        n >>= 1u;
     }
+    return count;
 }
 
+/*
+ * Converts the given number n to a binary string with leading zeros
+ */
 std::string Utilities::intToBinary(unsigned int n, unsigned int size) {
 
-    std::string res;
+    // Assert that the given number can be displayed in size bits
+    assert((firstSetBitIndex(n) + 1) >= size);
 
-    for (int i=0; i<size; i++){
-        res += std::to_string(n%2);
+    std::string res;
+    for (int i = 0; i < size; i++) {
+        res += std::to_string(n % 2);
         n = n / 2;
     }
-
     std::reverse(res.begin(), res.end());
-
     return res;
 }
 
@@ -99,4 +106,33 @@ DESCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string
     } else {
         return SubTypeBitwise::UNKNOWN;
     }
+}
+
+template<typename Key, typename Value>
+std::map<Key *, Value *> Utilities::getSubVarMap(const std::map<Key *, Value *> map) {
+    std::vector<Key *> keys;
+    for (const auto &var : map) {
+        if (var.first->isCompoundType()) {
+            for (const auto &subVar : var.first->getSubVarList()) {
+                keys.push_back(subVar);
+            }
+        } else {
+            keys.push_back(var.first);
+        }
+    }
+    std::vector<Value *> values;
+    for (const auto &var : map) {
+        if (var.second->isCompoundType()) {
+            for (const auto &subVar : var.second->getSubVarList()) {
+                values.push_back(subVar);
+            }
+        } else {
+            values.push_back(var.second);
+        }
+    }
+    std::map<Key *, Value *> subVarMap;
+    for (std::size_t it = 0; it < keys.size(); ++it) {
+        subVarMap.insert({keys.at(it), values.at(it)});
+    }
+    return subVarMap;
 }

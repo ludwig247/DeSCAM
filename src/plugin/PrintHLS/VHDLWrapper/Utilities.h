@@ -13,103 +13,81 @@
 #include "DataType.h"
 #include "Variable.h"
 
-namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper{
+namespace DESCAM {
+    namespace HLSPlugin {
+        namespace VHDLWrapper {
 
-    class Utilities {
-    public:
-        static bool isPowerOfTwo(long int n);
+            class Utilities {
 
-        static int bitPosition(long int n);
+            public:
 
-        static std::string intToBinary(unsigned int n, unsigned int size);
+                static bool isPowerOfTwo(long unsigned n);
 
-        static std::string typeToString(StmtType type);
-        static std::string subTypeBitwiseToString(SubTypeBitwise type);
-        static SubTypeBitwise getSubTypeBitwise(const std::string &name);
+                static unsigned int firstSetBitIndex(long unsigned int n);
 
-        template <typename T>
-        static std::string getFullName(T* variable, const std::string &delimiter);
+                static std::string intToBinary(unsigned int n, unsigned int size);
 
-        template <typename Key, typename Value>
-        static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
+                static std::string typeToString(StmtType type);
 
-        template<typename T>
-        static std::set<T *> getSubVars(const std::set<T *> &vars);
+                static std::string subTypeBitwiseToString(SubTypeBitwise type);
 
-        template <typename T>
-        static std::set<T *> getParents(const std::set<T *> &subVars);
-    };
+                static SubTypeBitwise getSubTypeBitwise(const std::string &name);
 
-    template<typename Key, typename Value>
-    std::map<Key *, Value *> Utilities::getSubVarMap(const std::map<Key *, Value *> map) {
-        std::vector<Key* > keys;
-        for (const auto& var : map) {
-            if (var.first->isCompoundType()) {
-                for (const auto& subVar : var.first->getSubVarList()) {
-                    keys.push_back(subVar);
+                template<typename T>
+                static std::string getFullName(T *variable, const std::string &delimiter);
+
+                template<typename Key, typename Value>
+                static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
+
+                template<typename T>
+                static std::set<T *> getSubVars(const std::set<T *> &vars);
+
+                template<typename T>
+                static std::set<T *> getParents(const std::set<T *> &subVars);
+            };
+
+            template<typename T>
+            std::set<T *> Utilities::getSubVars(const std::set<T *> &vars) {
+                std::set<T *> subVarSet;
+                for (const auto &var : vars) {
+                    if (var->isCompoundType()) {
+                        for (const auto &subVar : var->getSubVarList()) {
+                            subVarSet.insert(subVar);
+                        }
+                    } else {
+                        subVarSet.insert(var);
+                    }
                 }
-            } else {
-                keys.push_back(var.first);
+                return subVarSet;
             }
-        }
-        std::vector<Value* > values;
-        for (const auto& var : map) {
-            if (var.second->isCompoundType()) {
-                for (const auto& subVar : var.second->getSubVarList()) {
-                    values.push_back(subVar);
+
+            template<typename T>
+            std::set<T *> Utilities::getParents(const std::set<T *> &subVars) {
+                std::set<T *> parents;
+                for (const auto &var : subVars) {
+                    if (var->isSubVar()) {
+                        if (parents.find(var->getParent()) == parents.end()) {
+                            parents.insert(var->getParent());
+                        }
+                    } else {
+                        if (parents.find(var) == parents.end()) {
+                            parents.insert(var);
+                        }
+                    }
                 }
-            } else {
-                values.push_back(var.second);
+                return parents;
             }
-        }
-        std::map<Key *, Value *> subVarMap;
-        for (std::size_t it = 0; it < keys.size(); ++it) {
-            subVarMap.insert({keys.at(it), values.at(it)});
-        }
-        return subVarMap;
-    }
 
-    template<typename T>
-    std::set<T *> Utilities::getSubVars(const std::set<T *> &vars) {
-        std::set<T *> subVarSet;
-        for (const auto& var : vars) {
-            if (var->isCompoundType()) {
-                for (const auto& subVar : var->getSubVarList()) {
-                    subVarSet.insert(subVar);
+            template<typename T>
+            std::string Utilities::getFullName(T *variable, const std::string &delimiter) {
+                if (variable->isSubVar()) {
+                    return (variable->getParent()->getName() + delimiter + variable->getName());
                 }
-            } else {
-                subVarSet.insert(var);
+                return variable->getName();
             }
-        }
-        return subVarSet;
-    }
 
-    template <typename T>
-    std::set<T *> Utilities::getParents(const std::set<T *> &subVars) {
-        std::set<T *> parents;
-        for (const auto& var : subVars) {
-            if (var->isSubVar()) {
-                if (parents.find(var->getParent()) == parents.end()) {
-                    parents.insert(var->getParent());
-                }
-            } else {
-                if (parents.find(var) == parents.end()) {
-                    parents.insert(var);
-                }
-            }
         }
-        return parents;
     }
-
-    template <typename T>
-    std::string Utilities::getFullName(T* variable, const std::string &delimiter)
-    {
-        if (variable->isSubVar()) {
-            return (variable->getParent()->getName() + delimiter + variable->getName());
-        }
-        return variable->getName();
-    }
-
-}}}
+}
 
 #endif //PROJECT_Utilities_H
