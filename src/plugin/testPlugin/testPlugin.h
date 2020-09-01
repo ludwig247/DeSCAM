@@ -8,6 +8,7 @@
 #include <PluginFactory.h>
 #include "Model.h"
 #include <sstream>
+#include "Stmt.h"
 
 class testPlugin : public PluginFactory {
 public:
@@ -17,13 +18,16 @@ public:
 
     int returnBits(const DataType *dataType);
 
+    void findStateStmt(FSM * node);
+
     std::stringstream ss;
+
 
 private:
     /*std::map<std::string, Module *> moduleMap;
     FSM * myFSM;
     std::map<int, SCAM::State *> stateMap;*/
-
+    std::map <int, DESCAM::Stmt *> stateStmt;
 };
 
 

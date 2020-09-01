@@ -42,6 +42,7 @@ add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
 
 #test
 add_plugin(testPlugin; "This is a test" ; testPlugin)
+add_plugin(InstrumentPower; "test2" ; EstimatePower)
 
 #NOT WORKING ANYMORE
 #add_plugin(PrintAML; "Structure and FSM in AML")
