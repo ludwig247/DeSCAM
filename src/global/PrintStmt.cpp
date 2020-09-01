@@ -337,7 +337,7 @@ void SCAM::PrintStmt::visit(SCAM::Return &node) {
 //        this->ss << ")";
 //    }
 //    else{
-        this->ss << node.getFunctionName();
+        this->ss << "return " <<node.getFunctionName();
 //    }
 }
 
@@ -352,7 +352,12 @@ void SCAM::PrintStmt::visit(SCAM::Notify &node) {
 }
 
 void SCAM::PrintStmt::visit(SCAM::Wait &node) {
-    this->ss << "wait(SC_ZERO_TIME)";
+    if(&node.getStateName()!= nullptr){
+        this->ss << "wait("<< node.getStateName()<<")";
+    }
+    else{
+        this->ss << "wait(SC_ZERO_TIME)";
+    }
 }
 
 void SCAM::PrintStmt::visit(SCAM::Peek &node) {

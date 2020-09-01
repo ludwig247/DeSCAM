@@ -5,10 +5,10 @@
 #ifndef DESCAM_SLAVE_H
 #define DESCAM_SLAVE_H
 
-#include "types.h"
-#include "systemc.h"
-#include "AHB_Bus_Channel.h"
-#include "Interfaces.h"
+//#include "types.h"
+//#include "systemc.h"
+//#include "AHB_Bus_Channel.h"
+//#include "Interfaces.h"
 
 SC_MODULE(Slave){
     sc_port<AHB_Bus_Channel_Slave_out_if> slave_out;

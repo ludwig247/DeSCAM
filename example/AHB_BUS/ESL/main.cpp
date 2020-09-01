@@ -5,7 +5,6 @@
 //#include "AHB_bus.h"
 //#include "Mdummy.h"
 //#include "Sdummy.h"
-#include "types.h"
 #include "AHB_Bus_Channel.h"
 #include "Master.h"
 #include "Slave.h"
@@ -60,29 +59,31 @@ int sc_main(int, char **)  {
     AHB_Bus_Channel Bus ("Bus");
     Master M0("Master0");
     Master M1("Master1");
-    Master M2("Master2");
-    Master M3("Master3");
+//    Master M2("Master2");
+//    Master M3("Master3");
     Slave S0("Slave0");
     Slave S1("Slave1");
-    Slave S2("Slave2");
-    Slave S3("Slave3");
+//    Slave S2("Slave2");
+//    Slave S3("Slave3");
     Initializer_Dummy I("Initializer");
-    M0.master_out.bind(Bus);
-    M0.master_in.bind(Bus);
-    M1.master_out.bind(Bus);
-    M1.master_in.bind(Bus);
-    M2.master_out.bind(Bus);
-    M2.master_in.bind(Bus);
-    M3.master_out.bind(Bus);
-    M3.master_in.bind(Bus);
+//    M0.master_out.bind(Bus);
+//    M0.master_in.bind(Bus);
+//    M1.master_out.bind(Bus);
+//    M1.master_in.bind(Bus);
+    M0.master_if.bind(Bus);
+    M1.master_if.bind(Bus);
+//    M2.master_out.bind(Bus);
+//    M2.master_in.bind(Bus);
+//    M3.master_out.bind(Bus);
+//    M3.master_in.bind(Bus);
     S0.slave_out.bind(Bus);
     S0.slave_in.bind(Bus);
     S1.slave_out.bind(Bus);
     S1.slave_in.bind(Bus);
-    S2.slave_out.bind(Bus);
-    S2.slave_in.bind(Bus);
-    S3.slave_out.bind(Bus);
-    S3.slave_in.bind(Bus);
+//    S2.slave_out.bind(Bus);
+//    S2.slave_in.bind(Bus);
+//    S3.slave_out.bind(Bus);
+//    S3.slave_in.bind(Bus);
     I.init_out.bind(Bus);
     sc_start(10,SC_PS);
     return 0;

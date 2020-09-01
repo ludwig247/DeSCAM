@@ -12,10 +12,15 @@ public:
     virtual void read_slave(bus_req_t & out, int id) = 0;
 };
 
-class AHB_Bus_Channel_Master_in_if : virtual public sc_interface
+//class AHB_Bus_Channel_Master_in_if : virtual public sc_interface
+//{
+//public:
+//    virtual void read_master(bus_resp_t & out, int id) = 0;
+//};
+class AHB_Bus_Channel_Master_if : virtual public sc_interface
 {
 public:
-    virtual void read_master(bus_resp_t & out, int id) = 0;
+    virtual void access_bus(const bus_req_t &val, bus_resp_t &out, unsigned int id)=0;
 };
 
 
@@ -26,12 +31,17 @@ public:
     virtual void write_slave(const bus_resp_t & val, int id) = 0;
 };
 
-
-class AHB_Bus_Channel_Master_out_if : virtual public sc_interface
+class AHB_Bus_Channel_Slave_if : virtual public sc_interface
 {
 public:
-    virtual void write_master(const bus_req_t & val, int id) = 0;
+    virtual void handle_request(bus_req_t &out, const bus_resp_t &val, int id) = 0;
 };
+
+//class AHB_Bus_Channel_Master_out_if : virtual public sc_interface
+//{
+//public:
+//    virtual void write_master(const bus_req_t & val, int id) = 0;
+//};
 
 class AHB_Bus_Channel_Dummy_if : virtual public sc_interface
 {

@@ -11,18 +11,22 @@
 
 class AHB_Bus_Channel : public sc_prim_channel,
              virtual public AHB_Bus_Channel_Slave_in_if,
-             virtual public AHB_Bus_Channel_Master_in_if,
+//             virtual public AHB_Bus_Channel_Master_in_if,
              virtual public AHB_Bus_Channel_Slave_out_if,
-             virtual public AHB_Bus_Channel_Master_out_if,
+//             virtual public AHB_Bus_Channel_Master_out_if,
+             virtual public AHB_Bus_Channel_Master_if,
+             virtual public AHB_Bus_Channel_Slave_if,
              virtual public AHB_Bus_Channel_Dummy_if{
 
 public:
     AHB_Bus_Channel(const char *name);
 
     void read_slave(bus_req_t &out, int id);
-    void read_master(bus_resp_t &out, int id);
+//    void read_master(bus_resp_t &out, int id);
     void write_slave(const bus_resp_t &val, int id);
-    void write_master(const bus_req_t &val, int id);
+//    void write_master(const bus_req_t &val, int id);
+    void access_bus(const bus_req_t &val, bus_resp_t &out, unsigned int id);
+    void handle_request(bus_req_t &out, const bus_resp_t &val, int id);
     void dummyFunc();
 
 private:
