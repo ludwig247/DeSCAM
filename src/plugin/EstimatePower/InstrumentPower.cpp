@@ -64,6 +64,7 @@ std::string InstrumentPower::writeFile(std::pair <std::string, Module*> module )
             bracketCounter--;
         if (insideProcess && bracketCounter < bracketTarget)  {
             insideProcess = false;
+            traverseProcessBody(*module.second->getFSM(), processPosition);
             for (auto process_line : processBody)
                 ss << (process_line + "\n");
         }
