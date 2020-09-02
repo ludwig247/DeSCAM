@@ -1,0 +1,46 @@
+completeness FIR;
+disable iff: rst;
+inputs: clk, 
+	rst, 
+	p1_inst/data_in, 
+	p1_inst/data_in_sync,	 
+	p1_inst/data_out_sync, 	
+	p1_inst/coef_signal, 
+	p1_inst/shiftreg_signal, 
+	p1_inst/acc_signal_IN, 
+	p1_inst/data_algorithm_signal, 
+	p2_inst/data_in, 
+	p2_inst/data_in_sync, 
+	p2_inst/data_out_sync, 
+	p2_inst/coef_signal, 
+	p2_inst/shiftreg_signal, 
+	p2_inst/acc_signal_IN, 
+	p2_inst/data_algorithm_signal;
+
+determination_requirements:
+	determined(p1_inst/data_in_notify);
+	determined(p1_inst/data_out_notify);
+	if (p1_inst/data_out_notify) determined(p1_inst/data_out); endif;
+	determined(p1_inst/coef_signal);
+	determined(p1_inst/shiftreg_signal);
+	determined(p1_inst/data_algorithm_signal);
+	determined(p1_inst/acc_signal_IN);
+
+	determined(p2_inst/data_in_notify);
+	determined(p2_inst/data_out_notify);
+	if (p2_inst/data_out_notify) determined(p2_inst/data_out); endif;
+	determined(p2_inst/coef_signal);
+	determined(p2_inst/shiftreg_signal);
+	determined(p2_inst/acc_signal_IN);
+	determined(p2_inst/data_algorithm_signal);
+
+reset_property:
+	reset;
+property_graph:
+	reset -> cycle_0;
+	reset -> wait_data_in_1;
+	wait_data_in_1 -> wait_data_in_1;
+	cycle_0 -> cycle_0;
+	cycle_0 -> wait_data_out_5;
+	wait_data_out_5 -> wait_data_out_5;
+end completeness;

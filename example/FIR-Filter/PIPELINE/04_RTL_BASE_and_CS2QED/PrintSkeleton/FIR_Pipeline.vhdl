@@ -56,11 +56,11 @@ begin
 				data_algorithm_signal <= to_signed(0, 32);
 				shiftreg_signal <= (others => to_signed(0, 32));
 				data_in_notify_sig <= true;
-				valid_IN <= false;
+				valid_IN <= true;
 
 			elsif (data_in_sync = false) then 
 				data_in_notify_sig <= true;
-				valid_IN <= false;
+				--valid_IN <= false;
 
 			elsif (data_in_sync = true and ((not data_out_notify_sig) or data_out_sync)) then
 				--data_in_notify_sig <= false;
@@ -95,6 +95,9 @@ begin
 				acc_signal_C1 <= acc_signal_var64_C1(31 downto 0);
 				valid_C1 <= valid_IN;
 
+			else	
+				--valid_C1 <= valid_IN;
+
 			end if;
 		end if;
 
@@ -118,7 +121,11 @@ begin
 				acc_signal_C2 <= acc_signal_var64_C2(31 downto 0);
 				valid_C2 <= valid_C1;
 
+			else	
+				--valid_C2 <= valid_C1;
+
 			end if;
+
 		end if;
 
 	end process Stage_C2;
@@ -134,7 +141,7 @@ begin
 			if rst = '1' then
 				acc_signal_C3 <= to_signed(0, 32);
 				coef_signal <= to_signed(1, 32);
-				valid_C3 <= false;
+				data_out_notify_sig <= false;
 
 			elsif (data_in_sync = true and ((not data_out_notify_sig) or data_out_sync)) then --STATE_C3
 
@@ -145,7 +152,10 @@ begin
 
 				coef_signal <= acc_signal_var64_C3(31 downto 0);
 
-				valid_C3 <= valid_C2;
+				data_out_notify_sig <= valid_C2;
+
+			else
+				--data_out_notify_sig <= valid_C2;
 
 			end if;
 		end if;
@@ -159,13 +169,13 @@ begin
 		if(clk='1' and clk'event) then
 
 			if rst = '1' then
-				data_out_notify_sig <= false;
+				--data_out_notify_sig <= false;
 
 			elsif(data_in_sync = true and ((not data_out_notify_sig) or data_out_sync)) then	--STATE: DATA_OUT
-				data_out_notify_sig <= valid_C3;
+				--data_out_notify_sig <= valid_C3;
 				
 			else
-				data_out_notify_sig <= data_out_notify_sig;
+				--data_out_notify_sig <= data_out_notify_sig;
 								
 			end if;
 
