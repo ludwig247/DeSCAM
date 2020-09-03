@@ -18,6 +18,7 @@
 #include <z3++.h>
 #include <ExprTranslator.h>
 #include <chrono>
+#include <OperationOptimizations/ConditionOptimizer2.h>
 
 
 #include "gmock/gmock.h"
@@ -82,6 +83,7 @@ public:
     State* start_state;
     State* init;
     std::vector<std::vector<eventID>>permutations;
+    std::vector<std::string> portnames;
 
 
     int merge_count;
@@ -154,42 +156,6 @@ public:
             //terminal node => creates a new path and adds it to pathsFromStart
         else{
             //only add paths with more than one node
-            if(currentPath.size() > 1 && (currentPath.front() != currentPath.back())) {
-                pathsFromStart->push_back(currentPath);
-                pathsAsIDs->push_back(nodeIDPath);
-            }
-            //Pop_back id of CfgNode if you return from node
-            currentPath.pop_back();
-            nodeIDPath.pop_back();
-            return;
-        }
-    }
-    void findPathsfromNodeCyclic(CfgNode* startnode, std::vector<std::vector<SCAM::Stmt*>> *pathsFromStart, std::vector<std::vector<int>> *pathsAsIDs){
-        //Recursively compute all successors starting from startnode
-        //Push _back id of CfgNode to currentPath with each function call
-        static std::vector<SCAM::Stmt*> currentPath;
-        static std::vector<int> nodeIDPath;
-        currentPath.push_back(startnode->getStmt());
-        nodeIDPath.push_back(startnode->getId());
-        //check if node has at least one successor and node is no wait or return
-        if (startnode->getSuccessorList().size() >= 1 && (!NodePeekVisitor::nodePeekWait(startnode->getStmt()) && !NodePeekVisitor::nodePeekReturn(startnode->getStmt()) || currentPath.size() == 1)){
-            //true successor
-            findPathsfromNodeCyclic(startnode->getSuccessorList().at(0),pathsFromStart,pathsAsIDs);
-            //Node is an If statement
-            if(startnode->getSuccessorList().size() > 1) {
-                //false successor
-                auto if_cond = (If *)currentPath.back();
-                currentPath.back() = new If(new UnaryExpr("not", if_cond->getConditionStmt()));
-                findPathsfromNodeCyclic(startnode->getSuccessorList().at(1), pathsFromStart, pathsAsIDs);
-            }
-            //Pop_back id of CfgNode if you return from node
-            currentPath.pop_back();
-            nodeIDPath.pop_back();
-            return;
-        }
-            //terminal node => creates a new path and adds it to pathsFromStart
-        else{
-            //only add paths with more than one node
             if(currentPath.size() > 1) {
                 pathsFromStart->push_back(currentPath);
                 pathsAsIDs->push_back(nodeIDPath);
@@ -219,6 +185,20 @@ public:
                     //add IDs and statements to global path
                     currentPath.idList.insert(currentPath.idList.end(),path.idList.begin(),path.idList.end());
                     currentPath.stmtList.insert(currentPath.stmtList.end(),path.stmtList.begin(),path.stmtList.end());
+
+                    //check if resulting path is reachabble
+                    auto test_op = new Operation();
+                    test_op->setStatementsList(currentPath.stmtList);
+                    auto rOperations = new ReconstructOperations(module);
+                    rOperations->sortOperation(test_op);
+                    if(!ValidOperations::isOperationReachable(test_op)){
+                        unreachable_count++;
+                        currentPath = savedPath;
+                        readyQueue = savedReady;
+                        blockedFunctions = savedBlocked;
+                        continue;
+                    }
+
 
                     //check if path stmts contain a notify
                     for(auto p:path.idList){
@@ -286,50 +266,95 @@ public:
                     op->setStatementsList(statementList);
                     auto rOperations = new ReconstructOperations(module);
                     rOperations->sortOperation(op);
-                    if(ValidOperations::isOperationReachable(op)){
-                        //Compare commitments
-                        bool was_merged = false;
-                        for(auto comp_op: operationsFinalOpt){
-                            if(comp_op->getCommitmentsList().size()==op->getCommitmentsList().size()){
-                                equal_commits = true;
-                                for(int i=0; i< op->getCommitmentsList().size();i++){
-                                    if(!(*comp_op->getCommitmentsList().at(i)==*op->getCommitmentsList().at(i))){
-                                        //if one pair of commitments is not equal: stop
-                                        equal_commits = false;
-                                        break;
-                                    }
-                                }
-                                //if all commitments are equal, merge the AssumptionLists of both operations
-                                if(equal_commits){
-                                   //Merge
-                                   auto assump_list = op->getAssumptionsList();
-                                   auto comp_assump_list = comp_op->getAssumptionsList();
-                                   std::vector<SCAM::Expr*> combined_assump_list;
-                                   for(int i=0; i< assump_list.size();i++){
-                                       auto logical = new Logical(assump_list.at(i),"or",comp_assump_list.at(i));
-                                       combined_assump_list.push_back(logical);
-                                   }
-                                   comp_op->setAssumptionsList(combined_assump_list);
-                                   was_merged = true;
-                                   merge_count++;
-                                   break;
-                                }
+
+                    //Add sync and notify
+                    //Arrays that state if sync or notify needs to be added
+                    bool addsync[startnodes.size()];
+                    bool addnoti[startnodes.size()];
+
+                    //Sync and Notify are unset by default
+                    for(int j=0;j<startnodes.size();j++){
+                        addsync[j] = false;
+                        addnoti[j] = false;
+                    }
+
+                    for(auto id: currentPath.idList){
+                        for(int j=0; j<startnodes.size();j++){
+                            //If the startnode of a function is contained in the path, add the sync of that function
+                            if(id==startnodes.at(j).id){
+                                addsync[j]=true;
                             }
-                        }
-                        //If the operation wasn't merged it is a relevant new one, so store it
-                        if(!was_merged){
-                            //if operation is reachable add it to operationsFinalOpt
-                            if(ValidOperations::isOperationReachable(op)){
-                                operationsFinalOpt.push_back(op);
-                            }
-                            else{
-                                unreachable_count++;
+                            //If the endnode of a function is contained in the path, add the notify of that function
+                            if(id==endnodes.at(j).id){
+                                addnoti[j]=true;
                             }
                         }
                     }
-                    else{
-                        unreachable_count++;
+
+                    for(int j=0; j<startnodes.size();j++){
+                        //Add Sync and Notify to Assumptions/Commitments
+                        auto sync = new SyncSignal(module->getPort(portnames.at(j)));
+                        auto noti = new Notify(module->getPort(portnames.at(j)));
+                        if(addsync[j]){
+                            op->addAssumption(sync);
+                        }
+                        else{
+                            op->addAssumption(new UnaryExpr("not",sync));
+                        }
+                        if(addnoti[j]){
+                            auto assign = new Assignment(noti,new BoolValue(true));
+                            op->addCommitment(assign);
+                        }
+                        else{
+                            auto assign = new Assignment(noti,new BoolValue(false));
+                            op->addCommitment(assign);
+                        }
                     }
+
+                    //Compare commitments
+                    bool was_merged = false;
+                    for(auto comp_op: operationsFinalOpt){
+                        if(comp_op->getCommitmentsList().size()==op->getCommitmentsList().size()){
+                            equal_commits = true;
+                            for(int i=0; i< op->getCommitmentsList().size();i++){
+                                if(!(*comp_op->getCommitmentsList().at(i)==*op->getCommitmentsList().at(i))){
+                                    //if one pair of commitments is not equal: stop
+                                    equal_commits = false;
+                                    break;
+                                }
+                            }
+                            //if all commitments are equal, merge the AssumptionLists of both operations
+                            if(equal_commits){
+                                //Merge
+                                SCAM::Expr* combined_assump_list = new BoolValue(true);
+                                auto assump_list = op->getAssumptionsList();
+                                for(auto assump: assump_list){
+                                    combined_assump_list = new Logical(combined_assump_list,"and",assump);
+                                }
+                                SCAM::Expr* combined_assump_list2 = new BoolValue(true);
+                                auto comp_assump_list = comp_op->getAssumptionsList();
+                                for(auto assump: comp_assump_list){
+                                    combined_assump_list2 = new Logical(combined_assump_list2,"and",assump);
+                                }
+                                auto merged_assump_list = new Logical(combined_assump_list,"or",combined_assump_list2);
+                                std::vector<SCAM::Expr *> merged_assump_vector;
+                                merged_assump_vector.push_back(merged_assump_list);
+                                ModelGlobal::setModel(new Model("test"));
+                                ModelGlobal::getModel()->addModule(this->module);
+                                auto opti = new ConditionOptimizer2(merged_assump_vector,this->module);
+                                comp_op->setAssumptionsList(opti->getNewConditionList());
+                                was_merged = true;
+                                merge_count++;
+                                break;
+                            }
+                        }
+                    }
+                    //If the operation wasn't merged it is a relevant new one, so store it
+                    if(!was_merged){
+                        //if operation is reachable add it to operationsFinalOpt
+                        operationsFinalOpt.push_back(op);
+                    }
+
                 }
                 return;
             }
@@ -374,6 +399,7 @@ public:
     virtual void SetUp() {
         //create variables and datatypes
         auto states = new DataType("states");
+        DataTypes::addDataType(states);
         states->addEnumValue("MASTER_REQ");
         states->addEnumValue("SLAVE_REQ");
         states->addEnumValue("SLAVE_RESP");
@@ -398,26 +424,18 @@ public:
         //Master write
         auto bus_req_master_0 = new Port("val_master_0",new Interface("blocking","in"), bus_req_t);
         auto bus_req_master_1 = new Port("val_master_1",new Interface("blocking","in"), bus_req_t);
-        auto bus_req_master_2 = new Port("val_master_2",new Interface("blocking","in"), bus_req_t);
-        auto bus_req_master_3 = new Port("val_master_3",new Interface("blocking","in"), bus_req_t);
 
         //Slave read
         auto bus_req_slave_0 = new Port("out_slave_0",new Interface("blocking","out"),bus_req_t);
         auto bus_req_slave_1 = new Port("out_slave_1",new Interface("blocking","out"),bus_req_t);
-        auto bus_req_slave_2 = new Port("out_slave_2",new Interface("blocking","out"),bus_req_t);
-        auto bus_req_slave_3 = new Port("out_slave_3",new Interface("blocking","out"),bus_req_t);
 
         //Slave write
         auto bus_resp_slave_0 = new Port("val_slave_0",new Interface("blocking","in"),bus_resp_t);
         auto bus_resp_slave_1 = new Port("val_slave_1",new Interface("blocking","in"),bus_resp_t);
-        auto bus_resp_slave_2 = new Port("val_slave_2",new Interface("blocking","in"),bus_resp_t);
-        auto bus_resp_slave_3 = new Port("val_slave_3",new Interface("blocking","in"),bus_resp_t);
 
         //Master read
         auto bus_resp_master_0 = new Port("out_master_0",new Interface("blocking","out"),bus_resp_t);
         auto bus_resp_master_1 = new Port("out_master_1",new Interface("blocking","out"),bus_resp_t);
-        auto bus_resp_master_2 = new Port("out_master_2",new Interface("blocking","out"),bus_resp_t);
-        auto bus_resp_master_3 = new Port("out_master_3",new Interface("blocking","out"),bus_resp_t);
 
         //add Variables to Module
         module->addVariable(state);
@@ -428,20 +446,12 @@ public:
         module->addVariable(fromReset);
         module->addPort(bus_req_master_0);
         module->addPort(bus_req_master_1);
-        module->addPort(bus_req_master_2);
-        module->addPort(bus_req_master_3);
         module->addPort(bus_req_slave_0);
         module->addPort(bus_req_slave_1);
-        module->addPort(bus_req_slave_2);
-        module->addPort(bus_req_slave_3);
         module->addPort(bus_resp_master_0);
         module->addPort(bus_resp_master_1);
-        module->addPort(bus_resp_master_2);
-        module->addPort(bus_resp_master_3);
         module->addPort(bus_resp_slave_0);
         module->addPort(bus_resp_slave_1);
-        module->addPort(bus_resp_slave_2);
-        module->addPort(bus_resp_slave_3);
 
         for(auto subVar: req->getSubVarList()){
             module->addVariable(subVar);
@@ -474,23 +484,15 @@ public:
         //Slave 0
         auto val_0_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
         auto val_1_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
-        auto val_2_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
-        auto val_3_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
 
         auto val_0_haddr_lt_slave0_end = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),"<",SLAVE0_END);
         auto val_1_haddr_lt_slave0_end = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),"<",SLAVE0_END);
-        auto val_2_haddr_lt_slave0_end = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),"<",SLAVE0_END);
-        auto val_3_haddr_lt_slave0_end = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),"<",SLAVE0_END);
 
         auto val_0_slave0 = new Logical(val_0_haddr_geq_slave0_start,"and",val_0_haddr_lt_slave0_end);
         auto val_1_slave0 = new Logical(val_1_haddr_geq_slave0_start,"and",val_1_haddr_lt_slave0_end);
-        auto val_2_slave0 = new Logical(val_2_haddr_geq_slave0_start,"and",val_2_haddr_lt_slave0_end);
-        auto val_3_slave0 = new Logical(val_3_haddr_geq_slave0_start,"and",val_3_haddr_lt_slave0_end);
 
         auto if_val_0_slave_0 = new If(val_0_slave0);
         auto if_val_1_slave_0 = new If(val_1_slave0);
-        auto if_val_2_slave_0 = new If(val_2_slave0);
-        auto if_val_3_slave_0 = new If(val_3_slave0);
 
         auto slave_id_assign_0 = new Assignment(new VariableOperand(slave_id),new UnsignedValue(0));
 
@@ -577,13 +579,9 @@ public:
         //out.hwdata = req.hwdata
         auto out_0_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_0->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
         auto out_1_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_1->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
-        auto out_2_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_2->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
-        auto out_3_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_3->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
         //out.haddr = req.haddr
         auto out_0_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_0->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
         auto out_1_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_1->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
-        auto out_2_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_2->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
-        auto out_3_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_3->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
 
         //state = SLAVE_RESP
         auto state_assign_SLAVE_RESP = new Assignment(new VariableOperand(state),new EnumValue("SLAVE_RESP",states));
@@ -612,13 +610,9 @@ public:
         //resp.hrdata = val.hrdata
         auto resp_assign_val_0_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_0->getDataSignal()->getSubVar("hrdata")));
         auto resp_assign_val_1_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_1->getDataSignal()->getSubVar("hrdata")));
-        auto resp_assign_val_2_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_2->getDataSignal()->getSubVar("hrdata")));
-        auto resp_assign_val_3_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_3->getDataSignal()->getSubVar("hrdata")));
         //resp.hresp = val.hresp
         auto resp_assign_val_0_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_0->getDataSignal()->getSubVar("hresp")));
         auto resp_assign_val_1_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_1->getDataSignal()->getSubVar("hresp")));
-        auto resp_assign_val_2_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_2->getDataSignal()->getSubVar("hresp")));
-        auto resp_assign_val_3_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_3->getDataSignal()->getSubVar("hresp")));
         //state = MASTER_RESP
         auto state_assign_MASTER_RESP = new Assignment(new VariableOperand(state),new EnumValue("MASTER_RESP",states));
 
@@ -1033,9 +1027,9 @@ public:
         temp = {80,"slave1_write_sync"};
         startnodes.push_back(temp);
 
-        temp = {26,"master0_access_bus"};
+        temp = {26,"master0_access_bus_notify"};
         endnodes.push_back(temp);
-        temp = {51,"master1_access_bus"};
+        temp = {51,"master1_access_bus_notify"};
         endnodes.push_back(temp);
         temp = {60,"slave0_read_notify"};
         endnodes.push_back(temp);
@@ -1046,6 +1040,13 @@ public:
         temp = {87,"slave1_write_notify"};
         endnodes.push_back(temp);
 
+        //Define portnames for notify and sync signals
+        portnames.push_back("val_master_0");
+        portnames.push_back("val_master_1");
+        portnames.push_back("out_slave_0");
+        portnames.push_back("out_slave_1");
+        portnames.push_back("val_slave_0");
+        portnames.push_back("val_slave_1");
     }
 
     virtual void TearDown() {}
@@ -1064,6 +1065,16 @@ TEST_F(OperationGraphTest, ExtractPaths){
         findPathsfromNode(node.second,&pathsAccessBus0,&pathsAccessBus0IDs);
     }
 
+    //Find important states AccessBus1
+    std::map<int, CfgNode *> importantStatesAccessBus1;
+    findImportantStates(controlFlowMapAccessBus1,&importantStatesAccessBus1);
+
+    //Find paths AccessBus1
+    auto start_AccessBus1 = controlFlowMapAccessBus1.begin()->second;
+    findPathsfromNode(start_AccessBus1,&pathsAccessBus1,&pathsAccessBus1IDs);
+    for(auto const& node : importantStatesAccessBus1) {
+        findPathsfromNode(node.second,&pathsAccessBus1,&pathsAccessBus1IDs);
+    }
 
     //Find important states SlaveRead0
     std::map<int, CfgNode *> importantStatesSlaveRead0;
@@ -1115,9 +1126,9 @@ TEST_F(OperationGraphTest, ExtractPaths){
 
     //Find paths Dummy
     auto start_dummy = controlFlowMapDummy.begin()->second;
-    findPathsfromNodeCyclic(start_dummy,&pathsDummy,&pathsDummyIDs);
+    findPathsfromNode(start_dummy,&pathsDummy,&pathsDummyIDs);
     for(auto const& node : importantStatesDummy) {
-        findPathsfromNodeCyclic(node.second,&pathsDummy,&pathsDummyIDs);
+        findPathsfromNode(node.second,&pathsDummy,&pathsDummyIDs);
     }
 
     //Generate final FSM
@@ -1192,6 +1203,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::chrono::steady_clock::time_point end;
 
     // generate all Paths combining all CFGs and store them in variable finalPaths
+    std::chrono::steady_clock::time_point begin_all = std::chrono::steady_clock::now();
     for(auto perm: permutations){
         //set ready queue to current permutation and clear blocked queue
         readyQueue = perm;
@@ -1199,66 +1211,17 @@ TEST_F(OperationGraphTest, ExtractPaths){
         begin = std::chrono::steady_clock::now();
         combinePaths(readyQueue,blockedFunctions);
         end = std::chrono::steady_clock::now();
-        std::cout << "Time need for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
+        std::cout << "Time needed for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
         std::cout << operationsFinalOpt.size() << std::endl;
         //if(i>2) break;
     }
+    std::chrono::steady_clock::time_point end_all = std::chrono::steady_clock::now();
+    std::cout << "Time needed for all permutations: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_all-begin_all).count() <<" [ms]" << std::endl;
 
-//    //Generate final Operations
-//    //Iterate over all paths and set State, nextState and statementList
-//    for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
-//        auto op = new Operation();
-//        if(path->idList.size()>0){
-//        op->setState(start_state);
-//        op->setNextState(start_state);
-//        }
-//        operationsFinal.push_back(op);
-//    }
     int cnt = 0;
     std::vector<SCAM::Stmt*> statementList;
-//    for(auto op: operationsFinal) {
-//        for (auto stmt: finalPaths.at(cnt).stmtList) {
-//            statementList.push_back(stmt);
-//        }
-//        op->setStatementsList(statementList);
-//        cnt++;
-//        statementList.clear();
-//    }
-//
+
     auto rOperations = new ReconstructOperations(module);
-//    for(auto op: this->operationsFinal) {
-//        rOperations->sortOperation(op);
-//    }
-
-//    //Debug: Print finalPaths
-    int num = 0;
-//    for(auto p:finalPaths){
-//        std::cout << "Path " << num << ": ";
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//        num++;
-//    }
-
-//    //Optimize operations: only keep reachable operations and their paths
-//    for(int i=0; i<operationsFinal.size();i++){
-//        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
-//            operationsFinalOpt.push_back(operationsFinal.at(i));
-//            finalPathsOpt.push_back(finalPaths.at(i));
-//        }
-//    }
-
-//    //Debug: Print finalPathsOpt
-//    num = 0;
-//    for(auto p:finalPathsOpt){
-//        std::cout << "Path " << num << ": ";
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//        num++;
-//    }
 
     //Set Incoming and Outgoing Operations
     for(auto op:operationsFinalOpt){
@@ -1268,21 +1231,34 @@ TEST_F(OperationGraphTest, ExtractPaths){
 
     //add reset operation
     rOperations->sortOperation(reset_op);
+    for(int i=0; i<startnodes.size();i++){
+        auto noti = new Notify(module->getPort(portnames.at(i)));
+        auto assign = new Assignment(noti,new BoolValue(false));
+        reset_op->addCommitment(assign);
+    }
     operationsFinalOpt.push_back(reset_op);
     //Create empty path for reset operation
     std::vector<int> int_vec;
     std::vector<SCAM::Stmt*> stmt_vec;
     pathIDStmt temp = {int_vec,stmt_vec};
-    finalPathsOpt.push_back(temp);
+    //finalPathsOpt.push_back(temp);
     reset_op->getState()->addOutgoingOperation(reset_op);
     reset_op->getNextState()->addIncomingOperation(reset_op);
 
     //wait operation
     auto wait_op = new Operation();
     rOperations->sortOperation(wait_op);
+    for(int i=0; i<startnodes.size();i++){
+        auto sync = new SyncSignal(module->getPort(portnames.at(i)));
+        auto noti = new Notify(module->getPort(portnames.at(i)));
+        wait_op->addAssumption(new UnaryExpr("not",sync));
+        auto assign = new Assignment(noti,new BoolValue(false));
+        wait_op->addCommitment(assign);
+    }
+
     operationsFinalOpt.push_back(wait_op);
     //create empty path for wait operation
-    finalPathsOpt.push_back(temp);
+    //finalPathsOpt.push_back(temp);
     wait_op->setState(start_state);
     wait_op->setNextState(start_state);
     wait_op->getState()->addOutgoingOperation(wait_op);
@@ -1302,92 +1278,41 @@ TEST_F(OperationGraphTest, ExtractPaths){
         std::cout << std::endl;
     }
 
-    //Generate Property Graph
-    std::stringstream ss;
-    for(auto op: operationsFinalOpt){
-        //Store statementList of predecessor operation in stmtList_dummy
-        std::vector<SCAM::Stmt*> stmtList_dummy;
-        stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
-
-        for(auto succ_op: operationsFinalOpt){
-            if(!succ_op->getState()->isInit()){
-                std::vector<SCAM::Stmt*> comb_stmts;
-                //Add statementList of predecessor operation to comb_stmts
-                comb_stmts.insert(comb_stmts.end(),stmtList_dummy.begin(),stmtList_dummy.end());
-                //Add statementList of successor operation to comb_stmts
-                comb_stmts.insert(comb_stmts.end(),succ_op->getStatementsList().begin(),succ_op->getStatementsList().end());
-                //Create a dummy Operation and check if it is reachable
-                auto dummy_op = new Operation();
-                dummy_op->setStatementsList(comb_stmts);
-                rOperations->sortOperation(dummy_op);
-                if(ValidOperations::isOperationReachable(dummy_op)){
-                    //If dummy operation is reachable, create a string: predecessor->successor
-                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
-                    ss << " -> ";
-                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
-                    ss << ";" << std::endl;
-                }
-                comb_stmts.clear();
-            }
-        }
-        stmtList_dummy.clear();
-    }
+//    //Generate Property Graph
+//    std::stringstream ss;
+//    for(auto op: operationsFinalOpt){
+//        //Store statementList of predecessor operation in stmtList_dummy
+//        std::vector<SCAM::Stmt*> stmtList_dummy;
+//        stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
+//
+//        for(auto succ_op: operationsFinalOpt){
+//            if(!succ_op->getState()->isInit()){
+//                std::vector<SCAM::Stmt*> comb_stmts;
+//                //Add statementList of predecessor operation to comb_stmts
+//                comb_stmts.insert(comb_stmts.end(),stmtList_dummy.begin(),stmtList_dummy.end());
+//                //Add statementList of successor operation to comb_stmts
+//                comb_stmts.insert(comb_stmts.end(),succ_op->getStatementsList().begin(),succ_op->getStatementsList().end());
+//                //Create a dummy Operation and check if it is reachable
+//                auto dummy_op = new Operation();
+//                dummy_op->setStatementsList(comb_stmts);
+//                rOperations->sortOperation(dummy_op);
+//                if(ValidOperations::isOperationReachable(dummy_op)){
+//                    //If dummy operation is reachable, create a string: predecessor->successor
+//                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
+//                    ss << " -> ";
+//                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
+//                    ss << ";" << std::endl;
+//                }
+//                comb_stmts.clear();
+//            }
+//        }
+//        stmtList_dummy.clear();
+//    }
     //Print PropertyGraph into a file
     std::ofstream myfile;
-    myfile.open(SCAM_HOME"/tests/Regfile_Properties/PropertyGraph.gfv");
-    myfile << ss.str();
-    myfile.close();
-
-    //Define portnames for notify and sync signals
-    std::vector<std::string> portnames;
-    auto portMap = module->getPorts();
-    for(auto port: portMap){
-        portnames.push_back(port.second->getName());
-    }
-    //Arrays that state if sync or notify needs to be added
-    bool addsync[startnodes.size()];
-    bool addnoti[startnodes.size()];
-
-    //Add sync and notify signals
-    for(int i=0;i<operationsFinalOpt.size();i++){
-        auto op = operationsFinalOpt.at(i);
-        //Sync and Notify are unset by default
-        for(int j=0;j<startnodes.size();j++){
-            addsync[j] = false;
-            addnoti[j] = false;
-        }
-        for(auto id: finalPathsOpt.at(i).idList){
-            for(int j=0; j<startnodes.size();j++){
-                //If the startnode of a function is contained in the path, add the sync of that function
-                if(id==startnodes.at(j).id){
-                    addsync[j]=true;
-                }
-                //If the endnode of a function is contained in the path, add the notify of that function
-                if(id==endnodes.at(j).id){
-                    addnoti[j]=true;
-                }
-            }
-        }
-        for(int j=0; j<startnodes.size();j++){
-            //Add Sync and Notify to Assumptions/Commitments
-            auto sync = new SyncSignal(module->getPort(portnames.at(j)));
-            auto noti = new Notify(module->getPort(portnames.at(j)));
-            if(addsync[j]){
-                op->addAssumption(sync);
-            }
-            else{
-                op->addAssumption(new UnaryExpr("not",sync));
-            }
-            if(addnoti[j]){
-                auto assign = new Assignment(noti,new BoolValue(true));
-                op->addCommitment(assign);
-            }
-            else{
-                auto assign = new Assignment(noti,new BoolValue(false));
-                op->addCommitment(assign);
-            }
-        }
-    }
+//    myfile.open(SCAM_HOME"/tests/Regfile_Properties/PropertyGraph.gfv");
+//    myfile << ss.str();
+//    myfile.close();
 
     //Statemap consists of a initial state Init and one state start_state
     std::map<int,State*> stateMap;
@@ -1401,7 +1326,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Print ITL Properties to file
     PrintITL printITL;
     auto map = printITL.printModule(module);
-    myfile.open(SCAM_HOME"/tests/Regfile_Properties/" + module->getName() + "_generated.vhi");
+    myfile.open(SCAM_HOME"/tests/Bus_Properties/" + module->getName() + "_generated.vhi");
     myfile << map.at(module->getName() + ".vhi") << std::endl;
     myfile.close();
 }
