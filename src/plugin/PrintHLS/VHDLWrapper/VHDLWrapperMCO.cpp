@@ -17,16 +17,15 @@ VHDLWrapperMCO::VHDLWrapperMCO(
         std::shared_ptr<OptimizerHLS>& optimizer
 )
 {
-    this->propertySuite = propertySuite;
+    this->propertySuite = std::move(propertySuite);
     this->currentModule = module;
     this->moduleName = moduleName;
     this->optimizer = optimizer;
-    this->signalFactory = nullptr;
+    this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, false);
 }
 
 std::map<std::string, std::string> VHDLWrapperMCO::printModule() {
     std::map<std::string, std::string> pluginOutput;
-    signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, optimizer, false);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -38,47 +37,44 @@ std::map<std::string, std::string> VHDLWrapperMCO::printModule() {
 void VHDLWrapperMCO::signals(std::stringstream &ss) {
     auto printVars = [&ss](
             std::set<Variable *> const& vars,
-            Style const& style,
+            std::string const& delimiter,
             std::string const& prefix,
             std::string const& suffix,
             bool const& vld,
             bool const& asVector) {
         for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix) << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
+            ss << "\tsignal " << prefix << var->getFullName(delimiter) << suffix << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
             if (vld) {
-                ss << "\tsignal " << prefix << SignalFactory::getName(var, style, "_vld") << ": std_logic;\n";
+                ss << "\tsignal " << prefix << var->getFullName(delimiter) << "_vld: std_logic;\n";
             }
         }
     };
 
     auto printSignal = [&ss](
             std::set<DataSignal *> const& signals,
-            Style const& style,
+            std::string const& delimiter,
             std::string const& suffix,
             bool const& vld,
             bool const& asVector) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix) << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
+            ss << "\tsignal " << signal->getFullName(delimiter) << suffix << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
             if (vld) {
-                ss << "\tsignal " << SignalFactory::getName(signal, style, "_vld") << ": std_logic;\n";
+                ss << "\tsignal " << signal->getFullName(delimiter) << "_vld: std_logic;\n";
             }
         }
     };
 
     ss << "\n\t-- Internal Registers\n";
-    printVars(Utilities::getParents(signalFactory->getInternalRegister()),
-            Style::DOT, "", "", false, false);
-    printVars(signalFactory->getInternalRegisterIn(),Style::UL, "in_", "", false, true);
-    printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true, true);
+    printVars(Utilities::getParents(signalFactory->getInternalRegister()), ".", "", "", false, false);
+    printVars(signalFactory->getInternalRegisterIn(), "_", "in_", "", false, true);
+    printVars(signalFactory->getInternalRegisterOut(), "_", "out_", "", true, true);
 
     ss << "\n\t-- Module Inputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
-            Style::UL, "_in", false, true);
-    printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", false, true);
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "_", "_in", false, true);
+    printVars({signalFactory->getActiveOperation()}, ".", "", "_in", false, true);
 
     ss << "\n\t-- Module Outputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
-            Style::UL, "_out", true, true);
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "_", "_out", true, true);
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
@@ -88,9 +84,9 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
     }
 
     ss << "\n\t-- Handshaking Protocol Signals (Communication between top and operations_inst)\n";
-    printSignal(signalFactory->getHandshakingProtocolSignals(), Style::DOT, "_sig", false, false);
+    printSignal(signalFactory->getHandshakingProtocolSignals(), ".", "_sig", false, false);
     ss << "\n\t-- Monitor Signals\n";
-    printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false, false);
+    printVars(signalFactory->getMonitorSignals(), ".", "", "", false, false);
 }
 
 void VHDLWrapperMCO::component(std::stringstream& ss) {
@@ -102,12 +98,11 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
         for (const auto& signal : signals) {
             bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
             std::string suffix = (vectorType ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix) << ": "
+            ss << "\t\t" << prefix << signal->getFullName("_") << suffix << ": "
                << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::getDataTypeName(signal, true)
                << ";\n";
             if (vld) {
-                ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix + "_ap_vld")
-                   << ": out std_logic;\n";
+                ss << "\t\t" << prefix << signal->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
             }
         }
     };
@@ -116,12 +111,11 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
         for (const auto& var : vars) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix) << ": "
+            ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << ": "
                << prefix << " " << SignalFactory::getDataTypeName(var, true)
                << ";\n";
             if (vld) {
-                ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix + "_ap_vld")
-                   << ": out std_logic;\n";
+                ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
             }
         }
     };
@@ -158,11 +152,11 @@ void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
         for (const auto& signal : signals) {
             std::string type = signal->getDataType()->getName();
             std::string moduleSuffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix) << " => "
-               << SignalFactory::getName(signal, Style::UL, suffix) << ",\n";
+            ss << "\t\t" << prefix << signal->getFullName("_") << moduleSuffix << " => "
+               << signal->getFullName("_") << suffix << ",\n";
             if (vld) {
-                ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix + "_ap_vld")
-                   << " => " << SignalFactory::getName(signal, Style::UL, "_vld") << ",\n";
+                ss << "\t\t" << prefix << signal->getFullName("_") << moduleSuffix << "_ap_vld"
+                   << " => " << signal->getFullName("_") << "_vld,\n";
             }
         }
     };
@@ -171,11 +165,11 @@ void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
         for (const auto& var : vars) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix) << " => "
-               << prefix << SignalFactory::getName(var, Style::UL, "") << ",\n";
+            ss << "\t\t" << prefix << var->getFullName("_") << suffix << " => "
+               << prefix << var->getFullName("_") << ",\n";
             if (vld) {
-                ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix + "_ap_vld")
-                   << " => " << prefix << SignalFactory::getName(var, Style::UL, "_vld") << ",\n";
+                ss << "\t\t" << prefix << var->getFullName("_") << suffix << "_ap_vld"
+                   << " => " << prefix << var->getFullName("_") << "_vld,\n";
             }
         }
     };
@@ -193,7 +187,7 @@ void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
     }
 
     const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << " => " << SignalFactory::getName(activeOp, Style::UL, "_in") << "\n"
+    ss << "\t\t" << activeOp->getFullName() << " => " << activeOp->getFullName("_") <<"_in\n"
        << "\t);\n\n";
 }
 
@@ -268,14 +262,14 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
         bool isEnum = dataSignal->isEnumType();
-        ss << "\tprocess (rst, " << SignalFactory::getName(dataSignal, Style::UL, "_vld") << ")\n"
+        ss << "\tprocess (rst, " << dataSignal->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
+           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName("."))
            << " <= " << getResetValue(dataSignal) << ";\n"
-           << "\t\telsif (" << SignalFactory::getName(dataSignal, Style::UL, "_vld") << " = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : SignalFactory::getName(dataSignal, Style::DOT))
-           << " <= " << (isEnum ? SignalFactory::vectorToEnum(dataSignal, "_out") : SignalFactory::getName(dataSignal, Style::UL, "_out")) << ";\n"
+           << "\t\telsif (" << dataSignal->getFullName("_") << "_vld = \'1\') then\n"
+           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName("."))
+           << " <= " << (isEnum ? SignalFactory::vectorToEnum(dataSignal, "_out") : dataSignal->getFullName("_")+"_out") << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
@@ -286,14 +280,14 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
 
     auto printOutputProcessRegs = [&](Variable* var) {
         bool isEnum = var->isEnumType();
-        ss << "\tprocess (rst, out_" << SignalFactory::getName(var, Style::UL, "_vld") << ")\n"
+        ss << "\tprocess (rst, out_" << var->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << getResetValue(var) << ";\n"
-           << "\t\telsif (out_" << SignalFactory::getName(var, Style::UL, "_vld") << " = \'1\') then\n"
-           << "\t\t\t" << SignalFactory::getName(var, Style::DOT) << " <= " << (isEnum ?
+           << "\t\t\t" << var->getFullName(".") << " <= " << getResetValue(var) << ";\n"
+           << "\t\telsif (out_" << var->getFullName("_") <<"_vld = \'1\') then\n"
+           << "\t\t\t" << var->getFullName(".") << " <= " << (isEnum ?
                                                                                 SignalFactory::vectorToEnum(var, "", "out_") :
-                                                                                "out_" + SignalFactory::getName(var, Style::UL, "")) << ";\n"
+                                                                                "out_" + var->getFullName("_")) << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
@@ -316,11 +310,11 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
             signalIn = SignalFactory::vectorToEnum(reg, "", "in_");
             signalOut = SignalFactory::vectorToEnum(reg, "", "out_");
         } else {
-            signalIn = "in_" + SignalFactory::getName(reg, Style::UL);
-            signalOut = "out_" + SignalFactory::getName(reg, Style::UL);
+            signalIn = "in_" + reg->getFullName("_");
+            signalOut = "out_" + reg->getFullName("_");
         }
-        ss << "\twith out_" << SignalFactory::getName(reg, Style::UL, "_vld") << " select\n"
-           << "\t\t" << SignalFactory::getName(reg, Style::DOT) << " <= " << signalIn << " when '0',\n"
+        ss << "\twith out_" << reg->getFullName("_") << "_vld select\n"
+           << "\t\t" << reg->getFullName(".") << " <= " << signalIn << " when '0',\n"
            << "\t\t\t" << signalOut << " when others;\n\n";
     }
 
@@ -332,18 +326,18 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
             SignalRegister = SignalFactory::enumToVector(reg);
             SignalReset = SignalRegister;
             std::string replaceWith = getResetValue(reg);
-            std::string toReplace = SignalFactory::getName(reg, Style::DOT);
+            std::string toReplace = reg->getFullName(".");
             SignalReset.replace(SignalReset.find(toReplace), toReplace.length(), replaceWith);
         } else {
-            SignalRegister = SignalFactory::getName(reg, Style::DOT);
+            SignalRegister = reg->getFullName(".");
             SignalReset = getResetValue(reg);
         }
         ss << "\tprocess(clk, rst)\n"
            << "\tbegin\n"
            << "\t\tif (rst = '1') then\n"
-           << "\t\t\tin_" << SignalFactory::getName(reg, Style::UL) << " <= " << SignalReset << ";\n"
+           << "\t\t\tin_" << reg->getFullName("_") << " <= " << SignalReset << ";\n"
            << "\t\telsif (clk = '1' and clk'event) then\n"
-           << "\t\t\tin_" << SignalFactory::getName(reg, Style::UL) << " <= " << SignalRegister << ";\n"
+           << "\t\t\tin_" << reg->getFullName("_") << " <= " << SignalRegister << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     }
@@ -367,20 +361,20 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
             for (const auto& output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
                 if (output->isCompoundType()) {
                     for (const auto& subVar : output->getSubVarList()) {
-                        ss << "\t\t\t" << SignalFactory::getName(subVar, Style::DOT) << " <= " << getResetValue(subVar) << ";\n";
+                        ss << "\t\t\t" << subVar->getFullName(".") << " <= " << getResetValue(subVar) << ";\n";
                     }
                 } else {
-                    ss << "\t\t\t" << SignalFactory::getName(registerOutputMap.second, Style::DOT) << " <= "
+                    ss << "\t\t\t" << registerOutputMap.second->getFullName(".") << " <= "
                        << getResetValue(registerOutputMap.second) << ";\n";
                 }
             }
         } else {
             if (registerOutputMap.second->isCompoundType()) {
                 for (const auto& subVar : registerOutputMap.second->getSubVarList()) {
-                    ss << "\t\t\t" << SignalFactory::getName(subVar, Style::DOT) << " <= " << getResetValue(subVar) << ";\n";
+                    ss << "\t\t\t" << subVar->getFullName(".") << " <= " << getResetValue(subVar) << ";\n";
                 }
             } else {
-                ss << "\t\t\t" << SignalFactory::getName(registerOutputMap.second, Style::DOT) << " <= "
+                ss << "\t\t\t" << registerOutputMap.second->getFullName(".") << " <= "
                    << getResetValue(registerOutputMap.second) << ";\n";
             }
         }
@@ -432,22 +426,18 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
     auto printModuleInputSignals = [this, &ss](std::set<DataSignal*> const& dataSignals) {
         for (const auto& dataSignal : dataSignals) {
             if (!dataSignal->getPort()->isArrayType()) {
-                ss << "\t\t\t\t" << SignalFactory::getName(dataSignal, Style::UL) << "_in <= "
+                ss << "\t\t\t\t" << dataSignal->getFullName("_") << "_in <= "
                    << (dataSignal->isEnumType() ?
                        SignalFactory::enumToVector(dataSignal) :
-                       SignalFactory::getName(dataSignal, Style::DOT))
+                       dataSignal->getFullName("."))
                    << ";\n";
             }
         }
     };
 
     auto printModuleInputVars = [&ss](Variable* var, std::string const& prefix, std::string const& suffix) {
-        ss << "\t\t\t\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
-           << (
-//               var->isEnumType() ?
-//               SignalFactory::enumToVector(var) :
-               SignalFactory::getName(var, Style::DOT))
-           << ";\n";
+        ss << "\t\t\t\t" << prefix << var->getFullName("_") << suffix << " <= "
+           << var->getFullName(".") << ";\n";
     };
 
     // Print Control Process

@@ -38,8 +38,8 @@ public:
     template<typename T>
     static std::string getDataTypeName(T *dataSignal, bool asVector);
 
-    template<typename T>
-    static std::string getName(T *dataSignal, const Style &style, const std::string &suffix = "");
+//    template<typename T>
+//    static std::string getName(T *dataSignal, const Style &style, const std::string &suffix = "");
 
     template<typename T>
     static std::string vectorToEnum(T *dataSignal, const std::string &suffix, const std::string &prefix = "");
@@ -117,7 +117,7 @@ std::string SignalFactory::getDataTypeName(T *dataSignal, bool vector) {
         return SignalFactory::convertDataType(dataSignal->getDataType()->getName());
     }
 }
-
+/*
 template<typename T>
 std::string SignalFactory::getName(T *dataSignal, const Style &style, const std::string &suffix) {
     if (dataSignal->isSubVar()) {
@@ -126,12 +126,11 @@ std::string SignalFactory::getName(T *dataSignal, const Style &style, const std:
         return dataSignal->getName() + suffix;
     }
 }
-
+*/
 template<typename T>
 std::string
 SignalFactory::vectorToEnum(T *dataSignal, const std::string &suffix, const std::string &prefix) {
-    return dataSignal->getDataType()->getName() + "'val(to_integer(unsigned(" + prefix +
-            getName(dataSignal, Style::UL) + suffix + ")))";
+    return (dataSignal->getDataType()->getName() + "'val(to_integer(unsigned(" + prefix + dataSignal->getFullName("_") + suffix + ")))");
 }
 
 template<typename T>
@@ -141,7 +140,7 @@ std::string SignalFactory::enumToVector(T *dataSignal) {
         vectorSize++;
     }
     return "std_logic_vector(to_unsigned(" + dataSignal->getDataType()->getName() + "\'pos(" +
-        SignalFactory::getName(dataSignal, Style::DOT) + "), " + std::to_string(vectorSize) + "))";
+        dataSignal->getFullName(".") + "), " + std::to_string(vectorSize) + "))";
 }
 
 Variable *SignalFactory::getActiveOperation() const {

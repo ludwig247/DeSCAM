@@ -16,16 +16,15 @@ VHDLWrapperSCO::VHDLWrapperSCO(
         std::shared_ptr<OptimizerHLS>& optimizer
 )
 {
-    this->propertySuite = propertySuite;
+    this->propertySuite = std::move(propertySuite);
     this->currentModule = module;
     this->moduleName = moduleName;
     this->optimizer = optimizer;
-    this->signalFactory = nullptr;
+    this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, true);
 }
 
 std::map<std::string, std::string> VHDLWrapperSCO::printModule() {
     std::map<std::string, std::string> pluginOutput;
-    signalFactory = std::make_unique<SignalFactory>(propertySuite, currentModule, optimizer, true);
 
     pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
     pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
@@ -35,48 +34,44 @@ std::map<std::string, std::string> VHDLWrapperSCO::printModule() {
 
 // Print Signals
 void VHDLWrapperSCO::signals(std::stringstream &ss) {
+
     auto printVars = [&ss](
             std::set<Variable *> const& vars,
-            Style const& style,
+            std::string const& delimiter,
             std::string const& prefix,
             std::string const& suffix,
             bool const& asVector) {
         for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << SignalFactory::getName(var, style, suffix) << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
+            ss << "\tsignal " << prefix << var->getFullName(delimiter) << suffix << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
         }
     };
 
     auto printSignal = [&ss](
             std::set<DataSignal *> const& signals,
-            Style const& style,
+            std::string const& delimiter,
             std::string const& suffix,
             bool const& asVector) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << SignalFactory::getName(signal, style, suffix) << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
+            ss << "\tsignal " << signal->getFullName(delimiter) << suffix << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
         }
     };
 
     ss << "\n\t-- Internal Registers\n";
-    printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),Style::UL, "", "", false);
-    printVars(signalFactory->getInternalRegisterOut(),Style::UL, "out_", "", true);
-
-//    ss << "\n\t-- Output Registers\n";
-//    printVars(Utilities::getParents(signalFactory->getOutputRegister()), Style::DOT, "", "", false);
+    printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),"_", "", "", false);
+    printVars(signalFactory->getInternalRegisterOut(),"_", "out_", "", true);
 
     ss << "\n\t-- Operation Module Inputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()),
-            Style::UL, "_in", true);
-    printVars({signalFactory->getActiveOperation()}, Style::DOT, "", "_in", true);
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "_", "_in", true);
+    printVars({signalFactory->getActiveOperation()}, ".", "", "_in", true);
 
     ss << "\n\t-- Module Outputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()),
-            Style::UL, "_out", true);
+    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "_", "_out", true);
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
     }
 
     ss << "\n\t-- Monitor Signals\n";
-    printVars(signalFactory->getMonitorSignals(), Style::DOT, "", "", false);
+    printVars(signalFactory->getMonitorSignals(), ".", "", "", false);
 
 }
 
@@ -93,7 +88,7 @@ void VHDLWrapperSCO::component(std::stringstream& ss) {
         for (const auto& signal : signals) {
             bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
             std::string suffix = (vectorType ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, suffix) << ": "
+            ss << "\t\t" << prefix << signal->getFullName("_") << suffix << ": "
                << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::getDataTypeName(signal, true)
                << ";\n";
         }
@@ -103,7 +98,7 @@ void VHDLWrapperSCO::component(std::stringstream& ss) {
         for (const auto& var : vars) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix + "_" << SignalFactory::getName(var, Style::UL, suffix) << ": "
+            ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << ": "
                << prefix << " " << SignalFactory::getDataTypeName(var, true)
                << ";\n";
         }
@@ -141,8 +136,8 @@ void VHDLWrapperSCO::componentInst(std::stringstream& ss) {
         for (const auto& signal : signals) {
             std::string type = signal->getDataType()->getName();
             std::string moduleSuffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(signal, Style::UL, moduleSuffix) << " => "
-               << SignalFactory::getName(signal, Style::UL, suffix) << ",\n";
+            ss << "\t\t" << prefix << signal->getFullName("_") << moduleSuffix << " => "
+               << signal->getFullName("_") << suffix << ",\n";
         }
     };
 
@@ -150,8 +145,8 @@ void VHDLWrapperSCO::componentInst(std::stringstream& ss) {
         for (const auto& var : vars) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << SignalFactory::getName(var, Style::UL, suffix) << " => "
-               << prefix << SignalFactory::getName(var, Style::UL, "") << ",\n";
+            ss << "\t\t" << prefix << var->getFullName("_") << suffix << " => "
+               << prefix << var->getFullName("_") << ",\n";
         }
     };
 
@@ -165,7 +160,7 @@ void VHDLWrapperSCO::componentInst(std::stringstream& ss) {
     }
 
     const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << " => " << SignalFactory::getName(activeOp, Style::UL, "_in") << "\n"
+    ss << "\t\t" << activeOp->getFullName() << " => " << activeOp->getFullName("_") << "_in\n"
        << "\t);\n\n";
 }
 
@@ -241,25 +236,25 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
         bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
         std::string name;
         if (hasOutputReg) {
-            name = SignalFactory::getName(optimizer->getCorrespondingRegister(dataSignal), Style::DOT);
+            name = optimizer->getCorrespondingRegister(dataSignal)->getFullName(".");
         } else {
-            name = SignalFactory::getName(dataSignal, Style::DOT);
+            name = dataSignal->getFullName(".");
         }
         ss << "\t" << name << " <= "
            << (
                    isEnum ?
                    SignalFactory::vectorToEnum(dataSignal, "_out") :
-                   SignalFactory::getName(dataSignal, Style::UL, "_out"))
+                   dataSignal->getFullName("_") + "_out")
            << ";\n";
     };
 
     auto printOutputProcessRegs = [&](Variable* var) {
         bool isEnum = var->isEnumType();
-        ss << "\t" << SignalFactory::getName(var, Style::DOT) << " <= "
+        ss << "\t" << var->getFullName(".") << " <= "
            << (
                    isEnum ?
                    SignalFactory::vectorToEnum(var, "", "out_") :
-                   "out_" + SignalFactory::getName(var, Style::UL, ""))
+                   "out_" + var->getFullName("_"))
            << ";\n";
     };
 
@@ -287,14 +282,14 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
         ss << "\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_out;\n";
     }
 
-    auto printModuleInputSignals = [this, &ss](std::set<DataSignal*> const& dataSignals) {
+    auto printModuleInputSignals = [&ss](std::set<DataSignal*> const& dataSignals) {
         for (const auto& dataSignal : dataSignals) {
             if (!dataSignal->getPort()->isArrayType()) {
-                ss << "\t" << SignalFactory::getName(dataSignal, Style::UL) << "_in <= "
+                ss << "\t" << dataSignal->getFullName("_") << "_in <= "
                    << (
                            dataSignal->isEnumType() ?
                            SignalFactory::enumToVector(dataSignal) :
-                           SignalFactory::getName(dataSignal, Style::DOT))
+                           dataSignal->getFullName("."))
                    << ";\n";
             }
         }
@@ -302,12 +297,8 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
 
     auto printModuleInputVars = [&ss](std::set<Variable*> const& vars, std::string const& prefix, std::string const& suffix) {
         for (const auto& var : vars) {
-            ss << "\t" << prefix << SignalFactory::getName(var, Style::UL) << suffix << " <= "
-               << (
-                       //var->isEnumType() ?
-                       //SignalFactory::enumToVector(var) :
-                       SignalFactory::getName(var, Style::DOT))
-               << ";\n";
+            ss << "\t" << prefix << var->getFullName(".") << suffix << " <= "
+               << var->getFullName(".") << ";\n";
         }
     };
 
