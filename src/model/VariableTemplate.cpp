@@ -64,9 +64,9 @@ namespace DESCAM {
     }
 
     template<class T>
-    std::string VariableTemplate<T>::getFullName() const {
+    std::string VariableTemplate<T>::getFullName(const std::string& delimiter) const {
         if (this->isSubVar() && this->parent->isCompoundType()) {
-            return this->parent->getName() + "." + this->getName();
+            return this->parent->getName() + delimiter + this->getName();
         } else if (this->isSubVar() && this->parent->isArrayType()) {
             return this->parent->getName() + "[" + this->getName() + "]";
         } else return this->getName();

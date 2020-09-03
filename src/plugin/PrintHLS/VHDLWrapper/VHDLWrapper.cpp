@@ -250,7 +250,7 @@ void VHDLWrapper::functions(std::stringstream &ss) {
             if (parameter->second->isCompoundType()) {
                 const auto& subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); subVar++) {
-                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    ss << (*subVar)->getFullName("_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
                     if (std::next(subVar) != subVarList.end()) {
                         ss << "; ";
                     }
@@ -275,7 +275,7 @@ void VHDLWrapper::functions(std::stringstream &ss) {
             if (parameter->second->isCompoundType()) {
                 const auto& subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); subVar++) {
-                    ss << Utilities::getFullName(*subVar, "_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    ss << (*subVar)->getFullName("_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
                     if (std::next(subVar) != subVarList.end()) {
                         ss << "; ";
                     }

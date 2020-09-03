@@ -31,7 +31,7 @@ unsigned int Utilities::firstSetBitIndex(long unsigned int n) {
 std::string Utilities::intToBinary(unsigned int n, unsigned int size) {
 
     // Assert that the given number can be displayed in size bits
-    assert((firstSetBitIndex(n) + 1) >= size);
+    assert(size > firstSetBitIndex(n));
 
     std::string res;
     for (int i = 0; i < size; i++) {

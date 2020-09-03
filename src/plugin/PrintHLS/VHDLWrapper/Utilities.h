@@ -33,9 +33,6 @@ namespace DESCAM {
 
                 static SubTypeBitwise getSubTypeBitwise(const std::string &name);
 
-                template<typename T>
-                static std::string getFullName(T *variable, const std::string &delimiter);
-
                 template<typename Key, typename Value>
                 static std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
 
@@ -76,14 +73,6 @@ namespace DESCAM {
                     }
                 }
                 return parents;
-            }
-
-            template<typename T>
-            std::string Utilities::getFullName(T *variable, const std::string &delimiter) {
-                if (variable->isSubVar()) {
-                    return (variable->getParent()->getName() + delimiter + variable->getName());
-                }
-                return variable->getName();
             }
 
         }
