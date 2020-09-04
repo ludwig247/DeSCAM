@@ -24,60 +24,46 @@ VHDLWrapperMCO::VHDLWrapperMCO(
     this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, false);
 }
 
-// Print Signals
+/*
+ * Print Signal Definitions
+ */
 void VHDLWrapperMCO::signals(std::stringstream &ss) {
-    auto printVars = [&ss](
-            std::set<Variable *> const& vars,
-            std::string const& delimiter,
-            std::string const& prefix,
-            std::string const& suffix,
-            bool const& vld,
-            bool const& asVector) {
-        for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << var->getFullName(delimiter) << suffix << ": " << SignalFactory::convertDataTypeName(var->getDataType(), asVector) << ";\n";
-            if (vld) {
-                ss << "\tsignal " << prefix << var->getFullName(delimiter) << "_vld: std_logic;\n";
-            }
-        }
-    };
-
-    auto printSignal = [&ss](
-            std::set<DataSignal *> const& signals,
-            std::string const& delimiter,
-            std::string const& suffix,
-            bool const& vld,
-            bool const& asVector) {
-        for (const auto& signal : signals) {
-            ss << "\tsignal " << signal->getFullName(delimiter) << suffix << ": " << SignalFactory::convertDataTypeName(signal->getDataType(), asVector) << ";\n";
-            if (vld) {
-                ss << "\tsignal " << signal->getFullName(delimiter) << "_vld: std_logic;\n";
-            }
-        }
-    };
 
     ss << "\n\t-- Internal Registers\n";
-    printVars(Utilities::getParents(signalFactory->getInternalRegister()), ".", "", "", false, false);
-    printVars(signalFactory->getInternalRegisterIn(), "_", "in_", "", false, true);
-    printVars(signalFactory->getInternalRegisterOut(), "_", "out_", "", true, true);
+    for (const auto& signal : Utilities::getParents(signalFactory->getInternalRegister())) {
+        ss << SignalFactory::printSignalDefinition(signal, ".", "" , "", false, false);
+    }
+    for (const auto& signal : signalFactory->getInternalRegisterIn()) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "in_" , "", true, false);
+    }
+    for (const auto& signal : signalFactory->getInternalRegisterOut()) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "out_" , "", true, true);
+    }
 
     ss << "\n\t-- Module Inputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "_", "_in", false, true);
-    printVars({signalFactory->getActiveOperation()}, ".", "", "_in", false, true);
+    for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "" , "_in", true, false);
+    }
+    ss << SignalFactory::printSignalDefinition(signalFactory->getActiveOperation(), ".", "" , "_in", true, false);
 
     ss << "\n\t-- Module Outputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "_", "_out", true, true);
+    for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "" , "_out", true, true);
+    }
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
-    }
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
     }
 
     ss << "\n\t-- Handshaking Protocol Signals (Communication between top and operations_inst)\n";
-    printSignal(signalFactory->getHandshakingProtocolSignals(), ".", "_sig", false, false);
+    for (const auto& signal : signalFactory->getHandshakingProtocolSignals()) {
+        ss << SignalFactory::printSignalDefinition(signal, ".", "" , "_sig", false, false);
+    }
     ss << "\n\t-- Monitor Signals\n";
-    printVars(signalFactory->getMonitorSignals(), ".", "", "", false, false);
+    for (const auto& signal : signalFactory->getMonitorSignals()) {
+        ss << SignalFactory::printSignalDefinition(signal, ".", "" , "", false, false);
+    }
 }
 
 void VHDLWrapperMCO::component(std::stringstream& ss) {

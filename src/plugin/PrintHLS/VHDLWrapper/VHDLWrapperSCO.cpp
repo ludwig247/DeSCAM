@@ -23,46 +23,37 @@ VHDLWrapperSCO::VHDLWrapperSCO(
     this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, true);
 }
 
-// Print Signals
+/*
+ * Print Signal Definitions
+ */
 void VHDLWrapperSCO::signals(std::stringstream &ss) {
 
-    auto printVars = [&ss](
-            std::set<Variable *> const& vars,
-            std::string const& delimiter,
-            std::string const& prefix,
-            std::string const& suffix,
-            bool const& asVector) {
-        for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << var->getFullName(delimiter) << suffix << ": " << SignalFactory::convertDataTypeName(var->getDataType(), asVector) << ";\n";
-        }
-    };
-
-    auto printSignal = [&ss](
-            std::set<DataSignal *> const& signals,
-            std::string const& delimiter,
-            std::string const& suffix,
-            bool const& asVector) {
-        for (const auto& signal : signals) {
-            ss << "\tsignal " << signal->getFullName(delimiter) << suffix << ": " << SignalFactory::convertDataTypeName(signal->getDataType(), asVector) << ";\n";
-        }
-    };
-
     ss << "\n\t-- Internal Registers\n";
-    printVars(Utilities::getParents(signalFactory->getInternalRegisterOut()),"_", "", "", false);
-    printVars(signalFactory->getInternalRegisterOut(),"_", "out_", "", true);
+    for (const auto& signal : Utilities::getParents(signalFactory->getInternalRegisterOut())) {
+        ss << SignalFactory::printSignalDefinition(signal,"_", "", "", false);
+    }
+    for (const auto& signal : signalFactory->getInternalRegisterOut()) {
+        ss << SignalFactory::printSignalDefinition(signal,"_", "out_", "", true);
+    }
 
     ss << "\n\t-- Operation Module Inputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "_", "_in", true);
-    printVars({signalFactory->getActiveOperation()}, ".", "", "_in", true);
+    for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << SignalFactory::printSignalDefinition(signal,"_", "", "_in", true);
+    }
+    ss << SignalFactory::printSignalDefinition(signalFactory->getActiveOperation(), ".", "", "_in", true);
 
     ss << "\n\t-- Module Outputs\n";
-    printSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "_", "_out", true);
+    for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        ss << SignalFactory::printSignalDefinition(signal,"_", "", "_out", true);
+    }
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
     }
 
     ss << "\n\t-- Monitor Signals\n";
-    printVars(signalFactory->getMonitorSignals(), ".", "", "", false);
+    for (const auto& signal : signalFactory->getMonitorSignals()) {
+        ss << SignalFactory::printSignalDefinition(signal,".", "", "", false);
+    }
 
 }
 

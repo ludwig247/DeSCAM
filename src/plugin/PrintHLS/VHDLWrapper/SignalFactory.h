@@ -31,6 +31,14 @@ namespace DESCAM {
                 ~SignalFactory() = default;
 
                 template<typename T>
+                static std::string printSignalDefinition(const T& signal,
+                                                         const std::string& delimiter,
+                                                         const std::string& prefix,
+                                                         const std::string& suffix,
+                                                         const bool& asVector,
+                                                         const bool& addVld = false);
+
+                template<typename T>
                 static std::string convertDataTypeName(T *type, const bool& asVector = false);
 
                 template<typename T>
@@ -103,6 +111,21 @@ namespace DESCAM {
 
                 void setOperationModuleOutputs();
             };
+
+            template<typename T>
+            std::string SignalFactory::printSignalDefinition(const T& signal,
+                                                     const std::string& delimiter,
+                                                     const std::string& prefix,
+                                                     const std::string& suffix,
+                                                     const bool& asVector,
+                                                     const bool& addVld) {
+                std::stringstream ss;
+                ss << "\tsignal " << prefix << signal->getFullName(delimiter) << suffix << ": " << convertDataTypeName(signal->getDataType(), asVector) << ";\n";
+                if (addVld) {
+                    ss << "\tsignal " << prefix << signal->getFullName(delimiter) << "_vld: std_logic;\n";
+                }
+                return ss.str();
+            }
 
             template<typename T>
             std::string SignalFactory::convertDataTypeName(T *type, const bool& asVector) {
