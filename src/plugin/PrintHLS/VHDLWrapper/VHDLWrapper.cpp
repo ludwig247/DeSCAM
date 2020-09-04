@@ -15,7 +15,19 @@
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 /*
- * Main print function for module_types.vhd package
+ * Plugin output generation
+ */
+std::map<std::string, std::string> VHDLWrapper::printModule() {
+    std::map<std::string, std::string> pluginOutput;
+
+    pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
+    pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
+
+    return pluginOutput;
+}
+
+/*
+ * Print function for module_types.vhd package
  */
 std::string VHDLWrapper::printTypes() {
 

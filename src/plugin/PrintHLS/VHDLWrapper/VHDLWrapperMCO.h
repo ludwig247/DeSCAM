@@ -25,8 +25,6 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
             );
             ~VHDLWrapperMCO() = default;
 
-            std::map<std::string, std::string> printModule() override ;
-
         private:
 
             void signals(std::stringstream& ss) override ;

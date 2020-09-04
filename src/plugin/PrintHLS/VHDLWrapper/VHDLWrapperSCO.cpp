@@ -23,15 +23,6 @@ VHDLWrapperSCO::VHDLWrapperSCO(
     this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, true);
 }
 
-std::map<std::string, std::string> VHDLWrapperSCO::printModule() {
-    std::map<std::string, std::string> pluginOutput;
-
-    pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
-    pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
-
-    return pluginOutput;
-}
-
 // Print Signals
 void VHDLWrapperSCO::signals(std::stringstream &ss) {
 

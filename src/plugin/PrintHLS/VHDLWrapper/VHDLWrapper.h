@@ -20,7 +20,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 VHDLWrapper() = default;
                 ~VHDLWrapper() = default;
 
-                virtual std::map<std::string, std::string> printModule() = 0 ;
+                std::map<std::string, std::string> printModule();
 
             protected:
 

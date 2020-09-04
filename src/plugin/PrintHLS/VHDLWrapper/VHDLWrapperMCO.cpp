@@ -24,15 +24,6 @@ VHDLWrapperMCO::VHDLWrapperMCO(
     this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, false);
 }
 
-std::map<std::string, std::string> VHDLWrapperMCO::printModule() {
-    std::map<std::string, std::string> pluginOutput;
-
-    pluginOutput.insert(std::make_pair(moduleName + "_types.vhd", printTypes()));
-    pluginOutput.insert(std::make_pair(moduleName + ".vhd", printArchitecture()));
-
-    return pluginOutput;
-}
-
 // Print Signals
 void VHDLWrapperMCO::signals(std::stringstream &ss) {
     auto printVars = [&ss](
