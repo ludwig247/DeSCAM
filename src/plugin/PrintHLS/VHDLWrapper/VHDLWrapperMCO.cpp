@@ -34,7 +34,7 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
             bool const& vld,
             bool const& asVector) {
         for (const auto& var : vars) {
-            ss << "\tsignal " << prefix << var->getFullName(delimiter) << suffix << ": " << SignalFactory::getDataTypeName(var, asVector) << ";\n";
+            ss << "\tsignal " << prefix << var->getFullName(delimiter) << suffix << ": " << SignalFactory::convertDataTypeName(var->getDataType(), asVector) << ";\n";
             if (vld) {
                 ss << "\tsignal " << prefix << var->getFullName(delimiter) << "_vld: std_logic;\n";
             }
@@ -48,7 +48,7 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
             bool const& vld,
             bool const& asVector) {
         for (const auto& signal : signals) {
-            ss << "\tsignal " << signal->getFullName(delimiter) << suffix << ": " << SignalFactory::getDataTypeName(signal, asVector) << ";\n";
+            ss << "\tsignal " << signal->getFullName(delimiter) << suffix << ": " << SignalFactory::convertDataTypeName(signal->getDataType(), asVector) << ";\n";
             if (vld) {
                 ss << "\tsignal " << signal->getFullName(delimiter) << "_vld: std_logic;\n";
             }
@@ -90,7 +90,7 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
             bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
             std::string suffix = (vectorType ? "_V" : "");
             ss << "\t\t" << prefix << signal->getFullName("_") << suffix << ": "
-               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::getDataTypeName(signal, true)
+               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::convertDataTypeName(signal->getDataType(), true)
                << ";\n";
             if (vld) {
                 ss << "\t\t" << prefix << signal->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
@@ -103,7 +103,7 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
             ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << ": "
-               << prefix << " " << SignalFactory::getDataTypeName(var, true)
+               << prefix << " " << SignalFactory::convertDataTypeName(var->getDataType(), true)
                << ";\n";
             if (vld) {
                 ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
@@ -124,7 +124,7 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
     }
 
     const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactory::getDataTypeName(activeOp, true) << "\n";
+    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactory::convertDataTypeName(activeOp->getDataType(), true) << "\n";
 
     ss << "\t);\n"
        << "\tend component;\n";

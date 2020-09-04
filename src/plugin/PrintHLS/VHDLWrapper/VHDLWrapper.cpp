@@ -106,7 +106,7 @@ std::string VHDLWrapper::printTypes() {
 
     typeStream << "\n\t-- Constants\n";
     for (const auto& var : Utilities::getParents(optimizer->getConstantVariables())) {
-        typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataType(var->getDataType()->getName())
+        typeStream << "\tconstant " << var->getName() << ": " << SignalFactory::convertDataTypeName(var->getDataType())
                    << " := " << getResetValue(var) << ";\n";
     }
 
@@ -146,21 +146,21 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
     if (dataType->isEnumType()) {
-        dataTypeStream << "\ttype " << SignalFactory::convertDataType(dataType->getName()) << " is (";
+        dataTypeStream << "\ttype " << SignalFactory::convertDataTypeName(dataType) << " is (";
         for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
             dataTypeStream << enumVal->first;
             if (std::next(enumVal) != dataType->getEnumValueMap().end()) dataTypeStream << ", ";
         }
         dataTypeStream << ");\n";
     } else if (dataType->isCompoundType()) {
-        dataTypeStream << "\ttype " + SignalFactory::convertDataType(dataType->getName()) << " is record\n";
+        dataTypeStream << "\ttype " + SignalFactory::convertDataTypeName(dataType) << " is record\n";
         for (auto &subVar: dataType->getSubVarMap()) {
-            dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataType(subVar.second->getName()) << ";\n";
+            dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataTypeName(subVar.second) << ";\n";
         }
         dataTypeStream << "\tend record;\n";
     } else if (dataType->isArrayType()) {
         dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
-                       << " downto 0) of " << SignalFactory::convertDataType(dataType->getSubVarMap().begin()->second->getName())
+                       << " downto 0) of " << SignalFactory::convertDataTypeName(dataType->getSubVarMap().begin()->second)
                        << ";\n";
     }
 
@@ -213,7 +213,7 @@ void VHDLWrapper::entity(std::stringstream &ss) {
     auto printPortSignals = [&ss](std::set<DataSignal* > const& dataSignals, bool lastSet) {
         for (auto dataSignal = dataSignals.begin(); dataSignal != dataSignals.end(); dataSignal++) {
             ss << "\t" << (*dataSignal)->getFullName() << ": " << (*dataSignal)->getPort()->getInterface()->getDirection()
-               << " " << SignalFactory::getDataTypeName(*dataSignal, false);
+               << " " << SignalFactory::convertDataTypeName((*dataSignal)->getDataType(), false);
             if (std::next(dataSignal) != dataSignals.end() || !lastSet) {
                 ss << ";\n";
             }
@@ -262,13 +262,13 @@ void VHDLWrapper::functions(std::stringstream &ss) {
             if (parameter->second->isCompoundType()) {
                 const auto& subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); subVar++) {
-                    ss << (*subVar)->getFullName("_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    ss << (*subVar)->getFullName("_") << ": " << SignalFactory::convertDataTypeName((*subVar)->getDataType());
                     if (std::next(subVar) != subVarList.end()) {
                         ss << "; ";
                     }
                 }
             } else {
-                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
+                ss << parameter->first << ": " << SignalFactory::convertDataTypeName(parameter->second->getDataType());
             }
             if (std::next(parameter) != parameterMap.end()) {
                 ss << "; ";
@@ -287,13 +287,13 @@ void VHDLWrapper::functions(std::stringstream &ss) {
             if (parameter->second->isCompoundType()) {
                 const auto& subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); subVar++) {
-                    ss << (*subVar)->getFullName("_") << ": " << SignalFactory::convertDataType((*subVar)->getDataType()->getName());
+                    ss << (*subVar)->getFullName("_") << ": " << SignalFactory::convertDataTypeName((*subVar)->getDataType());
                     if (std::next(subVar) != subVarList.end()) {
                         ss << "; ";
                     }
                 }
             } else {
-                ss << parameter->first << ": " << SignalFactory::convertDataType(parameter->second->getDataType()->getName());
+                ss << parameter->first << ": " << SignalFactory::convertDataTypeName(parameter->second->getDataType());
             }
             if (std::next(parameter) != parameterMap.end()) {
                 ss << "; ";

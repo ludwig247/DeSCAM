@@ -3,7 +3,6 @@
 //
 
 #include <tuple>
-#include "FatalError.h"
 #include "Logger/Logger.h"
 #include "SignalFactory.h"
 
@@ -136,39 +135,7 @@ std::set<Variable *> SignalFactory::getInternalRegister() const {
     return vars;
 }
 
-std::string SignalFactory::convertDataType(const std::string& dataType)
-{
-    if (dataType == "bool") {
-        return "std_logic";
-    } else if (dataType == "int" || dataType == "unsigned") {
-        return "std_logic_vector(31 downto 0)";
-    } else {
-        return dataType;
-    }
-}
-
-//std::string SignalFactory::convertDataTypeFunction(const std::string &dataType) {
-//    if (dataType == "bool") {
-//        return "boolean";
-//    } else if (dataType == "int") {
-//        return "signed(31 downto 0)";
-//    } else if (dataType == "unsigned") {
-//        return "unsigned(31 downto 0)";
-//    } else {
-//        return dataType;
-//    }
-//}
-
 std::string SignalFactory::convertReturnTypeFunction(const std::string &returnType) {
-//    if (returnType == "bool") {
-//        return "boolean";
-//    } else if (returnType == "int") {
-//        return "signed";
-//    } else if (returnType == "unsigned") {
-//        return "unsigned";
-//    } else {
-//        return returnType;
-//    }
     if (returnType == "bool") {
         return "std_logic";
     } else if (returnType == "int" || returnType == "unsigned") {
@@ -177,15 +144,3 @@ std::string SignalFactory::convertReturnTypeFunction(const std::string &returnTy
         return returnType;
     }
 }
-
-std::string SignalFactory::styleToString(const Style& style)
-{
-    if (style == Style::UL) {
-        return "_";
-    } else if (style == Style::DOT) {
-        return ".";
-    } else {
-        TERMINATE("Unsupported Print Style!");
-    }
-}
-
