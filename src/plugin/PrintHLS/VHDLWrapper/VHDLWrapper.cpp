@@ -333,6 +333,51 @@ void VHDLWrapper::functions(std::stringstream &ss) {
 }
 
 /*
+ * Print operation monitor
+ */
+void VHDLWrapper::monitor(std::stringstream &ss) {
+    ss << "\t-- Monitor\n";
+    ss << "\tprocess (" << sensitivityList() << ")\n";
+    ss << "\tbegin\n";
+    ss << "\t\tcase active_state is\n";
+
+    for (const auto& state : currentModule->getFSM()->getStateMap()) {
+        if (state.second->isInit()) {
+            continue;
+        }
+        bool noEndIf = false;
+        bool skipAssumptions = false;
+        ss << "\t\twhen st_" << state.second->getName() << " =>\n";
+        auto operations = state.second->getOutgoingOperationsList();
+        for (auto operation = operations.begin(); operation != operations.end(); operation++) {
+            if (operation == operations.begin()) {
+                if (operations.size() == 1) {
+                    noEndIf = true;
+                    skipAssumptions = true;
+                } else {
+                    ss << "\t\t\tif (";
+                }
+            } else if (std::next(operation) == operations.end()) {
+                ss << "\t\t\telse\n";
+                skipAssumptions = true;
+            } else {
+                ss << "\t\t\telsif (";
+            }
+            if (!skipAssumptions) {
+                ss << printAssumptionList((*operation)->getAssumptionsList());
+                ss << ") then \n";
+            }
+            ss << printMonitorOperation(*(*operation));
+        }
+        if (!noEndIf) {
+            ss << "\t\t\tend if;\n";
+        }
+    }
+    ss << "\t\tend case;\n";
+    ss << "\tend process;\n\n";
+}
+
+/*
  * Prints constant outputs based on optimization
  */
 void VHDLWrapper::printConstantOutputs(std::stringstream &ss)

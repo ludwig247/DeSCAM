@@ -39,17 +39,20 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 std::string printArchitecture();
                 void entity(std::stringstream &ss);
                 void functions(std::stringstream &ss);
+                void monitor(std::stringstream& ss);
                 void printConstantOutputs(std::stringstream &ss);
 
+                // Utility print functions
                 std::string printAssumptionList(const std::vector<Expr*>& exprList);
                 std::string sensitivityList();
                 std::string getResetValue(Variable *variable);
                 std::string getResetValue(DataSignal *dataSignal);
 
+                // SCO/MCO specific functions
                 virtual void signals(std::stringstream &ss) = 0;
                 virtual void component(std::stringstream &ss) = 0;
                 virtual void componentInst(std::stringstream &ss) = 0;
-                virtual void monitor(std::stringstream &ss) = 0;
+                virtual std::string printMonitorOperation(const Operation& op) = 0;
                 virtual void moduleOutputHandling(std::stringstream &ss) = 0;
                 virtual void controlProcess(std::stringstream &ss) = 0;
             };

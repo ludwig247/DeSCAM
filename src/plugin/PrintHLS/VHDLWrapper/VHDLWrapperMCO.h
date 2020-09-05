@@ -30,7 +30,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
             void signals(std::stringstream& ss) override ;
             void component(std::stringstream& ss) override ;
             void componentInst(std::stringstream& ss) override ;
-            void monitor(std::stringstream& ss) override ;
+            std::string printMonitorOperation(const Operation &op) override;
             void moduleOutputHandling(std::stringstream& ss) override ;
             void controlProcess(std::stringstream& ss) override ;
         };

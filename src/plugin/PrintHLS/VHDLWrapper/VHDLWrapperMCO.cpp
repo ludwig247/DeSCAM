@@ -168,57 +168,19 @@ void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
        << "\t);\n\n";
 }
 
-// Print Monitor
-void VHDLWrapperMCO::monitor(std::stringstream &ss) {
-    ss << "\t-- Monitor\n"
-       << "\tprocess (" << sensitivityList() << ")\n"
-       << "\tbegin\n"
-       << "\t\tcase active_state is\n";
-
-    for (const auto& state : currentModule->getFSM()->getStateMap()) {
-        if (state.second->isInit()) {
-            continue;
-        }
-        bool noEndIf = false;
-        bool skipAssumptions = false;
-        ss << "\t\twhen st_" << state.second->getName() << " =>\n";
-        auto operations = state.second->getOutgoingOperationsList();
-        for (auto operation = operations.begin(); operation != operations.end(); ++operation) {
-            if (operation == operations.begin()) {
-                if (operations.size() == 1) {
-                    noEndIf = true;
-                    skipAssumptions = true;
-                } else {
-                    ss << "\t\t\tif (";
-                }
-            } else if (std::next(operation) == operations.end()) {
-                ss << "\t\t\telse\n";
-                skipAssumptions = true;
-            } else {
-                ss << "\t\t\telsif (";
-            }
-            if (!skipAssumptions) {
-                ss << printAssumptionList((*operation)->getAssumptionsList());
-                ss << ") then \n";
-            }
-            if (!(*operation)->IsWait()) {
-                const std::string& stateName = (*operation)->getState()->getName();
-                const std::string& nextStateName = (*operation)->getNextState()->getName();
-                const std::string operationName = stateName + "_" + std::to_string((*operation)->getId());
-
-                ss << "\t\t\t\tactive_operation <= op_" << operationName << ";\n"
-                   << "\t\t\t\tnext_state <= st_" << nextStateName << ";\n"
-                   << "\t\t\t\twait_state <= '0';\n";
-            } else {
-                ss << "\t\t\t\twait_state <= '1';\n";
-            }
-        }
-        if (!noEndIf) {
-            ss << "\t\t\tend if;\n";
-        }
+/*
+ * Print out a single Operation for the monitor
+ */
+std::string VHDLWrapperMCO::printMonitorOperation(const Operation& op) {
+    std::stringstream ss;
+    if (!op.IsWait()) {
+        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId()) << ";\n";
+        ss << "\t\t\t\tnext_state <= st_" << op.getNextState()->getName() << ";\n";
+        ss << "\t\t\t\twait_state <= '0';\n";
+    } else {
+        ss << "\t\t\t\twait_state <= '1';\n";
     }
-    ss << "\t\tend case;\n"
-       << "\tend process;\n\n";
+    return ss.str();
 }
 
 void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
