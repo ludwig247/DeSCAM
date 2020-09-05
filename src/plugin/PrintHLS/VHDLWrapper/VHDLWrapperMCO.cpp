@@ -175,18 +175,6 @@ void VHDLWrapperMCO::monitor(std::stringstream &ss) {
        << "\tbegin\n"
        << "\t\tcase active_state is\n";
 
-    auto printAssumptions = [&ss](std::vector<Expr* > exprList) {
-        if (exprList.empty()) {
-            ss << "true";
-        }
-        for (auto expr = exprList.begin(); expr != exprList.end(); ++expr) {
-            ss << PrintCondition::toString(*expr);
-            if (std::next(expr) != exprList.end()) {
-                ss << " and ";
-            }
-        }
-    };
-
     for (const auto& state : currentModule->getFSM()->getStateMap()) {
         if (state.second->isInit()) {
             continue;
@@ -210,7 +198,7 @@ void VHDLWrapperMCO::monitor(std::stringstream &ss) {
                 ss << "\t\t\telsif (";
             }
             if (!skipAssumptions) {
-                printAssumptions((*operation)->getAssumptionsList());
+                ss << printAssumptionList((*operation)->getAssumptionsList());
                 ss << ") then \n";
             }
             if (!(*operation)->IsWait()) {

@@ -41,6 +41,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 void functions(std::stringstream &ss);
                 void printConstantOutputs(std::stringstream &ss);
 
+                std::string printAssumptionList(const std::vector<Expr*>& exprList);
                 std::string sensitivityList();
                 std::string getResetValue(Variable *variable);
                 std::string getResetValue(DataSignal *dataSignal);

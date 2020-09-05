@@ -349,6 +349,23 @@ void VHDLWrapper::printConstantOutputs(std::stringstream &ss)
 }
 
 /*
+ * Prints given list of expressions as a single condition
+ */
+std::string VHDLWrapper::printAssumptionList(const std::vector<Expr*>& exprList) {
+    if (exprList.empty()) {
+        return "true";
+    }
+    std::stringstream ss;
+    for (auto expr = exprList.begin(); expr != exprList.end(); expr++) {
+        ss << PrintCondition::toString(*expr);
+        if (std::next(expr) != exprList.end()) {
+            ss << " and ";
+        }
+    }
+    return ss.str();
+}
+
+/*
  * Prints out sensitivity list for the monitor process
  */
 std::string VHDLWrapper::sensitivityList() {
