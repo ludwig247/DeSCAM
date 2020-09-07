@@ -20,11 +20,18 @@ struct Param
 {
     std::string FilePath;
     std::string Name;
+    std::string vhi;
     SCAM::Module * result;
-    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-        return os << bar.FilePath;}
+
+//    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
+//        return os << bar.FilePath;}
 };
 
+template <class Param>
+bool is_unique(std::vector<Param> &x) {
+//    sort( x.begin(), x.end() ); // O(N log N)
+//    return adjacent_find( x.begin(), x.end() ) == x.end();
+}
 
 
 static std::vector<Param> parameter(const char* header_list) {
@@ -32,20 +39,21 @@ static std::vector<Param> parameter(const char* header_list) {
 
     //SRC-File to be analyzed
     std::ifstream ifs(header_list);
+    std::set<std::string> param_names;
+    std::set<std::string> filepaths;
 
     std::string line;
     std::vector<Param> includes;
     int i = 0;
 
     while (std::getline(ifs, line)) {
-        if (line.size() > 0 && !(line.find("//") == 0)){
-//            std::string test_name = line.substr(line.find_last_of("/\\") + 1);
-//            const size_t period = test_name.rfind(".");
-//            if(std::string::npos != period) test_name.erase(period);
-//            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
-//                header_includes[i].Name = line;
-            const char *commandLineArgumentsArray[2];
+        if (!line.empty() && (line.find("//") != 0) && (filepaths.count(line) == 0)){
+            const size_t pos = line.rfind("/ESL");
+            const size_t lpos = line.find_last_of('/', pos-1);
+            std::string test_name = line.substr( lpos + 1, pos - lpos - 1);
+            std::cout << test_name << " at " << pos << " or " << lpos << std::endl;
 
+            const char *commandLineArgumentsArray[2];
             //Binary
             std::string bin = std::string(SCAM_HOME"/bin/SCAM");
             commandLineArgumentsArray[0] = (bin.c_str());
@@ -56,15 +64,28 @@ static std::vector<Param> parameter(const char* header_list) {
 //        CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
 
             //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+
             SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
                                            commandLineArgumentsArray[1]);
+
 
             for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::ModelGlobal::reset();
                 includes.push_back(Param());
                 includes[i].FilePath = line;
                 includes[i].result = (model.second);
-                includes[i].Name = model.second->getName();
+                if(param_names.count(model.second->getName()) == 1){
+                    std::cout<< "Warning: possible duplicate of test name" << includes[i].Name << std::endl;
+                    includes[i].Name = model.second->getName();
+                    includes[i].Name.append("_" + test_name );
+                }
+                else  includes[i].Name = model.second->getName();
+
+                includes[i].vhi = model.second->getName();
+                param_names.insert(model.second->getName());
+                filepaths.insert(line);
+
+
 //                std::cout<< "gets called " << includes[i].Name << std::endl;
                 i++;
             }
@@ -111,15 +132,15 @@ INSTANTIATE_TEST_CASE_P(
                 );
 
 INSTANTIATE_TEST_CASE_P(
-//        DISABLED_Functionality,
-        Functionality,
+        DISABLED_Functionality,
+//        Functionality,
         ITLTestFunctionality,
         testing::ValuesIn(funct_headers),
         ITLTest::PrintToStringParamName()
         );
 
 TEST_P(ITLTestExamples, Examples) {
-//    std::set<std::string> test_param_names;
+
 //    GTEST_CHECK_(test_param_names.count(param_name) == 0)
 //                << "Duplicate parameterized test name '" << param_name
 //                << "', in " << file << " line " << line << std::endl;

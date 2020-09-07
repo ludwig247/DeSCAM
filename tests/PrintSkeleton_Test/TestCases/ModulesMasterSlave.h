@@ -6,7 +6,9 @@
 #define PROJECT_MODULES_MS_H
 
 #include "systemc.h"
-#include "Interfaces.h"
+//#include "Interfaces.h"
+#include "../../../example/Interfaces/Interfaces.h"
+
 
 struct TestMasterSlave0 : public sc_module {
     //Sections

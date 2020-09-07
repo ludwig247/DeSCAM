@@ -21,9 +21,9 @@ struct Param
 {
     std::string Name;
     SCAM::Module * result;
-    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-        return os << bar.Name;
-    }
+//    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
+//        return os << bar.Name;
+//    }
 };
 
 static std::vector<SCAM::Module *> parameter() {
@@ -47,24 +47,18 @@ static std::vector<Param> parameter(const char* header_list) {
 
 //    while (std::getline(ifs, line)) {
 //        if (line.size() > 0 && !(line.find("//") == 0)) {
-            std::vector<const char *> commandLineArugmentsVector;
 
-            //Binary
-            std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
-            commandLineArugmentsVector.push_back(bin.c_str());
+    const char *commandLineArgumentsArray[2];
 
-            //SRC-File to be analyzed
-//            std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
-            commandLineArugmentsVector.push_back(header_list);
+    //Binary
+    std::string bin = std::string(SCAM_HOME"/bin/SCAM");
+    commandLineArgumentsArray[0] = (bin.c_str());
+    commandLineArgumentsArray[1] = (header_list);
 
-            //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-            const char *commandLineArgumentsArray[commandLineArugmentsVector.size()];
-            for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
-                commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
-            }
-            SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],
-                                           commandLineArgumentsArray[1]);
 
+    //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+    SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
+                                   commandLineArgumentsArray[1]);
 
             for (auto module: ModelGlobal::getModel()->getModules()) {
                 {
@@ -103,20 +97,19 @@ static std::vector<Param> parameter(const char* header_list) {
                 }
                 includes.push_back(Param());
 //            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
-//                header_includes[i].Name = line;
+//                includes[i].FilePath = line;
                 includes[i].Name = module.second->getName();
-//                std::cout << "gets called" << includes[i].Name << std::endl;
-
                 includes[i].result = (module.second);
-
+//                std::cout << "gets called" << includes[i].Name << std::endl;
 
                 i++;
             }
 
 //        }
 //    }
-    ifs.close();
-            std::cout << "Number of modules: " << includes.size() << std::endl;
+//    ifs.close();
+        std::cout << "Number of modules: " << includes.size() << std::endl;
+        std::cout << "" << std::endl;
     return includes;
 }
 
@@ -124,22 +117,16 @@ static std::vector<Param> parameter(const char* header_list) {
 class PrintSkeleton_Test : public ::testing::TestWithParam<Param>  {
 public:
 
-//    struct PrintToStringParamName
-//    {
-//        template <class ParamType>
-//        std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
-//        {
-//            auto Parameter = static_cast<Param>(info.param);
-//            return Parameter.Name;
-//        }
-//    };
+    struct PrintToStringParamName
+    {
+        template <class ParamType>
+        std::string operator()( const testing::TestParamInfo<ParamType>& info ) const
+        {
+            auto Parameter = static_cast<Param>(info.param);
+            return Parameter.Name;
+        }
+    };
 
-    static void SetUpTestCase() {
-
-    }
-
-    static void TearDownTestCase() {
-    }
 
     void SetUp() {
 
@@ -153,7 +140,7 @@ std::vector<Param> test_includes;
 
 INSTANTIATE_TEST_CASE_P(Basic, PrintSkeleton_Test,
         ::testing::ValuesIn(test_includes),
-        ::testing::PrintToStringParamName());
+        ::PrintSkeleton_Test::PrintToStringParamName());
 
 
 TEST_F(PrintSkeleton_Test, GlobalTypesVHDL) {
