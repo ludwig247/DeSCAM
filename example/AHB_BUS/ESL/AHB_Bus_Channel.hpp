@@ -11,6 +11,8 @@ AHB_Bus_Channel::AHB_Bus_Channel (const char *name) :
         state(MASTER_REQ),
         master_id(10),
         slave_id(10),
+        req({0,0}),
+        resp({0,0}),
         fromReset(true)
         {
         }
@@ -27,8 +29,14 @@ void AHB_Bus_Channel::access_bus(const bus_req_t &val, bus_resp_t &out, unsigned
             master_id = id;
             if (val.haddr >= SLAVE0_START && val.haddr < SLAVE0_END) {
                 slave_id = 0;
-            } else {//if (val.haddr >= SLAVE1_START && val.haddr < SLAVE1_END) {
+            } else if (val.haddr >= SLAVE1_START && val.haddr < SLAVE1_END) {
                 slave_id = 1;
+            }
+            else if (val.haddr >= SLAVE2_START && val.haddr < SLAVE2_END) {
+                slave_id = 2;
+            }
+            else {//if (val.haddr >= SLAVE3_START && val.haddr < SLAVE3_END) {
+                slave_id = 3;
             }
             req.hwdata = val.hwdata;
             req.haddr = val.haddr;
