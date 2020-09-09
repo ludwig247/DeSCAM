@@ -232,7 +232,11 @@ std::string PrintBitOperations::getString(Node *node) {
     if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
         for (auto &child : node->child) {
             if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND || child->type == StmtType::DATA_SIGNAL_OPERAND) {
-                ss << child->name << "(" << node->lastBit << " downto " << node->firstBit << ")";
+                if (node->lastBit == node->firstBit) {
+                    ss << child->name << "(" << node->lastBit << ")";
+                } else {
+                    ss << child->name << "(" << node->lastBit << " downto " << node->firstBit << ")";
+                }
             }
         }
     } else {
@@ -256,7 +260,11 @@ std::string PrintBitOperations::getString(Node *node) {
         }
         for (auto &child : node->child) {
             if (child->type == StmtType::UNSIGNED_VALUE || child->type == StmtType::INTEGER_VALUE) {
-                ss << (offset + node->lastBit) << " downto " << (node->firstBit + offset) << ")";
+                if (node->lastBit == node->firstBit) {
+                    ss << (offset + node->lastBit) << ")";
+                } else {
+                    ss << (offset + node->lastBit) << " downto " << (node->firstBit + offset) << ")";
+                }
             }
         }
     }
