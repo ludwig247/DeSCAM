@@ -4,12 +4,12 @@
 
 #include "ExprVisitor.h"
 #include "PrintReset.h"
-#include "PrintCondition.h"
 #include "Utilities.h"
 #include "VHDLWrapper.h"
 #include "PrintFunction.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "PrintStmtVHDL.h"
 
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
@@ -402,7 +402,7 @@ std::string VHDLWrapper::printAssumptionList(const std::vector<Expr*>& exprList)
     }
     std::stringstream ss;
     for (auto expr = exprList.begin(); expr != exprList.end(); expr++) {
-        ss << PrintCondition::toString(*expr);
+        ss << PrintStmtVHDL::toString(*expr);
         if (std::next(expr) != exprList.end()) {
             ss << " and ";
         }

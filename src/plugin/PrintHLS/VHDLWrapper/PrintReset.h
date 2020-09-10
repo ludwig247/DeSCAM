@@ -5,12 +5,12 @@
 #ifndef SCAM_VHDLPRINTRESETNOTIFY_H
 #define SCAM_VHDLPRINTRESETNOTIFY_H
 
-#include "PrintCondition.h"
+#include "PrintStmtVHDL.h"
 #include <PrintStmt.h>
 
 namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-    class PrintResetNotify : PrintCondition {
+    class PrintResetNotify : PrintStmtVHDL {
 
     public:
         explicit PrintResetNotify(DESCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
@@ -27,7 +27,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
         void visit(BoolValue &node) override ;
     };
 
-    class PrintResetSignal : PrintCondition {
+    class PrintResetSignal : PrintStmtVHDL {
 
     public:
         PrintResetSignal(DESCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);

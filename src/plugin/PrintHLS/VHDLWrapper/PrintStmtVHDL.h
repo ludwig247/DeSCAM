@@ -36,6 +36,11 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
                 virtual std::string getString();
 
+            private:
+
+                // Flag used to convert operands to signed types in arithmetic operations
+                bool arithmeticOperation = false;
+
             };
 
         }}}

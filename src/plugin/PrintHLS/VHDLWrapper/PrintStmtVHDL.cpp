@@ -2,6 +2,7 @@
 // Created by Deutschmann on 09.09.20.
 //
 
+#include <iomanip>
 #include "PrintStmtVHDL.h"
 #include "FatalError.h"
 
@@ -18,6 +19,11 @@ std::string PrintStmtVHDL::toString(Stmt *stmt, unsigned int indentSize, unsigne
 
 void PrintStmtVHDL::visit(DESCAM::Arithmetic &node) {
     // TODO: Consider replacing multiplication by a power of two with shifting
+
+    // Temporary variable for nested arithmetic operations
+    bool subArithmeticOperation = arithmeticOperation;
+    arithmeticOperation = true;
+
     ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "%") {
@@ -27,6 +33,8 @@ void PrintStmtVHDL::visit(DESCAM::Arithmetic &node) {
     }
     node.getRhs()->accept(*this);
     ss << ")";
+
+    arithmeticOperation = arithmeticOperation && subArithmeticOperation;
 }
 
 void PrintStmtVHDL::visit(DESCAM::ArrayOperand &node) {
@@ -72,17 +80,15 @@ void PrintStmtVHDL::visit(DESCAM::BoolValue &node) {
 
 void PrintStmtVHDL::visit(DESCAM::Cast &node) {
 
-    const auto &type = node.getDataType()->getName();
-
-    if ((type == "unsigned" && NodePeekVisitor::nodePeekIntegerValue(node.getSubExpr()))
-        || (type == "int" && NodePeekVisitor::nodePeekUnsignedValue(node.getSubExpr()))) {
+    if ((node.getDataType()->isUnsigned() && NodePeekVisitor::nodePeekIntegerValue(node.getSubExpr()))
+        || (node.getDataType()->isInteger() && NodePeekVisitor::nodePeekUnsignedValue(node.getSubExpr()))) {
         node.getSubExpr()->accept(*this);
     } else {
-        if (type == "unsigned") {
+        if (node.getDataType()->isUnsigned()) {
             ss << "unsigned";
-        } else if (type == "int") {
+        } else if (node.getDataType()->isInteger()) {
             ss << "signed";
-        } else if (type == "bool") {
+        } else if (node.getDataType()->isBoolean()) {
             ss << "boolean";
         }
         ss << "(";
@@ -97,6 +103,14 @@ void PrintStmtVHDL::visit(DESCAM::Cast &node) {
 
 void PrintStmtVHDL::visit(DESCAM::DataSignalOperand &node) {
 
+    if (node.getDataType()->isBoolean()) {
+        ss << "(";
+    } else if (arithmeticOperation && node.getDataType()->isInteger()) {
+        ss << "signed(";
+    } else if (arithmeticOperation && node.getDataType()->isUnsigned()) {
+        ss << "unsigned(";
+    }
+
     ss << node.getDataSignal()->getPort()->getName() << "_sig";
 
     if (node.getDataSignal()->isSubVar()) {
@@ -108,6 +122,13 @@ void PrintStmtVHDL::visit(DESCAM::DataSignalOperand &node) {
             throw std::runtime_error(
                     "Unknown type for SubVar in PrintStmtVHDL::visit(DESCAM::DataSignalOperand &node)");
         }
+    }
+
+    // ='1' is added to convert std_logic into boolean
+    if (node.getDataType()->isBoolean()) {
+        ss << " = \'1\')";
+    } else if (arithmeticOperation) {
+        ss << ")";
     }
 }
 
@@ -124,10 +145,8 @@ void PrintStmtVHDL::visit(DESCAM::FunctionOperand &node) {
 }
 
 void PrintStmtVHDL::visit(DESCAM::IntegerValue &node) {
-    //TODO: Slicing / Consider printing as hex vector
-    ss << "to_signed(";
-    ss << node.getValue();
-    ss << ", 32)";
+    //TODO: Slicing
+    this->ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
 }
 
 void PrintStmtVHDL::visit(DESCAM::Relational &node) {
@@ -146,7 +165,8 @@ void PrintStmtVHDL::visit(DESCAM::Relational &node) {
 }
 
 void PrintStmtVHDL::visit(DESCAM::SyncSignal &node) {
-    ss << node.getPort()->getName() << "_sync";
+    // ='1' is added to convert from std_logic into boolean
+    ss << "(" << node.getPort()->getName() << "_sync = \'1\')";
 }
 
 void PrintStmtVHDL::visit(DESCAM::UnaryExpr &node) {
@@ -161,13 +181,19 @@ void PrintStmtVHDL::visit(DESCAM::UnaryExpr &node) {
 }
 
 void PrintStmtVHDL::visit(DESCAM::UnsignedValue &node) {
-    //TODO: Slicing / Consider printing as hex vector
-    ss << "to_unsigned(";
-    ss << node.getValue();
-    ss << ", 32)";
+    //TODO: Slicing
+    this->ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
 }
 
 void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
+
+    if (node.getDataType()->isBoolean()) {
+        ss << "(";
+    } else if (arithmeticOperation && node.getDataType()->isInteger()) {
+        ss << "signed(";
+    } else if (arithmeticOperation && node.getDataType()->isUnsigned()) {
+        ss << "unsigned(";
+    }
 
     if (node.getVariable()->isSubVar()) {
         ss << node.getVariable()->getParent()->getName();
@@ -180,6 +206,13 @@ void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
         }
     } else {
         ss << node.getVariable()->getName();
+    }
+
+    // ='1' is added to convert std_logic into boolean
+    if (node.getDataType()->isBoolean()) {
+        ss << " = \'1\')";
+    } else if (arithmeticOperation) {
+        ss << ")";
     }
 }
 
