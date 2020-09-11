@@ -6,7 +6,6 @@
 #include "PrintReset.h"
 #include "Utilities.h"
 #include "VHDLWrapper.h"
-#include "PrintFunction.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
 #include "PrintStmtVHDL.h"
@@ -439,8 +438,8 @@ std::string VHDLWrapper::sensitivityList() {
     }
 
     sensitivityListStream << "active_state";
-    for (const auto& syncSignals : sensListSyncSignals) {
-        sensitivityListStream << ", " << PrintFunction::toString(syncSignals);
+    for (const auto& sync : sensListSyncSignals) {
+        sensitivityListStream << ", " << sync->getPort()->getName() << "_sync";
     }
 
     for (const auto& dataSignals : sensListDataSignals) {
@@ -462,10 +461,10 @@ std::string VHDLWrapper::getResetValue(Variable* variable)
     for (const auto& statement : optimizer->getResetStatements()) {
         auto printResetValue = PrintResetSignal(statement, variable->getName());
         if (printResetValue.toString()) {
-            return PrintFunction::toString(statement->getRhs());
+            return PrintStmtVHDL::toString(statement->getRhs());
         }
     }
-    return PrintFunction::toString(variable->getInitialValue());
+    return PrintStmtVHDL::toString(variable->getInitialValue());
 }
 
 /*
@@ -477,8 +476,8 @@ std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
     for (const auto& statement : optimizer->getResetStatements()) {
         auto printResetValue = PrintResetSignal(statement, dataSignal->getFullName());
         if (printResetValue.toString()) {
-            return PrintFunction::toString(statement->getRhs());
+            return PrintStmtVHDL::toString(statement->getRhs());
         }
     }
-    return PrintFunction::toString(dataSignal->getInitialValue());
+    return PrintStmtVHDL::toString(dataSignal->getInitialValue());
 }

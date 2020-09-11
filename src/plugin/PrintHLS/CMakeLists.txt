@@ -17,7 +17,6 @@ add_library(PrintHLS SHARED
         VHDLWrapper/PrintBitOperations.cpp
         VHDLWrapper/PrintReset.cpp
         VHDLWrapper/PrintStmtVHDL.cpp
-        VHDLWrapper/PrintFunction.cpp
         VHDLWrapper/SignalFactory.cpp
         VHDLWrapper/Utilities.cpp
         VHDLWrapper/VHDLWrapper.cpp

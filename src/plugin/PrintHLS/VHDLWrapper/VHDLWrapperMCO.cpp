@@ -2,7 +2,7 @@
 // Created by johannes on 02.11.19.
 //
 
-#include "PrintFunction.h"
+#include "PrintStmtVHDL.h"
 #include "PrintReset.h"
 #include "Utilities.h"
 #include "VHDLWrapperMCO.h"
@@ -394,7 +394,7 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
         for (const auto &expr : arrayPort.second) {
             ss << "\t\t\t\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
-               << PrintFunction::toString(expr) << ")));\n";
+               << PrintStmtVHDL::toString(expr) << ")));\n";
             exprNumber++;
         }
     }

@@ -2,7 +2,7 @@
 // Created by johannes on 02.11.19.
 //
 
-#include "PrintFunction.h"
+#include "PrintStmtVHDL.h"
 #include "Utilities.h"
 #include "VHDLWrapperSCO.h"
 
@@ -242,7 +242,7 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
         for (const auto &expr : arrayPort.second) {
             ss << "\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
                << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
-               << PrintFunction::toString(expr) << ")));\n";
+               << PrintStmtVHDL::toString(expr) << ")));\n";
             exprNumber++;
         }
     }
