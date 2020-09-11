@@ -308,7 +308,7 @@ void VHDLWrapper::functions(std::stringstream &ss) {
         const auto& returnValueConditionList = func->getReturnValueConditionList();
         for (auto retValData = returnValueConditionList.begin(); retValData != returnValueConditionList.end(); retValData++) {
             ss << "\t\t";
-            if (retValData == --returnValueConditionList.end()) {
+            if (retValData == (returnValueConditionList.end()-1)) {
                 if (returnValueConditionList.size() != 1)
                     ss << "else ";
             } else {
@@ -318,14 +318,14 @@ void VHDLWrapper::functions(std::stringstream &ss) {
                     ss << "elsif ";
                 }
                 for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
-                    ss << PrintFunction::toString(*cond);
+                    ss << PrintStmtVHDL::toString(*cond);
                     if (std::next(cond) != retValData->second.end()) {
                         ss << " and ";
                     }
                 }
                 ss << " then ";
             }
-            ss << PrintFunction::toString(retValData->first) << ";\n";
+            ss << PrintStmtVHDL::toString(retValData->first) << ";\n";
         }
         if (returnValueConditionList.size() != 1) ss << "\t\tend if;\n";
         ss << "\tend " + func->getName() + ";\n\n";

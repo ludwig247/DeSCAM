@@ -164,6 +164,11 @@ void PrintStmtVHDL::visit(DESCAM::Relational &node) {
     ss << ")";
 }
 
+void PrintStmtVHDL::visit(DESCAM::Return &node) {
+    ss << "return ";
+    node.getReturnValue()->accept(*this);
+}
+
 void PrintStmtVHDL::visit(DESCAM::SyncSignal &node) {
     // ='1' is added to convert from std_logic into boolean
     ss << "(" << node.getPort()->getName() << "_sync = \'1\')";
