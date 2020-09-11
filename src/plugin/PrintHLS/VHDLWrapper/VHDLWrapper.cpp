@@ -3,7 +3,6 @@
 //
 
 #include "ExprVisitor.h"
-#include "PrintReset.h"
 #include "Utilities.h"
 #include "VHDLWrapper.h"
 #include "FatalError.h"
@@ -453,31 +452,15 @@ std::string VHDLWrapper::sensitivityList() {
 }
 
 /*
- * Returns reset value for given Variable
- * Used for reset process
+ * Finds and returns the reset value of the given signal
+ * Intended inputs types are Variable and DataSignal
  */
-std::string VHDLWrapper::getResetValue(Variable* variable)
-{
-    for (const auto& statement : optimizer->getResetStatements()) {
-        auto printResetValue = PrintResetSignal(statement, variable->getName());
-        if (printResetValue.toString()) {
-            return PrintStmtVHDL::toString(statement->getRhs());
+template<typename T>
+std::string VHDLWrapper::getResetValue(const T& signal) {
+    for (const auto& assignment : optimizer->getResetStatements()) {
+        if (PrintStmtVHDL::toString(assignment->getLhs()) == signal->getFullName()) {
+            return PrintStmtVHDL::toString(assignment->getRhs());
         }
     }
-    return PrintStmtVHDL::toString(variable->getInitialValue());
-}
-
-/*
- * Returns reset value for given DataSignal
- * Used for reset process
- */
-std::string VHDLWrapper::getResetValue(DataSignal* dataSignal)
-{
-    for (const auto& statement : optimizer->getResetStatements()) {
-        auto printResetValue = PrintResetSignal(statement, dataSignal->getFullName());
-        if (printResetValue.toString()) {
-            return PrintStmtVHDL::toString(statement->getRhs());
-        }
-    }
-    return PrintStmtVHDL::toString(dataSignal->getInitialValue());
+    return PrintStmtVHDL::toString(signal->getInitialValue());
 }

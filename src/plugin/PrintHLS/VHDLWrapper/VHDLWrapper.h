@@ -45,8 +45,8 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 // Utility print functions
                 std::string printAssumptionList(const std::vector<Expr*>& exprList);
                 std::string sensitivityList();
-                std::string getResetValue(Variable *variable);
-                std::string getResetValue(DataSignal *dataSignal);
+                template<typename T>
+                std::string getResetValue(const T& signal);
 
                 // SCO/MCO specific functions
                 virtual void signals(std::stringstream &ss) = 0;

@@ -39,15 +39,15 @@ void PrintStmtVHDL::visit(DESCAM::Arithmetic &node) {
 
 void PrintStmtVHDL::visit(DESCAM::ArrayOperand &node) {
 
-    this->ss << node.getArrayOperand()->getOperandName();
-    this->ss << "(to_integer(unsigned(";
+    ss << node.getArrayOperand()->getOperandName();
+    ss << "(to_integer(unsigned(";
     node.getIdx()->accept(*this);
-    this->ss << ")))";
+    ss << ")))";
 }
 
 void PrintStmtVHDL::visit(DESCAM::Assignment &node) {
     node.getLhs()->accept(*this);
-    this->ss << " <= ";
+    ss << " <= ";
     node.getRhs()->accept(*this);
 }
 
@@ -148,7 +148,11 @@ void PrintStmtVHDL::visit(DESCAM::FunctionOperand &node) {
 
 void PrintStmtVHDL::visit(DESCAM::IntegerValue &node) {
     //TODO: Slicing
-    this->ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+}
+
+void PrintStmtVHDL::visit(DESCAM::Notify &node) {
+    ss << node.getPort()->getName() << "_notify";
 }
 
 void PrintStmtVHDL::visit(DESCAM::Relational &node) {
@@ -189,7 +193,7 @@ void PrintStmtVHDL::visit(DESCAM::UnaryExpr &node) {
 
 void PrintStmtVHDL::visit(DESCAM::UnsignedValue &node) {
     //TODO: Slicing
-    this->ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
 }
 
 void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
