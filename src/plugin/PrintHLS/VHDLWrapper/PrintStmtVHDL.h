@@ -20,7 +20,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
                 void visit(Arithmetic &node) override;
                 void visit(ArrayOperand &node) override;
-                //void visit(Assignment &node) override:
+                void visit(Assignment &node) override;
                 void visit(Bitwise &node) override;
                 void visit(BoolValue &node) override;
                 void visit(Cast &node) override;

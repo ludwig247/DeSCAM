@@ -10,23 +10,6 @@
 
 namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
-    class PrintResetNotify : PrintStmtVHDL {
-
-    public:
-        explicit PrintResetNotify(DESCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
-
-        static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
-
-    protected:
-
-        std::string getString() override;
-
-        void visit(Assignment &node) override ;
-        void visit(DataSignalOperand &node) override {};
-        void visit(VariableOperand &node) override {};
-        void visit(BoolValue &node) override ;
-    };
-
     class PrintResetSignal : PrintStmtVHDL {
 
     public:

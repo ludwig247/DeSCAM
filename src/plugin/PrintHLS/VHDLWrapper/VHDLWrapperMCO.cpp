@@ -3,7 +3,6 @@
 //
 
 #include "PrintStmtVHDL.h"
-#include "PrintReset.h"
 #include "Utilities.h"
 #include "VHDLWrapperMCO.h"
 
@@ -322,9 +321,10 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
     for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        std::string assignment = PrintResetNotify::toString(commitment->getStatement());
-        if (!assignment.empty()) {
-            ss << "\t\t\t" << assignment;
+        // Find and print notifies from reset property commitments
+        const auto &assignment = NodePeekVisitor::nodePeekAssignment((*commitment).getStatement());
+        if ((assignment != nullptr) && (NodePeekVisitor::nodePeekNotify(assignment->getLhs()) != nullptr)) {
+            ss << "\t\t\t" << PrintStmtVHDL::toString((*commitment).getStatement()) << ";\n";
         }
     }
     ss << "\t\telse\n"

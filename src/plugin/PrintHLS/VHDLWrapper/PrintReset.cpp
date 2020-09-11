@@ -6,36 +6,6 @@
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
-std::string PrintResetNotify::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    PrintResetNotify printer(stmt, indentSize, indentOffset);
-    return printer.getString();
-}
-
-PrintResetNotify::PrintResetNotify(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
-    this->createString(stmt, indentSize, indentOffset);
-}
-
-std::string PrintResetNotify::getString() {
-    return this->ss.str();
-}
-
-void PrintResetNotify::visit(Assignment &node) {
-    node.getLhs()->accept(*this);
-    if (!this->ss.str().empty()) {
-        this->ss << " <= ";
-        node.getRhs()->accept(*this);
-        this->ss << ";\n";
-    }
-}
-
-void PrintResetNotify::visit(BoolValue &node) {
-    if (node.getValue()) {
-        this->ss << "'1'";
-    } else {
-        this->ss << "'0'";
-    }
-}
-
 PrintResetSignal::PrintResetSignal(DESCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
     stmt(stmt),
     indentSize(indentSize),

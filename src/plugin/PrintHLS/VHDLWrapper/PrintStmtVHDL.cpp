@@ -45,9 +45,11 @@ void PrintStmtVHDL::visit(DESCAM::ArrayOperand &node) {
     this->ss << ")))";
 }
 
-//void PrintStmtVHDL::visit(DESCAM::Assignment &node) {
-//TODO
-//}
+void PrintStmtVHDL::visit(DESCAM::Assignment &node) {
+    node.getLhs()->accept(*this);
+    this->ss << " <= ";
+    node.getRhs()->accept(*this);
+}
 
 void PrintStmtVHDL::visit(DESCAM::Bitwise &node) {
 
