@@ -1,7 +1,3 @@
-//
-// Created by PauliusMorku on 06.14.18.
-//
-
 #ifndef RISCV_RI5CY_H_
 #define RISCV_RI5CY_H_
 
@@ -15,7 +11,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 0
+#define SCAM 1
 
 class ISA_ri5cy : public sc_module {
 public:
@@ -114,14 +110,11 @@ public:
     bool branchDecisionCalculation(unsigned int encodedInstr, unsigned int aluResult) const;
 };
 
-
 void ISA_ri5cy::run() {
     nextsection = Sections::FETCH_PH;
     while (true){
         section = nextsection;
-
         if (section == Sections::FETCH_PH){
-
             if(fromReset){
                 instr_req->master_write(iaddr);
                 pcReg = 0;
@@ -139,8 +132,6 @@ void ISA_ri5cy::run() {
                     wait(WAIT_TIME, SC_PS);
                 }
             #endif
-
-
         } else if (section == Sections::DECODE_PH){
             flush_in->get(flush);
             if (flush) {
@@ -154,32 +145,23 @@ void ISA_ri5cy::run() {
                     pcReg = iaddr;
                     iaddr = pcIf + getImmediate(encodedInstr);
                     instr_req->master_write(iaddr);
-                    #if SCAM == 1
-                        insert_state("ID_J");
-                    #endif
-
                 } else if (getEncType(encodedInstr) == ENC_I_J) {
                     fromRegsPort->get(regfile); //Read register contents
                     pcReg = iaddr;
                     iaddr = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
                     iaddr = iaddr & 0xFFFFFFFE;
                     instr_req->master_write(iaddr);
-                    #if SCAM == 1
-                        insert_state("ID_I_J");
-                    #endif
                 } else {
                     pcReg = iaddr;
                     iaddr = iaddr + 4;
                     instr_req->master_write(iaddr);
-                    #if SCAM == 1
-                        insert_state("ID");
-                    #endif
                 }
+                #if SCAM == 1
+                    insert_state("ID");
+                #endif
                 fromRegsPort->get(regfile); //Read register contents
                 nextsection = Sections::EXECUTE_PH;
             }
-
-
         } else if (section == Sections::EXECUTE_PH) {
             if(getInstrType(encodedInstr) != InstrType::INSTR_UNKNOWN){
                 if (getEncType(encodedInstr) == ENC_R){
@@ -281,7 +263,6 @@ void ISA_ri5cy::run() {
 
                     pcReg = iaddr;
                     pcIf = iaddr;
-
                 } else if (getEncType(encodedInstr) == ENC_U) {
                     /////////////////////////////////////////////////////////////////////////////
                     //|        ID       |        EX       |    ---------    |  WB (RF_WRITE)  |//
