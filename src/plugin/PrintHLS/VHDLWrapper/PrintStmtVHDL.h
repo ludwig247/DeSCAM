@@ -29,6 +29,7 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 void visit(FunctionOperand &node) override;
                 void visit(IntegerValue &node) override;
                 void visit(Notify &node) override;
+                void visit(ParamOperand &node) override;
                 void visit(Relational &node) override;
                 void visit(Return &node) override;
                 void visit(SyncSignal &node) override;

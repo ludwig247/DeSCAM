@@ -3,12 +3,15 @@
 //
 
 #include <algorithm>
+#include <PrintHLS/VHDLWrapper/Utilities.h>
+#include <PrintHLS/VHDLWrapper/PrintStmtVHDL.h>
 
 #include "ExprVisitor.h"
 #include "NodePeekVisitor.h"
 #include "OptimizerHLS.h"
 #include "PrintArrayStatements.h"
 #include "PropertySuite.h"
+#include "Utilities.h"
 
 using namespace DESCAM::HLSPlugin;
 
@@ -573,3 +576,86 @@ std::vector<DESCAM::Assignment *> OptimizerHLS::getResetStatements() {
     }
     return assignmentList;
 }
+
+/*
+ * Takes a bitwise operation and tries to express it as a bit slicing expression
+ *
+ * Since bit slicing is not part of descam, it has to be expressed by using the logical and operator.
+ * Rewriting it makes the generated code much more readable.
+ * E.g. x & "0000 0000 0011 1111" -> x(5 downto 0)
+ *
+ * If unsuccessful, an empty string is returned
+ */
+std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
+
+    if (operation.getOperation() == "&") {
+
+        const auto lhsConstant = (NodePeekVisitor::nodePeekIntegerValue(operation.getLhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(operation.getLhs()) != nullptr);
+        const auto rhsConstant = (NodePeekVisitor::nodePeekIntegerValue(operation.getRhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(operation.getRhs()) != nullptr);
+
+        // Ensure exactly one value is constant
+        if (lhsConstant == rhsConstant) {
+            return "";
+        }
+
+        const auto& constant = (lhsConstant ? operation.getLhs() : operation.getRhs());
+        const auto& variable = (rhsConstant ? operation.getLhs() : operation.getRhs());
+
+        auto constantValue = 0;
+        if (constant->getDataType()->isInteger()) {
+            constantValue = NodePeekVisitor::nodePeekIntegerValue(constant)->getValue();
+        } else if (constant->getDataType()->isUnsigned()) {
+            constantValue = NodePeekVisitor::nodePeekUnsignedValue(constant)->getValue();
+        } else {
+            throw std::runtime_error("OptimizerHLS::sliceBitwise - Unknown data type for variable \'constant\'");
+        }
+
+        std::stringstream ss;
+        if ((NodePeekVisitor::nodePeekVariableOperand(variable) != nullptr)
+        || (NodePeekVisitor::nodePeekDataSignalOperand(variable) != nullptr)
+        || (NodePeekVisitor::nodePeekParamOperand(variable) != nullptr)) {
+            ss << DESCAM::HLSPlugin::VHDLWrapper::PrintStmtVHDL::toString(variable);
+        } else { // TODO: check for constant shifts
+            return "";
+        }
+
+        auto sliceIndices = DESCAM::HLSPlugin::VHDLWrapper::Utilities::findBlockOfSetBits(constantValue);
+
+        ss << "(";
+        if ((sliceIndices.first < sliceIndices.second) || (sliceIndices.second != 0)) {
+            return "";
+        } else if (sliceIndices.first == sliceIndices.second) {
+            ss << sliceIndices.first;
+        } else {
+            ss << sliceIndices.first << " downto " << sliceIndices.second;
+        }
+        ss << ")";
+
+        return ss.str();
+
+    }
+
+    return "";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

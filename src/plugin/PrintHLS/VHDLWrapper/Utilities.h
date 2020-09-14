@@ -21,9 +21,11 @@ namespace DESCAM {
 
             public:
 
-                static bool isPowerOfTwo(long unsigned n);
+                static bool isPowerOfTwo(unsigned int n);
 
-                static unsigned int firstSetBitIndex(long unsigned int n);
+                static unsigned int firstSetBitIndex(unsigned int n);
+
+                static std::pair<const unsigned int, const unsigned int> findBlockOfSetBits(unsigned int value);
 
                 static std::string intToBinary(unsigned int n, unsigned int size);
 

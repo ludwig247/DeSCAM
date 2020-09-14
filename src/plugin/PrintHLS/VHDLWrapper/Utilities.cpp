@@ -7,7 +7,7 @@ using namespace DESCAM::HLSPlugin::VHDLWrapper;
 /*
  * Returns True, if the given number n is a power of two
  */
-bool Utilities::isPowerOfTwo(long unsigned int n) {
+bool Utilities::isPowerOfTwo(unsigned int n) {
     return !((n < 1) || (n & (n - 1)));
 }
 
@@ -16,13 +16,41 @@ bool Utilities::isPowerOfTwo(long unsigned int n) {
  *
  * If no bit is set (n = 0), zero is returned
  */
-unsigned int Utilities::firstSetBitIndex(long unsigned int n) {
+unsigned int Utilities::firstSetBitIndex(unsigned int n) {
     unsigned int count = 0;
     while (n > 1) {
         count++;
         n >>= 1u;
     }
     return count;
+}
+
+/*
+ * Checks if the given value consists of a single block of set bits
+ *
+ * The function returns the indices of the found block, e.g.
+ * "0001 1100" -> (4, 2)
+ * If no block is found, (0, 1) is returned
+ */
+std::pair<const unsigned int, const unsigned int> Utilities::findBlockOfSetBits(unsigned int value){
+
+    if (value == 0) {
+        return std::make_pair(0, 1);
+    }
+
+    auto rightIndex = 0;
+    while ((value % 2) == 0) {
+        rightIndex++;
+        value >>= 1u;
+    }
+
+    if (isPowerOfTwo(value + 1)) {
+        auto leftIndex = firstSetBitIndex(value);
+        return std::make_pair(leftIndex, rightIndex);
+    } else {
+        return std::make_pair(0, 1);
+    }
+
 }
 
 /*

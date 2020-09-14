@@ -48,6 +48,8 @@ namespace DESCAM { namespace HLSPlugin {
 
         std::vector<Assignment *> getResetStatements();
 
+        static std::string sliceBitwise(Bitwise& operation);
+
     private:
         //std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
         std::shared_ptr<PropertySuite> propertySuite;

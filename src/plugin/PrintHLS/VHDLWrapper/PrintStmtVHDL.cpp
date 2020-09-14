@@ -3,6 +3,7 @@
 //
 
 #include <iomanip>
+#include <PrintHLS/Common/OptimizerHLS.h>
 #include "PrintStmtVHDL.h"
 #include "FatalError.h"
 
@@ -53,7 +54,11 @@ void PrintStmtVHDL::visit(DESCAM::Assignment &node) {
 
 void PrintStmtVHDL::visit(DESCAM::Bitwise &node) {
 
-    if (node.getOperation() == "<<" || node.getOperation() == ">>") {
+    // Check if bitwise operation can be expressed as a slicing expression
+    const auto slicedOperation = DESCAM::HLSPlugin::OptimizerHLS::sliceBitwise(node);
+    if (!slicedOperation.empty()) {
+        ss << slicedOperation;
+    } else if (node.getOperation() == "<<" || node.getOperation() == ">>") {
         ss << ((node.getOperation() == "<<") ? "shift_left(" : "shift_right(");
         node.getLhs()->accept(*this);
         ss << ", ";
@@ -155,6 +160,10 @@ void PrintStmtVHDL::visit(DESCAM::Notify &node) {
     ss << node.getPort()->getName() << "_notify";
 }
 
+void PrintStmtVHDL::visit(DESCAM::ParamOperand &node) {
+    ss << node.getOperandName();
+}
+
 void PrintStmtVHDL::visit(DESCAM::Relational &node) {
 
     ss << "(";
@@ -230,7 +239,3 @@ void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
 std::string PrintStmtVHDL::getString() {
     return ss.str();
 }
-
-
-
-
