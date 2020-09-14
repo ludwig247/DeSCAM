@@ -14,7 +14,6 @@ add_library(PrintHLS SHARED
 
         SynthesisScript/SynthesisScripts.cpp
 
-        VHDLWrapper/PrintBitOperations.cpp
         VHDLWrapper/PrintStmtVHDL.cpp
         VHDLWrapper/SignalFactory.cpp
         VHDLWrapper/Utilities.cpp
