@@ -171,7 +171,7 @@ void PrintStmtVHDL::visit(DESCAM::Relational &node) {
     if (node.getOperation() == "==") {
         ss << " = ";
     } else if (node.getOperation() == "!=") {
-        ss << " /= ";
+        ss << (node.getDataType()->isBoolean() ? " xor " : " /= ");
     } else {
         ss << " " << node.getOperation() << " ";
     }
