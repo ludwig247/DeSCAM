@@ -611,11 +611,47 @@ std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
         }
 
         std::stringstream ss;
+        auto offset = 0;
         if ((NodePeekVisitor::nodePeekVariableOperand(variable) != nullptr)
         || (NodePeekVisitor::nodePeekDataSignalOperand(variable) != nullptr)
         || (NodePeekVisitor::nodePeekParamOperand(variable) != nullptr)) {
             ss << DESCAM::HLSPlugin::VHDLWrapper::PrintStmtVHDL::toString(variable);
-        } else { // TODO: check for constant shifts
+        } else if (NodePeekVisitor::nodePeekBitwise(variable) != nullptr) {
+
+            // Only consider the case "var >> const"
+            const auto& subOperation = NodePeekVisitor::nodePeekBitwise(variable);
+            if (!(subOperation->getOperation() == ">>")) {
+                return "";
+            }
+
+            const auto subLhsConstant = (NodePeekVisitor::nodePeekIntegerValue(subOperation->getLhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(subOperation->getLhs()) != nullptr);
+            const auto subRhsConstant = (NodePeekVisitor::nodePeekIntegerValue(subOperation->getRhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(subOperation->getRhs()) != nullptr);
+
+            // Ensure right value is constant, left is not
+            if (!(!subLhsConstant && subRhsConstant)) {
+                return "";
+            }
+
+            const auto& subConstant = subOperation->getRhs();
+            const auto& subVariable = subOperation->getLhs();
+
+            if (subConstant->getDataType()->isInteger()) {
+                offset = NodePeekVisitor::nodePeekIntegerValue(subConstant)->getValue();
+            } else if (subConstant->getDataType()->isUnsigned()) {
+                offset = NodePeekVisitor::nodePeekUnsignedValue(subConstant)->getValue();
+            } else {
+                throw std::runtime_error("OptimizerHLS::sliceBitwise - Unknown data type for variable \'subConstant\'");
+            }
+
+            if ((NodePeekVisitor::nodePeekVariableOperand(subVariable) != nullptr)
+                || (NodePeekVisitor::nodePeekDataSignalOperand(subVariable) != nullptr)
+                || (NodePeekVisitor::nodePeekParamOperand(subVariable) != nullptr)) {
+                ss << DESCAM::HLSPlugin::VHDLWrapper::PrintStmtVHDL::toString(subVariable);
+            } else {
+                return "";
+            }
+
+        } else {
             return "";
         }
 
@@ -625,9 +661,9 @@ std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
         if ((sliceIndices.first < sliceIndices.second) || (sliceIndices.second != 0)) {
             return "";
         } else if (sliceIndices.first == sliceIndices.second) {
-            ss << sliceIndices.first;
+            ss << (sliceIndices.first + offset);
         } else {
-            ss << sliceIndices.first << " downto " << sliceIndices.second;
+            ss << (sliceIndices.first + offset) << " downto " << (sliceIndices.second + offset);
         }
         ss << ")";
 
