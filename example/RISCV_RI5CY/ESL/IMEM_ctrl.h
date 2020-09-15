@@ -72,7 +72,7 @@ void IMEM_ctrl::run(){
             toMemoryPort->write(imemMemoryAccess); //Send request to memory
             fromMemoryPort->read(imemFromMemoryData); //Read encoded instruction from memory
             instr = imemFromMemoryData.loadedData;
-
+            insert_state();
             dataFromCPUPort->try_read(dmemMemoryAccess, flagDmemMemoryAccess);
             if(flagDmemMemoryAccess){
                 toMemoryPort->write(dmemMemoryAccess); //Send request to memory
@@ -85,7 +85,7 @@ void IMEM_ctrl::run(){
             toCPUPort->slave_write(instr);
         }else{
             //toCPUPort->slave_write(instr);
-            wait(WAIT_TIME, SC_PS);
+            insert_state();
         }
     }
 }
