@@ -77,10 +77,12 @@ void IMEM_ctrl::run(){
             if(flagDmemMemoryAccess){
                 toMemoryPort->write(dmemMemoryAccess); //Send request to memory
                 fromMemoryPort->read(dmemFromMemoryData); //Read encoded instruction from memory
+                if(dmemMemoryAccess.req == ME_RD){
 
-                data = dmemFromMemoryData.loadedData;
+                    data = dmemFromMemoryData.loadedData;
 
-                dataToCPUPort->slave_write(data);
+                    dataToCPUPort->slave_write(data);
+                }
             }
             toCPUPort->slave_write(instr);
         }else{

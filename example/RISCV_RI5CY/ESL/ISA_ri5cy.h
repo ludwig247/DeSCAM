@@ -232,11 +232,6 @@ void ISA_ri5cy::run() {
                     memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
 
                     data_out->write(memoryAccess, "STORE"); // Request store
-
-                    #if SCAM == 0
-                    // Store done
-                        data_in->master_read(fromMemoryData);//Fixme: Why do we need this read? For store a write should be sufficient
-                    #endif
                 } else if (getEncType(encodedInstr) == ENC_B) {
                     /////////////////////////////////////////////////////////////////////////////
                     //|  ID (RF_READ)   |        EX       |    ---------    |    ---------    |//
