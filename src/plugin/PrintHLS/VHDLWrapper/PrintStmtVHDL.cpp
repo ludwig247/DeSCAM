@@ -110,9 +110,7 @@ void PrintStmtVHDL::visit(DESCAM::Cast &node) {
 
 void PrintStmtVHDL::visit(DESCAM::DataSignalOperand &node) {
 
-    if (node.getDataType()->isBoolean()) {
-        ss << "(";
-    } else if (arithmeticOperation && node.getDataType()->isInteger()) {
+    if (arithmeticOperation && node.getDataType()->isInteger()) {
         ss << "signed(";
     } else if (arithmeticOperation && node.getDataType()->isUnsigned()) {
         ss << "unsigned(";
@@ -131,10 +129,7 @@ void PrintStmtVHDL::visit(DESCAM::DataSignalOperand &node) {
         }
     }
 
-    // ='1' is added to convert std_logic into boolean
-    if (node.getDataType()->isBoolean()) {
-        ss << " = \'1\')";
-    } else if (arithmeticOperation) {
+    if (arithmeticOperation) {
         ss << ")";
     }
 }
@@ -166,7 +161,7 @@ void PrintStmtVHDL::visit(DESCAM::ParamOperand &node) {
 
 void PrintStmtVHDL::visit(DESCAM::Relational &node) {
 
-    ss << "(";
+    ss << "bool_to_sl(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
         ss << " = ";
@@ -185,8 +180,7 @@ void PrintStmtVHDL::visit(DESCAM::Return &node) {
 }
 
 void PrintStmtVHDL::visit(DESCAM::SyncSignal &node) {
-    // ='1' is added to convert from std_logic into boolean
-    ss << "(" << node.getPort()->getName() << "_sync = \'1\')";
+    ss << node.getPort()->getName() << "_sync";
 }
 
 void PrintStmtVHDL::visit(DESCAM::UnaryExpr &node) {
@@ -207,9 +201,7 @@ void PrintStmtVHDL::visit(DESCAM::UnsignedValue &node) {
 
 void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
 
-    if (node.getDataType()->isBoolean()) {
-        ss << "(";
-    } else if (arithmeticOperation && node.getDataType()->isInteger()) {
+    if (arithmeticOperation && node.getDataType()->isInteger()) {
         ss << "signed(";
     } else if (arithmeticOperation && node.getDataType()->isUnsigned()) {
         ss << "unsigned(";
@@ -228,10 +220,7 @@ void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
         ss << node.getVariable()->getName();
     }
 
-    // ='1' is added to convert std_logic into boolean
-    if (node.getDataType()->isBoolean()) {
-        ss << " = \'1\')";
-    } else if (arithmeticOperation) {
+   if (arithmeticOperation) {
         ss << ")";
     }
 }

@@ -245,13 +245,14 @@ void VHDLWrapper::functions(std::stringstream &ss) {
         }
     }
 
-    if (usedFunctions.empty()) {
-        return;
-    }
+    //if (usedFunctions.empty()) {
+    //    return;
+    //}
 
     ss << "\n\t-- Functions\n";
 
     // Print function prototype
+    ss << "\tfunction bool_to_sl(x : boolean) return std_logic;\n";
     for (const auto& func : usedFunctions) {
         ss << "\tfunction " + func->getName() << "(";
 
@@ -277,6 +278,14 @@ void VHDLWrapper::functions(std::stringstream &ss) {
     ss << "\n";
 
     // Print function definition
+    ss << "\tfunction bool_to_sl(x : boolean) return std_logic is\n"
+          "\tbegin\n"
+          "  \tif x then\n"
+          "    \treturn '1';\n"
+          "  \telse\n"
+          "    \treturn '0';\n"
+          "  \tend if;\n"
+          "  end bool_to_sl;\n\n";
     for (const auto& func : usedFunctions) {
         ss << "\tfunction " + func->getName() << "(";
 
@@ -315,12 +324,14 @@ void VHDLWrapper::functions(std::stringstream &ss) {
                 } else {
                     ss << "elsif ";
                 }
+                ss << "(";
                 for (auto cond = retValData->second.begin(); cond != retValData->second.end(); cond++) {
                     ss << PrintStmtVHDL::toString(*cond);
                     if (std::next(cond) != retValData->second.end()) {
                         ss << " and ";
                     }
                 }
+                ss << ") = '1'";
                 ss << " then ";
             }
             ss << PrintStmtVHDL::toString(retValData->first) << ";\n";
@@ -399,12 +410,14 @@ std::string VHDLWrapper::printAssumptionList(const std::vector<Expr*>& exprList)
         return "true";
     }
     std::stringstream ss;
+    ss << "(";
     for (auto expr = exprList.begin(); expr != exprList.end(); expr++) {
         ss << PrintStmtVHDL::toString(*expr);
         if (std::next(expr) != exprList.end()) {
             ss << " and ";
         }
     }
+    ss << ") = '1'";
     return ss.str();
 }
 
