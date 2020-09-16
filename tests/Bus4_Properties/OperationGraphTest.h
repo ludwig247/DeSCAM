@@ -28,7 +28,7 @@ using namespace SCAM;
 
 class OperationGraphTest: public ::testing::Test{
 public:
-    OperationGraphTest():module(new SCAM::Module("Bus")){
+    OperationGraphTest():module(new SCAM::Module("Bus4")){
     }
 
     struct pathIDStmt{
@@ -50,11 +50,7 @@ public:
     std::map<int, CfgNode *> controlFlowMapSlaveRead1;
     std::map<int, CfgNode *> controlFlowMapSlaveWrite1;
     std::map<int, CfgNode *> controlFlowMapAccessBus2;
-    std::map<int, CfgNode *> controlFlowMapSlaveRead2;
-    std::map<int, CfgNode *> controlFlowMapSlaveWrite2;
     std::map<int, CfgNode *> controlFlowMapAccessBus3;
-    std::map<int, CfgNode *> controlFlowMapSlaveRead3;
-    std::map<int, CfgNode *> controlFlowMapSlaveWrite3;
     std::map<int, CfgNode *> controlFlowMapDummy;
     std::map<int, CfgNode *> controlFlowMap;
 
@@ -72,19 +68,11 @@ public:
     std::vector<std::vector<int>> pathsSlaveRead0IDs;
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveRead1;
     std::vector<std::vector<int>> pathsSlaveRead1IDs;
-    std::vector<std::vector<SCAM::Stmt*>> pathsSlaveRead2;
-    std::vector<std::vector<int>> pathsSlaveRead2IDs;
-    std::vector<std::vector<SCAM::Stmt*>> pathsSlaveRead3;
-    std::vector<std::vector<int>> pathsSlaveRead3IDs;
 
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveWrite0;
     std::vector<std::vector<int>> pathsSlaveWrite0IDs;
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveWrite1;
     std::vector<std::vector<int>> pathsSlaveWrite1IDs;
-    std::vector<std::vector<SCAM::Stmt*>> pathsSlaveWrite2;
-    std::vector<std::vector<int>> pathsSlaveWrite2IDs;
-    std::vector<std::vector<SCAM::Stmt*>> pathsSlaveWrite3;
-    std::vector<std::vector<int>> pathsSlaveWrite3IDs;
 
     std::vector<std::vector<SCAM::Stmt*>> pathsDummy;
     std::vector<std::vector<int>> pathsDummyIDs;
@@ -448,14 +436,10 @@ public:
         //Slave read
         auto bus_req_slave_0 = new Port("out_slave_0",new Interface("blocking","out"),bus_req_t);
         auto bus_req_slave_1 = new Port("out_slave_1",new Interface("blocking","out"),bus_req_t);
-        auto bus_req_slave_2 = new Port("out_slave_2",new Interface("blocking","out"),bus_req_t);
-        auto bus_req_slave_3 = new Port("out_slave_3",new Interface("blocking","out"),bus_req_t);
 
         //Slave write
         auto bus_resp_slave_0 = new Port("val_slave_0",new Interface("blocking","in"),bus_resp_t);
         auto bus_resp_slave_1 = new Port("val_slave_1",new Interface("blocking","in"),bus_resp_t);
-        auto bus_resp_slave_2 = new Port("val_slave_2",new Interface("blocking","in"),bus_resp_t);
-        auto bus_resp_slave_3 = new Port("val_slave_3",new Interface("blocking","in"),bus_resp_t);
 
         //Master read
         auto bus_resp_master_0 = new Port("out_master_0",new Interface("blocking","out"),bus_resp_t);
@@ -476,16 +460,12 @@ public:
         module->addPort(bus_req_master_3);
         module->addPort(bus_req_slave_0);
         module->addPort(bus_req_slave_1);
-        module->addPort(bus_req_slave_2);
-        module->addPort(bus_req_slave_3);
         module->addPort(bus_resp_master_0);
         module->addPort(bus_resp_master_1);
         module->addPort(bus_resp_master_2);
         module->addPort(bus_resp_master_3);
         module->addPort(bus_resp_slave_0);
         module->addPort(bus_resp_slave_1);
-        module->addPort(bus_resp_slave_2);
-        module->addPort(bus_resp_slave_3);
 
         for(auto subVar: req->getSubVarList()){
             module->addVariable(subVar);
@@ -526,10 +506,7 @@ public:
         auto SLAVE0_END = new UnsignedValue(0x00010000);
         auto SLAVE1_START = new UnsignedValue(0x00010000);
         auto SLAVE1_END = new UnsignedValue(0x00020000);
-        auto SLAVE2_START = new UnsignedValue(0x00020000);
-        auto SLAVE2_END = new UnsignedValue(0x00030000);
-        auto SLAVE3_START = new UnsignedValue(0x00030000);
-        auto SLAVE3_END = new UnsignedValue(0x00040000);
+
         //Slave 0
         auto val_0_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
         auto val_1_haddr_geq_slave0_start = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),">=",SLAVE0_START);
@@ -551,53 +528,9 @@ public:
         auto if_val_2_slave_0 = new If(val_2_slave0);
         auto if_val_3_slave_0 = new If(val_3_slave0);
 
-        //Slave 1
-        auto val_0_haddr_geq_slave1_start = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),">=",SLAVE1_START);
-        auto val_1_haddr_geq_slave1_start = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),">=",SLAVE1_START);
-        auto val_2_haddr_geq_slave1_start = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),">=",SLAVE1_START);
-        auto val_3_haddr_geq_slave1_start = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),">=",SLAVE1_START);
-
-        auto val_0_haddr_lt_slave1_end = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),"<",SLAVE1_END);
-        auto val_1_haddr_lt_slave1_end = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),"<",SLAVE1_END);
-        auto val_2_haddr_lt_slave1_end = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),"<",SLAVE1_END);
-        auto val_3_haddr_lt_slave1_end = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),"<",SLAVE1_END);
-
-        auto val_0_slave1 = new Logical(val_0_haddr_geq_slave1_start,"and",val_0_haddr_lt_slave1_end);
-        auto val_1_slave1 = new Logical(val_1_haddr_geq_slave1_start,"and",val_1_haddr_lt_slave1_end);
-        auto val_2_slave1 = new Logical(val_2_haddr_geq_slave1_start,"and",val_2_haddr_lt_slave1_end);
-        auto val_3_slave1 = new Logical(val_3_haddr_geq_slave1_start,"and",val_3_haddr_lt_slave1_end);
-
-        auto if_val_0_slave_1 = new If(val_0_slave1);
-        auto if_val_1_slave_1 = new If(val_1_slave1);
-        auto if_val_2_slave_1 = new If(val_2_slave1);
-        auto if_val_3_slave_1 = new If(val_3_slave1);
-
-        //Slave 2
-        auto val_0_haddr_geq_slave2_start = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),">=",SLAVE2_START);
-        auto val_1_haddr_geq_slave2_start = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),">=",SLAVE2_START);
-        auto val_2_haddr_geq_slave2_start = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),">=",SLAVE2_START);
-        auto val_3_haddr_geq_slave2_start = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),">=",SLAVE2_START);
-
-        auto val_0_haddr_lt_slave2_end = new Relational(new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("haddr")),"<",SLAVE2_END);
-        auto val_1_haddr_lt_slave2_end = new Relational(new DataSignalOperand(bus_req_master_1->getDataSignal()->getSubVar("haddr")),"<",SLAVE2_END);
-        auto val_2_haddr_lt_slave2_end = new Relational(new DataSignalOperand(bus_req_master_2->getDataSignal()->getSubVar("haddr")),"<",SLAVE2_END);
-        auto val_3_haddr_lt_slave2_end = new Relational(new DataSignalOperand(bus_req_master_3->getDataSignal()->getSubVar("haddr")),"<",SLAVE2_END);
-
-        auto val_0_slave2 = new Logical(val_0_haddr_geq_slave2_start,"and",val_0_haddr_lt_slave2_end);
-        auto val_1_slave2 = new Logical(val_1_haddr_geq_slave2_start,"and",val_1_haddr_lt_slave2_end);
-        auto val_2_slave2 = new Logical(val_2_haddr_geq_slave2_start,"and",val_2_haddr_lt_slave2_end);
-        auto val_3_slave2 = new Logical(val_3_haddr_geq_slave2_start,"and",val_3_haddr_lt_slave2_end);
-
-        auto if_val_0_slave_2 = new If(val_0_slave2);
-        auto if_val_1_slave_2 = new If(val_1_slave2);
-        auto if_val_2_slave_2 = new If(val_2_slave2);
-        auto if_val_3_slave_2 = new If(val_3_slave2);
-
         //Assign slave_id
         auto slave_id_assign_0 = new Assignment(new VariableOperand(slave_id),new UnsignedValue(0));
         auto slave_id_assign_1 = new Assignment(new VariableOperand(slave_id),new UnsignedValue(1));
-        auto slave_id_assign_2 = new Assignment(new VariableOperand(slave_id),new UnsignedValue(2));
-        auto slave_id_assign_3 = new Assignment(new VariableOperand(slave_id),new UnsignedValue(3));
 
         //req.hwdata=val.hwdata
         auto req_assign_val0_hwdata = new Assignment(new VariableOperand(req->getSubVar("hwdata")),new DataSignalOperand(bus_req_master_0->getDataSignal()->getSubVar("hwdata")));
@@ -681,25 +614,17 @@ public:
         //if(slave_id==id)
         auto slave_id_eq_0 = new Relational(new VariableOperand(slave_id),"==",new UnsignedValue(0));
         auto slave_id_eq_1 = new Relational(new VariableOperand(slave_id),"==",new UnsignedValue(1));
-        auto slave_id_eq_2 = new Relational(new VariableOperand(slave_id),"==",new UnsignedValue(2));
-        auto slave_id_eq_3 = new Relational(new VariableOperand(slave_id),"==",new UnsignedValue(3));
 
         auto if_slave_id_eq_0 = new If(slave_id_eq_0);
         auto if_slave_id_eq_1 = new If(slave_id_eq_1);
-        auto if_slave_id_eq_2 = new If(slave_id_eq_2);
-        auto if_slave_id_eq_3 = new If(slave_id_eq_3);
 
         //out.hwdata = req.hwdata
         auto out_0_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_0->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
         auto out_1_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_1->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
-        auto out_2_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_2->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
-        auto out_3_assign_req_hwdata = new Assignment(new DataSignalOperand(bus_req_slave_3->getDataSignal()->getSubVar("hwdata")),new VariableOperand(req->getSubVar("hwdata")));
 
         //out.haddr = req.haddr
         auto out_0_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_0->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
         auto out_1_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_1->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
-        auto out_2_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_2->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
-        auto out_3_assign_req_haddr = new Assignment(new DataSignalOperand(bus_req_slave_3->getDataSignal()->getSubVar("haddr")),new VariableOperand(req->getSubVar("haddr")));
 
         //state = SLAVE_RESP
         auto state_assign_SLAVE_RESP = new Assignment(new VariableOperand(state),new EnumValue("SLAVE_RESP",states));
@@ -729,14 +654,10 @@ public:
         //resp.hrdata = val.hrdata
         auto resp_assign_val_0_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_0->getDataSignal()->getSubVar("hrdata")));
         auto resp_assign_val_1_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_1->getDataSignal()->getSubVar("hrdata")));
-        auto resp_assign_val_2_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_2->getDataSignal()->getSubVar("hrdata")));
-        auto resp_assign_val_3_hrdata = new Assignment(new VariableOperand(resp->getSubVar("hrdata")),new DataSignalOperand(bus_resp_slave_3->getDataSignal()->getSubVar("hrdata")));
 
         //resp.hresp = val.hresp
         auto resp_assign_val_0_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_0->getDataSignal()->getSubVar("hresp")));
         auto resp_assign_val_1_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_1->getDataSignal()->getSubVar("hresp")));
-        auto resp_assign_val_2_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_2->getDataSignal()->getSubVar("hresp")));
-        auto resp_assign_val_3_hresp = new Assignment( new VariableOperand(resp->getSubVar("hresp")),new DataSignalOperand(bus_resp_slave_3->getDataSignal()->getSubVar("hresp")));
 
         //state = MASTER_RESP
         auto state_assign_MASTER_RESP = new Assignment(new VariableOperand(state),new EnumValue("MASTER_RESP",states));
@@ -770,11 +691,7 @@ public:
         auto set_master_id_master0 = new CfgNode(master_id_assign_0);
         auto check_addr_slave0_master0 = new CfgNode(if_val_0_slave_0);
         auto set_slave_id_0_master0 = new CfgNode(slave_id_assign_0);
-        auto check_addr_slave1_master0 = new CfgNode(if_val_0_slave_1);
         auto set_slave_id_1_master0 = new CfgNode(slave_id_assign_1);
-        auto check_addr_slave2_master0 = new CfgNode(if_val_0_slave_2);
-        auto set_slave_id_2_master0 = new CfgNode(slave_id_assign_2);
-        auto set_slave_id_3_master0 = new CfgNode(slave_id_assign_3);
         auto set_req_hwdata_master0 = new CfgNode(req_assign_val0_hwdata);
         auto set_req_haddr_master0 = new CfgNode(req_assign_val0_haddr);
         auto notify_dummy_master0 = new CfgNode(master_dummy_notify);
@@ -802,11 +719,7 @@ public:
         controlFlowMapAccessBus0.insert(std::make_pair(set_master_id_master0->getId(),set_master_id_master0));
         controlFlowMapAccessBus0.insert(std::make_pair(check_addr_slave0_master0->getId(),check_addr_slave0_master0));
         controlFlowMapAccessBus0.insert(std::make_pair(set_slave_id_0_master0->getId(),set_slave_id_0_master0));
-        controlFlowMapAccessBus0.insert(std::make_pair(check_addr_slave1_master0->getId(),check_addr_slave1_master0));
         controlFlowMapAccessBus0.insert(std::make_pair(set_slave_id_1_master0->getId(),set_slave_id_1_master0));
-        controlFlowMapAccessBus0.insert(std::make_pair(check_addr_slave2_master0->getId(),check_addr_slave2_master0));
-        controlFlowMapAccessBus0.insert(std::make_pair(set_slave_id_2_master0->getId(),set_slave_id_2_master0));
-        controlFlowMapAccessBus0.insert(std::make_pair(set_slave_id_3_master0->getId(),set_slave_id_3_master0));
         controlFlowMapAccessBus0.insert(std::make_pair(set_req_hwdata_master0->getId(),set_req_hwdata_master0));
         controlFlowMapAccessBus0.insert(std::make_pair(set_req_haddr_master0->getId(),set_req_haddr_master0));
         controlFlowMapAccessBus0.insert(std::make_pair(notify_dummy_master0->getId(),notify_dummy_master0));
@@ -835,15 +748,9 @@ public:
         check_master_id_master0->addSuccessor(wait_master_read_master0);
         set_master_id_master0->addSuccessor(check_addr_slave0_master0);
         check_addr_slave0_master0->addSuccessor(set_slave_id_0_master0);
-        check_addr_slave0_master0->addSuccessor(check_addr_slave1_master0);
+        check_addr_slave0_master0->addSuccessor(set_slave_id_1_master0);
         set_slave_id_0_master0->addSuccessor(set_req_hwdata_master0);
-        check_addr_slave1_master0->addSuccessor(set_slave_id_1_master0);
-        check_addr_slave1_master0->addSuccessor(check_addr_slave2_master0);
         set_slave_id_1_master0->addSuccessor(set_req_hwdata_master0);
-        check_addr_slave2_master0->addSuccessor(set_slave_id_2_master0);
-        check_addr_slave2_master0->addSuccessor(set_slave_id_3_master0);
-        set_slave_id_2_master0->addSuccessor(set_req_hwdata_master0);
-        set_slave_id_3_master0->addSuccessor(set_req_hwdata_master0);
         set_req_hwdata_master0->addSuccessor(set_req_haddr_master0);
         set_req_haddr_master0->addSuccessor(notify_dummy_master0);
         notify_dummy_master0->addSuccessor(wait_dummy_master0);
@@ -870,11 +777,7 @@ public:
         auto set_master_id_master1 = new CfgNode(master_id_assign_1);
         auto check_addr_slave0_master1 = new CfgNode(if_val_1_slave_0);
         auto set_slave_id_0_master1 = new CfgNode(slave_id_assign_0);
-        auto check_addr_slave1_master1 = new CfgNode(if_val_1_slave_1);
         auto set_slave_id_1_master1 = new CfgNode(slave_id_assign_1);
-        auto check_addr_slave2_master1 = new CfgNode(if_val_1_slave_2);
-        auto set_slave_id_2_master1 = new CfgNode(slave_id_assign_2);
-        auto set_slave_id_3_master1 = new CfgNode(slave_id_assign_3);
         auto set_req_hwdata_master1 = new CfgNode(req_assign_val1_hwdata);
         auto set_req_haddr_master1 = new CfgNode(req_assign_val1_haddr);
         auto notify_dummy_master1 = new CfgNode(master_dummy_notify);
@@ -902,11 +805,7 @@ public:
         controlFlowMapAccessBus1.insert(std::make_pair(set_master_id_master1->getId(),set_master_id_master1));
         controlFlowMapAccessBus1.insert(std::make_pair(check_addr_slave0_master1->getId(),check_addr_slave0_master1));
         controlFlowMapAccessBus1.insert(std::make_pair(set_slave_id_0_master1->getId(),set_slave_id_0_master1));
-        controlFlowMapAccessBus1.insert(std::make_pair(check_addr_slave1_master1->getId(),check_addr_slave1_master1));
         controlFlowMapAccessBus1.insert(std::make_pair(set_slave_id_1_master1->getId(),set_slave_id_1_master1));
-        controlFlowMapAccessBus1.insert(std::make_pair(check_addr_slave2_master1->getId(),check_addr_slave2_master1));
-        controlFlowMapAccessBus1.insert(std::make_pair(set_slave_id_2_master1->getId(),set_slave_id_2_master1));
-        controlFlowMapAccessBus1.insert(std::make_pair(set_slave_id_3_master1->getId(),set_slave_id_3_master1));
         controlFlowMapAccessBus1.insert(std::make_pair(set_req_hwdata_master1->getId(),set_req_hwdata_master1));
         controlFlowMapAccessBus1.insert(std::make_pair(set_req_haddr_master1->getId(),set_req_haddr_master1));
         controlFlowMapAccessBus1.insert(std::make_pair(notify_dummy_master1->getId(),notify_dummy_master1));
@@ -935,15 +834,9 @@ public:
         check_master_id_master1->addSuccessor(wait_master_read_master1);
         set_master_id_master1->addSuccessor(check_addr_slave0_master1);
         check_addr_slave0_master1->addSuccessor(set_slave_id_0_master1);
-        check_addr_slave0_master1->addSuccessor(check_addr_slave1_master1);
+        check_addr_slave0_master1->addSuccessor(set_slave_id_1_master1);
         set_slave_id_0_master1->addSuccessor(set_req_hwdata_master1);
-        check_addr_slave1_master1->addSuccessor(set_slave_id_1_master1);
-        check_addr_slave1_master1->addSuccessor(check_addr_slave2_master1);
         set_slave_id_1_master1->addSuccessor(set_req_hwdata_master1);
-        check_addr_slave2_master1->addSuccessor(set_slave_id_2_master1);
-        check_addr_slave2_master1->addSuccessor(set_slave_id_3_master1);
-        set_slave_id_2_master1->addSuccessor(set_req_hwdata_master1);
-        set_slave_id_3_master1->addSuccessor(set_req_hwdata_master1);
         set_req_hwdata_master1->addSuccessor(set_req_haddr_master1);
         set_req_haddr_master1->addSuccessor(notify_dummy_master1);
         notify_dummy_master1->addSuccessor(wait_dummy_master1);
@@ -970,11 +863,7 @@ public:
         auto set_master_id_master2 = new CfgNode(master_id_assign_2);
         auto check_addr_slave0_master2 = new CfgNode(if_val_2_slave_0);
         auto set_slave_id_0_master2 = new CfgNode(slave_id_assign_0);
-        auto check_addr_slave1_master2 = new CfgNode(if_val_2_slave_1);
         auto set_slave_id_1_master2 = new CfgNode(slave_id_assign_1);
-        auto check_addr_slave2_master2 = new CfgNode(if_val_2_slave_2);
-        auto set_slave_id_2_master2 = new CfgNode(slave_id_assign_2);
-        auto set_slave_id_3_master2 = new CfgNode(slave_id_assign_3);
         auto set_req_hwdata_master2 = new CfgNode(req_assign_val2_hwdata);
         auto set_req_haddr_master2 = new CfgNode(req_assign_val2_haddr);
         auto notify_dummy_master2 = new CfgNode(master_dummy_notify);
@@ -1002,11 +891,7 @@ public:
         controlFlowMapAccessBus2.insert(std::make_pair(set_master_id_master2->getId(),set_master_id_master2));
         controlFlowMapAccessBus2.insert(std::make_pair(check_addr_slave0_master2->getId(),check_addr_slave0_master2));
         controlFlowMapAccessBus2.insert(std::make_pair(set_slave_id_0_master2->getId(),set_slave_id_0_master2));
-        controlFlowMapAccessBus2.insert(std::make_pair(check_addr_slave1_master2->getId(),check_addr_slave1_master2));
         controlFlowMapAccessBus2.insert(std::make_pair(set_slave_id_1_master2->getId(),set_slave_id_1_master2));
-        controlFlowMapAccessBus2.insert(std::make_pair(check_addr_slave2_master2->getId(),check_addr_slave2_master2));
-        controlFlowMapAccessBus2.insert(std::make_pair(set_slave_id_2_master2->getId(),set_slave_id_2_master2));
-        controlFlowMapAccessBus2.insert(std::make_pair(set_slave_id_3_master2->getId(),set_slave_id_3_master2));
         controlFlowMapAccessBus2.insert(std::make_pair(set_req_hwdata_master2->getId(),set_req_hwdata_master2));
         controlFlowMapAccessBus2.insert(std::make_pair(set_req_haddr_master2->getId(),set_req_haddr_master2));
         controlFlowMapAccessBus2.insert(std::make_pair(notify_dummy_master2->getId(),notify_dummy_master2));
@@ -1035,15 +920,9 @@ public:
         check_master_id_master2->addSuccessor(wait_master_read_master2);
         set_master_id_master2->addSuccessor(check_addr_slave0_master2);
         check_addr_slave0_master2->addSuccessor(set_slave_id_0_master2);
-        check_addr_slave0_master2->addSuccessor(check_addr_slave1_master2);
+        check_addr_slave0_master2->addSuccessor(set_slave_id_1_master2);
         set_slave_id_0_master2->addSuccessor(set_req_hwdata_master2);
-        check_addr_slave1_master2->addSuccessor(set_slave_id_1_master2);
-        check_addr_slave1_master2->addSuccessor(check_addr_slave2_master2);
         set_slave_id_1_master2->addSuccessor(set_req_hwdata_master2);
-        check_addr_slave2_master2->addSuccessor(set_slave_id_2_master2);
-        check_addr_slave2_master2->addSuccessor(set_slave_id_3_master2);
-        set_slave_id_2_master2->addSuccessor(set_req_hwdata_master2);
-        set_slave_id_3_master2->addSuccessor(set_req_hwdata_master2);
         set_req_hwdata_master2->addSuccessor(set_req_haddr_master2);
         set_req_haddr_master2->addSuccessor(notify_dummy_master2);
         notify_dummy_master2->addSuccessor(wait_dummy_master2);
@@ -1070,11 +949,7 @@ public:
         auto set_master_id_master3 = new CfgNode(master_id_assign_3);
         auto check_addr_slave0_master3 = new CfgNode(if_val_3_slave_0);
         auto set_slave_id_0_master3 = new CfgNode(slave_id_assign_0);
-        auto check_addr_slave1_master3 = new CfgNode(if_val_3_slave_1);
         auto set_slave_id_1_master3 = new CfgNode(slave_id_assign_1);
-        auto check_addr_slave2_master3 = new CfgNode(if_val_3_slave_2);
-        auto set_slave_id_2_master3 = new CfgNode(slave_id_assign_2);
-        auto set_slave_id_3_master3 = new CfgNode(slave_id_assign_3);
         auto set_req_hwdata_master3 = new CfgNode(req_assign_val3_hwdata);
         auto set_req_haddr_master3 = new CfgNode(req_assign_val3_haddr);
         auto notify_dummy_master3 = new CfgNode(master_dummy_notify);
@@ -1102,11 +977,7 @@ public:
         controlFlowMapAccessBus3.insert(std::make_pair(set_master_id_master3->getId(),set_master_id_master3));
         controlFlowMapAccessBus3.insert(std::make_pair(check_addr_slave0_master3->getId(),check_addr_slave0_master3));
         controlFlowMapAccessBus3.insert(std::make_pair(set_slave_id_0_master3->getId(),set_slave_id_0_master3));
-        controlFlowMapAccessBus3.insert(std::make_pair(check_addr_slave1_master3->getId(),check_addr_slave1_master3));
         controlFlowMapAccessBus3.insert(std::make_pair(set_slave_id_1_master3->getId(),set_slave_id_1_master3));
-        controlFlowMapAccessBus3.insert(std::make_pair(check_addr_slave2_master3->getId(),check_addr_slave2_master3));
-        controlFlowMapAccessBus3.insert(std::make_pair(set_slave_id_2_master3->getId(),set_slave_id_2_master3));
-        controlFlowMapAccessBus3.insert(std::make_pair(set_slave_id_3_master3->getId(),set_slave_id_3_master3));
         controlFlowMapAccessBus3.insert(std::make_pair(set_req_hwdata_master3->getId(),set_req_hwdata_master3));
         controlFlowMapAccessBus3.insert(std::make_pair(set_req_haddr_master3->getId(),set_req_haddr_master3));
         controlFlowMapAccessBus3.insert(std::make_pair(notify_dummy_master3->getId(),notify_dummy_master3));
@@ -1135,15 +1006,9 @@ public:
         check_master_id_master3->addSuccessor(wait_master_read_master3);
         set_master_id_master3->addSuccessor(check_addr_slave0_master3);
         check_addr_slave0_master3->addSuccessor(set_slave_id_0_master3);
-        check_addr_slave0_master3->addSuccessor(check_addr_slave1_master3);
+        check_addr_slave0_master3->addSuccessor(set_slave_id_1_master3);
         set_slave_id_0_master3->addSuccessor(set_req_hwdata_master3);
-        check_addr_slave1_master3->addSuccessor(set_slave_id_1_master3);
-        check_addr_slave1_master3->addSuccessor(check_addr_slave2_master3);
         set_slave_id_1_master3->addSuccessor(set_req_hwdata_master3);
-        check_addr_slave2_master3->addSuccessor(set_slave_id_2_master3);
-        check_addr_slave2_master3->addSuccessor(set_slave_id_3_master3);
-        set_slave_id_2_master3->addSuccessor(set_req_hwdata_master3);
-        set_slave_id_3_master3->addSuccessor(set_req_hwdata_master3);
         set_req_hwdata_master3->addSuccessor(set_req_haddr_master3);
         set_req_haddr_master3->addSuccessor(notify_dummy_master3);
         notify_dummy_master3->addSuccessor(wait_dummy_master3);
@@ -1229,74 +1094,6 @@ public:
         notify_slave_read_slave1->addSuccessor(return_read_slave_slave1);
         wait_master_write_slave1->addSuccessor(check_slave_id_slave1);
 
-        //CFG Slave Read 2
-        auto check_state_SLAVE_REQ_slave2 = new CfgNode(if_state_neq_SLAVE_REQ);
-        auto wait_for_write_slave2 = new CfgNode(wait_master_write_notify);
-        auto check_slave_id_slave2 = new CfgNode(if_slave_id_eq_2);
-        auto set_out_hwdata_slave2 = new CfgNode(out_2_assign_req_hwdata);
-        auto set_out_haddr_slave2 = new CfgNode(out_2_assign_req_haddr);
-        auto set_state_SLAVE_RESP_slave2 = new CfgNode(state_assign_SLAVE_RESP);
-        auto notify_slave_read_slave2 = new CfgNode(slave_read_notify);
-        auto return_read_slave_slave2 = new CfgNode(ret_read_slave);
-        auto wait_master_write_slave2 = new CfgNode(wait_master_write_notify);
-
-        //Add Nodes to ControlFlowMap
-        controlFlowMapSlaveRead2.insert(std::make_pair(check_state_SLAVE_REQ_slave2->getId(),check_state_SLAVE_REQ_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(wait_for_write_slave2->getId(),wait_for_write_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(check_slave_id_slave2->getId(),check_slave_id_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(set_out_hwdata_slave2->getId(),set_out_hwdata_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(set_out_haddr_slave2->getId(),set_out_haddr_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(set_state_SLAVE_RESP_slave2->getId(),set_state_SLAVE_RESP_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(notify_slave_read_slave2->getId(),notify_slave_read_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(return_read_slave_slave2->getId(),return_read_slave_slave2));
-        controlFlowMapSlaveRead2.insert(std::make_pair(wait_master_write_slave2->getId(),wait_master_write_slave2));
-
-        //Link Nodes
-        check_state_SLAVE_REQ_slave2->addSuccessor(wait_for_write_slave2);
-        check_state_SLAVE_REQ_slave2->addSuccessor(check_slave_id_slave2);
-        wait_for_write_slave2->addSuccessor(check_slave_id_slave2);
-        check_slave_id_slave2->addSuccessor(set_out_hwdata_slave2);
-        check_slave_id_slave2->addSuccessor(wait_master_write_slave2);
-        set_out_hwdata_slave2->addSuccessor(set_out_haddr_slave2);
-        set_out_haddr_slave2->addSuccessor(set_state_SLAVE_RESP_slave2);
-        set_state_SLAVE_RESP_slave2->addSuccessor(notify_slave_read_slave2);
-        notify_slave_read_slave2->addSuccessor(return_read_slave_slave2);
-        wait_master_write_slave2->addSuccessor(check_slave_id_slave2);
-
-        //CFG Slave Read 3
-        auto check_state_SLAVE_REQ_slave3 = new CfgNode(if_state_neq_SLAVE_REQ);
-        auto wait_for_write_slave3 = new CfgNode(wait_master_write_notify);
-        auto check_slave_id_slave3 = new CfgNode(if_slave_id_eq_3);
-        auto set_out_hwdata_slave3 = new CfgNode(out_3_assign_req_hwdata);
-        auto set_out_haddr_slave3 = new CfgNode(out_3_assign_req_haddr);
-        auto set_state_SLAVE_RESP_slave3 = new CfgNode(state_assign_SLAVE_RESP);
-        auto notify_slave_read_slave3 = new CfgNode(slave_read_notify);
-        auto return_read_slave_slave3 = new CfgNode(ret_read_slave);
-        auto wait_master_write_slave3 = new CfgNode(wait_master_write_notify);
-
-        //Add Nodes to ControlFlowMap
-        controlFlowMapSlaveRead3.insert(std::make_pair(check_state_SLAVE_REQ_slave3->getId(),check_state_SLAVE_REQ_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(wait_for_write_slave3->getId(),wait_for_write_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(check_slave_id_slave3->getId(),check_slave_id_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(set_out_hwdata_slave3->getId(),set_out_hwdata_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(set_out_haddr_slave3->getId(),set_out_haddr_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(set_state_SLAVE_RESP_slave3->getId(),set_state_SLAVE_RESP_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(notify_slave_read_slave3->getId(),notify_slave_read_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(return_read_slave_slave3->getId(),return_read_slave_slave3));
-        controlFlowMapSlaveRead3.insert(std::make_pair(wait_master_write_slave3->getId(),wait_master_write_slave3));
-
-        //Link Nodes
-        check_state_SLAVE_REQ_slave3->addSuccessor(wait_for_write_slave3);
-        check_state_SLAVE_REQ_slave3->addSuccessor(check_slave_id_slave3);
-        wait_for_write_slave3->addSuccessor(check_slave_id_slave3);
-        check_slave_id_slave3->addSuccessor(set_out_hwdata_slave3);
-        check_slave_id_slave3->addSuccessor(wait_master_write_slave3);
-        set_out_hwdata_slave3->addSuccessor(set_out_haddr_slave3);
-        set_out_haddr_slave3->addSuccessor(set_state_SLAVE_RESP_slave3);
-        set_state_SLAVE_RESP_slave3->addSuccessor(notify_slave_read_slave3);
-        notify_slave_read_slave3->addSuccessor(return_read_slave_slave3);
-        wait_master_write_slave3->addSuccessor(check_slave_id_slave3);
-
         //CFG Slave Write 0
         auto check_state_SLAVE_RESP_slave0 = new CfgNode(if_state_neq_SLAVE_RESP);
         auto wait_for_read_slave0 = new CfgNode(wait_slave_read_notify);
@@ -1365,74 +1162,6 @@ public:
         notify_slave_write_slave1->addSuccessor(return_write_slave_slave1);
         wait_slave_read_slave1->addSuccessor(check_slave_id_write_slave1);
 
-        //CFG Slave Write 2
-        auto check_state_SLAVE_RESP_slave2 = new CfgNode(if_state_neq_SLAVE_RESP);
-        auto wait_for_read_slave2 = new CfgNode(wait_slave_read_notify);
-        auto check_slave_id_write_slave2 = new CfgNode(if_slave_id_eq_2);
-        auto set_resp_hrdata_slave2 = new CfgNode(resp_assign_val_2_hrdata);
-        auto set_resp_hresp_slave2 = new CfgNode(resp_assign_val_2_hresp);
-        auto set_state_MASTER_RESP_slave2 = new CfgNode(state_assign_MASTER_RESP);
-        auto notify_slave_write_slave2 = new CfgNode(slave_write_notify);
-        auto return_write_slave_slave2 = new CfgNode(ret_write_slave);
-        auto wait_slave_read_slave2 = new CfgNode(wait_slave_read_notify);
-
-        //Add Nodes to ControlFlowMap
-        controlFlowMapSlaveWrite2.insert(std::make_pair(check_state_SLAVE_RESP_slave2->getId(),check_state_SLAVE_RESP_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(wait_for_read_slave2->getId(),wait_for_read_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(check_slave_id_write_slave2->getId(),check_slave_id_write_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(set_resp_hrdata_slave2->getId(),set_resp_hrdata_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(set_resp_hresp_slave2->getId(),set_resp_hresp_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(set_state_MASTER_RESP_slave2->getId(),set_state_MASTER_RESP_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(notify_slave_write_slave2->getId(),notify_slave_write_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(return_write_slave_slave2->getId(),return_write_slave_slave2));
-        controlFlowMapSlaveWrite2.insert(std::make_pair(wait_slave_read_slave2->getId(),wait_slave_read_slave2));
-
-        //Link Nodes
-        check_state_SLAVE_RESP_slave2->addSuccessor(wait_for_read_slave2);
-        check_state_SLAVE_RESP_slave2->addSuccessor(check_slave_id_write_slave2);
-        wait_for_read_slave2->addSuccessor(check_slave_id_write_slave2);
-        check_slave_id_write_slave2->addSuccessor(set_resp_hrdata_slave2);
-        check_slave_id_write_slave2->addSuccessor(wait_slave_read_slave2);
-        set_resp_hrdata_slave2->addSuccessor(set_resp_hresp_slave2);
-        set_resp_hresp_slave2->addSuccessor(set_state_MASTER_RESP_slave2);
-        set_state_MASTER_RESP_slave2->addSuccessor(notify_slave_write_slave2);
-        notify_slave_write_slave2->addSuccessor(return_write_slave_slave2);
-        wait_slave_read_slave2->addSuccessor(check_slave_id_write_slave2);
-
-        //CFG Slave Write 3
-        auto check_state_SLAVE_RESP_slave3 = new CfgNode(if_state_neq_SLAVE_RESP);
-        auto wait_for_read_slave3 = new CfgNode(wait_slave_read_notify);
-        auto check_slave_id_write_slave3 = new CfgNode(if_slave_id_eq_3);
-        auto set_resp_hrdata_slave3 = new CfgNode(resp_assign_val_3_hrdata);
-        auto set_resp_hresp_slave3 = new CfgNode(resp_assign_val_3_hresp);
-        auto set_state_MASTER_RESP_slave3 = new CfgNode(state_assign_MASTER_RESP);
-        auto notify_slave_write_slave3 = new CfgNode(slave_write_notify);
-        auto return_write_slave_slave3 = new CfgNode(ret_write_slave);
-        auto wait_slave_read_slave3 = new CfgNode(wait_slave_read_notify);
-
-        //Add Nodes to ControlFlowMap
-        controlFlowMapSlaveWrite3.insert(std::make_pair(check_state_SLAVE_RESP_slave3->getId(),check_state_SLAVE_RESP_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(wait_for_read_slave3->getId(),wait_for_read_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(check_slave_id_write_slave3->getId(),check_slave_id_write_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(set_resp_hrdata_slave3->getId(),set_resp_hrdata_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(set_resp_hresp_slave3->getId(),set_resp_hresp_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(set_state_MASTER_RESP_slave3->getId(),set_state_MASTER_RESP_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(notify_slave_write_slave3->getId(),notify_slave_write_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(return_write_slave_slave3->getId(),return_write_slave_slave3));
-        controlFlowMapSlaveWrite3.insert(std::make_pair(wait_slave_read_slave3->getId(),wait_slave_read_slave3));
-
-        //Link Nodes
-        check_state_SLAVE_RESP_slave3->addSuccessor(wait_for_read_slave3);
-        check_state_SLAVE_RESP_slave3->addSuccessor(check_slave_id_write_slave3);
-        wait_for_read_slave3->addSuccessor(check_slave_id_write_slave3);
-        check_slave_id_write_slave3->addSuccessor(set_resp_hrdata_slave3);
-        check_slave_id_write_slave3->addSuccessor(wait_slave_read_slave3);
-        set_resp_hrdata_slave3->addSuccessor(set_resp_hresp_slave3);
-        set_resp_hresp_slave3->addSuccessor(set_state_MASTER_RESP_slave3);
-        set_state_MASTER_RESP_slave3->addSuccessor(notify_slave_write_slave3);
-        notify_slave_write_slave3->addSuccessor(return_write_slave_slave3);
-        wait_slave_read_slave3->addSuccessor(check_slave_id_write_slave3);
-
         //CFG DummyFunc
         auto set_fromReset = new CfgNode(fromReset_assign_false);
         auto notify_dummy_master = new CfgNode(dummy_master_notify);
@@ -1467,22 +1196,10 @@ public:
         for(auto node: controlFlowMapSlaveRead1){
             controlFlowMap.insert(std::make_pair(node.first,node.second));
         }
-        for(auto node: controlFlowMapSlaveRead2){
-            controlFlowMap.insert(std::make_pair(node.first,node.second));
-        }
-        for(auto node: controlFlowMapSlaveRead3){
-            controlFlowMap.insert(std::make_pair(node.first,node.second));
-        }
         for(auto node: controlFlowMapSlaveWrite0){
             controlFlowMap.insert(std::make_pair(node.first,node.second));
         }
         for(auto node: controlFlowMapSlaveWrite1){
-            controlFlowMap.insert(std::make_pair(node.first,node.second));
-        }
-        for(auto node: controlFlowMapSlaveWrite2){
-            controlFlowMap.insert(std::make_pair(node.first,node.second));
-        }
-        for(auto node: controlFlowMapSlaveWrite3){
             controlFlowMap.insert(std::make_pair(node.first,node.second));
         }
         for(auto node: controlFlowMapDummy){
@@ -1497,14 +1214,10 @@ public:
         //Print CFG for SlaveRead
         std::cout << printCFG(controlFlowMapSlaveRead0) << std::endl;
         std::cout << printCFG(controlFlowMapSlaveRead1) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveRead2) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveRead3) << std::endl;
 
         //Print CFG for SlaveWrite
         std::cout << printCFG(controlFlowMapSlaveWrite0) << std::endl;
         std::cout << printCFG(controlFlowMapSlaveWrite1) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveWrite2) << std::endl;
-        std::cout << printCFG(controlFlowMapSlaveWrite3) << std::endl;
 
         //Print CFG Dummy
         std::cout << printCFG(controlFlowMapDummy) << std::endl;
@@ -1528,52 +1241,36 @@ public:
         eventID temp;
         temp = {3,"master0_access_bus_sync"};
         startnodes.push_back(temp);
-        temp = {32,"master1_access_bus_sync"};
+        temp = {28,"master1_access_bus_sync"};
         startnodes.push_back(temp);
-        temp = {61,"master2_access_bus_sync"};
+        temp = {53,"master2_access_bus_sync"};
         startnodes.push_back(temp);
-        temp = {90,"master3_access_bus_sync"};
+        temp = {78,"master3_access_bus_sync"};
         startnodes.push_back(temp);
-        temp = {119,"slave0_read_sync"};
+        temp = {103,"slave0_read_sync"};
         startnodes.push_back(temp);
-        temp = {128,"slave1_read_sync"};
+        temp = {112,"slave1_read_sync"};
         startnodes.push_back(temp);
-        temp = {137,"slave2_read_sync"};
+        temp = {121,"slave0_write_sync"};
         startnodes.push_back(temp);
-        temp = {146,"slave3_read_sync"};
-        startnodes.push_back(temp);
-        temp = {155,"slave0_write_sync"};
-        startnodes.push_back(temp);
-        temp = {164,"slave1_write_sync"};
-        startnodes.push_back(temp);
-        temp = {173,"slave2_write_sync"};
-        startnodes.push_back(temp);
-        temp = {182,"slave3_write_sync"};
+        temp = {130,"slave1_write_sync"};
         startnodes.push_back(temp);
 
-        temp = {30,"master0_access_bus_notify"};
+        temp = {26,"master0_access_bus_notify"};
         endnodes.push_back(temp);
-        temp = {59,"master1_access_bus_notify"};
+        temp = {51,"master1_access_bus_notify"};
         endnodes.push_back(temp);
-        temp = {88,"master2_access_bus_notify"};
+        temp = {76,"master2_access_bus_notify"};
         endnodes.push_back(temp);
-        temp = {117,"master3_access_bus_notify"};
+        temp = {101,"master3_access_bus_notify"};
         endnodes.push_back(temp);
-        temp = {126,"slave0_read_notify"};
+        temp = {110,"slave0_read_notify"};
         endnodes.push_back(temp);
-        temp = {135,"slave1_read_notify"};
+        temp = {119,"slave1_read_notify"};
         endnodes.push_back(temp);
-        temp = {144,"slave2_read_notify"};
+        temp = {128,"slave0_write_notify"};
         endnodes.push_back(temp);
-        temp = {153,"slave3_read_notify"};
-        endnodes.push_back(temp);
-        temp = {162,"slave0_write_notify"};
-        endnodes.push_back(temp);
-        temp = {171,"slave1_write_notify"};
-        endnodes.push_back(temp);
-        temp = {180,"slave2_write_notify"};
-        endnodes.push_back(temp);
-        temp = {189,"slave3_write_notify"};
+        temp = {137,"slave1_write_notify"};
         endnodes.push_back(temp);
 
         //Define portnames for notify and sync signals
@@ -1583,12 +1280,8 @@ public:
         portnames.push_back("val_master_3");
         portnames.push_back("out_slave_0");
         portnames.push_back("out_slave_1");
-        portnames.push_back("out_slave_2");
-        portnames.push_back("out_slave_3");
         portnames.push_back("val_slave_0");
         portnames.push_back("val_slave_1");
-        portnames.push_back("val_slave_2");
-        portnames.push_back("val_slave_3");
     }
 
     virtual void TearDown() {}
@@ -1662,28 +1355,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
         findPathsfromNode(node.second,&pathsSlaveRead1,&pathsSlaveRead1IDs);
     }
 
-    //Find important states SlaveRead2
-    std::map<int, CfgNode *> importantStatesSlaveRead2;
-    findImportantStates(controlFlowMapSlaveRead2,&importantStatesSlaveRead2);
-
-    //Find paths SlaveRead2
-    auto start_SlaveRead2 = controlFlowMapSlaveRead2.begin()->second;
-    findPathsfromNode(start_SlaveRead2,&pathsSlaveRead2,&pathsSlaveRead2IDs);
-    for(auto const& node : importantStatesSlaveRead2) {
-        findPathsfromNode(node.second,&pathsSlaveRead2,&pathsSlaveRead2IDs);
-    }
-
-    //Find important states SlaveRead3
-    std::map<int, CfgNode *> importantStatesSlaveRead3;
-    findImportantStates(controlFlowMapSlaveRead3,&importantStatesSlaveRead3);
-
-    //Find paths SlaveRead3
-    auto start_SlaveRead3 = controlFlowMapSlaveRead3.begin()->second;
-    findPathsfromNode(start_SlaveRead3,&pathsSlaveRead3,&pathsSlaveRead3IDs);
-    for(auto const& node : importantStatesSlaveRead3) {
-        findPathsfromNode(node.second,&pathsSlaveRead3,&pathsSlaveRead3IDs);
-    }
-
     //Find important states SlaveWrite0
     std::map<int, CfgNode *> importantStatesSlaveWrite0;
     findImportantStates(controlFlowMapSlaveWrite0,&importantStatesSlaveWrite0);
@@ -1706,28 +1377,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
         findPathsfromNode(node.second,&pathsSlaveWrite1,&pathsSlaveWrite1IDs);
     }
 
-    //Find important states SlaveWrite2
-    std::map<int, CfgNode *> importantStatesSlaveWrite2;
-    findImportantStates(controlFlowMapSlaveWrite2,&importantStatesSlaveWrite2);
-
-    //Find paths SlaveWrite2
-    auto start_SlaveWrite2 = controlFlowMapSlaveWrite2.begin()->second;
-    findPathsfromNode(start_SlaveWrite2,&pathsSlaveWrite2,&pathsSlaveWrite2IDs);
-    for(auto const& node : importantStatesSlaveWrite2) {
-        findPathsfromNode(node.second,&pathsSlaveWrite2,&pathsSlaveWrite2IDs);
-    }
-
-    //Find important states SlaveWrite3
-    std::map<int, CfgNode *> importantStatesSlaveWrite3;
-    findImportantStates(controlFlowMapSlaveWrite3,&importantStatesSlaveWrite3);
-
-    //Find paths SlaveWrite3
-    auto start_SlaveWrite3 = controlFlowMapSlaveWrite3.begin()->second;
-    findPathsfromNode(start_SlaveWrite3,&pathsSlaveWrite3,&pathsSlaveWrite3IDs);
-    for(auto const& node : importantStatesSlaveWrite3) {
-        findPathsfromNode(node.second,&pathsSlaveWrite3,&pathsSlaveWrite3IDs);
-    }
-
     //Find important states Dummy
     std::map<int, CfgNode *> importantStatesDummy;
     findImportantStates(controlFlowMapDummy,&importantStatesDummy);
@@ -1746,18 +1395,14 @@ TEST_F(OperationGraphTest, ExtractPaths){
 
     //Define all possible functions and their starting nodes
     eventID AccessBus0 = {3,"AccessBus0"};
-    eventID AccessBus1 = {32,"AccessBus1"};
-    eventID AccessBus2 = {61,"AccessBus2"};
-    eventID AccessBus3 = {90,"AccessBus3"};
-    eventID SlaveRead0 = {119,"SlaveRead0"};
-    eventID SlaveRead1 = {128,"SlaveRead1"};
-    eventID SlaveRead2 = {137,"SlaveRead2"};
-    eventID SlaveRead3 = {146,"SlaveRead3"};
-    eventID SlaveWrite0 = {155,"SlaveWrite0"};
-    eventID SlaveWrite1 = {164,"SlaveWrite1"};
-    eventID SlaveWrite2 = {173,"SlaveWrite2"};
-    eventID SlaveWrite3 = {182,"SlaveWrite3"};
-    eventID dummy = {191,"dummy"};
+    eventID AccessBus1 = {28,"AccessBus1"};
+    eventID AccessBus2 = {53,"AccessBus2"};
+    eventID AccessBus3 = {78,"AccessBus3"};
+    eventID SlaveRead0 = {103,"SlaveRead0"};
+    eventID SlaveRead1 = {112,"SlaveRead1"};
+    eventID SlaveWrite0 = {121,"SlaveWrite0"};
+    eventID SlaveWrite1 = {130,"SlaveWrite1"};
+    eventID dummy = {139,"dummy"};
 
     //vector of all functions that are always ready to execute
     std::vector<eventID> always_ready;
@@ -1771,12 +1416,8 @@ TEST_F(OperationGraphTest, ExtractPaths){
     functions.push_back(AccessBus3);
     functions.push_back(SlaveRead0);
     functions.push_back(SlaveRead1);
-    functions.push_back(SlaveRead2);
-    functions.push_back(SlaveRead3);
     functions.push_back(SlaveWrite0);
     functions.push_back(SlaveWrite1);
-    functions.push_back(SlaveWrite2);
-    functions.push_back(SlaveWrite3);
 
     //compute all possible permutations and store them in variable permutations
     computePermutations(functions);
@@ -1814,28 +1455,12 @@ TEST_F(OperationGraphTest, ExtractPaths){
         pathIDStmt p = {pathsSlaveRead1IDs.at(i),pathsSlaveRead1.at(i)};
         allPaths.push_back(p);
     }
-    for(int i=0; i<pathsSlaveRead2IDs.size();i++){
-        pathIDStmt p = {pathsSlaveRead2IDs.at(i),pathsSlaveRead2.at(i)};
-        allPaths.push_back(p);
-    }
-    for(int i=0; i<pathsSlaveRead3IDs.size();i++){
-        pathIDStmt p = {pathsSlaveRead3IDs.at(i),pathsSlaveRead3.at(i)};
-        allPaths.push_back(p);
-    }
     for(int i=0; i<pathsSlaveWrite0IDs.size();i++){
         pathIDStmt p = {pathsSlaveWrite0IDs.at(i),pathsSlaveWrite0.at(i)};
         allPaths.push_back(p);
     }
     for(int i=0; i<pathsSlaveWrite1IDs.size();i++){
         pathIDStmt p = {pathsSlaveWrite1IDs.at(i),pathsSlaveWrite1.at(i)};
-        allPaths.push_back(p);
-    }
-    for(int i=0; i<pathsSlaveWrite2IDs.size();i++){
-        pathIDStmt p = {pathsSlaveWrite2IDs.at(i),pathsSlaveWrite2.at(i)};
-        allPaths.push_back(p);
-    }
-    for(int i=0; i<pathsSlaveWrite3IDs.size();i++){
-        pathIDStmt p = {pathsSlaveWrite3IDs.at(i),pathsSlaveWrite3.at(i)};
         allPaths.push_back(p);
     }
     for(int i=0; i<pathsDummyIDs.size();i++){
@@ -1858,7 +1483,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
         combinePaths(readyQueue,blockedFunctions);
         end = std::chrono::steady_clock::now();
         std::cout << "Time needed for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
-        std::cout << operationsFinalOpt.size() << std::endl;
+        std::cout << "Number of operations: " << operationsFinalOpt.size() << std::endl;
         //if(i>2) break;
     }
     std::chrono::steady_clock::time_point end_all = std::chrono::steady_clock::now();
@@ -1910,19 +1535,19 @@ TEST_F(OperationGraphTest, ExtractPaths){
     wait_op->getState()->addOutgoingOperation(wait_op);
     wait_op->getNextState()->addIncomingOperation(wait_op);
 
-    //Debug: Print Assumptions and Commitments for operationsFinalOpt
-    for(auto op: operationsFinalOpt){
-        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
-        for(auto assump: op->getAssumptionsList()){
-            std::cout << *assump << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Commitments Operation" << op->getId() <<std::endl;
-        for(auto commit: op->getCommitmentsList()){
-            std::cout << *commit << std::endl;
-        }
-        std::cout << std::endl;
-    }
+//    //Debug: Print Assumptions and Commitments for operationsFinalOpt
+//    for(auto op: operationsFinalOpt){
+//        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
+//        for(auto assump: op->getAssumptionsList()){
+//            std::cout << *assump << std::endl;
+//        }
+//        std::cout << std::endl;
+//        std::cout << "Commitments Operation" << op->getId() <<std::endl;
+//        for(auto commit: op->getCommitmentsList()){
+//            std::cout << *commit << std::endl;
+//        }
+//        std::cout << std::endl;
+//    }
 
     //Statemap consists of a initial state Init and one state start_state
     std::map<int,State*> stateMap;
