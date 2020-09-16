@@ -51,6 +51,7 @@ namespace DESCAM {
             dataTypeMap.insert(std::make_pair("bool", new DataType("bool")));
             dataTypeMap.insert(std::make_pair("int", new DataType("int")));
             dataTypeMap.insert(std::make_pair("unsigned", new DataType("unsigned")));
+            dataTypeMap.insert(std::make_pair("event", new DataType("event")));
             localDataTypeMap = {};
         };
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.1)
 project(BubbleSort_ESL)
 
 #set(CMAKE_SOURCE_DIR /import/lab/users/jauch/CLionProjects/DeSCAM)

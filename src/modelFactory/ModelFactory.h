@@ -71,7 +71,7 @@ namespace DESCAM {
 
         //Methods
         void HandleTranslationUnit(ASTContext & context) override ;
-
+        void addCustomChannels(clang::TranslationUnitDecl *decl);
         void addModules(clang::TranslationUnitDecl *decl);
         void addGlobalConstants(TranslationUnitDecl *pDecl);
         void addPorts(Module* module,clang::CXXRecordDecl* decl);

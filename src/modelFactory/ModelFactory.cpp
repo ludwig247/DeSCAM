@@ -22,6 +22,7 @@
 #include <PropertyFactory.h>
 #include <FatalError.h>
 #include "DescamException.h"
+#include "FindCustomChannels.h"
 
 
 //Constructor
@@ -52,6 +53,9 @@ bool DESCAM::ModelFactory::fire() {
     //Global variables
     this->addGlobalConstants(tu);
 
+    //Custom channel
+    this->addCustomChannels(tu);
+
     //Modules
     this->addModules(tu);
 
@@ -74,7 +78,6 @@ bool DESCAM::ModelFactory::fire() {
 void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
     FindModules modules(decl);
-
     //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
 
@@ -370,6 +373,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
 
     //Add members to module
     for (auto &&variable: findVariables.getVariableTypeMap()) {
+        std::cout << variable.first << std::endl;
         //Add Variable to Module
         auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
         auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
@@ -415,6 +419,8 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
                     initialValue = new BoolValue(false);
                 } else if (type == DataTypes::getDataType("unsigned")) {
                     DESCAM_ASSERT(initialValue = new UnsignedValue(0))
+                } else if (type == DataTypes::getDataType("event")) {
+                    DESCAM_ASSERT(initialValue = new BoolValue(false))
                 } else if (type->isEnumType()) {
                     DESCAM_ASSERT(initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type))
                 } else TERMINATE("No initialValue for type " + type->getName());
@@ -645,4 +651,32 @@ void DESCAM::ModelFactory::removeUnused() {
             Logger::removeFromTempMap(func.first->getName());
         }
     }
+}
+
+void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
+    //TODO: Find Instances of Channels ... otherwise type and size unknown
+    FindCustomChannels findChannel(decl);
+
+    for(auto channel: findChannel.getChannelMap()){
+        Module * module = new Module(channel.first);
+
+        //Add vars
+        this->addVariables(module,channel.second);
+
+        //name
+        //parameters
+        //CFG
+
+    }
+    /*
+
+    //channel: name, vars, methods(in/out params)
+    // method: name, parameter(in/out), CFG
+
+
+     */
+
+    throw std::runtime_error("stop");
+
+
 }

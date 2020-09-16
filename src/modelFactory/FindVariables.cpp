@@ -49,9 +49,11 @@ bool DESCAM::FindVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
     } else if(fieldDecl->getType()->isConstantArrayType()){
         this->memberMap.insert(std::make_pair(fieldDecl->getName(), fieldDecl));
         this->memberTypeMap.insert(std::make_pair(fieldDecl->getName(), "array"));
+    }else if( fieldDecl->getType().getAsString() == "class sc_core::sc_event"){
+        this->memberMap.insert(std::make_pair(fieldDecl->getName(), fieldDecl));
+        this->memberTypeMap.insert(std::make_pair(fieldDecl->getName(), "event"));
     }
     else{
-
         //TODO: is every fieldDecl catched? -> maybe first store all in a list in work off that list afterwards
     }
     return true;

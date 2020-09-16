@@ -21,24 +21,27 @@ namespace DESCAM {
 
         //Build sub varialbes for complex types
         if (this->isCompoundType()) {
-            if (this->isSubVar()) throw DescamException("in variable '" + getName() +  "', a compound sub-variable is not allowed",locationInfo);
+            if (this->isSubVar()) throw DescamException("in variable '" + getName() + "', a compound sub-variable is not allowed", locationInfo);
             //if (parent == nullptr) TERMINATE("Parent is not supposed to be null");
             //create the subVariables (with default init values)
             for (auto &&subvar : dataType->getSubVarMap()) {
                 subVarList.push_back(new T(subvar.first, subvar.second, subvar.second->getDefaultVal(), (T *) (this)));
             }
         } else if (this->isArrayType()) {
-            if (this->isSubVar()) throw DescamException("in variable '" + getName() +  "', a array sub-variable is not allowed",locationInfo);
+            if (this->isSubVar()) throw DescamException("in variable '" + getName() + "', a array sub-variable is not allowed", locationInfo);
             //if (parent == nullptr) TERMINATE("Parent is not supposed to be null");
             for (int i = 0; i < dataType->getArraySize(); ++i) {
                 subVarList.push_back(new T(std::to_string(i), this->getDataType()->getArrayType(), this->getDataType()->getArrayType()->getDefaultVal(), (T *) (this)));
             }
-        } else if (!this->isBuiltInType() && !this->isEnumType()) throw DescamException("variable '" + getName() + ", with unknown datatype",locationInfo);
+        } else if (!this->isBuiltInType() && !this->isEnumType()) throw DescamException("variable '" + getName() + ", with unknown datatype", locationInfo);
+        else if(this->getName() == "event"){
+
+        }
 
         if (this->initialValue == nullptr) {
             this->initialValue = dataType->getDefaultVal();
         } else
-            assert(dataType == initialValue->getDataType());
+            assert("Unknown datatype" && dataType == initialValue->getDataType());
     }
 
     template<class T>

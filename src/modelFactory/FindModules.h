@@ -17,7 +17,7 @@ namespace DESCAM {
     class FindModules : public clang::RecursiveASTVisitor<FindModules> {
     public:
 
-        FindModules(clang::TranslationUnitDecl *);
+        explicit FindModules(clang::TranslationUnitDecl *);
 
         virtual bool VisitCXXRecordDecl(clang::CXXRecordDecl *);
 

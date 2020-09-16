@@ -77,7 +77,9 @@ namespace DESCAM {
             std::string name = FindNewDatatype::getTypeName(constantArrayType->getElementType());
             std::string size = std::to_string(constantArrayType->getSize().getSExtValue());
             return name + "_" + size;
-        } else TERMINATE("Can't analyze datatype");
+        } else if (type.getAsString() == "class sc_core::sc_event"){
+            return "event";
+        } else TERMINATE("Can't analyze datatype: "+ type.getAsString());
     }
 
     bool FindNewDatatype::isGlobal(const clang::QualType &type) {

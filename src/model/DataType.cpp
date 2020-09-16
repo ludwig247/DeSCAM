@@ -57,6 +57,7 @@ DESCAM::ConstValue *DESCAM::DataType::getDefaultVal() const {
     if (this->getName() == "int") initVal = new IntegerValue(0);
     else if (this->getName() == "bool") initVal = new BoolValue(false);
     else if (this->getName() == "unsigned") initVal = new UnsignedValue(0);
+    else if (this->getName() == "event") initVal = new BoolValue(false);
     else if (this->isEnumType()) {
         for(auto val: this->getEnumValueMap() ){
             if(val.second == 0){

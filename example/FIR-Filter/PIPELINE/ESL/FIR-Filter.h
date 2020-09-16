@@ -62,22 +62,30 @@ struct FIR : public sc_module {
 
                 insert_state("C1");
 
-                acc += (shiftreg[2] * coef[2]);
+                acc = (shiftreg[2] * coef[2]);
                 phase_algorithm = RUN_C2;
 
             } else if(phase_algorithm == RUN_C2) {
 
                 insert_state("C2");
-                acc += shiftreg[1] * coef[1];
+                acc = acc + shiftreg[1] * coef[1];
+                //acc += shiftreg[1] * coef[1];
                 phase_algorithm = RUN_C3;
-
+                //assume: acc@c2 = s2*c2@c1 + s1*c1@c2
+                //c2 = c2
+                //s2 = s2
+                //s1 = s1
+                //s0 = c0
+                acc_c2_i2 = acc_c2_i1
             } else if(phase_algorithm == RUN_C3) {
 
                 insert_state("C3");
-                acc += shiftreg[0] * coef[0];
+                acc = acc +  shiftreg[0] * coef[0];
+                //acc = s2*c2(at c1) + s1*c1(at c2) + s0*c0@c3
                 coef[2] = coef[1];
                 coef[1] = coef[0];
                 coef[0] = acc;
+                //coef[0] = s2*c2(at c1) + s1*c1(at c2) + s0*c0@c3;
                 phase_algorithm = RUN_OUT;
 
             }else{
