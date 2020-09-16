@@ -54,16 +54,23 @@ void PrintStmtVHDL::visit(DESCAM::Assignment &node) {
 
 void PrintStmtVHDL::visit(DESCAM::Bitwise &node) {
 
+    //TODO: Fix slicing
+
     // Check if bitwise operation can be expressed as a slicing expression
-    const auto slicedOperation = DESCAM::HLSPlugin::OptimizerHLS::sliceBitwise(node);
+    /*const auto slicedOperation = DESCAM::HLSPlugin::OptimizerHLS::sliceBitwise(node);
     if (!slicedOperation.empty()) {
         ss << slicedOperation;
-    } else if (node.getOperation() == "<<" || node.getOperation() == ">>") {
+    } else */if (node.getOperation() == "<<" || node.getOperation() == ">>") {
+        ss << "std_logic_vector(";
         ss << ((node.getOperation() == "<<") ? "shift_left(" : "shift_right(");
+        arithmeticOperation = true;
         node.getLhs()->accept(*this);
+        arithmeticOperation = false;
         ss << ", ";
+        asNumber = true;
         node.getRhs()->accept(*this);
-        ss << ")";
+        asNumber = false;
+        ss << "))";
     } else {
         ss << "(";
         node.getLhs()->accept(*this);
@@ -148,7 +155,11 @@ void PrintStmtVHDL::visit(DESCAM::FunctionOperand &node) {
 
 void PrintStmtVHDL::visit(DESCAM::IntegerValue &node) {
     //TODO: Slicing
-    ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    if (asNumber) {
+        ss << node.getValue();
+    } else {
+        ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    }
 }
 
 void PrintStmtVHDL::visit(DESCAM::Notify &node) {
@@ -156,12 +167,27 @@ void PrintStmtVHDL::visit(DESCAM::Notify &node) {
 }
 
 void PrintStmtVHDL::visit(DESCAM::ParamOperand &node) {
+
+    if (arithmeticOperation && node.getDataType()->isInteger()) {
+        ss << "signed(";
+    } else if (arithmeticOperation && node.getDataType()->isUnsigned()) {
+        ss << "unsigned(";
+    }
+
     ss << node.getOperandName();
+
+    if (arithmeticOperation) {
+        ss << ")";
+    }
 }
 
 void PrintStmtVHDL::visit(DESCAM::Relational &node) {
 
-    ss << "bool_to_sl(";
+    if (!((node.getOperation() == "!=") && node.getDataType()->isBoolean())) {
+        ss << "bool_to_sl";
+    }
+
+    ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
         ss << " = ";
@@ -196,7 +222,11 @@ void PrintStmtVHDL::visit(DESCAM::UnaryExpr &node) {
 
 void PrintStmtVHDL::visit(DESCAM::UnsignedValue &node) {
     //TODO: Slicing
-    ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    if (asNumber) {
+        ss << node.getValue();
+    } else {
+        ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+    }
 }
 
 void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {

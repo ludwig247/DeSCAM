@@ -44,6 +44,9 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
                 // Flag used to convert operands to signed types in arithmetic operations
                 bool arithmeticOperation = false;
 
+                // Flag used to print Integer and Unsigned values as a number
+                bool asNumber = false;
+
             };
 
         }}}

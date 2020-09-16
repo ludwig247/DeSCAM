@@ -364,17 +364,17 @@ void VHDLWrapper::monitor(std::stringstream &ss) {
                     noEndIf = true;
                     skipAssumptions = true;
                 } else {
-                    ss << "\t\t\tif (";
+                    ss << "\t\t\tif ";
                 }
             } else if (std::next(operation) == operations.end()) {
                 ss << "\t\t\telse\n";
                 skipAssumptions = true;
             } else {
-                ss << "\t\t\telsif (";
+                ss << "\t\t\telsif ";
             }
             if (!skipAssumptions) {
                 ss << printAssumptionList((*operation)->getAssumptionsList());
-                ss << ") then \n";
+                ss << " then \n";
             }
             ss << printMonitorOperation(*(*operation));
         }
