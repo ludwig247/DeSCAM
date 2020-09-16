@@ -1,7 +1,11 @@
+add_compile_options(-D__STDC_CONSTANT_MACROS)
+add_compile_options(-D__STDC_LIMIT_MACROS)
 
 add_subdirectory(tinyxml)
 
-add_library(global SHARED ErrorMsg.cpp
+file(GLOB LoggerSrc "Logger/*.cpp" "Logger/LoggerFilter.h")
+
+add_library(global SHARED
         DataTypes.cpp
         ModelGlobal.h
         ExprTranslator.cpp
@@ -12,9 +16,8 @@ add_library(global SHARED ErrorMsg.cpp
         NodePeekVisitor.cpp
         StmtNodeAlloc.cpp
         SimplifyVisitor.cpp
-        ModelGlobal.cpp
+        GlobalUtilities.cpp
         RecursiveVisitor.cpp
-        Completeness.cpp)
-
-
-
+        Completeness.cpp
+        ${LoggerSrc}
+        FatalError.h GlobalUtilities.h)

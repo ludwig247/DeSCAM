@@ -13,33 +13,33 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
         * \brief: collects the values compared to variables values in relational expressions of If statements
         * \author:mi-alkoudsi
         * \inputs:
-        *       - std::map<int, SCAM::CfgNode *> CFG;
+        *       - std::map<int, DESCAM::CfgNode *> CFG;
         * \outputs:
-        *       - std::map<std::string, std::set<SCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
+        *       - std::map<std::string, std::set<DESCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
         *       - std::set<std::string> difficultToAnalyseVariablesSet;
         */
     class FindVariablesValuesInRelationalExpressions : public StmtAbstractVisitor {
     public:
         FindVariablesValuesInRelationalExpressions() = delete;
 
-        explicit FindVariablesValuesInRelationalExpressions(const std::map<int, SCAM::CfgNode *> &CFG);
+        explicit FindVariablesValuesInRelationalExpressions(const std::map<int, CfgNode *> &CFG);
 
         ~FindVariablesValuesInRelationalExpressions() = default;
 
-        const std::map<std::string, std::set<SCAM::Expr *>> &getVariableValuesFromRelationalExpressionsMap() const;
+        const std::map<std::string, std::set<Expr *>> &getVariableValuesFromRelationalExpressionsMap() const;
 
         const std::set<std::string> &getDifficultToAnalyseVariablesSet() const;
 
     private:
-        void addValToVarValMap(std::string varName, SCAM::Expr *expr);
+        void addValToVarValMap(std::string varName, Expr *expr);
 
-        std::map<int, SCAM::CfgNode *> CFG;
-        std::map<std::string, std::set<SCAM::Expr *>> variableValuesFromRelationalExpressionsMap;
+        std::map<int, CfgNode *> CFG;
+        std::map<std::string, std::set<Expr *>> variableValuesFromRelationalExpressionsMap;
         std::set<std::string> difficultToAnalyseVariablesSet;
 
         //visitors
@@ -91,7 +91,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override{};
 

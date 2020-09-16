@@ -8,12 +8,12 @@
 #include "Port.h"
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Notify : public Expr {
     public:
         Notify() = delete;
 
-        Notify(Port *port);
+        Notify(Port *port, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Notify() = default;
 

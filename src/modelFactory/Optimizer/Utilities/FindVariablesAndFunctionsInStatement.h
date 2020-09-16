@@ -13,7 +13,7 @@
 #include <set>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
     * \brief: Finds the variables and functions used in a statement or an expression
     * \author:mi-alkoudsi
@@ -22,19 +22,19 @@ namespace SCAM {
     public:
         FindVariablesAndFunctionsInStatement() = delete;
 
-        FindVariablesAndFunctionsInStatement(SCAM::Expr *expr, const std::set<std::string>& readVariablesSet);
+        FindVariablesAndFunctionsInStatement(Expr *expr, const std::set<std::string>& readVariablesSet);
 
-        FindVariablesAndFunctionsInStatement(SCAM::Stmt *stmt, const std::set<std::string>& readVariablesSet);
+        FindVariablesAndFunctionsInStatement(Stmt *stmt, const std::set<std::string>& readVariablesSet);
 
         ~FindVariablesAndFunctionsInStatement() = default;
 
         const std::set<std::string> &getVariablesInStmtSet() const;
 
-        const std::set<SCAM::VariableOperand *> &getVarOpInStmtSet() const;
+        const std::set<VariableOperand *> &getVarOpInStmtSet() const;
 
         bool hasFunctions();
 
-        const std::map<std::string, SCAM::FunctionOperand *> &getFunctionsInStmtMap() const;
+        const std::map<std::string, FunctionOperand *> &getFunctionsInStmtMap() const;
 
         bool hasReadVariable();
 
@@ -44,8 +44,8 @@ namespace SCAM {
         bool isVariableFromFunctionParameters;
         bool isVariableFromFunctionBody;
         std::set<std::string> variablesInStmtSet;
-        std::map<std::string, SCAM::FunctionOperand *> functionsInStmtMap;
-        std::set<SCAM::VariableOperand *> varOpInStmtSet;
+        std::map<std::string, FunctionOperand *> functionsInStmtMap;
+        std::set<VariableOperand *> varOpInStmtSet;
         std::set<std::string> readVariablesSet;
 
         //visitors
@@ -97,7 +97,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

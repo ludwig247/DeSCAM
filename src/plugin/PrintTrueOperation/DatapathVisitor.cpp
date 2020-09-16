@@ -5,16 +5,16 @@
 #include "DatapathVisitor.h"
 
 
-SCAM::DatapathVisitor2::DatapathVisitor2(std::string tp):tp(tp) {
+DESCAM::DatapathVisitor2::DatapathVisitor2(std::string tp):tp(tp) {
 
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::SyncSignal &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::SyncSignal &node) {
     PrintStmt::toString(&node);
     this->ss << node.getPort()->getName() << "_sync_at_t";
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::DataSignalOperand &node) {
     PrintStmt::toString(&node);
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {
@@ -28,18 +28,18 @@ void SCAM::DatapathVisitor2::visit(SCAM::DataSignalOperand &node) {
 }
 
 
-void SCAM::DatapathVisitor2::visit(class VariableOperand &node) {
+void DESCAM::DatapathVisitor2::visit(class VariableOperand &node) {
     if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() + "_" + node.getVariable()->getName() + tp;
     } else this->ss << node.getOperandName() << tp;
 }
 
-std::string SCAM::DatapathVisitor2::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset, std::string tp) {
+std::string DESCAM::DatapathVisitor2::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset, std::string tp) {
     DatapathVisitor2 printer(tp);
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::Arithmetic &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "%") {
@@ -51,7 +51,7 @@ void SCAM::DatapathVisitor2::visit(SCAM::Arithmetic &node) {
     this->ss << ")(31 downto 0)";
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::Bitwise &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::Bitwise &node) {
 
     if (node.getOperation() == "<<") {
         this->ss << "(shift_left(";
@@ -76,28 +76,28 @@ void SCAM::DatapathVisitor2::visit(SCAM::Bitwise &node) {
             this->ss << " or ";
         } else if (node.getOperation() == "^") {
             this->ss << " xor ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
 
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::UnsignedValue &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::UnsignedValue &node) {
     if (this->resize_flag) {
         //FIXME: remove once concat is present?
         this->ss << "resize(" << node.getValueAsString() << ",32)";
     } else this->ss << node.getValue();
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::IntegerValue &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::IntegerValue &node) {
     if (this->resize_flag) {
         //FIXME: remove once concat is present?
         this->ss << "resize(" << node.getValueAsString() << ",32)";
     } else this->ss << node.getValue();
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::Relational &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -109,17 +109,17 @@ void SCAM::DatapathVisitor2::visit(SCAM::Relational &node) {
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::Cast &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::DatapathVisitor2::visit(SCAM::CompoundExpr &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::CompoundExpr &node) {
 
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
@@ -131,7 +131,7 @@ void SCAM::DatapathVisitor2::visit(SCAM::CompoundExpr &node) {
 
 
 
-void SCAM::DatapathVisitor2::visit(SCAM::ArrayOperand &node) {
+void DESCAM::DatapathVisitor2::visit(DESCAM::ArrayOperand &node) {
     this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "(";
     node.getIdx()->accept(*this);

@@ -7,9 +7,11 @@
 
 #include "StmtAbstractVisitor.h"
 #include <iostream>
+#include <utility>
+#include "LocationInfo.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     /**
      * \brief Base class for every other suspensionAST node
@@ -38,10 +40,18 @@ namespace SCAM {
         virtual bool operator==(const Stmt &other) const = 0;
 
         virtual std::ostream &print(std::ostream &) const = 0;
+
+        const LocationInfo& getStmtInfo(){return this->stmtLocationInfo;};
+
+        void setStmtInfo(LocationInfo& info){ this->stmtLocationInfo = info;};
+
+    protected:
+        LocationInfo stmtLocationInfo;
     };
+
 }
 
-inline std::ostream &operator<<(std::ostream &os, SCAM::Stmt const &stmt) {
+inline std::ostream &operator<<(std::ostream &os, DESCAM::Stmt const &stmt) {
     return stmt.print(os);
 }
 

@@ -12,7 +12,7 @@
 #include "Expr.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class PropertyConstraint {
 

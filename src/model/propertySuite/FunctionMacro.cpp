@@ -4,18 +4,18 @@
 
 #include "FunctionMacro.h"
 
-SCAM::FunctionMacro::FunctionMacro(const std::string &name, const DataType * type) : AbstractMacro(name, type) {
+DESCAM::FunctionMacro::FunctionMacro(const std::string &name, const DataType * type) : AbstractMacro(name, type) {
 
 }
 
-const std::vector<SCAM::Parameter *> &SCAM::FunctionMacro::getParameters() const {
+const std::vector<DESCAM::Parameter *> &DESCAM::FunctionMacro::getParameters() const {
     return parameters;
 }
 
-void SCAM::FunctionMacro::setParameters(const std::vector<SCAM::Parameter *> &parameters) {
+void DESCAM::FunctionMacro::setParameters(const std::vector<DESCAM::Parameter *> &parameters) {
     FunctionMacro::parameters = parameters;
 }
 
-void SCAM::FunctionMacro::addParameter(SCAM::Parameter *parameter) {
+void DESCAM::FunctionMacro::addParameter(DESCAM::Parameter *parameter) {
     FunctionMacro::parameters.push_back(parameter);
 }

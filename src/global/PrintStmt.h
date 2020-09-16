@@ -15,7 +15,7 @@
 #include "Stmts_all.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class PrintStmt : public StmtAbstractVisitor {
     public:

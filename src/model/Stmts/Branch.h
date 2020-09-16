@@ -8,11 +8,11 @@
 #include "Stmt.h"
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    class Branch : public SCAM::Stmt {
+    class Branch : public DESCAM::Stmt {
     public:
-        virtual SCAM::Expr *getConditionStmt() const = 0;
+        virtual DESCAM::Expr *getConditionStmt() const = 0;
         virtual std::ostream &print(std::ostream &ostream) const;
     };
 

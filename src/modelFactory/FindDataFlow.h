@@ -7,15 +7,18 @@
 
 #include <map>
 #include <iostream>
-
+#include <clang/AST/Stmt.h>
+#include <clang/Analysis/CFG.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Frontend/CompilerInstance.h>
 #include "clang/AST/RecursiveASTVisitor.h"
 
 
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
 #include <Model.h>
 #include "PrintStmt.h"
 
-namespace SCAM{
+namespace DESCAM{
         class Module;
         class Process;
         /**
@@ -28,7 +31,7 @@ namespace SCAM{
          */
         class FindDataFlow: public clang::RecursiveASTVisitor<FindDataFlow> {
         public:
-            FindDataFlow(clang::Stmt *stmt, Module *module, bool unsigned_flag = false);
+            FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance &ci, bool unsigned_flag = false);
             //Operator
             bool VisitBinaryOperator(clang::BinaryOperator* binaryOperator);
             bool VisitConditionalOperator(clang::ConditionalOperator* conditionalOperator);
@@ -51,14 +54,15 @@ namespace SCAM{
 
             bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr * arraySubscriptExpr);
             Expr *getExpr() const;
-            SCAM::Stmt* getStmt();
+            DESCAM::Stmt* getStmt();
 
             static std::string functionName;
             static bool isFunction;
 
         private:
             Module * module; //! Module the dataflow is generated for
-            SCAM::Stmt* stmt; //! Represents the stmt in case of operator, values are stored in lhs and rhs
+            DESCAM::Stmt* stmt; //! Represents the stmt in case of operator, values are stored in lhs and rhs
+            clang::CompilerInstance &ci;
 
             Expr * expr;
             Expr* lhsExpr; //! Assign Operation lValue = rValue
@@ -68,7 +72,8 @@ namespace SCAM{
             std::stringstream logStream; //! Contains every message that is generated during
 
             void switchPassExpr(Expr * stmt); //! Depending on the current value of pass assigns value to stmt(pass==0), lhs(1) or rhs(2)
-            bool exitVisitor(std::string msg, ErrorMsg::ErrorType errorType = ErrorMsg::ErrorType::error);
+            bool exitVisitor(const std::string& msg, const DESCAM::LocationInfo& stmtInfo);
+            void clearExpressions();
 
             bool unsigned_flag;
         };

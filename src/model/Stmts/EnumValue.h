@@ -8,15 +8,15 @@
 #include <DataType.h>
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
     class EnumValue : public ConstValue {
     public:
-        EnumValue(std::string enumValue, const DataType *enumType);
+        EnumValue(std::string enumValue, const DataType *enumType, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         const std::string &getEnumValue() const;
 
-        virtual std::string getValueAsString() const override;
+        std::string getValueAsString() const override;
 
         //VISITOR
         virtual void accept(StmtAbstractVisitor &visitor);

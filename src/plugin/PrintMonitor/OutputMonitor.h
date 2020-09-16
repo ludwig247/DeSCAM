@@ -10,7 +10,7 @@
 #include <fstream>//for writing on files
 #include "PrintMonitor.h"
 
-namespace SCAM {
+namespace DESCAM {
     class OutputMonitor {
     public:
         OutputMonitor() = default;

@@ -9,11 +9,11 @@
 #include "Expr.h"
 #include <string>
 
-namespace SCAM {
+namespace DESCAM {
 
     class Arithmetic : public Expr {
     public:
-        Arithmetic(Expr *lhs, std::string operation, Expr *rhs);
+        Arithmetic(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs() const;

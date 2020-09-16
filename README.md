@@ -4,11 +4,7 @@
 # Getting started with Property-Driven Development (PDD)
 
 1) Installing the tool 
-    * Use a linux of your choice 
-    * Recommended is Ubuntu 14.04+ 
-    * Edit the script in install/install_new.sh (see comments in file) 
-    * Run the script to install
-    * If the installation worked correctly, you should find a binary "DESCAM" in bin/
+    * Read the Install.md
 
 2) Understand the SystemC-PPA with the example in <path-to-root>/HowTo/GettingStarted/ESL/
     1) Compile the example: <br>

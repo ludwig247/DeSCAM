@@ -10,7 +10,7 @@
 #include "PropertyMacro.h"
 #include "PropertyConstraint.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class AbstractProperty {
 

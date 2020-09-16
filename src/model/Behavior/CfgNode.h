@@ -10,7 +10,7 @@
 #include <string>
 #include <sstream>
 
-namespace SCAM {
+namespace DESCAM {
 
 
     class CfgNode {
@@ -69,7 +69,7 @@ namespace SCAM {
         mutable std::vector<CfgNode *> successorList;
         mutable std::vector<CfgNode *> predecessorList;
 
-        SCAM::Stmt *stmt;
+        DESCAM::Stmt *stmt;
 
     };
 }

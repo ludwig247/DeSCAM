@@ -35,7 +35,7 @@ struct Example1 : public sc_module {
             block_in->read(frames_ok);
             if (frames_ok > 10) {
                 ++succ_cnt;
-                success = block_out->nb_write(succ_cnt);
+                block_out->try_write(succ_cnt, success);
                 std::cout << "@Example: success:" << success << " succ_cnt:" << succ_cnt << " frames_ok:" << frames_ok << std::endl;
                 share_out->set(success);
             } else succ_cnt = 0;

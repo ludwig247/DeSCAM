@@ -5,7 +5,7 @@
 #ifndef DESCAM_CONSTANTS_H
 #define DESCAM_CONSTANTS_H
 
-namespace SCAM { namespace HLSPlugin {
+namespace DESCAM { namespace HLSPlugin {
 
 enum class HLSOption {
     SCO,   // Single Cycle Operations

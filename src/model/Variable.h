@@ -11,7 +11,7 @@
 #include "DataType.h"
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /** \brief Represnts a variable within the module structure
      *
@@ -27,7 +27,7 @@ namespace SCAM {
      */
     class Variable : public VariableTemplate<Variable> {
     public:
-        Variable(std::string name, const DataType *type, ConstValue *initialValue = nullptr, Variable *parent = nullptr);
+        Variable(std::string name, const DataType *type, ConstValue *initialValue = nullptr, Variable *parent = nullptr,LocationInfo locationInfo = LocationInfo());
 
         //Visitor
         virtual void accept(AbstractVisitor &visitor);

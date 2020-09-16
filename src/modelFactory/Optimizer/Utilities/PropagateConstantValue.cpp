@@ -5,13 +5,14 @@
 #include "PropagateConstantValue.h"
 #include "FindVariablesAndFunctionsInStatement.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    SCAM::PropagateConstantValue::PropagateConstantValue(
-            const std::map<int, std::vector<SCAM::CfgNode *>> &allPathsToNodeMap,
-            SCAM::Variable *var, int stmtId) :
+    DESCAM::PropagateConstantValue::PropagateConstantValue(
+            const std::map<int, std::vector<DESCAM::CfgNode *>> &allPathsToNodeMap,
+            DESCAM::Variable *var, int stmtId) :
             allPathsToNodeMap(allPathsToNodeMap),
-            variable(var), numLastAssignments(0), isVarRead(false), stmtId(stmtId), currentNodeId(0),lastAssignmentAlreadyStored(false) {
+            variable(var), numLastAssignments(0), isVarRead(false), stmtId(stmtId), currentNodeId(0),
+            lastAssignmentAlreadyStored(false) {
 
         for (const auto &pathPair: allPathsToNodeMap) {
             variableValueMap.clear();
@@ -38,7 +39,7 @@ namespace SCAM {
                 }
             }
             if (Propagtionvalid) {
-                SCAM::DetectCounterVariable counterDetector(this->variable->getFullName(), lastVarValInFirstPath);
+                DESCAM::DetectCounterVariable counterDetector(this->variable->getFullName(), lastVarValInFirstPath);
                 if (counterDetector.isCounterVariable()) {
                     this->propagatedValue = nullptr;
                     return;
@@ -54,7 +55,7 @@ namespace SCAM {
     }
 
 
-    SCAM::Expr *SCAM::PropagateConstantValue::lastVariableValueInPath(const std::vector<SCAM::CfgNode *> &path) {
+    DESCAM::Expr *DESCAM::PropagateConstantValue::lastVariableValueInPath(const std::vector<DESCAM::CfgNode *> &path) {
 
         for (auto node : path) {
             if (node->getStmt() != nullptr) {
@@ -105,7 +106,7 @@ namespace SCAM {
             return new ArrayExpr(variableValueMap, variable->getDataType());
         } else if (variableValueMap.size() == 1) { //variable is not a compound variable or array
             if (variableValueMap.begin()->second->getDataType() != this->variable->getDataType()) {
-                throw std::runtime_error("propagated values and variable are of different datatypes");
+                TERMINATE("propagated values and variable are of different datatypes");
             }
             return variableValueMap.begin()->second;
         } else {
@@ -113,7 +114,7 @@ namespace SCAM {
         }
     }
 
-    void PropagateConstantValue::addOrSubstituteVariableValue(const std::string &varName, SCAM::Expr *expr) {
+    void PropagateConstantValue::addOrSubstituteVariableValue(const std::string &varName, DESCAM::Expr *expr) {
         if (this->variableValueMap.find(varName) == this->variableValueMap.end()) {
             this->variableValueMap.insert(std::make_pair(varName, expr));
 
@@ -122,8 +123,8 @@ namespace SCAM {
         }
     }
 
-    void PropagateConstantValue::visit(SCAM::Assignment &node) {
-        if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(node.getLhs())) { //var is not sectionOperand
+    void PropagateConstantValue::visit(DESCAM::Assignment &node) {
+        if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(node.getLhs())) { //var is not sectionOperand
             std::string varOpName = varOp->getVariable()->getFullName();
             if (varOpName == this->variable->getFullName()) {
                 addOrSubstituteVariableValue(varOpName, node.getRhs());
@@ -136,7 +137,7 @@ namespace SCAM {
                 if (varOp->getVariable()->getParent() != nullptr) {
                     if (varOp->getVariable()->getParent()->getFullName() == this->variable->getFullName()) {
                         addOrSubstituteVariableValue(varOp->getVariable()->getName(), node.getRhs());
-                        if(!this->lastAssignmentAlreadyStored) {
+                        if (!this->lastAssignmentAlreadyStored) {
                             this->lastAssignmentId = this->currentNodeId;
                             this->lastAssignmentAlreadyStored = true;
                         }
@@ -164,12 +165,12 @@ namespace SCAM {
         }
     }
 
-    void PropagateConstantValue::visit(SCAM::ITE &node) {
-        throw std::runtime_error("ITE not allowed");
+    void PropagateConstantValue::visit(DESCAM::ITE &node) {
+        TERMINATE("ITE not allowed");
 
     }
 
-    void SCAM::PropagateConstantValue::visit(struct Read &node) {
+    void DESCAM::PropagateConstantValue::visit(struct Read &node) {
         if (node.getStatusOperand() != nullptr &&
             node.getStatusOperand()->getVariable()->getFullName() == this->variable->getFullName()) {
             this->isVarRead = true;
@@ -211,7 +212,7 @@ namespace SCAM {
         }
     }
 
-    void SCAM::PropagateConstantValue::visit(struct Write &node) {
+    void DESCAM::PropagateConstantValue::visit(struct Write &node) {
         if (node.getStatusOperand() != nullptr &&
             node.getStatusOperand()->getVariable()->getFullName() == this->variable->getFullName()) {
             this->isVarRead = true;
@@ -229,11 +230,11 @@ namespace SCAM {
     }
 
 
-    void SCAM::PropagateConstantValue::visit(SCAM::Return &node) {
-        throw std::runtime_error("return not expected in the main blockCFG");
+    void DESCAM::PropagateConstantValue::visit(DESCAM::Return &node) {
+        TERMINATE("return not expected in the module CFG");
     }
 
-    SCAM::Expr *PropagateConstantValue::getPropagatedValue() const {
+    DESCAM::Expr *PropagateConstantValue::getPropagatedValue() const {
         return this->propagatedValue;
     }
 
@@ -241,12 +242,12 @@ namespace SCAM {
         return this->numLastAssignments;
     }
 
-    const std::map<int, SCAM::Expr *> &PropagateConstantValue::getLastAssignmentsMap() const {
+    const std::map<int, DESCAM::Expr *> &PropagateConstantValue::getLastAssignmentsMap() const {
         return this->LastAssignmentMap;
     }
 
-    void PropagateConstantValue::checkIfRhsOfAssignmentIsAVarOp(SCAM::Expr *rhs) {
-        SCAM::FindVariablesAndFunctionsInStatement findVars(rhs,std::set<std::string>{});
+    void PropagateConstantValue::checkIfRhsOfAssignmentIsAVarOp(DESCAM::Expr *rhs) {
+        DESCAM::FindVariablesAndFunctionsInStatement findVars(rhs, std::set<std::string>{});
         if (!findVars.getVariablesInStmtSet().empty()) {// a new assignment to the variable from another variable
             this->wasRhsVarOp = true;
             std::set<int> assignmentsIds;
@@ -260,10 +261,5 @@ namespace SCAM {
             this->wasRhsVarOp = false;
             this->rhsVariableAssignmentsIds.clear();
         }
-    }
-
-    void PropagateConstantValue::visit(class Ternary &node) {
-        throw std::runtime_error("Combining -Optmize and Compare Operator ? is not allowed");
-
     }
 }

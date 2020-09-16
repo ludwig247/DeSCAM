@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class FindUnusedFunctions_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class FindUnusedFunctions_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -27,7 +27,7 @@ TEST_P(FindUnusedFunctions_Test, delete_unused_functions) {
         allFunctions.insert(func.first);
     }
 
-    SCAM::FindUnusedFunctions findUnusedFunctions(module->getCFG(), module);
+    DESCAM::FindUnusedFunctions findUnusedFunctions(module->getCFG(), module);
     auto functionMap = module->getFunctionMap();
     std::stringstream ss;
     for(auto func: allFunctions){

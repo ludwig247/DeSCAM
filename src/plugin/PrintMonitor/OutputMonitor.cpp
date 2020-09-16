@@ -5,7 +5,7 @@
 #include "OutputMonitor.h"
 
 
-std::string SCAM::OutputMonitor::createMonitor(Model *node, std::string dir) {
+std::string DESCAM::OutputMonitor::createMonitor(Model *node, std::string dir) {
     OutputMonitor printer;
     printer.DIRpath = dir + "/Monitor/";
     std::cout << "WARNING: This request might replace some files inside directory: " << printer.DIRpath << std::endl;
@@ -20,13 +20,13 @@ std::string SCAM::OutputMonitor::createMonitor(Model *node, std::string dir) {
     }
 }
 
-std::string SCAM::OutputMonitor::createFiles(Model *node) {
+std::string DESCAM::OutputMonitor::createFiles(Model *node) {
     DirectoryManage();
 
     for (auto module:node->getModules()) {
         try {
             this->ss.str("");
-            SCAM::PrintMonitor printMonitor(module.second);
+            DESCAM::PrintMonitor printMonitor(module.second);
             this->ss << printMonitor.print() << std::endl;
 
             fileStream.open(DIRpath + "/" + module.first + ".vhdl");
@@ -41,7 +41,7 @@ std::string SCAM::OutputMonitor::createFiles(Model *node) {
     return this->ss.str();
 }
 
-void SCAM::OutputMonitor::DirectoryManage() {
+void DESCAM::OutputMonitor::DirectoryManage() {
     DIR *pDir;
     int dir_err;
     pDir = opendir(DIRpath.c_str());

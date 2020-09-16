@@ -5,25 +5,25 @@
 #include "ConditionVisitor2.h"
 
 
-void SCAM::ConditionVisitor2::visit(SCAM::VariableOperand &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::VariableOperand &node) {
 
     if (node.getVariable()->isSubVar()) {
         if (node.getVariable()->getParent()->isCompoundType()) {
             this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
-        } else throw std::runtime_error(" Unknown ");
+        } else TERMINATE(" Unknown ");
 
     } else {
         this->ss << node.getVariable()->getName();
     }
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::SyncSignal &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::SyncSignal &node) {
     this->ss << node.getPort()->getName() << "_sync";
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << node.getDataSignal()->getParent()->getName() << "(" << node.getDataSignal()->getName() << ")";
@@ -35,12 +35,12 @@ void SCAM::ConditionVisitor2::visit(SCAM::DataSignalOperand &node) {
     }
 }
 
-std::string SCAM::ConditionVisitor2::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::ConditionVisitor2::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     ConditionVisitor2 printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::Relational &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -55,7 +55,7 @@ void SCAM::ConditionVisitor2::visit(SCAM::Relational &node) {
 }
 
 
-void SCAM::ConditionVisitor2::visit(SCAM::Arithmetic &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Arithmetic &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "%") {
@@ -68,7 +68,7 @@ void SCAM::ConditionVisitor2::visit(SCAM::Arithmetic &node) {
 
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::Bitwise &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Bitwise &node) {
     if (node.getOperation() == "<<") {
         this->resize_flag = true;
         this->ss << "(shift_left(";
@@ -92,41 +92,41 @@ void SCAM::ConditionVisitor2::visit(SCAM::Bitwise &node) {
             this->ss << " or ";
         } else if (node.getOperation() == "^") {
             this->ss << " xor ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::UnsignedValue &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::UnsignedValue &node) {
     //if(this->resize_flag){
     //FIXME: remove once concat is present?
     this->ss << "resize(" << node.getValueAsString() << ",32)";
     //}else this->ss << node.getValue();
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::IntegerValue &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::IntegerValue &node) {
     //if(this->resize_flag){
     //FIXME: remove once concat is present?
     this->ss << "resize(" << node.getValueAsString() << ",32)";
     //}else this->ss << node.getValue();
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::Cast &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::Return &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::ITE &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::ITE &node) {
     /*
      * if (print condition) {
      *   print stmts
@@ -167,19 +167,19 @@ void SCAM::ConditionVisitor2::visit(SCAM::ITE &node) {
 
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::Assignment &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Assignment &node) {
     PrintStmt::visit(node);
     this->ss << ";\n";
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::ArrayOperand &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::ArrayOperand &node) {
     this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "[";
     node.getIdx()->accept(*this);
     this->ss << "]";
 }
 
-void SCAM::ConditionVisitor2::visit(struct CompoundExpr &node) {
+void DESCAM::ConditionVisitor2::visit(struct CompoundExpr &node) {
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
         begin->second->accept(*this);
@@ -187,18 +187,18 @@ void SCAM::ConditionVisitor2::visit(struct CompoundExpr &node) {
     }
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::ParamOperand &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::ParamOperand &node) {
     auto param = node.getParameter();
     if (param->isSubVar()) {
         this->ss << param->getParent()->getName() << "_" << param->getName();
     } else this->ss << param->getName();
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::Notify &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify";
 }
 
-void SCAM::ConditionVisitor2::visit(SCAM::TimePointOperand &node) {
+void DESCAM::ConditionVisitor2::visit(DESCAM::TimePointOperand &node) {
 
         this->ss << node.getTimepoint()->getName();
 

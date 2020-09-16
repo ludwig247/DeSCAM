@@ -7,8 +7,8 @@
 
 #include "Stmts_all.h"
 
-namespace SCAM{
-    //! Visits a SCAM::Stmt recursively until all leaf nodes are reached. This class should be used a base for all recursive visitors
+namespace DESCAM{
+    //! Visits a DESCAM::Stmt recursively until all leaf nodes are reached. This class should be used a base for all recursive visitors
     class RecursiveVisitor: public StmtAbstractVisitor {
     public:
         RecursiveVisitor() = default;
@@ -66,7 +66,7 @@ namespace SCAM{
 
         virtual void visit(struct Cast &node);
 
-        virtual void visit(struct SCAM::FunctionOperand &node);
+        virtual void visit(struct DESCAM::FunctionOperand &node);
 
         virtual void visit(struct ArrayOperand &node);
 

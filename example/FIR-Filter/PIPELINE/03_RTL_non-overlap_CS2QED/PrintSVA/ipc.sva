@@ -1,0 +1,35 @@
+// required terminology 
+sequence hold(l, e);
+	(l===e, l=e);
+endsequence
+
+sequence t;
+	##`next_shift_amount 1'b1;
+endsequence
+
+sequence t_end(offset);
+	t ##offset 1'b1;
+endsequence
+
+sequence next(timepoint, offset);
+	timepoint ##offset 1'b1;
+endsequence
+
+property during(t1, t2, se);
+	(t1 ##0 se[*0:$] intersect t2) or
+	(t1 intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_limited(t1, t2, off, se);
+	(t1 ##0 se[*0:$] ##off 1'b1 intersect t2) or
+	(next(t1, off) intersect t2 ##[1:$] 1'b1);
+endproperty
+
+property during_o(t1, o1, t2, o2, se);
+	if (o2 >= 0)
+		during(next(t1, o1), next(t2, (o2<0) ? 0 : o2), se)
+	else
+		during_limited(next(t1, o1), t2, (o2>0) ? 0 : -o2, se);
+endproperty
+// end of ipc_sva
+

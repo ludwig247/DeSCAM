@@ -13,7 +13,7 @@
 #include "CLI/CLI.hpp"
 #include "CommandLineParameter.h"
 
-namespace SCAM {
+namespace DESCAM {
 //
 //    std::istream &operator>>(std::istream &in, OptimizeLevel &optimizelevel) {
 //        int i;

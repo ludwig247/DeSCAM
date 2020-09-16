@@ -8,7 +8,7 @@
 
 #include <PrintStmt.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class PrintStmtForDot : public PrintStmt {
     public:

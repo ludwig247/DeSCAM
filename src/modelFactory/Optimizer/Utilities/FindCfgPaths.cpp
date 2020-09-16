@@ -4,8 +4,11 @@
 
 #include "FindCfgPaths.h"
 #include "Optimizer/Debug.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-namespace SCAM {
+
+namespace DESCAM {
 
     FindCfgPaths::FindCfgPaths() = default;
 
@@ -13,7 +16,7 @@ namespace SCAM {
                                                                               whileNodeID(0) {
         //Finding whileNode
         for (auto node : Cfg) {
-            if (dynamic_cast<SCAM::While *>(node.second->getStmt())) {
+            if (dynamic_cast<DESCAM::While *>(node.second->getStmt())) {
                 whileNodeID = node.second->getId();
                 break;
             }
@@ -47,8 +50,8 @@ namespace SCAM {
 #endif
                     if (EntryNode > this->whileNodeID) {
                         bool whileNext = false;
-                        if (dynamic_cast<SCAM::While *>(Path->getPath().back()->getSuccessorList().front()->getStmt()) ||
-                            dynamic_cast<SCAM::While *>(
+                        if (dynamic_cast<DESCAM::While *>(Path->getPath().back()->getSuccessorList().front()->getStmt()) ||
+                            dynamic_cast<DESCAM::While *>(
                                     Path->getPath().back()->getSuccessorList().back()->getStmt())) {
                             whileNext = true;
                         }
@@ -86,8 +89,8 @@ namespace SCAM {
                     }
                 }
                 if (!stillToVisit) {
-                    if (dynamic_cast<SCAM::While *>(Path->getPath().back()->getSuccessorList().front()->getStmt()) ||
-                        (dynamic_cast<SCAM::While *>(
+                    if (dynamic_cast<DESCAM::While *>(Path->getPath().back()->getSuccessorList().front()->getStmt()) ||
+                        (dynamic_cast<DESCAM::While *>(
                                 Path->getPath().back()->getSuccessorList().back()->getStmt()))) {
                         addPathToPathsMap(Path->getPathID(), *Path);
 
@@ -121,7 +124,7 @@ namespace SCAM {
                 }
                 if (Path->getPath().empty() || Path->getPath().back()->getId() == 0) { break; }
             } else {
-                throw std::runtime_error("Last node in the path can't be a null pointer");
+                TERMINATE("Last node in the path can't be a null pointer");
             }
         }
     }
@@ -187,7 +190,7 @@ namespace SCAM {
         return pathsToNode;
     }
 
-    void FindCfgPaths::removeBackwardsUntilIf(SCAM::CfgPath *Path) {
+    void FindCfgPaths::removeBackwardsUntilIf(DESCAM::CfgPath *Path) {
 
         while (!Path->getPath().empty() && Path->getPath().back()->getSuccessorList().size() < 2) {
             isVisted[Path->getPath().back()->getId()] = false;

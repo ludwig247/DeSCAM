@@ -25,7 +25,7 @@ public:
 
     virtual ~aml_driver();
 
-    int parse(const std::string &f, SCAM::Model *m);
+    int parse(const std::string &f, DESCAM::Model *m);
 
 
     yy::location error_location;
@@ -47,16 +47,16 @@ public:
     void error(const std::string &m);
 
     //Top level objects are added here to the model (instead of directly within the parser)
-    bool addModule(SCAM::Module *module);
+    bool addModule(DESCAM::Module *module);
 
     //helper functions for checking constant expressions, using z3
-    bool isConstExpr(SCAM::Expr *e) const;
+    bool isConstExpr(DESCAM::Expr *e) const;
 
-    SCAM::ConstValue *reduzeToConstValue(SCAM::Expr *e) const;
+    DESCAM::ConstValue *reduzeToConstValue(DESCAM::Expr *e) const;
 
 
-    SCAM::Module *module; //data is added here during parsing only
-    SCAM::Model *model; //upon success, this is the output, the entire parsed model
+    DESCAM::Module *module; //data is added here during parsing only
+    DESCAM::Model *model; //upon success, this is the output, the entire parsed model
 };
 
 

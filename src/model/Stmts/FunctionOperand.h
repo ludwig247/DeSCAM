@@ -8,10 +8,10 @@
 #include "Function.h"
 #include "Operand.h"
 
-namespace SCAM {
+namespace DESCAM {
     class FunctionOperand : public Operand {
     public:
-        explicit FunctionOperand(Function *function, const std::map<std::string, SCAM::Expr *> &paramValueMap);
+        explicit FunctionOperand(Function *function, const std::map<std::string, DESCAM::Expr *> &paramValueMap, LocationInfo stmtLocationInfo = LocationInfo());
         FunctionOperand(FunctionOperand&) = delete;
         FunctionOperand() = delete;
         virtual ~FunctionOperand() = default;
@@ -22,14 +22,14 @@ namespace SCAM {
 
         const std::map<std::string, Expr *> &getParamValueMap() const;
 
-        void setParamValueMap(const std::map<std::string, SCAM::Expr *> &paramValueMap);
+        void setParamValueMap(const std::map<std::string, DESCAM::Expr *> &paramValueMap);
 
         virtual void accept(StmtAbstractVisitor &visitor);
 
         virtual bool operator==(const Stmt &other) const;
 
     private:
-        std::map<std::string, SCAM::Expr *> paramValueMap;
+        std::map<std::string, DESCAM::Expr *> paramValueMap;
         Function *function;
     };
 }

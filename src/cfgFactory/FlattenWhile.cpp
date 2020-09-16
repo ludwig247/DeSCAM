@@ -5,8 +5,8 @@
 #include "FlattenWhile.h"
 #include "FlattenIf.h"
 
-SCAM::FlattenWhile::FlattenWhile(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode,
-                                 std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap, std::map<SCAM::CfgBlock *, std::set<int>> &pathNodeMap) :
+DESCAM::FlattenWhile::FlattenWhile(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endNode,
+                                 std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap, std::map<DESCAM::CfgBlock *, std::set<int>> &pathNodeMap) :
         startNode(startNode),
         endNode(endNode),
         startEndMap(startEndMap),
@@ -16,7 +16,7 @@ SCAM::FlattenWhile::FlattenWhile(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endN
 }
 
 
-void SCAM::FlattenWhile::core(SCAM::CfgBlock *node) {
+void DESCAM::FlattenWhile::core(DESCAM::CfgBlock *node) {
     //Add all stmts of block to the stmtList
     if (node != endNode) {
         //std::cout << node->getBlockID() << std::endl;
@@ -25,7 +25,7 @@ void SCAM::FlattenWhile::core(SCAM::CfgBlock *node) {
         }
         //Check for a branching
         if (node->hasIf()) {
-            //Build SCAM:ite for this if-block
+            //Build DESCAM:ite for this if-block
             FlattenIf cascadeITE = FlattenIf(node, startEndMap[node], this->startEndMap, this->pathNodeMap);
             this->stmtList.push_back(cascadeITE.getITE());
             //Conntinue with endNode of the ite
@@ -45,7 +45,7 @@ void SCAM::FlattenWhile::core(SCAM::CfgBlock *node) {
 
 }
 
-std::vector<SCAM::Stmt *> SCAM::FlattenWhile::getStmtList() {
+std::vector<DESCAM::Stmt *> DESCAM::FlattenWhile::getStmtList() {
     return this->stmtList;
 
 }

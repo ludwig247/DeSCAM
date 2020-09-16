@@ -7,7 +7,7 @@
 
 #include <PrintStmt.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class ConditionVisitor2 : public PrintStmt {
     public:

@@ -30,7 +30,7 @@ using namespace clang::tooling;
 using namespace clang;
 
 
-namespace SCAM {
+namespace DESCAM {
 
     bool containsSubstring(std::string, std::string);
 

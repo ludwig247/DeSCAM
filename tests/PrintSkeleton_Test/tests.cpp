@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
         commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
     }
-    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+    DESCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
 
 
     for(auto module: ModelGlobal::getModel()->getModules()){

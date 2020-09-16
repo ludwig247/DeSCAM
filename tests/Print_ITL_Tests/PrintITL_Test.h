@@ -10,16 +10,16 @@
 
 #include <ModelGlobal.h>
 #include <fstream>
-
+#include <FatalError.h>
 #include <PrintITL/PrintITL.h>
 
 
-static std::vector<SCAM::Module *> parameter() {
+static std::vector<DESCAM::Module *> parameter() {
 
     std::vector<const char *> commandLineArugmentsVector;
 
     //Binaray
-    std::string bin = std::string(SCAM_HOME"/bin/SCAM ");
+    std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
     commandLineArugmentsVector.push_back(bin.c_str());
 
     //SRC-File to be analyzed
@@ -35,16 +35,19 @@ static std::vector<SCAM::Module *> parameter() {
 //    add optimizations
 //    std::set<std::string> optimizeOptions = {"all"};
 //    CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
-    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+    try{DESCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+    }catch(FatalError & e){
 
-    std::vector<SCAM::Module *> result;
-    for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
+    }
+
+    std::vector<DESCAM::Module *> result;
+    for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
         result.push_back(module.second);
     }
     return result;
 }
 
-class ITL_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class ITL_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     static void SetUpTestCase() {
     }
@@ -64,7 +67,7 @@ INSTANTIATE_TEST_CASE_P(Basic, ITL_Test, ::testing::ValuesIn(parameter()));
 TEST_P(ITL_Test, Basic) {
 
     PrintITL printITL;
-//    SCAM::Module * module = GetParam();
+//    DESCAM::Module * module = GetParam();
     printITL.printModule(GetParam());
     ASSERT_NO_THROW(printITL.print());
     std::ofstream myfile;
