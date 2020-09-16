@@ -13,7 +13,7 @@
 #include "State.h"
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
 
     class Operation {
     public:
@@ -28,38 +28,38 @@ namespace SCAM {
 
         bool IsWait() const;
 
-        const std::vector<SCAM::Stmt *> &getStatementsList() const;
+        const std::vector<DESCAM::Stmt *> &getStatementsList() const;
 
         const std::vector<Expr *> &getAssumptionsList() const;
 
         const std::vector<Assignment *> & getCommitmentsList() const;
 
-        const std::vector<SCAM::Assignment *> &getCommitmentList() const;
+        const std::vector<DESCAM::Assignment *> &getCommitmentList() const;
 
-        SCAM::State *getState() const;
+        DESCAM::State *getState() const;
 
-        SCAM::State *getNextState() const;
+        DESCAM::State *getNextState() const;
 
         // Setter
-        void setStatementsList(std::vector<SCAM::Stmt *> statementsList_arg);
+        void setStatementsList(std::vector<DESCAM::Stmt *> statementsList_arg);
 
         void setAssumptionsList(std::vector<Expr *> assumptionsList);
 
         void setCommitmentsList(std::vector<Assignment *> commitmentsList);
 
-        void setState(SCAM::State *state_arg);
+        void setState(DESCAM::State *state_arg);
 
-        void setNextState(SCAM::State *nextState);
+        void setNextState(DESCAM::State *nextState);
 
         void setReset(bool reset);
 
         void setWait(bool wait);
 
-        void addStatement(SCAM::Stmt *stmt);
+        void addStatement(DESCAM::Stmt *stmt);
 
-        void addAssumption(SCAM::Expr *assumption);
+        void addAssumption(DESCAM::Expr *assumption);
 
-        void addCommitment(SCAM::Assignment *commitment);
+        void addCommitment(DESCAM::Assignment *commitment);
 
         int getId() const;
 
@@ -69,12 +69,12 @@ namespace SCAM {
     private:
         int id;
 
-        std::vector<SCAM::Stmt *> statementsList;
-        std::vector<SCAM::Expr *> assumptionList;
-        std::vector<SCAM::Assignment *> commitmentList;
+        std::vector<DESCAM::Stmt *> statementsList;
+        std::vector<DESCAM::Expr *> assumptionList;
+        std::vector<DESCAM::Assignment *> commitmentList;
 
-        SCAM::State *state;
-        SCAM::State *nextState;
+        DESCAM::State *state;
+        DESCAM::State *nextState;
         bool resetOperation;
         bool waitOperation;
     };

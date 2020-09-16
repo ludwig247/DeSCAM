@@ -5,9 +5,12 @@
 #include "ConditionVisitor.h"
 #include "DatapathVisitor.h"
 #include "PrintITL.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
-using namespace SCAM;
+
+using namespace DESCAM;
 
 PrintITL::PrintITL()
 {
@@ -40,7 +43,7 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintITL::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintITL::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -76,7 +79,7 @@ std::string PrintITL::functions() {
         ss << ") : " << convertDataType(function.second->getReturnType()->getName()) << " :=\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto branchNum = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";
@@ -178,7 +181,7 @@ std::string PrintITL::printTemporalExpr(TemporalExpr* temporalExpr) {
     return ss.str();
 }
 
-std::string PrintITL::printProperty(Property *property) {
+std::string PrintITL::printProperty(std::shared_ptr<Property> property) {
 
     std::stringstream ss;
 
@@ -247,7 +250,7 @@ std::string PrintITL::printProperty(Property *property) {
 }
 
 std::string PrintITL::macros() {
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 
@@ -306,7 +309,7 @@ std::string PrintITL::macros() {
 
 std::string PrintITL::operations() {
 
-    PropertySuite *ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
 
     std::stringstream ss;
 
@@ -332,7 +335,7 @@ std::string PrintITL::operations() {
 
 std::string PrintITL::macrosForHLS()
 {
-    PropertySuite* ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
     std::stringstream ss;
 
     ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
@@ -420,7 +423,7 @@ std::string PrintITL::globalFunctions() {
         ss << ") : " << convertDataType(function.second->getReturnType()->getName()) << " :=\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto branchNum = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";

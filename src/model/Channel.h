@@ -7,7 +7,7 @@
 
 #include "AbstractNode.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Port;
 
@@ -16,7 +16,7 @@ namespace SCAM {
 
     class Channel : public AbstractNode {
     public:
-        Channel(std::string name);
+        Channel(std::string name, LocationInfo locationInfo = LocationInfo());
 
         virtual ~Channel();
 

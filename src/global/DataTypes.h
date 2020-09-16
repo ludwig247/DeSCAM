@@ -9,7 +9,7 @@
 #include <string>
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
 
 /**
  * \brief: Stores all datatypes for a model

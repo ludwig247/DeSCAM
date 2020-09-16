@@ -10,7 +10,7 @@
 #include"ModelGlobal.h"
 #include "PrintStmt.h"
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * \brief: looks for dead assignments to variables and removes them from the control flow graph
      * \author: mi-alkoudsi
@@ -25,16 +25,16 @@ namespace SCAM {
      *  2.if in info of any succ stmt = true  , current stmt out info = true
      *  3.set in info of every variable not used in current stmt to the output of it
      */
-    class LivenessAnalysis : public SCAM::StmtAbstractVisitor {
+    class LivenessAnalysis : public StmtAbstractVisitor {
     public:
         LivenessAnalysis() = delete;
 
-        LivenessAnalysis(std::map<int, SCAM::CfgNode *> CFG,
-                         const std::map<std::string, SCAM::Variable *> &ModuleVariables);
+        LivenessAnalysis(std::map<int, CfgNode *> CFG,
+                         const std::map<std::string, Variable *> &ModuleVariables);
 
         ~LivenessAnalysis() = default;
 
-        void initLA(const std::map<std::string, SCAM::Variable *> &ModuleVariables);
+        void initLA(const std::map<std::string, Variable *> &ModuleVariables);
 
         const std::map<int, CfgNode *> &getCFG() const;
 
@@ -42,14 +42,14 @@ namespace SCAM {
         bool deadNodeDetected;
         int currentNodeID;
         std::map<int, std::set<std::string>> variablesInStmtMap;
-        std::map<int, SCAM::CfgNode *> CFG;
-        std::map<std::string, SCAM::Variable *> moduleVariablesMap;
+        std::map<int, CfgNode *> CFG;
+        std::map<std::string, Variable *> moduleVariablesMap;
         std::map<std::string, std::map<int, std::pair<bool, bool>>> stmtInfoMap;  //contains propagated liveness analysis information for each stmt input and output
         std::map<std::string, std::set<int>> allAssignments;                      //stores for each variable in what nodes it is assigned
         std::vector<bool> toggledToTrueNodeVector;                                // true when a variable use detected/propagated at/to currentNode
         int numToTrueToggles;                                                     // if it doesn't change between runs,terminate algorithm
         std::set<int> deadAssignmentSet;
-        std::map<int, SCAM::Variable *> assignmentsToCompoundsVarsMap;
+        std::map<int, Variable *> assignmentsToCompoundsVarsMap;
 
         void removeDeadStatementAndReplaceItInPredecessorsAndSuccessors(int nodeId);
 
@@ -100,7 +100,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

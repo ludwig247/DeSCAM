@@ -2,30 +2,31 @@
 // Created by tobias on 24.10.16.
 //
 
-#include <assert.h>
 #include "EnumValue.h"
 #include "NodePeekVisitor.h"
+#include "DescamException.h"
 
-SCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType) :
+DESCAM::EnumValue::EnumValue(std::string enumValue, const DataType *enumType, LocationInfo locationInfo) :
         enumValue(enumValue),
         ConstValue(enumType) {
-    assert(enumType != nullptr);
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
+    if(!enumType) throw DescamException("enumType is null",locationInfo);
 }
 
-const std::string &SCAM::EnumValue::getEnumValue() const {
+const std::string &DESCAM::EnumValue::getEnumValue() const {
     return enumValue;
 }
 
-void SCAM::EnumValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::EnumValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-std::string SCAM::EnumValue::getValueAsString() const {
+std::string DESCAM::EnumValue::getValueAsString() const {
     return this->enumValue;
 }
 
-bool SCAM::EnumValue::operator==(const Stmt &other) const {
+bool DESCAM::EnumValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekEnumValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (EnumValue *) this;

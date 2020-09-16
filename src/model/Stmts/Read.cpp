@@ -4,15 +4,18 @@
 
 #include <assert.h>
 #include <PrintStmt.h>
+
+#include <utility>
 #include "Read.h"
 #include "NodePeekVisitor.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    Read::Read(Port *port, VariableOperand *variable, bool is_non_blocking_access, VariableOperand *status) :
+    Read::Read(Port *port, VariableOperand *variable, bool is_non_blocking_access, VariableOperand *status, LocationInfo stmtLocationInfo) :
             variable(variable),
             status(status),
             Communication(port, is_non_blocking_access) {
+        this->stmtLocationInfo = std::move(stmtLocationInfo);
         assert(variable != nullptr || port->getDataType()->isVoid());
     }
 
@@ -36,8 +39,9 @@ namespace SCAM {
         auto otherPtr = (const Read *) &other;
         if (thisPtr->getPort() != otherPtr->getPort()) return false;
         if ((thisPtr->variable == otherPtr->variable) && (!thisPtr->isNonBlockingAccess() && !otherPtr->isNonBlockingAccess())) return true;
-        if ((thisPtr->variable == otherPtr->variable) && (thisPtr->isNonBlockingAccess() && otherPtr->isNonBlockingAccess()) && (thisPtr->status == otherPtr->status)) return true;
-        return false;
+        return (thisPtr->variable == otherPtr->variable) &&
+               (thisPtr->isNonBlockingAccess() && otherPtr->isNonBlockingAccess()) &&
+               (thisPtr->status == otherPtr->status);
     }
 
     std::ostream &Read::print(std::ostream &ostream) const {

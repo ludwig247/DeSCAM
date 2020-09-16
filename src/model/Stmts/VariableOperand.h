@@ -8,14 +8,14 @@
 #include "Operand.h"
 #include "Variable.h"
 
-namespace SCAM {
+namespace DESCAM {
     /**
      * \brief Points to a MemberVariable of the class
      *
      */
     class VariableOperand : public Operand {
     public:
-        VariableOperand(Variable *variable);
+        VariableOperand(Variable *variable, LocationInfo stmtLocationInfo = LocationInfo());
 
         Variable *getVariable();
 

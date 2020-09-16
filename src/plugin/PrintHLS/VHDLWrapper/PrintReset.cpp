@@ -4,14 +4,14 @@
 
 #include "PrintReset.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
-std::string PrintResetNotify::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string PrintResetNotify::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     PrintResetNotify printer(stmt, indentSize, indentOffset);
     return printer.getString();
 }
 
-PrintResetNotify::PrintResetNotify(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+PrintResetNotify::PrintResetNotify(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->createString(stmt, indentSize, indentOffset);
 }
 
@@ -36,7 +36,7 @@ void PrintResetNotify::visit(BoolValue &node) {
     }
 }
 
-PrintResetSignal::PrintResetSignal(SCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
+PrintResetSignal::PrintResetSignal(DESCAM::Stmt* stmt, const std::string& signalName, unsigned int indentSize, unsigned int indentOffset) :
     stmt(stmt),
     indentSize(indentSize),
     indentOffset(indentOffset),

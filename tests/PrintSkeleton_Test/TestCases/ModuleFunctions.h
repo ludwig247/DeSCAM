@@ -6,7 +6,9 @@
 #define PROJECT_MODULEFUNCTIONS_H
 
 #include "systemc.h"
-#include "Interfaces.h"
+//#include "Interfaces.h"
+#include "../../../example/Interfaces/Interfaces.h"
+
 
 struct TestFunction0: public sc_module {
 

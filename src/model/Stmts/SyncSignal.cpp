@@ -3,24 +3,27 @@
 //
 
 #include <DataTypes.h>
+
+#include <utility>
 #include "SyncSignal.h"
 #include "NodePeekVisitor.h"
 
-SCAM::SyncSignal::SyncSignal(SCAM::Port *port) :
+DESCAM::SyncSignal::SyncSignal(DESCAM::Port *port, LocationInfo stmtLocationInfo) :
         port(port),
         Expr(DataTypes::getDataType("bool")) {
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
 }
 
-void SCAM::SyncSignal::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::SyncSignal::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-SCAM::Port *SCAM::SyncSignal::getPort() const {
+DESCAM::Port *DESCAM::SyncSignal::getPort() const {
     return port;
 }
 
-bool SCAM::SyncSignal::operator==(const Stmt &other) const {
+bool DESCAM::SyncSignal::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekSyncSignal(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (SyncSignal *) this;

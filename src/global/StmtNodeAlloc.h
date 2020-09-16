@@ -9,7 +9,7 @@
 #include <Stmts/StmtAbstractVisitor.h>
 #include <Stmts/Stmts_all.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class StmtNodeAlloc : public StmtAbstractVisitor {
 

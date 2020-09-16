@@ -9,7 +9,7 @@
 #include <PrintStmt.h>
 #include "CfgBlock.h"
 
-namespace SCAM {
+namespace DESCAM {
 //Constructor
     CfgBlock::CfgBlock() :
             blockID(-1),
@@ -69,27 +69,27 @@ namespace SCAM {
         return true;
     }
 
-    void CfgBlock::addStmt(SCAM::Stmt *stmt) {
+    void CfgBlock::addStmt(DESCAM::Stmt *stmt) {
         this->stmtList.push_back(stmt);
     }
 
-    std::vector<SCAM::Stmt *> CfgBlock::getStmtList() {
+    std::vector<DESCAM::Stmt *> CfgBlock::getStmtList() {
         return this->stmtList;
     }
 
-    void CfgBlock::setTerminator(SCAM::Stmt *terminator) {
+    void CfgBlock::setTerminator(DESCAM::Stmt *terminator) {
         this->terminator = terminator;
 
     }
 
-    SCAM::Stmt *CfgBlock::getTerminator() {
+    DESCAM::Stmt *CfgBlock::getTerminator() {
         return this->terminator;
     }
 
 
     bool CfgBlock::hasIf() {
         if (this->hasTerminator()) {
-            if (SCAM::If *stmt = dynamic_cast<SCAM::If *>(this->terminator)) {
+            if (DESCAM::If *stmt = dynamic_cast<DESCAM::If *>(this->terminator)) {
                 return true;
             }
 
@@ -139,7 +139,7 @@ namespace SCAM {
 
     }
 
-    void CfgBlock::setStmtList(const std::vector<SCAM::Stmt *> &newStmtList) {
+    void CfgBlock::setStmtList(const std::vector<DESCAM::Stmt *> &newStmtList) {
         this->stmtList = newStmtList;
     }
 }

@@ -7,11 +7,11 @@
 
 #include "ConstValue.h"
 
-namespace SCAM {
+namespace DESCAM {
     class
     IntegerValue : public ConstValue {
     public:
-        IntegerValue(int value);
+        IntegerValue(int value, LocationInfo stmtLocationInfo = LocationInfo());
 
         int getValue();
 

@@ -10,13 +10,13 @@
 #include "FindNewDatatype.h"
 #include "FindDataFlow.h"
 
-bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
+bool DESCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
     //Check whether constructor body is empty
     int cnt = 0;
     for (auto it = constructorDecl->getBody()->children().first; it != constructorDecl->getBody()->children().second; it++) {
         cnt++;
         if (cnt > 2)
-            throw std::runtime_error("The body of the constructor has to remain empty and is not analyzed."
+            TERMINATE("The body of the constructor has to remain empty and is not analyzed."
                                      "\n Please use a section to initialize your systems instead of the constructor body\n");
     }
     //Only one Constructor allowed
@@ -44,7 +44,7 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
                     //Find value and store in this->value
                     //If something goes wrong
                     try {
-                        FindDataFlow findDataFlow(initializer->getInit(), module);
+                        FindDataFlow findDataFlow(initializer->getInit(), module, ci);
 
                         auto initExpr = findDataFlow.getExpr();
                         if (initExpr != nullptr) {
@@ -53,36 +53,37 @@ bool SCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *
                                 Variable place_holder_variable("foo",place_holder_type);
                                 VariableOperand variableOperand(&place_holder_variable);
                                 auto assignment = Assignment(&variableOperand, findDataFlow.getExpr());
-                                auto result = SCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
+                                auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
                                 if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
                                     this->initValue = valueT;
-                                } else throw std::runtime_error("All intializer are required to have a constant value");
+                                } else TERMINATE("All intializer are required to have a constant value");
 
                         } else std::cout << "-I- Default init value for variable " << varName << std::endl;
                     } catch (std::runtime_error error) {
-                        std::string msg = "Error for initialization of variable " + varName + "\n";
-                        throw std::runtime_error(msg + error.what());
+                        std::string msg = "Error for initialization of variable " + varName;
+                        TERMINATE(msg + error.what());
                     }
                 }
             }
         }
-    }else throw std::runtime_error("Only one constructor allowed");
+    }else TERMINATE("Only one constructor allowed");
 
     return false;
 }
 
 
-SCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, SCAM::Module *module):
+DESCAM::FindInitalValues::FindInitalValues(clang::CXXRecordDecl *recordDecl, clang::FieldDecl * fieldDecl, DESCAM::Module *module, clang::CompilerInstance& ci):
     module(module),
     fieldDecl(fieldDecl),
     initValue(nullptr),
+    ci(ci),
     pass(0) {
     TraverseDecl(recordDecl);
 
 }
 
-SCAM::ConstValue *SCAM::FindInitalValues::getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl *fieldDecl, SCAM::Module *module) {
-    FindInitalValues findInitalValues(recordDecl,fieldDecl,module);
+DESCAM::ConstValue *DESCAM::FindInitalValues::getInitValue(clang::CXXRecordDecl *recordDecl, clang::FieldDecl *fieldDecl, DESCAM::Module *module, clang::CompilerInstance& ci) {
+    FindInitalValues findInitalValues(recordDecl,fieldDecl,module,ci);
     return findInitalValues.initValue;
 }
 

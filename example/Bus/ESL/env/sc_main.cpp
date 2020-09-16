@@ -3,7 +3,7 @@
 #include "../Bus.h"
 #include "SlaveDummy.h"
 #include "MasterDummy.h"
-#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../legacy/SingleMasterMultiSlave/ESL/Compound.h"
 
 
 using namespace std;

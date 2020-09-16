@@ -8,7 +8,7 @@
 #include "Utilities.h"
 #include "VHDLWrapperMCO.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 VHDLWrapperMCO::VHDLWrapperMCO(
         Module* module,

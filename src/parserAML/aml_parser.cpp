@@ -238,55 +238,55 @@ namespace yy {
             : super_type(s, that.location) {
         switch (that.type_get()) {
             case 95: // sections
-                value.move<std::map<std::string, std::vector<SCAM::Stmt *>>>(that.value);
+                value.move<std::map<std::string, std::vector<DESCAM::Stmt *>>>(that.value);
                 break;
 
             case 109: // statements
             case 110: // statement
             case 111: // assign_statement
             case 120: // opt_else
-                value.move<std::vector<SCAM::Stmt *> >(that.value);
+                value.move<std::vector<DESCAM::Stmt *> >(that.value);
                 break;
 
             case 104: // datatype
-                value.move<SCAM::DataType *>(that.value);
+                value.move<DESCAM::DataType *>(that.value);
                 break;
 
             case 123: // expr
-                value.move<SCAM::Expr *>(that.value);
+                value.move<DESCAM::Expr *>(that.value);
                 break;
 
             case 119: // if_statement
-                value.move<SCAM::ITE *>(that.value);
+                value.move<DESCAM::ITE *>(that.value);
                 break;
 
             case 113: // nb_read_statement
             case 116: // get_statement
-                value.move<SCAM::NBRead *>(that.value);
+                value.move<DESCAM::NBRead *>(that.value);
                 break;
 
             case 115: // nb_write_statement
             case 117: // set_statement
-                value.move<SCAM::NBWrite *>(that.value);
+                value.move<DESCAM::NBWrite *>(that.value);
                 break;
 
             case 101: // port_decl
-                value.move<SCAM::Port *>(that.value);
+                value.move<DESCAM::Port *>(that.value);
                 break;
 
             case 112: // read_statement
             case 118: // req_statement
-                value.move<SCAM::Read *>(that.value);
+                value.move<DESCAM::Read *>(that.value);
                 break;
 
             case 106: // var_ref
             case 107: // var_ref_parent
             case 108: // var_ref_child
-                value.move<SCAM::VariableOperand *>(that.value);
+                value.move<DESCAM::VariableOperand *>(that.value);
                 break;
 
             case 114: // write_statement
-                value.move<SCAM::Write *>(that.value);
+                value.move<DESCAM::Write *>(that.value);
                 break;
 
             case 5: // "boolean value"
@@ -298,7 +298,7 @@ namespace yy {
                 break;
 
             case 103: // var_list_comma
-                value.move<std::map<std::string, SCAM::Variable *> >(that.value);
+                value.move<std::map<std::string, DESCAM::Variable *> >(that.value);
                 break;
 
             case 3: // "identifier"
@@ -312,7 +312,7 @@ namespace yy {
 
             case 91: // opt_init
             case 121: // expr_list_comma
-                value.move<std::vector<SCAM::Expr *> >(that.value);
+                value.move<std::vector<DESCAM::Expr *> >(that.value);
                 break;
 
             case 102: // name_list_comma
@@ -333,55 +333,55 @@ namespace yy {
         state = that.state;
         switch (that.type_get()) {
             case 95: // sections
-                value.copy<std::map<std::string, std::vector<SCAM::Stmt *>>>(that.value);
+                value.copy<std::map<std::string, std::vector<DESCAM::Stmt *>>>(that.value);
                 break;
 
             case 109: // statements
             case 110: // statement
             case 111: // assign_statement
             case 120: // opt_else
-                value.copy<std::vector<SCAM::Stmt *> >(that.value);
+                value.copy<std::vector<DESCAM::Stmt *> >(that.value);
                 break;
 
             case 104: // datatype
-                value.copy<SCAM::DataType *>(that.value);
+                value.copy<DESCAM::DataType *>(that.value);
                 break;
 
             case 123: // expr
-                value.copy<SCAM::Expr *>(that.value);
+                value.copy<DESCAM::Expr *>(that.value);
                 break;
 
             case 119: // if_statement
-                value.copy<SCAM::ITE *>(that.value);
+                value.copy<DESCAM::ITE *>(that.value);
                 break;
 
             case 113: // nb_read_statement
             case 116: // get_statement
-                value.copy<SCAM::NBRead *>(that.value);
+                value.copy<DESCAM::NBRead *>(that.value);
                 break;
 
             case 115: // nb_write_statement
             case 117: // set_statement
-                value.copy<SCAM::NBWrite *>(that.value);
+                value.copy<DESCAM::NBWrite *>(that.value);
                 break;
 
             case 101: // port_decl
-                value.copy<SCAM::Port *>(that.value);
+                value.copy<DESCAM::Port *>(that.value);
                 break;
 
             case 112: // read_statement
             case 118: // req_statement
-                value.copy<SCAM::Read *>(that.value);
+                value.copy<DESCAM::Read *>(that.value);
                 break;
 
             case 106: // var_ref
             case 107: // var_ref_parent
             case 108: // var_ref_child
-                value.copy<SCAM::VariableOperand *>(that.value);
+                value.copy<DESCAM::VariableOperand *>(that.value);
                 break;
 
             case 114: // write_statement
-                value.copy<SCAM::Write *>(that.value);
+                value.copy<DESCAM::Write *>(that.value);
                 break;
 
             case 5: // "boolean value"
@@ -393,7 +393,7 @@ namespace yy {
                 break;
 
             case 103: // var_list_comma
-                value.copy<std::map<std::string, SCAM::Variable *> >(that.value);
+                value.copy<std::map<std::string, DESCAM::Variable *> >(that.value);
                 break;
 
             case 3: // "identifier"
@@ -407,7 +407,7 @@ namespace yy {
 
             case 91: // opt_init
             case 121: // expr_list_comma
-                value.copy<std::vector<SCAM::Expr *> >(that.value);
+                value.copy<std::vector<DESCAM::Expr *> >(that.value);
                 break;
 
             case 102: // name_list_comma
@@ -638,55 +638,55 @@ namespace yy {
          when using variants.  */
                 switch (yyr1_[yyn]) {
                     case 95: // sections
-                        yylhs.value.build<std::map<std::string, std::vector<SCAM::Stmt *>>>();
+                        yylhs.value.build<std::map<std::string, std::vector<DESCAM::Stmt *>>>();
                         break;
 
                     case 109: // statements
                     case 110: // statement
                     case 111: // assign_statement
                     case 120: // opt_else
-                        yylhs.value.build<std::vector<SCAM::Stmt *> >();
+                        yylhs.value.build<std::vector<DESCAM::Stmt *> >();
                         break;
 
                     case 104: // datatype
-                        yylhs.value.build<SCAM::DataType *>();
+                        yylhs.value.build<DESCAM::DataType *>();
                         break;
 
                     case 123: // expr
-                        yylhs.value.build<SCAM::Expr *>();
+                        yylhs.value.build<DESCAM::Expr *>();
                         break;
 
                     case 119: // if_statement
-                        yylhs.value.build<SCAM::ITE *>();
+                        yylhs.value.build<DESCAM::ITE *>();
                         break;
 
                     case 113: // nb_read_statement
                     case 116: // get_statement
-                        yylhs.value.build<SCAM::NBRead *>();
+                        yylhs.value.build<DESCAM::NBRead *>();
                         break;
 
                     case 115: // nb_write_statement
                     case 117: // set_statement
-                        yylhs.value.build<SCAM::NBWrite *>();
+                        yylhs.value.build<DESCAM::NBWrite *>();
                         break;
 
                     case 101: // port_decl
-                        yylhs.value.build<SCAM::Port *>();
+                        yylhs.value.build<DESCAM::Port *>();
                         break;
 
                     case 112: // read_statement
                     case 118: // req_statement
-                        yylhs.value.build<SCAM::Read *>();
+                        yylhs.value.build<DESCAM::Read *>();
                         break;
 
                     case 106: // var_ref
                     case 107: // var_ref_parent
                     case 108: // var_ref_child
-                        yylhs.value.build<SCAM::VariableOperand *>();
+                        yylhs.value.build<DESCAM::VariableOperand *>();
                         break;
 
                     case 114: // write_statement
-                        yylhs.value.build<SCAM::Write *>();
+                        yylhs.value.build<DESCAM::Write *>();
                         break;
 
                     case 5: // "boolean value"
@@ -698,7 +698,7 @@ namespace yy {
                         break;
 
                     case 103: // var_list_comma
-                        yylhs.value.build<std::map<std::string, SCAM::Variable *> >();
+                        yylhs.value.build<std::map<std::string, DESCAM::Variable *> >();
                         break;
 
                     case 3: // "identifier"
@@ -712,7 +712,7 @@ namespace yy {
 
                     case 91: // opt_init
                     case 121: // expr_list_comma
-                        yylhs.value.build<std::vector<SCAM::Expr *> >();
+                        yylhs.value.build<std::vector<DESCAM::Expr *> >();
                         break;
 
                     case 102: // name_list_comma
@@ -744,22 +744,22 @@ namespace yy {
                         case 11:
 #line 225 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (SCAM::DataTypes::isDataType(yystack_[5].value.as<std::string>())) {
+                            if (DESCAM::DataTypes::isDataType(yystack_[5].value.as<std::string>())) {
                                 error(yystack_[5].location, "The identifier " + yystack_[5].value.as<std::string>() + " is already used and cannot be re-defined");
                                 YYERROR;
                             }
-                            SCAM::DataType *dt = new SCAM::DataType(yystack_[5].value.as<std::string>());
+                            DESCAM::DataType *dt = new DESCAM::DataType(yystack_[5].value.as<std::string>());
                             //add symbolic values
                             std::vector<std::string>::iterator itSymVal;
                             for (itSymVal = yystack_[2].value.as<std::vector<std::string> >().begin();
                                  itSymVal != yystack_[2].value.as<std::vector<std::string> >().end(); ++itSymVal) {
-                                if (SCAM::DataTypes::isEnumValue(*itSymVal)) {
+                                if (DESCAM::DataTypes::isEnumValue(*itSymVal)) {
                                     error(yystack_[3].location, "The identifier " + *itSymVal + " is already used and cannot be re-defined");
                                     YYERROR;
                                 }
                                 dt->addEnumValue(*itSymVal);
                             }
-                            SCAM::DataTypes::addDataType(dt);
+                            DESCAM::DataTypes::addDataType(dt);
                         }
 #line 797 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -767,23 +767,23 @@ namespace yy {
                         case 12:
 #line 244 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (SCAM::DataTypes::isDataType(yystack_[5].value.as<std::string>())) {
+                            if (DESCAM::DataTypes::isDataType(yystack_[5].value.as<std::string>())) {
                                 error(yystack_[5].location, "A data type " + yystack_[5].value.as<std::string>() + " was already defined");
                                 YYERROR;
                             }
                             //var_list_comma should not be empty
-                            if (yystack_[2].value.as<std::map<std::string, SCAM::Variable *> >().empty()) {
+                            if (yystack_[2].value.as<std::map<std::string, DESCAM::Variable *> >().empty()) {
                                 error(yystack_[2].location, "The identifier " + yystack_[5].value.as<std::string>() + " is already used and cannot be re-defined");
                                 YYERROR;
                             }
-                            SCAM::DataType *dt = new SCAM::DataType(yystack_[5].value.as<std::string>());
+                            DESCAM::DataType *dt = new DESCAM::DataType(yystack_[5].value.as<std::string>());
                             //add subVars
-                            std::map<std::string, SCAM::Variable *>::iterator itSubVar;
-                            for (itSubVar = yystack_[2].value.as<std::map<std::string, SCAM::Variable *> >().begin();
-                                 itSubVar != yystack_[2].value.as<std::map<std::string, SCAM::Variable *> >().end(); ++itSubVar) {
+                            std::map<std::string, DESCAM::Variable *>::iterator itSubVar;
+                            for (itSubVar = yystack_[2].value.as<std::map<std::string, DESCAM::Variable *> >().begin();
+                                 itSubVar != yystack_[2].value.as<std::map<std::string, DESCAM::Variable *> >().end(); ++itSubVar) {
                                 dt->addSubVar(itSubVar->first, itSubVar->second->getDataType());
                             }
-                            SCAM::DataTypes::addDataType(dt);
+                            DESCAM::DataTypes::addDataType(dt);
 
                         }
 #line 821 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
@@ -856,7 +856,7 @@ namespace yy {
 #line 306 "aml_parser.ypp" // lalr1.cc:859
                         {
                             bool ok;
-                            ok = driver.addModule(new SCAM::Module(yystack_[1].value.as<std::string>()));
+                            ok = driver.addModule(new DESCAM::Module(yystack_[1].value.as<std::string>()));
                             if (!ok) {
                                 error(yystack_[1].location, "A module named " + yystack_[1].value.as<std::string>() + " is already defined");
                                 YYERROR;
@@ -874,8 +874,8 @@ namespace yy {
 
                             //sections, returns a sectionMap, added here to currentModule
 
-                            //SCAM::FSM* fsm = new SCAM::FSM;
-                            driver.module->getFSM()->setSectionMap(yystack_[3].value.as<std::map<std::string, std::vector<SCAM::Stmt *>>>());
+                            //DESCAM::FSM* fsm = new DESCAM::FSM;
+                            driver.module->getFSM()->setSectionMap(yystack_[3].value.as<std::map<std::string, std::vector<DESCAM::Stmt *>>>());
                             //fsm->setSectionMap($6);
                             //driver.module->setFSM(fsm);
                         }
@@ -885,7 +885,7 @@ namespace yy {
                         case 34:
 #line 330 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            driver.module->addPort(yystack_[0].value.as<SCAM::Port *>());
+                            driver.module->addPort(yystack_[0].value.as<DESCAM::Port *>());
                         }
 #line 913 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -894,11 +894,11 @@ namespace yy {
 #line 334 "aml_parser.ypp" // lalr1.cc:859
                         {
                             //check name against the names of the already defined ones
-                            if (driver.module->isPort(yystack_[0].value.as<SCAM::Port *>()->getName())) {
-                                error(yystack_[0].location, "A port named " + yystack_[0].value.as<SCAM::Port *>()->getName() + " is already defined");
+                            if (driver.module->isPort(yystack_[0].value.as<DESCAM::Port *>()->getName())) {
+                                error(yystack_[0].location, "A port named " + yystack_[0].value.as<DESCAM::Port *>()->getName() + " is already defined");
                                 YYERROR;
                             }
-                            driver.module->addPort(yystack_[0].value.as<SCAM::Port *>());
+                            driver.module->addPort(yystack_[0].value.as<DESCAM::Port *>());
                         }
 #line 926 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -913,7 +913,7 @@ namespace yy {
                         case 37:
 #line 345 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Expr *> >().push_back(yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<std::vector<DESCAM::Expr *> >().push_back(yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 938 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -921,7 +921,7 @@ namespace yy {
                         case 38:
 #line 346 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::vector<SCAM::Expr *> >(), yystack_[1].value.as<std::vector<SCAM::Expr *> >());
+                            std::swap(yylhs.value.as<std::vector<DESCAM::Expr *> >(), yystack_[1].value.as<std::vector<DESCAM::Expr *> >());
                         }
 #line 944 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -929,22 +929,22 @@ namespace yy {
                         case 39:
 #line 352 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (yystack_[1].value.as<std::vector<SCAM::Expr *> >().size() == 1) {
+                            if (yystack_[1].value.as<std::vector<DESCAM::Expr *> >().size() == 1) {
                                 // must be a name from the sections list
-                                if (driver.module->getFSM()->getSectionVariable()->getDataType() != yystack_[1].value.as<std::vector<SCAM::Expr *> >().at(0)->getDataType()) {
+                                if (driver.module->getFSM()->getSectionVariable()->getDataType() != yystack_[1].value.as<std::vector<DESCAM::Expr *> >().at(0)->getDataType()) {
                                     error(yystack_[1].location, "expected a section name");
                                     YYERROR;
                                 }
                                 {
-                                    SCAM::SectionValue *initval = new SCAM::SectionValue(
-                                            (dynamic_cast<SCAM::SectionValue *>(yystack_[1].value.as<std::vector<SCAM::Expr *> >().at(0)))->getValue(),
+                                    DESCAM::SectionValue *initval = new DESCAM::SectionValue(
+                                            (dynamic_cast<DESCAM::SectionValue *>(yystack_[1].value.as<std::vector<DESCAM::Expr *> >().at(0)))->getValue(),
                                             driver.module->getFSM()->getSectionVariable()->getDataType());
                                     driver.module->getFSM()->getSectionVariable()->setInitialValue(initval);
                                     driver.module->getFSM()->getNextSectionVariable()->setInitialValue(initval);
                                 }
 
                             } else {
-                                if (yystack_[1].value.as<std::vector<SCAM::Expr *> >().size() > 1) {
+                                if (yystack_[1].value.as<std::vector<DESCAM::Expr *> >().size() > 1) {
                                     error(yystack_[1].location, "initialization of section must be a scalar type");
                                     YYERROR;
                                 }
@@ -957,12 +957,12 @@ namespace yy {
 #line 373 "aml_parser.ypp" // lalr1.cc:859
                         {
 
-                            SCAM::DataType *sectionDataType = new SCAM::DataType(driver.module->getName() + "_SECTIONS");
+                            DESCAM::DataType *sectionDataType = new DESCAM::DataType(driver.module->getName() + "_SECTIONS");
                             //add symbolic values
                             std::vector<std::string>::iterator itSymVal;
                             for (itSymVal = yystack_[1].value.as<std::vector<std::string> >().begin();
                                  itSymVal != yystack_[1].value.as<std::vector<std::string> >().end(); ++itSymVal) {
-                                if (SCAM::DataTypes::isEnumValue(*itSymVal)) {
+                                if (DESCAM::DataTypes::isEnumValue(*itSymVal)) {
                                     error(yystack_[1].location, "identifier " + *itSymVal + " is already in use");
                                     YYERROR;
                                 }
@@ -983,7 +983,7 @@ namespace yy {
                                 YYERROR;
                             }
                             //check the name agains enum values
-                            if (SCAM::DataTypes::isEnumValue(yystack_[2].value.as<std::string>())) {
+                            if (DESCAM::DataTypes::isEnumValue(yystack_[2].value.as<std::string>())) {
                                 error(yystack_[2].location, "identifier " + yystack_[2].value.as<std::string>() + " is already used as enum value");
                                 YYERROR;
                             }
@@ -992,36 +992,36 @@ namespace yy {
                                 error(yystack_[2].location, "identifier " + yystack_[2].value.as<std::string>() + " is already used as section name");
                                 YYERROR;
                             }
-                            SCAM::Variable *variable = new SCAM::Variable(yystack_[2].value.as<std::string>(), yystack_[3].value.as<SCAM::DataType *>());
+                            DESCAM::Variable *variable = new DESCAM::Variable(yystack_[2].value.as<std::string>(), yystack_[3].value.as<DESCAM::DataType *>());
                             driver.module->addVariable(variable);
 
 
                             // scalar type initialization
-                            if (yystack_[1].value.as<std::vector<SCAM::Expr *> >().size() == 1) {
+                            if (yystack_[1].value.as<std::vector<DESCAM::Expr *> >().size() == 1) {
                                 //datatype should be the same
-                                if (yystack_[1].value.as<std::vector<SCAM::Expr *> >().at(0)->getDataType() != yystack_[3].value.as<SCAM::DataType *>()) {
+                                if (yystack_[1].value.as<std::vector<DESCAM::Expr *> >().at(0)->getDataType() != yystack_[3].value.as<DESCAM::DataType *>()) {
                                     error(yystack_[1].location, "datatype of initialization does not match the datatype of the variable");
                                     YYERROR;
                                 }
                                 //init must be (reducable to) a constant
                                 if (!driver.isConstExpr(
-                                        yystack_[1].value.as<std::vector<SCAM::Expr *> >().at(0))) { //should actually not be reachable since no variable are declared yet
+                                        yystack_[1].value.as<std::vector<DESCAM::Expr *> >().at(0))) { //should actually not be reachable since no variable are declared yet
                                     error(yystack_[1].location, "initialization value must be constant");
                                     YYERROR;
                                 }
-                                variable->setInitialValue(driver.reduzeToConstValue(yystack_[1].value.as<std::vector<SCAM::Expr *> >().at(0)));
+                                variable->setInitialValue(driver.reduzeToConstValue(yystack_[1].value.as<std::vector<DESCAM::Expr *> >().at(0)));
                             }
 
                             // Compound type initialization
-                            if (yystack_[1].value.as<std::vector<SCAM::Expr *> >().size() > 1) {
+                            if (yystack_[1].value.as<std::vector<DESCAM::Expr *> >().size() > 1) {
                                 //variable must be a compound  and list size must match
-                                if (!yystack_[3].value.as<SCAM::DataType *>()->isCompoundType() ||
-                                    yystack_[3].value.as<SCAM::DataType *>()->getSubVarMap().size() != yystack_[1].value.as<std::vector<SCAM::Expr *> >().size()) {
+                                if (!yystack_[3].value.as<DESCAM::DataType *>()->isCompoundType() ||
+                                    yystack_[3].value.as<DESCAM::DataType *>()->getSubVarMap().size() != yystack_[1].value.as<std::vector<DESCAM::Expr *> >().size()) {
                                     error(yystack_[1].location, "datatype of initialization does not match the datatype of the variable");
                                     YYERROR;
                                 }
 
-                                std::vector<SCAM::Expr *>::const_iterator initexpr = yystack_[1].value.as<std::vector<SCAM::Expr *> >().begin();
+                                std::vector<DESCAM::Expr *>::const_iterator initexpr = yystack_[1].value.as<std::vector<DESCAM::Expr *> >().begin();
                                 for (auto &&subvar : variable->getSubVarList()) {
 
                                     //all datatypes must match
@@ -1032,7 +1032,7 @@ namespace yy {
 
                                     //if enum (no need to reduce)
                                     if ((*initexpr)->getDataType()->isEnumType()) {
-                                        (*subvar).setInitialValue(dynamic_cast<SCAM::EnumValue *>(*initexpr));
+                                        (*subvar).setInitialValue(dynamic_cast<DESCAM::EnumValue *>(*initexpr));
                                     } else {
                                         //expression must (reduce to) be constant
                                         if (!driver.isConstExpr(*initexpr)) {
@@ -1052,7 +1052,7 @@ namespace yy {
                         case 43:
 #line 456 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::map<std::string, std::vector<SCAM::Stmt *>>>()[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<std::vector<SCAM::Stmt *> >();
+                            yylhs.value.as<std::map<std::string, std::vector<DESCAM::Stmt *>>>()[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<std::vector<DESCAM::Stmt *> >();
                         }
 #line 1059 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1060,8 +1060,8 @@ namespace yy {
                         case 44:
 #line 457 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::map<std::string, std::vector<SCAM::Stmt *>>>(), yystack_[4].value.as<std::map<std::string, std::vector<SCAM::Stmt *>>>());
-                            yylhs.value.as<std::map<std::string, std::vector<SCAM::Stmt *>>>()[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<std::vector<SCAM::Stmt *> >();
+                            std::swap(yylhs.value.as<std::map<std::string, std::vector<DESCAM::Stmt *>>>(), yystack_[4].value.as<std::map<std::string, std::vector<DESCAM::Stmt *>>>());
+                            yylhs.value.as<std::map<std::string, std::vector<DESCAM::Stmt *>>>()[yystack_[2].value.as<std::string>()] = yystack_[0].value.as<std::vector<DESCAM::Stmt *> >();
                         }
 #line 1065 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1189,9 +1189,9 @@ namespace yy {
                         case 60:
 #line 491 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::Port *>() = new SCAM::Port(yystack_[1].value.as<std::string>(),
-                                                                            new SCAM::Interface(yystack_[6].value.as<std::string>(), yystack_[5].value.as<std::string>()),
-                                                                            yystack_[3].value.as<SCAM::DataType *>());
+                            yylhs.value.as<DESCAM::Port *>() = new DESCAM::Port(yystack_[1].value.as<std::string>(),
+                                                                            new DESCAM::Interface(yystack_[6].value.as<std::string>(), yystack_[5].value.as<std::string>()),
+                                                                            yystack_[3].value.as<DESCAM::DataType *>());
                         }
 #line 1163 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1236,8 +1236,8 @@ namespace yy {
                         case 65:
 #line 511 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::map<std::string, SCAM::Variable *> >()[yystack_[0].value.as<std::string>()] = new SCAM::Variable(
-                                    yystack_[0].value.as<std::string>(), yystack_[1].value.as<SCAM::DataType *>());
+                            yylhs.value.as<std::map<std::string, DESCAM::Variable *> >()[yystack_[0].value.as<std::string>()] = new DESCAM::Variable(
+                                    yystack_[0].value.as<std::string>(), yystack_[1].value.as<DESCAM::DataType *>());
                         }
 #line 1201 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1245,15 +1245,15 @@ namespace yy {
                         case 66:
 #line 513 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::map<std::string, SCAM::Variable *> >(), yystack_[3].value.as<std::map<std::string, SCAM::Variable *> >());
+                            std::swap(yylhs.value.as<std::map<std::string, DESCAM::Variable *> >(), yystack_[3].value.as<std::map<std::string, DESCAM::Variable *> >());
                             //check name against the names of the already defined ones
-                            if (yylhs.value.as<std::map<std::string, SCAM::Variable *> >().find(yystack_[0].value.as<std::string>()) !=
-                                yylhs.value.as<std::map<std::string, SCAM::Variable *> >().end()) {
+                            if (yylhs.value.as<std::map<std::string, DESCAM::Variable *> >().find(yystack_[0].value.as<std::string>()) !=
+                                yylhs.value.as<std::map<std::string, DESCAM::Variable *> >().end()) {
                                 error(yystack_[0].location, "An identifier with name " + yystack_[0].value.as<std::string>() + " is already defined in this scope");
                                 YYERROR;
                             }
-                            yylhs.value.as<std::map<std::string, SCAM::Variable *> >()[yystack_[0].value.as<std::string>()] = new SCAM::Variable(
-                                    yystack_[0].value.as<std::string>(), yystack_[1].value.as<SCAM::DataType *>());
+                            yylhs.value.as<std::map<std::string, DESCAM::Variable *> >()[yystack_[0].value.as<std::string>()] = new DESCAM::Variable(
+                                    yystack_[0].value.as<std::string>(), yystack_[1].value.as<DESCAM::DataType *>());
                         }
 #line 1215 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1261,7 +1261,7 @@ namespace yy {
                         case 67:
 #line 525 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::DataType *>() = SCAM::DataTypes::getDataType("int");
+                            yylhs.value.as<DESCAM::DataType *>() = DESCAM::DataTypes::getDataType("int");
                         }
 #line 1221 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1269,7 +1269,7 @@ namespace yy {
                         case 68:
 #line 526 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::DataType *>() = SCAM::DataTypes::getDataType("bool");
+                            yylhs.value.as<DESCAM::DataType *>() = DESCAM::DataTypes::getDataType("bool");
                         }
 #line 1227 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1278,11 +1278,11 @@ namespace yy {
 #line 528 "aml_parser.ypp" // lalr1.cc:859
                         {
                             //check that $1 is a valid datatype
-                            if (!SCAM::DataTypes::isDataType(yystack_[0].value.as<std::string>())) {
+                            if (!DESCAM::DataTypes::isDataType(yystack_[0].value.as<std::string>())) {
                                 error(yystack_[0].location, "\"" + yystack_[0].value.as<std::string>() + "\" is not a valid datatype");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::DataType *>() = SCAM::DataTypes::getDataType(yystack_[0].value.as<std::string>());
+                            yylhs.value.as<DESCAM::DataType *>() = DESCAM::DataTypes::getDataType(yystack_[0].value.as<std::string>());
                         }
 #line 1240 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1304,7 +1304,7 @@ namespace yy {
                         case 72:
 #line 542 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::VariableOperand *>() = yystack_[0].value.as<SCAM::VariableOperand *>();
+                            yylhs.value.as<DESCAM::VariableOperand *>() = yystack_[0].value.as<DESCAM::VariableOperand *>();
                         }
 #line 1258 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1312,7 +1312,7 @@ namespace yy {
                         case 73:
 #line 543 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::VariableOperand *>() = yystack_[0].value.as<SCAM::VariableOperand *>();
+                            yylhs.value.as<DESCAM::VariableOperand *>() = yystack_[0].value.as<DESCAM::VariableOperand *>();
                         }
 #line 1264 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1325,7 +1325,7 @@ namespace yy {
                                 error(yystack_[0].location, "expected identifier for a variable, found \"" + yystack_[0].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::VariableOperand *>() = new SCAM::VariableOperand(driver.module->getVariable(yystack_[0].value.as<std::string>()));
+                            yylhs.value.as<DESCAM::VariableOperand *>() = new DESCAM::VariableOperand(driver.module->getVariable(yystack_[0].value.as<std::string>()));
                         }
 #line 1277 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1337,12 +1337,12 @@ namespace yy {
                                 error(yystack_[2].location, "expected an identifier for a variable, found \"" + yystack_[2].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Variable *parent = driver.module->getVariable(yystack_[2].value.as<std::string>());
+                            DESCAM::Variable *parent = driver.module->getVariable(yystack_[2].value.as<std::string>());
                             if (!parent->isCompoundType() || !parent->hasSubVar(yystack_[0].value.as<std::string>())) {
                                 error(yystack_[0].location, yystack_[2].value.as<std::string>() + "does not have a member named \"" + yystack_[0].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::VariableOperand *>() = new SCAM::VariableOperand(parent->getSubVar(yystack_[0].value.as<std::string>()));
+                            yylhs.value.as<DESCAM::VariableOperand *>() = new DESCAM::VariableOperand(parent->getSubVar(yystack_[0].value.as<std::string>()));
                         }
 #line 1294 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1350,7 +1350,7 @@ namespace yy {
                         case 76:
 #line 575 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::vector<SCAM::Stmt *> >(), yystack_[0].value.as<std::vector<SCAM::Stmt *> >());
+                            std::swap(yylhs.value.as<std::vector<DESCAM::Stmt *> >(), yystack_[0].value.as<std::vector<DESCAM::Stmt *> >());
                         }
 #line 1300 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1358,10 +1358,10 @@ namespace yy {
                         case 77:
 #line 576 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::vector<SCAM::Stmt *> >(), yystack_[1].value.as<std::vector<SCAM::Stmt *> >());
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().insert(yylhs.value.as<std::vector<SCAM::Stmt *> >().end(),
-                                                                                yystack_[0].value.as<std::vector<SCAM::Stmt *> >().begin(),
-                                                                                yystack_[0].value.as<std::vector<SCAM::Stmt *> >().end());
+                            std::swap(yylhs.value.as<std::vector<DESCAM::Stmt *> >(), yystack_[1].value.as<std::vector<DESCAM::Stmt *> >());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().insert(yylhs.value.as<std::vector<DESCAM::Stmt *> >().end(),
+                                                                                yystack_[0].value.as<std::vector<DESCAM::Stmt *> >().begin(),
+                                                                                yystack_[0].value.as<std::vector<DESCAM::Stmt *> >().end());
                         }
 #line 1306 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1369,7 +1369,7 @@ namespace yy {
                         case 78:
 #line 580 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::vector<SCAM::Stmt *> >(), yystack_[1].value.as<std::vector<SCAM::Stmt *> >());
+                            std::swap(yylhs.value.as<std::vector<DESCAM::Stmt *> >(), yystack_[1].value.as<std::vector<DESCAM::Stmt *> >());
                         }
 #line 1312 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1377,7 +1377,7 @@ namespace yy {
                         case 79:
 #line 581 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[0].value.as<SCAM::ITE *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[0].value.as<DESCAM::ITE *>());
                         }
 #line 1318 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1385,7 +1385,7 @@ namespace yy {
                         case 80:
 #line 582 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::Write *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::Write *>());
                         }
 #line 1324 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1393,7 +1393,7 @@ namespace yy {
                         case 81:
 #line 583 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::Read *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::Read *>());
                         }
 #line 1330 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1401,7 +1401,7 @@ namespace yy {
                         case 82:
 #line 584 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::NBWrite *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::NBWrite *>());
                         }
 #line 1336 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1409,7 +1409,7 @@ namespace yy {
                         case 83:
 #line 585 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::NBRead *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::NBRead *>());
                         }
 #line 1342 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1417,7 +1417,7 @@ namespace yy {
                         case 84:
 #line 586 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::NBRead *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::NBRead *>());
                         }
 #line 1348 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1425,7 +1425,7 @@ namespace yy {
                         case 85:
 #line 587 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::NBWrite *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::NBWrite *>());
                         }
 #line 1354 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1433,7 +1433,7 @@ namespace yy {
                         case 86:
 #line 588 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[1].value.as<SCAM::Read *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[1].value.as<DESCAM::Read *>());
                         }
 #line 1360 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1441,12 +1441,12 @@ namespace yy {
                         case 87:
 #line 593 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (yystack_[2].value.as<SCAM::VariableOperand *>()->getDataType() != yystack_[0].value.as<SCAM::Expr *>()->getDataType()) {
+                            if (yystack_[2].value.as<DESCAM::VariableOperand *>()->getDataType() != yystack_[0].value.as<DESCAM::Expr *>()->getDataType()) {
                                 error(yystack_[1].location, "data type missmatch in assignment");
                                 YYERROR;
                             }
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(
-                                    new SCAM::Assignment(yystack_[2].value.as<SCAM::VariableOperand *>(), yystack_[0].value.as<SCAM::Expr *>()));
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(
+                                    new DESCAM::Assignment(yystack_[2].value.as<DESCAM::VariableOperand *>(), yystack_[0].value.as<DESCAM::Expr *>()));
                         }
 #line 1369 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1454,12 +1454,12 @@ namespace yy {
                         case 88:
 #line 598 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::VariableOperand *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::VariableOperand *>()->isDataType("bool")) {
                                 error(yystack_[1].location, "data type missmatch in assignment");
                                 YYERROR;
                             }
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(
-                                    new SCAM::Assignment(yystack_[2].value.as<SCAM::VariableOperand *>(), yystack_[0].value.as<SCAM::NBRead *>()));
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(
+                                    new DESCAM::Assignment(yystack_[2].value.as<DESCAM::VariableOperand *>(), yystack_[0].value.as<DESCAM::NBRead *>()));
                         }
 #line 1378 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1467,12 +1467,12 @@ namespace yy {
                         case 89:
 #line 603 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::VariableOperand *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::VariableOperand *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected a boolean variable");
                                 YYERROR;
                             }
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(
-                                    new SCAM::Assignment(yystack_[2].value.as<SCAM::VariableOperand *>(), yystack_[0].value.as<SCAM::NBWrite *>()));
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(
+                                    new DESCAM::Assignment(yystack_[2].value.as<DESCAM::VariableOperand *>(), yystack_[0].value.as<DESCAM::NBWrite *>()));
                         }
 #line 1387 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1480,9 +1480,9 @@ namespace yy {
                         case 90:
 #line 608 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(new SCAM::Assignment(yystack_[0].value.as<SCAM::VariableOperand *>(),
-                                                                                                        new SCAM::Arithmetic(yystack_[0].value.as<SCAM::VariableOperand *>(), "+",
-                                                                                                                             new SCAM::IntegerValue(1))));
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(new DESCAM::Assignment(yystack_[0].value.as<DESCAM::VariableOperand *>(),
+                                                                                                        new DESCAM::Arithmetic(yystack_[0].value.as<DESCAM::VariableOperand *>(), "+",
+                                                                                                                             new DESCAM::IntegerValue(1))));
                         }
 #line 1395 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1490,13 +1490,13 @@ namespace yy {
                         case 91:
 #line 612 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[0].value.as<SCAM::VariableOperand *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::VariableOperand *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type operand");
                                 YYERROR;
                             }
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(new SCAM::Assignment(yystack_[0].value.as<SCAM::VariableOperand *>(),
-                                                                                                        new SCAM::Arithmetic(yystack_[0].value.as<SCAM::VariableOperand *>(), "-",
-                                                                                                                             new SCAM::IntegerValue(1))));
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(new DESCAM::Assignment(yystack_[0].value.as<DESCAM::VariableOperand *>(),
+                                                                                                        new DESCAM::Arithmetic(yystack_[0].value.as<DESCAM::VariableOperand *>(), "-",
+                                                                                                                             new DESCAM::IntegerValue(1))));
                         }
 #line 1404 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1504,12 +1504,12 @@ namespace yy {
                         case 92:
 #line 617 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (yystack_[0].value.as<SCAM::Expr *>()->getDataType() != driver.module->getFSM()->getSectionVariable()->getDataType()) {
+                            if (yystack_[0].value.as<DESCAM::Expr *>()->getDataType() != driver.module->getFSM()->getSectionVariable()->getDataType()) {
                                 error(yystack_[0].location, "expected a section name");
                                 YYERROR;
                             }
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(
-                                    new SCAM::Assignment(new SCAM::SectionOperand(driver.module->getFSM()->getSectionVariable()), yystack_[0].value.as<SCAM::Expr *>()));
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(
+                                    new DESCAM::Assignment(new DESCAM::SectionOperand(driver.module->getFSM()->getSectionVariable()), yystack_[0].value.as<DESCAM::Expr *>()));
                         }
 #line 1416 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1517,29 +1517,29 @@ namespace yy {
                         case 93:
 #line 625 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[4].value.as<SCAM::VariableOperand *>()->getDataType()->isCompoundType()) {
+                            if (!yystack_[4].value.as<DESCAM::VariableOperand *>()->getDataType()->isCompoundType()) {
                                 error(yystack_[3].location, "cannot assign a compound expression to a non-compound variable");
                                 YYERROR;
                             }
                             //list size must be the same as number of sub-variables
-                            if (yystack_[4].value.as<SCAM::VariableOperand *>()->getDataType()->getSubVarMap().size() !=
-                                yystack_[1].value.as<std::vector<SCAM::Expr *> >().size()) {
+                            if (yystack_[4].value.as<DESCAM::VariableOperand *>()->getDataType()->getSubVarMap().size() !=
+                                yystack_[1].value.as<std::vector<DESCAM::Expr *> >().size()) {
                                 error(yystack_[3].location, "compound expression type does not match compound variable type");
                                 YYERROR;
                             }
                             //the datatype of the expression list, must match the data type of the sub-var list
-                            std::vector<SCAM::Expr *>::const_iterator itExpr = yystack_[1].value.as<std::vector<SCAM::Expr *> >().begin();
-                            std::map<std::string, SCAM::DataType *>::const_iterator itVar;
-                            for (itVar = yystack_[4].value.as<SCAM::VariableOperand *>()->getDataType()->getSubVarMap().begin();
-                                 itVar != yystack_[4].value.as<SCAM::VariableOperand *>()->getDataType()->getSubVarMap().end(); ++itVar) {
+                            std::vector<DESCAM::Expr *>::const_iterator itExpr = yystack_[1].value.as<std::vector<DESCAM::Expr *> >().begin();
+                            std::map<std::string, DESCAM::DataType *>::const_iterator itVar;
+                            for (itVar = yystack_[4].value.as<DESCAM::VariableOperand *>()->getDataType()->getSubVarMap().begin();
+                                 itVar != yystack_[4].value.as<DESCAM::VariableOperand *>()->getDataType()->getSubVarMap().end(); ++itVar) {
                                 if (itVar->second != (*itExpr)->getDataType()) {
                                     error(yystack_[3].location, "compound expression type does not match compound variable type");
                                     YYERROR;
                                 }
 
-                                SCAM::VariableOperand *subOperand = new SCAM::VariableOperand(
-                                        driver.module->getVariable(yystack_[4].value.as<SCAM::VariableOperand *>()->getOperandName() + "." + itVar->first));
-                                yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(new SCAM::Assignment(subOperand, *itExpr));
+                                DESCAM::VariableOperand *subOperand = new DESCAM::VariableOperand(
+                                        driver.module->getVariable(yystack_[4].value.as<DESCAM::VariableOperand *>()->getOperandName() + "." + itVar->first));
+                                yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(new DESCAM::Assignment(subOperand, *itExpr));
 
                                 ++itExpr;
                             }
@@ -1555,17 +1555,17 @@ namespace yy {
                                 error(yystack_[5].location, "expected identifier for a port, found \"" + yystack_[5].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "blocking") {
                                 error(yystack_[5].location, "expected a blocking input port");
                                 YYERROR;
                             }
-                            if (port->getDataType() != yystack_[1].value.as<SCAM::VariableOperand *>()->getDataType()) {
-                                error(yystack_[1].location, "data type of variable \"" + yystack_[1].value.as<SCAM::VariableOperand *>()->getOperandName() +
+                            if (port->getDataType() != yystack_[1].value.as<DESCAM::VariableOperand *>()->getDataType()) {
+                                error(yystack_[1].location, "data type of variable \"" + yystack_[1].value.as<DESCAM::VariableOperand *>()->getOperandName() +
                                                             "\" does not match data type of input port \"" + port->getName() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Read *>() = new SCAM::Read(port, yystack_[1].value.as<SCAM::VariableOperand *>());
+                            yylhs.value.as<DESCAM::Read *>() = new DESCAM::Read(port, yystack_[1].value.as<DESCAM::VariableOperand *>());
                         }
 #line 1468 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1578,17 +1578,17 @@ namespace yy {
                                 error(yystack_[5].location, "expected identifier for a port, found \"" + yystack_[5].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "blocking") {
                                 error(yystack_[5].location, "expected a blocking input port");
                                 YYERROR;
                             }
-                            if (port->getDataType() != yystack_[1].value.as<SCAM::VariableOperand *>()->getDataType()) {
-                                error(yystack_[1].location, "data type of variable \"" + yystack_[1].value.as<SCAM::VariableOperand *>()->getOperandName() +
+                            if (port->getDataType() != yystack_[1].value.as<DESCAM::VariableOperand *>()->getDataType()) {
+                                error(yystack_[1].location, "data type of variable \"" + yystack_[1].value.as<DESCAM::VariableOperand *>()->getOperandName() +
                                                             "\" does not match data type of input port \"" + port->getName() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::NBRead *>() = new SCAM::NBRead(port, yystack_[1].value.as<SCAM::VariableOperand *>());
+                            yylhs.value.as<DESCAM::NBRead *>() = new DESCAM::NBRead(port, yystack_[1].value.as<DESCAM::VariableOperand *>());
                         }
 #line 1490 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1601,16 +1601,16 @@ namespace yy {
                                 error(yystack_[5].location, "expected identifier for a port, found \"" + yystack_[5].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "out" || port->getInterface()->getInterface() != "blocking") {
                                 error(yystack_[5].location, "expected a blocking output port");
                                 YYERROR;
                             }
-                            if (port->getDataType() != yystack_[1].value.as<SCAM::Expr *>()->getDataType()) {
+                            if (port->getDataType() != yystack_[1].value.as<DESCAM::Expr *>()->getDataType()) {
                                 error(yystack_[1].location, "data type of write argument does not match data type of output port \"" + port->getName() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Write *>() = new SCAM::Write(port, yystack_[1].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Write *>() = new DESCAM::Write(port, yystack_[1].value.as<DESCAM::Expr *>());
                         }
 #line 1512 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1623,16 +1623,16 @@ namespace yy {
                                 error(yystack_[5].location, "expected identifier for a port, found \"" + yystack_[5].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "out" || port->getInterface()->getInterface() != "blocking") {
                                 error(yystack_[5].location, "expected a blocking output port");
                                 YYERROR;
                             }
-                            if (port->getDataType() != yystack_[1].value.as<SCAM::Expr *>()->getDataType()) {
+                            if (port->getDataType() != yystack_[1].value.as<DESCAM::Expr *>()->getDataType()) {
                                 error(yystack_[1].location, "data type of nb_write argument does not match data type of output port \"" + port->getName() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::NBWrite *>() = new SCAM::NBWrite(port, yystack_[1].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::NBWrite *>() = new DESCAM::NBWrite(port, yystack_[1].value.as<DESCAM::Expr *>());
                         }
 #line 1534 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1645,17 +1645,17 @@ namespace yy {
                                 error(yystack_[5].location, "expected identifier for a port, found \"" + yystack_[5].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "shared") {
                                 error(yystack_[5].location, "expected a shared input port");
                                 YYERROR;
                             }
-                            if (port->getDataType() != yystack_[1].value.as<SCAM::VariableOperand *>()->getDataType()) {
-                                error(yystack_[1].location, "data type of variable \"" + yystack_[1].value.as<SCAM::VariableOperand *>()->getOperandName() +
+                            if (port->getDataType() != yystack_[1].value.as<DESCAM::VariableOperand *>()->getDataType()) {
+                                error(yystack_[1].location, "data type of variable \"" + yystack_[1].value.as<DESCAM::VariableOperand *>()->getOperandName() +
                                                             "\" does not match data type of input port \"" + port->getName() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::NBRead *>() = new SCAM::NBRead(port, yystack_[1].value.as<SCAM::VariableOperand *>());
+                            yylhs.value.as<DESCAM::NBRead *>() = new DESCAM::NBRead(port, yystack_[1].value.as<DESCAM::VariableOperand *>());
                         }
 #line 1556 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1668,16 +1668,16 @@ namespace yy {
                                 error(yystack_[5].location, "expected identifier for a port, found \"" + yystack_[5].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[5].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "out" || port->getInterface()->getInterface() != "shared") {
                                 error(yystack_[5].location, "expected a blocking output port");
                                 YYERROR;
                             }
-                            if (port->getDataType() != yystack_[1].value.as<SCAM::Expr *>()->getDataType()) {
+                            if (port->getDataType() != yystack_[1].value.as<DESCAM::Expr *>()->getDataType()) {
                                 error(yystack_[1].location, "data type of set argument does not match data type of output port \"" + port->getName() + "\"");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::NBWrite *>() = new SCAM::NBWrite(port, yystack_[1].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::NBWrite *>() = new DESCAM::NBWrite(port, yystack_[1].value.as<DESCAM::Expr *>());
                         }
 #line 1578 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1690,12 +1690,12 @@ namespace yy {
                                 error(yystack_[2].location, "expected identifier for a port, found \"" + yystack_[2].value.as<std::string>() + "\"");
                                 YYERROR;
                             }
-                            SCAM::Port *port = driver.module->getPort(yystack_[2].value.as<std::string>());
+                            DESCAM::Port *port = driver.module->getPort(yystack_[2].value.as<std::string>());
                             if (port->getInterface()->getDirection() != "in" || port->getInterface()->getInterface() != "synch") {
                                 error(yystack_[2].location, "expected a blocking input port");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Read *>() = new SCAM::Read(port, nullptr);
+                            yylhs.value.as<DESCAM::Read *>() = new DESCAM::Read(port, nullptr);
                         }
 #line 1596 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1704,15 +1704,15 @@ namespace yy {
 #line 795 "aml_parser.ypp" // lalr1.cc:859
                         {
                             //check that $3 is a Boolean Expression
-                            if (!yystack_[5].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[5].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[5].location, "expected a Boolean logic expression as if condition");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::ITE *>() = new SCAM::ITE(yystack_[5].value.as<SCAM::Expr *>());
-                            yylhs.value.as<SCAM::ITE *>()->setIfList(yystack_[2].value.as<std::vector<SCAM::Stmt *> >());
+                            yylhs.value.as<DESCAM::ITE *>() = new DESCAM::ITE(yystack_[5].value.as<DESCAM::Expr *>());
+                            yylhs.value.as<DESCAM::ITE *>()->setIfList(yystack_[2].value.as<std::vector<DESCAM::Stmt *> >());
 
-                            if (!yystack_[0].value.as<std::vector<SCAM::Stmt *> >().empty()) {
-                                yylhs.value.as<SCAM::ITE *>()->setElseList(yystack_[0].value.as<std::vector<SCAM::Stmt *> >());
+                            if (!yystack_[0].value.as<std::vector<DESCAM::Stmt *> >().empty()) {
+                                yylhs.value.as<DESCAM::ITE *>()->setElseList(yystack_[0].value.as<std::vector<DESCAM::Stmt *> >());
                             }
                         }
 #line 1614 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
@@ -1728,7 +1728,7 @@ namespace yy {
                         case 103:
 #line 811 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::vector<SCAM::Stmt *> >(), yystack_[1].value.as<std::vector<SCAM::Stmt *> >());
+                            std::swap(yylhs.value.as<std::vector<DESCAM::Stmt *> >(), yystack_[1].value.as<std::vector<DESCAM::Stmt *> >());
                         }
 #line 1626 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1736,7 +1736,7 @@ namespace yy {
                         case 104:
 #line 812 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Stmt *> >().push_back(yystack_[0].value.as<SCAM::ITE *>());
+                            yylhs.value.as<std::vector<DESCAM::Stmt *> >().push_back(yystack_[0].value.as<DESCAM::ITE *>());
                         }
 #line 1632 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1751,7 +1751,7 @@ namespace yy {
                         case 106:
 #line 818 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<std::vector<SCAM::Expr *> >().push_back(yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<std::vector<DESCAM::Expr *> >().push_back(yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1644 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1759,8 +1759,8 @@ namespace yy {
                         case 107:
 #line 819 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            std::swap(yylhs.value.as<std::vector<SCAM::Expr *> >(), yystack_[2].value.as<std::vector<SCAM::Expr *> >());
-                            yylhs.value.as<std::vector<SCAM::Expr *> >().push_back(yystack_[0].value.as<SCAM::Expr *>());
+                            std::swap(yylhs.value.as<std::vector<DESCAM::Expr *> >(), yystack_[2].value.as<std::vector<DESCAM::Expr *> >());
+                            yylhs.value.as<std::vector<DESCAM::Expr *> >().push_back(yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1650 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1775,7 +1775,7 @@ namespace yy {
                         case 109:
 #line 826 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::BoolValue(yystack_[0].value.as<bool>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::BoolValue(yystack_[0].value.as<bool>());
                         }
 #line 1662 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1783,7 +1783,7 @@ namespace yy {
                         case 110:
 #line 827 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::IntegerValue(yystack_[0].value.as<int>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::IntegerValue(yystack_[0].value.as<int>());
                         }
 #line 1668 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1796,12 +1796,12 @@ namespace yy {
                             //or for a section name
 
                             if (driver.module->isVariable(yystack_[0].value.as<std::string>())) {
-                                yylhs.value.as<SCAM::Expr *>() = new SCAM::VariableOperand(driver.module->getVariable(yystack_[0].value.as<std::string>()));
-                            } else if (SCAM::DataTypes::isEnumValue(yystack_[0].value.as<std::string>())) {
-                                yylhs.value.as<SCAM::Expr *>() = new SCAM::EnumValue(yystack_[0].value.as<std::string>(),
-                                                                                     SCAM::DataTypes::getEnumValueType(yystack_[0].value.as<std::string>()));
+                                yylhs.value.as<DESCAM::Expr *>() = new DESCAM::VariableOperand(driver.module->getVariable(yystack_[0].value.as<std::string>()));
+                            } else if (DESCAM::DataTypes::isEnumValue(yystack_[0].value.as<std::string>())) {
+                                yylhs.value.as<DESCAM::Expr *>() = new DESCAM::EnumValue(yystack_[0].value.as<std::string>(),
+                                                                                     DESCAM::DataTypes::getEnumValueType(yystack_[0].value.as<std::string>()));
                             } else if (driver.module->getFSM()->isSectionValue(yystack_[0].value.as<std::string>())) {
-                                yylhs.value.as<SCAM::Expr *>() = new SCAM::SectionValue(yystack_[0].value.as<std::string>(),
+                                yylhs.value.as<DESCAM::Expr *>() = new DESCAM::SectionValue(yystack_[0].value.as<std::string>(),
                                                                                         driver.module->getFSM()->getSectionVariable()->getDataType());
                             } else {
                                 error(yystack_[0].location, "expected an identifier found, \"" + yystack_[0].value.as<std::string>() + "\"");
@@ -1815,7 +1815,7 @@ namespace yy {
                         case 112:
 #line 846 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::Expr *>() = yystack_[1].value.as<SCAM::Expr *>();
+                            yylhs.value.as<DESCAM::Expr *>() = yystack_[1].value.as<DESCAM::Expr *>();
                         }
 #line 1696 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1832,7 +1832,7 @@ namespace yy {
                         case 114:
 #line 848 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            yylhs.value.as<SCAM::Expr *>() = yystack_[0].value.as<SCAM::VariableOperand *>();
+                            yylhs.value.as<DESCAM::Expr *>() = yystack_[0].value.as<DESCAM::VariableOperand *>();
                         }
 #line 1708 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1840,15 +1840,15 @@ namespace yy {
                         case 115:
 #line 854 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Arithmetic(yystack_[2].value.as<SCAM::Expr *>(), "+", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Arithmetic(yystack_[2].value.as<DESCAM::Expr *>(), "+", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1718 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1856,15 +1856,15 @@ namespace yy {
                         case 116:
 #line 860 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Arithmetic(yystack_[2].value.as<SCAM::Expr *>(), "-", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Arithmetic(yystack_[2].value.as<DESCAM::Expr *>(), "-", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1728 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1872,15 +1872,15 @@ namespace yy {
                         case 117:
 #line 866 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Arithmetic(yystack_[2].value.as<SCAM::Expr *>(), "*", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Arithmetic(yystack_[2].value.as<DESCAM::Expr *>(), "*", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1738 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1888,15 +1888,15 @@ namespace yy {
                         case 118:
 #line 872 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Arithmetic(yystack_[2].value.as<SCAM::Expr *>(), "/", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Arithmetic(yystack_[2].value.as<DESCAM::Expr *>(), "/", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1748 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1904,15 +1904,15 @@ namespace yy {
                         case 119:
 #line 878 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Arithmetic(yystack_[2].value.as<SCAM::Expr *>(), "%", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Arithmetic(yystack_[2].value.as<DESCAM::Expr *>(), "%", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1758 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1920,11 +1920,11 @@ namespace yy {
                         case 120:
 #line 884 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::UnaryExpr("-", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::UnaryExpr("-", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1767 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -1987,16 +1987,16 @@ namespace yy {
 #line 897 "aml_parser.ypp" // lalr1.cc:859
                         {
                             //not same data type
-                            if (yystack_[2].value.as<SCAM::Expr *>()->getDataType() != yystack_[0].value.as<SCAM::Expr *>()->getDataType()) {
+                            if (yystack_[2].value.as<DESCAM::Expr *>()->getDataType() != yystack_[0].value.as<DESCAM::Expr *>()->getDataType()) {
                                 error(yystack_[1].location, "data type missmatch in expression");
                                 YYERROR;
                             }
                             //not compound
-                            if (yystack_[2].value.as<SCAM::Expr *>()->getDataType()->isCompoundType()) {
+                            if (yystack_[2].value.as<DESCAM::Expr *>()->getDataType()->isCompoundType()) {
                                 error(yystack_[1].location, "operator \"==\" not supported for compound types ");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Relational(yystack_[2].value.as<SCAM::Expr *>(), "==", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Relational(yystack_[2].value.as<DESCAM::Expr *>(), "==", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1815 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2005,16 +2005,16 @@ namespace yy {
 #line 905 "aml_parser.ypp" // lalr1.cc:859
                         {
                             //not same data type
-                            if (yystack_[2].value.as<SCAM::Expr *>()->getDataType() != yystack_[0].value.as<SCAM::Expr *>()->getDataType()) {
+                            if (yystack_[2].value.as<DESCAM::Expr *>()->getDataType() != yystack_[0].value.as<DESCAM::Expr *>()->getDataType()) {
                                 error(yystack_[1].location, "data type missmatch in expression");
                                 YYERROR;
                             }
                             //not compound
-                            if (yystack_[2].value.as<SCAM::Expr *>()->getDataType()->isCompoundType()) {
+                            if (yystack_[2].value.as<DESCAM::Expr *>()->getDataType()->isCompoundType()) {
                                 error(yystack_[1].location, "operator \"!=\" not supported for compound types ");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Relational(yystack_[2].value.as<SCAM::Expr *>(), "!=", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Relational(yystack_[2].value.as<DESCAM::Expr *>(), "!=", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1827 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2022,15 +2022,15 @@ namespace yy {
                         case 129:
 #line 914 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Relational(yystack_[2].value.as<SCAM::Expr *>(), ">", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Relational(yystack_[2].value.as<DESCAM::Expr *>(), ">", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1837 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2038,15 +2038,15 @@ namespace yy {
                         case 130:
 #line 920 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Relational(yystack_[2].value.as<SCAM::Expr *>(), ">=", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Relational(yystack_[2].value.as<DESCAM::Expr *>(), ">=", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1847 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2054,15 +2054,15 @@ namespace yy {
                         case 131:
 #line 926 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Relational(yystack_[2].value.as<SCAM::Expr *>(), "<", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Relational(yystack_[2].value.as<DESCAM::Expr *>(), "<", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1857 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2070,15 +2070,15 @@ namespace yy {
                         case 132:
 #line 932 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("int")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("int")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Relational(yystack_[2].value.as<SCAM::Expr *>(), "<=", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Relational(yystack_[2].value.as<DESCAM::Expr *>(), "<=", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1867 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2086,15 +2086,15 @@ namespace yy {
                         case 133:
 #line 940 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Logical(yystack_[2].value.as<SCAM::Expr *>(), "and", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Logical(yystack_[2].value.as<DESCAM::Expr *>(), "and", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1877 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2102,15 +2102,15 @@ namespace yy {
                         case 134:
 #line 946 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Logical(yystack_[2].value.as<SCAM::Expr *>(), "or", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Logical(yystack_[2].value.as<DESCAM::Expr *>(), "or", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1887 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2118,15 +2118,15 @@ namespace yy {
                         case 135:
 #line 952 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Logical(yystack_[2].value.as<SCAM::Expr *>(), "nor", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Logical(yystack_[2].value.as<DESCAM::Expr *>(), "nor", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1897 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2134,15 +2134,15 @@ namespace yy {
                         case 136:
 #line 958 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Logical(yystack_[2].value.as<SCAM::Expr *>(), "nand", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Logical(yystack_[2].value.as<DESCAM::Expr *>(), "nand", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1907 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2150,15 +2150,15 @@ namespace yy {
                         case 137:
 #line 964 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Logical(yystack_[2].value.as<SCAM::Expr *>(), "xor", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Logical(yystack_[2].value.as<DESCAM::Expr *>(), "xor", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1917 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2166,15 +2166,15 @@ namespace yy {
                         case 138:
 #line 970 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[2].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[2].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[2].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected an integer type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::Logical(yystack_[2].value.as<SCAM::Expr *>(), "xnor", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::Logical(yystack_[2].value.as<DESCAM::Expr *>(), "xnor", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1927 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;
@@ -2182,11 +2182,11 @@ namespace yy {
                         case 139:
 #line 976 "aml_parser.ypp" // lalr1.cc:859
                         {
-                            if (!yystack_[0].value.as<SCAM::Expr *>()->isDataType("bool")) {
+                            if (!yystack_[0].value.as<DESCAM::Expr *>()->isDataType("bool")) {
                                 error(yystack_[0].location, "expected a bool type expression");
                                 YYERROR;
                             }
-                            yylhs.value.as<SCAM::Expr *>() = new SCAM::UnaryExpr("not", yystack_[0].value.as<SCAM::Expr *>());
+                            yylhs.value.as<DESCAM::Expr *>() = new DESCAM::UnaryExpr("not", yystack_[0].value.as<DESCAM::Expr *>());
                         }
 #line 1939 "/home/nawras/SCAM/src/parserAML/aml_parser.cpp" // lalr1.cc:859
                             break;

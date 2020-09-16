@@ -26,24 +26,24 @@
 #include "Optimizer/FunctionsOptimizer/FunctionOptimizer.h"
 #include "Optimizer/OperatorStrengthReduction/OperatorStrengthReduction.h"
 #include "RangeAnalysis/RangeAndBitwidthAnalysis.h"
-#include "Optimizer/Utilities/OptUtilities.h"
+#include "GlobalUtilities.h"
 #include <utility>
 
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * \brief: Performs optimizations on the control flow graph(CFG)
      *
      * \author: mi-alkoudsi
      *
      * \input:
-     *      - std::map<int, SCAM::CfgNode *> cfg;
-     *      - SCAM::Module * module;
+     *      - std::map<int, DESCAM::CfgNode *> cfg;
+     *      - DESCAM::Module * module;
      *      - std::set<std::string> optimizeOptionsSet;
      * \output:
      *      - std::map<int, CfgNode *> optimizedCFG;
      *      - std::map<std::string, int> deducedVariablesBitwidth;
-     *      - std::map<SCAM::Port *, int> deducedOutputPortsBitwidth;
+     *      - std::map<DESCAM::Port *, int> deducedOutputPortsBitwidth;
      *
      * \details: Performs some or all of the following optimizations depending on the given optimization options
      * Merge redundant conditions
@@ -61,8 +61,8 @@ namespace SCAM {
     public:
         Optimizer() = delete;
 
-        Optimizer(std::map<int, SCAM::CfgBlock *> CFG,
-                  SCAM::Module *module, SCAM::Model *model , const std::set<std::string>& optimizeOptionsSet);
+        Optimizer(std::map<int, CfgBlock *> CFG,
+                  Module *module, Model *model , const std::set<std::string>& optimizeOptionsSet);
 
         ~Optimizer() = default;
 
@@ -70,16 +70,16 @@ namespace SCAM {
 
         const std::map<std::string, int> &getVariableBitWidthMap() const;
 
-        const std::map<SCAM::Port *, int> &getPortsBitWidthMap() const;
+        const std::map<Port *, int> &getPortsBitWidthMap() const;
 
     private:
-        std::map<int, SCAM::CfgBlock *> blockCFG;
-        std::map<int, SCAM::CfgNode *> nodeCFG;
-        SCAM::Module *module;
+        std::map<int, CfgBlock *> blockCFG;
+        std::map<int, CfgNode *> nodeCFG;
+        Module *module;
         std::map<std::string, Variable *> globalVariableMap;
         std::set<std::string> optimizeOptionsSet;
         std::map<std::string, int> variableBitWidthMap;
-        std::map<SCAM::Port *, int> portBitWidthMap;
+        std::map<Port *, int> portBitWidthMap;
     };
 }
 

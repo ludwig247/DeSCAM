@@ -5,33 +5,36 @@
 
 #include <assert.h>
 #include "PrintStmt.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
-void SCAM::PrintStmt::visit(VariableOperand &node) {
+
+void DESCAM::PrintStmt::visit(VariableOperand &node) {
     useParenthesesFlag = true;
     if (node.getVariable()->isSubVar()) {
         if (node.getVariable()->getParent()->isCompoundType()) {
             this->ss << node.getVariable()->getParent()->getName() << "." << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "[" << node.getVariable()->getName() << "]";
-        } else throw std::runtime_error("Unknown Type for SubVar");
+        } else TERMINATE("Unknown Type for SubVar");
     } else {
         this->ss << node.getVariable()->getName();
     }
 }
 
-void SCAM::PrintStmt::visit(IntegerValue &node) {
+void DESCAM::PrintStmt::visit(IntegerValue &node) {
     useParenthesesFlag = true;
     this->ss << node.getValue();
 
 }
 
-void SCAM::PrintStmt::visit(SCAM::UnsignedValue &node) {
+void DESCAM::PrintStmt::visit(DESCAM::UnsignedValue &node) {
     useParenthesesFlag = true;
     this->ss << node.getValue();
 }
 
-void SCAM::PrintStmt::visit(BoolValue &node) {
+void DESCAM::PrintStmt::visit(BoolValue &node) {
     useParenthesesFlag = true;
     if (node.getValue()) {
         this->ss << "true";
@@ -41,12 +44,12 @@ void SCAM::PrintStmt::visit(BoolValue &node) {
 }
 
 
-void SCAM::PrintStmt::visit(EnumValue &node) {
+void DESCAM::PrintStmt::visit(EnumValue &node) {
     useParenthesesFlag = true;
     this->ss << node.getEnumValue();
 }
 
-void SCAM::PrintStmt::visit(SCAM::CompoundValue &node) {
+void DESCAM::PrintStmt::visit(DESCAM::CompoundValue &node) {
     useParenthesesFlag = true;
     this->ss << "{";
     for (auto iterator = node.getValues().begin(); iterator != node.getValues().end(); ++iterator) {
@@ -58,7 +61,7 @@ void SCAM::PrintStmt::visit(SCAM::CompoundValue &node) {
 }
 
 
-void SCAM::PrintStmt::visit(SCAM::Assignment &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Assignment &node) {
     useParenthesesFlag = true;
     //FIXME: not necssary
     if (node.getLhs() != nullptr) {
@@ -71,7 +74,7 @@ void SCAM::PrintStmt::visit(SCAM::Assignment &node) {
     }
 }
 
-void SCAM::PrintStmt::visit(Arithmetic &node) {
+void DESCAM::PrintStmt::visit(Arithmetic &node) {
     useParenthesesFlag = true;
     this->ss << "(";
     node.getLhs()->accept(*this);
@@ -81,7 +84,7 @@ void SCAM::PrintStmt::visit(Arithmetic &node) {
 }
 
 
-void SCAM::PrintStmt::visit(Logical &node) {
+void DESCAM::PrintStmt::visit(Logical &node) {
     bool tempUseParentheses = useParenthesesFlag;
     useParenthesesFlag = true;
     if (tempUseParentheses) this->ss << "(";
@@ -91,7 +94,7 @@ void SCAM::PrintStmt::visit(Logical &node) {
     if (tempUseParentheses) this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(Relational &node) {
+void DESCAM::PrintStmt::visit(Relational &node) {
     useParenthesesFlag = true;
     this->ss << "(";
     node.getLhs()->accept(*this);
@@ -100,7 +103,7 @@ void SCAM::PrintStmt::visit(Relational &node) {
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(SCAM::Bitwise &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Bitwise &node) {
     useParenthesesFlag = true;
     this->ss << "(";
     node.getLhs()->accept(*this);
@@ -109,20 +112,20 @@ void SCAM::PrintStmt::visit(SCAM::Bitwise &node) {
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(PortOperand &node) {
+void DESCAM::PrintStmt::visit(PortOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getPort()->getName();
 }
 
 
-void SCAM::PrintStmt::visit(UnaryExpr &node) {
+void DESCAM::PrintStmt::visit(UnaryExpr &node) {
     useParenthesesFlag = true;
     this->ss << node.getOperation() << "(";
     node.getExpr()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(Read &node) {
+void DESCAM::PrintStmt::visit(Read &node) {
     useParenthesesFlag = true;
     this->ss << node.getPort()->getName();
 
@@ -151,11 +154,11 @@ void SCAM::PrintStmt::visit(Read &node) {
     } else if (node.isShared()) {
         this->ss << ".get(";
         node.getVariableOperand()->accept(*this);
-    } else throw std::runtime_error("Unknown interface: " + node.getPort()->getInterface()->getName());
+    } else TERMINATE("Unknown interface: " + node.getPort()->getInterface()->getName());
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(Write &node) {
+void DESCAM::PrintStmt::visit(Write &node) {
     useParenthesesFlag = true;
     this->ss << node.getPort()->getName();
     if (node.isBlocking()) {
@@ -179,36 +182,36 @@ void SCAM::PrintStmt::visit(Write &node) {
     } else if (node.isShared()) {
         this->ss << ".set(";
         node.getValue()->accept(*this);
-    } else throw std::runtime_error("Unknown interface: " + node.getPort()->getInterface()->getName());
+    } else TERMINATE("Unknown interface: " + node.getPort()->getInterface()->getName());
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(While &node) {
+void DESCAM::PrintStmt::visit(While &node) {
     useParenthesesFlag = true;
     this->ss << "while (";
     node.getConditionStmt()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(If &node) {
+void DESCAM::PrintStmt::visit(If &node) {
     useParenthesesFlag = true;
     this->ss << "if (";
     node.getConditionStmt()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(SectionOperand &node) {
+void DESCAM::PrintStmt::visit(SectionOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getName();
 }
 
-void SCAM::PrintStmt::visit(SectionValue &node) {
+void DESCAM::PrintStmt::visit(SectionValue &node) {
     useParenthesesFlag = true;
     this->ss << node.getValue();
 }
 
 
-void SCAM::PrintStmt::visit(ITE &node) {
+void DESCAM::PrintStmt::visit(ITE &node) {
     useParenthesesFlag = true;
 
     /*
@@ -249,14 +252,14 @@ void SCAM::PrintStmt::visit(ITE &node) {
     }
 }
 
-void SCAM::PrintStmt::visit(Cast &node) {
+void DESCAM::PrintStmt::visit(Cast &node) {
     useParenthesesFlag = true;
     this->ss << "to_" << node.getDataType()->getName() << "(";
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(SCAM::FunctionOperand &node) {
+void DESCAM::PrintStmt::visit(DESCAM::FunctionOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getOperandName() << "(";
     auto paramMap = node.getParamValueMap();
@@ -267,12 +270,12 @@ void SCAM::PrintStmt::visit(SCAM::FunctionOperand &node) {
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(SyncSignal &node) {
+void DESCAM::PrintStmt::visit(SyncSignal &node) {
     useParenthesesFlag = true;
     this->ss << node.getPort()->getName() << ".sync()";
 }
 
-void SCAM::PrintStmt::visit(DataSignalOperand &node) {
+void DESCAM::PrintStmt::visit(DataSignalOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getDataSignal()->getPort()->getName() << "_sig";
     if (node.getDataSignal()->isSubVar()) {
@@ -280,7 +283,7 @@ void SCAM::PrintStmt::visit(DataSignalOperand &node) {
     }
 }
 
-std::string SCAM::PrintStmt::createString(SCAM::Stmt *stmt, unsigned int size, unsigned int offset) {
+std::string DESCAM::PrintStmt::createString(DESCAM::Stmt *stmt, unsigned int size, unsigned int offset) {
 
     this->indent = offset;
     this->indentSize = size;
@@ -288,17 +291,17 @@ std::string SCAM::PrintStmt::createString(SCAM::Stmt *stmt, unsigned int size, u
     return this->ss.str();
 }
 
-std::string SCAM::PrintStmt::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::PrintStmt::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     PrintStmt printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-std::string SCAM::PrintStmt::toString(const SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::PrintStmt::toString(const DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     PrintStmt printer;
     return printer.createString(const_cast<Stmt *>(stmt), indentSize, indentOffset);
 }
 
-void SCAM::PrintStmt::visit(SCAM::ArrayOperand &node) {
+void DESCAM::PrintStmt::visit(DESCAM::ArrayOperand &node) {
     useParenthesesFlag = true;
 
     this->ss << node.getArrayOperand()->getOperandName();
@@ -307,7 +310,7 @@ void SCAM::PrintStmt::visit(SCAM::ArrayOperand &node) {
     this->ss << "]";
 }
 
-void SCAM::PrintStmt::visit(struct CompoundExpr &node) {
+void DESCAM::PrintStmt::visit(struct CompoundExpr &node) {
     useParenthesesFlag = true;
     this->ss << "{";
     auto valueMap = node.getValueMap();
@@ -319,33 +322,33 @@ void SCAM::PrintStmt::visit(struct CompoundExpr &node) {
 
 }
 
-void SCAM::PrintStmt::visit(SCAM::ParamOperand &node) {
+void DESCAM::PrintStmt::visit(DESCAM::ParamOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getOperandName();
 }
 
-void SCAM::PrintStmt::visit(SCAM::Return &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Return &node) {
     useParenthesesFlag = true;
     this->ss << "return(";
     node.getReturnValue()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::PrintStmt::visit(SCAM::Notify &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Notify &node) {
     useParenthesesFlag = true;
     this->ss << node.getPort()->getName() << "_notify";
 }
 
-void SCAM::PrintStmt::visit(SCAM::Wait &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Wait &node) {
     this->ss << "wait(SC_ZERO_TIME)";
 }
 
-void SCAM::PrintStmt::visit(SCAM::Peek &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Peek &node) {
     useParenthesesFlag = true;
     this->ss << node.getPort()->getName() << ".sync()";
 }
 
-void SCAM::PrintStmt::visit(SCAM::ArrayExpr &node) {
+void DESCAM::PrintStmt::visit(DESCAM::ArrayExpr &node) {
 
     useParenthesesFlag = true;
     this->ss << "[";
@@ -358,11 +361,11 @@ void SCAM::PrintStmt::visit(SCAM::ArrayExpr &node) {
 }
 
 
-void SCAM::PrintStmt::visit(TimePointOperand &node) {
+void DESCAM::PrintStmt::visit(TimePointOperand &node) {
     this->ss << node.getTimepoint()->getName();
 }
 
-void SCAM::PrintStmt::visit(SCAM::Ternary &node) {
+void DESCAM::PrintStmt::visit(DESCAM::Ternary &node) {
 
     this->ss << "(";
     node.getCondition()->accept(*this);

@@ -7,10 +7,10 @@
 
 #include <Behavior/Operation.h>
 
-namespace SCAM{
+namespace DESCAM{
     class Completeness {
     public:
-        static bool checkCaseSplit(const std::vector<SCAM::Operation *> &operations, Module *module);
+        static bool checkCaseSplit(const std::vector<DESCAM::Operation *> &operations, Module *module);
     };
 }
 

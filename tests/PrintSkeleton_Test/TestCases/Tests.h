@@ -11,5 +11,4 @@
 #include "ModuleFunctions.h"
 #include "ModulesMasterSlave.h"
 
-
 #endif //SCAM_TESTS_H

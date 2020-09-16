@@ -3,29 +3,32 @@
 //
 
 #include "IntegerValue.h"
+#include <utility>
+#include <DescamException.h>
 #include "NodePeekVisitor.h"
 
-SCAM::IntegerValue::IntegerValue(int value) :
+DESCAM::IntegerValue::IntegerValue(int value, LocationInfo locationInfo) :
         value(value),
         ConstValue(DataTypes::getDataType("int")) {
-    assert(value >= -2147483648 && value <= 2147483647 && "Value is only allowed to be 32bit");
+    this->stmtLocationInfo = std::move(stmtLocationInfo);
+    if(!(value >= -2147483648) || !(value <= 2147483647)) throw DescamException("Integer value is only allowed to be 32bit",locationInfo);
 
 }
 
-int SCAM::IntegerValue::getValue() {
+int DESCAM::IntegerValue::getValue() {
     return this->value;
 }
 
-void SCAM::IntegerValue::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::IntegerValue::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 
 }
 
-std::string SCAM::IntegerValue::getValueAsString() const {
+std::string DESCAM::IntegerValue::getValueAsString() const {
     return std::to_string(value);
 }
 
-bool SCAM::IntegerValue::operator==(const Stmt &other) const {
+bool DESCAM::IntegerValue::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekIntegerValue(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (IntegerValue *) this;

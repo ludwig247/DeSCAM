@@ -8,7 +8,7 @@
 #include <Stmts/StmtAbstractVisitor.h>
 #include "Stmts_all.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class SimplifyVisitor : public StmtAbstractVisitor {
     public:

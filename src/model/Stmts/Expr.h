@@ -10,12 +10,12 @@
 #include "Stmt.h"
 #include <DataTypes.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class Expr : public Stmt {
     public:
         Expr() = delete;
-        explicit Expr(const DataType *dataType);
+        explicit Expr(const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
         ~Expr() = default;
 
         const DataType *getDataType() const;

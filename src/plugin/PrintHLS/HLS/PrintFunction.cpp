@@ -7,7 +7,7 @@
 #include "PrintBitOperations.h"
 #include "Utilities.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace DESCAM::HLSPlugin::HLS;
 
 PrintFunction::PrintFunction(
         Stmt *stmt,

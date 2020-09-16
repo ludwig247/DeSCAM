@@ -16,20 +16,20 @@ public:
 
     virtual ~CfgPath_test() = default;
 
-    SCAM::CfgPath path;
+    DESCAM::CfgPath path;
 };
 
 TEST_F(CfgPath_test, canAddAndRemoveNode) {
-    SCAM::CfgNode node(nullptr);
+    DESCAM::CfgNode node(nullptr);
     ASSERT_NO_THROW(path.insertAtEnd(&node)) << "could not add node to path\n";
     ASSERT_NO_THROW(path.deleteNodeBackward()) << "could not delete node from path\n";
     ASSERT_TRUE(path.getPath().empty()) << "path expected to be empty\n";
 }
 
 TEST_F(CfgPath_test, canGetPath) {
-    SCAM::CfgNode node1(nullptr);
+    DESCAM::CfgNode node1(nullptr);
     node1.replaceId(0);
-    SCAM::CfgNode node2(new SCAM::While(new SCAM::BoolValue(true)));
+    DESCAM::CfgNode node2(new DESCAM::While(new DESCAM::BoolValue(true)));
     node2.replaceId(1);
     path.insertAtEnd(&node1);
     path.insertAtEnd(&node2);
@@ -41,7 +41,7 @@ TEST_F(CfgPath_test, canGetPath) {
 
 TEST_F(CfgPath_test, canMakePath) {
     for (auto i = 0; i < 3; i++) {
-        auto node = new SCAM::CfgNode(nullptr);
+        auto node = new DESCAM::CfgNode(nullptr);
         node->replaceId(i);
         path.insertAtEnd(node);
     } // path has 0 1 2

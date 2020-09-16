@@ -10,16 +10,17 @@
 #include <vector>
 #include <map>
 #include "AbstractVisitor.h"
+#include "LocationInfo.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class AbstractNode {
 
     public:
         AbstractNode();
 
-        explicit AbstractNode(std::string name);
+        explicit AbstractNode(std::string name,LocationInfo locationInfo = LocationInfo());
 
         virtual ~AbstractNode() = default;
 
@@ -28,11 +29,15 @@ namespace SCAM {
 
         //Name
         std::string getName() const;
-
         void setName(std::string newName);
+
+        //Location information
+        const LocationInfo& getLocationInfo() {return this->locationInfo;};
+        void setLocationInfo(LocationInfo info){ this->locationInfo = info;};
 
     private:
         std::string name;
+        LocationInfo locationInfo;
 
 
     };

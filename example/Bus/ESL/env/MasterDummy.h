@@ -5,7 +5,7 @@
 #ifndef PROJECT_MASTERDUMMY_H
 #define PROJECT_MASTERDUMMY_H
 #include "systemc.h"
-#include "../../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../../legacy/SingleMasterMultiSlave/ESL/Compound.h"
 #include "Interfaces.h"
 
 struct MasterDummy : public sc_module {

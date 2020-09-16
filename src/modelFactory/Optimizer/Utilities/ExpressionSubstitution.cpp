@@ -3,8 +3,11 @@
 //
 
 #include "ExpressionSubstitution.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Expr *oldExpr, SCAM::Expr *newExpr) {
+
+DESCAM::ExpressionSubstitution::ExpressionSubstitution(DESCAM::Stmt *stmt, DESCAM::Expr *oldExpr, DESCAM::Expr *newExpr) {
     this->oldExpr = oldExpr;
     this->newExpr = newExpr;
     this->oldStmt = stmt;
@@ -13,15 +16,15 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Stmt *stmt, SCAM::Exp
     if (this->oldStmt) {
         stmt->accept(*this);
         if (*stmt == *this->newStmt) {
-            std::cout << "oldExpr " <<  PrintStmt::toString(this->oldExpr) << std::endl;
-            std::cout << "newExpr " <<  PrintStmt::toString(this->newExpr) << std::endl;
-            std::cout << PrintStmt::toString(this->newStmt) << std::endl;
-        //    throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
+//            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
+//            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
+//            std::cout << PrintStmt::toString(this->newStmt) << std::endl;
+            //    TERMINATE("substitutionError!, oldExpr was not found in stmt");
         }
     }
 }
 
-SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Expr *expr, SCAM::Expr *oldExpr, SCAM::Expr *newExpr) {
+DESCAM::ExpressionSubstitution::ExpressionSubstitution(DESCAM::Expr *expr, DESCAM::Expr *oldExpr, DESCAM::Expr *newExpr) {
     this->oldExpr = oldExpr;
     this->newExpr = newExpr;
     this->oldStmt = nullptr;
@@ -30,36 +33,36 @@ SCAM::ExpressionSubstitution::ExpressionSubstitution(SCAM::Expr *expr, SCAM::Exp
     if (expr) {
         expr->accept(*this);
         if (*expr == *this->propagatedExpr) {
-            std::cout << "oldExpr " <<  PrintStmt::toString(this->oldExpr) << std::endl;
-            std::cout << "newExpr " <<  PrintStmt::toString(this->newExpr) << std::endl;
-            std::cout << PrintStmt::toString(this->propagatedExpr) << std::endl;
-          //  throw std::runtime_error("substitutionError!, oldExpr was not found in stmt");
+//            std::cout << "oldExpr " << PrintStmt::toString(this->oldExpr) << std::endl;
+//            std::cout << "newExpr " << PrintStmt::toString(this->newExpr) << std::endl;
+//            std::cout << PrintStmt::toString(this->propagatedExpr) << std::endl;
+            //  TERMINATE("substitutionError!, oldExpr was not found in stmt");
         }
     }
 }
 
 
-SCAM::Stmt *SCAM::ExpressionSubstitution::substituteExpr(SCAM::Stmt *stmt, SCAM::Expr *oldExpr, SCAM::Expr *newExpr) {
+DESCAM::Stmt *DESCAM::ExpressionSubstitution::substituteExpr(DESCAM::Stmt *stmt, DESCAM::Expr *oldExpr, DESCAM::Expr *newExpr) {
     ExpressionSubstitution expressionSubstitution(stmt, oldExpr, newExpr);
     return expressionSubstitution.newStmt;
 }
 
 
-SCAM::Expr *SCAM::ExpressionSubstitution::substituteExpr(SCAM::Expr *expr, SCAM::Expr *oldExpr, SCAM::Expr *newExpr) {
-    SCAM::ExpressionSubstitution expressionSubstitution(expr, oldExpr, newExpr);
+DESCAM::Expr *DESCAM::ExpressionSubstitution::substituteExpr(DESCAM::Expr *expr, DESCAM::Expr *oldExpr, DESCAM::Expr *newExpr) {
+    DESCAM::ExpressionSubstitution expressionSubstitution(expr, oldExpr, newExpr);
     return expressionSubstitution.propagatedExpr;
 }
 
 
-SCAM::Stmt *SCAM::ExpressionSubstitution::getNewStmt() const {
+DESCAM::Stmt *DESCAM::ExpressionSubstitution::getNewStmt() const {
     return this->newStmt;
 }
 
-SCAM::Stmt *SCAM::ExpressionSubstitution::getModifiedExpr() const {
+DESCAM::Stmt *DESCAM::ExpressionSubstitution::getModifiedExpr() const {
     return this->propagatedExpr;
 }
 
-void SCAM::ExpressionSubstitution::visit(SCAM::VariableOperand &node) {
+void DESCAM::ExpressionSubstitution::visit(DESCAM::VariableOperand &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -67,7 +70,7 @@ void SCAM::ExpressionSubstitution::visit(SCAM::VariableOperand &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct IntegerValue &node) {
+void DESCAM::ExpressionSubstitution::visit(struct IntegerValue &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -75,7 +78,7 @@ void SCAM::ExpressionSubstitution::visit(struct IntegerValue &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct UnsignedValue &node) {
+void DESCAM::ExpressionSubstitution::visit(struct UnsignedValue &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -83,7 +86,7 @@ void SCAM::ExpressionSubstitution::visit(struct UnsignedValue &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct BoolValue &node) {
+void DESCAM::ExpressionSubstitution::visit(struct BoolValue &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -91,7 +94,7 @@ void SCAM::ExpressionSubstitution::visit(struct BoolValue &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct EnumValue &node) {
+void DESCAM::ExpressionSubstitution::visit(struct EnumValue &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -99,7 +102,7 @@ void SCAM::ExpressionSubstitution::visit(struct EnumValue &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct CompoundValue &node) {
+void DESCAM::ExpressionSubstitution::visit(struct CompoundValue &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -107,7 +110,7 @@ void SCAM::ExpressionSubstitution::visit(struct CompoundValue &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Assignment &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Assignment &node) {
     auto lhs = node.getLhs();
     auto rhs = node.getRhs();
     if (*lhs == *this->oldExpr) {
@@ -132,7 +135,7 @@ void SCAM::ExpressionSubstitution::visit(struct Assignment &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct UnaryExpr &node) {
+void DESCAM::ExpressionSubstitution::visit(struct UnaryExpr &node) {
     auto exprInsideUnary = node.getExpr();
     if (*exprInsideUnary == *this->oldExpr) {
         this->propagatedExpr = new UnaryExpr(node.getOperation(), this->newExpr);
@@ -147,7 +150,7 @@ void SCAM::ExpressionSubstitution::visit(struct UnaryExpr &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct If &node) {
+void DESCAM::ExpressionSubstitution::visit(struct If &node) {
     auto expressionInsideIf = node.getConditionStmt();
     if (*expressionInsideIf == *this->oldExpr) {
         assert(this->newExpr->getDataType() == DataTypes::getDataType("bool"));
@@ -164,17 +167,17 @@ void SCAM::ExpressionSubstitution::visit(struct If &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Read &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Read &node) {
     if (node.getVariableOperand() == this->oldExpr) {
-        if (auto varOp = dynamic_cast<SCAM::VariableOperand *>(this->newExpr)) {
+        if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(this->newExpr)) {
             this->newStmt = new Read(node.getPort(), varOp, node.isNonBlockingAccess(), node.getStatusOperand());
-        } else { throw std::runtime_error("Expected a variable operand!"); }
+        } else { TERMINATE("Expected a variable operand!"); }
     } else {
         this->newStmt = &node;
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Write &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Write &node) {
     if (*node.getValue() == *this->oldExpr) {
         this->newStmt = new Write(node.getPort(), this->newExpr, node.isNonBlockingAccess(), node.getStatusOperand());
     } else {
@@ -189,7 +192,7 @@ void SCAM::ExpressionSubstitution::visit(struct Write &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Arithmetic &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Arithmetic &node) {
     auto lhs = node.getLhs();
     auto rhs = node.getRhs();
     if (*lhs == *this->oldExpr) {
@@ -217,7 +220,7 @@ void SCAM::ExpressionSubstitution::visit(struct Arithmetic &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Logical &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Logical &node) {
     auto lhs = node.getLhs();
     auto rhs = node.getRhs();
     if (*lhs == *this->oldExpr) {
@@ -245,7 +248,7 @@ void SCAM::ExpressionSubstitution::visit(struct Logical &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Relational &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Relational &node) {
     auto lhs = node.getLhs();
     auto rhs = node.getRhs();
     if (*lhs == *this->oldExpr) {
@@ -273,7 +276,7 @@ void SCAM::ExpressionSubstitution::visit(struct Relational &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Bitwise &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Bitwise &node) {
     auto lhs = node.getLhs();
     auto rhs = node.getRhs();
     if (*lhs == *this->oldExpr) {
@@ -301,7 +304,7 @@ void SCAM::ExpressionSubstitution::visit(struct Bitwise &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Cast &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Cast &node) {
     if (*node.getSubExpr() == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -315,12 +318,12 @@ void SCAM::ExpressionSubstitution::visit(struct Cast &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(SCAM::FunctionOperand &node) {
+void DESCAM::ExpressionSubstitution::visit(DESCAM::FunctionOperand &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
         bool paramMapChanged = false;
-        std::map<std::string, SCAM::Expr *> newParamMap;
+        std::map<std::string, DESCAM::Expr *> newParamMap;
         for (auto subVar: node.getParamValueMap()) {
             if (*subVar.second == *this->oldExpr) {
                 paramMapChanged = true;
@@ -344,7 +347,7 @@ void SCAM::ExpressionSubstitution::visit(SCAM::FunctionOperand &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct ArrayOperand &node) {
+void DESCAM::ExpressionSubstitution::visit(struct ArrayOperand &node) {
     if (*node.getIdx() == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -358,12 +361,12 @@ void SCAM::ExpressionSubstitution::visit(struct ArrayOperand &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct CompoundExpr &node) {
+void DESCAM::ExpressionSubstitution::visit(struct CompoundExpr &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
         bool valueMapChanged = false;
-        std::map<std::string, SCAM::Expr *> newValueMap;
+        std::map<std::string, DESCAM::Expr *> newValueMap;
         for (auto subVar: node.getValueMap()) {
             if (*subVar.second == *this->oldExpr) {
                 valueMapChanged = true;
@@ -387,7 +390,7 @@ void SCAM::ExpressionSubstitution::visit(struct CompoundExpr &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct ParamOperand &node) {
+void DESCAM::ExpressionSubstitution::visit(struct ParamOperand &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -395,7 +398,7 @@ void SCAM::ExpressionSubstitution::visit(struct ParamOperand &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(struct Return &node) {
+void DESCAM::ExpressionSubstitution::visit(struct Return &node) {
     if (*node.getReturnValue() == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
@@ -409,12 +412,12 @@ void SCAM::ExpressionSubstitution::visit(struct Return &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(SCAM::ArrayExpr &node) {
+void DESCAM::ExpressionSubstitution::visit(DESCAM::ArrayExpr &node) {
     if (node == *this->oldExpr) {
         this->propagatedExpr = this->newExpr;
     } else {
         bool valueMapChanged = false;
-        std::map<std::string, SCAM::Expr *> newValueMap;
+        std::map<std::string, DESCAM::Expr *> newValueMap;
         for (auto subVar: node.getValueMap()) {
             if (*subVar.second == *this->oldExpr) {
                 valueMapChanged = true;
@@ -438,9 +441,41 @@ void SCAM::ExpressionSubstitution::visit(SCAM::ArrayExpr &node) {
     }
 }
 
-void SCAM::ExpressionSubstitution::visit(SCAM::Ternary &node) {
-    throw std::runtime_error("Compare operator and -Optimize is not allwoed together");
-
+void DESCAM::ExpressionSubstitution::visit(DESCAM::Ternary &node) {
+    auto condition = node.getCondition();
+    auto trueExpr = node.getTrueExpr();
+    auto falseExpr = node.getFalseExpr();
+    if (*condition == *this->oldExpr) {
+        condition = this->newExpr;
+    } else {
+        this->propagatedExpr = condition;
+        condition->accept(*this);
+        if (!(*this->propagatedExpr == *condition)) {
+            condition = this->propagatedExpr;
+        }
+    }
+    if (*trueExpr == *this->oldExpr) {
+        trueExpr = this->newExpr;
+    } else {
+        this->propagatedExpr = trueExpr;
+        trueExpr->accept(*this);
+        if (!(*this->propagatedExpr == *trueExpr)) {
+            trueExpr = this->propagatedExpr;
+        }
+    }
+    if (*falseExpr == *this->oldExpr) {
+        falseExpr = this->newExpr;
+    } else {
+        this->propagatedExpr = falseExpr;
+        falseExpr->accept(*this);
+        if (!(*this->propagatedExpr == *falseExpr)) {
+            falseExpr = this->propagatedExpr;
+        }
+    }
+    if (!(*condition == *node.getCondition()) || !(*trueExpr == *node.getTrueExpr()) ||
+        !(*falseExpr == *node.getFalseExpr()))
+        this->newExpr = new DESCAM::Ternary(condition, trueExpr, falseExpr, node.getStmtInfo());
+    else this->propagatedExpr = &node;
 }
 
 

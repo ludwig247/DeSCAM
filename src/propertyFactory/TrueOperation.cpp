@@ -6,8 +6,11 @@
 #include <ExprVisitor.h>
 #include "TrueOperation.h"
 #include <algorithm>
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-SCAM::TrueOperation::TrueOperation(SCAM::Module const *module) :
+
+DESCAM::TrueOperation::TrueOperation(DESCAM::Module const *module) :
 //stateMap(module->getFSM()->getStateMap()),
         module(module) {
     //Step 1: find all cycles starting from the start state
@@ -21,18 +24,18 @@ SCAM::TrueOperation::TrueOperation(SCAM::Module const *module) :
     //TODO: check output with hardware
 }
 
-const std::vector<std::vector<const SCAM::Operation *>> &SCAM::TrueOperation::getCycleMap() const {
+const std::vector<std::vector<const DESCAM::Operation *>> &DESCAM::TrueOperation::getCycleMap() const {
     return cycleMap;
 }
 
 
-void SCAM::TrueOperation::setRightHook() {
+void DESCAM::TrueOperation::setRightHook() {
 
 }
 
-void SCAM::TrueOperation::findCylces(State *current, State *start, const std::vector<const Operation *> &opList) {
+void DESCAM::TrueOperation::findCylces(State *current, State *start, const std::vector<const Operation *> &opList) {
     this->loop_detection++;
-    if (this->loop_detection == 0xFFFF - 1) throw std::runtime_error(" loop "); //TODO: show trace of loop
+    if (this->loop_detection == 0xFFFF - 1) TERMINATE(" loop "); //TODO: show trace of loop
     for (auto operation: current->getOutgoingOperationsList()) {
         if (operation->IsWait()) continue;
         auto newOpList = opList;
@@ -44,14 +47,14 @@ void SCAM::TrueOperation::findCylces(State *current, State *start, const std::ve
     return;
 }
 
-SCAM::State *SCAM::TrueOperation::getStartState(const std::map<int, State *> &stateMap) const {
+DESCAM::State *DESCAM::TrueOperation::getStartState(const std::map<int, State *> &stateMap) const {
     //Init state should always be index 0
     State *initState = stateMap.at(0);
     assert(initState->getName() == "init_0" && "Wrong state");
     return initState->getOutgoingOperationsList().back()->getNextState();
 }
 
-std::string SCAM::TrueOperation::printCycles() const {
+std::string DESCAM::TrueOperation::printCycles() const {
 
     std::stringstream ss;
     int i = 0;
@@ -70,19 +73,19 @@ std::string SCAM::TrueOperation::printCycles() const {
     return ss.str();
 }
 
-const std::set<SCAM::SyncSignal *> &SCAM::TrueOperation::getSyncSignals() const {
+const std::set<DESCAM::SyncSignal *> &DESCAM::TrueOperation::getSyncSignals() const {
     return syncSignals;
 }
 
-const std::set<SCAM::Variable *> &SCAM::TrueOperation::getVariables() const {
+const std::set<DESCAM::Variable *> &DESCAM::TrueOperation::getVariables() const {
     return variables;
 }
 
-const std::set<SCAM::DataSignal *> &SCAM::TrueOperation::getDataSignals() const {
+const std::set<DESCAM::DataSignal *> &DESCAM::TrueOperation::getDataSignals() const {
     return dataSignals;
 }
 
-void SCAM::TrueOperation::findFreezeVars(std::vector<const Operation *> cycle) {
+void DESCAM::TrueOperation::findFreezeVars(std::vector<const Operation *> cycle) {
     //Reset everything from previos operations
     this->variablesTimepoints.clear();
     this->variables.clear();
@@ -132,7 +135,7 @@ void SCAM::TrueOperation::findFreezeVars(std::vector<const Operation *> cycle) {
  * @param cycle
  * @return
  */
-bool SCAM::TrueOperation::isRequired(Variable *var, const Operation *currentOperation, const std::vector<const Operation *> &cycle) {
+bool DESCAM::TrueOperation::isRequired(Variable *var, const Operation *currentOperation, const std::vector<const Operation *> &cycle) {
 
     //Start iterating from currentOperation
     auto it = std::find(begin(cycle), end(cycle), currentOperation);
@@ -151,7 +154,7 @@ bool SCAM::TrueOperation::isRequired(Variable *var, const Operation *currentOper
     return false;
 }
 
-bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation *op, std::vector<const Operation *> &cycle) {
+bool DESCAM::TrueOperation::isRequired2(Variable *const &var, const Operation *op, std::vector<const Operation *> &cycle) {
     //Start iterating from currentOperation
 
     //Check operation: Is there already an assignment?
@@ -185,15 +188,15 @@ bool SCAM::TrueOperation::isRequired2(Variable *const &var, const Operation *op,
     return false;
 }
 
-const std::map<SCAM::SyncSignal *, SCAM::State *> &SCAM::TrueOperation::getSyncSignalTimepoints() const {
+const std::map<DESCAM::SyncSignal *, DESCAM::State *> &DESCAM::TrueOperation::getSyncSignalTimepoints() const {
     return syncSignalTimepoints;
 }
 
-const std::map<SCAM::Variable *, SCAM::State *> &SCAM::TrueOperation::getVariablesTimepoints() const {
+const std::map<DESCAM::Variable *, DESCAM::State *> &DESCAM::TrueOperation::getVariablesTimepoints() const {
     return variablesTimepoints;
 }
 
-const std::map<SCAM::DataSignal *, SCAM::State *> &SCAM::TrueOperation::getDataSignalsTimepoints() const {
+const std::map<DESCAM::DataSignal *, DESCAM::State *> &DESCAM::TrueOperation::getDataSignalsTimepoints() const {
     return dataSignalsTimepoints;
 }
 

@@ -9,7 +9,7 @@
 #include <Model.h>
 #include <cxxabi.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class PluginFactory {
 public:

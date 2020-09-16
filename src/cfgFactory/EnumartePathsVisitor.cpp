@@ -7,13 +7,13 @@
 #include "EnumartePathsVisitor.h"
 
 
-SCAM::EnumartePathsVisitor::EnumartePathsVisitor(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode) :
+DESCAM::EnumartePathsVisitor::EnumartePathsVisitor(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endNode) :
         startNode(startNode),
         endNode(endNode) {
     this->core(startNode, {});
 }
 
-void SCAM::EnumartePathsVisitor::core(SCAM::CfgBlock *node, std::set<int> path) {
+void DESCAM::EnumartePathsVisitor::core(DESCAM::CfgBlock *node, std::set<int> path) {
     if (node == endNode) {
         this->nodeList.insert(node->getBlockID());
         //Add all nodes among this path to the valid path list
@@ -36,6 +36,6 @@ void SCAM::EnumartePathsVisitor::core(SCAM::CfgBlock *node, std::set<int> path) 
     }
 }
 
-const std::set<int> &SCAM::EnumartePathsVisitor::getNodeList() const {
+const std::set<int> &DESCAM::EnumartePathsVisitor::getNodeList() const {
     return nodeList;
 }
