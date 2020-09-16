@@ -34,6 +34,20 @@ bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl)
         this->functionParamNameMap.insert(std::make_pair(name,paramNameList));
         this->functionParamTypeMap.insert(std::make_pair(name,paramTypeList));
 
+    }else if(methodDecl->getResultType()->isVoidType() && dynamic_cast<clang::CXXConstructorDecl*>(methodDecl) == nullptr){
+
+        std::string name = methodDecl->getNameAsString();
+        this->functionMap.insert(std::make_pair(name,methodDecl));
+        //Param name and param type
+        std::vector<std::string> paramNameList;
+        std::vector<std::string> paramTypeList;
+        for(int i=0;i<methodDecl->getNumParams();i++){
+            auto param = methodDecl->getParamDecl(i);
+            paramNameList.push_back(param->getName().str());
+            paramTypeList.push_back(this->clangToScamType(param->getType()));
+        }
+        this->functionParamNameMap.insert(std::make_pair(name,paramNameList));
+        this->functionParamTypeMap.insert(std::make_pair(name,paramTypeList));
     }
 
     return true;

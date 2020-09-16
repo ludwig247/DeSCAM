@@ -40,7 +40,7 @@ DESCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, clang::Com
         lhsExpr(nullptr),
         unsigned_flag(unsigned_flag),
         pass(0) {
-    //stmt->dump();
+    stmt->dumpColor();
     TraverseStmt(stmt);
 }
 
@@ -766,6 +766,24 @@ bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *
 
             } else
                 return exitVisitor("Unknown error: Stmts can't be processed(d)", opCallLocationInfo);
+        }else if(operatorCallExpr->getOperator() == clang::OverloadedOperatorKind::OO_EqualEqual ){
+            if (operatorCallExpr->getNumArgs() == 2) {
+                //get foo
+                this->pass = 1;
+                TraverseStmt(operatorCallExpr->getArg(0));
+                if (this->lhsExpr == nullptr) {
+                    return exitVisitor("Unknown error: Stmts can't be processed(a)", opCallLocationInfo);
+                }
+                //get port.read()
+                this->pass = 2;
+                TraverseStmt(operatorCallExpr->getArg(1));
+                if (this->rhsExpr == nullptr) {
+                    return exitVisitor("Unknown error: Stmts can't be processed(b)", opCallLocationInfo);
+                }
+                DESCAM_ASSERT(this->stmt = new Logical(this->lhsExpr,"==", this->rhsExpr, opCallLocationInfo))
+                if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
+            } else
+                return exitVisitor("Unknown error: Stmts can't be processed(c)", opCallLocationInfo);
         } else
             return exitVisitor("Unknown error: Stmts can't be processed(e)", opCallLocationInfo);
     }

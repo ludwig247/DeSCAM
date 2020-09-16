@@ -12,7 +12,7 @@ DESCAM::Function::Function(std::string name, DESCAM::DataType *returnType,
         returnType(returnType),
         paramMap(paramMap),
         AbstractNode(name, locationInfo) {
-    if (returnType->isCompoundType()) {
+    if (returnType != nullptr && returnType->isCompoundType()) {
         auto errorMsg = " Function " + name + "() unallowed return type: " + returnType->getName() + " only built-in types allowed";
         throw DescamException(errorMsg, locationInfo);
     }

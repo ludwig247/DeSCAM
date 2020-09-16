@@ -26,6 +26,9 @@ namespace DESCAM {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
         }
+
+        clangCFG->dump({},true);
+
         this->translateToScamCFG();
     }
 
@@ -111,7 +114,7 @@ namespace DESCAM {
             //In case of an Expr* skips the statement, because the statementlist should only contain Statements
             if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
                 cfgNode->addStmt(this->getScamStmt(clangStmt));
-            }
+            };
         }
 
         //Set terminator for codelbock
@@ -122,10 +125,10 @@ namespace DESCAM {
                 block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass) {
                 //Translate clang::Stmts to DESCAM::Stmts
                 DESCAM::Stmt *terminator = this->getScamStmt(block->getTerminator().getStmt());
-
                 if (terminator != nullptr) {
                     cfgNode->setTerminator(terminator);
                 } else {
+                    this->getScamStmt(block->getTerminator().getStmt());
                     clang::LangOptions LO;
                     LO.CPlusPlus = true;
                     //block->dump(clangCFG, LO, false);

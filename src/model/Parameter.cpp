@@ -17,4 +17,12 @@ DESCAM::Parameter::Parameter(std::string name, DESCAM::DataType *dataType, DESCA
 
 }
 
+bool DESCAM::Parameter::isInput() const {
+    return is_input;
+}
+
+void DESCAM::Parameter::setIsInput(bool isInput) {
+    is_input = isInput;
+}
+
 

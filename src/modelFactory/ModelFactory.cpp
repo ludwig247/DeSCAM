@@ -201,13 +201,13 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
                     "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
         }
         Port *inPort = nullptr;
-        DESCAM_ASSERT (if(portsLocationMap.find(port.first) != portsLocationMap.end())
-            inPort = new Port(port.first, interface,
-                              DataTypes::getDataType(
-                                      port.second),
-                              portsLocationMap[port.first]);
-        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort))
+        DESCAM_ASSERT (if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                           inPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                       else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                               module->addPort(inPort))
     }
     //Output ports
     for (auto &port: findPorts.getOutPortMap()) {
@@ -219,12 +219,12 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         }
         Port *outPort = nullptr;
         DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            outPort = new Port(port.first, interface,
-                               DataTypes::getDataType(
-                                       port.second),
-                               portsLocationMap[port.first]);
-        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(outPort))
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
 
     //AlwaysReady
@@ -238,12 +238,12 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         }
         Port *inPort = nullptr;
         DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            inPort = new Port(port.first, interface,
-                              DataTypes::getDataType(
-                                      port.second),
-                              portsLocationMap[port.first]);
-        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort))
+                          inPort = new Port(port.first, interface,
+                                            DataTypes::getDataType(
+                                                    port.second),
+                                            portsLocationMap[port.first]);
+                      else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(inPort))
 
     }
     //Output ports
@@ -256,12 +256,12 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         }
         Port *outPort = nullptr;
         DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            outPort = new Port(port.first, interface,
-                               DataTypes::getDataType(
-                                       port.second),
-                               portsLocationMap[port.first]);
-        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(outPort))
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
 
     //Input ports
@@ -274,12 +274,12 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         }
         Port *inPort = nullptr;
         DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            inPort = new Port(port.first, interface,
-                              DataTypes::getDataType(
-                                      port.second),
-                              portsLocationMap[port.first]);
-        else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort))
+                          inPort = new Port(port.first, interface,
+                                            DataTypes::getDataType(
+                                                    port.second),
+                                            portsLocationMap[port.first]);
+                      else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(inPort))
 
     }
     //Output ports
@@ -292,12 +292,12 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         DESCAM_ASSERT(interface = new Interface("slave", "out"))
         Port *outPort = nullptr;
         DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-            outPort = new Port(port.first, interface,
-                               DataTypes::getDataType(
-                                       port.second),
-                               portsLocationMap[port.first]);
-        else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(outPort))
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
 
     //Shared ports
@@ -311,7 +311,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         DESCAM_ASSERT(interface = new Interface("shared", "in"))
         Port *inPort = nullptr;
         DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort))
+                              module->addPort(inPort))
 
     }
     //Output ports
@@ -324,7 +324,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
         DESCAM_ASSERT(interface = new Interface("shared", "out"))
         Port *inPort = nullptr;
         DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-        module->addPort(inPort))
+                              module->addPort(inPort))
     }
     EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
@@ -373,7 +373,6 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
 
     //Add members to module
     for (auto &&variable: findVariables.getVariableTypeMap()) {
-        std::cout << variable.first << std::endl;
         //Add Variable to Module
         auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
         auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
@@ -388,7 +387,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
         //Step 1: Check whether the DataType already exists? Set type accordingly
         bool is_local = DataTypes::isLocalDataType(typeName, module->getName());
         bool is_global = DataTypes::isDataType(typeName);
-        if(is_local && is_global) TERMINATE("Variable " + variable.first + "is local and global at the same time!")
+        if (is_local && is_global) TERMINATE("Variable " + variable.first + "is local and global at the same time!")
         if (is_global) {
             type = DataTypes::getDataType(typeName);
         } else if (is_local) {
@@ -480,10 +479,10 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
         }
         Function *new_function = nullptr;
         DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
-            new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
-                    functionsMap[function.first], _ci));
-        else new_function = new Function(function.first, datatype, paramMap);
-        module->addFunction(new_function))
+                          new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
+                                  functionsMap[function.first], _ci));
+                      else new_function = new Function(function.first, datatype, paramMap);
+                              module->addFunction(new_function))
     }
     EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
     //Add behavioral description of function to module
@@ -657,26 +656,115 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
     //TODO: Find Instances of Channels ... otherwise type and size unknown
     FindCustomChannels findChannel(decl);
 
-    for(auto channel: findChannel.getChannelMap()){
-        Module * module = new Module(channel.first);
+    for (auto channel: findChannel.getChannelMap()) {
+        Module *module = new Module(channel.first);
 
         //Add vars
-        this->addVariables(module,channel.second);
+        this->addVariables(module, channel.second);
 
-        //name
-        //parameters
-        //CFG
+        //this->addFunctions(module,channel.second);
+        //Functions
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
+        FindFunctions findFunction(channel.second);
+        //Add datatypes for functions
+        auto functionsMap = findFunction.getFunctionMap();
+        for (auto function: functionsMap) {
+            assert(function.second->getResultType()->isVoidType());
+            std::map<std::string, Parameter *> paramMap;
+            auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
+            auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
+            if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
+            for (int i = 0; i < paramList.size(); i++) {
+                if(paramTypeList.at(i) == "T &"  ) {
+                    auto param = new Parameter(paramList.at(i), DataTypes::getDataType("int"));
+                    param->setIsInput(false);
+                    paramMap.insert(std::make_pair(paramList.at(i), param));
+                }else if(paramTypeList.at(i) == "T" || paramTypeList.at(i) == "const T &"){
+                    auto param = new Parameter(paramList.at(i), DataTypes::getDataType("int"));
+                    paramMap.insert(std::make_pair(paramList.at(i), param));
+                }else{
+                    auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
+                    paramMap.insert(std::make_pair(paramList.at(i), param));
+                }
 
+            }
+            Function *new_function = nullptr;
+            DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
+                              new_function = new Function(function.first, nullptr, paramMap, GlobalUtilities::getLocationInfo(
+                                      functionsMap[function.first], _ci));
+                          else new_function = new Function(function.first, nullptr, paramMap);
+                                  module->addFunction(new_function))
+            //Create blockCFG for this process
+            //Active searching only for functions
+            //FindDataFlow::functionName = function.first;
+            ///FindDataFlow::isFunction = true;
+            //DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
+            FindDataFlow::functionName = "";
+            FindDataFlow::isFunction = false;
+           // std::cout << cfgFactory.print() << std::endl;
+            //Transfor blockCFG back to code
+//            FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
+//            module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
+        }
+        //TODO: Create a class here that takes the module as input
+        //Name, methods + parameters -> done
+        std::cout << "Channel: " << module->getName() << std::endl;
+        for(auto function: module->getFunctionMap()){
+            std::cout << "\tFunction: " << function.first << std::endl;
+            for(auto param: function.second->getParamMap()){
+                std::cout << "\t\t" << "Param: " << param.first << " #" << (param.second->isInput() ? "input" : "output") << std::endl;
+            }
+        }
+
+        throw std::runtime_error("stop");
     }
     /*
+    //Add Structural description of fucntions to module
+    for (auto function: findFunction.getFunctionReturnTypeMap()) {
+        DataType *datatype;
+        if (DataTypes::isLocalDataType(function.second, module->getName())) {
+            datatype = DataTypes::getLocalDataType(function.second, module->getName());
+        } else datatype = DataTypes::getDataType(function.second);
 
-    //channel: name, vars, methods(in/out params)
-    // method: name, parameter(in/out), CFG
+        //Parameter
+        std::map<std::string, Parameter *> paramMap;
+        auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
+        auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
+        if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
+        for (int i = 0; i < paramList.size(); i++) {
+            auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
+            paramMap.insert(std::make_pair(paramList.at(i), param));
+        }
+        Function *new_function = nullptr;
+        DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
+                          new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
+                                  functionsMap[function.first], _ci));
+                      else new_function = new Function(function.first, datatype, paramMap);
+                              module->addFunction(new_function))
+    }
+    EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
+    //Add behavioral description of function to module
+    for (auto function: findFunction.getFunctionMap()) {
+        //Create blockCFG for this process
+        //Active searching only for functions
+        FindDataFlow::functionName = function.first;
+        FindDataFlow::isFunction = true;
+        DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
+        FindDataFlow::functionName = "";
+        FindDataFlow::isFunction = false;
+        //Transfor blockCFG back to code
+        FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
+        module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
+    }*/
+
+/*
+
+//channel: name, vars, methods(in/out params)
+// method: name, parameter(in/out), CFG
 
 
-     */
+ */
 
-    throw std::runtime_error("stop");
 
 
 }

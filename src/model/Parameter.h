@@ -21,9 +21,14 @@ namespace DESCAM {
 
         //DataType *getDataType() const;
 
+        bool isInput() const;
+
+        void setIsInput(bool isInput);
+
         virtual void accept(AbstractVisitor &visitor);
 
     private:
+        bool is_input = true; // call-by-value
 
     };
 

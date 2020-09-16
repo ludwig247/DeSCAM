@@ -34,14 +34,15 @@ namespace DESCAM {
                 subVarList.push_back(new T(std::to_string(i), this->getDataType()->getArrayType(), this->getDataType()->getArrayType()->getDefaultVal(), (T *) (this)));
             }
         } else if (!this->isBuiltInType() && !this->isEnumType()) throw DescamException("variable '" + getName() + ", with unknown datatype", locationInfo);
-        else if(this->getName() == "event"){
+        else if(this->getDataType()->getName() == "event"){
 
+        }else{
+            if (this->initialValue == nullptr) {
+                this->initialValue = dataType->getDefaultVal();
+            } else  assert(dataType == initialValue->getDataType());
         }
 
-        if (this->initialValue == nullptr) {
-            this->initialValue = dataType->getDefaultVal();
-        } else
-            assert("Unknown datatype" && dataType == initialValue->getDataType());
+
     }
 
     template<class T>
