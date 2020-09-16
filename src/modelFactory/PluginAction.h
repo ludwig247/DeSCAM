@@ -55,7 +55,6 @@ class PluginAction {
 public:
     PluginAction(int argc, const char **argv) {
 
-        CommonOptionsParser OptionsParser(argc, argv);
         std::vector<std::string> arg;
 
      //Ensures that only the specified file paths given as arguments in command line are passed to CLang at a time
@@ -69,7 +68,6 @@ public:
 
         CommonOptionsParser OptionsParser (argc, argv);
 
-        ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
         //Print to screen file paths given to compiler through CommonOptionsParser
 //        for(auto src: OptionsParser.getSourcePathList()){
 //            std::cout << "OP:" << src << std::endl;

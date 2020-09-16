@@ -22,18 +22,12 @@ struct Param
     std::string FilePath;
     std::string Name;
     std::string vhi;
-    SCAM::Module * result;
+    DESCAM::Module * result;
 
 //    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
 //        return os << bar.FilePath;}
 };
 
-static std::vector<DESCAM::Module *> parameter() {
-template <class Param>
-bool is_unique(std::vector<Param> &x) {
-//    sort( x.begin(), x.end() ); // O(N log N)
-//    return adjacent_find( x.begin(), x.end() ) == x.end();
-}
 
 
 static std::vector<Param> parameter(const char* header_list) {
@@ -71,8 +65,8 @@ static std::vector<Param> parameter(const char* header_list) {
                                            commandLineArgumentsArray[1]);}
             catch(FatalError & e){}
 
-            for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
-//        SCAM::ModelGlobal::reset();
+            for (auto model: DESCAM::ModelGlobal::getModel()->getModules()) {
+//        DESCAM::ModelGlobal::reset();
                 includes.push_back(Param());
                 includes[i].FilePath = line;
                 includes[i].result = (model.second);
@@ -87,8 +81,6 @@ static std::vector<Param> parameter(const char* header_list) {
                 param_names.insert(model.second->getName());
                 filepaths.insert(line);
 
-//    std::set<std::string> optimizeOptions = {"all"};
-//    CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
 
 //                std::cout<< "gets called " << includes[i].Name << std::endl;
                 i++;
@@ -136,8 +128,8 @@ INSTANTIATE_TEST_CASE_P(
                 );
 
 INSTANTIATE_TEST_CASE_P(
-        DISABLED_Functionality,
-//        Functionality,
+//        DISABLED_Functionality,
+        Functionality,
         ITLTestFunctionality,
         testing::ValuesIn(funct_headers),
         ITLTest::PrintToStringParamName()
@@ -145,10 +137,8 @@ INSTANTIATE_TEST_CASE_P(
 
 TEST_P(ITLTestExamples, Examples) {
 
-//    GTEST_CHECK_(test_param_names.count(param_name) == 0)
-//                << "Duplicate parameterized test name '" << param_name
-//                << "', in " << file << " line " << line << std::endl;
-    ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
+
+    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     printITL.printModule(GetParam().result);
     printITL.print();
@@ -175,7 +165,7 @@ TEST_P(ITLTestExamples, Examples) {
 }
 
 TEST_P(ITLTestFunctionality, Functionality) {
-    ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
+    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     printITL.printModule(GetParam().result);
     ASSERT_NO_THROW(printITL.print());

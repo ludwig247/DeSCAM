@@ -20,16 +20,16 @@
 struct Param
 {
     std::string Name;
-    SCAM::Module * result;
+    DESCAM::Module * result;
 //    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
 //        return os << bar.Name;
 //    }
 };
 
-static std::vector<SCAM::Module *> parameter() {
+static std::vector<DESCAM::Module *> parameter() {
 
-    std::vector<SCAM::Module *> result;
-    for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
+    std::vector<DESCAM::Module *> result;
+    for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
         result.push_back(module.second);
     }
     std::cout << "Number of modules: " << result.size() << std::endl;
@@ -57,7 +57,7 @@ static std::vector<Param> parameter(const char* header_list) {
 
 
     //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-    SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
+    DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
                                    commandLineArgumentsArray[1]);
 
             for (auto module: ModelGlobal::getModel()->getModules()) {
@@ -159,9 +159,9 @@ TEST_F(PrintSkeleton_Test, GlobalTypesVHDL) {
 
     PrintSkeleton printSkeleton;
     std::pair<std::string, std::string> result;
-    ASSERT_NO_THROW(result = printSkeleton.printGlobalTypes(SCAM::ModelGlobal::getModel()));
+    ASSERT_NO_THROW(result = printSkeleton.printGlobalTypes(DESCAM::ModelGlobal::getModel()));
     //ASSERT_EQ(content, result.second) << "Test for types " << GetParam()->getName() << "_types failed\n\n" << result.second;
-    ASSERT_EQ(content, result.second) << "Test for types " << SCAM::ModelGlobal::getModel()->getName() << " failed\n\n" << result.second;
+    ASSERT_EQ(content, result.second) << "Test for types " << DESCAM::ModelGlobal::getModel()->getName() << " failed\n\n" << result.second;
     std::cout << "" << std::endl;
 }
     
@@ -169,9 +169,9 @@ TEST_F(PrintSkeleton_Test, GlobalTypesSV) {
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
     //ASSERT_NE(GetParam(), nullptr) << "Module not found";
-    //std::cout << "Global types: " << SCAM::ModelGlobal::getModel()->getName() << std::endl;
+    //std::cout << "Global types: " << DESCAM::ModelGlobal::getModel()->getName() << std::endl;
     std::cout << "Global types " << std::endl;
-    //for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
+    //for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
     std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/sv/globalTypes.sv");
     ASSERT_TRUE(bool(ifs)) << "Can't open file";
 
@@ -184,9 +184,9 @@ TEST_F(PrintSkeleton_Test, GlobalTypesSV) {
 
     PrintSkeleton printSkeleton;
     std::pair<std::string, std::string> result;
-    ASSERT_NO_THROW(result = printSkeleton.printGlobalTypes(SCAM::ModelGlobal::getModel()));
+    ASSERT_NO_THROW(result = printSkeleton.printGlobalTypes(DESCAM::ModelGlobal::getModel()));
     //ASSERT_EQ(content, result.second) << "Test for types " << GetParam()->getName() << "_types failed\n\n" << result.second;
-    ASSERT_EQ(content, result.second) << "Test for types " << SCAM::ModelGlobal::getModel()->getName() << " failed\n\n" << result.second;
+    ASSERT_EQ(content, result.second) << "Test for types " << DESCAM::ModelGlobal::getModel()->getName() << " failed\n\n" << result.second;
     std::cout << "" << std::endl;
 }
     
