@@ -8,12 +8,12 @@
 #include "PrintCondition.h"
 #include <PrintStmt.h>
 
-namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
+namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
     class PrintResetNotify : PrintCondition {
 
     public:
-        explicit PrintResetNotify(SCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintResetNotify(DESCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
@@ -30,7 +30,7 @@ namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
     class PrintResetSignal : PrintCondition {
 
     public:
-        PrintResetSignal(SCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        PrintResetSignal(DESCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
         bool toString();
 

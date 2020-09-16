@@ -9,7 +9,7 @@
 #include <vector>
 #include <Model.h>
 
-namespace SCAM{
+namespace DESCAM{
  /*!
   * \brief Used to store paths to returns within functions
   */
@@ -19,19 +19,19 @@ class Path {
 public:
     Path() = default;
     Path(const Path& path); //Copy
-    Path(const Path& path,const std::vector<SCAM::Stmt*>& stmtList); //Copies everything except of the stmtList
+    Path(const Path& path,const std::vector<DESCAM::Stmt*>& stmtList); //Copies everything except of the stmtList
     virtual ~Path();
 
     Path& operator+=(const Path& newPath);
 
     //Add
-    void addStmt(SCAM::Stmt *stmt);
+    void addStmt(DESCAM::Stmt *stmt);
     const std::vector<Stmt *> &getStmtList() const;
 
 private:
-    std::vector<SCAM::Stmt*> stmtList;
+    std::vector<DESCAM::Stmt*> stmtList;
 };
-    inline SCAM::Path operator+(SCAM::Path lhs, const SCAM::Path& rhs)
+    inline DESCAM::Path operator+(DESCAM::Path lhs, const DESCAM::Path& rhs)
     {
         lhs += rhs;
         return lhs;

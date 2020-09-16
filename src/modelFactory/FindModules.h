@@ -6,7 +6,7 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 //#include "FindModule.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /*
      * \brief Finds all modules defined by the user

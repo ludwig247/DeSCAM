@@ -10,6 +10,7 @@
 
 #include <ModelGlobal.h>
 #include <fstream>
+#include <FatalError.h>
 #include <algorithm>
 #include <vector>
 
@@ -27,6 +28,7 @@ struct Param
 //        return os << bar.FilePath;}
 };
 
+static std::vector<DESCAM::Module *> parameter() {
 template <class Param>
 bool is_unique(std::vector<Param> &x) {
 //    sort( x.begin(), x.end() ); // O(N log N)
@@ -65,9 +67,9 @@ static std::vector<Param> parameter(const char* header_list) {
 
             //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
 
-            SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
-                                           commandLineArgumentsArray[1]);
-
+            try{DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
+                                           commandLineArgumentsArray[1]);}
+            catch(FatalError & e){}
 
             for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::ModelGlobal::reset();
@@ -85,6 +87,8 @@ static std::vector<Param> parameter(const char* header_list) {
                 param_names.insert(model.second->getName());
                 filepaths.insert(line);
 
+//    std::set<std::string> optimizeOptions = {"all"};
+//    CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
 
 //                std::cout<< "gets called " << includes[i].Name << std::endl;
                 i++;
@@ -174,7 +178,6 @@ TEST_P(ITLTestFunctionality, Functionality) {
     ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     printITL.printModule(GetParam().result);
-    printITL.print();
     ASSERT_NO_THROW(printITL.print());
     std::ofstream myfile;
     myfile.open(SCAM_HOME"/tests/Print_ITL_Tests/unsorted/" + GetParam().Name + ".vhi");

@@ -4,7 +4,7 @@
 
 #include "CfgPath.h"
 
-namespace SCAM {
+namespace DESCAM {
     CfgPath::CfgPath() : PathID(1) {}
 
     CfgPath::CfgPath(const CfgPath &Path, int &ID) : PathID(ID) {

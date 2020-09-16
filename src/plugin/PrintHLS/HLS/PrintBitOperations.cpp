@@ -8,7 +8,7 @@
 
 #include "NodePeekVisitor.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+using namespace DESCAM::HLSPlugin::HLS;
 
 PrintBitOperations::PrintBitOperations(Stmt *stmt, HLSOption hlsOption, std::shared_ptr<OptimizerHLS>& optimizer)
 {

@@ -16,6 +16,8 @@
 
 
 #include <iostream>
+#include <GlobalUtilities.h>
+#include <Logger/Logger.h>
 #include "clang/Frontend/FrontendPluginRegistry.h"
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/AST.h"
@@ -26,36 +28,34 @@
 #include "clang/Parse/Parser.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
-#include "ModelFactory.h"
-
+#include "ClangDiagnosticPrinter.h"
 
 
 using namespace clang::driver;
 using namespace clang::tooling;
 
 
+namespace scpar {
+    template<typename A>
+    class LightsCameraAction : public clang::ASTFrontendAction {
+    protected:
 
+        virtual clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) {
+            return new A(ci);
+        };
 
-namespace scpar{
-	template < typename A > class LightsCameraAction:public clang::ASTFrontendAction	{
-	protected:
-
-		virtual clang::ASTConsumer * CreateASTConsumer(clang::CompilerInstance & ci, clang::StringRef)
-		{
-			return new A(ci);
-		};
-
-	};
+    };
 
 }
 
 using namespace scpar;
 
-template < typename A > class PluginAction
-{
+template<typename A>
+class PluginAction {
 public:
-	PluginAction (int argc, const char **argv) {
+    PluginAction(int argc, const char **argv) {
 
+        CommonOptionsParser OptionsParser(argc, argv);
         std::vector<std::string> arg;
 
      //Ensures that only the specified file paths given as arguments in command line are passed to CLang at a time
@@ -69,6 +69,7 @@ public:
 
         CommonOptionsParser OptionsParser (argc, argv);
 
+        ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
         //Print to screen file paths given to compiler through CommonOptionsParser
 //        for(auto src: OptionsParser.getSourcePathList()){
 //            std::cout << "OP:" << src << std::endl;
@@ -77,24 +78,17 @@ public:
 
 		ClangTool Tool (OptionsParser.getCompilations (), arg);
 
-		std::string output;
-		llvm::raw_string_ostream ss(output);
-		clang::DiagnosticOptions * diagnosticOptions = new clang::DiagnosticOptions();
-		clang::TextDiagnosticPrinter * diagnosticPrinter = new clang::TextDiagnosticPrinter(ss,diagnosticOptions);
-
-		Tool.setDiagnosticConsumer(diagnosticPrinter);
-
-		FrontendActionFactory *fe =	newFrontendActionFactory < LightsCameraAction < A > >();
-		Tool.run(fe);
-		std::cout << ss.str() << std::endl;
-
-	};
-
-
-private:
+        std::string output;
+        llvm::raw_string_ostream ss(output);
+        auto diagnosticOptions = new clang::DiagnosticOptions();
+        diagnosticOptions->ShowSourceRanges = 1;
+        auto diagnosticPrinter = new clang::ClangDiagnosticPrinter(ss, diagnosticOptions);
+        Tool.setDiagnosticConsumer(diagnosticPrinter);
+        FrontendActionFactory *fe = newFrontendActionFactory<LightsCameraAction<A> >();
+        Tool.run(fe);
+        diagnosticPrinter->addDiagnosticsToLogger(std::move(ss.str()));
+    }
 
 };
-
-
 
 #endif /* _PLUGIN_ACTION_H_ */

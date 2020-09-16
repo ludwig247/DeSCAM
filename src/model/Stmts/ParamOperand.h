@@ -8,10 +8,10 @@
 #include <Parameter.h>
 #include "Operand.h"
 
-namespace SCAM {
+namespace DESCAM {
     class ParamOperand : public Operand {
     public:
-        explicit ParamOperand(Parameter *parameter);
+        explicit ParamOperand(Parameter *parameter, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~ParamOperand() = default;
 

@@ -1,4 +1,4 @@
--- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
 macro ecall_isa_Port_notify :  boolean  := end macro; 
 macro ecall_isa_Port_sync   :  boolean  := end macro; 
 macro fromMemoryPort_notify :  boolean  := end macro; 

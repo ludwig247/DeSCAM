@@ -10,7 +10,7 @@
 #include "Stmt.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class AbstractMacro: public TypeInterface {
 

@@ -5,13 +5,14 @@
 #include <memory>
 #include <iomanip>
 #include <cmath>
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include "NodePeekVisitor.h"
 #include "PrintCondition.h"
 #include "PrintBitOperations.h"
 #include "Utilities.h"
 
-using namespace SCAM::HLSPlugin::VHDLWrapper;
+using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 PrintCondition::PrintCondition(Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     this->slice = false;
@@ -79,7 +80,7 @@ void PrintCondition::visit(Bitwise &node) {
                 this->ss << " or ";
             } else if (node.getOperation() == "^") {
                 this->ss << " xor ";
-            } else throw std::runtime_error("Should not get here");
+            } else TERMINATE("Should not get here");
             node.getRhs()->accept(*this);
             if (tempUseParentheses) this->ss << ")";
         }
@@ -169,7 +170,7 @@ void PrintCondition::visit(VariableOperand& node) {
             this->ss << node.getVariable()->getParent()->getName() << "." << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
-        } else throw std::runtime_error("Unknown Type for SubVar");
+        } else TERMINATE("Unknown Type for SubVar");
     } else {
         this->ss << node.getVariable()->getName();
     }
@@ -207,7 +208,7 @@ void PrintCondition::visit(DataSignalOperand &node) {
             this->ss << "." << node.getDataSignal()->getName();
         } else if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << "(" << node.getDataSignal()->getName() << ")";
-        } else throw std::runtime_error("Unknown Type for SubVar");
+        } else TERMINATE("Unknown Type for SubVar");
     }
     if(arithmeticOp) {
         this->ss << ")";

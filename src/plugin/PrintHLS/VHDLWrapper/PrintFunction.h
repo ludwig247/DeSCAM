@@ -7,13 +7,13 @@
 
 #include <PrintStmt.h>
 
-namespace SCAM { namespace HLSPlugin { namespace VHDLWrapper {
+namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
     class PrintFunction : public PrintStmt {
     public:
         PrintFunction() = default;
 
-        explicit PrintFunction(SCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+        explicit PrintFunction(DESCAM::Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
     protected:

@@ -5,41 +5,42 @@
 #include <PrintStmt.h>
 #include "Cast.h"
 #include "NodePeekVisitor.h"
+#include "DescamException.h"
 
-SCAM::Cast::Cast(SCAM::Expr *expr, const SCAM::DataType *toDatatype) :
+DESCAM::Cast::Cast(DESCAM::Expr *expr, const DESCAM::DataType *toDatatype, LocationInfo stmtLocationInfo) :
         Expr(toDatatype),
         expr(expr) {
-    if (expr == nullptr) throw std::runtime_error("Cast: expr is null!");
-    if (expr->getDataType() == toDatatype) throw std::runtime_error("No cast necessary -> same datatype. Remove static_cast");
+    this->stmtLocationInfo = stmtLocationInfo;
+    if (expr == nullptr) throw DESCAM::DescamException("Cast: expr is null!",this->stmtLocationInfo);
+    if (expr->getDataType() == toDatatype) throw DESCAM::DescamException("No cast necessary -> same datatype. Remove static_cast",this->stmtLocationInfo);
     if (!expr->getDataType()->isUnsigned() && !expr->getDataType()->isInteger()) {
-        throw std::runtime_error("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed");
+        throw DESCAM::DescamException("Cast from " + expr->getDataType()->getName() + " to " + expr->getDataType()->getName() + " is not allowed",this->stmtLocationInfo);
     }
     if (!toDatatype->isUnsigned() && !toDatatype->isInteger()) {
-        throw std::runtime_error("Cast only to unsigned or int");
+        throw DESCAM::DescamException("Cast only to unsigned or int",this->stmtLocationInfo);
     }
 }
 
-SCAM::Cast::~Cast() {
+DESCAM::Cast::~Cast() {
 
 }
 
-void SCAM::Cast::accept(SCAM::StmtAbstractVisitor &visitor) {
+void DESCAM::Cast::accept(DESCAM::StmtAbstractVisitor &visitor) {
     visitor.visit(*this);
 }
 
-SCAM::Expr *SCAM::Cast::getSubExpr() const {
+DESCAM::Expr *DESCAM::Cast::getSubExpr() const {
     return expr;
 }
 
-bool SCAM::Cast::operator==(const Stmt &other) const {
+bool DESCAM::Cast::operator==(const Stmt &other) const {
     if (this == &other) return true;
     if (NodePeekVisitor::nodePeekCast(const_cast<Stmt *>(&other)) == nullptr) return false;
     auto thisPtr = (Cast *) this;
     auto otherPtr = (const Cast *) &other;
     if (thisPtr->getDataType() != otherPtr->getDataType()) return false;
     if (thisPtr->expr == otherPtr->expr) return true;
-    if (*thisPtr->expr == *otherPtr->expr) return true;
-    return false;
+    return *thisPtr->expr == *otherPtr->expr;
 }
 
 

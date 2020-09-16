@@ -91,7 +91,7 @@ struct Bus : public sc_module {
             }
             master_out->write(resp,"master_out");
 
-            //wait(SC_ZERO_TIME);
+            wait(SC_ZERO_TIME);
         }
     }
 };

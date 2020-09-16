@@ -9,12 +9,12 @@
 #include "VariableOperand.h"
 #include "Communication.h"
 
-namespace SCAM {
+namespace DESCAM {
 
 
     class Read : public Stmt, public Communication {
     public:
-        Read(Port *port, VariableOperand *variable, bool is_non_blocking_access = false, VariableOperand *status = nullptr);
+        Read(Port *port, VariableOperand *variable, bool is_non_blocking_access = false, VariableOperand *status = nullptr, LocationInfo stmtLocationInfo = LocationInfo());
 
         VariableOperand *getVariableOperand() const;
 

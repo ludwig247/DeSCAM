@@ -9,7 +9,7 @@
 #include "Optimizer_Test/src/CreateModel.h"
 
 
-class OperatorStrengthReduction_Test : public ::testing::TestWithParam<SCAM::Module *> {
+class OperatorStrengthReduction_Test : public ::testing::TestWithParam<DESCAM::Module *> {
 public:
     void SetUp() override {};
 
@@ -21,12 +21,12 @@ INSTANTIATE_TEST_CASE_P(Basic, OperatorStrengthReduction_Test, ::testing::Values
 TEST_P(OperatorStrengthReduction_Test, reduce_operators_strength) {
     auto module = GetParam();
     ASSERT_FALSE(module->getCFG().empty()) << "CFG of module " << module->getName() << " is empty\n";
-    SCAM::OperatorStrengthReduction operatorStrengthReduction(module->getCFG());
+    DESCAM::OperatorStrengthReduction operatorStrengthReduction(module->getCFG());
     ASSERT_FALSE(operatorStrengthReduction.getCFG().empty())
                                 << "after operatorStrengthReduction, CFG of module " << module->getName()
                                 << " is empty\n";
 
-    std::string CFG_str = SCAM::OptUtilities::printCFG(operatorStrengthReduction.getCFG());
+    std::string CFG_str = DESCAM::GlobalUtilities::printCFG(operatorStrengthReduction.getCFG());
     std::string refFilePath =
             SCAM_HOME"/tests/Optimizer_Test/src/OperatorStrengthReduction/ref_files/" + GetParam()->getName() + "_out.txt";
 /*

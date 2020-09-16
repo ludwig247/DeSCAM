@@ -35,7 +35,7 @@ struct Stimuli : public sc_module {
             frames_ok = (frames_ok * 7 / 5) + 3; //"PseudoRandom number generation"
             if(frames_ok > 100) frames_ok = 1;
             block_out->write(frames_ok);
-            success =  block_in->nb_read(succ_cnt);
+            block_in->try_read(succ_cnt, success);
             std::cout << "@Stimuli: success:" << success << " succ_cnt:" << succ_cnt << " frames_ok:" << frames_ok << std::endl;
             wait(SC_ZERO_TIME);
         }

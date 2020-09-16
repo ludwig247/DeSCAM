@@ -11,7 +11,7 @@
 #include "ExprVisitor.h"
 #include <utility>
 
-namespace SCAM {
+namespace DESCAM {
 
     /***
      * \brief: Checks if a variable assigns itself and whether its value increments, decrements or not known
@@ -19,7 +19,7 @@ namespace SCAM {
      * \author: mi-alkoudsi
      * \input:
      *      - std::string variableName;
-     *      - SCAM::Expr *expr;
+     *      - DESCAM::Expr *expr;
      * \output:
      *      - bool isCounterVariable;
      *      - bool isVariableIncrements;
@@ -32,7 +32,7 @@ namespace SCAM {
         //Constructors and Destructor
         DetectCounterVariable() = delete;
 
-        DetectCounterVariable(std::string variableName, SCAM::Expr *expr);
+        DetectCounterVariable(std::string variableName, Expr *expr);
 
         ~DetectCounterVariable() = default;
 
@@ -48,7 +48,7 @@ namespace SCAM {
         bool incrementKnown;
         bool isCounter;
         std::string variableName;
-        SCAM::Expr *expr;
+        Expr *expr;
 
         //visitors
         void visit(struct VariableOperand &node) override;
@@ -97,7 +97,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

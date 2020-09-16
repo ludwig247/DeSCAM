@@ -3,14 +3,16 @@
 //
 
 #include <clang/Lex/Lexer.h>
-#include <ErrorMsg.h>
+#include <Logger/Logger.h>
+#include <GlobalUtilities.h>
 #include "CreateInitSection2.h"
-
+#include "FatalError.h"
+#include "Logger/Logger.h"
 #include "CFGFactory.h"
 #include "FindDataFlow.h"
 
 
-namespace SCAM {
+namespace DESCAM {
     CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance &ci, Module *module, bool sourceModule) :
             sourceModule(sourceModule),
             methodDecl(decl),
@@ -18,7 +20,8 @@ namespace SCAM {
             module(module) {
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(), b);
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(),
+                                        b);
         if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
@@ -27,6 +30,7 @@ namespace SCAM {
     }
 
     CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl, clang::CompilerInstance &ci, Module *module, bool sourceModule) :
+
             sourceModule(sourceModule),
             methodDecl(nullptr),
             ci(ci),
@@ -35,7 +39,8 @@ namespace SCAM {
         //TODO: remove ci and methodDecl from class
         //Create Control flow graph(blockCFG)
         clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(), &functionDecl->getASTContext(), b);
+        clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(),
+                                        &functionDecl->getASTContext(), b);
         if (clangCFG == nullptr) {
             llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
             return;
@@ -62,9 +67,9 @@ namespace SCAM {
 
         if (sourceModule) {
             //Init Block
-            auto initBlock = new SCAM::CfgBlock();
+            auto initBlock = new DESCAM::CfgBlock();
             initBlock->setBlockID(this->controlFlowMap.size());
-            std::vector<SCAM::Stmt *> initList = SCAM::CreateInitSection2::createInitSection2(module);
+            std::vector<DESCAM::Stmt *> initList = DESCAM::CreateInitSection2::createInitSection2(module);
             for (auto stmt:initList) {
                 initBlock->addStmt(stmt);
             }
@@ -82,8 +87,8 @@ namespace SCAM {
         this->cleanEmptyBlocks();
     }
 
-//! Iterates over each statement of a block and create SCAM::Stmts*
-    CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, SCAM::CfgBlock *parent) {
+//! Iterates over each statement of a block and create DESCAM::Stmts*
+    CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *parent) {
         if (entryMap.find(block->getBlockID()) != entryMap.end()) {
             int scamBlockId = entryMap.find(block->getBlockID())->second;
             for (auto succ : parent->getSuccessorList()) {
@@ -99,9 +104,9 @@ namespace SCAM {
 
         //Create empty cfgNode
         auto cfgNode = new CfgBlock(-1, block->getBlockID());
-        //Translate CLANG::Stms to SCAM:Stmts and add to node
+        //Translate CLANG::Stms to DESCAM:Stmts and add to node
         for (auto clangStmt: statementList) {
-            SCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
+            DESCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
             //Check that the stmt is not null and the statement is not an Expr*
             //In case of an Expr* skips the statement, because the statementlist should only contain Statements
             if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
@@ -115,8 +120,8 @@ namespace SCAM {
         if (block->getTerminator().getStmt() != nullptr) {
             if (block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::IfStmtClass ||
                 block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass) {
-                //Translate clang::Stmts to SCAM::Stmts
-                SCAM::Stmt *terminator = this->getScamStmt(block->getTerminator().getStmt());
+                //Translate clang::Stmts to DESCAM::Stmts
+                DESCAM::Stmt *terminator = this->getScamStmt(block->getTerminator().getStmt());
 
                 if (terminator != nullptr) {
                     cfgNode->setTerminator(terminator);
@@ -189,7 +194,7 @@ namespace SCAM {
                 if (*succ_it_true != nullptr && *succ_it_false == nullptr) {
                     CfgBlock *cfgNode = this->createCFGNode(block, parent);
                     traverseBlocks(*succ_it_true, cfgNode);
-                } else throw std::runtime_error("Only 1 while(true) for thread-loop allowed! No other while stmts");
+                } else TERMINATE("Only 1 while(true) for thread-loop allowed! No other while stmts");
 
             }
                 //Case 2: Branching with complex if: e.g. (a&&b) -> terminator that is not an ifStmtClass
@@ -201,10 +206,12 @@ namespace SCAM {
                     clang::CFGBlock *falseSucc = *succ_it_false;
                     CfgBlock *cfgNode = this->createCFGNode(block, parent);
                     //If both successors are not null, search for the sucessor containing the hole "if" ignore others
-                    if (trueSucc->getTerminator().getStmt() != nullptr && falseSucc->getTerminator().getStmt() != nullptr) {
+                    if (trueSucc->getTerminator().getStmt() != nullptr &&
+                        falseSucc->getTerminator().getStmt() != nullptr) {
                         clang::Stmt *trueStmt = trueSucc->getTerminator().getStmt();
                         clang::Stmt *falseStmt = falseSucc->getTerminator().getStmt();
-                        if (trueStmt->getStmtClass() != clang::Stmt::IfStmtClass && falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
+                        if (trueStmt->getStmtClass() != clang::Stmt::IfStmtClass &&
+                            falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
                             traverseBlocks(trueSucc, cfgNode);
                         } else if (trueStmt->getStmtClass() == clang::Stmt::IfStmtClass &&
                                    falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
@@ -218,12 +225,14 @@ namespace SCAM {
                                    falseStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
                             if (this->exprContainedInIf(block, trueSucc)) traverseBlocks(trueSucc, cfgNode);
                             else traverseBlocks(falseSucc, cfgNode);
-                        } else throw std::runtime_error("Missed case here");
+                        } else TERMINATE("Missed case here");
                     }
                         // If one of the succesors is null visit the otherone
-                    else if (trueSucc->getTerminator().getStmt() != nullptr && falseSucc->getTerminator().getStmt() == nullptr) {
+                    else if (trueSucc->getTerminator().getStmt() != nullptr &&
+                             falseSucc->getTerminator().getStmt() == nullptr) {
                         traverseBlocks(trueSucc, cfgNode);
-                    } else if (trueSucc->getTerminator().getStmt() == nullptr && falseSucc->getTerminator().getStmt() != nullptr) {
+                    } else if (trueSucc->getTerminator().getStmt() == nullptr &&
+                               falseSucc->getTerminator().getStmt() != nullptr) {
                         traverseBlocks(falseSucc, cfgNode);
                         //Both succeors have no terminators:
                     } else {
@@ -235,10 +244,10 @@ namespace SCAM {
                             std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
                             trueSucc->dump(clangCFG, {}, true);
                         }
-                        //throw std::runtime_error(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
+                        //TERMINATE(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
                     }
 
-                } else throw std::runtime_error("Succ true or false == null");
+                } else TERMINATE("Succ true or false == null");
             }
                 //Case 3: Regular block with terminator if: e.g. (a&&b) -> terminator that is not an ifStmtClass
                 //Is dealt with two blocks, only visit successor that contains the if
@@ -294,7 +303,8 @@ namespace SCAM {
             //IF: Terminator in block: Check last element of statementlist -> might belong to terminator
             if (i == stmtList.size() - 1) {
                 if (block->getTerminator().getStmt() != nullptr) {
-                    if (stmt->getLocStart().getRawEncoding() >= block->getTerminator().getStmt()->getLocStart().getRawEncoding()) {
+                    if (stmt->getLocStart().getRawEncoding() >=
+                        block->getTerminator().getStmt()->getLocStart().getRawEncoding()) {
                         continue;
                     }
                 }
@@ -306,32 +316,10 @@ namespace SCAM {
         return newStatementList;
     };
 
-    //! Methods that translates a Clang::Stmt into a SCAM::Stmt
-    SCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
-        SCAM::FindDataFlow dataFlow(clangStmt, module, false);
-
-        //Is stmt properly initialized and is Stmt a stmt ... we don't translate expressions
-        if (dataFlow.getStmt() == nullptr && !clang::dyn_cast<clang::Expr>(clangStmt)) {
-            //Get the source code as string
-            std::string msg = clang::Lexer::getSourceText(clang::CharSourceRange::getTokenRange(clangStmt->getSourceRange()),
-                                                          ci.getSourceManager(), ci.getLangOpts()).str();
-            //Get the ast for the stms as string
-            std::string msgAST;
-            llvm::raw_string_ostream ss(msgAST);
-            clangStmt->dump(ss, ci.getSourceManager());
-
-            auto fileAndLineNumStream = std::istringstream(clangStmt->getLocStart().printToString(ci.getSourceManager()));
-            std::string fileDir = "", lineNumber = "",s;
-            if(std::getline(fileAndLineNumStream,s,':')){
-                fileDir = s;
-            }
-            if(std::getline(fileAndLineNumStream,s,':')){
-                lineNumber = s;
-            }
-            //Add error to singleton
-            ErrorMsg::addError(msg, msgAST,fileDir,lineNumber);
-            //assert(false);
-        }
+    //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
+    DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
+        // traverse clang stmt and create its equivalent descam stmt
+        DESCAM::FindDataFlow dataFlow(clangStmt, module,ci, false);
         return dataFlow.getStmt();
     }
 
@@ -350,10 +338,11 @@ namespace SCAM {
             //Check for successor size, if there are more than one successor and no condition -> remove
             bool succ_size = currentBlock->getSuccessorList().size() > 1;
             if (!terminator && stmts && succ_size) {
-                SCAM::CfgBlock *succ; //! depending whether it
+                DESCAM::CfgBlock *succ; //! depending whether it
                 //Check whether current block belongs to an AND or an OR
                 //AND
-                if (currentBlock->getSuccessorList().at(0) != currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
+                if (currentBlock->getSuccessorList().at(0) !=
+                    currentBlock->getSuccessorList().at(1)->getSuccessorList().at(0)) {
                     succ = currentBlock->getSuccessorList()[0];
                 }
                     //OR
@@ -361,7 +350,7 @@ namespace SCAM {
                     succ = currentBlock->getSuccessorList()[1];
                 } else {
                     std::cout << currentBlock->print() << std::endl;
-                    throw std::runtime_error("Empty block with 2 successors, that can't be deleted");
+                    TERMINATE("Empty block with 2 successors, that can't be deleted");
                 }
                 //Replace currentBlock as succesor in predecessors with new successor
                 for (auto pred: currentBlock->getPredecessorList()) {
