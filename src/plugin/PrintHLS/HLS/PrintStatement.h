@@ -43,20 +43,22 @@ namespace DESCAM { namespace HLSPlugin { namespace HLS {
 
     protected:
         void visit(ArrayOperand &node) override;
-        void visit(Assignment &node) override ;
-        void visit(Bitwise &node) override ;
-        void visit(Cast &node) override ;
-        void visit(CompoundExpr &node) override ;
-        void visit(DataSignalOperand &node) override ;
-        void visit(FunctionOperand &node) override ;
-        void visit(ITE &node) override ;
-        void visit(Logical &node) override ;
-        void visit(Notify &node) override ;
-        void visit(ParamOperand &node) override ;
-        void visit(Return &node) override ;
-        void visit(SyncSignal &node) override ;
-        void visit(UnaryExpr &node) override ;
-        void visit(VariableOperand &node) override ;
+        void visit(Assignment &node) override;
+        void visit(Bitwise &node) override;
+        void visit(Cast &node) override;
+        void visit(CompoundExpr &node) override;
+        void visit(DataSignalOperand &node) override;
+        void visit(FunctionOperand &node) override;
+        void visit(IntegerValue &node) override;
+        void visit(ITE &node) override;
+        void visit(Logical &node) override;
+        void visit(Notify &node) override;
+        void visit(ParamOperand &node) override;
+        void visit(Return &node) override;
+        void visit(SyncSignal &node) override;
+        void visit(UnaryExpr &node) override;
+        void visit(UnsignedValue &node) override;
+        void visit(VariableOperand &node) override;
 
     private:
         std::shared_ptr<OptimizerHLS> optimizer;

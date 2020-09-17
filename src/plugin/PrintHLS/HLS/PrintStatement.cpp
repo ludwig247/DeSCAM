@@ -135,6 +135,10 @@ void PrintStatement::visit(UnaryExpr &node) {
     this->ss << "))";
 }
 
+void PrintStatement::visit(UnsignedValue &node) {
+    this->ss << "(ap_uint<32>)" << node.getValue();
+}
+
 void PrintStatement::visit(CompoundExpr &node) {
     for (auto value = node.getValueMap().begin(); value != node.getValueMap().end(); ++value) {
         NodePeekVisitor nodePeekVisitor(value->second);
@@ -233,6 +237,10 @@ void PrintStatement::visit(FunctionOperand &node) {
         }
     }
     this->ss << ")";
+}
+
+void PrintStatement::visit(IntegerValue &node) {
+    this->ss << "(ap_int<32>)" << node.getValue();
 }
 
 void PrintStatement::visit(ArrayOperand &node) {
