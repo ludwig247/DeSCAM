@@ -14,7 +14,7 @@
 #include "IMEM_ctrl.h"
 
 #define REGFILE(x) RF.reg_file_##x
-#define PCREG isa.pcReg
+#define PCREG isa.pcIf
 
 class Core : public sc_module {
 public:

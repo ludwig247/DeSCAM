@@ -11,19 +11,18 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 0
+#define SCAM 1
 
 class ISA_ri5cy : public sc_module {
 public:
     //Constructor
     SC_HAS_PROCESS(ISA_ri5cy);
-
     ISA_ri5cy(sc_module_name name) :
             instr_in("instr_in"),
             instr_req("instr_req"),
             toRegsPort("toRegsPort"),
             fromRegsPort("fromRegsPort"),
-            pcReg(0),
+            pcIf(0),
             iaddr(0),
             branchDecision(false),
             fromReset(true){
@@ -52,11 +51,7 @@ public:
     RegfileWriteType regfileWrite;
     RegfileType regfile;
 
-    enum Sections {
-        FETCH_PH,
-        DECODE_PH,
-        EXECUTE_PH
-    };
+    enum Sections {FETCH_PH, DECODE_PH, EXECUTE_PH};
     Sections section, nextsection;
 
     bool fromReset;
@@ -72,7 +67,6 @@ public:
     bool branchDecision;
 
     unsigned int iaddr;
-    unsigned int pcReg;
     unsigned int pcIf;
 
     bool flush;
@@ -101,11 +95,7 @@ public:
 
     unsigned int getALUresult(ALUfuncType aluFunction, unsigned int operand1, unsigned int operand2) const;
 
-    unsigned int branchPCcalculation(unsigned int encodedInstr, bool branchDecision, unsigned int pcReg) const;
-
     unsigned int getEncUALUresult(unsigned int encodedInstr, unsigned int pcReg) const;
-
-    unsigned int applyMask (unsigned int data, ME_MaskType mask) const;
 
     bool branchDecisionCalculation(unsigned int encodedInstr, unsigned int aluResult) const;
 };
@@ -117,8 +107,7 @@ void ISA_ri5cy::run() {
         if (section == Sections::FETCH_PH){
             if(fromReset){
                 instr_req->master_write(iaddr);
-                pcReg = 0;
-                pcIf = pcReg;
+                pcIf = 0;
             }
             insert_state("IF");
             instr_in->master_read(encodedInstr);
@@ -133,24 +122,20 @@ void ISA_ri5cy::run() {
         } else if (section == Sections::DECODE_PH){
             flush_in->get(flush);
             if (flush) {
-                pcReg = iaddr;
                 iaddr = pcIf - 4 + getImmediate(prevInstr);
                 instr_req->master_write(iaddr);
                 prevInstr = encodedInstr;
                 nextsection = Sections::FETCH_PH;
             } else {
                 if(getEncType(encodedInstr) == ENC_J) {
-                    pcReg = iaddr;
                     iaddr = pcIf + getImmediate(encodedInstr);
                     instr_req->master_write(iaddr);
                 } else if (getEncType(encodedInstr) == ENC_I_J) {
                     fromRegsPort->get(regfile); //Read register contents
-                    pcReg = iaddr;
                     iaddr = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
                     iaddr = iaddr & 0xFFFFFFFE;
                     instr_req->master_write(iaddr);
                 } else {
-                    pcReg = iaddr;
                     iaddr = iaddr + 4;
                     instr_req->master_write(iaddr);
                 }
@@ -185,10 +170,6 @@ void ISA_ri5cy::run() {
 
                     pcIf = iaddr;
                 }else if (getEncType(encodedInstr) == ENC_I_L) {
-                    /////////////////////////////////////////////////////////////////////////////
-                    //|  ID (RF_READ)   |        EX       |       MEM       |  ID (RF_WRITE)  |//
-                    /////////////////////////////////////////////////////////////////////////////
-
                     //Set-up operands for alu by reading from regfile
                     aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
                     aluOp2 = getImmediate(encodedInstr);
@@ -213,10 +194,6 @@ void ISA_ri5cy::run() {
                     regfileWrite.dstData = fromMemoryData;
                     toRegsPort->master_write(regfileWrite); //Perform write back
                 }else if (getEncType(encodedInstr) == ENC_S) {
-                    /////////////////////////////////////////////////////////////////////////////
-                    //|  ID (RF_READ)   |        EX       |       MEM       |    ---------    |//
-                    /////////////////////////////////////////////////////////////////////////////
-
                     //Set-up operands for alu by reading from regfile
                     aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
                     aluOp2 = getImmediate(encodedInstr);
@@ -233,10 +210,6 @@ void ISA_ri5cy::run() {
 
                     data_out->write(memoryAccess, "STORE"); // Request store
                 } else if (getEncType(encodedInstr) == ENC_B) {
-                    /////////////////////////////////////////////////////////////////////////////
-                    //|  ID (RF_READ)   |        EX       |    ---------    |    ---------    |//
-                    /////////////////////////////////////////////////////////////////////////////
-
                     //Set-up operands for alu by reading from regfile
                     aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
                     aluOp2 = readRegfile(getRs2Addr(encodedInstr), regfile);
@@ -249,13 +222,8 @@ void ISA_ri5cy::run() {
                         instr_req->master_write(iaddr);
                         insert_state("EX");
                     }
-
-                    pcReg = iaddr;
                     pcIf = iaddr;
                 } else if (getEncType(encodedInstr) == ENC_U) {
-                    /////////////////////////////////////////////////////////////////////////////
-                    //|        ID       |        EX       |    ---------    |  WB (RF_WRITE)  |//
-                    /////////////////////////////////////////////////////////////////////////////
                     aluResult = getEncUALUresult(encodedInstr, pcIf);
 
                     regfileWrite.dst = getRdAddr(encodedInstr);
@@ -264,9 +232,6 @@ void ISA_ri5cy::run() {
 
                     pcIf = iaddr;
                 } else if (getEncType(encodedInstr) == ENC_J) {
-                    /////////////////////////////////////////////////////////////////////////////
-                    //|        ID       |    ---------    |    ---------    |  WB (RF_WRITE)  |//
-                    /////////////////////////////////////////////////////////////////////////////
                     aluResult = pcIf + 4; //Compute result
 
                     regfileWrite.dst = getRdAddr(encodedInstr);
@@ -275,9 +240,6 @@ void ISA_ri5cy::run() {
 
                     pcIf = iaddr;
                 } else if (getEncType(encodedInstr) == ENC_I_J) {
-                    /////////////////////////////////////////////////////////////////////////////
-                    //|  ID (RF_READ)   |    ---------    |    ---------    |  WB (RF_WRITE)  |//
-                    /////////////////////////////////////////////////////////////////////////////
                     aluResult = pcIf + 4; //Compute result
 
                     regfileWrite.dst = getRdAddr(encodedInstr);
@@ -290,30 +252,6 @@ void ISA_ri5cy::run() {
             nextsection = Sections::FETCH_PH;
         }
         fromReset = false;
-    }
-}
-
-unsigned int ISA_ri5cy::applyMask (unsigned int data, ME_MaskType mask) const {
-    if (mask == MT_H) {
-        // sign extend
-        if ((data & 0x00008000) != 0) {
-            return (data & 0x0000FFFF) |  0xFFFF0000 ;
-        } else {
-            return data & 0x0000FFFF;
-        }
-    } else if (mask == MT_B) {
-        // sign extend
-        if ((data & 0x00000080) != 0) {
-            return  (data & 0x000000FF) | 0xFFFFFF00;
-        } else {
-            return data & 0x000000FF;
-        }
-    } else if (mask == MT_HU) {
-        return data & 0x0000FFFF;
-    } else if (mask == MT_BU) {
-        return data & 0x000000FF;
-    } else {
-        return data;
     }
 }
 
@@ -714,14 +652,6 @@ unsigned int ISA_ri5cy::getALUresult(ALUfuncType aluFunction, unsigned int opera
     }
 }
 
-unsigned int ISA_ri5cy::branchPCcalculation(unsigned int encodedInstr, bool branchDecision, unsigned int pcReg) const {
-    if (branchDecision){
-        return pcReg + getImmediate(encodedInstr);
-    } else {
-        return pcReg + 4;
-    }
-}
-
 bool ISA_ri5cy::branchDecisionCalculation(unsigned int encodedInstr, unsigned int aluResult) const {
 
     if ((getInstrType(encodedInstr) == InstrType::INSTR_BEQ && aluResult == 0) ||
@@ -740,9 +670,9 @@ bool ISA_ri5cy::branchDecisionCalculation(unsigned int encodedInstr, unsigned in
 unsigned int ISA_ri5cy::getEncUALUresult(unsigned int encodedInstr, unsigned int pcReg) const {
 
     if (getInstrType(encodedInstr) == InstrType::INSTR_LUI) {
-        return getALUresult(ALU_COPY1, getImmediate(encodedInstr), 0);
+        return IMM_U_FIELD(encodedInstr);
     } else { // InstrType::INSTR_AUIPC)
-        return getALUresult(ALU_ADD, pcReg, getImmediate(encodedInstr));
+        return IMM_U_FIELD(encodedInstr) + pcReg;
     }
 }
 
