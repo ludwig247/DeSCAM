@@ -4,6 +4,7 @@
 
 #include "PrintStatement.h"
 #include "NodePeekVisitor.h"
+#include <PrintHLS/Common/Utilities.h>
 
 using namespace DESCAM::HLSPlugin::HLS;
 
@@ -49,7 +50,7 @@ void PrintStatement::visit(VariableOperand &node) {
     if (optimizer) {
         bool isConstant = optimizer->isConstant(node.getVariable());
         if (isConstant) {
-            this->ss << Utilities::getFullName(node.getVariable(), "_");
+            this->ss << node.getVariable()->getFullName("_");
             return;
         }
     }

@@ -8,6 +8,9 @@
 
 #include "NodePeekVisitor.h"
 
+#include <PrintHLS/Common/Utilities.h>
+
+
 using namespace DESCAM::HLSPlugin::HLS;
 
 PrintBitOperations::PrintBitOperations(Stmt *stmt, HLSOption hlsOption, std::shared_ptr<OptimizerHLS>& optimizer)

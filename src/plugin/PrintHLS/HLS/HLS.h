@@ -12,7 +12,6 @@
 #include "PluginFactory.h"
 #include "PrintStatement.h"
 #include "PrintReset.h"
-#include "Utilities.h"
 
 namespace DESCAM { namespace HLSPlugin { namespace  HLS {
 

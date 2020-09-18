@@ -10,7 +10,6 @@
 #include "OptimizerHLS.h"
 #include "PrintBitOperations.h"
 #include "PrintStmt.h"
-#include "Utilities.h"
 
 namespace DESCAM { namespace HLSPlugin { namespace HLS {
 

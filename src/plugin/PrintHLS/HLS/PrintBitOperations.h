@@ -10,7 +10,6 @@
 #include "Constants.h"
 #include "OptimizerHLS.h"
 #include "PrintStmt.h"
-#include "Utilities.h"
 
 namespace DESCAM { namespace HLSPlugin { namespace HLS {
 

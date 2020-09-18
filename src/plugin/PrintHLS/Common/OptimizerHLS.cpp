@@ -3,7 +3,7 @@
 //
 
 #include <algorithm>
-#include <PrintHLS/VHDLWrapper/Utilities.h>
+#include <PrintHLS/Common/Utilities.h>
 #include <PrintHLS/VHDLWrapper/PrintStmtVHDL.h>
 
 #include "ExprVisitor.h"
@@ -655,7 +655,7 @@ std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
             return "";
         }
 
-        auto sliceIndices = DESCAM::HLSPlugin::VHDLWrapper::Utilities::findBlockOfSetBits(constantValue);
+        auto sliceIndices = Utilities::findBlockOfSetBits(constantValue);
 
         ss << "(";
         if ((sliceIndices.first < sliceIndices.second) || (sliceIndices.second != 0)) {

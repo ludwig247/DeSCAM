@@ -2,10 +2,10 @@
 // Created by johannes on 28.07.19.
 //
 
+#include <PrintHLS/Common/Utilities.h>
 #include "NodePeekVisitor.h"
 #include "PrintFunction.h"
 #include "PrintBitOperations.h"
-#include "Utilities.h"
 
 using namespace DESCAM::HLSPlugin::HLS;
 

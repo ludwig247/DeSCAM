@@ -1,9 +1,9 @@
 //
-// Created by pmorku on 7/29/18.
+// Created by Deutschmann on 18.09.20.
 //
 
-#ifndef PROJECT_Utilities_H
-#define PROJECT_Utilities_H
+#ifndef DESCAM_UTILITIES_H
+#define DESCAM_UTILITIES_H
 
 #include <set>
 #include <string>
@@ -15,7 +15,6 @@
 
 namespace DESCAM {
     namespace HLSPlugin {
-        namespace VHDLWrapper {
 
             class Utilities {
 
@@ -29,9 +28,7 @@ namespace DESCAM {
 
                 static std::string intToBinary(unsigned int n, unsigned int size);
 
-                static std::string typeToString(StmtType type);
-
-                static std::string subTypeBitwiseToString(SubTypeBitwise type);
+                static std::string convertDataType(const std::string& type);
 
                 static SubTypeBitwise getSubTypeBitwise(const std::string &name);
 
@@ -77,8 +74,8 @@ namespace DESCAM {
                 return parents;
             }
 
-        }
+
     }
 }
 
-#endif //PROJECT_Utilities_H
+#endif //DESCAM_UTILITIES_H

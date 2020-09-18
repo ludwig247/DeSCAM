@@ -1,22 +1,21 @@
 add_library(PrintHLS SHARED
         PrintHLS.cpp
 
+        Common/Constants.h
         Common/OptimizerHLS.cpp
         Common/PrintArrayStatements.cpp
-        Common/Constants.h
+        Common/Utilities.cpp
 
         HLS/HLS.cpp
         HLS/PrintBitOperations.cpp
         HLS/PrintFunction.cpp
         HLS/PrintReset.cpp
         HLS/PrintStatement.cpp
-        HLS/Utilities.cpp
 
         SynthesisScript/SynthesisScripts.cpp
 
         VHDLWrapper/PrintStmtVHDL.cpp
         VHDLWrapper/SignalFactory.cpp
-        VHDLWrapper/Utilities.cpp
         VHDLWrapper/VHDLWrapper.cpp
         VHDLWrapper/VHDLWrapperMCO.cpp
         VHDLWrapper/VHDLWrapperSCO.cpp

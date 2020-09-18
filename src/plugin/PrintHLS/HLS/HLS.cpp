@@ -7,6 +7,7 @@
 #include "PrintFunction.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include <PrintHLS/Common/Utilities.h>
 
 
 using namespace DESCAM::HLSPlugin::HLS;
@@ -335,7 +336,7 @@ void HLS::dataTypes()
     ss << "\n// Constants\n";
     for (const auto& var : optimizer->getConstantVariables()) {
         ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
-           << " " << Utilities::getFullName(var, "_") << " = " << getVariableReset(var) << ";\n";
+           << " " << var->getFullName("_") << " = " << getVariableReset(var) << ";\n";
     }
 
     ss << "\n#endif //DATA_TYPES_H";
@@ -383,7 +384,7 @@ void HLS::functions()
                 auto subVarList = parameter->second->getSubVarList();
                 for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
                     this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
-                             << Utilities::getFullName(*subVar, "_");
+                             << (*subVar)->getFullName("_");
                     if (std::next(subVar) != subVarList.end()) {
                         this->ss << ", ";
                     }
@@ -418,7 +419,7 @@ void HLS::visit(Function& node)
         if (parameter->second->isCompoundType()) {
             auto subVarList = parameter->second->getSubVarList();
             for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
-                this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " " << Utilities::getFullName(*subVar, "_");
+                this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " " << (*subVar)->getFullName("_");
                 if (std::next(subVar) != subVarList.end()) {
                     this->ss << ", ";
                 }
