@@ -1,0 +1,97 @@
+// DATA TYPES //
+typedef enum {IDLE, RUN} phases;
+
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "Test_functions.sva"
+
+import top_level_types::*;
+
+module Test_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge Test.clk); endclocking
+`include "Test_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 Test.data_out == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property add(o);
+	t##1 Test.data_out == $past(Test.data1_in + Test.data2_in);
+endproperty;
+add_a: assert property (disable iff (reset) add(1)); //ASSIGN t_end offset here
+
+
+property add_self_macro(o);
+
+ bit[15:0] data_out_bit;
+	t##1 hold(data_out_bit, data_out())
+implies
+	t##0 data_out_bit == add_fixed(data1_in(),data2_in());
+
+endproperty;
+add_self_macro_a: assert property (disable iff (reset) add_self_macro(1)); //ASSIGN t_end offset here
+
+
+property add_self(o); //without OVERFLOW
+
+ bit[8:0] intermediate_upper;
+ bit[8:0] intermediate_lower;
+	t##0 hold(intermediate_lower, ((000000000 | data1_in()[7:0]) + (000000000 | data2_in()[7:0]))) and
+	t##0 hold(intermediate_upper, ((000000000 | data1_in()[15:8]) + (000000000 | data2_in()[15:8]))) and
+	intermediate_upper[8] != 1 and
+	intermediate_lower[8] != 1
+implies
+	//t##1 Test.data_out[-1:-8] == intermediate_lower[7:0] and
+	t##1 data_out()[15:8] == intermediate_upper[7:0] and
+	t##1 data_out()[7:0] == intermediate_lower[7:0];
+
+endproperty;
+add_self_a: assert property (disable iff (reset) add_self(1)); //ASSIGN t_end offset here
+
+property add_self_2(o); //without OVERFLOW
+
+ bit[16:0] intermediate;
+	t##0 hold(intermediate((00000000000000000 | data1_in()[15:0]) + (00000000000000000 | data2_in()[15:0]))) and
+	intermediate[15] != 1
+implies
+	//t##1 Test.data_out[-1:-8] == intermediate_lower[7:0] and
+	t##1 data_out() == intermediate[15:0];
+
+endproperty;
+add_self_2_a: assert property (disable iff (reset) add_self_2(1)); //ASSIGN t_end offset here
+
+property add_self_overflow(o);
+
+ bit[8:0] intermediate_upper;
+ bit[8:0] intermediate_lower;
+	t##0 hold(intermediate_lower, ((000000000 | data1_in()[7:0]) + (000000000 | data2_in()[7:0]))) and
+	t##0 hold(intermediate_upper, ((000000000 | data1_in()[15:8]) + (000000000 | data2_in()[15:8]))) and
+	intermediate_upper[8] == 1
+implies
+	t##1 data_out() == ;
+
+endproperty;
+add_self_overflow_a: assert property (disable iff (reset) add_self_overflow(1)); //ASSIGN t_end offset here
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind Test Test_verification inst (.*, .reset(Test.rst));
