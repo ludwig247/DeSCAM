@@ -10,7 +10,7 @@
 #include <Module.h>
 #include <Stmts/UnsignedValue.h>
 
-using namespace SCAM;
+using namespace DESCAM;
 
 class ModuleTest : public ::testing::Test {
 protected:
@@ -18,20 +18,20 @@ protected:
     }
 
     virtual void SetUp() {
-        SCAM::Variable variable("unsigned_var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
+        DESCAM::Variable variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
         module.addVariable(&variable);
     }
 
     virtual void TearDown() {}
-    SCAM::Module module;
+    DESCAM::Module module;
 };
 
 TEST_F(ModuleTest,CreateUnsignedVar){
-    ASSERT_NO_THROW(SCAM::Variable variable("unsiged_Var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
+    ASSERT_NO_THROW(DESCAM::Variable variable("unsiged_Var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
 }
 
 TEST_F(ModuleTest,AddUnsignedVar){
-    ASSERT_NO_THROW(module.addVariable(new SCAM::Variable("unsiged_Var",SCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100))));
+    ASSERT_NO_THROW(module.addVariable(new DESCAM::Variable("unsiged_Var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100))));
 }
 
 TEST_F(ModuleTest,GetUnsignedVar){

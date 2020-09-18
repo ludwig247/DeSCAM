@@ -9,23 +9,23 @@
 #include <map>
 #include <set>
 
-namespace SCAM {
+namespace DESCAM {
 
     class FlattenWhile {
     public:
-        FlattenWhile(SCAM::CfgBlock *startNode, SCAM::CfgBlock *endNode,
-                     std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap, std::map<SCAM::CfgBlock *, std::set<int>> &pathNodeMap);
+        FlattenWhile(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endNode,
+                     std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap, std::map<DESCAM::CfgBlock *, std::set<int>> &pathNodeMap);
 
-        void core(SCAM::CfgBlock *node);
+        void core(DESCAM::CfgBlock *node);
 
-        std::vector<SCAM::Stmt *> getStmtList();
+        std::vector<DESCAM::Stmt *> getStmtList();
 
     private:
-        SCAM::CfgBlock *startNode;
-        SCAM::CfgBlock *endNode;
-        std::map<SCAM::CfgBlock *, SCAM::CfgBlock *> &startEndMap; //! Map containg the exit node for each ite block
-        std::map<SCAM::CfgBlock *, std::set<int>> &pathNodeMap; //! Map containg an entry for each node between start and end
-        std::vector<SCAM::Stmt *> stmtList;
+        DESCAM::CfgBlock *startNode;
+        DESCAM::CfgBlock *endNode;
+        std::map<DESCAM::CfgBlock *, DESCAM::CfgBlock *> &startEndMap; //! Map containg the exit node for each ite block
+        std::map<DESCAM::CfgBlock *, std::set<int>> &pathNodeMap; //! Map containg an entry for each node between start and end
+        std::vector<DESCAM::Stmt *> stmtList;
     };
 
 

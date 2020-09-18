@@ -9,13 +9,13 @@
 #include "StmtAbstractVisitor.h"
 #include "Operand.h"
 
-namespace SCAM {
+namespace DESCAM {
     class ArrayOperand : public Expr {
     public:
         ArrayOperand() = delete;
 
-        ArrayOperand(Variable *arrayVar, Expr *idx);
-        ArrayOperand(Operand * operand, Expr *idx);
+        ArrayOperand(Variable *arrayVar, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
+        ArrayOperand(Operand * operand, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
 
 
         virtual ~ArrayOperand() = default;
@@ -30,10 +30,10 @@ namespace SCAM {
         virtual void accept(StmtAbstractVisitor &visitor);
 
     private:
-        SCAM::Variable *arrayVar;
+        DESCAM::Variable *arrayVar;
         Operand * operand;
 
-        SCAM::Expr *idx;
+        DESCAM::Expr *idx;
     };
 }
 

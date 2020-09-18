@@ -27,7 +27,7 @@ std::map<std::string, std::string> PrintChisel::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintChisel::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintChisel::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -156,7 +156,7 @@ std::string PrintChisel::functions() {
         }
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto branchNum = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t\t";
@@ -801,7 +801,7 @@ std::string PrintChisel::sva_functions() {
         ss << ");\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto branchNum = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";

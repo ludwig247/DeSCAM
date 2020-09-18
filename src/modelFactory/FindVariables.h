@@ -10,7 +10,7 @@
 
 
 
-namespace SCAM{
+namespace DESCAM{
    /**
      ** \brief Visit fieldDecl of a recordDecl: Memeber Variables
      **

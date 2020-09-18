@@ -2,98 +2,100 @@
 
 
 #include "FindPathsToReturn.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
-std::map<SCAM::Stmt *, SCAM::Stmt *> SCAM::FindPathsToReturn::trueMap;
-std::map<SCAM::Stmt *, SCAM::Stmt *> SCAM::FindPathsToReturn::falseMap;
+std::map<DESCAM::Stmt *, DESCAM::Stmt *> DESCAM::FindPathsToReturn::trueMap;
+std::map<DESCAM::Stmt *, DESCAM::Stmt *> DESCAM::FindPathsToReturn::falseMap;
 
 
-SCAM::FindPathsToReturn::FindPathsToReturn(const std::vector<SCAM::Stmt *> &stmtList){
+DESCAM::FindPathsToReturn::FindPathsToReturn(const std::vector<DESCAM::Stmt *> &stmtList){
     //Iterate over eac stmts of te stmtList
     for (auto stmt: stmtList) {
         stmt->accept(*this);
     }
 }
 
-void SCAM::FindPathsToReturn::visit(struct Wait &node) {
+void DESCAM::FindPathsToReturn::visit(struct Wait &node) {
     this->appendStmtToPaths(&node);
 }
 
 
-void SCAM::FindPathsToReturn::visit(struct Peek &node) {
+void DESCAM::FindPathsToReturn::visit(struct Peek &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(SCAM::ArrayExpr &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::ArrayExpr &node) {
     this->appendStmtToPaths(&node);;
 
 }
 
-void SCAM::FindPathsToReturn::visit(struct SectionOperand &node) {
+void DESCAM::FindPathsToReturn::visit(struct SectionOperand &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct IntegerValue &node) {
+void DESCAM::FindPathsToReturn::visit(struct IntegerValue &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(SCAM::UnsignedValue &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::UnsignedValue &node) {
     this->appendStmtToPaths(&node);
 }
-void SCAM::FindPathsToReturn::visit(struct EnumValue &node) {
-    this->appendStmtToPaths(&node);
-}
-
-
-void SCAM::FindPathsToReturn::visit(struct BoolValue &node) {
-    this->appendStmtToPaths(&node);
-}
-
-void SCAM::FindPathsToReturn::visit(struct CompoundValue &node) {
+void DESCAM::FindPathsToReturn::visit(struct EnumValue &node) {
     this->appendStmtToPaths(&node);
 }
 
 
-void SCAM::FindPathsToReturn::visit(struct VariableOperand &node) {
+void DESCAM::FindPathsToReturn::visit(struct BoolValue &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct TimePointOperand &node) {
+void DESCAM::FindPathsToReturn::visit(struct CompoundValue &node) {
     this->appendStmtToPaths(&node);
 }
 
 
-void SCAM::FindPathsToReturn::visit(struct PortOperand &node) {
+void DESCAM::FindPathsToReturn::visit(struct VariableOperand &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(class SCAM::Notify &node) {
-    throw std::runtime_error("not implemented");
+void DESCAM::FindPathsToReturn::visit(struct TimePointOperand &node) {
+    this->appendStmtToPaths(&node);
+}
+
+
+void DESCAM::FindPathsToReturn::visit(struct PortOperand &node) {
+    this->appendStmtToPaths(&node);
+}
+
+void DESCAM::FindPathsToReturn::visit(class DESCAM::Notify &node) {
+    TERMINATE("not implemented");
 
 }
 
-void SCAM::FindPathsToReturn::visit(struct Assignment &node) {
+void DESCAM::FindPathsToReturn::visit(struct Assignment &node) {
      this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct UnaryExpr &node) {
+void DESCAM::FindPathsToReturn::visit(struct UnaryExpr &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct While &node) {
+void DESCAM::FindPathsToReturn::visit(struct While &node) {
     this->appendStmtToPaths(&node);
 }
 
 
-void SCAM::FindPathsToReturn::visit(struct If &node) {
+void DESCAM::FindPathsToReturn::visit(struct If &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct SectionValue &node) {
+void DESCAM::FindPathsToReturn::visit(struct SectionValue &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct ITE &node) {
+void DESCAM::FindPathsToReturn::visit(struct ITE &node) {
     //Step 0: empty ITE ?
     if(node.getIfList().empty() && node.getElseList().empty()){
         return;
@@ -110,7 +112,7 @@ void SCAM::FindPathsToReturn::visit(struct ITE &node) {
         }
     }
     //Step 3: newPathList: all new paths are added to this list
-    std::vector<SCAM::Path *> newPathObjectList;
+    std::vector<DESCAM::Path *> newPathObjectList;
 
     //Step 4: Create X new paths for each old path
     //  X = #paths of true branch + #paths of false branch
@@ -160,20 +162,20 @@ void SCAM::FindPathsToReturn::visit(struct ITE &node) {
     }
     //Continue recursion
 }
-void SCAM::FindPathsToReturn::visit(struct Arithmetic &node) {
+void DESCAM::FindPathsToReturn::visit(struct Arithmetic &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct Cast &node) {
+void DESCAM::FindPathsToReturn::visit(struct Cast &node) {
     this->appendStmtToPaths(&node);
 }
 
 
-void SCAM::FindPathsToReturn::visit(SCAM::FunctionOperand &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::FunctionOperand &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::appendStmtToPaths(SCAM::Stmt *stmt) {
+void DESCAM::FindPathsToReturn::appendStmtToPaths(DESCAM::Stmt *stmt) {
     //Step 1: If no pathObject exists,yet add an empty one
     if (this->pathList.empty()) this->pathList.push_back(new Path());
     //Step 2: Add stmt to each existing path
@@ -182,14 +184,14 @@ void SCAM::FindPathsToReturn::appendStmtToPaths(SCAM::Stmt *stmt) {
     }
 }
 
-std::vector<SCAM::Path *> SCAM::FindPathsToReturn::getPathList() {
+std::vector<DESCAM::Path *> DESCAM::FindPathsToReturn::getPathList() {
     //Every nextstate that is empty is a path without nextstate assignment
     //Assign starting state of path as nextstate
     return this->pathList;
 }
 
 //! When creating paths, there is always a branch with the condition beeing true or not true
-SCAM::Stmt *SCAM::FindPathsToReturn::find_or_add_true(Expr *conditionStmt) {
+DESCAM::Stmt *DESCAM::FindPathsToReturn::find_or_add_true(Expr *conditionStmt) {
     //Is conditoin already in map?
     if (FindPathsToReturn::trueMap.find(conditionStmt) == FindPathsToReturn::trueMap.end()) {
         //Add variable to map
@@ -199,7 +201,7 @@ SCAM::Stmt *SCAM::FindPathsToReturn::find_or_add_true(Expr *conditionStmt) {
 }
 
 //! When creating paths, there is always a branch with the condition beeing true or not true
-SCAM::Stmt *SCAM::FindPathsToReturn::find_or_add_false(Expr *conditionStmt) {
+DESCAM::Stmt *DESCAM::FindPathsToReturn::find_or_add_false(Expr *conditionStmt) {
     //Is conditoin already in map?
     if (FindPathsToReturn::falseMap.find(conditionStmt) == FindPathsToReturn::falseMap.end()) {
         //Add variable to map
@@ -208,61 +210,61 @@ SCAM::Stmt *SCAM::FindPathsToReturn::find_or_add_false(Expr *conditionStmt) {
     return FindPathsToReturn::falseMap[conditionStmt];
 }
 
-SCAM::FindPathsToReturn::~FindPathsToReturn() {
+DESCAM::FindPathsToReturn::~FindPathsToReturn() {
 
 }
 
-void SCAM::FindPathsToReturn::visit(struct Logical &node) {
+void DESCAM::FindPathsToReturn::visit(struct Logical &node) {
     this->appendStmtToPaths(&node);
 }
 
 
-void SCAM::FindPathsToReturn::visit(struct Relational &node) {
+void DESCAM::FindPathsToReturn::visit(struct Relational &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct Bitwise &node) {
+void DESCAM::FindPathsToReturn::visit(struct Bitwise &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct Read &node) {
+void DESCAM::FindPathsToReturn::visit(struct Read &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct Write &node) {
+void DESCAM::FindPathsToReturn::visit(struct Write &node) {
     this->appendStmtToPaths(&node);
 }
 
-void SCAM::FindPathsToReturn::visit(struct SyncSignal &node) {
-    throw std::runtime_error("FindPathsToReturn: SynchSignal not allowed here");
+void DESCAM::FindPathsToReturn::visit(struct SyncSignal &node) {
+    TERMINATE("FindPathsToReturn: SynchSignal not allowed here");
 
 }
 
-void SCAM::FindPathsToReturn::visit(struct DataSignalOperand &node) {
-    throw std::runtime_error("FindPathsToReturn: DataSignal not allowed here");
+void DESCAM::FindPathsToReturn::visit(struct DataSignalOperand &node) {
+    TERMINATE("FindPathsToReturn: DataSignal not allowed here");
 }
 
-void SCAM::FindPathsToReturn::visit(SCAM::ArrayOperand &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::ArrayOperand &node) {
     this->appendStmtToPaths(&node);
 
 }
 
-void SCAM::FindPathsToReturn::visit(SCAM::CompoundExpr &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::CompoundExpr &node) {
     this->appendStmtToPaths(&node);;
 
 }
 
-void SCAM::FindPathsToReturn::visit(SCAM::ParamOperand &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::ParamOperand &node) {
     this->appendStmtToPaths(&node);
 
 }
 
-void SCAM::FindPathsToReturn::visit(SCAM::Return &node) {
+void DESCAM::FindPathsToReturn::visit(DESCAM::Return &node) {
     this->appendStmtToPaths(&node);
 
 }
 
-void SCAM::FindPathsToReturn::visit(class SCAM::Ternary &node) {
+void DESCAM::FindPathsToReturn::visit(class DESCAM::Ternary &node) {
     this->appendStmtToPaths(&node);
 
 }

@@ -9,7 +9,7 @@
 #include "Behavior/CfgNode.h"
 #include <sstream>
 
-namespace SCAM {
+namespace DESCAM {
     /***
      * \brief: Represents a data structure containing a sequence of connected CfgNode nodes and a unique ID
      * \author: mi-alkoudsi

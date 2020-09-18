@@ -5,10 +5,10 @@ include(add_example/AddExample.cmake)
 # Note: If example directory is not specified, it'll be assumed that plugin directory has the same name as the example itself.
 #
 #
-#add_example(Bus; Print_ITL_Tests )
+add_example(Bus; Print_ITL_Tests )
 add_example(FPI; Print_ITL_Tests)
 #add_example(I2C; Print_ITL_Tests)
-#add_example(Framer; Print_ITL_Tests)
+add_example(Framer; Print_ITL_Tests)
 add_example(Paper; Print_ITL_Tests)
 #add_example(operation-pipeline; Print_ITL_Tests)
 #add_example(RISCV_ISA; Print_ITL_Tests)

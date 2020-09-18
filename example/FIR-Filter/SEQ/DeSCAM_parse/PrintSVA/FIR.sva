@@ -1,0 +1,295 @@
+// DATA TYPES //
+typedef enum {IDLE, RUN_C1, RUN_C2, RUN_C3, RUN_OUT} phases;
+
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "FIR_functions.sva"
+
+import top_level_types::*;
+
+module FIR_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge FIR.clk); endclocking
+`include "FIR_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 data_in_1() and
+	t##0 acc() == 0 and
+	t##0 coef(0) == 1 and
+	t##0 coef(1) == 1 and
+	t##0 coef(2) == 1 and
+	t##0 data_algorithm() == 0 and
+	t##0 shiftreg(0) == 0 and
+	t##0 shiftreg(1) == 0 and
+	t##0 shiftreg(2) == 0 and
+	t##0 data_in_notify() == 1 and
+	t##0 data_out_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property C1_2_2_p(o);
+ bit[31:0] acc_0;
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] coef_2_0;
+ bit[31:0] data_algorithm_0;
+ bit[31:0] shiftreg_0_0;
+ bit[31:0] shiftreg_1_0;
+	t ##0 hold(acc_0, acc()) and
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(coef_2_0, coef(2)) and
+	t ##0 hold(data_algorithm_0, data_algorithm()) and
+	t ##0 hold(shiftreg_0_0, shiftreg(0)) and
+	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
+	t##0 C1_2()
+implies
+	t_end(o)##0 C2_3() and
+	t_end(o)##0 acc() == (acc_0 + (coef_2_0 * shiftreg_1_0)) and
+	t_end(o)##0 coef(0) == coef_0_0 and
+	t_end(o)##0 coef(1) == coef_1_0 and
+	t_end(o)##0 coef(2) == coef_2_0 and
+	t_end(o)##0 data_algorithm() == data_algorithm_0 and
+	t_end(o)##0 shiftreg(0) == shiftreg_0_0 and
+	t_end(o)##0 shiftreg(1) == shiftreg_1_0 and
+	t_end(o)##0 shiftreg(2) == shiftreg_1_0 and
+	during_o (t, 1, t_end(o), 0, data_in_notify() == 0) and
+	during_o (t, 1, t_end(o), 0, data_out_notify() == 0);
+endproperty;
+C1_2_2_a: assert property (disable iff (reset) C1_2_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property C2_3_3_p(o);
+ bit[31:0] acc_0;
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] coef_2_0;
+ bit[31:0] data_algorithm_0;
+ bit[31:0] shiftreg_0_0;
+ bit[31:0] shiftreg_2_0;
+	t ##0 hold(acc_0, acc()) and
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(coef_2_0, coef(2)) and
+	t ##0 hold(data_algorithm_0, data_algorithm()) and
+	t ##0 hold(shiftreg_0_0, shiftreg(0)) and
+	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
+	t##0 C2_3()
+implies
+	t_end(o)##0 C3_4() and
+	t_end(o)##0 acc() == (acc_0 + (coef_1_0 * shiftreg_0_0)) and
+	t_end(o)##0 coef(0) == coef_0_0 and
+	t_end(o)##0 coef(1) == coef_1_0 and
+	t_end(o)##0 coef(2) == coef_2_0 and
+	t_end(o)##0 data_algorithm() == data_algorithm_0 and
+	t_end(o)##0 shiftreg(0) == shiftreg_0_0 and
+	t_end(o)##0 shiftreg(1) == shiftreg_0_0 and
+	t_end(o)##0 shiftreg(2) == shiftreg_2_0 and
+	during_o (t, 1, t_end(o), 0, data_in_notify() == 0) and
+	during_o (t, 1, t_end(o), 0, data_out_notify() == 0);
+endproperty;
+C2_3_3_a: assert property (disable iff (reset) C2_3_3_p(1)); //ASSIGN t_end offset here
+
+
+
+property C3_4_4_p(o);
+ bit[31:0] acc_0;
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] data_algorithm_0;
+ bit[31:0] shiftreg_1_0;
+ bit[31:0] shiftreg_2_0;
+	t ##0 hold(acc_0, acc()) and
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(data_algorithm_0, data_algorithm()) and
+	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
+	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
+	t##0 C3_4() and
+	t ##0 data_algorithm_0 > 0 and
+	t ##0 data_algorithm_0 < 8
+implies
+	t_end(o)##0 data_out_5() and
+	t_end(o)##0 acc() == (acc_0 + (coef_0_0 * data_algorithm_0)) and
+	t_end(o)##0 coef(0) == (acc_0 + (coef_0_0 * data_algorithm_0)) and
+	t_end(o)##0 coef(1) == coef_0_0 and
+	t_end(o)##0 coef(2) == coef_1_0 and
+	t_end(o)##0 data_algorithm() == data_algorithm_0 and
+	t_end(o)##0 data_out_sig() == (acc_0 + (coef_0_0 * data_algorithm_0)) and
+	t_end(o)##0 shiftreg(0) == data_algorithm_0 and
+	t_end(o)##0 shiftreg(1) == shiftreg_1_0 and
+	t_end(o)##0 shiftreg(2) == shiftreg_2_0 and
+	during_o (t, 1, t_end(o), 0, data_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, data_out_notify() == 0) and
+	t_end(o)##0 data_out_notify() == 1;
+endproperty;
+C3_4_4_a: assert property (disable iff (reset) C3_4_4_p(1)); //ASSIGN t_end offset here
+
+
+
+property data_in_1_1_p(o);
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] coef_2_0;
+ bit[31:0] data_in_sig_0;
+ bit[31:0] shiftreg_0_0;
+ bit[31:0] shiftreg_1_0;
+ bit[31:0] shiftreg_2_0;
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(coef_2_0, coef(2)) and
+	t ##0 hold(data_in_sig_0, data_in_sig()) and
+	t ##0 hold(shiftreg_0_0, shiftreg(0)) and
+	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
+	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
+	t##0 data_in_1() and
+	t##0 data_in_sync()
+implies
+	t_end(o)##0 C1_2() and
+	t_end(o)##0 acc() == 0 and
+	t_end(o)##0 coef(0) == coef_0_0 and
+	t_end(o)##0 coef(1) == coef_1_0 and
+	t_end(o)##0 coef(2) == coef_2_0 and
+	t_end(o)##0 data_algorithm() == data_in_sig_0 and
+	t_end(o)##0 shiftreg(0) == shiftreg_0_0 and
+	t_end(o)##0 shiftreg(1) == shiftreg_1_0 and
+	t_end(o)##0 shiftreg(2) == shiftreg_2_0 and
+	during_o (t, 1, t_end(o), 0, data_in_notify() == 0) and
+	during_o (t, 1, t_end(o), 0, data_out_notify() == 0);
+endproperty;
+data_in_1_1_a: assert property (disable iff (reset) data_in_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property data_out_5_5_p(o);
+ bit[31:0] acc_0;
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] coef_2_0;
+ bit[31:0] data_algorithm_0;
+ bit[31:0] shiftreg_0_0;
+ bit[31:0] shiftreg_1_0;
+ bit[31:0] shiftreg_2_0;
+	t ##0 hold(acc_0, acc()) and
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(coef_2_0, coef(2)) and
+	t ##0 hold(data_algorithm_0, data_algorithm()) and
+	t ##0 hold(shiftreg_0_0, shiftreg(0)) and
+	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
+	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
+	t##0 data_out_5() and
+	t##0 data_out_sync()
+implies
+	t_end(o)##0 data_in_1() and
+	t_end(o)##0 acc() == acc_0 and
+	t_end(o)##0 coef(0) == coef_0_0 and
+	t_end(o)##0 coef(1) == coef_1_0 and
+	t_end(o)##0 coef(2) == coef_2_0 and
+	t_end(o)##0 data_algorithm() == data_algorithm_0 and
+	t_end(o)##0 shiftreg(0) == shiftreg_0_0 and
+	t_end(o)##0 shiftreg(1) == shiftreg_1_0 and
+	t_end(o)##0 shiftreg(2) == shiftreg_2_0 and
+	during_o (t, 1, t_end(o), -1, data_in_notify() == 0) and
+	t_end(o)##0 data_in_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, data_out_notify() == 0);
+endproperty;
+data_out_5_5_a: assert property (disable iff (reset) data_out_5_5_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_data_in_1_p(o);
+ bit[31:0] acc_0;
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] coef_2_0;
+ bit[31:0] data_algorithm_0;
+ bit[31:0] shiftreg_0_0;
+ bit[31:0] shiftreg_1_0;
+ bit[31:0] shiftreg_2_0;
+	t ##0 hold(acc_0, acc()) and
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(coef_2_0, coef(2)) and
+	t ##0 hold(data_algorithm_0, data_algorithm()) and
+	t ##0 hold(shiftreg_0_0, shiftreg(0)) and
+	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
+	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
+	t##0 data_in_1() and
+	t##0 !(data_in_sync())
+implies
+	t##1 data_in_1() and
+	t##1 acc() == acc_0 and
+	t##1 coef(0) == coef_0_0 and
+	t##1 coef(1) == coef_1_0 and
+	t##1 coef(2) == coef_2_0 and
+	t##1 data_algorithm() == data_algorithm_0 and
+	t##1 shiftreg(0) == shiftreg_0_0 and
+	t##1 shiftreg(1) == shiftreg_1_0 and
+	t##1 shiftreg(2) == shiftreg_2_0 and
+	t##1 data_in_notify() == 1 and
+	t##1 data_out_notify() == 0;
+endproperty;
+wait_data_in_1_a: assert property (disable iff (reset) wait_data_in_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_data_out_5_p(o);
+ bit[31:0] acc_0;
+ bit[31:0] coef_0_0;
+ bit[31:0] coef_1_0;
+ bit[31:0] coef_2_0;
+ bit[31:0] data_algorithm_0;
+ bit[31:0] data_out_sig_0;
+ bit[31:0] shiftreg_0_0;
+ bit[31:0] shiftreg_1_0;
+ bit[31:0] shiftreg_2_0;
+	t ##0 hold(acc_0, acc()) and
+	t ##0 hold(coef_0_0, coef(0)) and
+	t ##0 hold(coef_1_0, coef(1)) and
+	t ##0 hold(coef_2_0, coef(2)) and
+	t ##0 hold(data_algorithm_0, data_algorithm()) and
+	t ##0 hold(data_out_sig_0, data_out_sig()) and
+	t ##0 hold(shiftreg_0_0, shiftreg(0)) and
+	t ##0 hold(shiftreg_1_0, shiftreg(1)) and
+	t ##0 hold(shiftreg_2_0, shiftreg(2)) and
+	t##0 data_out_5() and
+	t##0 !(data_out_sync())
+implies
+	t##1 data_out_5() and
+	t##1 acc() == acc_0 and
+	t##1 coef(0) == coef_0_0 and
+	t##1 coef(1) == coef_1_0 and
+	t##1 coef(2) == coef_2_0 and
+	t##1 data_algorithm() == data_algorithm_0 and
+	t##1 data_out_sig() == data_out_sig_0 and
+	t##1 shiftreg(0) == shiftreg_0_0 and
+	t##1 shiftreg(1) == shiftreg_1_0 and
+	t##1 shiftreg(2) == shiftreg_2_0 and
+	t##1 data_in_notify() == 0 and
+	t##1 data_out_notify() == 1;
+endproperty;
+wait_data_out_5_a: assert property (disable iff (reset) wait_data_out_5_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind FIR FIR_verification inst (.*, .reset(FIR.rst));

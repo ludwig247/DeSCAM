@@ -10,11 +10,11 @@
 int main(int argc, const char *argv[]) {
 
 
-    SCAM::CommandlineControl commandlineControl("AML-parse", argc, argv);
+    DESCAM::CommandlineControl commandlineControl("AML-parse", argc, argv);
 
 
     aml_driver driver;
-    SCAM::Model *model = new SCAM::Model("AML-model");
+    DESCAM::Model *model = new DESCAM::Model("AML-model");
 
     //Is there a file specified
     if (commandlineControl.getFileName().empty()) return 0;

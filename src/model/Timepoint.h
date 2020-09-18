@@ -11,7 +11,7 @@
 #include "ConstValue.h"
 #include "VariableTemplate.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     /** \brief Represents a time expression within a property
      *
@@ -22,7 +22,7 @@ namespace SCAM {
     public:
         Timepoint() = delete;
         Timepoint(Timepoint&) = delete;
-        explicit Timepoint(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, Timepoint *parent = nullptr);
+        explicit Timepoint(std::string name, DataType *type = DataTypes::getDataType("unsigned"), ConstValue *initialValue = nullptr, Timepoint *parent = nullptr,LocationInfo locationInfo = LocationInfo());
 
         //Visitor
         virtual void accept(AbstractVisitor &visitor);

@@ -8,10 +8,10 @@
 
 #include "Expr.h"
 
-namespace SCAM {
+namespace DESCAM {
     class Bitwise : public Expr {
     public:
-        Bitwise(Expr *lhs, std::string operation, Expr *rhs);
+        Bitwise(Expr *lhs, std::string operation, Expr *rhs, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         Expr *getRhs();

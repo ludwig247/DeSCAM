@@ -13,7 +13,7 @@
 #include <set>
 #include <map>
 
-namespace SCAM {
+namespace DESCAM {
 
     class ValueSubstitution : public StmtAbstractVisitor {
 
@@ -26,13 +26,13 @@ namespace SCAM {
         * \author: mi-alkoudsi
         *
         * \input:
-        *      - SCAM::Expr *oldExpr;
+        *      - DESCAM::Expr *oldExpr;
         *      - std::string *varName;
-        *      - SCAM::Expr *varVal;
+        *      - DESCAM::Expr *varVal;
         * \output:
-        *      - SCAM::Expr *newExpr;
+        *      - DESCAM::Expr *newExpr;
         */
-        SCAM::Expr *substituteExpr(SCAM::Expr *oldExpr, std::string varName, SCAM::Expr *varVal);
+        Expr *substituteExpr(Expr *oldExpr, std::string varName, Expr *varVal);
 
         /***
         * \brief: Substitutes a variable inside a statement with another expression
@@ -40,22 +40,22 @@ namespace SCAM {
         * \author: mi-alkoudsi
         *
         * \input:
-        *      - SCAM::Stmt *oldStmt;
+        *      - DESCAM::Stmt *oldStmt;
         *      - std::string *varName;
-        *      - SCAM::Expr *varVal;
+        *      - DESCAM::Expr *varVal;
         * \output:
-        *      - SCAM::Stmt *newStmt;
+        *      - DESCAM::Stmt *newStmt;
         */
-        SCAM::Stmt *substituteStmt(SCAM::Stmt *oldStmt, std::string varName, SCAM::Expr *varVal);
+        Stmt *substituteStmt(Stmt *oldStmt, std::string varName, Expr *varVal);
 
 
     private:
         std::string varName;
-        SCAM::Expr *oldExpr;
-        SCAM::Expr *varVal;
-        SCAM::Expr *newExpr;
-        SCAM::Stmt *oldStmt;
-        SCAM::Stmt *newStmt;
+        Expr *oldExpr;
+        Expr *varVal;
+        Expr *newExpr;
+        Stmt *oldStmt;
+        Stmt *newStmt;
 
         //visitors
         void visit(struct VariableOperand &node) override;
@@ -104,7 +104,7 @@ namespace SCAM {
 
         void visit(struct Cast &node) override;
 
-        void visit(struct SCAM::FunctionOperand &node) override;
+        void visit(struct FunctionOperand &node) override;
 
         void visit(struct ArrayOperand &node) override;
 

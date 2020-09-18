@@ -4,7 +4,7 @@
 #include "../../Interfaces/Interfaces.h"
 #include "systemc.h"
 
-#include "../../SingleMasterMultiSlave/ESL/Compound.h"
+#include "../../legacy/SingleMasterMultiSlave/ESL/Compound.h"
 
 #ifndef PROJECT_BUS_H
 #define PROJECT_BUS_H
@@ -91,7 +91,7 @@ struct Bus : public sc_module {
             }
             master_out->write(resp,"master_out");
 
-            //wait(SC_ZERO_TIME);
+            wait(SC_ZERO_TIME);
         }
     }
 };

@@ -11,7 +11,7 @@
 #include "DataType.h"
 #include "TypeInterface.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class Module;
 
@@ -23,7 +23,7 @@ namespace SCAM {
 
     class Port : public TypeInterface, public AbstractNode {
     public:
-        Port(const std::string &name, Interface *_interface, DataType *datatype);
+        Port(const std::string &name, Interface *_interface, DataType *datatype, LocationInfo locationInfo = LocationInfo());
         Port() = delete;
         Port(Port&)= delete;
 

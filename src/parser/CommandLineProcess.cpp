@@ -3,6 +3,8 @@
 //
 
 #include "CommandLineProcess.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 // main object of this formatter is to adjust the spacing when help command is executed
 class MyFormatter : public CLI::Formatter {
@@ -10,7 +12,7 @@ public:
     MyFormatter() : Formatter() {}
 };
 
-namespace SCAM {
+namespace DESCAM {
 
     CommandLineProcess::CommandLineProcess(int argc, const char **argv) {
 
@@ -35,7 +37,7 @@ namespace SCAM {
     }
 
     void CommandLineProcess::commandLineInitialize() {
-        app = new CLI::App("-- SCAM tool --");
+        app = new CLI::App("-- DESCAM tool --");
         // we will need this to show the options available for each plugin
         app->set_help_all_flag("--help-all", "Show all help");
         // adjusting the spacing when help command is executed
@@ -156,13 +158,13 @@ namespace SCAM {
 
         //Manage Source File
         if (!isSourceFile(this->sourceFile))
-            throw std::runtime_error("Unknown Source File: " + this->sourceFile);
+            TERMINATE("Unknown Source File: " + this->sourceFile);
 
 
         //Manage Output Directory
         if (app->count("--output")) {
             if (!isDirectory(this->outputDirectory))
-                throw std::runtime_error("Unknown Output Directory: " + this->outputDirectory);
+            {TERMINATE("Unknown Output Directory: " + this->outputDirectory)}
             else
                 createOutputDirectory(this->outputDirectory);
         }

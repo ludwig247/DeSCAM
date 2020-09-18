@@ -3,26 +3,29 @@
 //
 
 #include "TimePointVisitor.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-void SCAM::TimePointVisitor::visit(SCAM::VariableOperand &node) {
+
+void DESCAM::TimePointVisitor::visit(DESCAM::VariableOperand &node) {
 
     if (node.getVariable()->isSubVar()) {
         if (node.getVariable()->getParent()->isCompoundType()) {
             this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
         } else if (node.getVariable()->getParent()->isArrayType()) {
             this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
-        } else throw std::runtime_error(" Unknown ");
+        } else TERMINATE(" Unknown ");
 
     } else {
         this->ss << node.getVariable()->getName();
     }
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::SyncSignal &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::SyncSignal &node) {
     this->ss << node.getPort()->getName() << "_sync";
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::DataSignalOperand &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {
             this->ss << node.getDataSignal()->getParent()->getName() << "(" << node.getDataSignal()->getName() << ")";
@@ -34,12 +37,12 @@ void SCAM::TimePointVisitor::visit(SCAM::DataSignalOperand &node) {
     }
 }
 
-std::string SCAM::TimePointVisitor::toString(SCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
+std::string DESCAM::TimePointVisitor::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset) {
     TimePointVisitor printer;
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Relational &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Relational &node) {
     this->ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
@@ -54,7 +57,7 @@ void SCAM::TimePointVisitor::visit(SCAM::Relational &node) {
 }
 
 
-void SCAM::TimePointVisitor::visit(SCAM::Arithmetic &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Arithmetic &node) {
     //TODO: Removing the brackets could lead to wrong expressions
     //this->ss << "(";
     node.getLhs()->accept(*this);
@@ -68,7 +71,7 @@ void SCAM::TimePointVisitor::visit(SCAM::Arithmetic &node) {
 
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Bitwise &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Bitwise &node) {
     if (node.getOperation() == "<<") {
         this->resize_flag = true;
         this->ss << "(shift_left(";
@@ -92,35 +95,35 @@ void SCAM::TimePointVisitor::visit(SCAM::Bitwise &node) {
             this->ss << " or ";
         } else if (node.getOperation() == "^") {
             this->ss << " xor ";
-        } else throw std::runtime_error("Should not get here");
+        } else TERMINATE("Should not get here");
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::UnsignedValue &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::UnsignedValue &node) {
     this->ss << node.getValueAsString();
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::IntegerValue &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::IntegerValue &node) {
     this->ss << node.getValueAsString();
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Cast &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed(";
-    } else throw std::runtime_error("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Return &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Return &node) {
     node.getReturnValue()->accept(*this);
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::ITE &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::ITE &node) {
     /*
      * if (print condition) {
      *   print stmts
@@ -161,18 +164,18 @@ void SCAM::TimePointVisitor::visit(SCAM::ITE &node) {
 
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Assignment &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Assignment &node) {
     PrintStmt::visit(node);
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::ArrayOperand &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::ArrayOperand &node) {
     this->ss << node.getArrayOperand()->getOperandName();
     this->ss << "(";
     node.getIdx()->accept(*this);
     this->ss << ")";
 }
 
-void SCAM::TimePointVisitor::visit(struct CompoundExpr &node) {
+void DESCAM::TimePointVisitor::visit(struct CompoundExpr &node) {
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
         begin->second->accept(*this);
@@ -180,20 +183,20 @@ void SCAM::TimePointVisitor::visit(struct CompoundExpr &node) {
     }
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::ParamOperand &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::ParamOperand &node) {
     auto param = node.getParameter();
     if (param->isSubVar()) {
         this->ss << param->getParent()->getName() << "_" << param->getName();
     } else this->ss << param->getName();
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Notify &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Notify &node) {
     this->ss << node.getPort()->getName() << "_notify";
 }
 
 
 
-void SCAM::TimePointVisitor::visit(SCAM::ArrayExpr &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::ArrayExpr &node) {
     auto valueMap = node.getValueMap();
     for (auto begin = valueMap.begin(); begin != valueMap.end(); ++begin) {
         begin->second->accept(*this);
@@ -202,7 +205,7 @@ void SCAM::TimePointVisitor::visit(SCAM::ArrayExpr &node) {
 }
 
 
-void SCAM::TimePointVisitor::visit(SCAM::UnaryExpr &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::UnaryExpr &node) {
     useParenthesesFlag = true;
     if(node.getOperation() == "~") {
         this->ss << "not(";
@@ -211,6 +214,6 @@ void SCAM::TimePointVisitor::visit(SCAM::UnaryExpr &node) {
     this->ss << ")";
 }
 
-void SCAM::TimePointVisitor::visit(SCAM::Timepoint &node) {
+void DESCAM::TimePointVisitor::visit(DESCAM::Timepoint &node) {
     this->ss << node.getName();
 }

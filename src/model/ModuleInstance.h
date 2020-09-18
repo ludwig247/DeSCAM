@@ -8,7 +8,7 @@
 #include "Channel.h"
 
 
-namespace SCAM {
+namespace DESCAM {
 
     class Module;
 
@@ -16,7 +16,7 @@ namespace SCAM {
 
     class ModuleInstance : public AbstractNode {
     public:
-        ModuleInstance(std::string name, Module *structure);
+        ModuleInstance(std::string name, Module *structure, LocationInfo locationInfo = LocationInfo());
 
         ModuleInstance();
 
@@ -34,7 +34,7 @@ namespace SCAM {
 
         std::map<std::string, Channel *> getChannelMap();
 
-        SCAM::Channel *getChannel(SCAM::Port *port); //! Returns the channel that belongs to the port
+        DESCAM::Channel *getChannel(DESCAM::Port *port); //! Returns the channel that belongs to the port
 
         //GETTER
         Module *getStructure();
@@ -42,9 +42,9 @@ namespace SCAM {
 
     private:
         Module *structure; //! Pointing to the structure of the model
-        std::map<std::string, SCAM::Channel *> channelMap; //! List of channels bound within this instance
+        std::map<std::string, DESCAM::Channel *> channelMap; //! List of channels bound within this instance
         std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains all instances of sub-modules instantiated in this modul
-        std::map<SCAM::Port *, SCAM::Channel *> portChannelMap;
+        std::map<DESCAM::Port *, DESCAM::Channel *> portChannelMap;
     };
 
 }

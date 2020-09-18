@@ -10,12 +10,12 @@
 #include "z3++.h"
 #include "ReconstructOperations.h"
 
-namespace SCAM {
+namespace DESCAM {
 
-    SCAM::ValidOperations::ValidOperations(const std::vector<SCAM::Operation *> &operationsList, SCAM::Module * module) : module(module){
+    DESCAM::ValidOperations::ValidOperations(const std::vector<DESCAM::Operation *> &operationsList, DESCAM::Module * module) : module(module){
 
         for (auto op : operationsList) {
-            if (SCAM::ValidOperations::isOperationReachable(op)) {
+            if (DESCAM::ValidOperations::isOperationReachable(op)) {
                 this->operationsList.push_back(op);
             } else {
                 /// Remove from stateList operations
@@ -29,7 +29,7 @@ namespace SCAM {
     }
 
 
-    const bool SCAM::ValidOperations::isOperationReachable(SCAM::Operation* op) {
+    const bool DESCAM::ValidOperations::isOperationReachable(DESCAM::Operation* op) {
         z3::context  context;
         z3::solver solver(context);
         ExprTranslator translator(&context);
@@ -41,22 +41,22 @@ namespace SCAM {
         return !(solver.check() == z3::unsat);
     }
 
-    const bool SCAM::ValidOperations::isPathReachable(std::vector<SCAM::CfgNode* > operationPath, SCAM::Module * module) {
+    const bool DESCAM::ValidOperations::isPathReachable(std::vector<DESCAM::CfgNode* > operationPath, DESCAM::Module * module) {
         z3::context  context;
         z3::solver solver(context);
         ExprTranslator translator(&context);
         // Collect statements
-        std::vector<SCAM::Stmt*> statementsList;
+        std::vector<DESCAM::Stmt*> statementsList;
         auto it = operationPath.begin();
         while (it != operationPath.end() - 1) {
             if((*it)->getStmt() != nullptr) {
-                SCAM::Stmt * statement = (*it)->getStmt();
+                DESCAM::Stmt * statement = (*it)->getStmt();
                 if ((*it)->getSuccessorList().size() > 1) { /// Branching node (condition)
-                    auto * if_statement = (SCAM::If *)((*it)->getStmt());
+                    auto * if_statement = (DESCAM::If *)((*it)->getStmt());
                     if ( (*(it + 1))->getId() == ((*it)->getId() + 1) ) {
                         statement = if_statement;
                     } else {
-                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt()));
+                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt(),if_statement->getStmtInfo()),if_statement->getStmtInfo());
                     }
                 }
                 statementsList.push_back(statement);
@@ -64,7 +64,7 @@ namespace SCAM {
             it++;
         }
 
-        std::vector<Expr *> conditionsList = SCAM::ReconstructOperations::extractConditions(statementsList,module);
+        std::vector<Expr *> conditionsList = DESCAM::ReconstructOperations::extractConditions(statementsList,module);
 
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
@@ -76,29 +76,29 @@ namespace SCAM {
         return !(solver.check() == z3::unsat);
     }
 
-    const bool SCAM::ValidOperations::isPathReachable(std::vector<SCAM::Stmt* > assumedStatements, std::vector<SCAM::CfgNode* > operationPath, SCAM::Module * module) {
+    const bool DESCAM::ValidOperations::isPathReachable(std::vector<DESCAM::Stmt* > assumedStatements, std::vector<DESCAM::CfgNode* > operationPath, DESCAM::Module * module) {
         z3::context  context;
         z3::solver solver(context);
         ExprTranslator translator(&context);
         // Collect statements
-        std::vector<SCAM::Stmt*> statementsList = std::move(assumedStatements);
+        std::vector<DESCAM::Stmt*> statementsList = std::move(assumedStatements);
         auto it = operationPath.begin();
         while (it != operationPath.end() - 1) {
             if((*it)->getStmt() != nullptr) {
-                SCAM::Stmt * statement = (*it)->getStmt();
+                DESCAM::Stmt * statement = (*it)->getStmt();
                 if ((*it)->getSuccessorList().size() > 1) { /// Branching node (condition)
-                    auto * if_statement = (SCAM::If *)((*it)->getStmt());
+                    auto * if_statement = (DESCAM::If *)((*it)->getStmt());
                     if ( (*(it + 1))->getId() == ((*it)->getId() + 1) ) {
                         statement = if_statement;
                     } else {
-                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt()));
+                        statement = new If(new UnaryExpr("not", if_statement->getConditionStmt(),if_statement->getStmtInfo()),if_statement->getStmtInfo());
                     }
                 }
                 statementsList.push_back(statement);
             }
             it++;
         }
-        std::vector<Expr *> conditionsList = SCAM::ReconstructOperations::extractConditions(statementsList,module);
+        std::vector<Expr *> conditionsList = DESCAM::ReconstructOperations::extractConditions(statementsList,module);
 
         //Translate each expression with the ExprtTranslator and add to solver
         for (auto condition: conditionsList) {
@@ -109,7 +109,7 @@ namespace SCAM {
         return !(solver.check() == z3::unsat);
     }
 
-    const std::vector<SCAM::Operation*> SCAM::ValidOperations::getOperationsList() const {
+    const std::vector<DESCAM::Operation*> DESCAM::ValidOperations::getOperationsList() const {
         return this->operationsList;
     }
 

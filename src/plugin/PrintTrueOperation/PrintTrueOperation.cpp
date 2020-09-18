@@ -31,7 +31,7 @@ std::map<std::string, std::string> PrintTrueOperation::printModel(Model *node) {
     return pluginOutput;
 }
 
-std::map<std::string, std::string> PrintTrueOperation::printModule(SCAM::Module *node) {
+std::map<std::string, std::string> PrintTrueOperation::printModule(DESCAM::Module *node) {
 
     this->module = node;
 
@@ -68,7 +68,7 @@ std::string PrintTrueOperation::functions() {
         ss << ") : " << convertDataType(function.second->getReturnType()->getName()) << " :=\n";
 
         if (function.second->getReturnValueConditionList().empty())
-            throw std::runtime_error(" No return value for function " + function.first + "()");
+            TERMINATE(" No return value for function " + function.first + "()");
         auto branchNum = function.second->getReturnValueConditionList().size();
         for (auto returnValue: function.second->getReturnValueConditionList()) {
             ss << "\t";
@@ -818,7 +818,7 @@ std::string PrintTrueOperation::pipelined() {
 
 void PrintTrueOperation::findCylces(State *current, State *start, const std::vector<Operation *> &opList) {
     save++;
-    if(save == 0xFFFF-1) throw std::runtime_error(" loop ");
+    if(save == 0xFFFF-1) TERMINATE(" loop ");
     for (auto operation: current->getOutgoingOperationsList()) {
         if(operation->IsWait()) continue;
         auto newOpList = opList;
@@ -848,9 +848,9 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation *> &cycle) {
     std::vector<std::string> freezeSignals;
     for (auto &&op : cycle) {
         //Find all objects that need to be freezed
-        std::set<SCAM::SyncSignal *> syncSignals;
-        std::set<SCAM::Variable *> variables;
-        std::set<SCAM::DataSignal *> dataSignals;
+        std::set<DESCAM::SyncSignal *> syncSignals;
+        std::set<DESCAM::Variable *> variables;
+        std::set<DESCAM::DataSignal *> dataSignals;
         for (auto &&assignment : op->getCommitmentsList()) {
             auto newSyncSignals = ExprVisitor::getUsedSynchSignals(assignment->getRhs());
             syncSignals.insert(newSyncSignals.begin(), newSyncSignals.end());
@@ -870,7 +870,7 @@ std::string PrintTrueOperation::generatTrueOp(std::vector<Operation *> &cycle) {
         }
         //Stream freeze variables to stringstream
 
-        //throw std::runtime_error("done");
+        //TERMINATE("done");
 
         auto state_name = op->getState()->getName();
         std::string tp = "_at_t_" + state_name;

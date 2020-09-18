@@ -9,7 +9,7 @@
 #include <Port.h>
 #include <Stmts/Communication.h>
 
-namespace SCAM {
+namespace DESCAM {
 
     class Operation;
 
@@ -29,11 +29,11 @@ namespace SCAM {
 
         bool isWait() const;
 
-        SCAM::Port *getCommunicationPort() const;
+        DESCAM::Port *getCommunicationPort() const;
 
-        const std::vector<SCAM::Operation *> &getOutgoingOperationsList() const;
+        const std::vector<DESCAM::Operation *> &getOutgoingOperationsList() const;
 
-        const std::vector<SCAM::Operation *> &getIncomingOperationsList() const;
+        const std::vector<DESCAM::Operation *> &getIncomingOperationsList() const;
 
 
         //SETTERS
@@ -43,17 +43,17 @@ namespace SCAM {
 
         void setWait();
 
-        void setCommunicationStmt(SCAM::Communication *commStmt);
+        void setCommunicationStmt(DESCAM::Communication *commStmt);
 
         //ADDERS
-        void addIncomingOperation(SCAM::Operation *incomingOperation);
+        void addIncomingOperation(DESCAM::Operation *incomingOperation);
 
-        void addOutgoingOperation(SCAM::Operation *outgoingOperation);
+        void addOutgoingOperation(DESCAM::Operation *outgoingOperation);
 
         //REMOVE
-        void removeIncomingOperation(SCAM::Operation *incomingOperation);
+        void removeIncomingOperation(DESCAM::Operation *incomingOperation);
 
-        void removeOutgoingOperation(SCAM::Operation *outgoingOperation);
+        void removeOutgoingOperation(DESCAM::Operation *outgoingOperation);
 
         //WAIT STATE
 
@@ -66,11 +66,11 @@ namespace SCAM {
         std::string name;
         bool init;
         bool wait;
-        SCAM::Communication *commStmt;    //! Stmt that is communication in this state
-        std::vector<SCAM::Operation *> incomingOperationsList;
-        std::vector<SCAM::Operation *> outgoingOperationsList;
-        std::vector<std::vector<SCAM::Stmt *> > incomingFreezeSignals;
-        std::vector<std::vector<SCAM::Stmt *> > outgoingAssignSignals;
+        DESCAM::Communication *commStmt;    //! Stmt that is communication in this state
+        std::vector<DESCAM::Operation *> incomingOperationsList;
+        std::vector<DESCAM::Operation *> outgoingOperationsList;
+        std::vector<std::vector<DESCAM::Stmt *> > incomingFreezeSignals;
+        std::vector<std::vector<DESCAM::Stmt *> > outgoingAssignSignals;
     };
 
 }

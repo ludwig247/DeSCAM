@@ -4,7 +4,7 @@
 
 #include "NodePeekVisitor.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     NodePeekVisitor::NodePeekVisitor(Stmt *node) {
         node->accept(*this);
@@ -312,7 +312,7 @@ namespace SCAM {
         return peekVisitor.nodePeekArrayOperand();
     }
 
-    Notify *NodePeekVisitor::nodePeekNotify(SCAM::Stmt *node) {
+    Notify *NodePeekVisitor::nodePeekNotify(DESCAM::Stmt *node) {
         NodePeekVisitor peekVisitor(node);
         return peekVisitor.nodePeekNotify();
     }

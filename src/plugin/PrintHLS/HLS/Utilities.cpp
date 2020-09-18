@@ -3,8 +3,11 @@
 //
 
 #include "Utilities.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-using namespace SCAM::HLSPlugin::HLS;
+
+using namespace DESCAM::HLSPlugin::HLS;
 
 std::string Utilities::convertDataType(const std::string& type) {
     if (type == "int") {
@@ -47,7 +50,7 @@ std::string Utilities::typeToString(StmtType type) {
         case StmtType::UNKNOWN:
             return "unknown type";
         default:
-            throw std::runtime_error("Unknown statement!");
+            TERMINATE("Unknown statement!");
     }
 }
 
@@ -64,11 +67,11 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
         case SubTypeBitwise::RIGHT_SHIFT:
             return ">>";
         default:
-            throw std::runtime_error("unknown operation");
+            TERMINATE("unknown operation");
     }
 }
 
-SCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
+DESCAM::HLSPlugin::SubTypeBitwise Utilities::getSubTypeBitwise(const std::string &name) {
     if (name == "&") {
         return SubTypeBitwise::BITWISE_AND;
     } else if (name == "|") {

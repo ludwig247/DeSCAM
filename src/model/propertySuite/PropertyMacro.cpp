@@ -3,8 +3,10 @@
 //
 
 #include "PropertyMacro.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     // ------------------------------------------------------------------------------
     //                                Constructor
@@ -47,35 +49,35 @@ namespace SCAM {
 
     Port *PropertyMacro::getPort() const {
         if (macroType != MacroType::portType and macroType != MacroType::notifyType and macroType != MacroType::syncType) {
-            throw std::runtime_error("Called Macro is not of type port, notifySignal or syncSignal!");
+            TERMINATE("Called Macro is not of type port, notifySignal or syncSignal!");
         }
         return port;
     }
 
     Notify *PropertyMacro::getNotifySignal() const {
         if (macroType != MacroType::notifyType) {
-            throw std::runtime_error("Called Macro is not of type notifySignal!");
+            TERMINATE("Called Macro is not of type notifySignal!");
         }
         return notifySignal;
     }
 
     SyncSignal *PropertyMacro::getSyncSignal() const {
         if (macroType != MacroType::syncType) {
-            throw std::runtime_error("Called Macro is not of type syncSignal!");
+            TERMINATE("Called Macro is not of type syncSignal!");
         }
         return syncSignal;
     }
 
     Variable *PropertyMacro::getVariable() const {
         if (macroType != MacroType::varType and macroType != MacroType::arrayType) {
-            throw std::runtime_error("Called Macro is not of type variable!");
+            TERMINATE("Called Macro is not of type variable!");
         }
         return variable;
     }
 
     VariableOperand *PropertyMacro::getVariableOperand() const {
         if (macroType != MacroType::varType and macroType != MacroType::arrayType) {
-            throw std::runtime_error("Called Macro is not of type variable!");
+            TERMINATE("Called Macro is not of type variable!");
         }
         return variableOperand;
     }
@@ -94,7 +96,7 @@ namespace SCAM {
         } else if (macroType == MacroType::arrayType) {
             return variableOperand;
         } else {
-            throw std::runtime_error("Unknown macroType when calling PropertyMacro::getOperand.");
+            TERMINATE("Unknown macroType when calling PropertyMacro::getOperand.");
         }
 
     }
@@ -118,7 +120,7 @@ namespace SCAM {
                 return this->dataSignal->getParent()->getName();
             }
         } else {
-            throw std::runtime_error(" Macro is not a subvarible. Check first with ->isSubVar() ");
+            TERMINATE(" Macro is not a subvarible. Check first with ->isSubVar() ");
         }
     }
 
@@ -132,12 +134,11 @@ namespace SCAM {
                 return this->dataSignal->getName();
             }
         } else {
-            throw std::runtime_error(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
+            TERMINATE(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
         }
     }
 
     std::string PropertyMacro::getFullName(const std::string &delimiter) const {
-
         if (this->isSubVar()) {
             if(this->getParentDataType()->isArrayType() && delimiter == "."){
                 return this->getParentName() + "(" + this->getSubVarName() + ")";
@@ -163,7 +164,7 @@ namespace SCAM {
                 return this->dataSignal->getParent()->getDataType();
             }
         } else {
-            throw std::runtime_error(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
+            TERMINATE(" Macro does not contain a subvarible. Check first with ->isSubVar() ");
         }
     }
 

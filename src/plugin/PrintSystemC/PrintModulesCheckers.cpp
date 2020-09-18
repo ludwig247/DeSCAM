@@ -126,7 +126,7 @@ std::string PrintModulesCheckers::Text_DataTypesEXT() {
     return result.str();
 }
 
-void PrintModulesCheckers::Text_SCMain(SCAM::Module *node) {
+void PrintModulesCheckers::Text_SCMain(DESCAM::Module *node) {
     /*
  * Connecting the checker to original and generated modules
  * int sc_main(int, char **) {
@@ -198,7 +198,7 @@ void PrintModulesCheckers::Text_SCMain(SCAM::Module *node) {
              << "}//end of sc_main";
 }
 
-void PrintModulesCheckers::Text_Checker(SCAM::Module *node) {
+void PrintModulesCheckers::Text_Checker(DESCAM::Module *node) {
     /*
  * struct Module_checker : public sc_module {
  *      //OUTPUT PORTs to original and generated modules
@@ -520,7 +520,7 @@ void PrintModulesCheckers::printSpace(unsigned int size) {
     }
 }
 
-void PrintModulesCheckers::visit(SCAM::Module &node) {
+void PrintModulesCheckers::visit(DESCAM::Module &node) {
     this->ss << std::endl;
 
     printSpace(this->indent);
@@ -637,7 +637,7 @@ void PrintModulesCheckers::visit(Variable &node) {
      * */
 
     if (!node.isCompoundType() && node.getInitialValue() == nullptr)
-        throw std::runtime_error("Variable " + node.getName() + " does not have an initial value");
+        TERMINATE("Variable " + node.getName() + " does not have an initial value");
 
     printSpace(this->indent);
     this->ss << node.getDataType()->getName() << " " << node.getName();

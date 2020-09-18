@@ -1,7 +1,7 @@
 #include "FindNetlist.h"
 #include <iostream>
 
-namespace SCAM {
+namespace DESCAM {
 
 //Constructor
     FindNetlist::FindNetlist(clang::FunctionDecl *fnDecl) :

@@ -1,0 +1,4 @@
+#!/bin/bash
+#Test
+chmod +x /root/DeSCAM_v
+/root/DeSCAM_v --file /root/test/uart_transmitter.h --output /root/outputs -PrintSkeleton

@@ -29,7 +29,7 @@ struct Bus : public sc_module {
     //Variables
     bus_req_t req;
     bus_resp_t resp;
-
+    int x;
     //Constructor
     SC_HAS_PROCESS(Bus);
 
@@ -57,6 +57,7 @@ struct Bus : public sc_module {
             16 - 23 TEMP_TOP
             24 - 31 TEMP_BOT
              */
+            x = x + req;
             master_in->read(req);
 
 	    std::cout << "req addrs:" << req.addr << std::endl;

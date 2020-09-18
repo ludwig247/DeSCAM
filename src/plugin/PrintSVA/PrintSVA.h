@@ -2,8 +2,8 @@
 // Created by Nawras Altaleb (nawras.altaleb89@gmail.com) on 17.04.18.
 //
 
-#ifndef SCAM_PRINTSVA_H
-#define SCAM_PRINTSVA_H
+#ifndef DESCAM_PRINTSVA_H
+#define DESCAM_PRINTSVA_H
 
 #include <PluginFactory.h>
 #include <sstream>
@@ -18,17 +18,17 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
-    std::map<std::string, std::string> printModule(SCAM::Module *node);
+    std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
 private:
     std::stringstream ss;
     Model *model;
-    SCAM::Module *module;
+    DESCAM::Module *module;
 
     ////////////////
     std::string Text_ipc();
 
-    std::string Text_body();
+    std::string properties();
 
     std::string functions();
 
@@ -55,6 +55,8 @@ private:
     std::string location(bool loc);
 
     std::string tolower(std::string str);
+
+    std::string macros();
 };
 
-#endif //SCAM_PRINTSVA_H
+#endif //DESCAM_PRINTSVA_H

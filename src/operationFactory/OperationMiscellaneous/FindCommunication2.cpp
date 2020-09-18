@@ -3,9 +3,12 @@
 //
 
 #include "FindCommunication2.h"
+#include "FatalError.h"
+#include "Logger/Logger.h"
 
 
-SCAM::FindCommunication2::FindCommunication2() :
+
+DESCAM::FindCommunication2::FindCommunication2() :
         waitComm(false),
         communication(false),
         commStmt(nullptr),
@@ -15,153 +18,153 @@ SCAM::FindCommunication2::FindCommunication2() :
         stmt(nullptr){
 }
 
-SCAM::FindCommunication2::~FindCommunication2() = default;
+DESCAM::FindCommunication2::~FindCommunication2() = default;
 
 
-bool SCAM::FindCommunication2::isWaitComm() const {
+bool DESCAM::FindCommunication2::isWaitComm() const {
     return waitComm;
 }
 
-bool SCAM::FindCommunication2::isCommunication() const {
+bool DESCAM::FindCommunication2::isCommunication() const {
     return communication;
 }
 
-bool SCAM::FindCommunication2::isBlockingInterface() const {
+bool DESCAM::FindCommunication2::isBlockingInterface() const {
     if(this->isCommunication()) return this->commStmt->isBlocking();
     return false;
 }
 
-bool SCAM::FindCommunication2::isMaster() const {
+bool DESCAM::FindCommunication2::isMaster() const {
     if(this->isCommunication()) return this->commStmt->isMaster();
     return false;
 }
 
-bool SCAM::FindCommunication2::isSlave() const {
+bool DESCAM::FindCommunication2::isSlave() const {
     if(this->isCommunication()) return this->commStmt->isSlave();
     return false;
 }
 
-bool SCAM::FindCommunication2::isShared() const {
+bool DESCAM::FindCommunication2::isShared() const {
     if(this->isCommunication()) return this->commStmt->isShared();
     return false;
 }
 
-bool SCAM::FindCommunication2::isRead() const {
+bool DESCAM::FindCommunication2::isRead() const {
     if(this->isCommunication()) return this->commStmt->isRead();
     return false;
 }
 
-bool SCAM::FindCommunication2::isWrite() const {
+bool DESCAM::FindCommunication2::isWrite() const {
     if(this->isCommunication()) return this->commStmt->isWrite();
     return false;
 }
 
-bool SCAM::FindCommunication2::isNonBlockingAccess() const {
+bool DESCAM::FindCommunication2::isNonBlockingAccess() const {
     return non_blocking_access;
 }
 
-SCAM::Communication * SCAM::FindCommunication2::getCommStmt() const {
+DESCAM::Communication * DESCAM::FindCommunication2::getCommStmt() const {
     return commStmt;
 }
 
-SCAM::Port *SCAM::FindCommunication2::getPort() const {
-    if(!this->isCommunication()) throw std::runtime_error("Not a communication stmt! No port available");
+DESCAM::Port *DESCAM::FindCommunication2::getPort() const {
+    if(!this->isCommunication()) TERMINATE("Not a communication stmt! No port available");
     return this->commStmt->getPort();
 }
 
-SCAM::Stmt *SCAM::FindCommunication2::getStmt() const {
+DESCAM::Stmt *DESCAM::FindCommunication2::getStmt() const {
     return this->stmt;
 }
 
-SCAM::Expr *SCAM::FindCommunication2::getWriteValue() const {
+DESCAM::Expr *DESCAM::FindCommunication2::getWriteValue() const {
     return writeValue;
 }
 
-SCAM::VariableOperand * SCAM::FindCommunication2::getReadVariable() const {
+DESCAM::VariableOperand * DESCAM::FindCommunication2::getReadVariable() const {
     return readVariable;
 }
 
 
 // Visitors
-namespace SCAM {
+namespace DESCAM {
 
-void SCAM::FindCommunication2::visit(struct VariableOperand &node) {
+void DESCAM::FindCommunication2::visit(struct VariableOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct IntegerValue &node) {
+void DESCAM::FindCommunication2::visit(struct IntegerValue &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct UnsignedValue &node) {
+void DESCAM::FindCommunication2::visit(struct UnsignedValue &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct EnumValue &node) {
+void DESCAM::FindCommunication2::visit(struct EnumValue &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct BoolValue &node) {
+void DESCAM::FindCommunication2::visit(struct BoolValue &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct PortOperand &node) {
+void DESCAM::FindCommunication2::visit(struct PortOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct Assignment &node) {
+void DESCAM::FindCommunication2::visit(struct Assignment &node) {
     waitComm = false;
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindCommunication2::visit(struct FunctionOperand &node) {
+void DESCAM::FindCommunication2::visit(struct FunctionOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct UnaryExpr &node) {
+void DESCAM::FindCommunication2::visit(struct UnaryExpr &node) {
     FindCommunication2 conditionChecker;
     node.getExpr()->accept(conditionChecker);
-    if (conditionChecker.isCommunication()) throw std::runtime_error("Interfaces in unary operator not supported");
+    if (conditionChecker.isCommunication()) TERMINATE("Interfaces in unary operator not supported");
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct While &node) {
+void DESCAM::FindCommunication2::visit(struct While &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct If &node) {
+void DESCAM::FindCommunication2::visit(struct If &node) {
     FindCommunication2 conditionChecker;
     node.getConditionStmt()->accept(conditionChecker);
-    if (conditionChecker.isCommunication()) throw std::runtime_error("Interfaces in if condition not supported");
+    if (conditionChecker.isCommunication()) TERMINATE("Interfaces in if condition not supported");
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct SectionOperand &node) {
+void DESCAM::FindCommunication2::visit(struct SectionOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct SectionValue &node) {
+void DESCAM::FindCommunication2::visit(struct SectionValue &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct ITE &node) {
+void DESCAM::FindCommunication2::visit(struct ITE &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct Arithmetic &node) {
+void DESCAM::FindCommunication2::visit(struct Arithmetic &node) {
     waitComm = false;
     communication = false;
     node.getLhs()->accept(*this);
@@ -169,22 +172,22 @@ void SCAM::FindCommunication2::visit(struct Arithmetic &node) {
     node.getRhs()->accept(*this);
 }
 
-void SCAM::FindCommunication2::visit(struct Logical &node) {
+void DESCAM::FindCommunication2::visit(struct Logical &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct Relational &node) {
+void DESCAM::FindCommunication2::visit(struct Relational &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct Bitwise &node) {
+void DESCAM::FindCommunication2::visit(struct Bitwise &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct Read &node) {
+void DESCAM::FindCommunication2::visit(struct Read &node) {
     waitComm = false;
     communication = true;
     this->non_blocking_access = node.isNonBlockingAccess();
@@ -194,7 +197,7 @@ void SCAM::FindCommunication2::visit(struct Read &node) {
     this->stateName = node.getStateName();
 }
 
-void SCAM::FindCommunication2::visit(struct Write &node) {
+void DESCAM::FindCommunication2::visit(struct Write &node) {
     waitComm = false;
     communication = true;
     this->non_blocking_access = node.isNonBlockingAccess();
@@ -205,54 +208,54 @@ void SCAM::FindCommunication2::visit(struct Write &node) {
 
 }
 
-void SCAM::FindCommunication2::visit(struct SyncSignal &node) {
+void DESCAM::FindCommunication2::visit(struct SyncSignal &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct Cast &node) {
+void DESCAM::FindCommunication2::visit(struct Cast &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct DataSignalOperand &node) {
+void DESCAM::FindCommunication2::visit(struct DataSignalOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(struct CompoundValue &node) {
+void DESCAM::FindCommunication2::visit(struct CompoundValue &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(SCAM::ArrayOperand &node) {
+void DESCAM::FindCommunication2::visit(DESCAM::ArrayOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(SCAM::CompoundExpr &node) {
-    throw std::runtime_error(" Not implemented");
+void DESCAM::FindCommunication2::visit(DESCAM::CompoundExpr &node) {
+    TERMINATE(" Not implemented");
 }
 
-void SCAM::FindCommunication2::visit(SCAM::ParamOperand &node) {
-    throw std::runtime_error(" Not implemented");
+void DESCAM::FindCommunication2::visit(DESCAM::ParamOperand &node) {
+    TERMINATE(" Not implemented");
 }
 
-void SCAM::FindCommunication2::visit(SCAM::Return &node) {
-    throw std::runtime_error(" Not implemented");
+void DESCAM::FindCommunication2::visit(DESCAM::Return &node) {
+    TERMINATE(" Not implemented");
 }
 
-void SCAM::FindCommunication2::visit(SCAM::Notify &node) {
-    throw std::runtime_error(" Not implemented");
+void DESCAM::FindCommunication2::visit(DESCAM::Notify &node) {
+    TERMINATE(" Not implemented");
 }
 
-void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
+void DESCAM::FindCommunication2::visit(DESCAM::Wait &node) {
     waitComm = true;
     this->stateName = node.getStateName();
     communication = false;
 }
 
-    void SCAM::FindCommunication2::visit(SCAM::Peek &node) {
+    void DESCAM::FindCommunication2::visit(DESCAM::Peek &node) {
         waitComm = false;
         communication = false;
     }
@@ -271,12 +274,12 @@ void SCAM::FindCommunication2::visit(SCAM::Wait &node) {
     }
 }
 
-void SCAM::FindCommunication2::visit(struct TimePointOperand &node) {
+void DESCAM::FindCommunication2::visit(struct TimePointOperand &node) {
     waitComm = false;
     communication = false;
 }
 
-void SCAM::FindCommunication2::visit(SCAM::Ternary &node) {
+void DESCAM::FindCommunication2::visit(DESCAM::Ternary &node) {
     waitComm = false;
     communication = false;
 }

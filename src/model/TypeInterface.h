@@ -6,15 +6,16 @@
 #define PROJECT_TYPEINTERFACE_H
 
 #include "DataType.h"
+#include "DescamException.h"
 
-namespace SCAM {
+namespace DESCAM {
 
     class TypeInterface {
     protected:
 
         explicit TypeInterface(const DataType *dataType) :
                 dataType(dataType) {
-            assert(dataType != nullptr && "Datatype is null");
+            if(!dataType) throw DescamException("Datatype is null",LocationInfo());
         };
     public:
 

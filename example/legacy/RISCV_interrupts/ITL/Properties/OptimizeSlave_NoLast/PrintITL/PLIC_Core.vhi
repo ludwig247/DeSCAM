@@ -1,4 +1,4 @@
--- SYNC AND NOTIFY SIGNALS (1-cycle macros) -- 
+-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
 -- macro fromGateway_Int1_sync   :  boolean  := end macro;
 -- macro fromGateway_Int2_sync   :  boolean  := end macro;
 -- macro fromMemory_Claimed_sync   :  boolean  := end macro;

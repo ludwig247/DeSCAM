@@ -7,7 +7,7 @@
 #include <PrintStmt.h>
 #include "CfgNode.h"
 
-namespace SCAM {
+namespace DESCAM {
     int CfgNode::node_cnt = 0;
 
     CfgNode::CfgNode(Stmt *stmt) :

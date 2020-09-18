@@ -10,6 +10,7 @@
 
 #include <ModelGlobal.h>
 #include <fstream>
+#include <FatalError.h>
 #include <algorithm>
 #include <vector>
 
@@ -100,8 +101,9 @@ public:
 //        CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
 
         //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-        SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
-                                       commandLineArgumentsArray[1]);
+            try{DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
+                                           commandLineArgumentsArray[1]);}
+            catch(FatalError & e){}
 
         for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::ModelGlobal::reset();
@@ -116,8 +118,6 @@ public:
 class ITLTestExamples : public ITLTest {};
 
 class ITLTestFunctionality : public ITLTest {};
-
-std::vector<Param> example_headers, funct_headers;
 
 INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Examples,
@@ -136,9 +136,7 @@ INSTANTIATE_TEST_CASE_P(
         );
 
 TEST_P(ITLTestExamples, Examples) {
-
-
-    ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
+    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     for (auto result: results) {
         SCAM::Module *module = result;
@@ -169,6 +167,7 @@ TEST_P(ITLTestExamples, Examples) {
 }
 
 TEST_P(ITLTestFunctionality, Functionality) {
+    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     for (auto result: results) {
         SCAM::Module *module = result;
