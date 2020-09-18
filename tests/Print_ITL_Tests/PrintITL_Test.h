@@ -24,8 +24,8 @@ struct Param
     std::string vhi;
     DESCAM::Module * result;
 
-//    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-//        return os << bar.FilePath;}
+    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
+        return os << bar.FilePath;}
 };
 
 
@@ -44,7 +44,13 @@ static std::vector<Param> parameter(const char* header_list) {
 
     while (std::getline(ifs, line)) {
         if (!line.empty() && (line.find("//") != 0) && (filepaths.count(line) == 0)){
-            const size_t pos = line.rfind("/ESL");
+            size_t pos;
+
+            pos = line.rfind("/ESL");
+            if (line.rfind("/ESL") == std::string::npos )
+                pos = line.rfind("/TestCases");
+
+
             const size_t lpos = line.find_last_of('/', pos-1);
             std::string test_name = line.substr( lpos + 1, pos - lpos - 1);
             std::cout << test_name << " at " << pos << " or " << lpos << std::endl;

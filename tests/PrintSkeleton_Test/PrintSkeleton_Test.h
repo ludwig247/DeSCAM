@@ -46,7 +46,7 @@ static std::vector<Param> parameter(const char* header_list) {
 
 
 //    while (std::getline(ifs, line)) {
-//        if (line.size() > 0 && !(line.find("//") == 0)) {
+//        if (!line.empty() && (line.find("//") != 0)){
 
     const char *commandLineArgumentsArray[2];
 
@@ -96,8 +96,7 @@ static std::vector<Param> parameter(const char* header_list) {
                     functionString.close();
                 }
                 includes.push_back(Param());
-//            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
-//                includes[i].FilePath = line;
+
                 includes[i].Name = module.second->getName();
                 includes[i].result = (module.second);
 //                std::cout << "gets called" << includes[i].Name << std::endl;

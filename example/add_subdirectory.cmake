@@ -11,4 +11,5 @@ add_subdirectory(FPI)
 #add_subdirectory(UART_NORDIC)
 #add_subdirectory(RISCV_Test_ELF)
 #add_subdirectory(RISCV_RI5CY)
+#add_subdirectory(example_test)
 
