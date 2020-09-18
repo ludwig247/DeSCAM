@@ -183,16 +183,13 @@ void PrintStmtVHDL::visit(DESCAM::ParamOperand &node) {
 
 void PrintStmtVHDL::visit(DESCAM::Relational &node) {
 
-    if (!((node.getOperation() == "!=") && node.getDataType()->isBoolean())) {
-        ss << "bool_to_sl";
-    }
-
-    ss << "(";
+    // Convert resulting boolean back to std_logic
+    ss << "bool_to_sl(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "==") {
         ss << " = ";
     } else if (node.getOperation() == "!=") {
-        ss << (node.getDataType()->isBoolean() ? " xor " : " /= ");
+        ss << " /= ";
     } else {
         ss << " " << node.getOperation() << " ";
     }
