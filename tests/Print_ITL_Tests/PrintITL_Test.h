@@ -30,35 +30,54 @@ static std::vector<Param> parameter(const char* header_list) {
 
     //SRC-File to be analyzed
     std::ifstream ifs(header_list);
+    std::set<std::string> param_names;
+    std::set<std::string> filepaths;
 
     std::string line;
-    std::vector<Param> header_includes;
+    std::vector<Param> includes;
     int i = 0;
 
     while (std::getline(ifs, line)) {
-        if (line.size() > 0 && !(line.find("//") == 0)){
+        if (!line.empty() && (line.find("//") != 0) && (filepaths.count(line) == 0)){
+            size_t pos;
+
+            pos = line.rfind("/ESL");
+            if (line.rfind("/ESL") == std::string::npos )
+                pos = line.rfind("/TestCases");
+
+            const size_t lpos = line.find_last_of('/', pos-1);
+            std::string example_name = line.substr( lpos + 1, pos - lpos - 1);
+//            std::cout << example_name << " at " << pos << " or " << lpos << std::endl;
+
             std::string test_name = line.substr(line.find_last_of("/\\") + 1);
             const size_t period = test_name.rfind(".");
             if(std::string::npos != period) test_name.erase(period);
-            header_includes.push_back(Param());
-            header_includes[i].FilePath = line;
-//            if(std::find(header_includes.begin()->Name, header_includes.end()->Name, test_name) != header_includes.end()->Name)
-//                header_includes[i].Name = line;
+            includes.push_back(Param());
+            includes[i].FilePath = line;
 
-                header_includes[i].Name = test_name;
+
+            if(param_names.count(test_name) == 1){
+                std::cout<< "Warning: possible duplicate of test name" << includes[i].Name << std::endl;
+                includes[i].Name = example_name + "_" + test_name;
+//                includes[i].Name.append("/" + test_name );
+            }
+            else  includes[i].Name = test_name;
+            param_names.insert(includes[i].Name);
+            filepaths.insert(line);
+
             i++;
         }
     }
     ifs.close();
 
-    return header_includes;
+    return includes;
 }
 
 
 class ITLTest : public ::testing::TestWithParam<Param> {
 
 public:
-    std::vector<SCAM::Module *> result;
+    std::vector<SCAM::Module *> results;
     struct PrintToStringParamName
     {
         template <class ParamType>
@@ -84,9 +103,9 @@ public:
         SCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
                                        commandLineArgumentsArray[1]);
 
-        for (auto model: SCAM::ModelGlobal::getModel()->getModules()) {
+        for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::ModelGlobal::reset();
-            result.push_back(model.second);
+            results.push_back(module.second);
         }
     }
     void TearDown() {
@@ -97,6 +116,8 @@ public:
 class ITLTestExamples : public ITLTest {};
 
 class ITLTestFunctionality : public ITLTest {};
+
+std::vector<Param> example_headers, funct_headers;
 
 INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Examples,
@@ -115,62 +136,66 @@ INSTANTIATE_TEST_CASE_P(
         );
 
 TEST_P(ITLTestExamples, Examples) {
-//    std::set<std::string> test_param_names;
-//    GTEST_CHECK_(test_param_names.count(param_name) == 0)
-//                << "Duplicate parameterized test name '" << param_name
-//                << "', in " << file << " line " << line << std::endl;
+
+
     ASSERT_TRUE(SCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
-    SCAM::Module * module = result.back();
-    printITL.printModule(module);
-    printITL.print();
-    ASSERT_NO_THROW(printITL.print());
-    std::ofstream myfile;
-    myfile.open(SCAM_HOME"/tests/Print_ITL_Tests/unsorted/" + module->getName() + ".vhi");
-    myfile << printITL.print();
-    myfile.close();
+    for (auto result: results) {
+        SCAM::Module *module = result;
+        printITL.printModule(module);
+        printITL.print();
+        ASSERT_NO_THROW(printITL.print());
+        std::ofstream myfile;
+        myfile.open(SCAM_HOME"/tests/Print_ITL_Tests/unsorted/" + module->getName() + ".vhi");
+        myfile << printITL.print();
+        myfile.close();
 
-    ASSERT_NE(module, nullptr) << "Module not found";
-    std::cout << "Instance: " << module->getName() << std::endl;
+        ASSERT_NE(module, nullptr) << "Module not found";
+        std::cout << "Instance: " << module->getName() << std::endl;
 
 //    std::ifstream ifs(SCAM_HOME"/example/" + module->getName() +"/RTL/properties/" + module->getName() + ".vhi");
-    std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
-    ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" << module->getName()  << ".vhi";
+        std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
+        ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/"
+                               << module->getName() << ".vhi";
 
-    std::stringstream buffer;
-    std::string content((std::istreambuf_iterator<char>(ifs)),
-                        (std::istreambuf_iterator<char>()));
+        std::stringstream buffer;
+        std::string content((std::istreambuf_iterator<char>(ifs)),
+                            (std::istreambuf_iterator<char>()));
 
-    ASSERT_EQ(content, printITL.print()) << "Test for module " << module->getName() << " failed\n\n" << printITL.print();
-    std::cout << "" << std::endl;
-
+        ASSERT_EQ(content, printITL.print())
+                                    << "Test for module " << module->getName() << " failed\n\n" << printITL.print();
+        std::cout << "" << std::endl;
+    }
 }
 
 TEST_P(ITLTestFunctionality, Functionality) {
     PrintITL printITL;
-    SCAM::Module * module = result.back();
-    printITL.printModule(module);
-    printITL.print();
-    ASSERT_NO_THROW(printITL.print());
-    std::ofstream myfile;
-    myfile.open(SCAM_HOME"/tests/Print_ITL_Tests/unsorted/" + module->getName() + ".vhi");
-    myfile << printITL.print();
-    myfile.close();
+    for (auto result: results) {
+        SCAM::Module *module = result;
+        printITL.printModule(module);
+        printITL.print();
+        ASSERT_NO_THROW(printITL.print());
+        std::ofstream myfile;
+        myfile.open(SCAM_HOME"/tests/Print_ITL_Tests/unsorted/" + module->getName() + ".vhi");
+        myfile << printITL.print();
+        myfile.close();
 
-    ASSERT_NE(module, nullptr) << "Module not found";
-    std::cout << "Instance: " << module->getName() << std::endl;
+        ASSERT_NE(module, nullptr) << "Module not found";
+        std::cout << "Instance: " << module->getName() << std::endl;
 
-    //    std::ifstream ifs(SCAM_HOME"/example/" + module->getName() +"/RTL/properties/" + module->getName() + ".vhi");
-    std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
-    ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" << module->getName()  << ".vhi";
+        //    std::ifstream ifs(SCAM_HOME"/example/" + module->getName() +"/RTL/properties/" + module->getName() + ".vhi");
+        std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
+        ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/"
+                               << module->getName() << ".vhi";
 
-    std::stringstream buffer;
-    std::string content((std::istreambuf_iterator<char>(ifs)),
-                        (std::istreambuf_iterator<char>()));
+        std::stringstream buffer;
+        std::string content((std::istreambuf_iterator<char>(ifs)),
+                            (std::istreambuf_iterator<char>()));
 
-    ASSERT_EQ(content, printITL.print()) << "Test for module " << module->getName() << " failed\n\n" << printITL.print();
-    std::cout << "" << std::endl;
-
+        ASSERT_EQ(content, printITL.print())
+                                    << "Test for module " << module->getName() << " failed\n\n" << printITL.print();
+        std::cout << "" << std::endl;
+    }
     }
 
 #endif //PROJECT_PRINTITL_TEST_H
