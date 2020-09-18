@@ -20,10 +20,11 @@
 struct Param
 {
     std::string Name;
+    std::string FilePath;
     DESCAM::Module * result;
-//    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
-//        return os << bar.Name;
-//    }
+    friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
+        return os << bar.FilePath;
+    }
 };
 
 static std::vector<DESCAM::Module *> parameter() {
@@ -45,8 +46,8 @@ static std::vector<Param> parameter(const char* header_list) {
     std::string line;
 
 
-//    while (std::getline(ifs, line)) {
-//        if (!line.empty() && (line.find("//") != 0)){
+    while (std::getline(ifs, line)) {
+        if (!line.empty() && (line.find("//") != 0)){
 
     const char *commandLineArgumentsArray[2];
 
@@ -104,9 +105,9 @@ static std::vector<Param> parameter(const char* header_list) {
                 i++;
             }
 
-//        }
-//    }
-//    ifs.close();
+        }
+    }
+    ifs.close();
         std::cout << "Number of modules: " << includes.size() << std::endl;
         std::cout << "" << std::endl;
     return includes;
@@ -138,7 +139,7 @@ public:
 std::vector<Param> test_includes;
 
 INSTANTIATE_TEST_CASE_P(Basic, PrintSkeleton_Test,
-        ::testing::ValuesIn(test_includes),
+        ::testing::ValuesIn(parameter(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h")),
         ::PrintSkeleton_Test::PrintToStringParamName());
 
 

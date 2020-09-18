@@ -60,7 +60,6 @@ int main(int argc, char **argv) {
 //            functionString.close();
 //        }
 //    }
-    test_includes = parameter(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
     testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();

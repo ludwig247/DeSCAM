@@ -78,7 +78,7 @@ static std::vector<Param> parameter(const char* header_list) {
 class ITLTest : public ::testing::TestWithParam<Param> {
 
 public:
-    std::vector<SCAM::Module *> results;
+    std::vector<DESCAM::Module *> results;
     struct PrintToStringParamName
     {
         template <class ParamType>
@@ -105,7 +105,7 @@ public:
                                            commandLineArgumentsArray[1]);}
             catch(FatalError & e){}
 
-        for (auto module: SCAM::ModelGlobal::getModel()->getModules()) {
+        for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
 //        SCAM::ModelGlobal::reset();
             results.push_back(module.second);
         }
@@ -139,7 +139,7 @@ TEST_P(ITLTestExamples, Examples) {
     ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     for (auto result: results) {
-        SCAM::Module *module = result;
+        DESCAM::Module *module = result;
         printITL.printModule(module);
         printITL.print();
         ASSERT_NO_THROW(printITL.print());
@@ -167,10 +167,9 @@ TEST_P(ITLTestExamples, Examples) {
 }
 
 TEST_P(ITLTestFunctionality, Functionality) {
-    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     for (auto result: results) {
-        SCAM::Module *module = result;
+        DESCAM::Module *module = result;
         printITL.printModule(module);
         printITL.print();
         ASSERT_NO_THROW(printITL.print());
