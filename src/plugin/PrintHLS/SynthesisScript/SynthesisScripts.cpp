@@ -4,7 +4,7 @@
 
 #include <Optimizer/Optimizer.h>
 #include "SynthesisScripts.h"
-#include "../HLS/Utilities.h"
+#include "../Common/Utilities.h"
 
 using namespace DESCAM::HLSPlugin::Script;
 
@@ -76,13 +76,13 @@ std::string SynthesisScripts::directivesScript() {
 std::string SynthesisScripts::setDirectiveInterfaceNone() {
     std::stringstream ss;
     ss << "set_directive_interface -mode ap_ctrl_none " << moduleName << "_operations\n";
-    for (auto &out : HLS::Utilities::getParents(optimizer->getOutputs())) {
+    for (auto &out : Utilities::getParents(optimizer->getOutputs())) {
         ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << out->getName() << "\n";
     }
     for (auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << notifySignal->getName() << "\n";
     }
-    for (auto &internalRegisterOut : HLS::Utilities::getParents(optimizer->getInternalRegisterOut())) {
+    for (auto &internalRegisterOut : Utilities::getParents(optimizer->getInternalRegisterOut())) {
         ss << "set_directive_interface -mode ap_none " << moduleName << "_operations out_" << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
@@ -99,7 +99,7 @@ std::string SynthesisScripts::setDirectiveInterfaceHS() {
     for (auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations " << notifySignal->getName() << "\n";
     }
-    for (auto &internalRegisterOut : HLS::Utilities::getParents(optimizer->getInternalRegisterOut())) {
+    for (auto &internalRegisterOut : Utilities::getParents(optimizer->getInternalRegisterOut())) {
         ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations out_" << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
