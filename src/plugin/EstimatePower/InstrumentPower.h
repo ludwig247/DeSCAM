@@ -55,7 +55,11 @@ private:
 
     std::map <int, DESCAM::Stmt *> stateStmt;
 
+    std::map <int, DESCAM::Operation *> opStmt;
+
     void findStateStmt(FSM * node);
+
+    void findOpStmt(FSM *node);
 
 };
 

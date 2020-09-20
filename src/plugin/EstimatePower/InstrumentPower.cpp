@@ -45,7 +45,8 @@ void InstrumentPower::registerOperations(FSM &node) {
 std::string InstrumentPower::writeFile(std::pair <std::string, Module*> module ) {
     std::stringstream ss;
     std::ifstream inFile;
-    inFile.open(module.first + ".h");
+    LocationInfo loc = module.second->getLocationInfo();
+    inFile.open(loc.getFile());
     if (!inFile) throw(std::runtime_error("Unable to open file."));
     bool insideProcess = false;
     std::string line;
@@ -219,6 +220,7 @@ void InstrumentPower::traverseProcessBody(FSM &node, unsigned int processPositio
                             for (int i = startState; i < processBody.size(); i++)  {
                                 if (processBody.at(i).find(statementString) != std::string::npos)  {
                                     currentLine = i;
+                                    std::cout << operation->getId() << statementString << std::endl;
                                     break;
                                 } else currentLine = -1;
                             }
@@ -264,6 +266,7 @@ void InstrumentPower::traverseProcessBody(FSM &node, unsigned int processPositio
 
 void InstrumentPower::findStateStmt(FSM *node) {
     for (auto state : node->getStateMap()){
+        if (state.second->isWait() | state.second->isInit()) continue;
         bool flag = false;
         for(auto op : state.second->getOutgoingOperationsList()){
             for (auto st : op->getStatementsList()){
@@ -276,4 +279,8 @@ void InstrumentPower::findStateStmt(FSM *node) {
             if (flag) break;
         }
     }
+
+    /*for (auto st : stateStmt){
+        std::cout << PrintStmt::toString(st.second) << std::endl;
+    }*/
 }

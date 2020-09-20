@@ -12,22 +12,29 @@
 
 class testPlugin : public PluginFactory {
 public:
+    int s;
+public:
     testPlugin()  = default;
     ~testPlugin() = default;
     std::map<std::string, std::string> printModel(Model *node);
-
-    int returnBits(const DataType *dataType);
-
-    void findStateStmt(FSM * node);
 
     std::stringstream ss;
 
 
 private:
-    /*std::map<std::string, Module *> moduleMap;
-    FSM * myFSM;
-    std::map<int, SCAM::State *> stateMap;*/
+    void instrumentModule(DESCAM::Module *node);
+    void printPrefix(int val);
+    void printMain(int val1, int val2,FSM *node);
+    void printSuffix();
+    void findStateStmt(FSM *node);
+    void findOpStmt(FSM *node);
+
+    std::ifstream inFile;
+    //unsigned int operationsCounter = 6;
     std::map <int, DESCAM::Stmt *> stateStmt;
+    std::map <int, DESCAM::Stmt *> opStmt;
+    std::set<std::string> vars;
+    unsigned int opNo = 0;
 };
 
 
