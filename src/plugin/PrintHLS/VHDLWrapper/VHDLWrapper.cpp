@@ -144,12 +144,6 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
     if (dataType->isEnumType()) {
-        //dataTypeStream << "\ttype " << SignalFactory::convertDataTypeName(dataType) << " is (";
-        //for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
-        //    dataTypeStream << enumVal->first;
-        //    if (std::next(enumVal) != dataType->getEnumValueMap().end()) dataTypeStream << ", ";
-        //}
-        //dataTypeStream << ");\n";
         const auto typeName = SignalFactory::convertDataTypeName(dataType);
         int i = 0;
         int vectorSize = ceil(log2(dataType->getEnumValueMap().size()));
@@ -255,10 +249,6 @@ void VHDLWrapper::functions(std::stringstream &ss) {
             usedFunctions.insert(funcSet.begin(), funcSet.end());
         }
     }
-
-    //if (usedFunctions.empty()) {
-    //    return;
-    //}
 
     ss << "\n\t-- Functions\n";
 

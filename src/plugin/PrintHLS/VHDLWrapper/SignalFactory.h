@@ -13,6 +13,7 @@
 #include "DataSignal.h"
 #include "OptimizerHLS.h"
 #include "PluginFactory.h"
+#include "NodePeekVisitor.h"
 
 namespace DESCAM {
     namespace HLSPlugin {
@@ -31,15 +32,21 @@ namespace DESCAM {
                 ~SignalFactory() = default;
 
                 template<typename T>
-                static std::string printSignalDefinition(const T& signal,
-                                                         const std::string& delimiter,
-                                                         const std::string& prefix,
-                                                         const std::string& suffix,
-                                                         const bool& asVector,
-                                                         const bool& addVld = false);
+                static std::string printSignalDefinition(const T &signal,
+                                                         const std::string &delimiter,
+                                                         const std::string &prefix,
+                                                         const std::string &suffix,
+                                                         const bool &asVector,
+                                                         const bool &addVld = false);
 
                 template<typename T>
-                static std::string convertDataTypeName(T *type, const bool& asVector = false);
+                static std::string printPortMapSignal(const T &signal,
+                                                      const std::string &delimiter,
+                                                      const std::string &prefix,
+                                                      const std::string &suffix);
+
+                template<typename T>
+                static std::string convertDataTypeName(T *type, const bool &asVector = false);
 
                 template<typename T>
                 static std::string
@@ -113,14 +120,15 @@ namespace DESCAM {
             };
 
             template<typename T>
-            std::string SignalFactory::printSignalDefinition(const T& signal,
-                                                     const std::string& delimiter,
-                                                     const std::string& prefix,
-                                                     const std::string& suffix,
-                                                     const bool& asVector,
-                                                     const bool& addVld) {
+            std::string SignalFactory::printSignalDefinition(const T &signal,
+                                                             const std::string &delimiter,
+                                                             const std::string &prefix,
+                                                             const std::string &suffix,
+                                                             const bool &asVector,
+                                                             const bool &addVld) {
                 std::stringstream ss;
-                ss << "\tsignal " << prefix << signal->getFullName(delimiter) << suffix << ": " << convertDataTypeName(signal->getDataType(), asVector) << ";\n";
+                ss << "\tsignal " << prefix << signal->getFullName(delimiter) << suffix << ": "
+                   << convertDataTypeName(signal->getDataType(), asVector) << ";\n";
                 if (addVld) {
                     ss << "\tsignal " << prefix << signal->getFullName(delimiter) << "_vld: std_logic;\n";
                 }
@@ -128,8 +136,20 @@ namespace DESCAM {
             }
 
             template<typename T>
-            std::string SignalFactory::convertDataTypeName(T *type, const bool& asVector) {
-                
+            std::string SignalFactory::printPortMapSignal(const T &signal,
+                                                          const std::string &delimiter,
+                                                          const std::string &prefix,
+                                                          const std::string &suffix) {
+                std::stringstream ss;
+                ss << "\t\t" << prefix << signal->getFullName("_");
+                ss << (signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned() ? "_V" : "");
+                ss << " => " << signal->getFullName(delimiter) << suffix << ",\n";
+                return ss.str();
+            }
+
+            template<typename T>
+            std::string SignalFactory::convertDataTypeName(T *type, const bool &asVector) {
+
                 if (type->isEnumType() && asVector) {
                     uint32_t vectorSize = ceil(log2(type->getEnumValueMap().size()));
                     if (vectorSize == 0) {
