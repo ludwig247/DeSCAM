@@ -156,7 +156,7 @@ void HLS::interface()
         else {
             ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName()) << " &";
         }
-        ss << "out_" << reg->getFullName();
+        ss << "" << reg->getFullName();
         if (isArrayType) {
             ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
         }
@@ -177,7 +177,7 @@ void HLS::writeToOutput()
         ss << "\t" << output->getName() << " = " << output->getName() << "_reg;\n";
     }
     for (const auto reg : Utilities::getParents(optimizer->getInternalRegisterOut())) {
-        ss << "\tout_" << reg->getName() << " = " << reg->getName() << "_reg;\n";
+        ss << "\t" << reg->getName() << " = " << reg->getName() << "_reg;\n";
     }
     for (auto notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << " = " << notifySignal->getName() << "_reg;\n";

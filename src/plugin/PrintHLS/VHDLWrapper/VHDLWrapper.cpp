@@ -144,15 +144,26 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
     std::stringstream dataTypeStream;
 
     if (dataType->isEnumType()) {
-        dataTypeStream << "\ttype " << SignalFactory::convertDataTypeName(dataType) << " is (";
-        for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
-            dataTypeStream << enumVal->first;
-            if (std::next(enumVal) != dataType->getEnumValueMap().end()) dataTypeStream << ", ";
+        //dataTypeStream << "\ttype " << SignalFactory::convertDataTypeName(dataType) << " is (";
+        //for (auto enumVal = dataType->getEnumValueMap().begin(); enumVal != dataType->getEnumValueMap().end(); enumVal++) {
+        //    dataTypeStream << enumVal->first;
+        //    if (std::next(enumVal) != dataType->getEnumValueMap().end()) dataTypeStream << ", ";
+        //}
+        //dataTypeStream << ");\n";
+        const auto typeName = SignalFactory::convertDataTypeName(dataType);
+        int i = 0;
+        int vectorSize = ceil(log2(dataType->getEnumValueMap().size()));
+        if (vectorSize == 0) {
+            vectorSize++;
         }
-        dataTypeStream << ");\n";
+        dataTypeStream << "\tsubtype " << typeName << " is std_logic_vector(" << std::to_string(vectorSize - 1) << " downto 0);\n";
+        for (const auto &enumVal : dataType->getEnumValueMap()) {
+            dataTypeStream << "\tconstant " << enumVal.first << " : " << typeName << " := \"" <<  Utilities::intToBinary(i, vectorSize) << "\";\n";
+            i++;
+        }
     } else if (dataType->isCompoundType()) {
         dataTypeStream << "\ttype " + SignalFactory::convertDataTypeName(dataType) << " is record\n";
-        for (auto &subVar: dataType->getSubVarMap()) {
+        for (const auto &subVar: dataType->getSubVarMap()) {
             dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataTypeName(subVar.second) << ";\n";
         }
         dataTypeStream << "\tend record;\n";

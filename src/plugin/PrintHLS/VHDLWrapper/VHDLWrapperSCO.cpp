@@ -31,9 +31,6 @@ void VHDLWrapperSCO::signals(std::stringstream &ss) {
     for (const auto& signal : Utilities::getParents(signalFactory->getInternalRegisterOut())) {
         ss << SignalFactory::printSignalDefinition(signal,"_", "", "", false);
     }
-    for (const auto& signal : signalFactory->getInternalRegisterOut()) {
-        ss << SignalFactory::printSignalDefinition(signal,"_", "out_", "", true);
-    }
 
     ss << "\n\t-- Operation Module Inputs\n";
     for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
@@ -79,7 +76,7 @@ void VHDLWrapperSCO::component(std::stringstream& ss) {
         for (const auto& var : vars) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << ": "
+            ss << "\t\t" << var->getFullName("_") << suffix << ": "
                << prefix << " " << SignalFactory::convertDataTypeName(var->getDataType(), true)
                << ";\n";
         }
@@ -127,14 +124,14 @@ void VHDLWrapperSCO::componentInst(std::stringstream& ss) {
             std::string type = var->getDataType()->getName();
             std::string suffix = (type == "int" || type == "unsigned" ? "_V" : "");
             ss << "\t\t" << prefix << var->getFullName("_") << suffix << " => "
-               << prefix << var->getFullName("_") << ",\n";
+               << prefix << var->getFullName(".") << ",\n";
         }
     };
 
     printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "");
     printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in");
     printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out");
-    printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_");
+    printComponentInstVars(signalFactory->getInternalRegisterOut(), "");
 
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
@@ -184,8 +181,8 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
         ss << "\t" << var->getFullName(".") << " <= "
            << (
                    isEnum ?
-                   SignalFactory::vectorToEnum(var, "", "out_") :
-                   "out_" + var->getFullName("_"))
+                   SignalFactory::vectorToEnum(var, "", "") :
+                   "" + var->getFullName("_"))
            << ";\n";
     };
 
@@ -193,9 +190,9 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream& ss)
     for (const auto& out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
         printOutputProcess(out);
     }
-    for (const auto& internalRegs : signalFactory->getInternalRegisterOut()) {
-        printOutputProcessRegs(internalRegs);
-    }
+    //for (const auto& internalRegs : signalFactory->getInternalRegisterOut()) {
+    //    printOutputProcessRegs(internalRegs);
+    //}
 
     ss << "\n\t-- Output Register to Output Mapping\n";
     for (const auto& registerOutputMap : optimizer->getOutputRegisterMap()) {

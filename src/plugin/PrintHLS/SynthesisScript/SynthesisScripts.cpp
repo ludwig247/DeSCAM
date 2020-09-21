@@ -83,7 +83,7 @@ std::string SynthesisScripts::setDirectiveInterfaceNone() {
         ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << notifySignal->getName() << "\n";
     }
     for (auto &internalRegisterOut : Utilities::getParents(optimizer->getInternalRegisterOut())) {
-        ss << "set_directive_interface -mode ap_none " << moduleName << "_operations out_" << internalRegisterOut->getName() << "\n";
+        ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
 }
