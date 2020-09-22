@@ -2,6 +2,7 @@
 // Created by tobias on 17.07.18.
 //
 
+
 #include "Function.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
@@ -65,6 +66,14 @@ DESCAM::Function::Function(DESCAM::Function *function) : AbstractNode(function->
     this->paramMap = function->getParamMap();
     this->returnType = function->getReturnType();
     this->setLocationInfo(function->getLocationInfo());
+}
+
+const std::map<int, DESCAM::CfgNode *> &DESCAM::Function::getCfg() const {
+    return cfg;
+}
+
+void DESCAM::Function::setCfg(const std::map<int, DESCAM::CfgNode *> &cfg) {
+    Function::cfg = cfg;
 }
 
 

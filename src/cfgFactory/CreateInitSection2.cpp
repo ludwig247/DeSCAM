@@ -28,7 +28,9 @@ std::vector<DESCAM::Stmt *> DESCAM::CreateInitSection2::createInitSection2(const
                 initList.push_back(new Assignment(new VariableOperand(subvar), const_cast<ConstValue *>(subvar->getInitialValue())));
             }
             //Regular var
-        } else {
+        }else if(var.second->getDataType()->getName() == "event") {
+            continue;
+        }else {
             initList.push_back(new Assignment(new VariableOperand(var.second), const_cast<ConstValue *>(var.second->getInitialValue())));
         }
     }

@@ -7,6 +7,14 @@
 
 #include "systemc.h"
 #include "FIFO_ifs.h"
+
+
+void inline wait_event(sc_event event){
+    wait(event);
+};
+
+
+
 const int size = 16;
 template<typename T>
 class Regfile : public sc_prim_channel,
@@ -16,9 +24,9 @@ public:
     Regfile(const char *name);
 
     // Consumer reads Value from FIFO (blocking)
-    void read(T &out);
+    bool read(T &out);
     //Producer writes Value to FIFO (blocking)
-    void write(const T &val);
+    bool write(const T &val);
 
 private:
 
@@ -29,8 +37,8 @@ private:
         EMPTY, FILLED, FULL
     };
     states state;
-    int head;
-    int tail;
+    unsigned int head;
+    unsigned int tail;
     sc_event reader_notify, writer_notify;
 };
 

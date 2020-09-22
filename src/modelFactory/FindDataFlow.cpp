@@ -40,7 +40,8 @@ DESCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, clang::Com
         lhsExpr(nullptr),
         unsigned_flag(unsigned_flag),
         pass(0) {
-    stmt->dumpColor();
+    //stmt->dumpColor();
+    if(FindDataFlow::isFunction) stmt->dumpColor();
     TraverseStmt(stmt);
 }
 
@@ -68,8 +69,10 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
         //Are LHS and RHS Valid?
         if (this->rhsExpr == nullptr || this->lhsExpr == nullptr) {
             auto message = "";
-            if (!(this->rhsExpr && this->lhsExpr)) message = "Could not translate LHS and RHS of Stmts";
-            else if (!this->rhsExpr) message = "Could not translate RHS of Stmts";
+            if ((this->rhsExpr == nullptr && this->lhsExpr == nullptr)) message = "Could not translate LHS and RHS of Stmts";
+            else if (!this->rhsExpr){
+                message = "Could not translate RHS of Stmts";
+            }
             else message = "Could not translate LHS of Stmts";
             return exitVisitor(message, binaryOpLocationInfo);
         }
@@ -744,18 +747,21 @@ bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *
         //Find assignemnt of structs -> which is represented as an overloaded copy
         // ComplexType foo = port[ComplexType].read()
         //Return-type is an expression(is that always the case?)
-        if (!operatorCallExpr->isTypeDependent() && operatorCallExpr->getCallReturnType()->isReferenceType()) {
+       // if (!operatorCallExpr->isTypeDependent() && operatorCallExpr->getCallReturnType()->isReferenceType()) {
+        if (clang::OverloadedOperatorKind::OO_Equal == operatorCallExpr->getOperator()) {
             if (clang::OverloadedOperatorKind::OO_Equal == operatorCallExpr->getOperator()) {
                 if (operatorCallExpr->getNumArgs() == 2) {
                     //get foo
                     this->pass = 1;
-                    TraverseStmt(operatorCallExpr->getArg(0));
+                    FindDataFlow findLHS( operatorCallExpr->getArg(0),module,ci,unsigned_flag);
+                    this->lhsExpr = findLHS.getExpr();
                     if (this->lhsExpr == nullptr) {
                         return exitVisitor("Unknown error: Stmts can't be processed(a)", opCallLocationInfo);
                     }
                     //get port.read()
                     this->pass = 2;
-                    TraverseStmt(operatorCallExpr->getArg(1));
+                    FindDataFlow findRHS( operatorCallExpr->getArg(1),module,ci,unsigned_flag);
+                    this->rhsExpr = findRHS.getExpr();;
                     if (this->rhsExpr == nullptr) {
                         return exitVisitor("Unknown error: Stmts can't be processed(b)", opCallLocationInfo);
                     }
@@ -764,42 +770,72 @@ bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *
                 } else
                     return exitVisitor("Unknown error: Stmts can't be processed(c)", opCallLocationInfo);
 
-            } else
-                return exitVisitor("Unknown error: Stmts can't be processed(d)", opCallLocationInfo);
+            } else  return exitVisitor("Unknown error: Stmts can't be processed(d)", opCallLocationInfo);
         }else if(operatorCallExpr->getOperator() == clang::OverloadedOperatorKind::OO_EqualEqual ){
             if (operatorCallExpr->getNumArgs() == 2) {
                 //get foo
                 this->pass = 1;
-                TraverseStmt(operatorCallExpr->getArg(0));
+
+                FindDataFlow findLHS( operatorCallExpr->getArg(0),module,ci,unsigned_flag);
+                this->lhsExpr = findLHS.getExpr();
                 if (this->lhsExpr == nullptr) {
                     return exitVisitor("Unknown error: Stmts can't be processed(a)", opCallLocationInfo);
                 }
                 //get port.read()
                 this->pass = 2;
-                TraverseStmt(operatorCallExpr->getArg(1));
+                FindDataFlow findRHS( operatorCallExpr->getArg(1),module,ci,unsigned_flag);
+                this->rhsExpr = findRHS.getExpr();
                 if (this->rhsExpr == nullptr) {
                     return exitVisitor("Unknown error: Stmts can't be processed(b)", opCallLocationInfo);
                 }
-                DESCAM_ASSERT(this->stmt = new Logical(this->lhsExpr,"==", this->rhsExpr, opCallLocationInfo))
+                DESCAM_ASSERT(this->expr = new Relational(this->lhsExpr,"==", this->rhsExpr, opCallLocationInfo))
                 if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
             } else
                 return exitVisitor("Unknown error: Stmts can't be processed(c)", opCallLocationInfo);
-        } else
+        }else if(operatorCallExpr->getOperator()  == clang::OverloadedOperatorKind::OO_Plus ){
+            if (operatorCallExpr->getNumArgs() == 2) {
+                //get foo
+                this->pass = 1;
+                FindDataFlow findLHS( operatorCallExpr->getArg(0),module,ci,unsigned_flag);
+                if (findLHS.getExpr() == nullptr) {
+                    return exitVisitor("Unknown error: Stmts can't be processed(a)", opCallLocationInfo);
+                }
+
+                //get port.read()
+                this->pass = 2;
+                FindDataFlow findRHS( operatorCallExpr->getArg(1),module,ci,unsigned_flag);
+                if (findRHS.getExpr() == nullptr) {
+                    return exitVisitor("Unknown error: Stmts can't be processed(b)", opCallLocationInfo);
+                }
+                DESCAM_ASSERT(this->expr = new Arithmetic(findLHS.getExpr(),"+", findRHS.getExpr(), opCallLocationInfo))
+                if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
+            } else
+                return exitVisitor("Unknown error: Stmts can't be processed(c)", opCallLocationInfo);
+        } else{
             return exitVisitor("Unknown error: Stmts can't be processed(e)", opCallLocationInfo);
+        }
+
     }
     return true;
 }
 
 
 bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
-    auto callee = callExpr->getDirectCallee();
-    if (callee == nullptr || callee->isCXXClassMember()) return true;
-
+    std::string name = "";
     // Collecting statement location information from clang
     auto callLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(callExpr,ci);
 
-    std::string functionName = callee->getNameAsString();
-    if (functionName == "insert_state") {
+
+    auto callee = callExpr->getDirectCallee();
+    if (callee == nullptr || callee->isCXXClassMember()) {
+        if (callExpr->getCallee()) {
+            if (auto func_expr = dyn_cast<clang::UnresolvedLookupExpr>(callExpr->getCallee())) {
+                name = func_expr->getName().getAsString();
+            } else return true;
+        } else return true;
+    }else name = callee->getNameAsString();
+
+    if (name == "insert_state") {
         if (callExpr->getNumArgs() == 0) {
             DESCAM_ASSERT(this->stmt = new Wait(callLocationInfo))
             if (DescamException::isExceptionHappened()) clearExpressions();
@@ -814,6 +850,21 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
         } else {
             return exitVisitor("Unallowed number of param for important_state()", callLocationInfo);
         }
+    }else if(name == "wait_event"){
+        if (callExpr->getNumArgs() == 1) {
+            Wait * wait;
+            DESCAM_ASSERT(wait = new Wait(callLocationInfo));
+            this->stmt = wait;
+            FindDataFlow findArgument(callExpr->getArg(0),module,ci, unsigned_flag);
+            if(findArgument.getExpr()){
+                if(NodePeekVisitor::nodePeekVariableOperand(findArgument.getExpr())){
+                    auto stateName = NodePeekVisitor::nodePeekVariableOperand(findArgument.getExpr())->getOperandName();
+                    wait->setStateName(stateName);
+                    return false;
+                } return exitVisitor("Error for wait_event(event) #1", callLocationInfo);
+            } return exitVisitor("Error for wait_event(event) #2", callLocationInfo);
+
+        }else return exitVisitor("Unallowed number of param for wait_event(event)", callLocationInfo);
     }
     auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
 
@@ -832,8 +883,8 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
         this->stmt = this->expr)
         if (DescamException::isExceptionHappened()) {clearExpressions(); return false;}
     } else {
-        std::string funcName = callExpr->getDirectCallee()->getNameAsString();
-        return exitVisitor(funcName + "() is not a valid function", callLocationInfo);
+        return true;
+        return exitVisitor(name + "() is not a valid function", callLocationInfo);
     }
 }
 

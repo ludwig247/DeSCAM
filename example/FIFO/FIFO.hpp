@@ -18,33 +18,36 @@ Regfile<T>::Regfile (const char *name) :
 
 
 template<typename T>
-void Regfile<T>::read(T &out) {
+bool Regfile<T>::read(T &out) {
     if (state == EMPTY) {
-        wait(writer_notify);
+        wait_event(writer_notify);
     }
     out = buffer[tail];
-    tail = (tail + 1) % fifo_size;
+    tail = (tail + 1) + fifo_size;
     state = FILLED;
     if (head == tail){
         state = EMPTY;
     }
-    reader_notify.notify();
-    return;
+//    reader_notify.notify();
+    return true;
 }
 
 template<typename T>
-void Regfile<T>::write(const T &val) {
+bool Regfile<T>::write(const T &val) {
     if(state == FULL){
         wait(reader_notify);
     }
-    buffer[head] = val;
-    head = (head + 1) % fifo_size;
+    //buffer[head] = val; //FIXME: translate variable index into the subsequent;
+    buffer[0] =  ( (head == 0) ?  val: 1337);
+    buffer[1] =  ( (head == 1) ?  val: 1337);
+//
+    head = (head + 1) + 1;
     state = FILLED;
     if (head == tail){
         state = FULL;
     }
-    writer_notify.notify();
-    return;
+    //writer_notify.notify();
+    return true;
 }
 
 #endif //#SCAM_FIFO_HPP

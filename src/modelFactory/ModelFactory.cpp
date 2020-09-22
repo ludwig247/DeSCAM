@@ -664,12 +664,12 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
 
         //this->addFunctions(module,channel.second);
         //Functions
-        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
+        Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
         FindFunctions findFunction(channel.second);
         //Add datatypes for functions
         auto functionsMap = findFunction.getFunctionMap();
         for (auto function: functionsMap) {
-            assert(function.second->getResultType()->isVoidType());
+            assert(function.second->getResultType()->isBooleanType());
             std::map<std::string, Parameter *> paramMap;
             auto paramList = findFunction.getFunctionParamNameMap().find(function.first)->second;
             auto paramTypeList = findFunction.getFunctionParamTypeMap().find(function.first)->second;
@@ -696,11 +696,13 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
                                   module->addFunction(new_function))
             //Create blockCFG for this process
             //Active searching only for functions
-            //FindDataFlow::functionName = function.first;
-            ///FindDataFlow::isFunction = true;
-            //DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
+            FindDataFlow::functionName = function.first;
+            FindDataFlow::isFunction = true;
+            DESCAM::CFGFactory cfgFactory(function.second, _ci, module,true);
             FindDataFlow::functionName = "";
             FindDataFlow::isFunction = false;
+            DESCAM::CreateRealCFG realCfg(cfgFactory.getControlFlowMap());
+            new_function->setCfg(realCfg.getCFG());
            // std::cout << cfgFactory.print() << std::endl;
             //Transfor blockCFG back to code
 //            FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
@@ -714,6 +716,13 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
             for(auto param: function.second->getParamMap()){
                 std::cout << "\t\t" << "Param: " << param.first << " #" << (param.second->isInput() ? "input" : "output") << std::endl;
             }
+            for(auto node: function.second->getCfg()){
+                std::cout << "\t" << node.second->print() << std::endl;
+            }
+        }
+
+        if (DESCAM::Logger::hasFeedback()) {
+            DESCAM::Logger::log();
         }
 
         throw std::runtime_error("stop");

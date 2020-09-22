@@ -9,7 +9,7 @@ template<typename T>
 class FIFO_in_if : virtual public sc_interface
 {
 public:
-    virtual void read(T & out) = 0;
+    virtual bool read(T & out) = 0;
 };
 
 
@@ -17,6 +17,6 @@ template<typename T>
 class FIFO_out_if : virtual public sc_interface
 {
 public:
-    virtual void write(const T & val) = 0; //regular blocking write
+    virtual bool write(const T & val) = 0; //regular blocking write
 };
 #endif //SCAM_FIFO_IFS_H

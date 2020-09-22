@@ -114,7 +114,9 @@ namespace DESCAM {
             //In case of an Expr* skips the statement, because the statementlist should only contain Statements
             if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
                 cfgNode->addStmt(this->getScamStmt(clangStmt));
-            };
+            }else{
+                clangStmt->dumpColor();
+            }
         }
 
         //Set terminator for codelbock
@@ -323,6 +325,7 @@ namespace DESCAM {
     DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
         // traverse clang stmt and create its equivalent descam stmt
         DESCAM::FindDataFlow dataFlow(clangStmt, module,ci, false);
+
         return dataFlow.getStmt();
     }
 

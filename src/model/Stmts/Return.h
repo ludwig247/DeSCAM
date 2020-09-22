@@ -10,6 +10,8 @@
 namespace DESCAM {
     class Return : public Stmt {
     public:
+        Return() = delete;
+
         explicit Return(Expr *returnValue, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Return() = default;
@@ -18,14 +20,14 @@ namespace DESCAM {
 
         void setReturnValue(Expr *returnValue);
 
-        virtual void accept(StmtAbstractVisitor &visitor);
+        void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual std::ostream &print(std::ostream &ostream) const;
+        std::ostream &print(std::ostream &ostream) const override;
 
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
     private:
-        Return() = default;
+
 
         Expr *returnValue;
     };

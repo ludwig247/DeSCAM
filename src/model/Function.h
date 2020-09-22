@@ -10,6 +10,7 @@
 #include <Stmts/Return.h>
 #include "AbstractNode.h"
 #include "DataType.h"
+#include <Behavior/CfgNode.h>
 
 namespace DESCAM {
     class Function : public AbstractNode {
@@ -36,11 +37,17 @@ namespace DESCAM {
 
         virtual void accept(AbstractVisitor &visitor);
 
+        const std::map<int, DESCAM::CfgNode *> &getCfg() const;
+
+        void setCfg(const std::map<int, DESCAM::CfgNode *> &cfg);
+
     private:
         std::vector<std::pair<DESCAM::Return *, std::vector<DESCAM::Expr *> > > returnValueConditionList; //! Stores the return value for each possible sequence of inputs
         DataType *returnType;
         std::vector<Stmt *> stmtList;
         std::map<std::string, Parameter *> paramMap;
+
+        std::map<int, DESCAM::CfgNode *> cfg;
 
 
     };
