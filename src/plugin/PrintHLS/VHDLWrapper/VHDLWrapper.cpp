@@ -97,7 +97,9 @@ std::string VHDLWrapper::printTypes() {
         typeStream << printDataTypes(type);
     }
 
-    typeStream << "\n\t-- Array Types\n";
+    if (!arrayTypes.empty()) {
+        typeStream << "\n\t-- Array Types\n";
+    }
     for (const auto& type : arrayTypes) {
         typeStream << printDataTypes(type);
     }
