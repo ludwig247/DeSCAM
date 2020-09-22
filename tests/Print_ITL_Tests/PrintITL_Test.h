@@ -76,7 +76,6 @@ static std::vector<Param> parameter(const char* header_list) {
 
 
 class ITLTest : public ::testing::TestWithParam<Param> {
-
 public:
     std::vector<DESCAM::Module *> results;
     struct PrintToStringParamName
@@ -106,11 +105,11 @@ public:
             catch(FatalError & e){}
 
         for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
-//        SCAM::ModelGlobal::reset();
             results.push_back(module.second);
         }
     }
     void TearDown() {
+        DESCAM::ModelGlobal::reset();
     }
 };
 

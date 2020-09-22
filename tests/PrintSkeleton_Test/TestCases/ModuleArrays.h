@@ -5,7 +5,8 @@
 #ifndef PROJECT_MODULEARRAYS_H
 #define PROJECT_MODULEARRAYS_H
 
-#include <Interfaces.h>
+#include "systemc.h"
+#include "../../../example/Interfaces/Interfaces.h"
 
 struct TestArray0 : public sc_module {
     blocking_in<int> b_in;

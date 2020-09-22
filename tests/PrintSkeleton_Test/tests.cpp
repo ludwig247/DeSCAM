@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 //    commandLineArugmentsVector.push_back(bin.c_str());
 //
 //    //SRC-File to be analyzed
-//    std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.h");
+//    std::string file_path = std::string(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/tests.h");
 //    commandLineArugmentsVector.push_back(file_path.c_str());
 //
 //    //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 //    for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
 //        commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
 //    }
-//    SCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
+//    DESCAM::ModelGlobal::createModel(commandLineArugmentsVector.size(), commandLineArgumentsArray[0],commandLineArgumentsArray[1]);
 //
 //
 //    for(auto module: ModelGlobal::getModel()->getModules()){
@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
 //            functionString.close();
 //        }
 //    }
+//    test_includes = parameter(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/tests.h");
     testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();
