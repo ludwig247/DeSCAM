@@ -2,6 +2,7 @@
 // Created by johannes on 05.12.19.
 //
 
+#include <memory>
 #include <tuple>
 #include "Logger/Logger.h"
 #include "SignalFactory.h"
@@ -31,28 +32,44 @@ SignalFactory::SignalFactory(
         optimizer(optimizer),
         useWaitOp(useWaitState)
 {
+    generateTypes();
     setOperationSelector();
     setControlSignals();
     setMonitorSignals();
-    setInputs();
-    setOutputs();
+    splitInputOutput();
     setInternalRegister();
     setOutputRegister();
     setOperationModuleInputs();
     setOperationModuleOutputs();
 }
 
-void SignalFactory::setOperationSelector() {
-    auto operationSelectorType = new DataType(propertySuite->getName() + "_operation_t");
-    for (const auto& property : propertySuite->getOperationProperties()) {
-        operationSelectorType->addEnumValue(property->getName());
+/*
+ * Generate enum types for states and operations
+ */
+void SignalFactory::generateTypes() {
+    stateType = new DataType(propertySuite->getName() + "_state_t");
+    for (const auto& state : propertySuite->getStates()) {
+        stateType->addEnumValue(state->getName());
+    }
+    operationType = new DataType(propertySuite->getName() + "_operation_t");
+    for (const auto& operation : propertySuite->getOperationProperties()) {
+        operationType->addEnumValue(operation->getName());
     }
     if (useWaitOp) {
-        operationSelectorType->addEnumValue("state_wait");
+        operationType->addEnumValue("state_wait");
     }
-    activeOperation = new Variable("active_operation", operationSelectorType);
 }
 
+/*
+ * Generate the active_operation variable
+ */
+void SignalFactory::setOperationSelector() {
+    activeOperation = std::make_shared<Variable> ("active_operation", operationType);
+}
+
+/*
+ * Generate Vivado protocol and control signals
+ */
 void SignalFactory::setControlSignals() {
     for (const auto& signal : HANDSHAKING_PROTOCOL_SIGNALS) {
         handshakingProtocolSignals.insert( new DataSignal(std::get<0>(signal),
@@ -78,34 +95,26 @@ void SignalFactory::setControlSignals() {
     }
 }
 
+/*
+ * Generate control signals for the monitor
+ */
 void SignalFactory::setMonitorSignals() {
-    auto stateType = new DataType(propertySuite->getName() + "_state_t");
-    for (const auto& state : propertySuite->getStates()) {
-        stateType->addEnumValue(state->getName());
-    }
-    auto operationType = new DataType(propertySuite->getName() + "_operation_t");
-    for (const auto& operation : propertySuite->getOperationProperties()) {
-        operationType->addEnumValue(operation->getName());
-    }
-    monitorSignals.insert(new Variable("active_state", stateType));
-    monitorSignals.insert(new Variable("next_state", stateType));
-    monitorSignals.insert(new Variable("active_operation", operationType));
+    monitorSignals.insert(std::make_shared<Variable> ("active_state", stateType));
+    monitorSignals.insert(std::make_shared<Variable> ("next_state", stateType));
+    monitorSignals.insert(activeOperation);
     if (!useWaitOp) {
-        monitorSignals.insert(new Variable("wait_state", new DataType("bool")));
+        monitorSignals.insert(std::make_shared<Variable> ("wait_state", DataTypes::getDataType("bool")));
     }
 }
 
-void SignalFactory::setInputs() {
+/*
+ * Split DataSignals based on port direction
+ */
+void SignalFactory::splitInputOutput() {
     for (const auto& port : module->getPorts()) {
         if (port.second->getInterface()->isInput()) {
             inputs.insert(port.second->getDataSignal());
-        }
-    }
-}
-
-void SignalFactory::setOutputs() {
-    for (const auto& port : module->getPorts()) {
-        if (port.second->getInterface()->isOutput()) {
+        } else if (port.second->getInterface()->isOutput()) {
             outputs.insert(port.second->getDataSignal());
         }
     }
@@ -135,12 +144,15 @@ std::set<Variable *> SignalFactory::getInternalRegister() const {
     return vars;
 }
 
-std::string SignalFactory::convertReturnTypeFunction(const std::string &returnType) {
-    if (returnType == "bool") {
+/*
+ * Print given type as VHDL style return type
+ */
+std::string SignalFactory::convertReturnType(const DataType &type) {
+    if (type.isBoolean()) {
         return "std_logic";
-    } else if (returnType == "int" || returnType == "unsigned") {
+    } else if (type.isInteger() || type.isUnsigned()) {
         return "std_logic_vector";
     } else {
-        return returnType;
+        return type.getName();
     }
 }

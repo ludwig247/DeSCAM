@@ -378,7 +378,7 @@ void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
        << "\t\t\t\tstart_sig <= '1';\n"
        << "\t\t\t\tactive_state <= next_state;\n";
 
-    printModuleInputVars({signalFactory->getActiveOperation()}, "" , "_in");
+    ss << "\t\t\t\tactive_operation_in <= active_operation;\n";
     printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
 
     for (auto&& internalRegIn : signalFactory->getInternalRegisterIn()) {

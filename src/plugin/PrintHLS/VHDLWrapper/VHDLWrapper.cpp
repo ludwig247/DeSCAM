@@ -274,7 +274,7 @@ void VHDLWrapper::functions(std::stringstream &ss) {
                 ss << "; ";
             }
         }
-        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << ";\n";
+        ss << ") return " << SignalFactory::convertReturnType(*(func->getReturnType())) << ";\n";
     }
     ss << "\n";
 
@@ -307,7 +307,7 @@ void VHDLWrapper::functions(std::stringstream &ss) {
                 ss << "; ";
             }
         }
-        ss << ") return " << SignalFactory::convertReturnTypeFunction(func->getReturnType()->getName()) << " is\n";
+        ss << ") return " << SignalFactory::convertReturnType(*(func->getReturnType())) << " is\n";
         ss << "\tbegin\n";
 
         if (func->getReturnValueConditionList().empty())

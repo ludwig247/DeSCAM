@@ -55,13 +55,13 @@ namespace DESCAM {
                 template<typename T>
                 static std::string enumToVector(T *dataSignal);
 
-                static std::string convertReturnTypeFunction(const std::string &returnType);
+                static std::string convertReturnType (const DataType &type);
 
                 std::set<Variable *> getInternalRegister() const;
 
-                inline Variable *getActiveOperation() const;
+                inline std::shared_ptr<Variable> getActiveOperation() const;
 
-                inline std::set<Variable *> getMonitorSignals() const;
+                inline std::set<std::shared_ptr<Variable>> getMonitorSignals() const;
 
                 inline std::set<Variable *> getInternalRegisterIn() const;
 
@@ -83,13 +83,16 @@ namespace DESCAM {
 
             private:
 
+                DataType *stateType;
+                DataType *operationType;
+
                 std::shared_ptr<PropertySuite> propertySuite;
                 Module *module;
                 std::shared_ptr<OptimizerHLS> optimizer;
                 bool useWaitOp;
 
-                Variable *activeOperation;
-                std::set<Variable *> monitorSignals;
+                std::shared_ptr<Variable> activeOperation;
+                std::set<std::shared_ptr<Variable>> monitorSignals;
                 std::set<Variable *> internalRegisterIn;
                 std::set<Variable *> internalRegisterOut;
                 std::set<Variable *> outputRegister;
@@ -100,15 +103,15 @@ namespace DESCAM {
                 std::set<DataSignal *> controlSignals;
                 std::set<DataSignal *> handshakingProtocolSignals;
 
+                void generateTypes();
+
                 void setOperationSelector();
 
                 void setControlSignals();
 
                 void setMonitorSignals();
 
-                void setInputs();
-
-                void setOutputs();
+                void splitInputOutput();
 
                 void setInternalRegister();
 
@@ -185,11 +188,11 @@ namespace DESCAM {
                        dataSignal->getFullName(".") + "), " + std::to_string(vectorSize) + "))";
             }
 
-            Variable *SignalFactory::getActiveOperation() const {
+            std::shared_ptr<Variable> SignalFactory::getActiveOperation() const {
                 return activeOperation;
             }
 
-            std::set<Variable *> SignalFactory::getMonitorSignals() const {
+            std::set<std::shared_ptr<Variable>> SignalFactory::getMonitorSignals() const {
                 return monitorSignals;
             }
 
