@@ -50,6 +50,8 @@ namespace DESCAM { namespace HLSPlugin {
 
         static std::string sliceBitwise(Bitwise& operation);
 
+        const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
+
     private:
         //std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
         std::shared_ptr<PropertySuite> propertySuite;
@@ -68,14 +70,15 @@ namespace DESCAM { namespace HLSPlugin {
         std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
 
         std::map<std::shared_ptr<Property>, std::vector<Assignment*>> simplifiedCommitments;
-    public:
-        const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
-
-    private:
 
         std::map<Port *, std::list<Expr *>> arrayPorts;
 
+        void removeRedundantConditions();
+
         void findVariables();
+
+        void mapOutputRegistersToOutput();
+
         void findOperationModuleSignals();
 
         void simplifyCommitments();
@@ -84,9 +87,6 @@ namespace DESCAM { namespace HLSPlugin {
 
         optional replaceDataSignals(Assignment *assignment);
         optional replaceByOutputRegister(Assignment *assignment);
-
-        void removeRedundantConditions();
-        void mapOutputRegistersToOutput();
         void arraySlicing();
 
         std::multimap<Variable *, DataSignal *> getParentMap(const std::multimap<Variable *, DataSignal *> &multimap);

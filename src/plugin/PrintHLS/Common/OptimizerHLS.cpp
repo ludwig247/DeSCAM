@@ -27,25 +27,6 @@ OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module
     findOperationModuleSignals();
 }
 
-bool OptimizerHLS::hasOutputReg(DataSignal *dataSignal) {
-    const auto &subVarMap = getSubVarMap(outputToRegisterMap);
-    return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
-            subVarMap.find(dataSignal) != subVarMap.end());
-}
-
-bool OptimizerHLS::hasMultipleOutputs(DataSignal *dataSignal) const {
-    return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
-}
-
-Variable *OptimizerHLS::getCorrespondingRegister(DataSignal *dataSignal) {
-    const auto &subVarMap = getSubVarMap(outputToRegisterMap);
-    if (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end()) {
-        return outputToRegisterMap.at(dataSignal);
-    } else {
-        return subVarMap.at(dataSignal);
-    }
-}
-
 /*
  * Iterates over all return values of a function, removing redundant conditions of previous branches
  *
@@ -89,13 +70,27 @@ void OptimizerHLS::removeRedundantConditions() {
     }
 }
 
+void OptimizerHLS::findVariables() {
+
+    for (const auto &var : module->getVariableMap()) {
+        if (var.second->isCompoundType()) {
+            for (const auto &subVar : var.second->getSubVarList()) {
+                variables.insert(subVar);
+            }
+        } else if (!(var.second->isArrayType()) && !(var.second->isSubVar() && var.second->getParent()->isArrayType())) {
+            variables.insert(var.second);
+        }
+    }
+}
+
 void OptimizerHLS::mapOutputRegistersToOutput() {
     // If for every operation the assignment of a Variable equals the assignment of a DataSignal
     // we can map Variable -> DataSignal
     auto compareAssignments = [this](DataSignal *output) -> std::set<Variable *> {
 
-        auto getOutputReg = [this](std::shared_ptr<Property> operationProperty, Expr *expr,
-                                   std::set<Variable *> &vars) -> void {
+        auto getOutputReg = [this](const std::shared_ptr<Property>& operationProperty,
+                                   Expr *expr,
+                                   std::set<Variable *> &vars) {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
                     Variable *var = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
@@ -134,6 +129,7 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
         return candidates;
     };
 
+    // Find used DataSignals
     std::set<DataSignal *> outputSet;
     for (const auto &property : propertySuite->getOperationProperties()) {
         for (const auto &commitment : property->getOperation()->getCommitmentsList()) {
@@ -183,9 +179,28 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
     }
 }
 
+bool OptimizerHLS::hasOutputReg(DataSignal *dataSignal) {
+    const auto &subVarMap = getSubVarMap(outputToRegisterMap);
+    return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
+            subVarMap.find(dataSignal) != subVarMap.end());
+}
+
+bool OptimizerHLS::hasMultipleOutputs(DataSignal *dataSignal) const {
+    return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
+}
+
+Variable *OptimizerHLS::getCorrespondingRegister(DataSignal *dataSignal) {
+    const auto &subVarMap = getSubVarMap(outputToRegisterMap);
+    if (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end()) {
+        return outputToRegisterMap.at(dataSignal);
+    } else {
+        return subVarMap.at(dataSignal);
+    }
+}
+
 
 void OptimizerHLS::simplifyCommitments() {
-    for (auto & property : propertySuite->getOperationProperties()) {
+    for (auto &property : propertySuite->getOperationProperties()) {
         std::vector<Assignment *> assignments;
         for (const auto &commitment : property->getOperation()->getCommitmentsList()) {
             if (isSelfAssignments(commitment)) {
@@ -305,7 +320,7 @@ void OptimizerHLS::findOperationModuleSignals() {
 
     std::set<Variable *> assumptionVariables;
 
-    for (auto & property : propertySuite->getOperationProperties()) {
+    for (auto &property : propertySuite->getOperationProperties()) {
 
         for (const auto &commitment : simplifiedCommitments.at(property)) {
 
@@ -352,42 +367,6 @@ void OptimizerHLS::findOperationModuleSignals() {
         }
     }
 
-}
-
-void OptimizerHLS::findVariables() {
-    for (const auto &var : module->getVariableMap()) {
-        if (var.second->isCompoundType()) {
-            for (const auto &subVar : var.second->getSubVarList()) {
-                variables.insert(subVar);
-            }
-        } else if (!var.second->isArrayType()) {
-            if (!(var.second->isSubVar() && var.second->getParent()->isArrayType())) {
-                variables.insert(var.second);
-            }
-        }
-    }
-
-    auto eraseIfFunction = [this](Variable *var) {
-        for (const auto &operationProperties : propertySuite->getOperationProperties()) {
-            for (const auto &commitment : operationProperties->getOperation()->getCommitmentsList()) {
-                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
-                    Variable *var2 = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
-                    if (var->getFullName() == var2->getFullName()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    };
-
-    for (auto var = variables.begin(); var != variables.end();) {
-        if (eraseIfFunction(*var)) {
-            variables.erase(var++);
-        } else {
-            ++var;
-        }
-    }
 }
 
 bool OptimizerHLS::isConstant(Variable *variable) const {
@@ -590,16 +569,18 @@ std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
 
     if (operation.getOperation() == "&") {
 
-        const auto lhsConstant = (NodePeekVisitor::nodePeekIntegerValue(operation.getLhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(operation.getLhs()) != nullptr);
-        const auto rhsConstant = (NodePeekVisitor::nodePeekIntegerValue(operation.getRhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(operation.getRhs()) != nullptr);
+        const auto lhsConstant = (NodePeekVisitor::nodePeekIntegerValue(operation.getLhs()) != nullptr) ||
+                                 (NodePeekVisitor::nodePeekUnsignedValue(operation.getLhs()) != nullptr);
+        const auto rhsConstant = (NodePeekVisitor::nodePeekIntegerValue(operation.getRhs()) != nullptr) ||
+                                 (NodePeekVisitor::nodePeekUnsignedValue(operation.getRhs()) != nullptr);
 
         // Ensure exactly one value is constant
         if (lhsConstant == rhsConstant) {
             return "";
         }
 
-        const auto& constant = (lhsConstant ? operation.getLhs() : operation.getRhs());
-        const auto& variable = (rhsConstant ? operation.getLhs() : operation.getRhs());
+        const auto &constant = (lhsConstant ? operation.getLhs() : operation.getRhs());
+        const auto &variable = (rhsConstant ? operation.getLhs() : operation.getRhs());
 
         auto constantValue = 0;
         if (constant->getDataType()->isInteger()) {
@@ -613,27 +594,29 @@ std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
         std::stringstream ss;
         auto offset = 0;
         if ((NodePeekVisitor::nodePeekVariableOperand(variable) != nullptr)
-        || (NodePeekVisitor::nodePeekDataSignalOperand(variable) != nullptr)
-        || (NodePeekVisitor::nodePeekParamOperand(variable) != nullptr)) {
+            || (NodePeekVisitor::nodePeekDataSignalOperand(variable) != nullptr)
+            || (NodePeekVisitor::nodePeekParamOperand(variable) != nullptr)) {
             ss << DESCAM::HLSPlugin::VHDLWrapper::PrintStmtVHDL::toString(variable);
         } else if (NodePeekVisitor::nodePeekBitwise(variable) != nullptr) {
 
             // Only consider the case "var >> const"
-            const auto& subOperation = NodePeekVisitor::nodePeekBitwise(variable);
+            const auto &subOperation = NodePeekVisitor::nodePeekBitwise(variable);
             if (!(subOperation->getOperation() == ">>")) {
                 return "";
             }
 
-            const auto subLhsConstant = (NodePeekVisitor::nodePeekIntegerValue(subOperation->getLhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(subOperation->getLhs()) != nullptr);
-            const auto subRhsConstant = (NodePeekVisitor::nodePeekIntegerValue(subOperation->getRhs()) != nullptr) || (NodePeekVisitor::nodePeekUnsignedValue(subOperation->getRhs()) != nullptr);
+            const auto subLhsConstant = (NodePeekVisitor::nodePeekIntegerValue(subOperation->getLhs()) != nullptr) ||
+                                        (NodePeekVisitor::nodePeekUnsignedValue(subOperation->getLhs()) != nullptr);
+            const auto subRhsConstant = (NodePeekVisitor::nodePeekIntegerValue(subOperation->getRhs()) != nullptr) ||
+                                        (NodePeekVisitor::nodePeekUnsignedValue(subOperation->getRhs()) != nullptr);
 
             // Ensure right value is constant, left is not
             if (!(!subLhsConstant && subRhsConstant)) {
                 return "";
             }
 
-            const auto& subConstant = subOperation->getRhs();
-            const auto& subVariable = subOperation->getLhs();
+            const auto &subConstant = subOperation->getRhs();
+            const auto &subVariable = subOperation->getLhs();
 
             if (subConstant->getDataType()->isInteger()) {
                 offset = NodePeekVisitor::nodePeekIntegerValue(subConstant)->getValue();
