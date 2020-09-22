@@ -39,7 +39,6 @@ std::string VHDLWrapper::printTypes() {
 
     typeStream << "package " + moduleName << "_types is\n\n";
 
-    // State enumeration
     typeStream << "\t -- States\n"
                << "\ttype " + propertySuite->getName() << "_state_t is (";
     const auto& states = propertySuite->getStates();
@@ -53,54 +52,20 @@ std::string VHDLWrapper::printTypes() {
 
     operationEnum(typeStream);
 
-    // Find all used data types and sort them
-    std::set<const DataType *> enumTypes;
-    std::set<const DataType *> compoundTypes;
-    std::set<const DataType *> arrayTypes;
-
-    auto fillTypeSets = [&enumTypes, &compoundTypes, &arrayTypes](const DataType* dataType) {
-        if (dataType->isEnumType()) {
-            enumTypes.insert(dataType);
-        } else if (dataType->isCompoundType()) {
-            compoundTypes.insert(dataType);
-        } else if (dataType->isArrayType()) {
-            arrayTypes.insert(dataType);
-        }
-    };
-
-    for (const auto& reg : propertySuite->getVisibleRegisters()) {
-        fillTypeSets(reg->getDataType());
-    }
-    for (const auto& func : propertySuite->getFunctions()) {
-        fillTypeSets(func->getReturnType());
-    }
-    for (const auto &port : currentModule->getPorts()) {
-        if (port.second->isCompoundType()) {
-            for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
-                fillTypeSets(subVar->getDataType());
-            }
-        }
-        fillTypeSets(port.second->getDataType());
-    }
-    for (const auto& var : currentModule->getVariableMap()) {
-        fillTypeSets(var.second->getDataType());
-    }
-
-    // Print data types
     typeStream << "\t-- Enum Types\n";
-    for (const auto& type : enumTypes) {
+    for (const auto& type : optimizer->getEnumTypes()) {
         typeStream << printDataTypes(type);
     }
 
     typeStream << "\n\t-- Compound Types\n";
-    for (const auto& type : compoundTypes) {
+    for (const auto& type : optimizer->getCompoundTypes()) {
         typeStream << printDataTypes(type);
     }
 
-    if (!arrayTypes.empty()) {
+    if (!optimizer->getArrayTypes().empty()) {
         typeStream << "\n\t-- Array Types\n";
     }
-    for (const auto& type : arrayTypes) {
+    for (const auto& type : optimizer->getArrayTypes()) {
         typeStream << printDataTypes(type);
     }
 

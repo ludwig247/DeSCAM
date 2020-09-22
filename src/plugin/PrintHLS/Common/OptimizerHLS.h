@@ -34,6 +34,10 @@ namespace DESCAM { namespace HLSPlugin {
         std::set<Variable *> getOutputRegister();
         std::vector<DataSignal *> getConstantOutputs();
 
+        inline std::set<const DataType *> getEnumTypes() const;
+        inline std::set<const DataType *> getCompoundTypes() const;
+        inline std::set<const DataType *> getArrayTypes() const;
+
         inline std::set<DataSignal *> getOutputs() const;
         inline std::set<DataSignal *> getInputs() const;
         inline std::set<Variable *> getInternalRegisterIn() const;
@@ -57,6 +61,10 @@ namespace DESCAM { namespace HLSPlugin {
         std::shared_ptr<PropertySuite> propertySuite;
         Module* module;
 
+        std::set<const DataType *> enumTypes;
+        std::set<const DataType *> compoundTypes;
+        std::set<const DataType *> arrayTypes;
+
         std::set<DataSignal *> outputs;
         std::set<DataSignal *> inputs;
         std::set<Variable *> variables;
@@ -72,6 +80,8 @@ namespace DESCAM { namespace HLSPlugin {
         std::map<std::shared_ptr<Property>, std::vector<Assignment*>> simplifiedCommitments;
 
         std::map<Port *, std::list<Expr *>> arrayPorts;
+
+        void findUsedDataTypes();
 
         void removeRedundantConditions();
 
@@ -102,6 +112,18 @@ namespace DESCAM { namespace HLSPlugin {
 
     std::vector<DataSignal *> OptimizerHLS::getCorrespondingTopSignals(DataSignal *dataSignal) const {
         return moduleToTopSignalMap.at(dataSignal);
+    }
+
+    std::set<const DataType *> OptimizerHLS::getEnumTypes() const {
+        return enumTypes;
+    }
+
+    std::set<const DataType *> OptimizerHLS::getCompoundTypes() const {
+        return compoundTypes;
+    }
+
+    std::set<const DataType *> OptimizerHLS::getArrayTypes() const {
+        return arrayTypes;
     }
 
     std::set<DataSignal *> OptimizerHLS::getOutputs() const {

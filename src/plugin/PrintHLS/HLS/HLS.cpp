@@ -14,18 +14,17 @@ using namespace DESCAM::HLSPlugin::HLS;
 
 HLS::HLS(
         HLSOption hlsOption,
-        Module* module,
+        Module *module,
         const std::string &moduleName,
-        std::shared_ptr<PropertySuite>& propertySuite,
-        std::shared_ptr<OptimizerHLS>& optimizer
+        std::shared_ptr<PropertySuite> &propertySuite,
+        std::shared_ptr<OptimizerHLS> &optimizer
 ) :
         ss(""),
         moduleName(moduleName),
         propertySuite(propertySuite),
         currentModule(module),
         optimizer(optimizer),
-        hlsOption(hlsOption)
-{
+        hlsOption(hlsOption) {
 }
 
 std::map<std::string, std::string> HLS::printModule() {
@@ -48,8 +47,7 @@ std::map<std::string, std::string> HLS::printModule() {
     return pluginOutput;
 }
 
-void HLS::operations()
-{
+void HLS::operations() {
     ss << "#include \"ap_int.h\"\n";
     if (!currentModule->getFunctionMap().empty()) {
         ss << "#include \"" << moduleName << "_functions.h\"\n";
@@ -71,12 +69,12 @@ void HLS::operations()
 
     // operation properties
     for (auto operationProperty : propertySuite->getOperationProperties()) {
-        const std::string& operationName = operationProperty->getName();
+        const std::string &operationName = operationProperty->getName();
         ss << "\tcase " << operationName << ":\n";
         for (auto commitment : optimizer->getSimplifiedCommitments().at(operationProperty)) {
             ss << PrintStatement::toString(commitment, optimizer, hlsOption, 2, 2);
         }
-        for (const auto& notifyStmt : optimizer->getNotifyStatements(operationProperty)) {
+        for (const auto &notifyStmt : optimizer->getNotifyStatements(operationProperty)) {
             ss << PrintStatement::toString(notifyStmt, optimizer, hlsOption, 2, 2);
         }
         ss << "\t\tbreak;\n";
@@ -88,13 +86,13 @@ void HLS::operations()
     ss << "}";
 }
 
-void HLS::interface()
-{
+void HLS::interface() {
     // Input
-    for (const auto& input : Utilities::getParents(optimizer->getInputs())) {
+    for (const auto &input : Utilities::getParents(optimizer->getInputs())) {
         bool isArrayType = input->isArrayType();
         if (isArrayType) {
-            ss << "\t" << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
+            ss << "\t" << Utilities::convertDataType(input->getDataType()->getSubVarMap().begin()->second->getName())
+               << " ";
         } else {
             ss << "\t" << Utilities::convertDataType(input->getDataType()->getName()) << " ";
         }
@@ -106,10 +104,11 @@ void HLS::interface()
     }
 
     // Output
-    for (const auto& output : Utilities::getParents(optimizer->getOutputs())) {
+    for (const auto &output : Utilities::getParents(optimizer->getOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
-            ss << "\t" << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
+            ss << "\t" << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName())
+               << " ";
         } else {
             ss << "\t" << Utilities::convertDataType(output->getDataType()->getName()) << " &";
         }
@@ -135,8 +134,7 @@ void HLS::interface()
             bool isArrayType = reg->isArrayType();
             if (isArrayType) {
                 ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
-            }
-            else {
+            } else {
                 ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
             }
             ss << " in_" << reg->getFullName();
@@ -151,9 +149,9 @@ void HLS::interface()
     for (const auto reg : Utilities::getParents(optimizer->getInternalRegisterOut())) {
         bool isArrayType = reg->isArrayType();
         if (isArrayType) {
-            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName()) << " ";
-        }
-        else {
+            ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName())
+               << " ";
+        } else {
             ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName()) << " &";
         }
         ss << "" << reg->getFullName();
@@ -171,9 +169,8 @@ void HLS::interface()
     ss << "\toperation active_operation\n)\n";
 }
 
-void HLS::writeToOutput()
-{
-    for (const auto& output : Utilities::getParents(optimizer->getOutputs())) {
+void HLS::writeToOutput() {
+    for (const auto &output : Utilities::getParents(optimizer->getOutputs())) {
         ss << "\t" << output->getName() << " = " << output->getName() << "_reg;\n";
     }
     for (const auto reg : Utilities::getParents(optimizer->getInternalRegisterOut())) {
@@ -184,15 +181,13 @@ void HLS::writeToOutput()
     }
 }
 
-void HLS::registerVariables()
-{
-    for (const auto& output : Utilities::getParents(optimizer->getOutputs())) {
+void HLS::registerVariables() {
+    for (const auto &output : Utilities::getParents(optimizer->getOutputs())) {
         bool isArrayType = output->isArrayType();
         if (isArrayType) {
             ss << "\tstatic "
                << Utilities::convertDataType(output->getDataType()->getSubVarMap().begin()->second->getName());
-        }
-        else {
+        } else {
             ss << "\tstatic " << Utilities::convertDataType(output->getDataType()->getName());
         }
         ss << " " << output->getName() << "_reg";
@@ -208,8 +203,7 @@ void HLS::registerVariables()
         if (isArrayType) {
             ss << "\tstatic "
                << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
-        }
-        else {
+        } else {
             ss << "\tstatic " << Utilities::convertDataType(reg->getDataType()->getName());
         }
         ss << " " << reg->getFullName() << "_reg";
@@ -231,8 +225,7 @@ void HLS::registerVariables()
         bool isArrayType = reg->isArrayType();
         if (isArrayType) {
             ss << "\t" << Utilities::convertDataType(reg->getDataType()->getSubVarMap().begin()->second->getName());
-        }
-        else {
+        } else {
             ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName());
         }
         ss << " " << reg->getFullName() << "_tmp";
@@ -260,27 +253,24 @@ void HLS::registerVariables()
     }
 }
 
-void HLS::dataTypes()
-{
+void HLS::dataTypes() {
     ss << "#ifndef DATA_TYPES_H\n";
     ss << "#define DATA_TYPES_H\n\n";
     ss << "#include \"ap_int.h\"\n\n";
 
-    // enum of states
     ss << "// States\n"
        << "enum state {";
-    for (auto state = propertySuite->getStates().begin(); state!=propertySuite->getStates().end(); ++state) {
+    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
         ss << (*state)->getName();
-        if (std::next(state)!=propertySuite->getStates().end()) {
+        if (std::next(state) != propertySuite->getStates().end()) {
             ss << ", ";
         }
     }
     ss << "};\n\n";
 
-    // enum of operations
     ss << "// Operations\n"
        << "enum operation {";
-    const auto& operationProperties = propertySuite->getOperationProperties();
+    const auto &operationProperties = propertySuite->getOperationProperties();
     for (auto property = operationProperties.begin(); property != operationProperties.end(); ++property) {
         ss << (*property)->getName();
         if (std::next(property) != operationProperties.end()) {
@@ -292,48 +282,18 @@ void HLS::dataTypes()
     }
     ss << "};\n\n";
 
-    std::set<const DataType*> enumTypes;
-    std::set<const DataType*> compoundTypes;
-
-    auto addDataType = [&enumTypes, &compoundTypes](const DataType* dataType) {
-        if (dataType->isEnumType()) {
-            enumTypes.insert(dataType);
-        }
-        else if (dataType->isCompoundType()) {
-            compoundTypes.insert(dataType);
-        }
-    };
-
-    for (const auto& reg : propertySuite->getVisibleRegisters()) {
-        addDataType((DataType*) (reg->getDataType()));
-    }
-    for (const auto& func : propertySuite->getFunctions()) {
-        addDataType(func->getReturnType());
-    }
-    for (auto& port : currentModule->getPorts()) {
-        if (port.second->isCompoundType()) {
-            for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
-                addDataType(subVar->getDataType());
-            }
-        }
-        addDataType(port.second->getDataType());
-    }
-    for (const auto& var : currentModule->getVariableMap()) {
-        addDataType(var.second->getDataType());
-    }
-
     ss << "// Enum Types\n";
-    for (auto type : enumTypes) {
+    for (auto type : optimizer->getEnumTypes()) {
         printDataType(type);
     }
 
     ss << "// Compound Types\n";
-    for (auto type : compoundTypes) {
+    for (auto type : optimizer->getCompoundTypes()) {
         printDataType(type);
     }
 
     ss << "\n// Constants\n";
-    for (const auto& var : optimizer->getConstantVariables()) {
+    for (const auto &var : optimizer->getConstantVariables()) {
         ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
            << " " << var->getFullName("_") << " = " << getVariableReset(var) << ";\n";
     }
@@ -341,32 +301,28 @@ void HLS::dataTypes()
     ss << "\n#endif //DATA_TYPES_H";
 }
 
-void HLS::printDataType(const DataType *node)
-{
-    // Enums
+void HLS::printDataType(const DataType *node) {
     if (node->isEnumType()) {
         if (node->getName().find("_SECTIONS") < node->getName().size())
             return;
         ss << "enum " << node->getName() << " {";
-        for (auto enumValue = node->getEnumValueMap().begin(); enumValue != node->getEnumValueMap().end(); ++enumValue) {
+        for (auto enumValue = node->getEnumValueMap().begin();
+             enumValue != node->getEnumValueMap().end(); ++enumValue) {
             ss << enumValue->first;
             if (std::next(enumValue) != node->getEnumValueMap().end())
                 ss << ", ";
         }
         ss << "};\n\n";
-    }
-    // Structs
-    else if (node->isCompoundType()) {
+    } else if (node->isCompoundType()) {
         ss << "struct " << node->getName() << " {\n";
-        for (auto& subVar : node->getSubVarMap()) {
+        for (auto &subVar : node->getSubVarMap()) {
             ss << "\t" << Utilities::convertDataType(subVar.second->getName()) << " " << subVar.first << ";\n";
         }
         ss << "};\n\n";
     }
 }
 
-void HLS::functions()
-{
+void HLS::functions() {
     this->ss << "#ifndef FUNCTIONS_H\n";
     this->ss << "#define FUNCTIONS_H\n\n";
     this->ss << "#include \"ap_int.h\"\n";
@@ -374,7 +330,7 @@ void HLS::functions()
 
     // Function Prototypes
     auto functionMap = currentModule->getFunctionMap();
-    for (auto& function :functionMap) {
+    for (auto &function :functionMap) {
         this->ss << Utilities::convertDataType(function.second->getReturnType()->getName()) << " "
                  << function.second->getName() << "(";
         auto parameterMap = function.second->getParamMap();
@@ -394,7 +350,7 @@ void HLS::functions()
             } else {
                 this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
                          << parameter->first;
-                if (std::next(parameter)!=parameterMap.end()) {
+                if (std::next(parameter) != parameterMap.end()) {
                     this->ss << ", ";
                 }
             }
@@ -410,24 +366,25 @@ void HLS::functions()
     this->ss << "#endif //FUNCTIONS_H";
 }
 
-void HLS::visit(Function& node)
-{
+void HLS::visit(Function &node) {
     this->ss << Utilities::convertDataType(node.getReturnType()->getName()) << " " << node.getName() << "(";
     auto parameterMap = node.getParamMap();
     for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); ++parameter) {
         if (parameter->second->isCompoundType()) {
             auto subVarList = parameter->second->getSubVarList();
             for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
-                this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " " << (*subVar)->getFullName("_");
+                this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
+                         << (*subVar)->getFullName("_");
                 if (std::next(subVar) != subVarList.end()) {
                     this->ss << ", ";
                 }
             }
-            if (std::next(parameter)!=parameterMap.end()) {
+            if (std::next(parameter) != parameterMap.end()) {
                 this->ss << ", ";
             }
         } else {
-            this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " " << parameter->first;
+            this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
+                     << parameter->first;
             if (std::next(parameter) != parameterMap.end()) {
                 this->ss << ", ";
             }
@@ -435,16 +392,15 @@ void HLS::visit(Function& node)
     }
     this->ss << ") {\n";
     if (node.getReturnValueConditionList().empty()) {
-        TERMINATE("No return value for function "+node.getName());
+        TERMINATE("No return value for function " + node.getName());
     }
     auto numberOfBranches = node.getReturnValueConditionList().size();
-    for (auto& returnValue : node.getReturnValueConditionList()) {
+    for (auto &returnValue : node.getReturnValueConditionList()) {
         if (!returnValue.second.empty()) {
             if (numberOfBranches > 1) {
                 if (numberOfBranches == node.getReturnValueConditionList().size()) {
                     ss << "\tif ((";
-                }
-                else {
+                } else {
                     ss << "else if((";
                 }
                 for (auto condition = returnValue.second.begin();
@@ -458,7 +414,7 @@ void HLS::visit(Function& node)
                 ss << ")) {\n";
             }
         }
-        if (node.getReturnValueConditionList().size() > 1 && numberOfBranches==1) {
+        if (node.getReturnValueConditionList().size() > 1 && numberOfBranches == 1) {
             ss << "else {\n";
         }
         ss << PrintFunction::toString(returnValue.first, 2, 2) << ";";
@@ -470,18 +426,15 @@ void HLS::visit(Function& node)
     this->ss << "\n}\n\n";
 }
 
-std::string HLS::getDataSignalReset(DataSignal* dataSignal)
-{
-    auto getDataSignalValue = [this](DataSignal* dataSignal) {
+std::string HLS::getDataSignalReset(DataSignal *dataSignal) {
+    auto getDataSignalValue = [this](DataSignal *dataSignal) {
         auto resetValue = getResetValue(dataSignal);
         if (resetValue.valid) {
             return resetValue.value;
-        }
-        else {
+        } else {
             if (optimizer->hasOutputReg(dataSignal)) {
                 return getValue(optimizer->getCorrespondingRegister(dataSignal));
-            }
-            else {
+            } else {
                 std::string resetString = dataSignal->getInitialValue()->getValueAsString();
                 return resetString.empty() ? "{}" : resetString;
             }
@@ -492,7 +445,7 @@ std::string HLS::getDataSignalReset(DataSignal* dataSignal)
         std::stringstream resetValueStream;
         resetValueStream << "{";
         auto subVarList = dataSignal->getSubVarList();
-        for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
+        for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
             resetValueStream << getDataSignalValue(*subVar);
             if (std::next(subVar) != subVarList.end()) {
                 resetValueStream << ", ";
@@ -500,31 +453,27 @@ std::string HLS::getDataSignalReset(DataSignal* dataSignal)
         }
         resetValueStream << "}";
         return resetValueStream.str();
-    }
-    else {
+    } else {
         return getDataSignalValue(dataSignal);
     }
 }
 
-std::string HLS::getValue(Variable* variable)
-{
+std::string HLS::getValue(Variable *variable) {
     auto resetValue = getResetValue(variable);
     if (resetValue.valid) {
         return resetValue.value;
-    }
-    else {
+    } else {
         std::string resetString = variable->getInitialValue()->getValueAsString();
         return resetString.empty() ? "{}" : resetString;
     }
 }
 
-std::string HLS::getVariableReset(Variable* variable)
-{
+std::string HLS::getVariableReset(Variable *variable) {
     if (variable->isCompoundType()) {
         std::stringstream resetValueStream;
         resetValueStream << "{";
         auto subVarList = variable->getSubVarList();
-        for (auto subVar = subVarList.begin(); subVar!=subVarList.end(); ++subVar) {
+        for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
             resetValueStream << getValue(*subVar);
             if (std::next(subVar) != subVarList.end()) {
                 resetValueStream << ", ";
@@ -532,15 +481,13 @@ std::string HLS::getVariableReset(Variable* variable)
         }
         resetValueStream << "}";
         return resetValueStream.str();
-    }
-    else {
+    } else {
         return getValue(variable);
     }
 }
 
 template<typename T>
-optional HLS::getResetValue(T* signal)
-{
+optional HLS::getResetValue(T *signal) {
     std::vector<DESCAM::Assignment *> assignmentList;
     auto temporalExprs = propertySuite->getResetProperty()->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
@@ -550,7 +497,7 @@ optional HLS::getResetValue(T* signal)
         }
     }
 
-    for (const auto& commitment : assignmentList) {
+    for (const auto &commitment : assignmentList) {
         auto printResetValue = PrintReset(commitment->getLhs(), signal->getFullName());
         if (printResetValue.hasReset()) {
             return {true, PrintStatement::toString(commitment->getRhs())};
@@ -559,10 +506,9 @@ optional HLS::getResetValue(T* signal)
     return {false, ""};
 }
 
-void HLS::waitOperation()
-{
+void HLS::waitOperation() {
     ss << "\tcase state_wait:\n";
-    for (const auto& port : currentModule->getPorts()) {
+    for (const auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isMasterOut()) {
             ss << "\t\t" << port.second->getName() << "_notify_reg = false;\n";
         }

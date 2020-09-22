@@ -20,11 +20,46 @@ OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module
         module(module),
         registerToOutputMap(),
         outputToRegisterMap() {
+    findUsedDataTypes();
     removeRedundantConditions();
     findVariables();
     mapOutputRegistersToOutput();
     simplifyCommitments();
     findOperationModuleSignals();
+}
+
+/*
+ * Extracts enum, compound and array data types used in the design
+ */
+void OptimizerHLS::findUsedDataTypes() {
+
+    auto fillTypeSets = [this](const DataType* dataType) {
+        if (dataType->isEnumType()) {
+            enumTypes.insert(dataType);
+        } else if (dataType->isCompoundType()) {
+            compoundTypes.insert(dataType);
+        } else if (dataType->isArrayType()) {
+            arrayTypes.insert(dataType);
+        }
+    };
+
+    for (const auto& reg : propertySuite->getVisibleRegisters()) {
+        fillTypeSets(reg->getDataType());
+    }
+    for (const auto& func : propertySuite->getFunctions()) {
+        fillTypeSets(func->getReturnType());
+    }
+    for (const auto &port : module->getPorts()) {
+        if (port.second->isCompoundType()) {
+            for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+                fillTypeSets(subVar->getDataType());
+            }
+        }
+        fillTypeSets(port.second->getDataType());
+    }
+    for (const auto& var : module->getVariableMap()) {
+        fillTypeSets(var.second->getDataType());
+    }
 }
 
 /*
