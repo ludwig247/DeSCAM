@@ -57,7 +57,6 @@ void VHDLWrapperSCO::component(std::stringstream &ss) {
         return;
     }
 
-    // Print Component
     ss << "\n\tcomponent " << moduleName << "_operations is\n";
     ss << "\tport(\n";
 
@@ -147,84 +146,50 @@ std::string VHDLWrapperSCO::printMonitorOperation(const Operation &op) {
     return ss.str();
 }
 
+/*
+ * Print signal assignments outside processes
+ */
 void VHDLWrapperSCO::moduleOutputHandling(std::stringstream &ss) {
-    auto printOutputProcess = [&](DataSignal *dataSignal) {
-        bool isEnum = dataSignal->isEnumType();
-        bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
-        std::string name;
-        if (hasOutputReg) {
-            name = optimizer->getCorrespondingRegister(dataSignal)->getFullName(".");
-        } else {
-            name = dataSignal->getFullName(".");
-        }
-        ss << "\t" << name << " <= "
-           << (
-                   isEnum ?
-                   SignalFactory::vectorToEnum(dataSignal, "_out") :
-                   dataSignal->getFullName("_") + "_out")
-           << ";\n";
-    };
 
-    ss << "\n\t-- Operation Module Outputs\n";
-    for (const auto &out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
-        printOutputProcess(out);
+    if (!Utilities::getSubVars(signalFactory->getOperationModuleOutputs()).empty()) {
+        ss << "\n\t-- Operation Module Outputs\n";
+    }
+    for (const auto &output : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        const auto outputName = (optimizer->hasOutputReg(output) ?
+                                 optimizer->getCorrespondingRegister(output)->getFullName() :
+                                 output->getFullName());
+        ss << "\t" << outputName << " <= " << output->getFullName("_") << "_out;\n";
     }
 
-    ss << "\n\t-- Output Register to Output Mapping\n";
+    if (!optimizer->getOutputRegisterMap().empty()){
+        ss << "\n\t-- Output Register to Output Mapping\n";
+    }
     for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
         if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
             for (const auto &output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
                 ss << "\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
             }
         } else {
-            ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName()
-               << ";\n";
+            ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
         }
     }
 
-    ss << "\n\t-- Notify Signals\n";
+    if (!propertySuite->getNotifySignals().empty()) {
+        ss << "\n\t-- Notify Signals\n";
+    }
     for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_out;\n";
     }
 
-    auto printModuleInputSignals = [&ss](std::set<DataSignal *> const &dataSignals) {
-        for (const auto &dataSignal : dataSignals) {
-            if (!dataSignal->getPort()->isArrayType()) {
-                ss << "\t" << dataSignal->getFullName("_") << "_in <= "
-                   << (
-                           dataSignal->isEnumType() ?
-                           SignalFactory::enumToVector(dataSignal) :
-                           dataSignal->getFullName("."))
-                   << ";\n";
-            }
-        }
-    };
-
-    auto printModuleInputVars = [&ss](std::set<Variable *> const &vars, std::string const &prefix,
-                                      std::string const &suffix) {
-        for (const auto &var : vars) {
-            ss << "\t" << prefix << var->getFullName(".") << suffix << " <= "
-               << var->getFullName(".") << ";\n";
-        }
-    };
-
     ss << "\n\t-- Operation Module Inputs\n";
-    printModuleInputVars({signalFactory->getActiveOperation()}, "", "_in");
-    printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
-
-    for (const auto &arrayPort : optimizer->getArrayPorts()) {
-        uint32_t exprNumber = 0;
-        for (const auto &expr : arrayPort.second) {
-            ss << "\t" << arrayPort.first->getDataSignal()->getName() << "_" << exprNumber << "_in"
-               << " <= " << arrayPort.first->getDataSignal()->getName() << "(to_integer(unsigned("
-               << PrintStmtVHDL::toString(expr) << ")));\n";
-            exprNumber++;
-        }
+    ss << "\t" << signalFactory->getActiveOperation()->getFullName() << "_in <= " << signalFactory->getActiveOperation()->getFullName() << ";\n";
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << "\t" << signal->getFullName("_") << "_in <= " << signal->getFullName() << ";\n";
     }
+
 }
 
 void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
-    // Print Control Process
     ss << "\n\t-- Control process\n"
        << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
