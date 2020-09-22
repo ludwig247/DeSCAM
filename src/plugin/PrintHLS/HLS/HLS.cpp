@@ -327,8 +327,7 @@ void HLS::dataTypes()
         printDataType(type);
     }
 
-    ss << "\n"
-       << "// Compound Types\n";
+    ss << "// Compound Types\n";
     for (auto type : compoundTypes) {
         printDataType(type);
     }

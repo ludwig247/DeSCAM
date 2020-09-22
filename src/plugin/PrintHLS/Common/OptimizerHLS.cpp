@@ -367,6 +367,25 @@ void OptimizerHLS::findOperationModuleSignals() {
         }
     }
 
+    // Check for constants only used inside functions
+    for (const auto &function : module->getFunctionMap()) {
+        std::set<Variable*> usedVariables;
+        for (const auto &retVal : function.second->getReturnValueConditionList()) {
+            for (const auto &cond : retVal.second) {
+                const auto &foundVariables = ExprVisitor::getUsedVariables(cond);
+                usedVariables.insert(foundVariables.begin(), foundVariables.end());
+            }
+            auto const &foundVariables = ExprVisitor::getUsedVariables(retVal.first->getReturnValue());
+            usedVariables.insert(foundVariables.begin(), foundVariables.end());
+        }
+        for (const auto &var : usedVariables) {
+            if (var->isConstant()) {
+                constantVariables.insert(var);
+            }
+        }
+
+    }
+
 }
 
 bool OptimizerHLS::isConstant(Variable *variable) const {
