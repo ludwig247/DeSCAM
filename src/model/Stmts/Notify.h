@@ -14,6 +14,7 @@ namespace DESCAM {
         Notify() = delete;
 
         Notify(Port *port, LocationInfo stmtLocationInfo = LocationInfo());
+        Notify(std::string event_name, LocationInfo stmtLocationInfo = LocationInfo());
 
         virtual ~Notify() = default;
 
@@ -23,7 +24,11 @@ namespace DESCAM {
 
         Port *getPort() const;
 
+        const std::string &getEventName() const;
+
     private:
+        std::string event_name = "";
+
         Port *port;
 
     };

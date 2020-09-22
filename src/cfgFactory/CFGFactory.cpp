@@ -27,7 +27,7 @@ namespace DESCAM {
             return;
         }
 
-        clangCFG->dump({},true);
+        //clangCFG->dump({},true);
 
         this->translateToScamCFG();
     }
@@ -115,7 +115,7 @@ namespace DESCAM {
             if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
                 cfgNode->addStmt(this->getScamStmt(clangStmt));
             }else{
-                clangStmt->dumpColor();
+                //clangStmt->dumpColor();
             }
         }
 

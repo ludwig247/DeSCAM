@@ -29,3 +29,15 @@ bool DESCAM::Notify::operator==(const DESCAM::Stmt &other) const {
     return (thisPtr->getPort() == otherPtr->getPort());
 }
 
+DESCAM::Notify::Notify(std::string event_name, DESCAM::LocationInfo stmtLocationInfo):
+    event_name(event_name),
+    Expr(DataTypes::getDataType("bool"),stmtLocationInfo){
+
+    this->port = new Port("even_name",new Interface("event","out",stmtLocationInfo),DataTypes::getDataType("bool"),stmtLocationInfo);
+
+}
+
+const std::string &DESCAM::Notify::getEventName() const {
+    return event_name;
+}
+

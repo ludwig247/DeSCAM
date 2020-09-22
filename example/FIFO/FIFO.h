@@ -13,6 +13,10 @@ void inline wait_event(sc_event event){
     wait(event);
 };
 
+void inline notify_event(sc_event event){
+    event.notify();
+};
+
 
 
 const int size = 16;

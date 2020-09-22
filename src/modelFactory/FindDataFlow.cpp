@@ -41,7 +41,6 @@ DESCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, clang::Com
         unsigned_flag(unsigned_flag),
         pass(0) {
     //stmt->dumpColor();
-    if(FindDataFlow::isFunction) stmt->dumpColor();
     TraverseStmt(stmt);
 }
 
@@ -860,6 +859,19 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
                 if(NodePeekVisitor::nodePeekVariableOperand(findArgument.getExpr())){
                     auto stateName = NodePeekVisitor::nodePeekVariableOperand(findArgument.getExpr())->getOperandName();
                     wait->setStateName(stateName);
+                    return false;
+                } return exitVisitor("Error for wait_event(event) #1", callLocationInfo);
+            } return exitVisitor("Error for wait_event(event) #2", callLocationInfo);
+
+        }else return exitVisitor("Unallowed number of param for wait_event(event)", callLocationInfo);
+    }else if(name == "notify_event"){
+        if (callExpr->getNumArgs() == 1) {
+            FindDataFlow findArgument(callExpr->getArg(0),module,ci, unsigned_flag);
+            if(findArgument.getExpr()){
+                if(NodePeekVisitor::nodePeekVariableOperand(findArgument.getExpr())){
+                    DESCAM_ASSERT(this->stmt = new Return(findArgument.getExpr()));
+                    //FIXME: Notify is only an expression, there should be a statement for this
+                    auto event_name = NodePeekVisitor::nodePeekVariableOperand(findArgument.getExpr())->getOperandName();
                     return false;
                 } return exitVisitor("Error for wait_event(event) #1", callLocationInfo);
             } return exitVisitor("Error for wait_event(event) #2", callLocationInfo);

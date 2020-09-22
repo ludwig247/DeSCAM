@@ -28,6 +28,7 @@ bool Regfile<T>::read(T &out) {
     if (head == tail){
         state = EMPTY;
     }
+    notify_event(reader_notify);
 //    reader_notify.notify();
     return true;
 }
@@ -35,7 +36,7 @@ bool Regfile<T>::read(T &out) {
 template<typename T>
 bool Regfile<T>::write(const T &val) {
     if(state == FULL){
-        wait(reader_notify);
+        wait_event(reader_notify);
     }
     //buffer[head] = val; //FIXME: translate variable index into the subsequent;
     buffer[0] =  ( (head == 0) ?  val: 1337);
@@ -46,6 +47,7 @@ bool Regfile<T>::write(const T &val) {
     if (head == tail){
         state = FULL;
     }
+    notify_event(writer_notify);
     //writer_notify.notify();
     return true;
 }
