@@ -212,8 +212,8 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;     <---
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;   <---
+	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
+	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 0;
 	at t_end: req_haddr = val_master_0_sig_haddr_at_t;
 	at t_end: req_hwdata = val_master_0_sig_hwdata_at_t;
