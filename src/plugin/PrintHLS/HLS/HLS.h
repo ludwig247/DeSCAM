@@ -42,14 +42,15 @@ namespace DESCAM { namespace HLSPlugin { namespace  HLS {
         std::shared_ptr<OptimizerHLS> optimizer;
         std::shared_ptr<PropertySuite> propertySuite;
 
-        void dataTypes();
-        void functions();
+        std::string dataTypes();
+
+        std::string functions();
+
         void operations();
         void interface();
         void registerVariables();
         void writeToOutput();
         void waitOperation();
-        void printDataType(const DataType *node);
 
         std::string getVariableReset(Variable* variable);
         std::string getDataSignalReset(DataSignal* dataSignal);

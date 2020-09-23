@@ -27,17 +27,16 @@ HLS::HLS(
         hlsOption(hlsOption) {
 }
 
+/*
+ * Main print function
+ */
 std::map<std::string, std::string> HLS::printModule() {
     std::map<std::string, std::string> pluginOutput;
 
-    ss.str("");
-    dataTypes();
-    pluginOutput.insert(std::make_pair(moduleName + "_data_Types.h", ss.str()));
+    pluginOutput.insert(std::make_pair(moduleName + "_data_types.h", dataTypes()));
 
     if (!currentModule->getFunctionMap().empty()) {
-        ss.str("");
-        functions();
-        pluginOutput.insert(std::make_pair(moduleName + "_functions.h", ss.str()));
+        pluginOutput.insert(std::make_pair(moduleName + "_functions.h", functions()));
     }
 
     ss.str("");
@@ -47,12 +46,136 @@ std::map<std::string, std::string> HLS::printModule() {
     return pluginOutput;
 }
 
+/*
+ * Print data type file
+ */
+std::string HLS::dataTypes() {
+
+    ss.str("");
+
+    ss << "#ifndef DATA_TYPES_H\n";
+    ss << "#define DATA_TYPES_H\n\n";
+    ss << "#include \"ap_int.h\"\n\n";
+
+    ss << "// States\n"
+       << "enum state {";
+    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); state++) {
+        ss << (*state)->getName();
+        if (std::next(state) != propertySuite->getStates().end()) {
+            ss << ", ";
+        }
+    }
+    ss << "};\n\n";
+
+    ss << "// Operations\n"
+       << "enum operation {";
+    const auto &operationProperties = propertySuite->getOperationProperties();
+    for (auto property = operationProperties.begin(); property != operationProperties.end(); property++) {
+        ss << (*property)->getName();
+        if (std::next(property) != operationProperties.end()) {
+            ss << ", ";
+        }
+    }
+    if ((hlsOption == HLSOption::SCO) && (!propertySuite->getWaitProperties().empty())) {
+        ss << ", state_wait";
+    }
+    ss << "};\n\n";
+
+    if (!optimizer->getEnumTypes().empty()) {
+        ss << "// Enum Types\n";
+    }
+    for (const auto& type : optimizer->getEnumTypes()) {
+        ss << "enum " << type->getName() << " {";
+        for (auto enumValue = type->getEnumValueMap().begin(); enumValue != type->getEnumValueMap().end(); enumValue++) {
+            ss << enumValue->first;
+            if (std::next(enumValue) != type->getEnumValueMap().end()) {
+                ss << ", ";
+            }
+        }
+        ss << "};\n\n";
+    }
+
+    if (!optimizer->getCompoundTypes().empty()) {
+        ss << "// Compound Types\n";
+    }
+    for (const auto &type : optimizer->getCompoundTypes()) {
+        ss << "struct " << type->getName() << " {\n";
+        for (const auto &subType : type->getSubVarMap()) {
+            ss << "\t" << Utilities::convertDataType(subType.second->getName()) << " " << subType.first << ";\n";
+        }
+        ss << "};\n\n";
+    }
+
+    if (!optimizer->getConstantVariables().empty()) {
+        ss << "// Constants\n";
+    }
+    for (const auto &var : optimizer->getConstantVariables()) {
+        ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
+           << " " << var->getFullName("_") << " = " << getVariableReset(var) << ";\n";
+    }
+
+    ss << "\n#endif //DATA_TYPES_H";
+
+    return ss.str();
+}
+
+/*
+ * Print function file
+ */
+std::string HLS::functions() {
+
+    ss.str("");
+
+    ss << "#ifndef FUNCTIONS_H\n";
+    ss << "#define FUNCTIONS_H\n\n";
+    ss << "#include \"ap_int.h\"\n";
+    ss << "#include \"" << moduleName << "_data_types.h\"\n\n";
+
+    // Function Prototypes
+    for (const auto &function : currentModule->getFunctionMap()) {
+        ss << Utilities::convertDataType(function.second->getReturnType()->getName()) << " "
+                 << function.second->getName() << "(";
+        auto parameterMap = function.second->getParamMap();
+        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); ++parameter) {
+            if (parameter->second->isCompoundType()) {
+                auto subVarList = parameter->second->getSubVarList();
+                for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
+                    ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
+                             << (*subVar)->getFullName("_");
+                    if (std::next(subVar) != subVarList.end()) {
+                        ss << ", ";
+                    }
+                }
+                if (std::next(parameter) != parameterMap.end()) {
+                    ss << ", ";
+                }
+            } else {
+                ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
+                         << parameter->first;
+                if (std::next(parameter) != parameterMap.end()) {
+                    ss << ", ";
+                }
+            }
+        }
+        ss << ");\n";
+    }
+
+    ss << "\n\n";
+    for (auto function : currentModule->getFunctionMap()) {
+        function.second->accept(*this);
+    }
+
+    ss << "#endif //FUNCTIONS_H";
+
+    return ss.str();
+}
+
 void HLS::operations() {
     ss << "#include \"ap_int.h\"\n";
     if (!currentModule->getFunctionMap().empty()) {
         ss << "#include \"" << moduleName << "_functions.h\"\n";
     }
-    ss << "#include \"" << moduleName << "_data_Types.h\"\n\n";
+    ss << "#include \"" << moduleName << "_data_types.h\"\n\n";
 
     ss << "void " << moduleName << "_operations(\n";
     interface();
@@ -251,119 +374,6 @@ void HLS::registerVariables() {
             ss << reg->getName() << "_reg" << ";\n";
         }
     }
-}
-
-void HLS::dataTypes() {
-    ss << "#ifndef DATA_TYPES_H\n";
-    ss << "#define DATA_TYPES_H\n\n";
-    ss << "#include \"ap_int.h\"\n\n";
-
-    ss << "// States\n"
-       << "enum state {";
-    for (auto state = propertySuite->getStates().begin(); state != propertySuite->getStates().end(); ++state) {
-        ss << (*state)->getName();
-        if (std::next(state) != propertySuite->getStates().end()) {
-            ss << ", ";
-        }
-    }
-    ss << "};\n\n";
-
-    ss << "// Operations\n"
-       << "enum operation {";
-    const auto &operationProperties = propertySuite->getOperationProperties();
-    for (auto property = operationProperties.begin(); property != operationProperties.end(); ++property) {
-        ss << (*property)->getName();
-        if (std::next(property) != operationProperties.end()) {
-            ss << ", ";
-        }
-    }
-    if ((hlsOption == HLSOption::SCO) && (!propertySuite->getWaitProperties().empty())) {
-        ss << ", state_wait";
-    }
-    ss << "};\n\n";
-
-    ss << "// Enum Types\n";
-    for (auto type : optimizer->getEnumTypes()) {
-        printDataType(type);
-    }
-
-    ss << "// Compound Types\n";
-    for (auto type : optimizer->getCompoundTypes()) {
-        printDataType(type);
-    }
-
-    ss << "\n// Constants\n";
-    for (const auto &var : optimizer->getConstantVariables()) {
-        ss << "const " << Utilities::convertDataType(var->getDataType()->getName())
-           << " " << var->getFullName("_") << " = " << getVariableReset(var) << ";\n";
-    }
-
-    ss << "\n#endif //DATA_TYPES_H";
-}
-
-void HLS::printDataType(const DataType *node) {
-    if (node->isEnumType()) {
-        if (node->getName().find("_SECTIONS") < node->getName().size())
-            return;
-        ss << "enum " << node->getName() << " {";
-        for (auto enumValue = node->getEnumValueMap().begin();
-             enumValue != node->getEnumValueMap().end(); ++enumValue) {
-            ss << enumValue->first;
-            if (std::next(enumValue) != node->getEnumValueMap().end())
-                ss << ", ";
-        }
-        ss << "};\n\n";
-    } else if (node->isCompoundType()) {
-        ss << "struct " << node->getName() << " {\n";
-        for (auto &subVar : node->getSubVarMap()) {
-            ss << "\t" << Utilities::convertDataType(subVar.second->getName()) << " " << subVar.first << ";\n";
-        }
-        ss << "};\n\n";
-    }
-}
-
-void HLS::functions() {
-    this->ss << "#ifndef FUNCTIONS_H\n";
-    this->ss << "#define FUNCTIONS_H\n\n";
-    this->ss << "#include \"ap_int.h\"\n";
-    this->ss << "#include \"" << moduleName << "_data_Types.h\"\n\n";
-
-    // Function Prototypes
-    auto functionMap = currentModule->getFunctionMap();
-    for (auto &function :functionMap) {
-        this->ss << Utilities::convertDataType(function.second->getReturnType()->getName()) << " "
-                 << function.second->getName() << "(";
-        auto parameterMap = function.second->getParamMap();
-        for (auto parameter = parameterMap.begin(); parameter != parameterMap.end(); ++parameter) {
-            if (parameter->second->isCompoundType()) {
-                auto subVarList = parameter->second->getSubVarList();
-                for (auto subVar = subVarList.begin(); subVar != subVarList.end(); ++subVar) {
-                    this->ss << Utilities::convertDataType((*subVar)->getDataType()->getName()) << " "
-                             << (*subVar)->getFullName("_");
-                    if (std::next(subVar) != subVarList.end()) {
-                        this->ss << ", ";
-                    }
-                }
-                if (std::next(parameter) != parameterMap.end()) {
-                    this->ss << ", ";
-                }
-            } else {
-                this->ss << Utilities::convertDataType(parameter->second->getDataType()->getName()) << " "
-                         << parameter->first;
-                if (std::next(parameter) != parameterMap.end()) {
-                    this->ss << ", ";
-                }
-            }
-        }
-        this->ss << ");\n";
-    }
-
-    this->ss << "\n\n";
-    for (auto function : functionMap) {
-        function.second->accept(*this);
-    }
-
-    this->ss << "#endif //FUNCTIONS_H";
 }
 
 void HLS::visit(Function &node) {
