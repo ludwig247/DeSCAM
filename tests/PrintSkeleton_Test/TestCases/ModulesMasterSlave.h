@@ -9,6 +9,7 @@
 //#include "Interfaces.h"
 #include "../../../example/Interfaces/Interfaces.h"
 
+#include "Types.h"
 
 
 struct TestMasterSlave0 : public sc_module {

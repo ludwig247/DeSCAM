@@ -9,29 +9,7 @@
 #include "systemc.h"
 #include "../../../example/Interfaces/Interfaces.h"
 
-
-
-enum Mode {
-    READ, WRITE
-};
-
-struct CompoundType {
-    int x;
-    bool y;
-    Mode mode;
-};
-
-
-
-struct record_t{int x; unsigned int y;};
-
-struct global_compound_type {
-    unsigned w;
-    bool b;
-};
-
-enum global_enum{A,B};
-enum class global_enum_class{M,N};
+#include "Types.h"
 
 
 struct GlobalLocal : public sc_module {
