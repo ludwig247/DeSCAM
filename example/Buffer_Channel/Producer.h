@@ -7,7 +7,7 @@ SC_MODULE(Producer){
 
     int id;
     float random;
-    float limit = 0.75;
+    float limit = 0.25;
 
     void drive_out(){
         static int number_of_producers;
@@ -21,7 +21,13 @@ SC_MODULE(Producer){
             }
             if (cnt > 10*(id+1)) break;
             //Produce Values and write them to the Input of the Buffer_Channel
-            out->write(cnt++);
+            if(id == 0) {
+                out->write0(cnt++);
+            } else if (id == 1){
+                out->write1(cnt++);
+            } else{
+                out->write2(cnt++);
+            }
             std::cout << "At " << sc_time_stamp() << " Producer " << id << " sent: " << cnt-1 << endl;
             insert_state();
         }

@@ -7,7 +7,7 @@ SC_MODULE(Consumer){
 
     int value = 0;
     float random;
-    float limit = 0.25;
+    float limit = 0.75;
     int value_old = 0;
 
     void check_inp(){
@@ -20,7 +20,7 @@ SC_MODULE(Consumer){
                 random = ((float) rand()) / (float) RAND_MAX;
             }
             inp->read(value);
-            //sc_assert(value == value_old + 1);
+            //sc_assert(value == value_old + 10);
             value_old = value;
             std::cout << "At " << sc_time_stamp() << " Consumer received: " << value << endl;
             insert_state();

@@ -392,16 +392,28 @@ public:
         states->addEnumValue("EMPTY");
         states->addEnumValue("FILLED");
         states->addEnumValue("FULL");
-        auto state = new Variable("state", states);
+        auto state0 = new Variable("state0", states);
+        auto state1 = new Variable("state1", states);
+        auto state2 = new Variable("state2", states);
+
 
         auto array = new DataType("int_8");
         DataTypes::addDataType(array);
         array->addArray(DataTypes::getDataType("int"),8);
-        auto buffer = new Variable("buffer", array);
-//        auto size = new Variable("size", DataTypes::getDataType("unsigned"));
+        auto buffer0 = new Variable("buffer0", array);
+        auto buffer1 = new Variable("buffer1", array);
+        auto buffer2 = new Variable("buffer2", array);
+
+        //        auto size = new Variable("size", DataTypes::getDataType("unsigned"));
         auto size = new IntegerValue(8);
-        auto head = new Variable("head", DataTypes::getDataType("int"));
-        auto tail = new Variable("tail", DataTypes::getDataType("int"));
+        auto head0 = new Variable("head0", DataTypes::getDataType("int"));
+        auto tail0 = new Variable("tail0", DataTypes::getDataType("int"));
+        auto head1 = new Variable("head1", DataTypes::getDataType("int"));
+        auto tail1 = new Variable("tail1", DataTypes::getDataType("int"));
+        auto head2 = new Variable("head2", DataTypes::getDataType("int"));
+        auto tail2 = new Variable("tail2", DataTypes::getDataType("int"));
+
+        auto next_read = new Variable("next_read",DataTypes::getDataType("int"));
 
         auto out = new Port("out",new Interface("blocking","out"),DataTypes::getDataType(("int")));
         auto val_0 = new Port("val_0",new Interface("blocking","in"), DataTypes::getDataType("int"));
@@ -409,94 +421,257 @@ public:
         auto val_2 = new Port("val_2",new Interface("blocking","in"), DataTypes::getDataType("int"));
 
         //add Variables to Module
-        module->addVariable(state);
-        module->addVariable(buffer);
+        module->addVariable(state0);
+        module->addVariable(buffer0);
         //module->addVariable(size);
-        module->addVariable(head);
-        module->addVariable(tail);
+        module->addVariable(head0);
+        module->addVariable(tail0);
+        module->addVariable(state1);
+        module->addVariable(buffer1);
+        module->addVariable(head1);
+        module->addVariable(tail1);
+        module->addVariable(state2);
+        module->addVariable(buffer2);
+        module->addVariable(head2);
+        module->addVariable(tail2);
+        module->addVariable(next_read);
+
         module->addPort(out);
         module->addPort(val_0);
         module->addPort(val_1);
         module->addPort(val_2);
 
         //Read Expressions/Assignments
+        //if(next_read == 0)
+        auto next_read_eq_0 = new Relational(new VariableOperand(module->getVariable("next_read")),"==",new IntegerValue(0));
+        auto if_next_read_eq_0 = new If(next_read_eq_0);
         //while(state == EMPTY)
         auto empty_enum = new EnumValue("EMPTY", states);
-        auto state_eq_empty = new Relational(new VariableOperand(module->getVariable("state")),"==",empty_enum);
-        auto check_state_empty = new If(state_eq_empty);
+        auto state0_eq_empty = new Relational(new VariableOperand(module->getVariable("state0")),"==",empty_enum);
+        auto check_state0_empty = new If(state0_eq_empty);
 
-        //wait(writer_notify)
-        auto writer_wait = new Wait("writer_notify");
-        //out = buffer.at(tail)
+        //wait(writer_notify0)
+        auto writer_wait0 = new Wait("writer_notify0");
+        //out = buffer0.at(tail0)
         auto port_out = new DataSignalOperand(out->getDataSignal());
-        auto buffer_at_tail = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new VariableOperand(module->getVariable(("tail"))));
-        auto out_assign_buffer_at_tail = new Assignment(port_out,buffer_at_tail);
-        //tail = (tail+1)%size
-        auto tail_increment = new Arithmetic(new VariableOperand(module->getVariable("tail")),"+",new IntegerValue(1));
-        auto tail_modulo_increment = new Arithmetic(tail_increment,"%",size);
-        auto tail_assign_tail_modulo_increment= new Assignment(new VariableOperand(module->getVariable("tail")),tail_modulo_increment);
+        auto buffer0_at_tail0 = new ArrayOperand(new VariableOperand(module->getVariable("buffer0")),new VariableOperand(module->getVariable(("tail0"))));
+        auto out_assign_buffer0_at_tail0 = new Assignment(port_out,buffer0_at_tail0);
+        //tail0 = (tail0+1)%size
+        auto tail0_increment = new Arithmetic(new VariableOperand(module->getVariable("tail0")),"+",new IntegerValue(1));
+        auto tail0_modulo_increment = new Arithmetic(tail0_increment,"%",size);
+        auto tail0_assign_tail0_modulo_increment= new Assignment(new VariableOperand(module->getVariable("tail0")),tail0_modulo_increment);
         //state = FILLED
         auto filled_enum = new EnumValue("FILLED",states);
-        auto state_assign_filled = new Assignment(new VariableOperand(module->getVariable("state")),filled_enum);
+        auto state0_assign_filled = new Assignment(new VariableOperand(module->getVariable("state0")),filled_enum);
         //if(head == tail)
-        auto head_eq_tail = new Relational(new VariableOperand(module->getVariable("head")),"==",new VariableOperand(module->getVariable("tail")));
-        auto if_head_eq_tail = new If(head_eq_tail);
+        auto head0_eq_tail0 = new Relational(new VariableOperand(module->getVariable("head0")),"==",new VariableOperand(module->getVariable("tail0")));
+        auto if_head0_eq_tail0 = new If(head0_eq_tail0);
         //state = EMPTY
-        auto state_assign_empty = new Assignment(new VariableOperand(module->getVariable("state")),empty_enum);
+        auto state0_assign_empty = new Assignment(new VariableOperand(module->getVariable("state0")),empty_enum);
 
-        auto noti = new Notify("Debug");
-        auto noticfg = new CfgNode(noti);
-        auto ret = new Return("Debug");
+        auto noti0 = new Notify("Debug0");
+        auto noticfg0 = new CfgNode(noti0);
+        auto ret0 = new Return("Debug0");
         //reader_notify.notify()
-        auto notify_reader = new Notify("reader_notify");
+        auto notify_reader0 = new Notify("reader_notify0");
+        //next_read++
+        auto next_read_increment = new Arithmetic(new VariableOperand(module->getVariable("next_read")),"+",new IntegerValue(1));
+        auto next_read_assign_increment = new Assignment(new VariableOperand(module->getVariable("next_read")),next_read_increment);
+
+        //else if(next_read == 1)
+        auto next_read_eq_1 = new Relational(new VariableOperand(module->getVariable("next_read")),"==",new IntegerValue(1));
+        auto if_next_read_eq_1 = new If(next_read_eq_1);
+        //while(state == EMPTY)
+        auto state1_eq_empty = new Relational(new VariableOperand(module->getVariable("state1")),"==",empty_enum);
+        auto check_state1_empty = new If(state1_eq_empty);
+
+        //wait(writer_notify1)
+        auto writer_wait1 = new Wait("writer_notify1");
+        //out = buffer1.at(tail1)
+        auto buffer1_at_tail1 = new ArrayOperand(new VariableOperand(module->getVariable("buffer1")),new VariableOperand(module->getVariable(("tail1"))));
+        auto out_assign_buffer1_at_tail1 = new Assignment(port_out,buffer1_at_tail1);
+        //tail1 = (tail1+1)%size
+        auto tail1_increment = new Arithmetic(new VariableOperand(module->getVariable("tail1")),"+",new IntegerValue(1));
+        auto tail1_modulo_increment = new Arithmetic(tail1_increment,"%",size);
+        auto tail1_assign_tail1_modulo_increment= new Assignment(new VariableOperand(module->getVariable("tail1")),tail1_modulo_increment);
+        //state = FILLED
+        auto state1_assign_filled = new Assignment(new VariableOperand(module->getVariable("state1")),filled_enum);
+        //if(head == tail)
+        auto head1_eq_tail1 = new Relational(new VariableOperand(module->getVariable("head1")),"==",new VariableOperand(module->getVariable("tail1")));
+        auto if_head1_eq_tail1 = new If(head1_eq_tail1);
+        //state = EMPTY
+        auto state1_assign_empty = new Assignment(new VariableOperand(module->getVariable("state1")),empty_enum);
+
+        auto noti1 = new Notify("Debug1");
+        auto noticfg1 = new CfgNode(noti1);
+        auto ret1 = new Return("Debug1");
+        //reader_notify.notify()
+        auto notify_reader1 = new Notify("reader_notify1");
+        //next_read++
+        //already exists
+//        auto next_read_increment = new Arithmetic(new VariableOperand(module->getVariable("next_read")),"+",new IntegerValue(1));
+//        auto next_read_assign_increment = new Assignment(new VariableOperand(module->getVariable("next_read")),next_read_increment);
+
+        //else
+        //while(state == EMPTY)
+        auto state2_eq_empty = new Relational(new VariableOperand(module->getVariable("state2")),"==",empty_enum);
+        auto check_state2_empty = new If(state2_eq_empty);
+
+        //wait(writer_notify2)
+        auto writer_wait2 = new Wait("writer_notify2");
+        //out = buffer2.at(tail2)
+        auto buffer2_at_tail2 = new ArrayOperand(new VariableOperand(module->getVariable("buffer2")),new VariableOperand(module->getVariable(("tail2"))));
+        auto out_assign_buffer2_at_tail2 = new Assignment(port_out,buffer2_at_tail2);
+        //tail2 = (tail2+1)%size
+        auto tail2_increment = new Arithmetic(new VariableOperand(module->getVariable("tail2")),"+",new IntegerValue(1));
+        auto tail2_modulo_increment = new Arithmetic(tail2_increment,"%",size);
+        auto tail2_assign_tail2_modulo_increment= new Assignment(new VariableOperand(module->getVariable("tail2")),tail2_modulo_increment);
+        //state = FILLED
+        auto state2_assign_filled = new Assignment(new VariableOperand(module->getVariable("state2")),filled_enum);
+        //if(head == tail)
+        auto head2_eq_tail2 = new Relational(new VariableOperand(module->getVariable("head2")),"==",new VariableOperand(module->getVariable("tail2")));
+        auto if_head2_eq_tail2 = new If(head2_eq_tail2);
+        //state = EMPTY
+        auto state2_assign_empty = new Assignment(new VariableOperand(module->getVariable("state2")),empty_enum);
+
+        auto noti2 = new Notify("Debug2");
+        auto noticfg2 = new CfgNode(noti2);
+        auto ret2 = new Return("Debug2");
+        //reader_notify.notify()
+        auto notify_reader2 = new Notify("reader_notify2");
+        //next_read = 0;
+        auto next_read_assign_0 = new Assignment(new VariableOperand(module->getVariable("next_read")),new IntegerValue(0));
         //return
         auto read_return = new Return("read_return");
 
-        //Write Expressions/Assignments
-        //while (state == FULL)
+        //Write0 Expressions/Assignments
+        //while (state0 == FULL)
         auto full_enum = new EnumValue("FULL", states);
-        auto state_eq_full = new Relational(new VariableOperand(module->getVariable("state")),"==",full_enum);
-        auto check_state_full = new If(state_eq_full);
-        //wait(reader_notify);
-        auto reader_wait = new Wait("reader_notify");
-        //buffer.at(head) = val;
-        auto buffer_at_head = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new VariableOperand(head));
-        auto port_val_0 = new DataSignalOperand(val_0->getDataSignal());
-        auto buffer_at_head_assign_val_0 = new Assignment(buffer_at_head, port_val_0);
-        auto port_val_1 = new DataSignalOperand(val_1->getDataSignal());
-        auto buffer_at_head_assign_val_1 = new Assignment(buffer_at_head, port_val_1);
-        auto port_val_2 = new DataSignalOperand(val_2->getDataSignal());
-        auto buffer_at_head_assign_val_2 = new Assignment(buffer_at_head, port_val_2);
-        //head = (head+1)%size
-        auto head_increment = new Arithmetic(new VariableOperand(module->getVariable("head")),"+",new IntegerValue(1));
-        auto head_modulo_increment = new Arithmetic(head_increment,"%",size);
-        auto head_assign_head_modulo_increment = new Assignment(new VariableOperand(module->getVariable("head")),head_modulo_increment);
+        auto state0_eq_full = new Relational(new VariableOperand(module->getVariable("state0")),"==",full_enum);
+        auto check_state0_full = new If(state0_eq_full);
+        //wait(reader_notify0);
+        auto reader_wait0 = new Wait("reader_notify0");
+        //buffer0.at(head0) = val;
+        auto buffer0_at_head0 = new ArrayOperand(new VariableOperand(module->getVariable("buffer0")),new VariableOperand(head0));
+        auto port0_val_0 = new DataSignalOperand(val_0->getDataSignal());
+        auto buffer0_at_head0_assign_val_0 = new Assignment(buffer0_at_head0, port0_val_0);
+
+        //head0 = (head0+1)%size
+        auto head0_increment = new Arithmetic(new VariableOperand(module->getVariable("head0")),"+",new IntegerValue(1));
+        auto head0_modulo_increment = new Arithmetic(head0_increment,"%",size);
+        auto head0_assign_head0_modulo_increment = new Assignment(new VariableOperand(module->getVariable("head0")),head0_modulo_increment);
         //state = FILLED
         //already exists
-        //if (head==tail)
+        //if (head0==tail0)
         //already exists
-        //state = FULL
-        auto state_assign_full = new Assignment(new VariableOperand(module->getVariable("state")),full_enum);
+        //state0 = FULL
+        auto state0_assign_full = new Assignment(new VariableOperand(module->getVariable("state0")),full_enum);
 
         auto noti3 = new Notify("Debug3");
         auto noti3cfg = new CfgNode(noti3);
         auto ret3 = new Return("Debug3");
 
         //writer_notify.notify()
-        auto notify_writer = new Notify("writer_notify");
+        auto notify_writer0 = new Notify("writer_notify0");
         //return
-        auto write_return = new Return("write_return");
+        auto write_return0 = new Return("write_return0");
+
+        //Write1 Expressions/Assignments
+        //while (state1 == FULL)
+        auto state1_eq_full = new Relational(new VariableOperand(module->getVariable("state1")),"==",full_enum);
+        auto check_state1_full = new If(state1_eq_full);
+        //wait(reader_notify1);
+        auto reader_wait1 = new Wait("reader_notify1");
+        //buffer1.at(head1) = val;
+        auto buffer1_at_head1 = new ArrayOperand(new VariableOperand(module->getVariable("buffer1")),new VariableOperand(head1));
+        auto port1_val_1 = new DataSignalOperand(val_1->getDataSignal());
+        auto buffer1_at_head1_assign_val_1 = new Assignment(buffer1_at_head1, port1_val_1);
+
+        //head1 = (head1+1)%size
+        auto head1_increment = new Arithmetic(new VariableOperand(module->getVariable("head1")),"+",new IntegerValue(1));
+        auto head1_modulo_increment = new Arithmetic(head1_increment,"%",size);
+        auto head1_assign_head1_modulo_increment = new Assignment(new VariableOperand(module->getVariable("head1")),head1_modulo_increment);
+        //state = FILLED
+        //already exists
+        //if (head1==tail1)
+        //already exists
+        //state1 = FULL
+        auto state1_assign_full = new Assignment(new VariableOperand(module->getVariable("state1")),full_enum);
+
+        auto noti4 = new Notify("Debug4");
+        auto noti4cfg = new CfgNode(noti4);
+        auto ret4 = new Return("Debug4");
+
+        //writer_notify.notify()
+        auto notify_writer1 = new Notify("writer_notify1");
+        //return
+        auto write_return1 = new Return("write_return1");
+
+        //Write2 Expressions/Assignments
+        //while (state2 == FULL)
+        auto state2_eq_full = new Relational(new VariableOperand(module->getVariable("state2")),"==",full_enum);
+        auto check_state2_full = new If(state2_eq_full);
+        //wait(reader_notify2);
+        auto reader_wait2 = new Wait("reader_notify2");
+        //buffer2.at(head2) = val;
+        auto buffer2_at_head2 = new ArrayOperand(new VariableOperand(module->getVariable("buffer2")),new VariableOperand(head2));
+        auto port2_val_2 = new DataSignalOperand(val_2->getDataSignal());
+        auto buffer2_at_head2_assign_val_2 = new Assignment(buffer2_at_head2, port2_val_2);
+
+        //head2 = (head2+1)%size
+        auto head2_increment = new Arithmetic(new VariableOperand(module->getVariable("head2")),"+",new IntegerValue(1));
+        auto head2_modulo_increment = new Arithmetic(head2_increment,"%",size);
+        auto head2_assign_head2_modulo_increment = new Assignment(new VariableOperand(module->getVariable("head2")),head2_modulo_increment);
+        //state = FILLED
+        //already exists
+        //if (head2==tail2)
+        //already exists
+        //state2 = FULL
+        auto state2_assign_full = new Assignment(new VariableOperand(module->getVariable("state2")),full_enum);
+
+        auto noti5 = new Notify("Debug5");
+        auto noti5cfg = new CfgNode(noti5);
+        auto ret5 = new Return("Debug5");
+
+        //writer_notify.notify()
+        auto notify_writer2 = new Notify("writer_notify2");
+        //return
+        auto write_return2 = new Return("write_return2");
 
         //CFG Nodes Read
-        auto state_equal_empty = new CfgNode(check_state_empty);
-        auto read_wait = new CfgNode(writer_wait);
-        auto read_value = new CfgNode(out_assign_buffer_at_tail);
-        auto tail_incr = new CfgNode(tail_assign_tail_modulo_increment);
-        auto state_filled_read = new CfgNode(state_assign_filled);
-        auto head_equal_tail_read = new CfgNode(if_head_eq_tail);
-        auto state_empty = new CfgNode(state_assign_empty);
-        auto reader_noti = new CfgNode(notify_reader);
+        auto check_next_read_eq_0 = new CfgNode(if_next_read_eq_0);
+        auto state0_equal_empty = new CfgNode(check_state0_empty);
+        auto read_wait0 = new CfgNode(writer_wait0);
+        auto read_value0 = new CfgNode(out_assign_buffer0_at_tail0);
+        auto tail0_incr = new CfgNode(tail0_assign_tail0_modulo_increment);
+        auto state0_filled_read = new CfgNode(state0_assign_filled);
+        auto head0_equal_tail0_read = new CfgNode(if_head0_eq_tail0);
+        auto state0_empty = new CfgNode(state0_assign_empty);
+        auto reader_noti0 = new CfgNode(notify_reader0);
+        auto next_read_incr0 = new CfgNode(next_read_assign_increment);
+
+        auto check_next_read_eq_1 = new CfgNode(if_next_read_eq_1);
+        auto state1_equal_empty = new CfgNode(check_state1_empty);
+        auto read_wait1 = new CfgNode(writer_wait1);
+        auto read_value1 = new CfgNode(out_assign_buffer1_at_tail1);
+        auto tail1_incr = new CfgNode(tail1_assign_tail1_modulo_increment);
+        auto state1_filled_read = new CfgNode(state1_assign_filled);
+        auto head1_equal_tail1_read = new CfgNode(if_head1_eq_tail1);
+        auto state1_empty = new CfgNode(state1_assign_empty);
+        auto reader_noti1 = new CfgNode(notify_reader1);
+        auto next_read_incr1 = new CfgNode(next_read_assign_increment);
+
+        auto state2_equal_empty = new CfgNode(check_state2_empty);
+        auto read_wait2 = new CfgNode(writer_wait2);
+        auto read_value2 = new CfgNode(out_assign_buffer2_at_tail2);
+        auto tail2_incr = new CfgNode(tail2_assign_tail2_modulo_increment);
+        auto state2_filled_read = new CfgNode(state2_assign_filled);
+        auto head2_equal_tail2_read = new CfgNode(if_head2_eq_tail2);
+        auto state2_empty = new CfgNode(state2_assign_empty);
+        auto reader_noti2 = new CfgNode(notify_reader2);
+        auto next_read_reset = new CfgNode(next_read_assign_0);
         auto return_read = new CfgNode(read_return);
+
 
         //Add Nodes to controFlowMap
         controlFlowMapRead.insert(std::make_pair(state_equal_empty->getId(),state_equal_empty));
