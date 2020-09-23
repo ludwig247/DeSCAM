@@ -310,6 +310,7 @@ TEST_P(PrintSkeletonParam, LocalTypesVHDL) {
 TEST_P(PrintSkeletonParam, LocalTypesSV) {
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
+    ASSERT_TRUE(results.size() != 0);
     for (auto res: results) {
         DESCAM::Module *module = res;
         ASSERT_NE(module, nullptr) << "Module not found";
@@ -336,6 +337,7 @@ TEST_P(PrintSkeletonParam, LocalTypesSV) {
 TEST_P(PrintSkeletonParam, ModuleVHDL) {
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+    ASSERT_TRUE(results.size() != 0);
     for (auto res: results) {
         DESCAM::Module *module = res;
         ASSERT_NE(module, nullptr) << "Module not found";
@@ -360,7 +362,8 @@ TEST_P(PrintSkeletonParam, ModuleVHDL) {
 TEST_P(PrintSkeletonParam, ModuleSV) {
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
-        for (auto res: results) {
+    ASSERT_TRUE(results.size() != 0);
+    for (auto res: results) {
             DESCAM::Module *module = res;
             ASSERT_NE(module, nullptr) << "Module not found";
             std::cout << "Instance: " << module->getName() << std::endl;

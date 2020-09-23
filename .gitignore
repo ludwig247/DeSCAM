@@ -61,7 +61,6 @@ example/RISCV_synthesis/riscv_tailoring/formal_verification/work/
 example/RISCV_synthesis/riscv_tailoring/synthesis_flow/work/
 /tests/Print_ITL_Tests/tests.list
 /tests/Print_ITL_Tests/functionality_tests.list
-/tests/PrintSkeleton_Test/TestCases/tests.h
 /tests/Compile_ESL_Tests/error.txt
 /tests/Compile_ESL_Tests/error_file
 /tests/Compile_ESL_Tests/error.json
