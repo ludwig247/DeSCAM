@@ -90,24 +90,29 @@ std::string VHDLWrapper::printTypes() {
  * Prints operation subtype for types package
  */
 void VHDLWrapper::operationEnum(std::stringstream &ss) {
-    // Calculate bit vector size for operation enum
-    int vectorSize = ceil(log2(propertySuite->getOperationProperties().size()));
-    if (vectorSize == 0) {
-        vectorSize++;
-    }
+
+    const auto waitPropertiesUsed = !propertySuite->getWaitProperties().empty();
+
+    auto numberOfProperties = propertySuite->getOperationProperties().size();
+    numberOfProperties += (waitPropertiesUsed ? 1 : 0);
+    int vectorSize = ceil(log2(numberOfProperties));
+    vectorSize += ((vectorSize == 0) ? 1 : 0);
+
     std::string opTypeName = propertySuite->getName() + "_operation_t";
 
     ss << "\t-- Operations\n"
        << "\tsubtype " << opTypeName << " is std_logic_vector("
        << std::to_string(vectorSize - 1) << " downto 0);\n";
-    const auto &operations = propertySuite->getOperationProperties();
     int i = 0;
-    for (const auto &op : operations) {
+    for (const auto &op : propertySuite->getOperationProperties()) {
         ss << "\tconstant op_" << op->getName() << " : " << opTypeName << " := \""
            << Utilities::intToBinary(i, vectorSize) << "\";\n";
         i++;
     }
-    ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n\n";
+    if (waitPropertiesUsed) {
+        ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n";
+    }
+    ss << "\n";
 }
 
 /*

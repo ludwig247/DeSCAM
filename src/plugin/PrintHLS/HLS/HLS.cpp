@@ -79,7 +79,7 @@ void HLS::operations() {
         }
         ss << "\t\tbreak;\n";
     }
-    if (hlsOption == HLSOption::SCO) {
+    if ((hlsOption == HLSOption::SCO) && (!propertySuite->getWaitProperties().empty())) {
         waitOperation();
     }
     ss << "\t}\n";
@@ -277,7 +277,7 @@ void HLS::dataTypes() {
             ss << ", ";
         }
     }
-    if (hlsOption == HLSOption::SCO) {
+    if ((hlsOption == HLSOption::SCO) && (!propertySuite->getWaitProperties().empty())) {
         ss << ", state_wait";
     }
     ss << "};\n\n";
