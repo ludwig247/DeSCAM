@@ -12,9 +12,8 @@
 #include <PluginAction.h>
 #include <ModelGlobal.h>
 #include <fstream>
-#include <iostream>
-#include "/import/home/ludwig/DeSCAM/src/global/Logger/ConsoleSink.h"
-#include "/import/home/ludwig/DeSCAM/src/global/Logger/FileSink.h"
+#include "../../src/global/Logger/ConsoleSink.h"
+#include "../../src/global/Logger/FileSink.h"
 
 #include <PrintSkeleton/PrintSkeleton.h>
 
@@ -23,21 +22,10 @@ struct Param
 {
     std::string Name;
     std::string FilePath;
-//    DESCAM::Module * result;
     friend std::ostream& operator<<(std::ostream& os, const Param& bar) {
         return os << bar.FilePath;
     }
 };
-
-//static std::vector<DESCAM::Module *> parameter() {
-//
-//    std::vector<DESCAM::Module *> result;
-//    for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
-//        result.push_back(module.second);
-//    }
-//    std::cout << "Number of modules: " << result.size() << std::endl;
-//    return result;
-//}
 
 static std::vector<Param> parameter(const char* header_list) {
 
@@ -76,7 +64,7 @@ static std::vector<Param> parameter(const char* header_list) {
             }
             else  includes[i].Name = test_name;
             param_names.insert(includes[i].Name);
-//            filepaths.insert(line);
+            filepaths.insert(line);
 
             i++;
         }
@@ -121,11 +109,13 @@ public:
         //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
     DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0], commandLineArgumentsArray[1]);
 
+
     // write log messages to all sinks
     if (DESCAM::Logger::hasFeedback()) {
-        auto foo = ModelGlobal::getModel();
-        DESCAM::Logger::log();
-        DESCAM::Logger::clear();
+        for(auto foo: ModelGlobal::getModel()->getModules()) {
+            DESCAM::Logger::log();
+            ASSERT_FALSE(DESCAM::Logger::hasFeedback() == true) << foo.second->getName()<< " has errors: check logger";
+        }
     }
 
      for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
@@ -172,6 +162,7 @@ public:
         std::cout << "" << std::endl;
     }
     void TearDown() override {
+        DESCAM::Logger::clear();
         DESCAM::ModelGlobal::reset();
     }
 protected:    std::vector<DESCAM::Module *> results;
@@ -237,7 +228,7 @@ protected:
 
 
 INSTANTIATE_TEST_CASE_P(Basic, PrintSkeletonParam,
-        ::testing::ValuesIn(parameter(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/Tests.list")),
+        ::testing::ValuesIn(parameter(SCAM_HOME"/tests/PrintSkeleton_Test/Tests.list")),
         ::PrintSkeletonParam::PrintToStringParamName());
 
 

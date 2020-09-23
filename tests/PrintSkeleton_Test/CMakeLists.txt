@@ -25,5 +25,12 @@ endforeach()
 
 #configure_file (
 #        "${CMAKE_SOURCE_DIR}/example/add_example/templates/tests.h.in"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/tests.h"
+#        "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Tests.list"
 #)
+
+file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/*.h")
+#message(STATUS "${FUNC_TESTS}")
+list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)
+list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/tests.h)
+string(REPLACE ";" "\n" FUNC_TESTS "${FUNC_TESTS}")
+file(WRITE Tests.list "${FUNC_TESTS}")
