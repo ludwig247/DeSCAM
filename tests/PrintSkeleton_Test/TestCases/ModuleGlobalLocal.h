@@ -7,7 +7,8 @@
 
 
 #include "systemc.h"
-#include "../Interfaces/Interfaces.h"
+#include "../../../example/Interfaces/Interfaces.h"
+
 
 
 enum Mode {
