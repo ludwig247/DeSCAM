@@ -8,6 +8,7 @@
 #include "systemc.h"
 #include "../Interfaces/Interfaces.h"
 
+#include "Types.h"
 
 struct TestBasic0 : public sc_module {
     //Sections

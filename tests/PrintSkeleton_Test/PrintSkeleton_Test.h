@@ -13,6 +13,8 @@
 #include <ModelGlobal.h>
 #include <fstream>
 #include <iostream>
+#include "/import/home/ludwig/DeSCAM/src/global/Logger/ConsoleSink.h"
+#include "/import/home/ludwig/DeSCAM/src/global/Logger/FileSink.h"
 
 #include <PrintSkeleton/PrintSkeleton.h>
 
@@ -105,17 +107,28 @@ public:
         commandLineArgumentsArray[0] = (bin.c_str());
         commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
 
-
+            /* Initialize logger */
+    //setting sinks
+    std::shared_ptr<LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
+    consoleSink->setFormatOption(LoggerFormatter::FormatOption::TEXT);
+    DESCAM::Logger::addSink(consoleSink);
+    std::shared_ptr<LoggerSink> fileSink = std::make_shared<DESCAM::FileSink>(std::string(SCAM_HOME"/bin/LOGS"),true);
+    fileSink->setFormatOption(LoggerFormatter::FormatOption::JSON);
+    DESCAM::Logger::addSink(fileSink);
+    //setting filtering options
+    DESCAM::Logger::setFilteringOptions(std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});
+    DESCAM::Logger::setPrintDecorativeFrames();
         //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-        try{DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
-                                             commandLineArgumentsArray[1]);}
-        catch(FatalError & e){}
+    DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0], commandLineArgumentsArray[1]);
 
+    // write log messages to all sinks
+    if (DESCAM::Logger::hasFeedback()) {
+        auto foo = ModelGlobal::getModel();
+        DESCAM::Logger::log();
+        DESCAM::Logger::clear();
+    }
 
-
-
-
-        for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
+     for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
 //            results.push_back(module.second);
             {
                 CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
@@ -281,6 +294,7 @@ TEST_P(PrintSkeletonParam, LocalTypesVHDL) {
 
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
     CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+
     ASSERT_TRUE(results.size() != 0);
     for (auto res: results) {
         DESCAM::Module *module = res;

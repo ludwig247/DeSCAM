@@ -121,7 +121,9 @@ z3::expr DESCAM::AssignmentOptimizer2::lhsToExpr(DESCAM::Expr *expr, bool bitvec
         else return context.int_const("result"); //TODO: is this correct?
     }
         //Case: Unknown
-    else TERMINATE("Type " + expr->getDataType()->getName() + " is not supported for assignment");
+    else {
+        TERMINATE("Type " + expr->getDataType()->getName() + " is not supported for assignment");
+    }
 }
 
 DESCAM::Assignment * DESCAM::AssignmentOptimizer2::optimizeAssignment(DESCAM::Assignment *assignment) {
