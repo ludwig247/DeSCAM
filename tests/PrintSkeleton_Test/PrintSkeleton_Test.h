@@ -111,9 +111,7 @@ public:
                                              commandLineArgumentsArray[1]);}
         catch(FatalError & e){}
 
-        for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
-            results.push_back(module.second);
-        }
+
 
 
 
@@ -154,11 +152,14 @@ public:
                 functionString.close();
             }
         }
+        for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
+            results.push_back(module.second);
+        }
         std::cout << "Number of modules: " << results.size() << std::endl;
         std::cout << "" << std::endl;
     }
     void TearDown() override {
-//        DESCAM::ModelGlobal::reset();
+        DESCAM::ModelGlobal::reset();
     }
 protected:    std::vector<DESCAM::Module *> results;
 };
@@ -262,15 +263,17 @@ TEST_F(PrintSkeletonGlobal, GlobalTypesSV) {
     std::stringstream buffer;
     std::string content((std::istreambuf_iterator<char>(ifs)),
                         (std::istreambuf_iterator<char>()));
-    while (content[content.length()-1] == '\n') {
-        content.erase(content.length()-1);
+    while (content[content.length() - 1] == '\n') {
+        content.erase(content.length() - 1);
     }
 
     PrintSkeleton printSkeleton;
     std::pair<std::string, std::string> result;
     ASSERT_NO_THROW(result = printSkeleton.printGlobalTypes(DESCAM::ModelGlobal::getModel()));
     //ASSERT_EQ(content, result.second) << "Test for types " << GetParam()->getName() << "_types failed\n\n" << result.second;
-    ASSERT_EQ(content, result.second) << "Test for types " << DESCAM::ModelGlobal::getModel()->getName() << " failed\n\n" << result.second;
+    ASSERT_EQ(content, result.second)
+                                << "Test for types " << DESCAM::ModelGlobal::getModel()->getName() << " failed\n\n"
+                                << result.second;
     std::cout << "" << std::endl;
 }
     
@@ -330,52 +333,56 @@ TEST_P(PrintSkeletonParam, LocalTypesSV) {
     }
 }
 
-//TEST_P(PrintSkeleton_Test, ModuleVHDL) {
-//    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
-//    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
-//    ASSERT_NE(GetParam().result, nullptr) << "Module not found";
-//    std::cout << "Instance: " << GetParam().Name << std::endl;
-//    std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + GetParam().Name + ".vhdl");
-//    ASSERT_TRUE(bool(ifs)) << "Can't open file" + GetParam().Name + ".vhdl";
-//
-//    std::stringstream buffer;
-//    std::string content((std::istreambuf_iterator<char>(ifs)),
-//                        (std::istreambuf_iterator<char>()));
-//    while (content[content.length()-1] == '\n') {
-//        content.erase(content.length()-1);
-//    }
-//
-//    PrintSkeleton printSkeleton;
-//    std::pair<std::string, std::string> result;
-//    ASSERT_NO_THROW(result = printSkeleton.printModule(GetParam().result));
-//    ASSERT_EQ(content, result.second) << "Test for types " << GetParam().Name << " failed\n\n" << result.second;
-//    std::cout << "" << std::endl;
-//
-//}
-//TEST_P(PrintSkeleton_Test, ModuleSV) {
-//    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
-//    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
-//
-//    ASSERT_NE(GetParam().result, nullptr) << "Module not found";
-//    std::cout << "Instance: " << GetParam().Name << std::endl;
-//    std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/sv/" + GetParam().Name + ".sv");
-//    ASSERT_TRUE(bool(ifs)) << "Can't open file" + GetParam().Name + ".sv";
-//
-//    std::stringstream buffer;
-//    std::string content((std::istreambuf_iterator<char>(ifs)),
-//                        (std::istreambuf_iterator<char>()));
-//    //std::string content(std::istreambuf_iterator<char>(ifs));
-//    while (content[content.length()-1] == '\n') {
-//        content.erase(content.length()-1);
-//    }
-//
-//    PrintSkeleton printSkeleton;
-//    std::pair<std::string, std::string> result;
-//    ASSERT_NO_THROW(result = printSkeleton.printModule(GetParam().result));
-//    ASSERT_EQ(content, result.second) << "Test for types " << GetParam().Name << " failed\n\n" << result.second;
-//    std::cout << "" << std::endl;
-//
-//}
+TEST_P(PrintSkeletonParam, ModuleVHDL) {
+    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
+    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+    for (auto res: results) {
+        DESCAM::Module *module = res;
+        ASSERT_NE(module, nullptr) << "Module not found";
+        std::cout << "Instance: " << module->getName() << std::endl;
+        std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/vhdl/" + module->getName() + ".vhdl");
+        ASSERT_TRUE(bool(ifs)) << "Can't open file" + module->getName() + ".vhdl";
+
+        std::stringstream buffer;
+        std::string content((std::istreambuf_iterator<char>(ifs)),
+                            (std::istreambuf_iterator<char>()));
+        while (content[content.length() - 1] == '\n') {
+            content.erase(content.length() - 1);
+        }
+
+        PrintSkeleton printSkeleton;
+        std::pair<std::string, std::string> result;
+        ASSERT_NO_THROW(result = printSkeleton.printModule(module));
+        ASSERT_EQ(content, result.second) << "Test for types " << module->getName() << " failed\n\n" << result.second;
+        std::cout << "" << std::endl;
+    }
+}
+TEST_P(PrintSkeletonParam, ModuleSV) {
+    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", false);
+    CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", true);
+        for (auto res: results) {
+            DESCAM::Module *module = res;
+            ASSERT_NE(module, nullptr) << "Module not found";
+            std::cout << "Instance: " << module->getName() << std::endl;
+            std::ifstream ifs(SCAM_HOME"/tests/PrintSkeleton_Test/TestCases/sv/" + module->getName() + ".sv");
+            ASSERT_TRUE(bool(ifs)) << "Can't open file" + module->getName() + ".sv";
+
+            std::stringstream buffer;
+            std::string content((std::istreambuf_iterator<char>(ifs)),
+                                (std::istreambuf_iterator<char>()));
+            //std::string content(std::istreambuf_iterator<char>(ifs));
+            while (content[content.length() - 1] == '\n') {
+                content.erase(content.length() - 1);
+            }
+
+            PrintSkeleton printSkeleton;
+            std::pair<std::string, std::string> result;
+            ASSERT_NO_THROW(result = printSkeleton.printModule(module));
+            ASSERT_EQ(content, result.second)
+                                        << "Test for types " << module->getName() << " failed\n\n" << result.second;
+            std::cout << "" << std::endl;
+        }
+}
 
 
 #endif //PROJECT_PRINTSKELETONSV_TEST_H

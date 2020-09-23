@@ -1,0 +1,19 @@
+"/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:79:17:
+error: use of undeclared identifier 'record_t'\n     blocking_in<record_t> b_in;\n
+^\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:83:5: error: unknown type name 'record_t'\n
+record_t record_var;\n
+^\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:74:9:{74:9-74:23}:
+error: cannot initialize a parameter of type 'sc_core::sc_process_host *' with an rvalue of type 'TestFunction1 *'\n         SC_THREAD(fsm);\n
+        ^~~~~~~~~~~~~~\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/include/sysc/kernel/sc_module.h:459:5:{459:5-462:35}: note: expanded from macro 'SC_THREAD'\n
+            declare_thread_process( func ## _handle,                                  \\\n
+              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              \n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/include/sysc/kernel/sc_module.h:430:54:{430:54-430:58}: note: expanded from macro 'declare_thread_process'\n
+                               SC_MAKE_FUNC_PTR( host_tag, func ), this, 0 ); \\\n
+                               ^~~~\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/include/sysc/kernel/sc_simcontext.h:220:22: note: passing argument to parameter 'host_p' here\n
+                                sc_process_host* host_p, const sc_spawn_options* opt_p );\n
+                                 ^\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:102:22: error: unknown type name 'record_t'\n
+                                 unsigned int foo(record_t record_var) const{\n
+                                  ^\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:117:17: error: use of undeclared identifier 'record_t'\n
+                                   blocking_in<record_t> b_in;\n
+                                    ^\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:121:5: error: unknown type name 'record_t'\n
+                                     record_t record_var;\n     ^\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/tests/PrintSkeleton_Test/TestCases/ModuleFunctions.h:112:9:{112:9-112:23}: error: cannot initialize a parameter of type 'sc_core::sc_process_host *' with an rvalue of type 'TestFunction2 *'\n         SC_THREAD(fsm);\n         ^~~~~~~~~~~~~~\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/include/sysc/kernel/sc_module.h:459:5:{459:5-462:35}: note: expanded from macro 'SC_THREAD'\n     declare_thread_process( func ## _handle,                                  \\\n     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/include/sysc/kernel/sc_module.h:430:54:{430:54-430:58}: note: expanded from macro 'declare_thread_process'\n                  SC_MAKE_FUNC_PTR( host_tag, func ), this, 0 ); \\\n                                                      ^~~~\n/import/lab/users/hesselberg/Simon_repo/Frascati/DeSCAM/include/sysc/kernel/sc_simcontext.h:220:22: note: passing argument to parameter 'host_p' here\n     sc_process_host* host_p, const sc_spawn_options* opt_p );\n                      ^\n"
