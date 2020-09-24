@@ -405,7 +405,7 @@ public:
         auto buffer2 = new Variable("buffer2", array);
 
         //        auto size = new Variable("size", DataTypes::getDataType("unsigned"));
-        auto size = new IntegerValue(8);
+        auto size = new IntegerValue(3);
         auto head0 = new Variable("head0", DataTypes::getDataType("int"));
         auto tail0 = new Variable("tail0", DataTypes::getDataType("int"));
         auto head1 = new Variable("head1", DataTypes::getDataType("int"));
@@ -674,128 +674,178 @@ public:
 
 
         //Add Nodes to controFlowMap
-        controlFlowMapRead.insert(std::make_pair(state_equal_empty->getId(),state_equal_empty));
-        controlFlowMapRead.insert(std::make_pair(read_wait->getId(),read_wait));
-        controlFlowMapRead.insert(std::make_pair(read_value->getId(),read_value));
-        controlFlowMapRead.insert(std::make_pair(tail_incr->getId(),tail_incr));
-        controlFlowMapRead.insert(std::make_pair(state_filled_read->getId(),state_filled_read));
-        controlFlowMapRead.insert(std::make_pair(head_equal_tail_read->getId(),head_equal_tail_read));
-        controlFlowMapRead.insert(std::make_pair(state_empty->getId(),state_empty));
-        controlFlowMapRead.insert(std::make_pair(reader_noti->getId(),reader_noti));
+        controlFlowMapRead.insert(std::make_pair(check_next_read_eq_0->getId(),check_next_read_eq_0));
+        controlFlowMapRead.insert(std::make_pair(state0_equal_empty->getId(),state0_equal_empty));
+        controlFlowMapRead.insert(std::make_pair(read_wait0->getId(),read_wait0));
+        controlFlowMapRead.insert(std::make_pair(read_value0->getId(),read_value0));
+        controlFlowMapRead.insert(std::make_pair(tail0_incr->getId(),tail0_incr));
+        controlFlowMapRead.insert(std::make_pair(state0_filled_read->getId(),state0_filled_read));
+        controlFlowMapRead.insert(std::make_pair(head0_equal_tail0_read->getId(),head0_equal_tail0_read));
+        controlFlowMapRead.insert(std::make_pair(state0_empty->getId(),state0_empty));
+        controlFlowMapRead.insert(std::make_pair(reader_noti0->getId(),reader_noti0));
+        controlFlowMapRead.insert(std::make_pair(next_read_incr0->getId(),next_read_incr0));
+
+        controlFlowMapRead.insert(std::make_pair(check_next_read_eq_1->getId(),check_next_read_eq_1));
+        controlFlowMapRead.insert(std::make_pair(state1_equal_empty->getId(),state1_equal_empty));
+        controlFlowMapRead.insert(std::make_pair(read_wait1->getId(),read_wait1));
+        controlFlowMapRead.insert(std::make_pair(read_value1->getId(),read_value1));
+        controlFlowMapRead.insert(std::make_pair(tail1_incr->getId(),tail1_incr));
+        controlFlowMapRead.insert(std::make_pair(state1_filled_read->getId(),state1_filled_read));
+        controlFlowMapRead.insert(std::make_pair(head1_equal_tail1_read->getId(),head1_equal_tail1_read));
+        controlFlowMapRead.insert(std::make_pair(state1_empty->getId(),state1_empty));
+        controlFlowMapRead.insert(std::make_pair(reader_noti1->getId(),reader_noti1));
+        controlFlowMapRead.insert(std::make_pair(next_read_incr1->getId(),next_read_incr1));
+
+        controlFlowMapRead.insert(std::make_pair(state2_equal_empty->getId(),state2_equal_empty));
+        controlFlowMapRead.insert(std::make_pair(read_wait2->getId(),read_wait2));
+        controlFlowMapRead.insert(std::make_pair(read_value2->getId(),read_value2));
+        controlFlowMapRead.insert(std::make_pair(tail2_incr->getId(),tail2_incr));
+        controlFlowMapRead.insert(std::make_pair(state2_filled_read->getId(),state2_filled_read));
+        controlFlowMapRead.insert(std::make_pair(head2_equal_tail2_read->getId(),head2_equal_tail2_read));
+        controlFlowMapRead.insert(std::make_pair(state2_empty->getId(),state2_empty));
+        controlFlowMapRead.insert(std::make_pair(reader_noti2->getId(),reader_noti2));
+        controlFlowMapRead.insert(std::make_pair(next_read_reset->getId(),next_read_reset));
         controlFlowMapRead.insert(std::make_pair(return_read->getId(),return_read));
 
         //Link CFG Nodes
-        state_equal_empty->addSuccessor(read_wait);
-        state_equal_empty->addSuccessor(read_value);
-        read_wait->addSuccessor(state_equal_empty);
-        read_value->addSuccessor(tail_incr);
-        tail_incr->addSuccessor(state_filled_read);
-        state_filled_read->addSuccessor(head_equal_tail_read);
-        head_equal_tail_read->addSuccessor(state_empty);
-        head_equal_tail_read->addSuccessor(reader_noti);
-        state_empty->addSuccessor(reader_noti);
-        reader_noti->addSuccessor(return_read);
+        check_next_read_eq_0->addSuccessor(state0_equal_empty);
+        check_next_read_eq_0->addSuccessor(check_next_read_eq_1);
+        state0_equal_empty->addSuccessor(read_wait0);
+        state0_equal_empty->addSuccessor(read_value0);
+        read_wait0->addSuccessor(read_value0);
+        read_value0->addSuccessor(tail0_incr);
+        tail0_incr->addSuccessor(state0_filled_read);
+        state0_filled_read->addSuccessor(head0_equal_tail0_read);
+        head0_equal_tail0_read->addSuccessor(state0_empty);
+        head0_equal_tail0_read->addSuccessor(reader_noti0);
+        state0_empty->addSuccessor(reader_noti0);
+        reader_noti0->addSuccessor(next_read_incr0);
+        next_read_incr0->addSuccessor(return_read);
+        check_next_read_eq_1->addSuccessor(state1_equal_empty);
+        check_next_read_eq_1->addSuccessor(state2_equal_empty);
+        state1_equal_empty->addSuccessor(read_wait1);
+        state1_equal_empty->addSuccessor(read_value1);
+        read_wait1->addSuccessor(read_value1);
+        read_value1->addSuccessor(tail1_incr);
+        tail1_incr->addSuccessor(state1_filled_read);
+        state1_filled_read->addSuccessor(head1_equal_tail1_read);
+        head1_equal_tail1_read->addSuccessor(state1_empty);
+        head1_equal_tail1_read->addSuccessor(reader_noti1);
+        state1_empty->addSuccessor(reader_noti1);
+        reader_noti1->addSuccessor(next_read_incr1);
+        next_read_incr1->addSuccessor(return_read);
+        state2_equal_empty->addSuccessor(read_wait2);
+        state2_equal_empty->addSuccessor(read_value2);
+        read_wait2->addSuccessor(read_value2);
+        read_value2->addSuccessor(tail2_incr);
+        tail2_incr->addSuccessor(state2_filled_read);
+        state2_filled_read->addSuccessor(head2_equal_tail2_read);
+        head2_equal_tail2_read->addSuccessor(state2_empty);
+        head2_equal_tail2_read->addSuccessor(reader_noti2);
+        state2_empty->addSuccessor(reader_noti2);
+        reader_noti2->addSuccessor(next_read_reset);
+        next_read_reset->addSuccessor(return_read);
 
         //CFG Nodes Write0
-        auto state_equal_full_0 = new CfgNode(check_state_full);
-        auto write_wait_0 = new CfgNode(reader_wait);
-        auto write_value_0 = new CfgNode(buffer_at_head_assign_val_0);
-        auto head_incr_0 = new CfgNode(head_assign_head_modulo_increment);
-        auto state_filled_write_0 = new CfgNode(state_assign_filled);
-        auto head_equal_tail_write_0 = new CfgNode(if_head_eq_tail);
-        auto state_full_0 = new CfgNode(state_assign_full);
-        auto writer_noti_0 = new CfgNode(notify_writer);
-        auto return_write_0 = new CfgNode(write_return);
+        auto state0_equal_full_0 = new CfgNode(check_state0_full);
+        auto write_wait_0 = new CfgNode(reader_wait0);
+        auto write_value_0 = new CfgNode(buffer0_at_head0_assign_val_0);
+        auto head0_incr_0 = new CfgNode(head0_assign_head0_modulo_increment);
+        auto state0_filled_write_0 = new CfgNode(state0_assign_filled);
+        auto head0_equal_tail0_write_0 = new CfgNode(if_head0_eq_tail0);
+        auto state0_full_0 = new CfgNode(state0_assign_full);
+        auto writer_noti_0 = new CfgNode(notify_writer0);
+        auto return_write_0 = new CfgNode(write_return0);
 
         //Add Nodes to controFlowMap
-        controlFlowMapWrite0.insert(std::make_pair(state_equal_full_0->getId(),state_equal_full_0));
+        controlFlowMapWrite0.insert(std::make_pair(state0_equal_full_0->getId(),state0_equal_full_0));
         controlFlowMapWrite0.insert(std::make_pair(write_wait_0->getId(),write_wait_0));
         controlFlowMapWrite0.insert(std::make_pair(write_value_0->getId(),write_value_0));
-        controlFlowMapWrite0.insert(std::make_pair(head_incr_0->getId(),head_incr_0));
-        controlFlowMapWrite0.insert(std::make_pair(state_filled_write_0->getId(),state_filled_write_0));
-        controlFlowMapWrite0.insert(std::make_pair(head_equal_tail_write_0->getId(),head_equal_tail_write_0));
-        controlFlowMapWrite0.insert(std::make_pair(state_full_0->getId(),state_full_0));
+        controlFlowMapWrite0.insert(std::make_pair(head0_incr_0->getId(),head0_incr_0));
+        controlFlowMapWrite0.insert(std::make_pair(state0_filled_write_0->getId(),state0_filled_write_0));
+        controlFlowMapWrite0.insert(std::make_pair(head0_equal_tail0_write_0->getId(),head0_equal_tail0_write_0));
+        controlFlowMapWrite0.insert(std::make_pair(state0_full_0->getId(),state0_full_0));
         controlFlowMapWrite0.insert(std::make_pair(writer_noti_0->getId(),writer_noti_0));
         controlFlowMapWrite0.insert(std::make_pair(return_write_0->getId(),return_write_0));
 
         //Link CFG Nodes
-        state_equal_full_0->addSuccessor(write_wait_0);
-        state_equal_full_0->addSuccessor(write_value_0);
-        write_wait_0->addSuccessor(state_equal_full_0);
-        write_value_0->addSuccessor(head_incr_0);
-        head_incr_0->addSuccessor(state_filled_write_0);
-        state_filled_write_0->addSuccessor(head_equal_tail_write_0);
-        head_equal_tail_write_0->addSuccessor(state_full_0);
-        head_equal_tail_write_0->addSuccessor(writer_noti_0);
-        state_full_0->addSuccessor(writer_noti_0);
+        state0_equal_full_0->addSuccessor(write_wait_0);
+        state0_equal_full_0->addSuccessor(write_value_0);
+        write_wait_0->addSuccessor(write_value_0);
+        write_value_0->addSuccessor(head0_incr_0);
+        head0_incr_0->addSuccessor(state0_filled_write_0);
+        state0_filled_write_0->addSuccessor(head0_equal_tail0_write_0);
+        head0_equal_tail0_write_0->addSuccessor(state0_full_0);
+        head0_equal_tail0_write_0->addSuccessor(writer_noti_0);
+        state0_full_0->addSuccessor(writer_noti_0);
         writer_noti_0->addSuccessor(return_write_0);
 
         //CFG Nodes Write1
-        auto state_equal_full_1 = new CfgNode(check_state_full);
-        auto write_wait_1 = new CfgNode(reader_wait);
-        auto write_value_1 = new CfgNode(buffer_at_head_assign_val_1);
-        auto head_incr_1 = new CfgNode(head_assign_head_modulo_increment);
-        auto state_filled_write_1 = new CfgNode(state_assign_filled);
-        auto head_equal_tail_write_1 = new CfgNode(if_head_eq_tail);
-        auto state_full_1 = new CfgNode(state_assign_full);
-        auto writer_noti_1 = new CfgNode(notify_writer);
-        auto return_write_1 = new CfgNode(write_return);
+        auto state1_equal_full_1 = new CfgNode(check_state1_full);
+        auto write_wait_1 = new CfgNode(reader_wait1);
+        auto write_value_1 = new CfgNode(buffer1_at_head1_assign_val_1);
+        auto head1_incr_1 = new CfgNode(head1_assign_head1_modulo_increment);
+        auto state1_filled_write_1 = new CfgNode(state1_assign_filled);
+        auto head1_equal_tail1_write_1 = new CfgNode(if_head1_eq_tail1);
+        auto state1_full_1 = new CfgNode(state1_assign_full);
+        auto writer_noti_1 = new CfgNode(notify_writer1);
+        auto return_write_1 = new CfgNode(write_return1);
 
         //Add Nodes to controFlowMap
-        controlFlowMapWrite1.insert(std::make_pair(state_equal_full_1->getId(),state_equal_full_1));
+        controlFlowMapWrite1.insert(std::make_pair(state1_equal_full_1->getId(),state1_equal_full_1));
         controlFlowMapWrite1.insert(std::make_pair(write_wait_1->getId(),write_wait_1));
         controlFlowMapWrite1.insert(std::make_pair(write_value_1->getId(),write_value_1));
-        controlFlowMapWrite1.insert(std::make_pair(head_incr_1->getId(),head_incr_1));
-        controlFlowMapWrite1.insert(std::make_pair(state_filled_write_1->getId(),state_filled_write_1));
-        controlFlowMapWrite1.insert(std::make_pair(head_equal_tail_write_1->getId(),head_equal_tail_write_1));
-        controlFlowMapWrite1.insert(std::make_pair(state_full_1->getId(),state_full_1));
+        controlFlowMapWrite1.insert(std::make_pair(head1_incr_1->getId(),head1_incr_1));
+        controlFlowMapWrite1.insert(std::make_pair(state1_filled_write_1->getId(),state1_filled_write_1));
+        controlFlowMapWrite1.insert(std::make_pair(head1_equal_tail1_write_1->getId(),head1_equal_tail1_write_1));
+        controlFlowMapWrite1.insert(std::make_pair(state1_full_1->getId(),state1_full_1));
         controlFlowMapWrite1.insert(std::make_pair(writer_noti_1->getId(),writer_noti_1));
         controlFlowMapWrite1.insert(std::make_pair(return_write_1->getId(),return_write_1));
 
         //Link CFG Nodes
-        state_equal_full_1->addSuccessor(write_wait_1);
-        state_equal_full_1->addSuccessor(write_value_1);
-        write_wait_1->addSuccessor(state_equal_full_1);
-        write_value_1->addSuccessor(head_incr_1);
-        head_incr_1->addSuccessor(state_filled_write_1);
-        state_filled_write_1->addSuccessor(head_equal_tail_write_1);
-        head_equal_tail_write_1->addSuccessor(state_full_1);
-        head_equal_tail_write_1->addSuccessor(writer_noti_1);
-        state_full_1->addSuccessor(writer_noti_1);
+        state1_equal_full_1->addSuccessor(write_wait_1);
+        state1_equal_full_1->addSuccessor(write_value_1);
+        write_wait_1->addSuccessor(write_value_1);
+        write_value_1->addSuccessor(head1_incr_1);
+        head1_incr_1->addSuccessor(state1_filled_write_1);
+        state1_filled_write_1->addSuccessor(head1_equal_tail1_write_1);
+        head1_equal_tail1_write_1->addSuccessor(state1_full_1);
+        head1_equal_tail1_write_1->addSuccessor(writer_noti_1);
+        state1_full_1->addSuccessor(writer_noti_1);
         writer_noti_1->addSuccessor(return_write_1);
 
         //CFG Nodes Write2
-        auto state_equal_full_2 = new CfgNode(check_state_full);
-        auto write_wait_2 = new CfgNode(reader_wait);
-        auto write_value_2 = new CfgNode(buffer_at_head_assign_val_2);
-        auto head_incr_2 = new CfgNode(head_assign_head_modulo_increment);
-        auto state_filled_write_2 = new CfgNode(state_assign_filled);
-        auto head_equal_tail_write_2 = new CfgNode(if_head_eq_tail);
-        auto state_full_2 = new CfgNode(state_assign_full);
-        auto writer_noti_2 = new CfgNode(notify_writer);
-        auto return_write_2 = new CfgNode(write_return);
+        auto state2_equal_full_2 = new CfgNode(check_state2_full);
+        auto write_wait_2 = new CfgNode(reader_wait2);
+        auto write_value_2 = new CfgNode(buffer2_at_head2_assign_val_2);
+        auto head2_incr_2 = new CfgNode(head2_assign_head2_modulo_increment);
+        auto state2_filled_write_2 = new CfgNode(state2_assign_filled);
+        auto head2_equal_tail2_write_2 = new CfgNode(if_head2_eq_tail2);
+        auto state2_full_2 = new CfgNode(state2_assign_full);
+        auto writer_noti_2 = new CfgNode(notify_writer2);
+        auto return_write_2 = new CfgNode(write_return2);
 
         //Add Nodes to controFlowMap
-        controlFlowMapWrite2.insert(std::make_pair(state_equal_full_2->getId(),state_equal_full_2));
+        controlFlowMapWrite2.insert(std::make_pair(state2_equal_full_2->getId(),state2_equal_full_2));
         controlFlowMapWrite2.insert(std::make_pair(write_wait_2->getId(),write_wait_2));
         controlFlowMapWrite2.insert(std::make_pair(write_value_2->getId(),write_value_2));
-        controlFlowMapWrite2.insert(std::make_pair(head_incr_2->getId(),head_incr_2));
-        controlFlowMapWrite2.insert(std::make_pair(state_filled_write_2->getId(),state_filled_write_2));
-        controlFlowMapWrite2.insert(std::make_pair(head_equal_tail_write_2->getId(),head_equal_tail_write_2));
-        controlFlowMapWrite2.insert(std::make_pair(state_full_2->getId(),state_full_2));
+        controlFlowMapWrite2.insert(std::make_pair(head2_incr_2->getId(),head2_incr_2));
+        controlFlowMapWrite2.insert(std::make_pair(state2_filled_write_2->getId(),state2_filled_write_2));
+        controlFlowMapWrite2.insert(std::make_pair(head2_equal_tail2_write_2->getId(),head2_equal_tail2_write_2));
+        controlFlowMapWrite2.insert(std::make_pair(state2_full_2->getId(),state2_full_2));
         controlFlowMapWrite2.insert(std::make_pair(writer_noti_2->getId(),writer_noti_2));
         controlFlowMapWrite2.insert(std::make_pair(return_write_2->getId(),return_write_2));
 
         //Link CFG Nodes
-        state_equal_full_2->addSuccessor(write_wait_2);
-        state_equal_full_2->addSuccessor(write_value_2);
-        write_wait_2->addSuccessor(state_equal_full_2);
-        write_value_2->addSuccessor(head_incr_2);
-        head_incr_2->addSuccessor(state_filled_write_2);
-        state_filled_write_2->addSuccessor(head_equal_tail_write_2);
-        head_equal_tail_write_2->addSuccessor(state_full_2);
-        head_equal_tail_write_2->addSuccessor(writer_noti_2);
-        state_full_2->addSuccessor(writer_noti_2);
+        state2_equal_full_2->addSuccessor(write_wait_2);
+        state2_equal_full_2->addSuccessor(write_value_2);
+        write_wait_2->addSuccessor(write_value_2);
+        write_value_2->addSuccessor(head2_incr_2);
+        head2_incr_2->addSuccessor(state2_filled_write_2);
+        state2_filled_write_2->addSuccessor(head2_equal_tail2_write_2);
+        head2_equal_tail2_write_2->addSuccessor(state2_full_2);
+        head2_equal_tail2_write_2->addSuccessor(writer_noti_2);
+        state2_full_2->addSuccessor(writer_noti_2);
         writer_noti_2->addSuccessor(return_write_2);
 
 
@@ -824,12 +874,23 @@ public:
 
         //Generate Reset Operation
         reset_op = new Operation();
-        reset_op->addStatement(state_assign_empty);
+        reset_op->addStatement(state0_assign_empty);
+        reset_op->addStatement(state1_assign_empty);
+        reset_op->addStatement(state2_assign_empty);
         auto zero = new IntegerValue(0);
-        auto tail_assign_0 = new Assignment(new VariableOperand(module->getVariable("tail")),zero);
-        auto head_assign_0 = new Assignment(new VariableOperand(module->getVariable("head")),zero);
-        reset_op->addStatement(tail_assign_0);
-        reset_op->addStatement(head_assign_0);
+        auto tail0_assign_0 = new Assignment(new VariableOperand(module->getVariable("tail0")),zero);
+        auto head0_assign_0 = new Assignment(new VariableOperand(module->getVariable("head0")),zero);
+        auto tail1_assign_0 = new Assignment(new VariableOperand(module->getVariable("tail1")),zero);
+        auto head1_assign_0 = new Assignment(new VariableOperand(module->getVariable("head1")),zero);
+        auto tail2_assign_0 = new Assignment(new VariableOperand(module->getVariable("tail2")),zero);
+        auto head2_assign_0 = new Assignment(new VariableOperand(module->getVariable("head2")),zero);
+        reset_op->addStatement(tail0_assign_0);
+        reset_op->addStatement(head0_assign_0);
+        reset_op->addStatement(tail1_assign_0);
+        reset_op->addStatement(head1_assign_0);
+        reset_op->addStatement(tail2_assign_0);
+        reset_op->addStatement(head2_assign_0);
+        reset_op->addStatement(next_read_assign_0);
         reset_op->setState(init);
         start_state = new State("start_state");
         reset_op->setNextState(start_state);
@@ -837,22 +898,22 @@ public:
 
         //set start and end nodes for sync and notify
         eventID temp;
-        temp = {2,"read_sync"};
+        temp = {6,"read_sync"};
         startnodes.push_back(temp);
-        temp = {11,"write_0_sync"};
+        temp = {36,"write_0_sync"};
         startnodes.push_back(temp);
-        temp = {20,"write_1_sync"};
+        temp = {45,"write_1_sync"};
         startnodes.push_back(temp);
-        temp = {29,"write_2_sync"};
+        temp = {54,"write_2_sync"};
         startnodes.push_back(temp);
 
-        temp = {10,"read_notify"};
+        temp = {35,"read_notify"};
         endnodes.push_back(temp);
-        temp = {19,"write_0_notify"};
+        temp = {44,"write_0_notify"};
         endnodes.push_back(temp);
-        temp = {28,"write_1_notify"};
+        temp = {53,"write_1_notify"};
         endnodes.push_back(temp);
-        temp = {37,"write_2_notify"};
+        temp = {62,"write_2_notify"};
         endnodes.push_back(temp);
 
         //Define portnames for notify and sync signals
@@ -918,10 +979,10 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::vector<eventID> hv;
 
     //Define all possible functions and their starting nodes
-    eventID Read = {2,"Read"};
-    eventID Write0 = {11,"Write0"};
-    eventID Write1 = {20,"Write1"};
-    eventID Write2 = {29,"Write2"};
+    eventID Read = {6,"Read"};
+    eventID Write0 = {36,"Write0"};
+    eventID Write1 = {45,"Write1"};
+    eventID Write2 = {54,"Write2"};
 
     //vector of all functions that are always ready to execute
     std::vector<eventID> always_ready;

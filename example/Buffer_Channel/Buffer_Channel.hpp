@@ -24,7 +24,7 @@ Buffer_Channel<T>::Buffer_Channel (const char *name) :
 template<typename T>
 void Buffer_Channel<T>::read(T &out) {
     if(next_read==0) {
-        while (state0 == EMPTY) {
+        if (state0 == EMPTY) {
             wait(writer_notify0);
         }
         out = buffer0.at(tail0);
@@ -36,7 +36,7 @@ void Buffer_Channel<T>::read(T &out) {
         reader_notify0.notify();
         next_read++;
     } else if (next_read == 1){
-        while (state1 == EMPTY) {
+        if (state1 == EMPTY) {
             wait(writer_notify1);
         }
         out = buffer1.at(tail1);
@@ -49,7 +49,7 @@ void Buffer_Channel<T>::read(T &out) {
         next_read++;
     }
     else{//if(next_read == 2){
-        while (state2 == EMPTY) {
+        if (state2 == EMPTY) {
             wait(writer_notify2);
         }
         out = buffer2.at(tail2);
@@ -66,7 +66,7 @@ void Buffer_Channel<T>::read(T &out) {
 
 template<typename T>
 void Buffer_Channel<T>::write0(const T &val) {
-    while(state0 == FULL){
+    if(state0 == FULL){
         wait(reader_notify0);
     }
     buffer0.at(head0) = val;
@@ -80,7 +80,7 @@ void Buffer_Channel<T>::write0(const T &val) {
 }
 template<typename T>
 void Buffer_Channel<T>::write1(const T &val) {
-    while(state1 == FULL){
+    if(state1 == FULL){
         wait(reader_notify1);
     }
     buffer1.at(head1) = val;
@@ -94,7 +94,7 @@ void Buffer_Channel<T>::write1(const T &val) {
 }
 template<typename T>
 void Buffer_Channel<T>::write2(const T &val) {
-    while(state2 == FULL){
+    if(state2 == FULL){
         wait(reader_notify2);
     }
     buffer2.at(head2) = val;
