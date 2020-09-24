@@ -323,8 +323,12 @@ std::map<Key *, Value *> OptimizerHLS::getSubVarMap(const std::map<Key *, Value 
             values.push_back(var.second);
         }
     }
+    if (keys.size() > values.size()) {
+        std::cout << "Terminating inside OptimizerHLS::getSubVarMap. To be fixed.\n";
+    }
     std::map<Key *, Value *> subVarMap;
     for (std::size_t it = 0; it < keys.size(); ++it) {
+        //FIXME: Segmentation fault if keys.size() > values.size()
         subVarMap.insert({keys.at(it), values.at(it)});
     }
     return subVarMap;
