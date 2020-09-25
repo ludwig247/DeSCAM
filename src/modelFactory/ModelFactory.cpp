@@ -22,7 +22,7 @@
 #include <PropertyFactory.h>
 #include <FatalError.h>
 #include "DescamException.h"
-#include "FindCustomChannels.h"
+#include <FindCustomChannels.h>
 
 
 //Constructor
@@ -709,6 +709,7 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
 //            module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
         }
         //TODO: Create a class here that takes the module as input
+        ChannelProperties *prop = new ChannelProperties(module);
         //Name, methods + parameters -> done
         std::cout << "Channel: " << module->getName() << std::endl;
         for(auto function: module->getFunctionMap()){

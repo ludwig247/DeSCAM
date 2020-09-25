@@ -28,6 +28,7 @@
 #include "FindVariables.h"
 #include "Model.h"
 #include <iostream>
+#include "ChannelProperties.cpp"
 
 using namespace clang::driver;
 using namespace clang::tooling;
