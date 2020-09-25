@@ -219,6 +219,7 @@ void PrintStatement::visit(ParamOperand &node) {
 }
 
 void PrintStatement::visit(Logical &node) {
+    ss << "(";
     node.getLhs()->accept(*this);
     if (node.getOperation() == "or") {
         this->ss << " || ";
@@ -226,6 +227,7 @@ void PrintStatement::visit(Logical &node) {
         this->ss << " && ";
     }
     node.getRhs()->accept(*this);
+    ss << ")";
 }
 
 void PrintStatement::visit(FunctionOperand &node) {
