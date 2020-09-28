@@ -7,8 +7,7 @@
 
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
-
+#include "Interfaces.h"
 #include "Types.h"
 
 

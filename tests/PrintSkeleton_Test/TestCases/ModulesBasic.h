@@ -841,11 +841,6 @@ struct TestBasic21 : public sc_module {
     }
 };
 
-struct test_compound {
-    int x;
-    unsigned int y;
-};
-
 struct TestBasic22 : public sc_module {
     //Sections
     enum Sections {

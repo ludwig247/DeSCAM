@@ -8,7 +8,7 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-#include "Types.h"
+#include "../Types.h"
 
 //TODO: TestBasic16 ... actually compoundType.x doesn't need to be a register ... if there is time fix this
 struct TestBasic16 : public sc_module {

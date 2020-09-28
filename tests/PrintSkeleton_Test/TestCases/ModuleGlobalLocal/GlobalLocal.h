@@ -4,9 +4,10 @@
 
 #ifndef SCAM_GLOBALLOCAL_H
 #define SCAM_GLOBALLOCAL_H
+
 #include "systemc.h"
 #include "Interfaces.h"
-#include "Types.h"
+#include "../Types.h"
 
 
 struct GlobalLocal : public sc_module {

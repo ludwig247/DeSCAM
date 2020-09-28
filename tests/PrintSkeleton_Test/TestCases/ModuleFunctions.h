@@ -6,8 +6,7 @@
 #define PROJECT_MODULEFUNCTIONS_H
 
 #include "systemc.h"
-//#include "Interfaces.h"
-#include "../../../example/Interfaces/Interfaces.h"
+#include "Interfaces.h"
 #include "Types.h"
 
 

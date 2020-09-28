@@ -7,7 +7,6 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-
 #include "Types.h"
 
 

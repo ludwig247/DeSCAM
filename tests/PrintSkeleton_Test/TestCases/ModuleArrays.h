@@ -6,9 +6,9 @@
 #define PROJECT_MODULEARRAYS_H
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
-
+#include "Interfaces.h"
 #include "Types.h"
+
 struct TestArray0 : public sc_module {
     blocking_in<int> b_in;
     blocking_out<int[2]> b_out;

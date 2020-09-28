@@ -7,8 +7,7 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-#include "Types.h"
-
+#include "../Types.h"
 struct TestBasic10 : public sc_module {
     //Sections
     enum Sections {

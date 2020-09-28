@@ -4,9 +4,10 @@
 
 #ifndef SCAM_TESTFUNCTION0_H
 #define SCAM_TESTFUNCTION0_H
+
 #include "systemc.h"
 #include "Interfaces.h"
-#include "Types.h"
+#include "../Types.h"
 
 
 

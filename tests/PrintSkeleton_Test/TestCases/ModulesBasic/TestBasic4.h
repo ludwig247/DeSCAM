@@ -7,7 +7,7 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-#include "Types.h"
+#include "../Types.h"
 
 struct TestBasic4 : public sc_module {
     //Constructor

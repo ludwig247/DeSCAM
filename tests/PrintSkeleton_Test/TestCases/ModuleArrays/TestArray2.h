@@ -6,9 +6,8 @@
 #define SCAM_TESTARRAY2_H
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
-
-#include "Types.h"
+#include "Interfaces.h"
+#include "../Types.h"
 
 struct TestArray2 : public sc_module {
     blocking_in<int> b_in;
