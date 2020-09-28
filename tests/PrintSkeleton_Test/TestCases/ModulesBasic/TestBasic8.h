@@ -4,6 +4,11 @@
 
 #ifndef SCAM_TESTBASIC8_H
 #define SCAM_TESTBASIC8_H
+
+#include "systemc.h"
+#include "Interfaces.h"
+#include "Types.h"
+
 struct TestBasic8 : public sc_module {
     //Constructor
     TestBasic8(sc_module_name name) :

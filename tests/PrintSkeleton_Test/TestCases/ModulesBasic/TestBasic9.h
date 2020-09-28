@@ -4,6 +4,11 @@
 
 #ifndef SCAM_TESTBASIC9_H
 #define SCAM_TESTBASIC9_H
+
+#include "systemc.h"
+#include "Interfaces.h"
+#include "Types.h"
+
 struct TestBasic9 : public sc_module {
     //Constructor
     TestBasic9(sc_module_name name) :

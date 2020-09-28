@@ -4,6 +4,11 @@
 
 #ifndef SCAM_TESTBAISC11_H
 #define SCAM_TESTBAISC11_H
+
+#include "systemc.h"
+#include "Interfaces.h"
+#include "Types.h"
+
 struct TestBasic11 : public sc_module {
     //Sections
     enum Sections {

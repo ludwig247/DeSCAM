@@ -28,6 +28,9 @@ struct global_compound_type {
 enum global_enum{A,B};
 enum class global_enum_class{M,N};
 
-
+struct test_compound {
+    int x;
+    unsigned int y;
+};
 
 #endif //SCAM_TYPES_H

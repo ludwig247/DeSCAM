@@ -6,8 +6,7 @@
 #define PROJECT_TESTING_H
 
 #include "systemc.h"
-#include "../Interfaces/Interfaces.h"
-
+#include "Interfaces.h"
 #include "Types.h"
 
 struct TestBasic0 : public sc_module {
