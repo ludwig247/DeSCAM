@@ -28,7 +28,7 @@ endforeach()
 #        "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Tests.list"
 #)
 
-file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/*.h")
+file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModuleArrays/*.h")
 #message(STATUS "${FUNC_TESTS}")
 list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)
 list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/tests.h)
