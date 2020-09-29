@@ -11,7 +11,7 @@
 // Adjusts code to be appropriate for the SCAM tool
 // 0 : Working ESL-Description
 // 1 : Properties can be generated
-#define SCAM 1
+#define SCAM 0
 
 class ISA_ri5cy : public sc_module {
 public:
@@ -57,7 +57,6 @@ public:
     bool fromReset;
 
     // Other control signals:
-    unsigned int toReg_data;
     unsigned int encodedInstr;
     unsigned int prevInstr;
 
