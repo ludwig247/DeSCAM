@@ -2,7 +2,25 @@
 // Created by wezel on 9/24/20.
 //
 
+
+
 #include "ChannelProperties.h"
+
+//#include <Stmts_all.h>
+//#include <PrintStmt.h>
+//#include <ModelGlobal.h>
+//#include <PrintITL/PrintITL.h>
+//#include <ReconstructOperations.h>
+//#include <ExprVisitor.h>
+#include <PropertyFactory.h>
+#include <ValidOperations.h>
+//#include <z3++.h>
+//#include <ExprTranslator.h>
+#include <chrono>
+#include <OperationOptimizations/ConditionOptimizer2.h>
+//#include "Model.h"
+
+
 
 ChannelProperties::ChannelProperties (DESCAM::Module *module) :
         module(module)
@@ -53,11 +71,11 @@ void ChannelProperties::generateProperties() {
 
 
     //Step1:Find important states
-    std::vector<std::map<int, CfgNode *>> importantStatesVector;
+    std::vector<std::map<int, DESCAM::CfgNode *>> importantStatesVector;
 
     //Find all important states for the CFG of each function
     for(int i=0; i<module->getFunctionMap().size();i++){
-        std::map<int, CfgNode*> importantStates;
+        std::map<int, DESCAM::CfgNode*> importantStates;
         findImportantStates(allcontrolFlowMaps.at(i),&importantStates);
         importantStatesVector.push_back(importantStates);
     }
@@ -163,21 +181,21 @@ void ChannelProperties::generateProperties() {
     PropertyFactory propertyFactory(module);
     module->setPropertySuite(propertyFactory.getPropertySuite());
 
-    //Print ITL Properties to file
-    PrintITL printITL;
-    auto map = printITL.printModule(module);
-    std::ofstream myfile;
-    myfile.open("/tests/Buffer_Channel_Properties/" + module->getName() + "_generated.vhi");
-    myfile << map.at(module->getName() + ".vhi") << std::endl;
-    myfile.close();
+//    //Print ITL Properties to file
+//    PrintITL printITL;
+//    auto map = printITL.printModule(module);
+//    std::ofstream myfile;
+//    myfile.open("/tests/Buffer_Channel_Properties/" + module->getName() + "_generated.vhi");
+//    myfile << map.at(module->getName() + ".vhi") << std::endl;
+//    myfile.close();
 
 }
 
-std::string ChannelProperties::printCFG(std::map<int,CfgNode*> controlFlowMap) {
+std::string ChannelProperties::printCFG(std::map<int,DESCAM::CfgNode*> controlFlowMap) {
     //Print CFG for debugging
     std::stringstream ss;
     for (auto node: controlFlowMap) {
-        CfgNode *sus = node.second;
+        DESCAM::CfgNode *sus = node.second;
 
         ss << "[ID" << node.first << "] [Node" << sus->getName() << "]" << "\n";
         ss << "\tStmnt: " << "\n";
@@ -200,7 +218,7 @@ std::string ChannelProperties::printCFG(std::map<int,CfgNode*> controlFlowMap) {
     return ss.str();
 }
 
-void ChannelProperties::findImportantStates(std::map<int,CfgNode*> controlFlowMap, std::map<int,CfgNode*>* importantStateMap) {
+void ChannelProperties::findImportantStates(std::map<int,DESCAM::CfgNode*> controlFlowMap, std::map<int,DESCAM::CfgNode*>* importantStateMap) {
     //Iterate over all CfgNodes and find wait and return statements
     for (auto node : controlFlowMap) {
         //Nodes with a wait statement
@@ -215,7 +233,7 @@ void ChannelProperties::findImportantStates(std::map<int,CfgNode*> controlFlowMa
     return;
 }
 
-void ChannelProperties::findPathsfromNode(CfgNode* startnode, std::vector<std::vector<DESCAM::Stmt*>> *pathsFromStart, std::vector<std::vector<int>> *pathsAsIDs){
+void ChannelProperties::findPathsfromNode(DESCAM::CfgNode* startnode, std::vector<std::vector<DESCAM::Stmt*>> *pathsFromStart, std::vector<std::vector<int>> *pathsAsIDs){
     //Recursively compute all successors starting from startnode
     //Push _back id of CfgNode to currentPath with each function call
     static std::vector<DESCAM::Stmt*> currentPath;
@@ -446,4 +464,8 @@ void ChannelProperties::combinePaths(std::vector<eventID> readyQueue, std::vecto
             return;
         }
     }
+}
+
+void ChannelProperties::computePermutations(std::vector<eventID> functionVec){
+
 }
