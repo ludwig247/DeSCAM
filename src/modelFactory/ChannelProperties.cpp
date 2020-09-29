@@ -10,7 +10,7 @@
 //#include <PrintStmt.h>
 //#include <ModelGlobal.h>
 //#include <PrintITL/PrintITL.h>
-//#include <ReconstructOperations.h>
+#include <ReconstructOperations.h>
 //#include <ExprVisitor.h>
 #include <PropertyFactory.h>
 #include <ValidOperations.h>
@@ -18,6 +18,7 @@
 //#include <ExprTranslator.h>
 #include <chrono>
 #include <OperationOptimizations/ConditionOptimizer2.h>
+#include <ModelGlobal.h>
 //#include "Model.h"
 
 
@@ -137,8 +138,8 @@ void ChannelProperties::generateProperties() {
     }
 
     //add reset operation
-    //TODO: auto rOperations = new ReconstructOperations(module);
-    //TODO: rOperations->sortOperation(reset_op);
+    ReconstructOperations rOperations;
+    rOperations.sortOperation(reset_op); //TODO:
     for(int i=0; i<startnodes.size();i++){
         auto noti = new Notify(module->getPort(portnames.at(i)));
         auto assign = new Assignment(noti,new BoolValue(false));
@@ -444,8 +445,8 @@ void ChannelProperties::combinePaths(std::vector<eventID> readyQueue, std::vecto
                             auto merged_assump_list = new Logical(combined_assump_list,"or",combined_assump_list2);
                             std::vector<DESCAM::Expr *> merged_assump_vector;
                             merged_assump_vector.push_back(merged_assump_list);
-                            //TODO:ModelGlobal::setModel(new Model("test"));
-                            //TODO:ModelGlobal::getModel()->addModule(this->module);
+                            ModelGlobal::setModel(new Model("test"));
+                            ModelGlobal::getModel()->addModule(this->module);
                             auto opti = new ConditionOptimizer2(merged_assump_vector,this->module);
                             comp_op->setAssumptionsList(opti->getNewConditionList());
                             was_merged = true;
