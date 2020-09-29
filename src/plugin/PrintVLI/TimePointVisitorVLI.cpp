@@ -71,16 +71,19 @@ void SCAM::TimePointVisitorVLI::visit(SCAM::Arithmetic &node) {
 void SCAM::TimePointVisitorVLI::visit(SCAM::Bitwise &node) {
     if (node.getOperation() == "<<") {
         this->resize_flag = true;
-        this->ss << "(shift_left(";
+        this->ss << "((";
         node.getLhs()->accept(*this);
-        this->resize_flag = false;
-        this->ss << ",";
+        this->ss << ")";
+        this->ss << " << ";
+        this->ss << "(";
         node.getRhs()->accept(*this);
         this->ss << "))";
     } else if (node.getOperation() == ">>") {
-        this->ss << "(shift_right(";
+        this->ss << "((";
         node.getLhs()->accept(*this);
-        this->ss << ",";
+        this->ss << ")";
+        this->ss << " >> ";
+        this->ss << "(";
         node.getRhs()->accept(*this);
         this->ss << "))";
     } else {
@@ -99,11 +102,17 @@ void SCAM::TimePointVisitorVLI::visit(SCAM::Bitwise &node) {
 }
 
 void SCAM::TimePointVisitorVLI::visit(SCAM::UnsignedValue &node) {
-    this->ss << node.getValueAsString();
+    if (this->resize_flag) {
+        //FIXME: remove once concat is present?
+        this->ss << "resize(" << node.getValueAsString() << ",32)";
+    } else this->ss << node.getValue();
 }
 
 void SCAM::TimePointVisitorVLI::visit(SCAM::IntegerValue &node) {
-    this->ss << node.getValueAsString();
+    if (this->resize_flag) {
+        //FIXME: remove once concat is present?
+        this->ss << "resize(" << node.getValueAsString() << ",32)";
+    } else this->ss << node.getValue();
 }
 
 void SCAM::TimePointVisitorVLI::visit(SCAM::Cast &node) {

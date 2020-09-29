@@ -58,17 +58,19 @@ void SCAM::DatapathVisitorVLI::visit(SCAM::Arithmetic &node) {
 void SCAM::DatapathVisitorVLI::visit(SCAM::Bitwise &node) {
 
     if (node.getOperation() == "<<") {
-        this->ss << "(shift_left(";
-        this->resize_flag = true;
+        this->ss << "((";
         node.getLhs()->accept(*this);
-        this->resize_flag = false;
-        this->ss << ",";
+        this->ss << ")";
+        this->ss << " << ";
+        this->ss << "(";
         node.getRhs()->accept(*this);
         this->ss << "))";
     } else if (node.getOperation() == ">>") {
-        this->ss << "(shift_right(";
+        this->ss << "((";
         node.getLhs()->accept(*this);
-        this->ss << ",";
+        this->ss << ")";
+        this->ss << " >> ";
+        this->ss << "(";
         node.getRhs()->accept(*this);
         this->ss << "))";
     } else {
