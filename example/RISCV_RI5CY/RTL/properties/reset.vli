@@ -13,7 +13,6 @@ freeze:
 assume:
     reset_sequence;
     during [t_fetch,t_writeb]: rst_ni;
-    
 prove:
     // conceptual state
     at t_execute: conceptual_state;
@@ -36,5 +35,4 @@ prove:
     during[t_fetch,t_writeb]: foreach r in 0..31: REGISTER(r) == 0; end foreach;
 
     right_hook: t_execute;
-
 end property;

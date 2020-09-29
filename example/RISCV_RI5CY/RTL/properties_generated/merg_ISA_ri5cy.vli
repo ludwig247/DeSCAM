@@ -101,7 +101,7 @@ prove:
 	// at t_ex: prevInstr == prevInstr_at_t;
 	at t_ex: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t_id);
 	at t_ex: toRegsPort_sig_dstData == getALUresult(getALUfunc(getInstrType(encodedInstr_at_t_id)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t_id)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(encodedInstr_at_t_id)));
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
 	// during[t_id+1, t_ex-1]: toRegsPort_notify == false;
 	at t_ex: toRegsPort_notify == true;
@@ -185,7 +185,7 @@ prove:
 	// at t_ex: prevInstr == prevInstr_at_t;
 	at t_ex: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t_id);
 	at t_ex: toRegsPort_sig_dstData == getALUresult(getALUfunc(getInstrType(encodedInstr_at_t_id)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t_id)),getImmediate(encodedInstr_at_t_id));
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
 	// during[t_id+1, t_ex-1]: toRegsPort_notify == false;
 	at t_ex: toRegsPort_notify == true;
@@ -245,19 +245,19 @@ prove:
 	at t_ex: instr_req_sig == (pcIf_at_t + getImmediate(encodedInstr_at_t_id))[31:0];
 	// at t_ex: pcIf == pcIf_at_t;
 	// at t_ex: prevInstr == prevInstr_at_t;
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex-1]: instr_req_notify == false;
 	at t_ex: instr_req_notify == true;
-	during[t_id+1, t_ex]: toRegsPort_notify == false;
+	// -- during[t_id+1, t_ex]: toRegsPort_notify == false;
 
 	// at t_end: IF_1;
 	// at t_wb: encodedInstr == encodedInstr_at_t;
 	// at t_wb: iaddr == iaddr_at_t;
 	at t_wb: pcIf == iaddr_at_t_ex;
 	// at t_wb: prevInstr == prevInstr_at_t;
-	during[t_ex+1, t_wb]: data_out_notify == false;
+	// -- during[t_ex+1, t_wb]: data_out_notify == false;
 	// during[t_ex+1, t_wb]: instr_req_notify == false;
-	during[t_ex+1, t_wb]: toRegsPort_notify == false;	
+	// -- during[t_ex+1, t_wb]: toRegsPort_notify == false;	
 end property;
 
 property BRANCH_NOT_TAKEN;
@@ -307,9 +307,9 @@ prove:
 	// at t_ex: iaddr == iaddr_at_t_id;
 	at t_ex: pcIf == iaddr_at_t_id;
 	// at t_ex: prevInstr == prevInstr_at_t;
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
-	during[t_id+1, t_ex]: toRegsPort_notify == false;
+	// -- during[t_id+1, t_ex]: toRegsPort_notify == false;
 end property;
 
 property LOAD;
@@ -410,7 +410,7 @@ prove:
 	// during[t_id+1, t_ex-1]: data_out_notify == false;
 	at t_ex: data_out_notify == true;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
-	during[t_id+1, t_ex]: toRegsPort_notify == false;
+	// -- during[t_id+1, t_ex]: toRegsPort_notify == false;
 
 	// at t_end: IF_1;
 	// at t_wb: encodedInstr == encodedInstr_at_t;
@@ -517,7 +517,7 @@ prove:
 	// during[t_id+1, t_ex-1]: data_out_notify == false;
 	at t_ex: data_out_notify == true;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
-	during[t_id+1, t_ex]: toRegsPort_notify == false;
+	// -- during[t_id+1, t_ex]: toRegsPort_notify == false;
 	
 	// at t_end: IF_1;
 	// at t_wb: encodedInstr == encodedInstr_at_t;
@@ -526,7 +526,7 @@ prove:
 	// at t_wb: prevInstr == prevInstr_at_t;
 	// during[t_ex+1, t_wb]: data_out_notify == false;
 	// during[t_ex+1, t_wb]: instr_req_notify == false;
-	during[t_ex+1, t_wb]: toRegsPort_notify == false;
+	// -- during[t_ex+1, t_wb]: toRegsPort_notify == false;
 end property;
 
 property JAL;
@@ -577,7 +577,7 @@ prove:
 	// at t_ex: prevInstr == prevInstr_at_t;
 	at t_ex: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t_id);
 	at t_ex: toRegsPort_sig_dstData == (4 + pcIf_at_t)[31:0];
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
 	// during[t_id+1, t_ex-1]: toRegsPort_notify == false;
 	at t_ex: toRegsPort_notify == true;
@@ -662,7 +662,7 @@ prove:
 	// at t_ex: prevInstr == prevInstr_at_t;
 	at t_ex: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t_id);
 	at t_ex: toRegsPort_sig_dstData == (4 + pcIf_at_t)[31:0];
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
 	// during[t_id+1, t_ex-1]: toRegsPort_notify == false;
 	at t_ex: toRegsPort_notify == true;
@@ -686,7 +686,7 @@ freeze:
 
 	encodedInstr_at_t_id = encodedInstr@t_id,
 	iaddr_at_t_id = iaddr@t_id,
-	pcIf_at__idt = pcIf@t_id,
+	pcIf_at_t_id = pcIf@t_id,
 	prevInstr_at_t_id = prevInstr@t_id;
 assume:
 	at t: IF_1;
@@ -716,7 +716,7 @@ prove:
 	// at t_ex: prevInstr == prevInstr_at_t;
 	at t_ex: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t_id);
 	at t_ex: toRegsPort_sig_dstData == getEncUALUresult(encodedInstr_at_t_id,pcIf_at_t);
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
 	// during[t_id+1, t_ex-1]: toRegsPort_notify == false;
 	at t_ex: toRegsPort_notify == true;
@@ -775,9 +775,9 @@ prove:
 	// at t_ex: iaddr == iaddr_at_t;
 	// at t_ex: pcIf == pcIf_at_t;
 	// at t_ex: prevInstr == prevInstr_at_t;
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
-	during[t_id+1, t_ex]: toRegsPort_notify == false;
+	// -- during[t_id+1, t_ex]: toRegsPort_notify == false;
 end property;
 
 property UNKNOWN;
@@ -829,9 +829,9 @@ prove:
 	// at t_ex: iaddr == iaddr_at_t;
 	// at t_ex: pcIf == pcIf_at_t;
 	// at t_ex: prevInstr == prevInstr_at_t;
-	during[t_id+1, t_ex]: data_out_notify == false;
+	// -- during[t_id+1, t_ex]: data_out_notify == false;
 	// during[t_id+1, t_ex]: instr_req_notify == false;
-	during[t_id+1, t_ex]: toRegsPort_notify == false;
+	// -- during[t_id+1, t_ex]: toRegsPort_notify == false;
 end property;
 
 property FLUSH;

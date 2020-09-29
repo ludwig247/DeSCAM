@@ -15,4 +15,6 @@ set_itl_flavor vli
 
 read_itl  { properties_s2qed/*.vli}
 
+check  {S2QED_ADD S2QED_BRANCH_NOT_TAKEN S2QED_BRANCH_TAKEN S2QED_ENC_I_I S2QED_JUMP S2QED_UI S2QED_STORE};
+
 

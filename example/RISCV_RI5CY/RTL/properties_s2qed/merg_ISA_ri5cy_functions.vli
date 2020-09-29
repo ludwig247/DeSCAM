@@ -72,8 +72,8 @@ endif;
 end macro;
 
 macro unsigned getEncUALUresult (unsigned encodedInstr; unsigned pcReg) :=
-	if ((getInstrType(encodedInstr) == instr_lui)) unsigned(getALUresult(alu_copy1,getImmediate(encodedInstr),resize(0,32)))
-	else unsigned(getALUresult(alu_add,pcReg,getImmediate(encodedInstr)))
+	if ((getInstrType(encodedInstr) == instr_lui)) unsigned((encodedInstr & unsigned(resize(-4096,32))))
+	else unsigned(((encodedInstr & unsigned(resize(-4096,32))) + pcReg)[31:0])
 endif;
 end macro;
 

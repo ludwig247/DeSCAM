@@ -650,8 +650,10 @@ module riscv_id_stage
   always_comb begin : operand_a_fw_mux
     case (operand_a_fw_mux_sel)
       SEL_FW_EX:    operand_a_fw_id = regfile_alu_wdata_fw_i;
+      // SEL_FW_EX:    operand_a_fw_id = 32'hffff_f844; //INTRODUCED ERROR IN FORWARDING
       SEL_FW_WB:    operand_a_fw_id = regfile_wdata_wb_i;
       SEL_REGFILE:  operand_a_fw_id = regfile_data_ra_id;
+      // SEL_REGFILE:  operand_a_fw_id = 32'hffff_f844;
       default:      operand_a_fw_id = regfile_data_ra_id;
     endcase; // case (operand_a_fw_mux_sel)
   end
@@ -717,8 +719,10 @@ module riscv_id_stage
   always_comb begin : operand_b_fw_mux
     case (operand_b_fw_mux_sel)
       SEL_FW_EX:    operand_b_fw_id = regfile_alu_wdata_fw_i;
+      // SEL_FW_EX:    operand_b_fw_id = 32'hffff_f844; //INTRODUCED ERROR IN FORWARDING
       SEL_FW_WB:    operand_b_fw_id = regfile_wdata_wb_i;
       SEL_REGFILE:  operand_b_fw_id = regfile_data_rb_id;
+      // SEL_REGFILE:  operand_b_fw_id = 32'hffff_f844;
       default:      operand_b_fw_id = regfile_data_rb_id;
     endcase; // case (operand_b_fw_mux_sel)
   end
@@ -761,6 +765,7 @@ module riscv_id_stage
   always_comb begin : operand_c_fw_mux
     case (operand_c_fw_mux_sel)
       SEL_FW_EX:    operand_c_fw_id = regfile_alu_wdata_fw_i;
+      // SEL_FW_EX:    operand_c_fw_id = 32'hffff_f844; //INTRODUCED ERROR IN FORWARDING
       SEL_FW_WB:    operand_c_fw_id = regfile_wdata_wb_i;
       SEL_REGFILE:  operand_c_fw_id = regfile_data_rc_id;
       default:      operand_c_fw_id = regfile_data_rc_id;
