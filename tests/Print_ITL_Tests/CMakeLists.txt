@@ -30,7 +30,7 @@ configure_file (
 file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesTernary/*.h"
                      "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModuleArrays_new/*.h"
                      "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModuleStateNames/*.h"
-
+                     "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesBasic/*.h"
         )
 #message(STATUS "${INCLUDE_HEADER}")
 list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)

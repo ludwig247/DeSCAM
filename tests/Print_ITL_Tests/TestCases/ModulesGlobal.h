@@ -6,7 +6,7 @@
 #define DESCAM_MODULESGLOBAL_H
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 const unsigned number = 0x111;
 const unsigned int number2 = 0x111;

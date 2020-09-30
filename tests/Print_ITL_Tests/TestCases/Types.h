@@ -5,6 +5,12 @@
 #ifndef PROJECT_TYPES_H
 #define PROJECT_TYPES_H
 
+const unsigned number = 0x111;
+const unsigned int number2 = 0x111;
+const int number3 = 20;
+const bool number4 = true;
+const int intern = 3;
+const int intern2 = 3;
 enum Mode {
     READ, WRITE
 };
