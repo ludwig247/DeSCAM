@@ -5,6 +5,10 @@
 #ifndef SCAM_TESTBASIC24_H
 #define SCAM_TESTBASIC24_H
 
+#include "systemc.h"
+#include "Interfaces.h"
+#include "../Types.h"
+
 
 /// checking a master_in after a master_out => color master_out
 struct TestBasic24 : public sc_module {
