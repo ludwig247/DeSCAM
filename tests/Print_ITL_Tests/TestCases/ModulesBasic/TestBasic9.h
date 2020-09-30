@@ -31,7 +31,7 @@ struct TestBasic09 : public sc_module {
         while (true) {
             b_in->read(var); //state_5
             m_in->master_read(var);
-            wait(SC_ZERO_TIME);
+            wait(0);
         }
     }
 };

@@ -128,9 +128,9 @@ class ITLTestExamples : public ITLTest {};
 class ITLTestFunctionality : public ITLTest {};
 
 INSTANTIATE_TEST_CASE_P(
-        DISABLED_Examples,
-//        Examples,
-        ITLTestExamples,
+//        DISABLED_Examples,
+        Examples,
+        ITLTestEamples,
         testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/tests.list")),
         ITLTest::PrintToStringParamName()
                 );

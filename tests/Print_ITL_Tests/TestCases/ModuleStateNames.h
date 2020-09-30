@@ -6,7 +6,7 @@
 #define DESCAM_MODULESTATENAMES_H
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 SC_MODULE(ModuleStateName01) {
         blocking_in<int> b_in;

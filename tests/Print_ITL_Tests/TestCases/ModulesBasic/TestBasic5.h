@@ -31,7 +31,7 @@ struct TestBasic05 : public sc_module {
         while (true) {
             b_in->read(var); //state_5
             b_out->write(var); //state_6 // need var for case of !sync
-            wait(SC_ZERO_TIME); //No state
+            wait(0); //No state
         }
     }
 };
