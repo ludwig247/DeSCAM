@@ -1,4 +1,4 @@
-add_subdirectory(Bus)
+#add_subdirectory(Bus)
 add_subdirectory(Framer)
 #add_subdirectory(SingleMasterMultiSlave)
 add_subdirectory(FPI)
@@ -12,5 +12,5 @@ add_subdirectory(FPI)
 #add_subdirectory(RISCV_Test_ELF)
 #add_subdirectory(RISCV_RI5CY)
 #add_subdirectory(I2C)
-add_subdirectory(Tobias_test)
+#add_subdirectory(Tobias_test)
 

@@ -27,7 +27,7 @@ configure_file (
         "${CMAKE_CURRENT_SOURCE_DIR}/tests.list"
 )
 
-file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/*.h")
+file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesTernary/*.h")
 #message(STATUS "${INCLUDE_HEADER}")
 list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)
 string(REPLACE ";" "\n" FUNC_TESTS "${FUNC_TESTS}")
