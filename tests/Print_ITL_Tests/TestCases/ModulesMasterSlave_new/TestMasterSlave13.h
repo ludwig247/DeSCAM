@@ -11,12 +11,8 @@
 
 struct TestMasterSlave13 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
+    enum Phases { SECTION_A, SECTION_B};
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestMasterSlave13);
@@ -24,22 +20,20 @@ struct TestMasterSlave13 : public sc_module {
     TestMasterSlave13(sc_module_name name) :
             s_in("s_in"),
             s_in2("s_in2"),
-            s_out("s_out"),
+            sh_out("sh_out"),
             m_in("m_in"),
             m_out("m_out"),
-            shared_out("shared_out"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            sh_out2("sh_out2") {
         SC_THREAD(fsm);
     }
 
     //Out-port
     slave_in<int> s_in;
     slave_in<int> s_in2;
-    shared_out <int> s_out;
+    shared_out <int> sh_out;
     master_in<int> m_in;
     master_out<int> m_out;
-    shared_out<int> shared_out;
+    shared_out<int> sh_out2;
 
 
     //Variable
@@ -48,9 +42,10 @@ struct TestMasterSlave13 : public sc_module {
     bool succ;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
                 save_val += val;
@@ -59,17 +54,17 @@ struct TestMasterSlave13 : public sc_module {
                 s_in2->slave_read(val);
                 save_val += val;
                 m_out->master_write(save_val);
-                shared_out->set(save_val);
-                s_out->set(val);
-                if(succ) nextsection = SECTION_B;
+                sh_out2->set(save_val);
+                sh_out->set(val);
+                if(succ) nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
+            if (phase == SECTION_B) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
                 s_in2->slave_read(val);
                 val = val*2;
-                s_out->set(val*2);
-                nextsection = SECTION_A;
+                sh_out->set(val*2);
+                nextphase = SECTION_A;
             }
         }
     }

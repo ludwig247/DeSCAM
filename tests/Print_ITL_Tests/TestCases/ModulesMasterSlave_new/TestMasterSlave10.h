@@ -11,12 +11,8 @@
 
 struct TestMasterSlave10 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
+    enum Phases { SECTION_A, SECTION_B};
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestMasterSlave10);
@@ -24,18 +20,16 @@ struct TestMasterSlave10 : public sc_module {
     TestMasterSlave10(sc_module_name name) :
             s_in("s_in"),
             s_in2("s_in2"),
-            s_out("s_out"),
-            sharded_in("sharded_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            sh_out("sh_out"),
+            sh_in("sh_in") {
         SC_THREAD(fsm);
     }
 
     //Out-port
     slave_in<int> s_in;
     slave_in<int> s_in2;
-    shared_in<int> sharded_in;
-    shared_out <int> s_out;
+    shared_in<int> sh_in;
+    shared_out <int> sh_out;
 
     //Variable
     int val;
@@ -43,23 +37,26 @@ struct TestMasterSlave10 : public sc_module {
     bool succ;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
                 s_in2->slave_read(val);
-                s_out->set(val);
-                if(succ) nextsection = SECTION_B;
+                sh_out->set(val);
+                if(succ) nextphase = SECTION_B;//FIXME:: this should be unreachable
+                // but because the backtrack only goes until the while(true) statement, then we can't exclude it
+                // Ibra's work should detect it.
             }
-            if (section == SECTION_B) {
-                wait(WAIT_TIME, SC_PS);//state
-                s_in->slave_read(val);
+            if (phase == SECTION_B) {
+                wait(WAIT_TIME, SC_PS);
+                s_in->slave_read(val); //FIXME: original properties are not as expected!
                 s_in2->slave_read(val);
                 val = val*2;
-                sharded_in->get(shared);
-                s_out->set(val*2 + shared);
-                nextsection = SECTION_A;
+                sh_in->get(shared);//FIXME: this variable should disappear because we always read from sh_in
+                sh_out->set(val*2 + shared);
+                nextphase = SECTION_A;
             }
         }
     }

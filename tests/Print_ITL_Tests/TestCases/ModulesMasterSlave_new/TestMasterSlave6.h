@@ -9,22 +9,16 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-struct TestMasterSlave6 : public sc_module {
+struct TestMasterSlave06 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
+    enum Phases { SECTION_A, SECTION_B};
+    Phases phase, nextphase;
 
     //Constructor
-    SC_HAS_PROCESS(TestMasterSlave6);
+    SC_HAS_PROCESS(TestMasterSlave06);
 
-    TestMasterSlave6(sc_module_name name):
-            s_in("s_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+    TestMasterSlave06(sc_module_name name):
+            s_in("s_in") {
         SC_THREAD(fsm);
     }
     //Out-port
@@ -34,19 +28,20 @@ struct TestMasterSlave6 : public sc_module {
     int val;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
+            if (phase == SECTION_B) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
-                nextsection = SECTION_A;
+                nextphase = SECTION_A;
             }
         }
     }

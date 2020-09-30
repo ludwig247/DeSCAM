@@ -11,50 +11,45 @@
 
 struct TestMasterSlave11 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
+    enum Phases { SECTION_A, SECTION_B};
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestMasterSlave11);
 
     TestMasterSlave11(sc_module_name name) :
             s_in("s_in"),
-            s_out("s_out"),
-            shared_in("shared_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            sh_out("sh_out"),
+            sh_in("sh_in") {
         SC_THREAD(fsm);
     }
 
     //Out-port
     slave_in<int> s_in;
-    shared_out <int> s_out;
-    shared_in <bool> shared_in;
+    shared_out <int> sh_out;
+    shared_in <bool> sh_in;
 
     //Variable
     int val;
     bool succ;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
-                s_out->set(val);
-                shared_in->get(succ);
-                if(succ) nextsection = SECTION_B;
+                sh_out->set(val);
+                sh_in->get(succ);
+                if(succ) nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
+            if (phase == SECTION_B) {
                 wait(WAIT_TIME, SC_PS);//state
                 s_in->slave_read(val);
                 val = val*2;
-                s_out->set(val);
-                nextsection = SECTION_A;
+                sh_out->set(val);
+                nextphase = SECTION_A;
             }
         }
     }
