@@ -12,22 +12,15 @@
 
 struct TestBasic21 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
-
+    enum Phases { SECTION_A, SECTION_B };
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestBasic21);
 
     TestBasic21(sc_module_name name) :
             b_out("b_out"),
-            m_out("m_out"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            m_out("m_out") {
         SC_THREAD(fsm);
     }
 
@@ -39,19 +32,22 @@ struct TestBasic21 : public sc_module {
     CompoundType compoundType;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
-                b_out->try_write(compoundType);
+            phase = nextphase;
+            if (phase == SECTION_A) {
+//                b_out->nb_write(compoundType);//state_11
+                b_out->try_write(compoundType);//state_11
+                m_out->master_write(compoundType);//state_12
                 m_out->master_write(compoundType);
-                //m_out->write(compoundType);
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
-                nextsection = SECTION_A;
+            if (phase == SECTION_B) {
+                nextphase = SECTION_A;
             }
         }
     }
 };
+
 
 #endif //SCAM_TESTBASIC21_H

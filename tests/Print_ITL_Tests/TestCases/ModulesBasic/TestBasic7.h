@@ -9,17 +9,16 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-struct TestBasic7 : public sc_module {
+struct TestBasic07 : public sc_module {
     //Constructor
-    TestBasic7(sc_module_name name) :
-    //sensor_in("sensor_in"),
+    TestBasic07(sc_module_name name) :
             b_in("b_in"),
             m_out("m_out"),
             var(1337) {
         SC_THREAD(fsm);
     }
 
-    SC_HAS_PROCESS(TestBasic7);
+    SC_HAS_PROCESS(TestBasic07);
 
     //Out port
     blocking_in<int> b_in;
@@ -30,7 +29,7 @@ struct TestBasic7 : public sc_module {
 
     void fsm() {
         while (true) {
-            b_in->read(var);
+            b_in->read(var); //state_5
             m_out->master_write(var);
             wait(SC_ZERO_TIME);
         }

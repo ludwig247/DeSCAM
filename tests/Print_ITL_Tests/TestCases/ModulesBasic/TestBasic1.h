@@ -9,23 +9,21 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-struct TestBasic1 : public sc_module {
+struct TestBasic01 : public sc_module {
     //Sections
-    enum Sections {
+    enum Phases {
         SECTION_A, SECTION_B
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
 
 
     //Constructor
-    SC_HAS_PROCESS(TestBasic1);
+    SC_HAS_PROCESS(TestBasic01);
 
-    TestBasic1(sc_module_name name) :
-            b_in("b_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+    TestBasic01(sc_module_name name) :
+            b_in("b_in") {
         SC_THREAD(fsm);
     }
 
@@ -35,16 +33,18 @@ struct TestBasic1 : public sc_module {
     int x;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 b_in->read(x);
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
-                nextsection = SECTION_A;
+            if (phase == SECTION_B) {
+                nextphase = SECTION_A;
             }
         }
     }
 };
+
 #endif //SCAM_TESTBASIC1_H

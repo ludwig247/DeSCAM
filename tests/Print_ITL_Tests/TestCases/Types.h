@@ -5,6 +5,22 @@
 #ifndef PROJECT_TYPES_H
 #define PROJECT_TYPES_H
 
+enum Mode {
+    READ, WRITE
+};
+
+struct CompoundType {
+    int x;
+    bool y;
+    Mode mode;
+};
+
+struct test_compound {
+    int x;
+    unsigned int y;
+//    int y;
+};
+
 enum err_id_t {
     NO_ERR,ERR_MIX, ERR_TEMP, ERR_TEMP_TOP, ERR_TEMP_BOT, ERR_UNKNOWN
 };

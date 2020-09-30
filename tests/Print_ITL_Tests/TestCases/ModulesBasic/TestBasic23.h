@@ -12,21 +12,13 @@
 
 struct TestBasic23 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
-
+    enum Phases { SECTION_A, SECTION_B };
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestBasic23);
 
     TestBasic23(sc_module_name name) :
-    //m_out("m_out"),
-            section(SECTION_A),
-            nextsection(SECTION_A),
             b_out("b_out"),
             b_out2("b_out2"),
             val_unsigned(13),
@@ -42,37 +34,37 @@ struct TestBasic23 : public sc_module {
     int val_signed;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 b_out->write(val_unsigned>>2);
                 b_out->write(val_unsigned<<2);
                 b_out->write(val_unsigned&2);
                 b_out->write(val_unsigned|2);
 
-                if ((val_unsigned % 2) == 0) nextsection = SECTION_B;
-                if ((val_unsigned & 2) == 0) nextsection = SECTION_B;
-                if ((val_unsigned | 2) == 0) nextsection = SECTION_B;
-                if ((val_unsigned >> 2) == 0) nextsection = SECTION_B;
-                if ((val_unsigned << 2) == 0) nextsection = SECTION_B;
+                if ((val_unsigned % 2) == 0) nextphase = SECTION_B;
+                if ((val_unsigned & 2) == 0) nextphase = SECTION_B;
+                if ((val_unsigned | 2) == 0) nextphase = SECTION_B;
+                if ((val_unsigned >> 2) == 0) nextphase = SECTION_B;
+                if ((val_unsigned << 2) == 0) nextphase = SECTION_B;
 
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
+            if (phase == SECTION_B) {
 
                 b_out2->write(val_signed>>2);
                 b_out2->write(val_signed<<2);
                 b_out2->write(val_signed&2);
                 b_out2->write(val_signed|2);
 
-                if ((val_signed % 2) == 0) nextsection = SECTION_B;
-                if ((val_signed & 2) == 0) nextsection = SECTION_B;
-                if ((val_signed | 2) == 0) nextsection = SECTION_B;
-                if ((val_signed >> 2) == 0) nextsection = SECTION_B;
-                if ((val_signed << 2) == 0) nextsection = SECTION_B;
+                if ((val_signed % 2) == 0) nextphase = SECTION_B;
+                if ((val_signed & 2) == 0) nextphase = SECTION_B;
+                if ((val_signed | 2) == 0) nextphase = SECTION_B;
+                if ((val_signed >> 2) == 0) nextphase = SECTION_B;
+                if ((val_signed << 2) == 0) nextphase = SECTION_B;
 
-
-                nextsection = SECTION_A;
+                nextphase = SECTION_A;
             }
         }
     }

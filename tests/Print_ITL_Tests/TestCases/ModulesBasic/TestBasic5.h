@@ -9,30 +9,29 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-struct TestBasic5 : public sc_module {
+struct TestBasic05 : public sc_module {
     //Constructor
-    TestBasic5(sc_module_name name) :
-    //sensor_in("sensor_in"),
+    TestBasic05(sc_module_name name) :
             b_out("b_out"),
             b_in("b_in"),
             var(4) {
         SC_THREAD(fsm);
     }
 
-    SC_HAS_PROCESS(TestBasic5);
+    SC_HAS_PROCESS(TestBasic05);
 
     //Out port
     blocking_out<int> b_out;
     blocking_in<int> b_in;
-    //Variable - both should be removed from the model
+    //Variable - both should be removed from the model // wrong
     bool nb_result;
     int var;
 
     void fsm() {
         while (true) {
-            b_in->read(var);
-            b_out->write(var);
-            wait(SC_ZERO_TIME);
+            b_in->read(var); //state_5
+            b_out->write(var); //state_6 // need var for case of !sync
+            wait(SC_ZERO_TIME); //No state
         }
     }
 };

@@ -9,15 +9,15 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-struct TestBasic3 : public sc_module {
+struct TestBasic03 : public sc_module {
 
     //Constructor
-    TestBasic3(sc_module_name name) :
+    TestBasic03(sc_module_name name) :
             b_out("b_out") {
         SC_THREAD(fsm);
     }
 
-    SC_HAS_PROCESS(TestBasic3);
+    SC_HAS_PROCESS(TestBasic03);
 
     //Out port
     blocking_out<int> b_out;
@@ -26,11 +26,13 @@ struct TestBasic3 : public sc_module {
 
     void fsm() {
         while (true) {
-            b_out->try_write(10,nb_result);
+//            nb_result = b_out->nb_write(10); //state_4
+            b_out->try_write(10,nb_result); //state_4
             if (nb_result) {
-                b_out->try_write(11);
+//                b_out->nb_write(11); //state_6
+                b_out->try_write(11); //state_6
             }
-            wait(SC_ZERO_TIME);
+            wait(SC_ZERO_TIME); // not considered! should be wait(0) to be valid
         }
     }
 };

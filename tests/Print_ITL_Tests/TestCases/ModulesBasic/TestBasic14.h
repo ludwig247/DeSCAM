@@ -10,23 +10,19 @@
 #include "../Types.h"
 
 struct TestBasic14 : public sc_module {
-    //Sections
-    enum Sections {
+    enum Phases {
         SECTION_A, SECTION_B
     };
 
-    Sections section;
-    Sections nextsection;
-
+    Phases phase;
+    Phases nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestBasic14);
 
     TestBasic14(sc_module_name name) :
             b_out("b_out"),
-            b_in("b_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            b_in("b_in") {
         SC_THREAD(fsm);
     }
 
@@ -38,21 +34,21 @@ struct TestBasic14 : public sc_module {
     CompoundType compoundType;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 b_in->read(compoundType);
                 ++compoundType.x;
                 if (compoundType.mode == WRITE) {
-                    nextsection = SECTION_B;
+                    nextphase = SECTION_B;
                     compoundType.y = false;
                 }
-
             }
-            if (section == SECTION_B) {
+            if (phase == SECTION_B) {
+//                b_out->nb_write(compoundType);
                 b_out->try_write(compoundType);
-
-                nextsection = SECTION_A;
+                nextphase = SECTION_A;
             }
         }
     }

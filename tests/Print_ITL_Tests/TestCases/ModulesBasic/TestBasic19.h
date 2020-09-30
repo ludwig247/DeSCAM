@@ -12,22 +12,17 @@
 
 struct TestBasic19 : public sc_module {
     //Sections
-    enum Sections {
+    enum Phases {
         SECTION_A, SECTION_B
     };
-
-    Sections section;
-    Sections nextsection;
-
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestBasic19);
 
     TestBasic19(sc_module_name name) :
             b_out("b_out"),
-            m_in("m_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            m_in("m_in") {
         SC_THREAD(fsm);
     }
 
@@ -39,15 +34,17 @@ struct TestBasic19 : public sc_module {
     CompoundType compoundType;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
+//                b_out->nb_write(compoundType);
                 b_out->try_write(compoundType);
                 m_in->master_read(compoundType);
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
-                nextsection = SECTION_A;
+            if (phase == SECTION_B) {
+                nextphase = SECTION_A;
             }
         }
     }

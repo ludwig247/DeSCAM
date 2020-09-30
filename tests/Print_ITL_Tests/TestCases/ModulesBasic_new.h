@@ -6,7 +6,7 @@
 #define PRINT_ITL_TESTING_H
 
 #include "systemc.h"
-#include "../../../example/Interfaces/Interfaces.h"
+#include "Interfaces.h"
 
 /*
 struct TestBasicX : public sc_module {
@@ -380,15 +380,7 @@ struct TestBasic09 : public sc_module {
 };
 
 
-enum Mode {
-    READ, WRITE
-};
 
-struct CompoundType {
-    int x;
-    bool y;
-    Mode mode;
-};
 
 struct TestBasic10 : public sc_module {
     //Sections
@@ -899,11 +891,7 @@ struct TestBasic21 : public sc_module {
     }
 };
 
-struct test_compound {
-    int x;
-    unsigned int y;
-//    int y;
-};
+
 
 struct TestBasic22 : public sc_module {
     //Sections

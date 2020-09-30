@@ -8,14 +8,24 @@
 #include "systemc.h"
 #include "Interfaces.h"
 #include "../Types.h"
+enum Mode {
+    READ, WRITE
+};
+
+struct CompoundType {
+    int x;
+    bool y;
+    Mode mode;
+};
+
 struct TestBasic10 : public sc_module {
     //Sections
-    enum Sections {
+    enum Phases {
         SECTION_A, SECTION_B
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
 
 
     //Constructor
@@ -23,9 +33,7 @@ struct TestBasic10 : public sc_module {
 
     TestBasic10(sc_module_name name) :
             b_out("b_out"),
-            b_in("b_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            b_in("b_in") {
         SC_THREAD(fsm);
     }
 
@@ -37,17 +45,19 @@ struct TestBasic10 : public sc_module {
     CompoundType compoundType;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
-                b_in->read(compoundType);
-                b_out->write(compoundType);
-                nextsection = SECTION_B;
+            phase = nextphase;
+            if (phase == SECTION_A) {
+                b_in->read(compoundType);//state_11
+                b_out->write(compoundType);//state_12
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
-                nextsection = SECTION_A;
+            if (phase == SECTION_B) {
+                nextphase = SECTION_A;
             }
         }
     }
 };
+
 #endif //SCAM_TESTBASIC10_H

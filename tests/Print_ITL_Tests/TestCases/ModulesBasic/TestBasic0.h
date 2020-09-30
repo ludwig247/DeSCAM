@@ -9,22 +9,22 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-struct TestBasic0 : public sc_module {
+struct TestBasic00 : public sc_module {
     //Sections
-    enum Sections {
+    enum Phases {
         SECTION_A, SECTION_B
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
+
 
     //Constructor
-    SC_HAS_PROCESS(TestBasic0);
+    SC_HAS_PROCESS(TestBasic00);
 
-    TestBasic0(sc_module_name name) :
-            b_out("b_out"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+    TestBasic00(sc_module_name name) :
+            b_out("b_out")
+    {
         SC_THREAD(fsm);
     }
 
@@ -32,14 +32,15 @@ struct TestBasic0 : public sc_module {
     blocking_out<int> b_out;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 b_out->write(5);
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
-                nextsection = SECTION_A;
+            if (phase == SECTION_B) {
+                nextphase = SECTION_A;
             }
         }
     }

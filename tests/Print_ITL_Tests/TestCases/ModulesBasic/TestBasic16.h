@@ -10,15 +10,13 @@
 #include "Interfaces.h"
 #include "../Types.h"
 
-//TODO: TestBasic16 ... actually compoundType.x doesn't need to be a register ... if there is time fix this
 struct TestBasic16 : public sc_module {
-    //Sections
-    enum Sections {
+    enum Phases {
         SECTION_A, SECTION_B
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
 
 
     //Constructor
@@ -26,9 +24,7 @@ struct TestBasic16 : public sc_module {
 
     TestBasic16(sc_module_name name) :
             b_out("b_out"),
-            b_in("b_in"),
-            section(SECTION_A),
-            nextsection(SECTION_A) {
+            b_in("b_in") {
         SC_THREAD(fsm);
     }
 
@@ -40,21 +36,22 @@ struct TestBasic16 : public sc_module {
     CompoundType compoundType;
 
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 b_in->read(compoundType);
                 ++compoundType.x;
                 if (compoundType.mode == WRITE) {
-                    nextsection = SECTION_B;
+                    nextphase = SECTION_B;
                 }
-
             }
-            if (section == SECTION_B) {
+            if (phase == SECTION_B) {
+//                b_out->nb_write(compoundType);
                 b_out->try_write(compoundType);
                 --compoundType.x;
                 compoundType.y = false;
-                nextsection = SECTION_A;
+                nextphase = SECTION_A;
             }
         }
     }

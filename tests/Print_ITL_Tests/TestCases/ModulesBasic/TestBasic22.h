@@ -12,21 +12,14 @@
 
 struct TestBasic22 : public sc_module {
     //Sections
-    enum Sections {
-        SECTION_A, SECTION_B
-    };
-
-    Sections section;
-    Sections nextsection;
-
+    enum Phases { SECTION_A, SECTION_B };
+    Phases phase, nextphase;
 
     //Constructor
     SC_HAS_PROCESS(TestBasic22);
 
     TestBasic22(sc_module_name name) :
-    //m_out("m_out"),
-            section(SECTION_A),
-            nextsection(SECTION_A),
+            m_out("m_out"),
             test2(30) {
         SC_THREAD(fsm);
     }
@@ -36,13 +29,15 @@ struct TestBasic22 : public sc_module {
     //Vars
     test_compound test;
     unsigned int test2;
+//    int test2;
 
+    // TODO: an issue with conditions optimization
     void fsm() {
+        nextphase = SECTION_A;
         while (true) {
-            section = nextsection;
-            if (section == SECTION_A) {
+            phase = nextphase;
+            if (phase == SECTION_A) {
                 //test.set(9);
-
                 ++test.y;
                 test.y = test2;
                 ++test2;
@@ -50,12 +45,13 @@ struct TestBasic22 : public sc_module {
                 if (test.y > 10) {
                     test.y = test2;
                     m_out->master_write(test);
-                } else m_out->master_write(test);
+                } else
+                    m_out->master_write(test);
 
-                nextsection = SECTION_B;
+                nextphase = SECTION_B;
             }
-            if (section == SECTION_B) {
-                nextsection = SECTION_A;
+            if (phase == SECTION_B) {
+                nextphase = SECTION_A;
             }
         }
     }
