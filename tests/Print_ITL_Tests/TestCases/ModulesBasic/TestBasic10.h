@@ -8,15 +8,6 @@
 #include "systemc.h"
 #include "Interfaces.h"
 #include "../Types.h"
-enum Mode {
-    READ, WRITE
-};
-
-struct CompoundType {
-    int x;
-    bool y;
-    Mode mode;
-};
 
 struct TestBasic10 : public sc_module {
     //Sections

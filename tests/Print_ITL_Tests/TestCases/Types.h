@@ -11,6 +11,7 @@ const int number3 = 20;
 const bool number4 = true;
 const int intern = 3;
 const int intern2 = 3;
+
 enum Mode {
     READ, WRITE
 };

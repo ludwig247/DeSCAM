@@ -175,7 +175,7 @@ TEST_P(ITLTestExamples, Examples) {
 }
 
 TEST_P(ITLTestFunctionality, Functionality) {
-//    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
+    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     for (auto result: results) {
         DESCAM::Module *module = result;
