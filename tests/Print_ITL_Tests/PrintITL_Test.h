@@ -96,17 +96,7 @@ public:
         commandLineArgumentsArray[0] = (bin.c_str());
         commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
 
-        /* Initialize logger */
-        //setting sinks
-        std::shared_ptr<LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
-        consoleSink->setFormatOption(LoggerFormatter::FormatOption::TEXT);
-        DESCAM::Logger::addSink(consoleSink);
-        std::shared_ptr<LoggerSink> fileSink = std::make_shared<DESCAM::FileSink>(std::string(SCAM_HOME"/bin/LOGS"),true);
-        fileSink->setFormatOption(LoggerFormatter::FormatOption::JSON);
-        DESCAM::Logger::addSink(fileSink);
-        //setting filtering options
-        DESCAM::Logger::setFilteringOptions(std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});
-        DESCAM::Logger::setPrintDecorativeFrames();
+
         //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
         DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0], commandLineArgumentsArray[1]);
 
@@ -114,11 +104,11 @@ public:
         // write log messages to all sinks
         if (DESCAM::Logger::hasFeedback()) {
             DESCAM::Logger::log();
-            for(auto module: ModelGlobal::getModel()->getModules()) {
-                results.push_back(module.second);
-                ASSERT_FALSE(DESCAM::Logger::hasFeedback() == true) << module.second->getName()<< " has errors: check logger";
             }
-        }
+    for(auto module: ModelGlobal::getModel()->getModules()) {
+        results.push_back(module.second);
+        ASSERT_FALSE(DESCAM::Logger::hasFeedback() == true) << module.second->getName()<< " has errors: check logger";
+    }
 
 //    add optimizations
 //        std::set<std::string> optimizeOptions = {"all"};
