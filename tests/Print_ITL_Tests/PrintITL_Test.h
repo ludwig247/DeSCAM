@@ -130,7 +130,7 @@ class ITLTestFunctionality : public ITLTest {};
 INSTANTIATE_TEST_CASE_P(
 //        DISABLED_Examples,
         Examples,
-        ITLTestEamples,
+        ITLTestExamples,
         testing::ValuesIn(parameter(SCAM_HOME"/tests/Print_ITL_Tests/tests.list")),
         ITLTest::PrintToStringParamName()
                 );
