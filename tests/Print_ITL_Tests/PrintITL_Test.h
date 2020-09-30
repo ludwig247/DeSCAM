@@ -11,8 +11,11 @@
 #include <ModelGlobal.h>
 #include <fstream>
 #include <FatalError.h>
-#include <algorithm>
+//#include <algorithm>
 #include <vector>
+#include "../../src/global/Logger/ConsoleSink.h"
+#include "../../src/global/Logger/FileSink.h"
+
 
 
 #include <PrintITL/PrintITL.h>
@@ -95,20 +98,38 @@ public:
         commandLineArgumentsArray[0] = (bin.c_str());
         commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
 
+        /* Initialize logger */
+        //setting sinks
+        std::shared_ptr<LoggerSink> consoleSink = std::make_shared<DESCAM::ConsoleSink>();
+        consoleSink->setFormatOption(LoggerFormatter::FormatOption::TEXT);
+        DESCAM::Logger::addSink(consoleSink);
+        std::shared_ptr<LoggerSink> fileSink = std::make_shared<DESCAM::FileSink>(std::string(SCAM_HOME"/bin/LOGS"),true);
+        fileSink->setFormatOption(LoggerFormatter::FormatOption::JSON);
+        DESCAM::Logger::addSink(fileSink);
+        //setting filtering options
+        DESCAM::Logger::setFilteringOptions(std::set<LoggerFilter::FilterOptions>{LoggerFilter::FilterOptions::showAllMsgs});
+        DESCAM::Logger::setPrintDecorativeFrames();
+        //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+        DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0], commandLineArgumentsArray[1]);
+
+
+        // write log messages to all sinks
+        if (DESCAM::Logger::hasFeedback()) {
+            for(auto module: ModelGlobal::getModel()->getModules()) {
+                DESCAM::Logger::log();
+                results.push_back(module.second);
+                ASSERT_FALSE(DESCAM::Logger::hasFeedback() == true) << module.second->getName()<< " has errors: check logger";
+            }
+        }
+
 //    add optimizations
 //        std::set<std::string> optimizeOptions = {"all"};
 //        CommandLineParameter::setOptimizeOptionsSet(optimizeOptions);
 
-        //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-            try{DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
-                                           commandLineArgumentsArray[1]);}
-            catch(FatalError & e){}
 
-        for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
-            results.push_back(module.second);
-        }
     }
     void TearDown() {
+        DESCAM::Logger::clear();
         DESCAM::ModelGlobal::reset();
     }
 };
@@ -166,6 +187,7 @@ TEST_P(ITLTestExamples, Examples) {
 }
 
 TEST_P(ITLTestFunctionality, Functionality) {
+    ASSERT_TRUE(DESCAM::ModelGlobal::getModel()->getModules().size() == 1);
     PrintITL printITL;
     for (auto result: results) {
         DESCAM::Module *module = result;

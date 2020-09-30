@@ -161,7 +161,7 @@ public:
         std::cout << "Number of modules: " << results.size() << std::endl;
         std::cout << "" << std::endl;
     }
-    void TearDown() override {
+    void TearDown() {
         DESCAM::Logger::clear();
         DESCAM::ModelGlobal::reset();
     }
