@@ -708,9 +708,7 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
 //            FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
 //            module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
         }
-        //TODO: Create a class here that takes the module as input
-        ChannelProperties *prop = new ChannelProperties(module);
-        //Name, methods + parameters -> done
+        // Name, methods + parameters -> done
         std::cout << "Channel: " << module->getName() << std::endl;
         for(auto function: module->getFunctionMap()){
             std::cout << "\tFunction: " << function.first << std::endl;
@@ -721,6 +719,9 @@ void DESCAM::ModelFactory::addCustomChannels(clang::TranslationUnitDecl *decl) {
                 std::cout << "\t" << node.second->print() << std::endl;
             }
         }
+
+        //TODO: Create a class here that takes the module as input
+        ChannelProperties *prop = new ChannelProperties(module);
 
         if (DESCAM::Logger::hasFeedback()) {
             DESCAM::Logger::log();

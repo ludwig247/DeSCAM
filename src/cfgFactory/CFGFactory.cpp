@@ -68,7 +68,7 @@ namespace DESCAM {
         //Translate entry node of block
         CfgBlock *entryNode = this->createCFGNode(entryCFGBlock, nullptr);
 
-        if (sourceModule) {
+        if (sourceModule && !FindDataFlow::isFunction) {
             //Init Block
             auto initBlock = new DESCAM::CfgBlock();
             initBlock->setBlockID(this->controlFlowMap.size());

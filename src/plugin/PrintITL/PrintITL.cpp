@@ -48,7 +48,7 @@ std::map<std::string, std::string> PrintITL::printModule(DESCAM::Module *node) {
     this->module = node;
 
     pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macroFunction() + operations()));
-    pluginOutput.insert(std::make_pair(node->getName() + "_functions.vhi", functions()));
+//    pluginOutput.insert(std::make_pair(node->getName() + "_functions.vhi", functions()));
 
     return pluginOutput;
 }

@@ -22,7 +22,8 @@ add_library (modelFactory SHARED
         FindNewDatatype.cpp
         FindFunctions.cpp
         FindGlobal.cpp FindGlobal.h FindStateName.cpp FindStateName.h
-        FindCustomChannels.cpp)
+        FindCustomChannels.cpp
+        ChannelProperties.cpp)
 
 target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)

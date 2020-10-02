@@ -521,7 +521,7 @@ namespace DESCAM {
 
     void DESCAM::ReconstructOperations::visit(DESCAM::Return &node) {
         node.getReturnValue()->accept(*this);
-        if (this->returnValue != nullptr) TERMINATE("Current path has two return values");
+//        if (this->returnValue != nullptr) TERMINATE("Current path has two return values");
         this->returnValue = new Return(this->newExpr,node.getStmtInfo());
 
     }
