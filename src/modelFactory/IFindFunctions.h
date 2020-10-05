@@ -1,0 +1,25 @@
+//
+// Created by burr on 05.10.20.
+//
+
+#ifndef SCAM_SRC_MODELFACTORY_IFINDFUNCTIONS_H_
+#define SCAM_SRC_MODELFACTORY_IFINDFUNCTIONS_H_
+
+#include "clang/AST/RecursiveASTVisitor.h"
+#include <map>
+
+namespace DESCAM{
+ class IFindFunctions : public clang::RecursiveASTVisitor<IFindFunctions>{
+  public:
+   virtual ~IFindFunctions() = default;
+
+   virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl * methodDecl) = 0;
+
+   virtual const std::map<std::string, clang::CXXMethodDecl*> &getFunctionMap() const = 0;
+   virtual const std::map<std::string, std::string> &getFunctionReturnTypeMap() const = 0;
+   virtual const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const = 0;
+   virtual const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const = 0;
+ };
+}
+
+#endif //SCAM_SRC_MODELFACTORY_IFINDFUNCTIONS_H_
