@@ -21,7 +21,6 @@
 // PArse SystemC
 #include "FindPorts.h"
 #include "FindSCMain.h"
-#include "FindCall.h"
 #include "FindModules.h"
 #include "FindNetlist.h"
 #include "FindProcess.h"
