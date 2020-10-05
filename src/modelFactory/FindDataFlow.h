@@ -16,7 +16,7 @@
 #include <Logger/Logger.h>
 #include <Model.h>
 #include "PrintStmt.h"
-#include "IFindDataFLow.h"
+#include "IFindDataFlow.h"
 
 namespace DESCAM {
 class Module;
