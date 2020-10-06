@@ -8,7 +8,8 @@
 #include <OperationOptimizations/AssignmentOptimizer2.h>
 #include "FindInitalValues.h"
 #include "FindNewDatatype.h"
-#include "FindDataFlow.h"
+#include "IFindDataFlow.h"
+#include "FindDataFlowFactory.h"
 
 bool DESCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
     //Check whether constructor body is empty
@@ -44,15 +45,15 @@ bool DESCAM::FindInitalValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl
                     //Find value and store in this->value
                     //If something goes wrong
                     try {
-                        FindDataFlow findDataFlow(initializer->getInit(), module, ci);
+                        std::unique_ptr<IFindDataFlow> findDataFlow = FindDataFlowFactory::create(initializer->getInit(), module, ci);
 
-                        auto initExpr = findDataFlow.getExpr();
+                        auto initExpr = findDataFlow->getExpr();
                         if (initExpr != nullptr) {
                                 //Part start:
                                 DataType * place_holder_type = const_cast<DataType*>(initExpr->getDataType());
                                 Variable place_holder_variable("foo",place_holder_type);
                                 VariableOperand variableOperand(&place_holder_variable);
-                                auto assignment = Assignment(&variableOperand, findDataFlow.getExpr());
+                                auto assignment = Assignment(&variableOperand, findDataFlow->getExpr());
                                 auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
                                 if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
                                     this->initValue = valueT;
