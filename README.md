@@ -8,7 +8,7 @@
 
 2) Understand the SystemC-PPA with the example in <path-to-root>/HowTo/GettingStarted/ESL/
     1) Compile the example: <br>
-       `cd <path-to-root>/HowTo/GettingStarted/ESL/`   
+       `cd <path-to-root>/doc/Howto/GettingStarted/ESL/`   
        `mkdir build && cd build` <br>
        `cmake ../ && make`
        
