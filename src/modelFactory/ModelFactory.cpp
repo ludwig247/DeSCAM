@@ -4,7 +4,8 @@
 
 #include "ModelFactory.h"
 #include <FindInterface.h>
-#include "FindInitalValues.h"
+#include "IFindInitialValues.h"
+#include "FindInitialValuesFactory.h"
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
@@ -366,7 +367,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
   FindVariables findVariables(decl);
 
   //Initial Values
-  //FindInitalValues findInitalValues(decl, findVariables.getVariableMap(), module);
+  //FindInitialValues findInitalValues(decl, findVariables.getVariableMap(), module);
 
   //Add members to module
   for (auto &&variable: findVariables.getVariableTypeMap()) {
@@ -404,8 +405,8 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      ConstValue *initialValue = FindInitalValues::getInitValue(decl, fieldDecl, module, _ci);
-      //FindInitalValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
+      ConstValue *initialValue = FindInitialValuesFactory::getInitValue(decl, fieldDecl, module, _ci);
+      //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto intitalValMap = findInitalValues.getVariableInitialMap();
       //Variable not initialized -> intialize with default value
       if (initialValue == nullptr) {

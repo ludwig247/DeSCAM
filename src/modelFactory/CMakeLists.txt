@@ -16,7 +16,7 @@ add_library (modelFactory SHARED
         FindProcess.cpp
         FindVariables.cpp
         FindDataFlow.cpp
-        FindInitalValues.cpp
+        FindInitialValues.cpp
         FindSections.cpp
         FindNewDatatype.cpp
         FindFunctions.cpp
