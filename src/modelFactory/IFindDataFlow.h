@@ -12,11 +12,14 @@
 #include "PrintStmt.h"
 
 namespace DESCAM {
+
+/**
+ * @brief processes a clang::stmt and extract all necessary information from it
+ */
 class IFindDataFlow : public clang::RecursiveASTVisitor<IFindDataFlow> {
  public:
   virtual ~IFindDataFlow() = default;
 
-  //Operator
   virtual bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) = 0;
   virtual bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) = 0;
   virtual bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) = 0;

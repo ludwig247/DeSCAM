@@ -9,8 +9,16 @@
 #include "FindFunctions.h"
 
 namespace DESCAM {
+/**
+ * @brief Factory-Class for FindDataFlow
+ */
 class FindFunctionsFactory {
  public:
+  /**
+   * @brief Creates a new instance of FindFunctions
+   * @param recordDecl ?
+   * @return Smart pointer to FindFunctions object
+   */
   static std::unique_ptr<IFindFunctions> create(clang::CXXRecordDecl *recordDecl) {
     std::unique_ptr<IFindFunctions> pointer(new FindFunctions(recordDecl));
     return pointer;
