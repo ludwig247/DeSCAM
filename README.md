@@ -12,7 +12,7 @@
        `mkdir build && cd build` <br>
        `cmake ../ && make`
        
-    2) Runt the example with: <br>
+    2) Ru the example with: <br>
     `./GettingStarted`
     
     3) The files MasterDummy, SlaveDummy and main.cpp are meant to model the environment, they are the testbench.
