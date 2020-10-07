@@ -1,6 +1,6 @@
 #include "CheckErrors.h"
 #include "IFindInitialValues.h"
-#include "FindInitialValuesFactory.h"
+#include "FindInitialValues.h"
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
@@ -9,12 +9,13 @@
 #include <FunctionFactory.h>
 #include "ModuleInstance.h"
 #include "FindDataFlow.h"
-#include "FindFunctionsFactory.h"
-#include "IFindFunctions.h"
+#include "FindFunctions.h"
 #include "FindGlobal.h"
 #include <OperationFactory.h>
 #include <FatalError.h>
 #include <CreateRealCFG.h>
+
+#include <utility>
 #include "DescamException.h"
 
 //Constructor
@@ -24,6 +25,10 @@ DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
     _context(ci.getASTContext()),
     _os(llvm::errs()),
     model(nullptr) {
+
+  //Compositional root
+  this->findFunctions = std::make_unique<FindFunctions>();
+  this->findInitialValues = std::make_unique<FindInitialValues>(ci);
 
   //Unimportant modules
   this->unimportantModules.emplace_back("sc_event_queue");//! Not important for the abstract model:
@@ -302,7 +307,8 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      ConstValue *initialValue = FindInitialValuesFactory::getInitValue(decl, fieldDecl, module, _ci);
+      this->findInitialValues->setup(decl,fieldDecl,module);
+      ConstValue *initialValue = this->findInitialValues->getInitValue();
       //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto intitalValMap = findInitalValues.getVariableInitialMap();
       //Variable not initialized -> intialize with default value
@@ -333,9 +339,9 @@ void DESCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
 
 void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
-  std::unique_ptr<IFindFunctions> findFunction = FindFunctionsFactory::create(decl);
+  findFunctions->setup(decl);
   //Add datatypes for functions
-  auto functionsMap = findFunction->getFunctionMap();
+  auto functionsMap = findFunctions->getFunctionMap();
   for (auto func: functionsMap) {
     auto newType = FindNewDatatype::getDataType(func.second->getResultType());
     if (FindNewDatatype::isGlobal(func.second->getResultType())) {
@@ -344,7 +350,7 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
   }
 
   //Add Structural description of fucntions to module
-  for (auto function: findFunction->getFunctionReturnTypeMap()) {
+  for (auto function: findFunctions->getFunctionReturnTypeMap()) {
     DataType *datatype;
     if (DataTypes::isLocalDataType(function.second, module->getName())) {
       datatype = DataTypes::getLocalDataType(function.second, module->getName());
@@ -352,8 +358,8 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
 
     //Parameter
     std::map<std::string, Parameter *> paramMap;
-    auto paramList = findFunction->getFunctionParamNameMap().find(function.first)->second;
-    auto paramTypeList = findFunction->getFunctionParamTypeMap().find(function.first)->second;
+    auto paramList = findFunctions->getFunctionParamNameMap().find(function.first)->second;
+    auto paramTypeList = findFunctions->getFunctionParamTypeMap().find(function.first)->second;
     if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
     for (int i = 0; i < paramList.size(); i++) {
       auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
@@ -368,7 +374,7 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
   }
   TERMINATE_IF_ERROR
   //Add behavioral description of function to module
-  for (auto function: findFunction->getFunctionMap()) {
+  for (auto function: findFunctions->getFunctionMap()) {
     //Create blockCFG for this process
     //Active searching only for functions
     FindDataFlow::functionName = function.first;

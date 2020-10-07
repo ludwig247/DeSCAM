@@ -7,8 +7,18 @@
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
-DESCAM::FindFunctions::FindFunctions(clang::CXXRecordDecl *recordDecl) {
+DESCAM::FindFunctions::FindFunctions() {}
+
+void DESCAM::FindFunctions::setup(clang::CXXRecordDecl *recordDecl) {
+  this->clean();
   TraverseDecl(recordDecl);
+}
+
+void DESCAM::FindFunctions::clean() {
+  functionMap.clear();
+  functionReturnTypeMap.clear();
+  functionParamNameMap.clear();
+  functionParamTypeMap.clear();
 }
 
 bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
@@ -43,7 +53,7 @@ const std::map<std::string, clang::CXXMethodDecl *> &DESCAM::FindFunctions::getF
   return functionMap;
 }
 
-std::string DESCAM::FindFunctions::clangToScamType(clang::QualType qualType) {
+std::string DESCAM::FindFunctions::clangToScamType(clang::QualType qualType) const {
   auto return_type = qualType.getAsString();
   if (qualType->isRecordType()) {
     return_type = qualType->getAsCXXRecordDecl()->getName();

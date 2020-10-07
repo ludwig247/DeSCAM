@@ -16,6 +16,12 @@ class IFindFunctions : public clang::RecursiveASTVisitor<IFindFunctions> {
  public:
   virtual ~IFindFunctions() = default;
 
+  /**
+   * @brief setup for the IFindFunctions class
+   * @param recordDecl ?
+   */
+  virtual void setup(clang::CXXRecordDecl *recordDecl) = 0;
+
   virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) = 0;
 
   virtual const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const = 0;
