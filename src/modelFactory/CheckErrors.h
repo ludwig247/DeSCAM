@@ -17,59 +17,62 @@
 // PArse SystemC
 #include "FindPorts.h"
 #include "FindSCMain.h"
-#include "FindCall.h"
 #include "FindModules.h"
 #include "FindNetlist.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
 #include "Model.h"
+#include "IFindFunctions.h"
+#include "IFindInitialValues.h"
 #include <iostream>
 
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace clang;
 
-
 namespace DESCAM {
 
-    bool containsSubstring(std::string, std::string);
+bool containsSubstring(std::string, std::string);
 
-    class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> {
-    public:
-        explicit CheckErrors(CompilerInstance &ci);
+class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> {
+ public:
+  explicit CheckErrors(CompilerInstance &ci);
 
-        ~CheckErrors() override = default;
+  ~CheckErrors() override = default;
 
-        virtual bool preFire();
+  virtual bool preFire();
 
-        virtual bool fire();
+  virtual bool fire();
 
-        virtual bool postFire();
+  virtual bool postFire();
 
-    private:
-        Model *model;
-        CompilerInstance &_ci;
-        ASTContext &_context;
-        SourceManager &_sm;
-        llvm::raw_ostream &_os;
-        std::vector<std::string> unimportantModules; //! List containing unimportant modules
+ private:
+  Model *model;
+  CompilerInstance &_ci;
+  ASTContext &_context;
+  SourceManager &_sm;
+  llvm::raw_ostream &_os;
+  std::vector<std::string> unimportantModules; //! List containing unimportant modules
+  /** Pointer to FindFunctions Class (DIP) */
+  std::unique_ptr<IFindFunctions> findFunctions;
+  /** Pointer to FindInitialValues Class (DIP) */
+  std::unique_ptr<IFindInitialValues> findInitialValues;
 
-        //Methods
-        void HandleTranslationUnit(ASTContext &context) override;
+  //Methods
+  void HandleTranslationUnit(ASTContext &context) override;
 
-        void addModules(clang::TranslationUnitDecl *decl);
+  void addModules(clang::TranslationUnitDecl *decl);
 
-        void addGlobalConstants(TranslationUnitDecl *pDecl);
+  void addGlobalConstants(TranslationUnitDecl *pDecl);
 
-        void addPorts(Module *module, clang::CXXRecordDecl *decl);
+  void addPorts(Module *module, clang::CXXRecordDecl *decl);
 
-        void addFunctions(Module *module, CXXRecordDecl *decl);
+  void addFunctions(Module *module, CXXRecordDecl *decl);
 
-        void addBehavior(Module *module, clang::CXXRecordDecl *decl);
+  void addBehavior(Module *module, clang::CXXRecordDecl *decl);
 
-        void addVariables(Module *module, clang::CXXRecordDecl *decl);
-    };
-
+  void addVariables(Module *module, clang::CXXRecordDecl *decl);
+};
 
 }
 #endif //DESCAM_CHECKERRORS_H

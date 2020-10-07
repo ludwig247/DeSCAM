@@ -11,13 +11,11 @@ add_library (modelFactory SHARED
         FindModules.cpp
         FindSCMain.cpp
         FindPorts.cpp
-        FindCall.cpp
         FindNetlist.cpp
-        FindInterface.cpp
         FindProcess.cpp
         FindVariables.cpp
         FindDataFlow.cpp
-        FindInitalValues.cpp
+        FindInitialValues.cpp
         FindSections.cpp
         FindNewDatatype.cpp
         FindFunctions.cpp
