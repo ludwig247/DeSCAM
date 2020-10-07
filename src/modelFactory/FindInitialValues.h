@@ -24,16 +24,17 @@ namespace DESCAM {
 class FindInitialValues : public IFindInitialValues {
  public:
   virtual ~FindInitialValues() = default;
+  FindInitialValues(clang::CompilerInstance &ci);
 
-  FindInitialValues(clang::CXXRecordDecl *recordDecl,
-                    clang::FieldDecl *fieldDecl,
-                    DESCAM::Module *module,
-                    clang::CompilerInstance &ci);
+  void setup(clang::CXXRecordDecl *recordDecl,
+             clang::FieldDecl *fieldDecl,
+             DESCAM::Module *module);
 
-  ConstValue *getInitValue();
+  ConstValue *getInitValue() override;
   //Visitor
   bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) override;
  private:
+  void clean();
 
   clang::FieldDecl *fieldDecl;
   ConstValue *initValue;

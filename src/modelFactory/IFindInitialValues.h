@@ -16,6 +16,10 @@ class IFindInitialValues : public clang::RecursiveASTVisitor<IFindInitialValues>
  public:
   virtual ~IFindInitialValues() = default;
 
+  virtual void setup(clang::CXXRecordDecl *recordDecl,
+                     clang::FieldDecl *fieldDecl,
+                     DESCAM::Module *module) = 0;
+
   virtual ConstValue *getInitValue() = 0;
 
   virtual bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) = 0;

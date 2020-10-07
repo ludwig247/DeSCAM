@@ -5,7 +5,6 @@
 #ifndef PROJECT_FINDCOMBINATIONALFUNCTION_H
 #define PROJECT_FINDCOMBINATIONALFUNCTION_H
 
-#include <clang/AST/RecursiveASTVisitor.h>
 #include <map>
 #include "IFindFunctions.h"
 
@@ -17,8 +16,11 @@ namespace DESCAM {
  */
 class FindFunctions : public IFindFunctions {
  public:
-  FindFunctions(clang::CXXRecordDecl *recordDecl);
-  virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) override;
+  FindFunctions();
+
+  void setup(clang::CXXRecordDecl *recordDecl) override;
+
+  bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) override;
 
   const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const override;
 
@@ -30,10 +32,15 @@ class FindFunctions : public IFindFunctions {
 
  private:
 
+  /**
+   * Resets the object back to its initial state
+   */
+  void clean();
+
   std::map<std::string, clang::CXXMethodDecl *> functionMap;
   std::map<std::string, std::string> functionReturnTypeMap;
 
-  std::string clangToScamType(clang::QualType qualType);
+  std::string clangToScamType(clang::QualType qualType) const;
 
   std::map<std::string, std::vector<std::string>> functionParamNameMap;
   std::map<std::string, std::vector<std::string>> functionParamTypeMap;

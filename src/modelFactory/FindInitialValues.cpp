@@ -11,6 +11,26 @@
 #include "IFindDataFlow.h"
 #include "FindDataFlowFactory.h"
 
+DESCAM::FindInitialValues::FindInitialValues(clang::CompilerInstance &ci) : ci(ci) {}
+
+void DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
+                                      clang::FieldDecl *fieldDecl,
+                                      DESCAM::Module *module) {
+  this->clean();
+  this->module = module;
+  this->fieldDecl = fieldDecl;
+  this->initValue = nullptr;
+  this->pass = 0;
+  TraverseDecl(recordDecl);
+}
+
+void DESCAM::FindInitialValues::clean(){
+  fieldDecl = nullptr;
+  initValue = nullptr;
+  pass = 0;
+  module = nullptr;
+}
+
 bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
   //Check whether constructor body is empty
   int cnt = 0;
@@ -71,19 +91,6 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
   } else TERMINATE("Only one constructor allowed");
 
   return false;
-}
-
-DESCAM::FindInitialValues::FindInitialValues(clang::CXXRecordDecl *recordDecl,
-                                             clang::FieldDecl *fieldDecl,
-                                             DESCAM::Module *module,
-                                             clang::CompilerInstance &ci) :
-    module(module),
-    fieldDecl(fieldDecl),
-    initValue(nullptr),
-    ci(ci),
-    pass(0) {
-  TraverseDecl(recordDecl);
-
 }
 
 DESCAM::ConstValue *DESCAM::FindInitialValues::getInitValue() {
