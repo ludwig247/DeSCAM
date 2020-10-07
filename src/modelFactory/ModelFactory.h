@@ -29,6 +29,8 @@
 #include "Model.h"
 #include <iostream>
 
+#include "IFindGlobal.h"
+
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace clang;
@@ -36,7 +38,7 @@ using namespace clang;
 
 namespace DESCAM {
 
-    bool containsSubstring(std::string,std::string);
+    bool containsSubstring(std::string, std::string);
 
     /*!
      * \brief Factory for creating a DESCAM::Model
@@ -56,29 +58,43 @@ namespace DESCAM {
     class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {
     public:
         explicit ModelFactory(CompilerInstance &ci);
+
         ~ModelFactory() override = default;
 
         virtual bool preFire();
+
         virtual bool fire();
+
         virtual bool postFire();
+
     private:
-        Model* model;
+        Model *model;
         CompilerInstance &_ci;
-        ASTContext & _context;
-        SourceManager & _sm;
-        llvm::raw_ostream & _os;
+        ASTContext &_context;
+        SourceManager &_sm;
+        llvm::raw_ostream &_os;
         std::vector<std::string> unimportantModules; //! List containing unimportant modules
 
+        std::unique_ptr<IFindGlobal> findGlobal_;
+
+
         //Methods
-        void HandleTranslationUnit(ASTContext & context) override ;
+        void HandleTranslationUnit(ASTContext &context) override;
 
         void addModules(clang::TranslationUnitDecl *decl);
+
         void addGlobalConstants(TranslationUnitDecl *pDecl);
-        void addPorts(Module* module,clang::CXXRecordDecl* decl);
-        void addFunctions(Module *module, CXXRecordDecl * decl);
+
+        //void addGlobalConstants();
+        void addPorts(Module *module, clang::CXXRecordDecl *decl);
+
+        void addFunctions(Module *module, CXXRecordDecl *decl);
+
         void addBehavior(Module *module, clang::CXXRecordDecl *decl);
+
         void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
-        void addInstances(TranslationUnitDecl * tu );
+        void addInstances(TranslationUnitDecl *tu);
+
         void removeUnused();
 
     };

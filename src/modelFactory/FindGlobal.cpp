@@ -11,11 +11,17 @@
 #include "FatalError.h"
 
 
-DESCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl,clang::CompilerInstance &ci) :
-        ci(ci),
-        decl(decl){
+DESCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) : ci(ci) {}
+
+bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) {
     assert(!(decl == nullptr));
-    TraverseDecl(decl);
+
+    this->variableMap.clear();
+    this->functionMap.clear();
+    this->functionDeclMap.clear();
+
+    this->decl = decl;
+    return TraverseDecl(decl);
 }
 
 bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
@@ -55,13 +61,13 @@ bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
                         }
 
                         //Types have to be equivalent
-                        if(checkForExpr.getExpr()->getDataType() == descam_type){
+                        if (checkForExpr.getExpr()->getDataType() == descam_type) {
                             //set initval && create new global constant variable
                             if (auto initVal = dynamic_cast<ConstValue *>(checkForExpr.getExpr())) {
                                 auto var = new Variable(name, descam_type, initVal);
                                 var->setConstant(true);
                                 this->variableMap.insert(std::make_pair(name, var));
-                            }else {
+                            } else {
                                 //std::cout << "Global variable: " << name << " with value " << PrintStmt::toString(checkForExpr.getExpr()) << " is not added as global var." << std::endl;
                                 //std::cout << "The reason is that the initialvalue has to be of constant and simple type without expressions of any kind" << std::endl;
                                 //FIXME move back to exception
@@ -94,18 +100,19 @@ const std::map<std::string, DESCAM::Variable *> &DESCAM::FindGlobal::getVariable
  */
 
 bool DESCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
-     //Define lambdas for checking the function
-    auto valid_result_type = [=](){
+    //Define lambdas for checking the function
+    auto valid_result_type = [=]() {
         auto res = funDecl->getResultType();
-        return((res->isIntegerType()||res->isBooleanType()) && !res->isReferenceType() && !res->isAnyPointerType() && !res->isEnumeralType());
+        return ((res->isIntegerType() || res->isBooleanType()) && !res->isReferenceType() && !res->isAnyPointerType() &&
+                !res->isEnumeralType());
     };
 
-    auto valid_function_type = [=](){
+    auto valid_function_type = [=]() {
         return funDecl->isGlobal() && funDecl->isUsed() && !funDecl->isCXXClassMember();
     };
 
-    auto valid_parameters = [=](){
-        for(int i=0;i<funDecl->getNumParams();i++) {
+    auto valid_parameters = [=]() {
+        for (int i = 0; i < funDecl->getNumParams(); i++) {
             auto type = funDecl->getParamDecl((i))->getType().getCanonicalType();
             if (!type->isIntegerType() && !type->isBooleanType() && !type->isEnumeralType()) {
                 return false;
@@ -115,31 +122,31 @@ bool DESCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
     };
 
     //Ensure, that all conditions are correct
-    if(valid_result_type() && valid_function_type() && valid_parameters()){
-        std::map<std::string,Parameter*> parameterMap;
-        for(int i=0;i<funDecl->getNumParams();i++){
+    if (valid_result_type() && valid_function_type() && valid_parameters()) {
+        std::map<std::string, Parameter *> parameterMap;
+        for (int i = 0; i < funDecl->getNumParams(); i++) {
             auto param = funDecl->getParamDecl(i);
             std::string paraName = param->getNameAsString();
-            auto newParam = new Parameter(paraName,getDataType(param->getType()));
-            parameterMap.insert(std::make_pair(paraName,newParam));
+            auto newParam = new Parameter(paraName, getDataType(param->getType()));
+            parameterMap.insert(std::make_pair(paraName, newParam));
         }
         std::string name = funDecl->getNameAsString();
-        auto function = new Function(name,getDataType(funDecl->getResultType()),parameterMap);
-        this->functionMap.insert(std::make_pair(name,function));
-        this->functionDeclMap.insert(std::make_pair(name,funDecl));
+        auto function = new Function(name, getDataType(funDecl->getResultType()), parameterMap);
+        this->functionMap.insert(std::make_pair(name, function));
+        this->functionDeclMap.insert(std::make_pair(name, funDecl));
     }
     return true;
 }
 
-DESCAM::DataType * DESCAM::FindGlobal::getDataType(const clang::QualType& type) const {
-    DESCAM::DataType * dataType;
-    if(type->isBooleanType()){
+DESCAM::DataType *DESCAM::FindGlobal::getDataType(const clang::QualType &type) const {
+    DESCAM::DataType *dataType;
+    if (type->isBooleanType()) {
         dataType = DESCAM::DataTypes::getDataType("bool");
-    }else if(type->isUnsignedIntegerType()){
+    } else if (type->isUnsignedIntegerType()) {
         dataType = DESCAM::DataTypes::getDataType("unsigned");
-    }else if(type->isIntegerType()){
+    } else if (type->isIntegerType()) {
         dataType = DESCAM::DataTypes::getDataType("int");
-    }else TERMINATE("Type: "+type.getAsString() + "not allowed");
+    } else TERMINATE("Type: " + type.getAsString() + "not allowed");
     return dataType;
 }
 
