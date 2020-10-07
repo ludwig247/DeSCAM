@@ -35,7 +35,7 @@ execute_process(
 )
 
 
-# Detele std::gets line from systemc because it is not supported in c++11 and newer
+# Delete std::gets line from systemc because it is not supported in c++11 and newer
 execute_process(
         COMMAND sed -i "s@using\ std::gets;@//using\ //std::gets;@g" ${CMAKE_CURRENT_SOURCE_DIR}/install/tmp/systemc-2.3.1/src/systemc.h
 )
