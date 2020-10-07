@@ -1,6 +1,6 @@
 #include "CheckErrors.h"
-#include <FindInterface.h>
-#include "FindInitalValues.h"
+#include "IFindInitialValues.h"
+#include "FindInitialValues.h"
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
@@ -14,6 +14,8 @@
 #include <OperationFactory.h>
 #include <FatalError.h>
 #include <CreateRealCFG.h>
+
+#include <utility>
 #include "DescamException.h"
 
 //Constructor
