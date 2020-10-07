@@ -19,7 +19,7 @@
 
 
 // PArse SystemC
-#include "FindPorts.h"
+#include "IFindPorts.h"
 #include "FindSCMain.h"
 #include "FindCall.h"
 #include "FindModules.h"
@@ -33,56 +33,56 @@ using namespace clang::driver;
 using namespace clang::tooling;
 using namespace clang;
 
-
 namespace DESCAM {
 
-    bool containsSubstring(std::string,std::string);
+bool containsSubstring(std::string, std::string);
 
-    /*!
-     * \brief Factory for creating a DESCAM::Model
-     *
-     * HandleTranslationUnit is called after instantiation of the model and calls three methods preFire, fire and postFire
-     * The preFire face is unimportant for us and is automatically followed by the fire face.
-     * During the fire face the clang ast is instantiated and can be accessed using visitors.
-     * The clang::TranslationUnitDecl contains the hole AST and is passed to FindModules in order to extract the modules of the
-     * systemc description. For each module the ports are extraced using FindPorts and so on.
-     * Aferwards a netlist of all modules is extracted, starting with the sc_main().
-     * Right now only two modules can be connceted and  a nested modules are not supported
-     *
-     * The model is then accessed using the DESCAM::GraphVistor. This visitors only prints the structural information of the system.
-     * In order to access the behavioral information  for each module we refer DESCAM::SuspensionAutomata.
-     *
-     */
-    class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {
-    public:
-        explicit ModelFactory(CompilerInstance &ci);
-        ~ModelFactory() override = default;
+/*!
+ * \brief Factory for creating a DESCAM::Model
+ *
+ * HandleTranslationUnit is called after instantiation of the model and calls three methods preFire, fire and postFire
+ * The preFire face is unimportant for us and is automatically followed by the fire face.
+ * During the fire face the clang ast is instantiated and can be accessed using visitors.
+ * The clang::TranslationUnitDecl contains the hole AST and is passed to FindModules in order to extract the modules of the
+ * systemc description. For each module the ports are extraced using FindPorts and so on.
+ * Aferwards a netlist of all modules is extracted, starting with the sc_main().
+ * Right now only two modules can be connceted and  a nested modules are not supported
+ *
+ * The model is then accessed using the DESCAM::GraphVistor. This visitors only prints the structural information of the system.
+ * In order to access the behavioral information  for each module we refer DESCAM::SuspensionAutomata.
+ *
+ */
+class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {
+ public:
+  explicit ModelFactory(CompilerInstance &ci);
+  ~ModelFactory() override = default;
 
-        virtual bool preFire();
-        virtual bool fire();
-        virtual bool postFire();
-    private:
-        Model* model;
-        CompilerInstance &_ci;
-        ASTContext & _context;
-        SourceManager & _sm;
-        llvm::raw_ostream & _os;
-        std::vector<std::string> unimportantModules; //! List containing unimportant modules
+  virtual bool preFire();
+  virtual bool fire();
+  virtual bool postFire();
+ private:
+  Model *model;
+  CompilerInstance &_ci;
+  ASTContext &_context;
+  SourceManager &_sm;
+  llvm::raw_ostream &_os;
+  std::vector<std::string> unimportantModules; //! List containing unimportant modules
 
-        //Methods
-        void HandleTranslationUnit(ASTContext & context) override ;
+  //Methods
+  void HandleTranslationUnit(ASTContext &context) override;
 
-        void addModules(clang::TranslationUnitDecl *decl);
-        void addGlobalConstants(TranslationUnitDecl *pDecl);
-        void addPorts(Module* module,clang::CXXRecordDecl* decl);
-        void addFunctions(Module *module, CXXRecordDecl * decl);
-        void addBehavior(Module *module, clang::CXXRecordDecl *decl);
-        void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
-        void addInstances(TranslationUnitDecl * tu );
-        void removeUnused();
+  void addModules(clang::TranslationUnitDecl *decl);
+  void addGlobalConstants(TranslationUnitDecl *pDecl);
+  void addPorts(Module *module, clang::CXXRecordDecl *decl);
+  void addFunctions(Module *module, CXXRecordDecl *decl);
+  void addBehavior(Module *module, clang::CXXRecordDecl *decl);
+  void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
+  void addInstances(TranslationUnitDecl *tu);
+  void removeUnused();
 
-    };
-
+  IFindModules * find_modules_;
+  IFindPorts * find_ports_;
+};
 
 }
 #endif //SCAM_CREATEMODEL_H

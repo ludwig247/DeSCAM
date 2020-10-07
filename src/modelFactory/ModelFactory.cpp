@@ -34,6 +34,10 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   //Unimportant modules
   this->unimportantModules.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
+
+  this->find_modules_ = new FindModules();
+  this->find_ports_ = new FindPorts(_ci);
+
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -72,10 +76,10 @@ bool DESCAM::ModelFactory::fire() {
 */
 void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
-  FindModules modules(decl);
+  this->find_modules_->setup(decl);
 
   //Fill the model with modules(structural describtion)
-  for (auto &scparModule: modules.getModuleMap()) {
+  for (auto &scparModule: find_modules_->getModuleMap()) {
 
     //Module Name
     std::string name = scparModule.first;
@@ -184,12 +188,14 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
   //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
   //Right now, we are not interested about the direction of the port.
 
-  DESCAM::FindPorts findPorts(decl, this->_context, _ci);
-  auto portsLocationMap = findPorts.getLocationInfoMap();
+  //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
+
+  this->find_ports_->setup(decl);
+  auto portsLocationMap = this->find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //RendezVouz
   //Input ports
-  for (auto &port: findPorts.getInPortMap()) {
+  for (auto &port: this->find_ports_->getInPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("blocking", "in"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -206,7 +212,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
                        module->addPort(inPort))
   }
   //Output ports
-  for (auto &port: findPorts.getOutPortMap()) {
+  for (auto &port: this->find_ports_->getOutPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("blocking", "out"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -225,7 +231,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   //AlwaysReady
   //Input ports
-  for (auto &port: findPorts.getMasterInPortMap()) {
+  for (auto &port: this->find_ports_->getMasterInPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("master", "in"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -243,7 +249,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   }
   //Output ports
-  for (auto &port: findPorts.getMasterOutPortMap()) {
+  for (auto &port: this->find_ports_->getMasterOutPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("master", "out"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -261,7 +267,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
   }
 
   //Input ports
-  for (auto &port: findPorts.getSlaveInPortMap()) {
+  for (auto &port: this->find_ports_->getSlaveInPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("slave", "in"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -279,7 +285,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   }
   //Output ports
-  for (auto &port: findPorts.getSlaveOutPortMap()) {
+  for (auto &port: this->find_ports_->getSlaveOutPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
       TERMINATE(
           "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
@@ -298,7 +304,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   //Shared ports
   //Input ports
-  for (auto &port: findPorts.getInSharedPortMap()) {
+  for (auto &port: this->find_ports_->getInSharedPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
       TERMINATE("No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second)
     }
@@ -310,7 +316,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   }
   //Output ports
-  for (auto &port: findPorts.getOutSharedPortMap()) {
+  for (auto &port: this->find_ports_->getOutSharedPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
       TERMINATE(
           "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);

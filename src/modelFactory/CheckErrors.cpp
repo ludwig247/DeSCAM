@@ -53,7 +53,7 @@ bool DESCAM::CheckErrors::fire() {
 
 void DESCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 
-    FindModules modules(decl);
+    FindModules modules;
 
     //Fill the model with modules(structural describtion)
     for (auto &scparModule: modules.getModuleMap()) {
@@ -88,7 +88,8 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
     //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
     //Right now, we are not interested about the direction of the port.
 
-    DESCAM::FindPorts findPorts(decl, this->_context, _ci);
+    DESCAM::FindPorts findPorts(this->_ci);
+    findPorts.setup(decl);
     auto portsLocationMap = findPorts.getLocationInfoMap();
     //Add Ports -> requires Name, Interface and DataType
     //RendezVouz
