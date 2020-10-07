@@ -12,7 +12,6 @@ add_library (modelFactory SHARED
         FindSCMain.cpp
         FindPorts.cpp
         FindNetlist.cpp
-        FindInterface.cpp
         FindProcess.cpp
         FindVariables.cpp
         FindDataFlow.cpp

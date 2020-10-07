@@ -1,5 +1,4 @@
 #include "CheckErrors.h"
-#include <FindInterface.h>
 #include "IFindInitialValues.h"
 #include "FindInitialValuesFactory.h"
 #include <FindSections.h>
