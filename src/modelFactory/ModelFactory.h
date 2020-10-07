@@ -69,9 +69,9 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   llvm::raw_ostream &_os;
   std::vector<std::string> unimportantModules; //! List containing unimportant modules
   /** Pointer to FindFunctions Class (DIP) */
-  std::unique_ptr<IFindFunctions> findFunctions;
+  std::unique_ptr<IFindFunctions> findFunctions_;
   /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindInitialValues> findInitialValues;
+  std::unique_ptr<IFindInitialValues> findInitialValues_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;

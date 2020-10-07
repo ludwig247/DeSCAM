@@ -2,7 +2,7 @@ project(GMock_Test CXX)
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_executable(GMock_Test main.cpp TestCase1.h)
+add_executable(GMock_Test main.cpp)
 target_compile_options(GMock_Test PRIVATE -fPIC -O2 )
 
 #TODO: factory should not be included
