@@ -30,9 +30,12 @@
 #include "IFindInitialValues.h"
 #include <iostream>
 
+#include "IFindGlobal.h"
+
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace clang;
+
 
 namespace DESCAM {
 
@@ -72,8 +75,11 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   std::unique_ptr<IFindFunctions> findFunctions_;
   /** Pointer to FindInitialValues Class (DIP) */
   std::unique_ptr<IFindInitialValues> findInitialValues_;
+/** Pointer to FindInitialValues Class (DIP) */
+  std::unique_ptr<IFindGlobal> findGlobal_;
 
-  //Methods
+
+        //Methods
   void HandleTranslationUnit(ASTContext &context) override;
 
   void addModules(clang::TranslationUnitDecl *decl);
@@ -86,6 +92,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   void removeUnused();
 
 };
+
 
 }
 #endif //SCAM_CREATEMODEL_H
