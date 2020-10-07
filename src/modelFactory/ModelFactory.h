@@ -68,11 +68,11 @@ namespace DESCAM {
         ASTContext & _context;
         SourceManager & _sm;
         llvm::raw_ostream & _os;
-        std::vector<std::string> unimportantModules; //! List containing unimportant modules
+        std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
       /** Pointer to FindFunctions Class (DIP) */
-      std::unique_ptr<IFindFunctions> findFunctions_;
+      std::unique_ptr<IFindFunctions> find_functions_;
       /** Pointer to FindInitialValues Class (DIP) */
-      std::unique_ptr<IFindInitialValues> findInitialValues_;
+      std::unique_ptr<IFindInitialValues> find_initial_values_;
         //Methods
         void HandleTranslationUnit(ASTContext & context) override ;
 
