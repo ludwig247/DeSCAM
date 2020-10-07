@@ -12,7 +12,7 @@ namespace DESCAM {
  */
 class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts> {
  public:
-  FindPorts(clang::CompilerInstance &ci);
+  FindPorts(clang::CompilerInstance * ci);
   virtual ~FindPorts() = default ;
 
   void setup(clang::CXXRecordDecl *recordDecl) override;
@@ -45,7 +45,7 @@ class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts
   std::map<std::string, std::string> out_shared_port_map_; //! Map containing an entry for every shared out-port,type
   std::map<std::string, DESCAM::LocationInfo> port_location_info_map_; //! Map containing an entry for every port and its location info
   int pass;
-  clang::CompilerInstance &ci_;
+  clang::CompilerInstance * ci_;
   //Helper
   std::vector<std::string> port_templates_; //! sc_port<sc_fifo_in_if<_Bool> > Contains an entry for each Template used {sc_port,sc_fifo_in,_Bool}
   void recursiveTemplateVisitor(clang::QualType qualType);

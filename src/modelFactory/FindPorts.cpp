@@ -22,7 +22,7 @@ bool containsSubstring(std::string fullString, std::string subString) {
 }
 
 //Constructor
-FindPorts::FindPorts(clang::CompilerInstance &ci) :
+FindPorts::FindPorts(clang::CompilerInstance * ci) :
     ci_(ci),
     pass(0){
 }
@@ -68,7 +68,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
       } else {
         TERMINATE("Unknown interface: " + port_templates_.at(0));
       }
-      this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(), DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl, ci_)));
+      this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(), DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl, (*ci_))));
     }
   }
   return true;

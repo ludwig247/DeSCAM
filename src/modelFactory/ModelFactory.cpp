@@ -39,7 +39,7 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
 
   this->find_modules_ = new FindModules();
-  this->find_ports_ = new FindPorts(_ci);
+  this->find_ports_ = new FindPorts(&_ci);
 
 }
 
