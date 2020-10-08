@@ -4,7 +4,6 @@
 
 #include "ModelFactory.h"
 #include "FindInitialValues.h"
-#include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
 #include <Logger/Logger.h>
