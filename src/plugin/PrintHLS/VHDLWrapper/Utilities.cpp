@@ -1,14 +1,15 @@
 #include "Utilities.h"
-#include <assert.h>
+#include <cassert>
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
+//TODO switch to unsigned long int?
 bool Utilities::isPowerOfTwo(long int n) {
     if ((n < 1) || (n & n - 1))
         return false;
     return true;
 }
-
+//TODO switch to unsigned long int?
 int Utilities::bitPosition(long int n) {
     assert(isPowerOfTwo(n) == true);
     int count = 0;
@@ -20,6 +21,7 @@ int Utilities::bitPosition(long int n) {
             n >>= 1;
         }
     }
+    assert(false && "-E- Utilities::bitPosition returned non-sensible data. Couldn't find bit position");
 }
 
 std::string Utilities::typeToString(StmtType type) {
@@ -52,6 +54,8 @@ std::string Utilities::typeToString(StmtType type) {
             return "assignment";
         case StmtType::UNKNOWN:
             return "unknown type";
+      default:
+          assert(false && "-E- Unexpected StmtType in Utilities::typeToString");
     }
 }
 
@@ -69,6 +73,8 @@ std::string Utilities::subTypeBitwiseToString(SubTypeBitwise type) {
             return ">>";
         case SubTypeBitwise::UNKNOWN:
             return "unknown operation";
+      default:
+        assert(false && "-E- Unexpected SubTypeBitwise in Utilities::subTypeBitwiseToString");
     }
 }
 
