@@ -21,26 +21,27 @@ namespace DESCAM {
  * FindInitialValues has to be called after FindMember, otherwise no intitalvalues can be found.
  *
  */
-class FindInitialValues : public IFindInitialValues {
+class FindInitialValues : public IFindInitialValues, public clang::RecursiveASTVisitor<FindInitialValues> {
  public:
   virtual ~FindInitialValues() = default;
-  FindInitialValues(clang::CompilerInstance &ci);
+  FindInitialValues();
 
   void setup(clang::CXXRecordDecl *recordDecl,
              clang::FieldDecl *fieldDecl,
-             DESCAM::Module *module);
+             DESCAM::Module *module,
+             clang::CompilerInstance *ci);
 
   ConstValue *getInitValue() override;
   //Visitor
-  bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) override;
+  bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl);
  private:
   void clean();
 
-  clang::FieldDecl *fieldDecl;
-  ConstValue *initValue;
-  int pass;
-  DESCAM::Module *module;
-  clang::CompilerInstance &ci;
+  clang::FieldDecl *field_decl_;
+  ConstValue *init_value_;
+  int pass_;
+  DESCAM::Module *module_;
+  clang::CompilerInstance *ci_;
 };
 
 }
