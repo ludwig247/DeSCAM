@@ -153,11 +153,11 @@ DESCAM::DataType *DESCAM::FindGlobal::getDataType(const clang::QualType &type) c
 }
 
 const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunctionMap() const {
-    return functionMap;
+  return functionMap;
 }
 
 const std::map<std::string, const clang::FunctionDecl *> &DESCAM::FindGlobal::getFunctionDeclMap() const {
-    return functionDeclMap;
+  return functionDeclMap;
 }
 
 

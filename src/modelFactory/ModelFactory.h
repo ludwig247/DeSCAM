@@ -94,7 +94,6 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   void addInstances(TranslationUnitDecl *tu);
   void removeUnused();
 
-
 };
 
 }

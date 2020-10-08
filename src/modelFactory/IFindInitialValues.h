@@ -5,24 +5,21 @@
 #ifndef SCAM_SRC_MODELFACTORY_IFINDINITIALVALUES_H_
 #define SCAM_SRC_MODELFACTORY_IFINDINITIALVALUES_H_
 
-#include "clang/AST/RecursiveASTVisitor.h"
-
 namespace DESCAM {
 
 /**
  * @brief Visits the constructors of a sc_module in order to find inital values for members
  */
-class IFindInitialValues : public clang::RecursiveASTVisitor<IFindInitialValues> {
+class IFindInitialValues {
  public:
   virtual ~IFindInitialValues() = default;
 
   virtual void setup(clang::CXXRecordDecl *recordDecl,
                      clang::FieldDecl *fieldDecl,
-                     DESCAM::Module *module) = 0;
+                     DESCAM::Module *module,
+                     clang::CompilerInstance *ci) = 0;
 
   virtual ConstValue *getInitValue() = 0;
-
-  virtual bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) = 0;
 };
 }
 
