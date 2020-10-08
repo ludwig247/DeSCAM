@@ -1,6 +1,6 @@
 #include "CheckErrors.h"
-#include "IFindInitialValues.h"
 #include "FindInitialValues.h"
+#include "FindProcess.h"
 #include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
@@ -29,6 +29,7 @@ DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
   //Compositional root
   this->findFunctions = std::make_unique<FindFunctions>();
   this->findInitialValues = std::make_unique<FindInitialValues>();
+  this->findProcess = std::make_unique<FindProcess>();
   //Unimportant modules
   this->unimportantModules.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
@@ -240,10 +241,10 @@ void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDe
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
 
   //Find the process describing the behavior
-  DESCAM::FindProcess findProcess(decl);
-  if (findProcess.getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
+  findProcess->setup(decl);
+  if (findProcess->getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
   //Check Proces Type
-  auto process = findProcess.getProcessMap().begin();
+  auto process = findProcess->getProcessMap().begin();
   //Process name
   std::string processName = process->first;
   if (process->second.second != DESCAM::PROCESS_TYPE::THREAD) {

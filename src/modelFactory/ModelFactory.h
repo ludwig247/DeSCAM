@@ -31,6 +31,7 @@
 
 #include "IFindGlobal.h"
 #include "IFindNetlist.h"
+#include "IFindProcess.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -47,11 +48,11 @@ bool containsSubstring(std::string, std::string);
  * The preFire face is unimportant for us and is automatically followed by the fire face.
  * During the fire face the clang ast is instantiated and can be accessed using visitors.
  * The clang::TranslationUnitDecl contains the hole AST and is passed to FindModules in order to extract the modules of the
- * systemc description. For each module the ports are extraced using FindPorts and so on.
- * Aferwards a netlist of all modules is extracted, starting with the sc_main().
- * Right now only two modules can be connceted and  a nested modules are not supported
+ * systemc description. For each module the ports are extracted using FindPorts and so on.
+ * Afterwards a netlist of all modules is extracted, starting with the sc_main().
+ * Right now only two modules can be connected and  a nested modules are not supported
  *
- * The model is then accessed using the DESCAM::GraphVistor. This visitors only prints the structural information of the system.
+ * The model is then accessed using the DESCAM::GraphVisitor. This visitors only prints the structural information of the system.
  * In order to access the behavioral information  for each module we refer DESCAM::SuspensionAutomata.
  *
  */
@@ -67,7 +68,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   Model *model;
   CompilerInstance &_ci;
   ASTContext &_context;
-  SourceManager &_sm;
+  // unused?: SourceManager &_sm;
   llvm::raw_ostream &_os;
   std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
   /** Pointer to FindFunctions Class (DIP) */
@@ -82,6 +83,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   std::unique_ptr<IFindPorts> find_ports_;
   /** TODO Pointer to is X is not a descriptive/useful comment */
   std::unique_ptr<IFindNetlist> find_netlist_;
+  std::unique_ptr<IFindProcess> find_process_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
