@@ -564,6 +564,8 @@ std::string PrintSkeleton::getFilenameExtention() {
             return ".vhdl";
         case SV:
             return ".sv";
+      default:
+        assert(false && "-E- Unsupported language selected in PrintSkeleton::getFilenameExtention");
     }
 }
 
@@ -588,6 +590,8 @@ std::string PrintSkeleton::getDirectionWrapper(const std::string &in) {
         return "output";
     } else if (language == VHDL) {
         return in;
+    } else {
+      assert(false && "-E- Unsupported language selected in PrintSkeleton::getDirectionWrapper");
     }
 }
 
@@ -621,6 +625,8 @@ std::string PrintSkeleton::booleanWrapper(bool value) {
     } else if (language == VHDL) {
         if (value) return "true";
         else return "false";
+    } else {
+      assert(false && "-E- Unsupported language selected in PrintSkeleton::booleanWrapper");
     }
 }
 
