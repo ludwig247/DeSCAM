@@ -69,7 +69,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
           //If something goes wrong
           try {
             std::unique_ptr<IFindDataFlow>
-                findDataFlow = FindDataFlowFactory::create(initializer->getInit(), module_, ci_);
+                findDataFlow = FindDataFlowFactory::create(initializer->getInit(), module_, *ci_);
 
             auto initExpr = findDataFlow->getExpr();
             if (initExpr != nullptr) {
