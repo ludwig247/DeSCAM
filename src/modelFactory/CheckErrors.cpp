@@ -20,19 +20,19 @@
 
 //Constructor
 DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
-    _sm(ci.getSourceManager()),
-    _ci(ci),
-    _context(ci.getASTContext()),
-    _os(llvm::errs()),
-    model(nullptr) {
+    ci_(ci),
+    context_(ci.getASTContext()),
+    ostream_(llvm::errs()),
+    model_(nullptr) {
 
   //Compositional root
-  this->findFunctions = std::make_unique<FindFunctions>();
-  this->findInitialValues = std::make_unique<FindInitialValues>();
-  this->findProcess = std::make_unique<FindProcess>();
+  this->find_functions_ = std::make_unique<FindFunctions>();
+  this->find_initial_values_ = std::make_unique<FindInitialValues>();
+  this->find_process_ = std::make_unique<FindProcess>();
+  this->find_global_ = std::make_unique<FindGlobal>();
   //Unimportant modules
-  this->unimportantModules.emplace_back("sc_event_queue");//! Not important for the abstract model:
-  this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
+  this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
+  this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
 bool DESCAM::CheckErrors::preFire() {
@@ -41,11 +41,11 @@ bool DESCAM::CheckErrors::preFire() {
 
 bool DESCAM::CheckErrors::fire() {
   //Translation Unit
-  TranslationUnitDecl *tu = _context.getTranslationUnitDecl();
+  TranslationUnitDecl *tu = context_.getTranslationUnitDecl();
 
   //DESCAM model
-  this->model = new Model("top_level");
-  ModelGlobal::setModel(model);
+  this->model_ = new Model("top_level");
+  ModelGlobal::setModel(model_);
 
   //Global variables
   this->addGlobalConstants(tu);
@@ -59,30 +59,30 @@ bool DESCAM::CheckErrors::fire() {
 
 void DESCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 
-  FindModules modules(decl);
+  FindModules modules;
 
-  //Fill the model with modules(structural describtion)
-  for (auto &scparModule: modules.getModuleMap()) {
-    std::string name = scparModule.first;
-    auto moduleLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
+  //Fill the model with modules(structural description)
+  for (auto &scpar_module: modules.getModuleMap()) {
+    std::string name = scpar_module.first;
+    auto moduleLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scpar_module.second, ci_);
 
     //Module is on the unimportant module list -> skip
-    if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
-        this->unimportantModules.end()) {
+    if (std::find(this->unimportant_modules_.begin(), this->unimportant_modules_.end(), name) !=
+        this->unimportant_modules_.end()) {
       //Skip this module
       continue;
     }
     //DataTypes::reset();//FIXME:
-    auto module = new Module(scparModule.first, moduleLocationInfo);
-    model->addModule(module);
+    auto module = new Module(scpar_module.first, moduleLocationInfo);
+    model_->addModule(module);
     //Members
-    this->addVariables(module, scparModule.second);
+    this->addVariables(module, scpar_module.second);
     //Ports
-    this->addPorts(module, scparModule.second);
+    this->addPorts(module, scpar_module.second);
     //Combinational Functions
-    this->addFunctions(module, scparModule.second);
-    //Processe
-    this->addBehavior(module, scparModule.second);
+    this->addFunctions(module, scpar_module.second);
+    //Processes
+    this->addBehavior(module, scpar_module.second);
     //this->addCommunicationFSM(module);
   }
 }
@@ -91,13 +91,14 @@ void DESCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
   //Parse ports from CXXRecordDecl
-  //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
+  //Ports are sc_in,sc_out, sc_inout (sc_port) is considers as
   //Right now, we are not interested about the direction of the port.
 
-  DESCAM::FindPorts findPorts(decl, this->_context, _ci);
+  DESCAM::FindPorts findPorts(&this->ci_);
+  findPorts.setup(decl);
   auto portsLocationMap = findPorts.getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
-  //RendezVouz
+  //Rendezvous
   //Input ports
   for (auto &port: findPorts.getInPortMap()) {
     Interface *interface = nullptr;
@@ -240,20 +241,20 @@ void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDe
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
 
   //Find the process describing the behavior
-  findProcess->setup(decl);
-  if (findProcess->getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
-  //Check Proces Type
-  auto process = findProcess->getProcessMap().begin();
+  find_process_->setup(decl);
+  if (find_process_->getProcessMap().size() != 1) TERMINATE("Module need exactly 1 process!");
+  //Check Process Type
+  auto process = find_process_->getProcessMap().begin();
   //Process name
   std::string processName = process->first;
   if (process->second.second != DESCAM::PROCESS_TYPE::THREAD) {
     TERMINATE(processName + ":Only THREAD allowed as process type");
   }
 
-  //Process declarationinde
+  //Process declaration
   clang::CXXMethodDecl *methodDecl = process->second.first;
   //Create blockCFG for this process
-  DESCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
+  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, true);
   TERMINATE_IF_ERROR
   DESCAM::CfgNode::node_cnt = 0;
   DESCAM::State::state_cnt = 0;
@@ -269,18 +270,18 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
   FindVariables findVariables(decl);
 
   //Initial Values
-  //FindInitialValues findInitalValues(decl, findVariables.getVariableMap(), module);
+  //FindInitialValues findInitialValues(decl, findVariables.getVariableMap(), module);
 
   //Add members to module
   for (auto &&variable: findVariables.getVariableTypeMap()) {
     //Add Variable to Module
     auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
-    auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
+    auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, ci_);
 
     /*
-     * Disinguish between local and global DataTypes.
+     * Distinguish between local and global DataTypes.
      * If a module declares a type within it's class, then it's a local datatype ... global otherwise
-     * This toggle is in place because of some legacy plugins not beeing aware of local/global types.
+     * This toggle is in place because of some legacy plugins not being aware of local/global types.
      */
     DataType *type;
     std::string typeName = FindNewDatatype::getTypeName(variable.second);
@@ -307,11 +308,11 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->findInitialValues->setup(decl, fieldDecl, module, &_ci);
-      ConstValue *initialValue = this->findInitialValues->getInitValue();
-      //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
-      //auto intitalValMap = findInitalValues.getVariableInitialMap();
-      //Variable not initialized -> intialize with default value
+      this->find_initial_values_->setup(decl, fieldDecl, module, &ci_);
+      ConstValue *initialValue = this->find_initial_values_->getInitValue();
+      //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
+      //auto initialValMap = findInitialValues.getVariableInitialMap();
+      //Variable not initialized -> initialize with default value
       if (initialValue == nullptr) {
         if (type == DataTypes::getDataType("int")) {
           DESCAM_ASSERT(initialValue = new IntegerValue(0))
@@ -339,18 +340,18 @@ void DESCAM::CheckErrors::HandleTranslationUnit(ASTContext &context) {
 
 void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
-  findFunctions->setup(decl);
+  find_functions_->setup(decl);
   //Add datatypes for functions
-  auto functionsMap = findFunctions->getFunctionMap();
-  for (auto func: functionsMap) {
-    auto newType = FindNewDatatype::getDataType(func.second->getResultType());
+  auto functions_map = find_functions_->getFunctionMap();
+  for (const auto& func: functions_map) {
+    auto new_type = FindNewDatatype::getDataType(func.second->getResultType());
     if (FindNewDatatype::isGlobal(func.second->getResultType())) {
-      DataTypes::addDataType(newType);
-    } else DataTypes::addLocalDataType(module->getName(), newType);
+      DataTypes::addDataType(new_type);
+    } else DataTypes::addLocalDataType(module->getName(), new_type);
   }
 
-  //Add Structural description of fucntions to module
-  for (auto function: findFunctions->getFunctionReturnTypeMap()) {
+  //Add Structural description of functions to module
+  for (const auto &function: find_functions_->getFunctionReturnTypeMap()) {
     DataType *datatype;
     if (DataTypes::isLocalDataType(function.second, module->getName())) {
       datatype = DataTypes::getLocalDataType(function.second, module->getName());
@@ -358,31 +359,31 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
 
     //Parameter
     std::map<std::string, Parameter *> paramMap;
-    auto paramList = findFunctions->getFunctionParamNameMap().find(function.first)->second;
-    auto paramTypeList = findFunctions->getFunctionParamTypeMap().find(function.first)->second;
+    auto paramList = find_functions_->getFunctionParamNameMap().find(function.first)->second;
+    auto paramTypeList = find_functions_->getFunctionParamTypeMap().find(function.first)->second;
     if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
     for (int i = 0; i < paramList.size(); i++) {
       auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
       paramMap.insert(std::make_pair(paramList.at(i), param));
     }
     Function *new_function = nullptr;
-    DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
+    DESCAM_ASSERT(if (functions_map.find(function.first) != functions_map.end())
                     new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
-                        functionsMap[function.first], _ci));
+                        functions_map[function.first], ci_));
                   else new_function = new Function(function.first, datatype, paramMap);
                       module->addFunction(new_function);)
   }
   TERMINATE_IF_ERROR
   //Add behavioral description of function to module
-  for (auto function: findFunctions->getFunctionMap()) {
+  for (const auto &function: find_functions_->getFunctionMap()) {
     //Create blockCFG for this process
     //Active searching only for functions
     FindDataFlow::functionName = function.first;
     FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
+    DESCAM::CFGFactory cfgFactory(function.second, ci_, module);
     FindDataFlow::functionName = "";
     FindDataFlow::isFunction = false;
-    //Transfor blockCFG back to code
+    //Transform blockCFG back to code
     FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
     module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
   }
@@ -392,19 +393,18 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  FindGlobal findGlobal(pDecl, _ci);
-
-  for (auto var: findGlobal.getVariableMap()) {
-    this->model->addGlobalVariable(var.second);
+  this->find_global_->setup(pDecl, &ci_);
+  for (const auto& var: find_global_->getVariableMap()) {
+    this->model_->addGlobalVariable(var.second);
   }
 
   //Add all global functions need in case of nested functions
-  for (auto func: findGlobal.getFunctionMap()) {
+  for (const auto& func: find_global_->getFunctionMap()) {
     //Add the definition to the function map
-    this->model->addGlobalFunction(func.second);
+    this->model_->addGlobalFunction(func.second);
   }
 
-  for (auto func: findGlobal.getFunctionMap()) {
+  for (auto func: find_global_->getFunctionMap()) {
     try {
       std::string name = func.first;
       //Create blockCFG for this process
@@ -414,15 +414,15 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
-      DESCAM::CFGFactory cfgFactory(findGlobal.getFunctionDeclMap().at(name), _ci, &module);
+      DESCAM::CFGFactory cfgFactory(find_global_->getFunctionDeclMap().at(name), ci_, &module);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
-      //Transfor blockCFG back to code
+      //Transform blockCFG back to code
       FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
       func.second->setStmtList(functionFactory.getStmtList());
       Logger::tagTempMsgs(func.first);
     } catch (std::runtime_error &e) {
-      this->model->removeGlobalFunction(func.second);
+      this->model_->removeGlobalFunction(func.second);
       Logger::clearTempVector();
     }
   }

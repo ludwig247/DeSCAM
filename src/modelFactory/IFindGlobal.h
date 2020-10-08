@@ -22,7 +22,7 @@ namespace DESCAM {
 
         virtual ~IFindGlobal() = default;
 
-        virtual bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) = 0;
+        virtual bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) = 0;
 
         virtual const std::map<std::string, Variable *> &getVariableMap() const = 0;
 

@@ -19,11 +19,12 @@
 #include "FindSCMain.h"
 #include "FindModules.h"
 #include "FindNetlist.h"
-#include "IFindProcess.h"
 #include "FindVariables.h"
-#include "Model.h"
+#include "IFindProcess.h"
+#include "IFindGlobal.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
+#include "Model.h"
 #include <iostream>
 
 using namespace clang::driver;
@@ -47,17 +48,18 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   virtual bool postFire();
 
  private:
-  Model *model;
-  CompilerInstance &_ci;
-  ASTContext &_context;
-  SourceManager &_sm;
-  llvm::raw_ostream &_os;
-  std::vector<std::string> unimportantModules; //! List containing unimportant modules
+  Model *model_;
+  CompilerInstance &ci_;
+  ASTContext &context_;
+  llvm::raw_ostream &ostream_;
+  std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
   /** Pointer to FindFunctions Class (DIP) */
-  std::unique_ptr<IFindFunctions> findFunctions;
+  std::unique_ptr<IFindFunctions> find_functions_;
   /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindInitialValues> findInitialValues;
-  std::unique_ptr<IFindProcess> findProcess;
+  std::unique_ptr<IFindInitialValues> find_initial_values_;
+  std::unique_ptr<IFindProcess> find_process_;
+  std::unique_ptr<IFindGlobal> find_global_;
+
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
 
@@ -72,6 +74,7 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   void addBehavior(Module *module, clang::CXXRecordDecl *decl);
 
   void addVariables(Module *module, clang::CXXRecordDecl *decl);
+
 
 };
 
