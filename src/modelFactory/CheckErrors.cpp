@@ -307,7 +307,7 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->findInitialValues->setup(decl,fieldDecl,module);
+      this->findInitialValues->setup(decl, fieldDecl, module, nullptr);
       ConstValue *initialValue = this->findInitialValues->getInitValue();
       //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto intitalValMap = findInitalValues.getVariableInitialMap();

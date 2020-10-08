@@ -7,6 +7,7 @@
 
 #include <map>
 #include "IFindFunctions.h"
+#include "clang/AST/RecursiveASTVisitor.h"
 
 namespace DESCAM {
 /***
@@ -14,13 +15,13 @@ namespace DESCAM {
  *
  * Functions are considered const if they are const with respect to the class and thereby don't change the state of the class.
  */
-class FindFunctions : public IFindFunctions {
+class FindFunctions : public IFindFunctions, public clang::RecursiveASTVisitor<FindFunctions> {
  public:
   FindFunctions();
 
   void setup(clang::CXXRecordDecl *recordDecl) override;
 
-  bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) override;
+  bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl);
 
   const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const override;
 
@@ -37,13 +38,13 @@ class FindFunctions : public IFindFunctions {
    */
   void clean();
 
-  std::map<std::string, clang::CXXMethodDecl *> functionMap;
-  std::map<std::string, std::string> functionReturnTypeMap;
+  std::map<std::string, clang::CXXMethodDecl *> function_map_;
+  std::map<std::string, std::string> function_return_type_map_;
 
   std::string clangToScamType(clang::QualType qualType) const;
 
-  std::map<std::string, std::vector<std::string>> functionParamNameMap;
-  std::map<std::string, std::vector<std::string>> functionParamTypeMap;
+  std::map<std::string, std::vector<std::string>> function_param_name_map_;
+  std::map<std::string, std::vector<std::string>> function_param_type_map_;
 };
 }
 
