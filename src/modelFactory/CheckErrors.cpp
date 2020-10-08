@@ -1,7 +1,6 @@
 #include "CheckErrors.h"
 #include "FindInitialValues.h"
 #include "FindProcess.h"
-#include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
 #include <Logger/Logger.h>
