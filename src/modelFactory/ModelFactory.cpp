@@ -32,7 +32,7 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
 
   //Compositional root
   this->find_functions_ = std::make_unique<FindFunctions>();
-  this->find_initial_values_ = std::make_unique<FindInitialValues>(ci);
+  this->find_initial_values_ = std::make_unique<FindInitialValues>();
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
@@ -309,8 +309,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
   //Input ports
   for (auto &port: this->find_ports_->getInSharedPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
-      TERMINATE(
-          "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      TERMINATE("No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
     }
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("shared", "in"))
