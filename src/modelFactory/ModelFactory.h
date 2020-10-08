@@ -22,7 +22,6 @@
 #include "IFindPorts.h"
 #include "FindSCMain.h"
 #include "FindModules.h"
-#include "FindNetlist.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
 #include "Model.h"
@@ -31,6 +30,7 @@
 #include <iostream>
 
 #include "IFindGlobal.h"
+#include "IFindNetlist.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -74,15 +74,16 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   std::unique_ptr<IFindFunctions> find_functions_;
   /** Pointer to FindInitialValues Class (DIP) */
   std::unique_ptr<IFindInitialValues> find_initial_values_;
-/** Pointer to FindInitialValues Class (DIP) */
+  /** Pointer to FindInitialValues Class (DIP) */
   std::unique_ptr<IFindGlobal> find_global_;
-/** Pointer to IFindModules Class (DIP) */
+  /** Pointer to IFindModules Class (DIP) */
   std::unique_ptr<IFindModules> find_modules_;
-/** Pointer to IFindPorts Class (DIP) */
+  /** Pointer to IFindPorts Class (DIP) */
   std::unique_ptr<IFindPorts> find_ports_;
+  /** TODO Pointer to is X is not a descriptive/useful comment */
+  std::unique_ptr<IFindNetlist> find_netlist_;
 
-
-        //Methods
+  //Methods
   void HandleTranslationUnit(ASTContext &context) override;
 
   void addModules(clang::TranslationUnitDecl *decl);
