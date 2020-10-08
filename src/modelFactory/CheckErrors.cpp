@@ -28,8 +28,7 @@ DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
 
   //Compositional root
   this->findFunctions = std::make_unique<FindFunctions>();
-  this->findInitialValues = std::make_unique<FindInitialValues>(ci);
-
+  this->findInitialValues = std::make_unique<FindInitialValues>();
   //Unimportant modules
   this->unimportantModules.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportantModules.emplace_back("Testbench");//! Not important for the abstract model:
@@ -307,7 +306,7 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->findInitialValues->setup(decl, fieldDecl, module, nullptr);
+      this->findInitialValues->setup(decl, fieldDecl, module, &_ci);
       ConstValue *initialValue = this->findInitialValues->getInitValue();
       //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto intitalValMap = findInitalValues.getVariableInitialMap();
