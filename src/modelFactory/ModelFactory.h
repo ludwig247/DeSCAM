@@ -19,7 +19,7 @@
 
 
 // PArse SystemC
-#include "FindPorts.h"
+#include "IFindPorts.h"
 #include "FindSCMain.h"
 #include "FindModules.h"
 #include "FindNetlist.h"
@@ -29,6 +29,8 @@
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
 #include <iostream>
+
+#include "IFindGlobal.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -67,13 +69,20 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   ASTContext &_context;
   SourceManager &_sm;
   llvm::raw_ostream &_os;
-  std::vector<std::string> unimportantModules; //! List containing unimportant modules
+  std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
   /** Pointer to FindFunctions Class (DIP) */
-  std::unique_ptr<IFindFunctions> findFunctions_;
+  std::unique_ptr<IFindFunctions> find_functions_;
   /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindInitialValues> findInitialValues_;
+  std::unique_ptr<IFindInitialValues> find_initial_values_;
+/** Pointer to FindInitialValues Class (DIP) */
+  std::unique_ptr<IFindGlobal> find_global_;
+/** Pointer to IFindModules Class (DIP) */
+  std::unique_ptr<IFindModules> find_modules_;
+/** Pointer to IFindPorts Class (DIP) */
+  std::unique_ptr<IFindPorts> find_ports_;
 
-  //Methods
+
+        //Methods
   void HandleTranslationUnit(ASTContext &context) override;
 
   void addModules(clang::TranslationUnitDecl *decl);

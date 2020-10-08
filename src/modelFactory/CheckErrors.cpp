@@ -59,7 +59,7 @@ bool DESCAM::CheckErrors::fire() {
 
 void DESCAM::CheckErrors::addModules(clang::TranslationUnitDecl *decl) {
 
-  FindModules modules(decl);
+    FindModules modules;
 
   //Fill the model with modules(structural describtion)
   for (auto &scparModule: modules.getModuleMap()) {
@@ -94,44 +94,45 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
   //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
   //Right now, we are not interested about the direction of the port.
 
-  DESCAM::FindPorts findPorts(decl, this->_context, _ci);
-  auto portsLocationMap = findPorts.getLocationInfoMap();
-  //Add Ports -> requires Name, Interface and DataType
-  //RendezVouz
-  //Input ports
-  for (auto &port: findPorts.getInPortMap()) {
-    Interface *interface = nullptr;
-    DESCAM_ASSERT(interface = new Interface("blocking", "in"))
-    if (DataTypes::isLocalDataType(port.second, module->getName())) {
-      TERMINATE(
-          "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+    DESCAM::FindPorts findPorts(&this->_ci);
+    findPorts.setup(decl);
+    auto portsLocationMap = findPorts.getLocationInfoMap();
+    //Add Ports -> requires Name, Interface and DataType
+    //RendezVouz
+    //Input ports
+    for (auto &port: findPorts.getInPortMap()) {
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("blocking", "in"))
+        if (DataTypes::isLocalDataType(port.second, module->getName())) {
+            TERMINATE(
+                    "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+        }
+        Port *inPort = nullptr;
+        DESCAM_ASSERT (if(portsLocationMap.find(port.first) != portsLocationMap.end())
+                           inPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                       else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                               module->addPort(inPort))
     }
-    Port *inPort = nullptr;
-    DESCAM_ASSERT (if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                     inPort = new Port(port.first, interface,
-                                       DataTypes::getDataType(
-                                           port.second),
-                                       portsLocationMap[port.first]);
-                   else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                       module->addPort(inPort))
-  }
-  //Output ports
-  for (auto &port: findPorts.getOutPortMap()) {
-    Interface *interface = nullptr;
-    DESCAM_ASSERT(interface = new Interface("blocking", "out"))
-    if (DataTypes::isLocalDataType(port.second, module->getName())) {
-      TERMINATE(
-          "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+    //Output ports
+    for (auto &port: findPorts.getOutPortMap()) {
+        Interface *interface = nullptr;
+        DESCAM_ASSERT(interface = new Interface("blocking", "out"))
+        if (DataTypes::isLocalDataType(port.second, module->getName())) {
+            TERMINATE(
+                    "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+        }
+        Port *outPort = nullptr;
+        DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                          outPort = new Port(port.first, interface,
+                                             DataTypes::getDataType(
+                                                     port.second),
+                                             portsLocationMap[port.first]);
+                      else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                              module->addPort(outPort))
     }
-    Port *outPort = nullptr;
-    DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                    outPort = new Port(port.first, interface,
-                                       DataTypes::getDataType(
-                                           port.second),
-                                       portsLocationMap[port.first]);
-                  else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                      module->addPort(outPort))
-  }
 
   //AlwaysReady
   //Input ports
