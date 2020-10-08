@@ -59,6 +59,7 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   std::unique_ptr<IFindInitialValues> find_initial_values_;
   std::unique_ptr<IFindProcess> find_process_;
   std::unique_ptr<IFindGlobal> find_global_;
+  std::unique_ptr<IFindVariables> find_variables_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
@@ -74,7 +75,6 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   void addBehavior(Module *module, clang::CXXRecordDecl *decl);
 
   void addVariables(Module *module, clang::CXXRecordDecl *decl);
-
 
 };
 
