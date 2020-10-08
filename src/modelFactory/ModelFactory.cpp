@@ -24,7 +24,7 @@
 
 //Constructor
 DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
-    _sm(ci.getSourceManager()),
+// unused? _sm(ci.getSourceManager()),
     _ci(ci),
     _context(ci.getASTContext()),
     _os(llvm::errs()),
@@ -41,6 +41,8 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->find_modules_ = std::make_unique<FindModules>();
   this->find_ports_ = std::make_unique<FindPorts>(&_ci);
   this->find_global_ = std::make_unique<FindGlobal>(_context.getTranslationUnitDecl(), _ci);
+  this->find_netlist_ = std::make_unique<FindNetlist>();
+  this->find_process_ = std::make_unique<FindProcess>();
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -81,12 +83,12 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
   this->find_modules_->setup(decl);
 
-  //Fill the model with modules(structural describtion)
-  for (auto &scparModule: find_modules_->getModuleMap()) {
+  //Fill the model with modules(structural description)
+  for (auto &scpar_module: find_modules_->getModuleMap()) {
 
     //Module Name
-    std::string name = scparModule.first;
-    auto moduleLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
+    std::string name = scpar_module.first;
+    auto module_location_info = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scpar_module.second, _ci);
 
     //Module is on the unimportant module list -> skip
     if (std::find(this->unimportant_modules_.begin(), this->unimportant_modules_.end(), name) !=
@@ -98,33 +100,33 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
     std::cout << "Module: " << name << std::endl;
     std::cout << "############################" << std::endl;
     //DataTypes::reset();//FIXME:
-    auto module = new Module(scparModule.first, moduleLocationInfo);
+    auto module = new Module(scpar_module.first, module_location_info);
     model->addModule(module);
     //Members
-    this->addVariables(module, scparModule.second);
+    this->addVariables(module, scpar_module.second);
     //Ports
-    this->addPorts(module, scparModule.second);
+    this->addPorts(module, scpar_module.second);
     //Combinational Functions
-    this->addFunctions(module, scparModule.second);
-    //Processe
-    this->addBehavior(module, scparModule.second);
+    this->addFunctions(module, scpar_module.second);
+    //Processes
+    this->addBehavior(module, scpar_module.second);
     //this->addCommunicationFSM(module);
   }
 }
 
 //! Add structure ...
 void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
-  FindSCMain scmain(tu);
+  FindSCMain find_sc_main(tu);
 
   //The top instance is the sc_main. It doesn't contain any ports
   //Create empty dummy module for sc_main
   auto sc_main = new Module("main");
   //this->model->addModule(sc_main);
   //Create instance for sc_main and add to model
-  auto topInstance = new ModuleInstance("TopInstance", sc_main);
+  auto top_instance = new ModuleInstance("TopInstance", sc_main);
   //std::cout << model->getModuleInstance() << std::cout;
-  model->addTopInstance(topInstance);
-  if (!scmain.isScMainFound()) {
+  model->addTopInstance(top_instance);
+  if (!find_sc_main.isScMainFound()) {
     std::cout << "" << std::endl;
     std::cout << "======================" << std::endl;
     std::cout << "Instances:" << std::endl;
@@ -133,51 +135,51 @@ void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     return;
   }
 
-  FindNetlist findNetlist(scmain.getSCMainFunctionDecl());
+  find_netlist_->setup(find_sc_main.getSCMainFunctionDecl());
   //findNetlist.getInstanceMap() = std::map<string instance_name,string sc_module>
-  for (auto &instance: findNetlist.getInstanceMap()) {
-    //Search for pointer in modul map
+  for (const auto &instance: find_netlist_->getInstanceMap()) {
+    //Search for pointer in module map
     Module *module = model->getModules().find(instance.second)->second;
     //In case module is not found -> error!
     if (!module) {TERMINATE("ModelFactory::addInstances module not found"); }
     //Add instance to model
-    topInstance->addModuleInstance(new ModuleInstance(instance.first, module));
+    top_instance->addModuleInstance(new ModuleInstance(instance.first, module));
   }
   //ChannelMap = <<Instance,Port>, channelDecl*> >
   //Create exactly one channel for each channelDecl and attach respective ports to this channel
-  for (auto channel: findNetlist.getChannelMap()) {
+  for (const auto &channel: find_netlist_->getChannelMap()) {
     //Search instance in model ( instanceName = channel.first.first)
     std::string instanceName = channel.first.first;
-    ModuleInstance *instance = topInstance->getModuleInstances().find(instanceName)->second;
+    ModuleInstance *instance;
+    instance = top_instance->getModuleInstances().find(instanceName)->second;
 
     //Channel name and type
-    std::string channelName = channel.second->getNameInfo().getAsString();
-    //std::cout << channelName << "= "<< channel.first.first << ":" << channel.first.second << std::endl;
+    std::string channel_name = channel.second->getNameInfo().getAsString();
 
     //Check whether channel is already created
     //If channel does not already exist
-    if (topInstance->getChannelMap().count(channelName) == 0) {
+    if (top_instance->getChannelMap().count(channel_name) == 0) {
       //Create new channel
       //Add to channelMap of instance
-      topInstance->addChannel(new Channel(channelName));
+      top_instance->addChannel(new Channel(channel_name));
     }
     //Otherwise receive current channel
-    Channel *currentChannel = topInstance->getChannelMap().find(channelName)->second;
+    Channel *current_channel = top_instance->getChannelMap().find(channel_name)->second;
 
     //Add port to channel
     //Search search port in instance.module ( portName = channel.first.second )
-    std::string portName = channel.first.second;
-    Port *port = instance->getStructure()->getPorts().find(portName)->second;
+    std::string port_name = channel.first.second;
+    Port *port = instance->getStructure()->getPorts().find(port_name)->second;
 
     //Differ between in/output port
     std::string direction = port->getInterface()->getDirection();
     //Bind Port to Channel
     if (direction == "in") {
-      currentChannel->setToPort(port);
-      currentChannel->setToInstance(instance);
+      current_channel->setToPort(port);
+      current_channel->setToInstance(instance);
     } else if (direction == "out") {
-      currentChannel->setFromPort(port);
-      currentChannel->setFromInstance(instance);
+      current_channel->setFromPort(port);
+      current_channel->setFromInstance(instance);
     } else {TERMINATE("Interface direction not supported"); }
     //Add instance to channel
 
@@ -188,7 +190,7 @@ void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
 void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
   //Parse ports from CXXRecordDecl
-  //Ports are sc_in,sc_out, sc_inout (sc_port) is consideres as
+  //Ports are sc_in,sc_out, sc_inout (sc_port) is considers as
   //Right now, we are not interested about the direction of the port.
 
   //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
@@ -196,7 +198,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
   this->find_ports_->setup(decl);
   auto portsLocationMap = this->find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
-  //RendezVouz
+  //Rendezvous
   //Input ports
   for (auto &port: this->find_ports_->getInPortMap()) {
     Interface *interface = nullptr;
@@ -338,11 +340,14 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
 
   //Find the process describing the behavior
-  DESCAM::FindProcess findProcess(decl);
+  find_process_->setup(decl);
   clang::CXXMethodDecl *methodDecl;
-  if (findProcess.isValidProcess()) {
-    methodDecl = findProcess.getProcess();
+  if (find_process_->isValidProcess()) {
+    methodDecl = find_process_->getProcess();
   }
+  /*
+   * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
+   */
   DESCAM::CFGFactory cfgFactory(methodDecl, _ci, module, true);
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
@@ -373,7 +378,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
   FindVariables findVariables(decl);
 
   //Initial Values
-  //FindInitialValues findInitalValues(decl, findVariables.getVariableMap(), module);
+  //FindInitialValues findInitialValues(decl, findVariables.getVariableMap(), module);
 
   //Add members to module
   for (auto &&variable: findVariables.getVariableTypeMap()) {
@@ -382,9 +387,9 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, _ci);
 
     /*
-     * Disinguish between local and global DataTypes.
+     * Distinguish between local and global DataTypes.
      * If a module declares a type within it's class, then it's a local datatype ... global otherwise
-     * This toggle is in place because of some legacy plugins not beeing aware of local/global types.
+     * This toggle is in place because of some legacy plugins not being aware of local/global types.
      */
     DataType *type;
     std::string typeName = FindNewDatatype::getTypeName(variable.second);
@@ -411,11 +416,11 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, nullptr);
+      this->find_initial_values_->setup(decl, fieldDecl, module, &_ci);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
-      //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
-      //auto intitalValMap = findInitalValues.getVariableInitialMap();
-      //Variable not initialized -> intialize with default value
+      //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
+      //auto initialValMap = findInitialValues.getVariableInitialMap();
+      //Variable not initialized -> initialize with default value
       if (initialValue == nullptr) {
         if (type == DataTypes::getDataType("int")) {
           DESCAM_ASSERT(initialValue = new IntegerValue(0))
@@ -434,7 +439,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
 }
 
 bool DESCAM::ModelFactory::postFire() {
-  return 0;
+  return false;
 }
 
 void DESCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
@@ -490,7 +495,7 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
   }
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   //Add behavioral description of function to module
-  for (auto function: find_functions_->getFunctionMap()) {
+  for (const auto &function: find_functions_->getFunctionMap()) {
     //Create blockCFG for this process
     //Active searching only for functions
     FindDataFlow::functionName = function.first;
@@ -498,7 +503,7 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
     DESCAM::CFGFactory cfgFactory(function.second, _ci, module);
     FindDataFlow::functionName = "";
     FindDataFlow::isFunction = false;
-    //Transfor blockCFG back to code
+    //Transform blockCFG back to code
     FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
     module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
   }
@@ -508,14 +513,14 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl,this->_ci);
+  this->find_global_->setup(pDecl, this->_ci);
 
-  for (auto var: this->find_global_->getVariableMap()) {
+  for (const auto &var: this->find_global_->getVariableMap()) {
     this->model->addGlobalVariable(var.second);
   }
 
   //Add all global functions need in case of nested functions
-  for (auto func: this->find_global_->getFunctionMap()) {
+  for (const auto &func: this->find_global_->getFunctionMap()) {
     //Add the definition to the function map
     this->model->addGlobalFunction(func.second);
   }
@@ -527,13 +532,14 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
       //Active searching only for functions
       //If fails ... function is not SystemC-PPA compliant
       //don't add body to function
+      // TODO: Replace type deduction through flags by strong types and overloaded function
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
       DESCAM::CFGFactory cfgFactory(this->find_global_->getFunctionDeclMap().at(name), _ci, &module);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
-      //Transfor blockCFG back to code
+      //Transform blockCFG back to code
       FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
       func.second->setStmtList(functionFactory.getStmtList());
       Logger::tagTempMsgs(func.first);
@@ -549,20 +555,20 @@ void DESCAM::ModelFactory::removeUnused() {
   //Remove unused globalVariables & globalFunctions
   std::map<Variable *, bool> removeGlobalVars;
 
-  for (auto var: model->getGlobalVariableMap()) {
+  for (const auto &var: model->getGlobalVariableMap()) {
     assert(var.second->isBuiltInType() && var.second->isConstant() && "Only built-in allowed as global variable");
     removeGlobalVars.insert(std::make_pair(var.second, true));
   }
   std::map<Function *, bool> removeGlobalFunctions;
-  for (auto var: model->getGlobalFunctionMap()) {
+  for (const auto &var: model->getGlobalFunctionMap()) {
     //assert(var.second->isBuiltInType() && var.second->isConstant() && "Only built-in allowed as global variable");
     removeGlobalFunctions.insert(std::make_pair(var.second, true));
   }
 
   auto globalFunMap = this->model->getGlobalFunctionMap();
   //Nested calls
-  for (auto func  : globalFunMap) {
-    for (auto retValCond  : func.second->getReturnValueConditionList()) {
+  for (const auto &func  : globalFunMap) {
+    for (const auto &retValCond  : func.second->getReturnValueConditionList()) {
       for (auto usedFunc: ExprVisitor::getUsedFunction(retValCond.first->getReturnValue())) {
         if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
           removeGlobalFunctions.at(usedFunc) = false;
@@ -584,7 +590,7 @@ void DESCAM::ModelFactory::removeUnused() {
     }
   }
 
-  for (auto module: model->getModules()) {
+  for (const auto &module: model->getModules()) {
     for (auto state : module.second->getFSM()->getStateMap()) {
       for (auto op: state.second->getOutgoingOperationsList()) {
         for (auto ass: op->getAssumptionsList()) {
@@ -613,8 +619,8 @@ void DESCAM::ModelFactory::removeUnused() {
         }
       }
       //Check functions:
-      for (auto func: module.second->getFunctionMap()) {
-        for (auto retValCond  : func.second->getReturnValueConditionList()) {
+      for (const auto &func: module.second->getFunctionMap()) {
+        for (const auto &retValCond  : func.second->getReturnValueConditionList()) {
           for (auto usedFunc: ExprVisitor::getUsedFunction(retValCond.first->getReturnValue())) {
             if (globalFunMap.find(usedFunc->getName()) != globalFunMap.end()) {
               removeGlobalFunctions.at(usedFunc) = false;

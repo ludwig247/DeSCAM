@@ -19,7 +19,7 @@
 #include "FindSCMain.h"
 #include "FindModules.h"
 #include "FindNetlist.h"
-#include "FindProcess.h"
+#include "IFindProcess.h"
 #include "FindVariables.h"
 #include "Model.h"
 #include "IFindFunctions.h"
@@ -57,7 +57,7 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   std::unique_ptr<IFindFunctions> findFunctions;
   /** Pointer to FindInitialValues Class (DIP) */
   std::unique_ptr<IFindInitialValues> findInitialValues;
-
+  std::unique_ptr<IFindProcess> findProcess;
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
 
@@ -72,6 +72,7 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   void addBehavior(Module *module, clang::CXXRecordDecl *decl);
 
   void addVariables(Module *module, clang::CXXRecordDecl *decl);
+
 };
 
 }

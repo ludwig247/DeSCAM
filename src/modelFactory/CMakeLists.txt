@@ -24,7 +24,9 @@ add_library (modelFactory SHARED
 		FindStateName.h
 		IFindGlobal.h
 		IFindModules.h
-		IFindPorts.h)
+		IFindPorts.h
+		IFindNetlist.h
+		IFindProcess.h)
 
 
 target_link_libraries(modelFactory propertyFactory)
