@@ -30,6 +30,7 @@ DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
   this->find_initial_values_ = std::make_unique<FindInitialValues>();
   this->find_process_ = std::make_unique<FindProcess>();
   this->find_global_ = std::make_unique<FindGlobal>();
+  this->find_variables_ = std::make_unique<FindVariables>();
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
@@ -267,15 +268,15 @@ void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDe
 void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
   //Find all Variables within the Module
-  FindVariables findVariables(decl);
+  find_variables_->setup(decl);
 
   //Initial Values
   //FindInitialValues findInitialValues(decl, findVariables.getVariableMap(), module);
 
   //Add members to module
-  for (auto &&variable: findVariables.getVariableTypeMap()) {
+  for (auto &&variable: find_variables_->getVariableTypeMap()) {
     //Add Variable to Module
-    auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
+    auto fieldDecl = find_variables_->getVariableMap().find(variable.first)->second;
     auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, ci_);
 
     /*
@@ -343,7 +344,7 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
   find_functions_->setup(decl);
   //Add datatypes for functions
   auto functions_map = find_functions_->getFunctionMap();
-  for (const auto& func: functions_map) {
+  for (const auto &func: functions_map) {
     auto new_type = FindNewDatatype::getDataType(func.second->getResultType());
     if (FindNewDatatype::isGlobal(func.second->getResultType())) {
       DataTypes::addDataType(new_type);
@@ -394,12 +395,12 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
 
   //Find all global functions and variables
   this->find_global_->setup(pDecl, &ci_);
-  for (const auto& var: find_global_->getVariableMap()) {
+  for (const auto &var: find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
   }
 
   //Add all global functions need in case of nested functions
-  for (const auto& func: find_global_->getFunctionMap()) {
+  for (const auto &func: find_global_->getFunctionMap()) {
     //Add the definition to the function map
     this->model_->addGlobalFunction(func.second);
   }

@@ -42,6 +42,7 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->find_global_ = std::make_unique<FindGlobal>();
   this->find_netlist_ = std::make_unique<FindNetlist>();
   this->find_process_ = std::make_unique<FindProcess>();
+  this->find_variables_ = std::make_unique<FindVariables>();
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -374,15 +375,14 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
 void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
   //Find all Variables within the Module
-  FindVariables findVariables(decl);
-
+  find_variables_->setup(decl);
   //Initial Values
   //FindInitialValues findInitialValues(decl, findVariables.getVariableMap(), module);
 
   //Add members to module
-  for (auto &&variable: findVariables.getVariableTypeMap()) {
+  for (auto &&variable: find_variables_->getVariableTypeMap()) {
     //Add Variable to Module
-    auto fieldDecl = findVariables.getVariableMap().find(variable.first)->second;
+    auto fieldDecl = find_variables_->getVariableMap().find(variable.first)->second;
     auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, ci_);
 
     /*
