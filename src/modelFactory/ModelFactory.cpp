@@ -31,8 +31,8 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
     model(nullptr) {
 
   //Compositional root
-  this->find_functions_ = std::make_unique<FindFunctions>();
-  this->find_initial_values_ = std::make_unique<FindInitialValues>(ci);
+  this->findFunctions_ = std::make_unique<FindFunctions>();
+  this->findInitialValues_ = std::make_unique<FindInitialValues>(ci);
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
@@ -40,7 +40,7 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
 
   this->find_modules_ = new FindModules();
   this->find_ports_ = new FindPorts(&_ci);
-
+  this->findGlobal_ = std::make_unique<FindGlobal>(tu, _ci);
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -89,8 +89,8 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
     auto moduleLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scparModule.second, _ci);
 
     //Module is on the unimportant module list -> skip
-    if (std::find(this->unimportant_modules_.begin(), this->unimportant_modules_.end(), name) !=
-        this->unimportant_modules_.end()) {
+    if (std::find(this->unimportantModules.begin(), this->unimportantModules.end(), name) !=
+        this->unimportantModules.end()) {
       //Skip this module
       continue;
     }
@@ -412,8 +412,8 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module);
-      ConstValue *initialValue = this->find_initial_values_->getInitValue();
+      this->findInitialValues_->setup(decl, fieldDecl, module);
+      ConstValue *initialValue = this->findInitialValues_->getInitValue();
       //FindInitialValues findInitalValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto intitalValMap = findInitalValues.getVariableInitialMap();
       //Variable not initialized -> intialize with default value
@@ -455,19 +455,19 @@ void DESCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 
 void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
-  //std::unique_ptr<IFindFunctions> find_functions_ = FindFunctionsFactory::create(decl);
-  find_functions_->setup(decl);
+  //std::unique_ptr<IFindFunctions> findFunctions_ = FindFunctionsFactory::create(decl);
+  findFunctions_->setup(decl);
   //Add datatypes for functions
-  auto functionsMap = find_functions_->getFunctionMap();
-  for (auto func: functionsMap) {
+  auto functionsMap = findFunctions_->getFunctionMap();
+  for (const auto &func: functionsMap) {
     auto newType = FindNewDatatype::getDataType(func.second->getResultType());
     if (FindNewDatatype::isGlobal(func.second->getResultType())) {
       DataTypes::addDataType(newType);
     } else DataTypes::addLocalDataType(module->getName(), newType);
   }
 
-  //Add Structural description of fucntions to module
-  for (auto function: find_functions_->getFunctionReturnTypeMap()) {
+  //Add Structural description of functions to module
+  for (const auto &function: findFunctions_->getFunctionReturnTypeMap()) {
     DataType *datatype;
     if (DataTypes::isLocalDataType(function.second, module->getName())) {
       datatype = DataTypes::getLocalDataType(function.second, module->getName());
@@ -475,8 +475,8 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
 
     //Parameter
     std::map<std::string, Parameter *> paramMap;
-    auto paramList = find_functions_->getFunctionParamNameMap().find(function.first)->second;
-    auto paramTypeList = find_functions_->getFunctionParamTypeMap().find(function.first)->second;
+    auto paramList = findFunctions_->getFunctionParamNameMap().find(function.first)->second;
+    auto paramTypeList = findFunctions_->getFunctionParamTypeMap().find(function.first)->second;
     if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
     for (int i = 0; i < paramList.size(); i++) {
       auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
@@ -491,7 +491,7 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
   }
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   //Add behavioral description of function to module
-  for (auto function: find_functions_->getFunctionMap()) {
+  for (auto function: findFunctions_->getFunctionMap()) {
     //Create blockCFG for this process
     //Active searching only for functions
     FindDataFlow::functionName = function.first;

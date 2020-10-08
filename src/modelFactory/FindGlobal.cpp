@@ -11,11 +11,18 @@
 #include "FindNewDatatype.h"
 #include "FatalError.h"
 
-DESCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) :
-    ci(ci),
-    decl(decl) {
-  assert(!(decl == nullptr));
-  TraverseDecl(decl);
+
+DESCAM::FindGlobal::FindGlobal(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) : ci(ci) {}
+
+bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) {
+    assert(!(decl == nullptr));
+
+    this->variableMap.clear();
+    this->functionMap.clear();
+    this->functionDeclMap.clear();
+
+    this->decl = decl;
+    return TraverseDecl(decl);
 }
 
 bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
@@ -146,11 +153,11 @@ DESCAM::DataType *DESCAM::FindGlobal::getDataType(const clang::QualType &type) c
 }
 
 const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunctionMap() const {
-  return functionMap;
+    return functionMap;
 }
 
 const std::map<std::string, const clang::FunctionDecl *> &DESCAM::FindGlobal::getFunctionDeclMap() const {
-  return functionDeclMap;
+    return functionDeclMap;
 }
 
 
