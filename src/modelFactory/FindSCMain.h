@@ -1,28 +1,30 @@
 #ifndef _FIND_SCMAIN_H_
 #define _FIND_SCMAIN_H_
 
-
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "IFindSCMain.h"
 
 namespace DESCAM {
-    /*!
-     * \brief Finds the sc_main within a TranslationUnit
-     */
-    class FindSCMain : public clang::RecursiveASTVisitor<FindSCMain> {
-    public:
-        FindSCMain(clang::TranslationUnitDecl *);
+/*!
+ * \brief Finds the sc_main within a TranslationUnit
+ */
+class FindSCMain : public IFindSCMain, public clang::RecursiveASTVisitor<FindSCMain> {
+ public:
+  ~FindSCMain() override = default;
 
-        virtual bool VisitFunctionDecl(clang::FunctionDecl *functionDecl);
+  virtual bool VisitFunctionDecl(clang::FunctionDecl *functionDecl);
 
-        bool isScMainFound() const;
+  bool setup(clang::TranslationUnitDecl *) override;
+  bool isScMainFound() const override;
 
-        clang::FunctionDecl* getSCMainFunctionDecl();
+  clang::FunctionDecl *getSCMainFunctionDecl() override;
 
-    private:
-        clang::FunctionDecl *_scmainFunctionDecl;
-        int pass;
-        bool scMainFound;
+ private:
+  clang::FunctionDecl *scmain_function_decl_;
+  clang::TranslationUnitDecl * unit_decl_;
+  int pass_;
+  bool sc_main_found_;
 
-    };
+};
 }
 #endif
