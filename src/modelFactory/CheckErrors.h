@@ -24,6 +24,7 @@
 #include "IFindGlobal.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
+#include "IFindNewDatatype.h"
 #include "Model.h"
 #include <iostream>
 
@@ -60,6 +61,8 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   std::unique_ptr<IFindProcess> find_process_;
   std::unique_ptr<IFindGlobal> find_global_;
   std::unique_ptr<IFindVariables> find_variables_;
+  std::unique_ptr<IFindPorts> find_ports_;
+  std::unique_ptr<IFindNewDatatype> find_new_datatype_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
