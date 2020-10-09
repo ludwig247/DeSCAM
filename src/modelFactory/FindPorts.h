@@ -2,6 +2,7 @@
 #define _FIND_PORTS_H_
 
 #include "IFindPorts.h"
+#include "IFindNewDatatype.h"
 
 namespace DESCAM {
 
@@ -12,8 +13,8 @@ namespace DESCAM {
  */
 class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts> {
  public:
-  FindPorts(clang::CompilerInstance * ci);
-  virtual ~FindPorts() = default ;
+  FindPorts(clang::CompilerInstance *ci, IFindNewDatatype *findNewDatatype);
+  virtual ~FindPorts() = default;
 
   void setup(clang::CXXRecordDecl *recordDecl) override;
   //Visitor
@@ -35,6 +36,8 @@ class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts
   const std::map<std::string, DESCAM::LocationInfo> &getLocationInfoMap() const override;
 
  private:
+  IFindNewDatatype *find_new_datatype_;
+
   std::map<std::string, std::string> in_port_map_; //! Map containing an entry for every rendezVouz in-port,type
   std::map<std::string, std::string> out_port_map_; //! Map containing an entry for every rendezVouz out-port,type
   std::map<std::string, std::string> master_in_port_map_; //! Map containing an entry for every master in-port,type
@@ -43,11 +46,13 @@ class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts
   std::map<std::string, std::string> slave_out_port_map_; //! Map containing an entry for every slave out-port,type
   std::map<std::string, std::string> in_shared_port_map_; //! Map containing an entry for every shared  in-port,type
   std::map<std::string, std::string> out_shared_port_map_; //! Map containing an entry for every shared out-port,type
-  std::map<std::string, DESCAM::LocationInfo> port_location_info_map_; //! Map containing an entry for every port and its location info
+  std::map<std::string, DESCAM::LocationInfo>
+      port_location_info_map_; //! Map containing an entry for every port and its location info
   int pass;
-  clang::CompilerInstance * ci_;
+  clang::CompilerInstance *ci_;
   //Helper
-  std::vector<std::string> port_templates_; //! sc_port<sc_fifo_in_if<_Bool> > Contains an entry for each Template used {sc_port,sc_fifo_in,_Bool}
+  std::vector<std::string>
+      port_templates_; //! sc_port<sc_fifo_in_if<_Bool> > Contains an entry for each Template used {sc_port,sc_fifo_in,_Bool}
   void recursiveTemplateVisitor(clang::QualType qualType);
   void clean_up();
 };

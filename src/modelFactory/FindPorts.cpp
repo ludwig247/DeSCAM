@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include <clang/AST/PrettyPrinter.h>
 #include <clang/Lex/Lexer.h>
 #include <GlobalUtilities.h>
@@ -22,10 +23,10 @@ bool containsSubstring(std::string fullString, std::string subString) {
 }
 
 //Constructor
-FindPorts::FindPorts(clang::CompilerInstance * ci) :
+FindPorts::FindPorts(clang::CompilerInstance *ci, IFindNewDatatype *findNewDatatype) :
     ci_(ci),
-    pass(0){
-}
+    find_new_datatype_(findNewDatatype),
+    pass(0) {}
 
 /*!
  * \brief Visits every FieldDecl and check whether a fieldDecl represents a port
@@ -68,7 +69,10 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
       } else {
         TERMINATE("Unknown interface: " + port_templates_.at(0));
       }
-      this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(), DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl, (*ci_))));
+      this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(),
+                                                          DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(
+                                                              fieldDecl,
+                                                              (*ci_))));
     }
   }
   return true;
@@ -101,7 +105,7 @@ void FindPorts::recursiveTemplateVisitor(clang::QualType qualType) {
   }
     //Type of port int, bool, struct ...
   else if (qualType.isCanonical()) {
-    this->port_templates_.push_back(FindNewDatatype::getTypeName(qualType));
+    this->port_templates_.push_back(find_new_datatype_->getTypeName(qualType));
   }
   return;
 

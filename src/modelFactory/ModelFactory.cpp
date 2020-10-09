@@ -38,7 +38,8 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->find_functions_ = std::make_unique<FindFunctions>();
   this->find_initial_values_ = std::make_unique<FindInitialValues>();
   this->find_modules_ = std::make_unique<FindModules>();
-  this->find_ports_ = std::make_unique<FindPorts>(&ci_);
+  this->find_new_datatype_ = std::make_unique<FindNewDatatype>();
+  this->find_ports_ = std::make_unique<FindPorts>(&ci_,this->find_new_datatype_.get());
   this->find_global_ = std::make_unique<FindGlobal>();
   this->find_netlist_ = std::make_unique<FindNetlist>();
   this->find_process_ = std::make_unique<FindProcess>();
@@ -391,7 +392,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
      * This toggle is in place because of some legacy plugins not being aware of local/global types.
      */
     DataType *type;
-    std::string typeName = FindNewDatatype::getTypeName(variable.second);
+    std::string typeName = find_new_datatype_->getTypeName(variable.second);
     //Step 1: Check whether the DataType already exists? Set type accordingly
     bool is_local = DataTypes::isLocalDataType(typeName, module->getName());
     bool is_global = DataTypes::isDataType(typeName);
@@ -402,8 +403,8 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
       type = DataTypes::getLocalDataType(module->getName(), typeName);
     } else {
       //Step2 : Add new datatype either as local or global datatype
-      type = FindNewDatatype::getDataType(variable.second);
-      if (FindNewDatatype::isGlobal(variable.second)) {
+      type = find_new_datatype_->getDataType(variable.second);
+      if (find_new_datatype_->isGlobal(variable.second)) {
         DataTypes::addDataType(type);
       } else {
         DataTypes::addLocalDataType(module->getName(), type);
@@ -463,8 +464,8 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
   //Add datatypes for functions
   auto functionsMap = find_functions_->getFunctionMap();
   for (const auto &func: functionsMap) {
-    auto newType = FindNewDatatype::getDataType(func.second->getResultType());
-    if (FindNewDatatype::isGlobal(func.second->getResultType())) {
+    auto newType = find_new_datatype_->getDataType(func.second->getResultType());
+    if (find_new_datatype_->isGlobal(func.second->getResultType())) {
       DataTypes::addDataType(newType);
     } else DataTypes::addLocalDataType(module->getName(), newType);
   }

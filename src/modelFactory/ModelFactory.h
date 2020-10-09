@@ -27,6 +27,7 @@
 #include "Model.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
+#include "IFindNewDatatype.h"
 #include <iostream>
 
 #include "IFindGlobal.h"
@@ -85,6 +86,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   std::unique_ptr<IFindNetlist> find_netlist_;
   std::unique_ptr<IFindProcess> find_process_;
   std::unique_ptr<IFindVariables> find_variables_;
+  std::unique_ptr<IFindNewDatatype> find_new_datatype_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
