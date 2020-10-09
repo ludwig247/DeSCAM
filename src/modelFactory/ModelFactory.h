@@ -25,13 +25,14 @@
 #include "FindProcess.h"
 #include "FindVariables.h"
 #include "Model.h"
-#include "IFindFunctions.h"
-#include "IFindInitialValues.h"
 #include <iostream>
 
+#include "IFindFunctions.h"
+#include "IFindInitialValues.h"
 #include "IFindGlobal.h"
 #include "IFindNetlist.h"
 #include "IFindProcess.h"
+#include "IFindSCMain.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -85,6 +86,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   std::unique_ptr<IFindNetlist> find_netlist_;
   std::unique_ptr<IFindProcess> find_process_;
   std::unique_ptr<IFindVariables> find_variables_;
+  std::unique_ptr<IFindSCMain> find_sc_main_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
@@ -97,6 +99,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
   void addInstances(TranslationUnitDecl *tu);
   void removeUnused();
+
 
 };
 
