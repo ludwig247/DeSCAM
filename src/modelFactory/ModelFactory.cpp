@@ -3,17 +3,12 @@
 //
 
 #include "ModelFactory.h"
-#include "FindInitialValues.h"
 #include <CFGFactory.h>
-#include <FindNewDatatype.h>
 #include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include <CreateRealCFG.h>
 #include "ModuleInstance.h"
-#include "FindDataFlow.h"
-#include "FindFunctions.h"
-#include "FindGlobal.h"
 #include "../parser/CommandLineParameter.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
@@ -21,9 +16,15 @@
 #include <FatalError.h>
 #include "DescamException.h"
 
+// FindX Implementations
+#include "FindNewDatatype.h"
+#include "FindInitialValues.h"
+#include "FindDataFlow.h"
+#include "FindFunctions.h"
+#include "FindGlobal.h"
+
 //Constructor
 DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
-// unused? _sm(ci.getSourceManager()),
     ci_(ci),
     context_(ci.getASTContext()),
     ostream_(llvm::errs()),
@@ -37,7 +38,7 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->find_functions_ = std::make_unique<FindFunctions>();
   this->find_initial_values_ = std::make_unique<FindInitialValues>();
   this->find_modules_ = std::make_unique<FindModules>();
-  this->find_ports_ = std::make_unique<FindPorts>(&ci_);
+  this->find_ports_ = std::make_unique<FindPorts>();
   this->find_global_ = std::make_unique<FindGlobal>();
   this->find_netlist_ = std::make_unique<FindNetlist>();
   this->find_process_ = std::make_unique<FindProcess>();
@@ -197,7 +198,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
 
-  this->find_ports_->setup(decl);
+  this->find_ports_->setup(decl, &ci_);
   auto portsLocationMap = this->find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous

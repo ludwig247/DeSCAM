@@ -94,8 +94,8 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
   //Ports are sc_in,sc_out, sc_inout (sc_port) is considers as
   //Right now, we are not interested about the direction of the port.
 
-  DESCAM::FindPorts findPorts(&this->ci_);
-  findPorts.setup(decl);
+  DESCAM::FindPorts findPorts;
+  findPorts.setup(decl, &this->ci_);
   auto portsLocationMap = findPorts.getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous
