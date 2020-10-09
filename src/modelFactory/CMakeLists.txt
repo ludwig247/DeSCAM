@@ -16,10 +16,17 @@ add_library (modelFactory SHARED
         FindVariables.cpp
         FindDataFlow.cpp
         FindInitialValues.cpp
-        FindSections.cpp
         FindNewDatatype.cpp
         FindFunctions.cpp
-        FindGlobal.cpp FindGlobal.h FindStateName.cpp FindStateName.h IFindGlobal.h)
+        FindGlobal.cpp FindGlobal.h
+		FindStateName.cpp
+		FindStateName.h
+		IFindGlobal.h
+		IFindModules.h
+		IFindPorts.h
+		IFindNetlist.h
+		IFindProcess.h IFindVariables.h)
+
 
 target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)
