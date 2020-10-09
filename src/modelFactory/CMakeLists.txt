@@ -25,7 +25,9 @@ add_library (modelFactory SHARED
 		IFindModules.h
 		IFindPorts.h
 		IFindNetlist.h
-		IFindProcess.h IFindVariables.h)
+		IFindProcess.h
+		IFindVariables.h
+		IFindSCMain.h)
 
 
 target_link_libraries(modelFactory propertyFactory)
