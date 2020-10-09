@@ -13,10 +13,10 @@ namespace DESCAM {
  */
 class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts> {
  public:
-  FindPorts(clang::CompilerInstance *ci, IFindNewDatatype *findNewDatatype);
+  FindPorts(IFindNewDatatype *findNewDatatype);
   virtual ~FindPorts() = default;
 
-  void setup(clang::CXXRecordDecl *recordDecl) override;
+  bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci) override;
   //Visitor
   virtual bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
 
@@ -53,8 +53,9 @@ class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts
   //Helper
   std::vector<std::string>
       port_templates_; //! sc_port<sc_fifo_in_if<_Bool> > Contains an entry for each Template used {sc_port,sc_fifo_in,_Bool}
-  void recursiveTemplateVisitor(clang::QualType qualType);
-  void clean_up();
+  void recursiveTemplateVisitor(clang::QualType qual_type);
+  void clear();
+
 };
 
 }

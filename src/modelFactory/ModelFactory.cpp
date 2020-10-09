@@ -3,18 +3,12 @@
 //
 
 #include "ModelFactory.h"
-#include "FindInitialValues.h"
-#include <FindSections.h>
 #include <CFGFactory.h>
-#include <FindNewDatatype.h>
 #include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include <CreateRealCFG.h>
 #include "ModuleInstance.h"
-#include "FindDataFlow.h"
-#include "FindFunctions.h"
-#include "FindGlobal.h"
 #include "../parser/CommandLineParameter.h"
 #include <Optimizer/Optimizer.h>
 #include <OperationFactory.h>
@@ -22,9 +16,15 @@
 #include <FatalError.h>
 #include "DescamException.h"
 
+// FindX Implementations
+#include "FindNewDatatype.h"
+#include "FindInitialValues.h"
+#include "FindDataFlow.h"
+#include "FindFunctions.h"
+#include "FindGlobal.h"
+
 //Constructor
 DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
-// unused? _sm(ci.getSourceManager()),
     ci_(ci),
     context_(ci.getASTContext()),
     ostream_(llvm::errs()),
@@ -39,11 +39,13 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->find_initial_values_ = std::make_unique<FindInitialValues>();
   this->find_modules_ = std::make_unique<FindModules>();
   this->find_new_datatype_ = std::make_unique<FindNewDatatype>();
-  this->find_ports_ = std::make_unique<FindPorts>(&ci_,this->find_new_datatype_.get());
+  this->find_ports_ = std::make_unique<FindPorts>(this->find_new_datatype_.get());
   this->find_global_ = std::make_unique<FindGlobal>();
   this->find_netlist_ = std::make_unique<FindNetlist>();
   this->find_process_ = std::make_unique<FindProcess>();
   this->find_variables_ = std::make_unique<FindVariables>();
+  this->find_sc_main_ = std::make_unique<FindSCMain>();
+
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -117,7 +119,8 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
 //! Add structure ...
 void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
-  FindSCMain find_sc_main(tu);
+
+  find_sc_main_->setup(tu);
 
   //The top instance is the sc_main. It doesn't contain any ports
   //Create empty dummy module for sc_main
@@ -127,7 +130,7 @@ void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
   auto top_instance = new ModuleInstance("TopInstance", sc_main);
   //std::cout << model->getModuleInstance() << std::cout;
   model_->addTopInstance(top_instance);
-  if (!find_sc_main.isScMainFound()) {
+  if (!find_sc_main_->isScMainFound()) {
     std::cout << "" << std::endl;
     std::cout << "======================" << std::endl;
     std::cout << "Instances:" << std::endl;
@@ -136,7 +139,7 @@ void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
     return;
   }
 
-  find_netlist_->setup(find_sc_main.getSCMainFunctionDecl());
+  find_netlist_->setup(find_sc_main_->getSCMainFunctionDecl());
   //findNetlist.getInstanceMap() = std::map<string instance_name,string sc_module>
   for (const auto &instance: find_netlist_->getInstanceMap()) {
     //Search for pointer in module map
@@ -196,7 +199,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
 
-  this->find_ports_->setup(decl);
+  this->find_ports_->setup(decl, &ci_);
   auto portsLocationMap = this->find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous

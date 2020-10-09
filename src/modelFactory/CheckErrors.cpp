@@ -1,7 +1,6 @@
 #include "CheckErrors.h"
 #include "FindInitialValues.h"
 #include "FindProcess.h"
-#include <FindSections.h>
 #include <CFGFactory.h>
 #include <FindNewDatatype.h>
 #include <Logger/Logger.h>
@@ -97,7 +96,8 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
   //Ports are sc_in,sc_out, sc_inout (sc_port) is considers as
   //Right now, we are not interested about the direction of the port.
 
-  find_ports_->setup(decl);
+
+  find_ports_->setup(decl, &this->ci_);
   auto portsLocationMap = find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous

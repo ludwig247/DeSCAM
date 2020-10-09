@@ -14,7 +14,7 @@
 
 class IFindPorts{
  public:
-  virtual void setup(clang::CXXRecordDecl *recordDecl) = 0;
+  virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci) = 0;
   //GETTER
   virtual const std::map<std::string, std::string> &getInPortMap() const = 0;
   virtual const std::map<std::string, std::string> &getOutPortMap() const = 0;

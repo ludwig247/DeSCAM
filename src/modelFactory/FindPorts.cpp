@@ -1,7 +1,6 @@
 #include <iostream>
 #include <utility>
 #include <clang/AST/PrettyPrinter.h>
-#include <clang/Lex/Lexer.h>
 #include <GlobalUtilities.h>
 #include "FindPorts.h"
 #include "FindNewDatatype.h"
@@ -10,13 +9,13 @@
 
 namespace DESCAM {
 /*!
-* \brief Methods that checks wheter a subString is contained in a given String
+* \brief Methods that checks whether a subString is contained in a given String
  */
-bool containsSubstring(std::string fullString, std::string subString) {
-  if (fullString.size() == 0) {
+bool containsSubstring(const std::string &full_string, const std::string &sub_string) {
+  if (full_string.empty()) {
     return false;
   }
-  if (fullString.find(subString) < fullString.size()) {
+  if (full_string.find(sub_string) < full_string.size()) {
     return true;
   }
   return false;
@@ -40,10 +39,9 @@ FindPorts::FindPorts(clang::CompilerInstance *ci, IFindNewDatatype *findNewDatat
 bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
   clang::QualType qualType = fieldDecl->getType();
   //Synch: find by name, doesn't have a parameter
-  if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
-      qualType.getTypePtr())) {
+  if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(qualType.getTypePtr())) {
     //In order to have a port there needs to be a qualType with 3 parameters
-    //Dissassemble the template
+    //Disassemble the template
     port_templates_.clear();
     this->recursiveTemplateVisitor(qualType);
     //Determine type of port:
@@ -78,10 +76,10 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
   return true;
 }
 
-void FindPorts::recursiveTemplateVisitor(clang::QualType qualType) {
+void FindPorts::recursiveTemplateVisitor(clang::QualType qual_type) {
   //Is there another template class?
-  if (const clang::TemplateSpecializationType *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
-      qualType.getTypePtr())) {
+  if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
+      qual_type.getTypePtr())) {
 
     //Get name of the template class
     std::string templateName;
@@ -104,11 +102,9 @@ void FindPorts::recursiveTemplateVisitor(clang::QualType qualType) {
     }
   }
     //Type of port int, bool, struct ...
-  else if (qualType.isCanonical()) {
-    this->port_templates_.push_back(find_new_datatype_->getTypeName(qualType));
+  else if (qual_type.isCanonical()) {
+    this->port_templates_.push_back(find_new_datatype_->getTypeName(qual_type));
   }
-  return;
-
 }
 
 const std::map<std::string, std::string> &FindPorts::getInPortMap() const {
@@ -146,11 +142,21 @@ const std::map<std::string, std::string> &FindPorts::getMasterOutPortMap() const
 const std::map<std::string, DESCAM::LocationInfo> &FindPorts::getLocationInfoMap() const {
   return this->port_location_info_map_;
 }
-void FindPorts::setup(clang::CXXRecordDecl *recordDecl) {
-  this->clean_up();
-  TraverseDecl(recordDecl);
+bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci) {
+  assert(record_decl);
+  assert(ci);
+  if (record_decl == record_decl_ && ci == ci_) {
+    return true;
+  } else {
+    pass_ = 0;
+    ci_ = ci;
+    record_decl_ = record_decl;
+    this->clear();
+    return TraverseDecl(record_decl);
+  }
 }
-void FindPorts::clean_up() {
+
+void FindPorts::clear() {
   this->port_location_info_map_.clear();
   this->in_port_map_.clear();
   this->out_port_map_.clear();
@@ -161,7 +167,6 @@ void FindPorts::clean_up() {
   this->out_shared_port_map_.clear();
   this->in_shared_port_map_.clear();
   this->port_templates_.clear();
-
 }
 
 }
