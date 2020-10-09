@@ -12,39 +12,38 @@
 #include <IFindGlobal.h>
 
 namespace DESCAM {
-    class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlobal> {
-    public:
-        explicit FindGlobal(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci);
+class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlobal> {
+ public:
 
-        FindGlobal() = delete;
+  FindGlobal() = default;
 
-        ~FindGlobal() override = default;
+  ~FindGlobal() override = default;
 
-        bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance &ci) override;
+  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) override;
 
-        const std::map<std::string, Variable *> &getVariableMap() const override;
+  const std::map<std::string, Variable *> &getVariableMap() const override;
 
-        const std::map<std::string, Function *> &getFunctionMap() const override;
+  const std::map<std::string, Function *> &getFunctionMap() const override;
 
-        const std::map<std::string, const clang::FunctionDecl *> &getFunctionDeclMap() const override;
+  const std::map<std::string, const clang::FunctionDecl *> &getFunctionDeclMap() const override;
 
-        bool VisitVarDecl(const clang::VarDecl *varDecl);
+  bool VisitVarDecl(const clang::VarDecl *varDecl);
 
-        bool VisitFunctionDecl(const clang::FunctionDecl *funDecl);
+  bool VisitFunctionDecl(const clang::FunctionDecl *funDecl);
 
-    private:
-        clang::CompilerInstance &ci;
+ private:
 
-        DESCAM::DataType *getDataType(const clang::QualType &type) const;
+  clang::CompilerInstance *ci_;
+  DESCAM::DataType *getDataType(const clang::QualType &type) const;
 
-        clang::TranslationUnitDecl *decl;
-        DESCAM::Module module = Module("placeholder");
+  clang::TranslationUnitDecl *decl_;
+  DESCAM::Module module_ = Module("placeholder");
 
-        std::map<std::string, Variable *> variableMap;
-        std::map<std::string, Function *> functionMap;
-        std::map<std::string, const clang::FunctionDecl *> functionDeclMap;
-    };
+  std::map<std::string, Variable *> variable_map_;
+  std::map<std::string, Function *> function_map_;
+  std::map<std::string, const clang::FunctionDecl *> functionDeclMap;
+
+};
 }
-
 
 #endif //DESCAM_FINDGLOBAL_H

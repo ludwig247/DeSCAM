@@ -7,37 +7,35 @@
 
 #include <map>
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "IFindVariables.h"
 
+namespace DESCAM {
+/**
+  ** \brief Visit fieldDecl of a recordDecl: Member Variables
+  **
+  ** Ports are covered by find Ports. Hence, here we're looking for everything else.
+  ** For now, we are considering built-in types only. Here we are also able to track down
+  ** Types that are not supported!
+ */
 
+class FindVariables : public IFindVariables, public clang::RecursiveASTVisitor<FindVariables> {
+ public:
+  FindVariables() = default;
+  ~FindVariables() override = default;
+  //Visitor
+  bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
 
-namespace DESCAM{
-   /**
-     ** \brief Visit fieldDecl of a recordDecl: Memeber Variables
-     **
-     ** Ports are covered by find Ports. Hence, here we're looking for everything else.
-     ** For now, we are considering built-in types only. Here we are also able to track down
-     ** Types that are not supported!
-    */
+  //GETTER
+  bool setup(clang::CXXRecordDecl *record_decl) override;
+  std::map<std::string, clang::QualType> getVariableTypeMap() const override;
+  const std::map<std::string, clang::FieldDecl *> &getVariableMap() const override;
+ private:
+  clang::CXXRecordDecl *record_decl_;
+  std::map<std::string, clang::FieldDecl *> member_map_; //! <NameOfField,Declaration>
+  std::map<std::string, std::string> member_type_map_; //! <NameOfField,Declaration>
 
-    class FindVariables : public clang::RecursiveASTVisitor<FindVariables> {
-    public:
-        FindVariables(clang::CXXRecordDecl* recordDecl);
-        //Visitor
-        bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
-
-        //GETTER
-        std::map<std::string, clang::QualType>  getVariableTypeMap() const;
-        const std::map<std::string, clang::FieldDecl *> & getVariableMap() const;
-    private:
-        clang::CXXRecordDecl* recordDecl;
-        std::map<std::string,clang::FieldDecl*> memberMap; //! <NameOfField,Declaration>
-        std::map<std::string, std::string> memberTypeMap; //! <NameOfField,Declaration>
-
-
-    };
-
+};
 
 }
-
 
 #endif //SCAM_FINDMEMBERS_H
