@@ -32,9 +32,11 @@ bool DESCAM::FindProcess::VisitCXXMethodDecl(clang::CXXMethodDecl *md) {
       /// Check if name is the same as in processMap
       for (auto &process: this->process_map_) {
         if (md->getNameAsString() == process.first) {
-          if (md != nullptr) {
-            process.second.first = md;
-          }
+//          if (md != nullptr) {
+//            process.second.first = md;
+//          }
+          assert(md);
+          process.second.first = md;
         }
       }
       break;
@@ -98,13 +100,13 @@ bool DESCAM::FindProcess::isValidProcess() const {
     if (process.second.second == DESCAM::PROCESS_TYPE::THREAD) {
       return true;
     } else TERMINATE("Process: " + process.first + " is not an SC_THREAD");
-  } else TERMINATE(" Multiple proccess defined. Only one allowed");
+  } else TERMINATE(" Multiple processes defined. Only one allowed");
 }
 
 clang::CXXMethodDecl *DESCAM::FindProcess::getProcess() const {
   if (this->process_map_.size() == 1) {
     return this->process_map_.begin()->second.first;
-  } else TERMINATE(" Zero or >2 proccesses defined. Exactly one process is required");
+  } else TERMINATE(" Zero or >2 processes defined. Exactly one process is required");
 }
 
 bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl) {

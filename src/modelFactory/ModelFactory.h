@@ -65,11 +65,11 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   virtual bool fire();
   virtual bool postFire();
  private:
-  Model *model;
-  CompilerInstance &_ci;
-  ASTContext &_context;
+  Model *model_;
+  CompilerInstance &ci_;
+  ASTContext &context_;
   // unused?: SourceManager &_sm;
-  llvm::raw_ostream &_os;
+  llvm::raw_ostream &ostream_;
   std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
   /** Pointer to FindFunctions Class (DIP) */
   std::unique_ptr<IFindFunctions> find_functions_;
@@ -84,6 +84,7 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   /** TODO Pointer to is X is not a descriptive/useful comment */
   std::unique_ptr<IFindNetlist> find_netlist_;
   std::unique_ptr<IFindProcess> find_process_;
+  std::unique_ptr<IFindVariables> find_variables_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;

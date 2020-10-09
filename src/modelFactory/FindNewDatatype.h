@@ -14,14 +14,14 @@
  * \brief Maps clang:Qualtypes to DESCAM:Datatypes
  */
 
-namespace DESCAM{
+namespace DESCAM {
 
 class FindNewDatatype : public clang::RecursiveASTVisitor<FindNewDatatype> {
-public:
+ public:
 
-    static DESCAM::DataType*  getDataType(const clang::QualType& type);
-    static std::string getTypeName(const clang::QualType& type);
-    static bool isGlobal(const clang::QualType& type); //! Returns true, if datatype is not defined within a module class
+  static DESCAM::DataType *getDataType(const clang::QualType &type);
+  static std::string getTypeName(const clang::QualType &type);
+  static bool isGlobal(const clang::QualType &type); //! Returns true, if datatype is not defined within a module class
 
 };
 
