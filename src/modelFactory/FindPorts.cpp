@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include <clang/AST/PrettyPrinter.h>
 #include <GlobalUtilities.h>
 #include "FindPorts.h"
@@ -19,6 +20,12 @@ bool containsSubstring(const std::string &full_string, const std::string &sub_st
   }
   return false;
 }
+
+//Constructor
+FindPorts::FindPorts(clang::CompilerInstance *ci, IFindNewDatatype *findNewDatatype) :
+    ci_(ci),
+    find_new_datatype_(findNewDatatype),
+    pass(0) {}
 
 /*!
  * \brief Visits every FieldDecl and check whether a fieldDecl represents a port
@@ -96,7 +103,7 @@ void FindPorts::recursiveTemplateVisitor(clang::QualType qual_type) {
   }
     //Type of port int, bool, struct ...
   else if (qual_type.isCanonical()) {
-    this->port_templates_.push_back(FindNewDatatype::getTypeName(qual_type));
+    this->port_templates_.push_back(find_new_datatype_->getTypeName(qual_type));
   }
 }
 
