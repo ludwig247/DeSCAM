@@ -38,6 +38,8 @@ class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts
  private:
   IFindNewDatatype *find_new_datatype_;
 
+  clang::CXXRecordDecl *record_decl_;
+
   std::map<std::string, std::string> in_port_map_; //! Map containing an entry for every rendezVouz in-port,type
   std::map<std::string, std::string> out_port_map_; //! Map containing an entry for every rendezVouz out-port,type
   std::map<std::string, std::string> master_in_port_map_; //! Map containing an entry for every master in-port,type
@@ -48,7 +50,7 @@ class FindPorts : public IFindPorts, public clang::RecursiveASTVisitor<FindPorts
   std::map<std::string, std::string> out_shared_port_map_; //! Map containing an entry for every shared out-port,type
   std::map<std::string, DESCAM::LocationInfo>
       port_location_info_map_; //! Map containing an entry for every port and its location info
-  int pass;
+  int pass_;
   clang::CompilerInstance *ci_;
   //Helper
   std::vector<std::string>

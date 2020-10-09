@@ -31,7 +31,7 @@ DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
   this->find_global_ = std::make_unique<FindGlobal>();
   this->find_variables_ = std::make_unique<FindVariables>();
   this->find_new_datatype_ = std::make_unique<FindNewDatatype>();
-  this->find_ports_ = std::make_unique<FindPorts>(&ci_,this->find_new_datatype_.get());
+  this->find_ports_ = std::make_unique<FindPorts>(this->find_new_datatype_.get());
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
