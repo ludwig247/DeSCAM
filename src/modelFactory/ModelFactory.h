@@ -19,22 +19,18 @@
 
 
 // PArse SystemC
-#include "IFindPorts.h"
-#include "FindSCMain.h"
-#include "FindModules.h"
-#include "FindProcess.h"
-#include "FindVariables.h"
 #include "Model.h"
+#include "IFindPorts.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
 #include "IFindNewDatatype.h"
-#include <iostream>
-
 #include "IFindGlobal.h"
 #include "IFindNetlist.h"
 #include "IFindProcess.h"
 #include "IFindSCMain.h"
 #include "IModelFactory.h"
+#include "IFindModules.h"
+#include "IFindVariables.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -61,7 +57,16 @@ bool containsSubstring(std::string, std::string);
  */
 class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFactory> {
  public:
-  explicit ModelFactory();
+  explicit ModelFactory(IFindFunctions *find_functions,
+                        IFindInitialValues *find_initial_values,
+                        IFindModules *find_modules,
+                        IFindNewDatatype *find_new_datatype,
+                        IFindPorts *find_ports,
+                        IFindGlobal *find_global,
+                        IFindNetlist *find_netlist,
+                        IFindProcess *find_process,
+                        IFindVariables *find_variables,
+                        IFindSCMain *find_sc_main);
   ~ModelFactory() override = default;
 
   void setup(CompilerInstance *ci) override;
@@ -76,22 +81,18 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
   // unused?: SourceManager &_sm;
   llvm::raw_ostream &ostream_;
   std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
-  /** Pointer to FindFunctions Class (DIP) */
-  std::unique_ptr<IFindFunctions> find_functions_;
-  /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindInitialValues> find_initial_values_;
-  /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindGlobal> find_global_;
-  /** Pointer to IFindModules Class (DIP) */
-  std::unique_ptr<IFindModules> find_modules_;
-  /** Pointer to IFindPorts Class (DIP) */
-  std::unique_ptr<IFindPorts> find_ports_;
-  /** TODO Pointer to is X is not a descriptive/useful comment */
-  std::unique_ptr<IFindNetlist> find_netlist_;
-  std::unique_ptr<IFindProcess> find_process_;
-  std::unique_ptr<IFindVariables> find_variables_;
-  std::unique_ptr<IFindNewDatatype> find_new_datatype_;
-  std::unique_ptr<IFindSCMain> find_sc_main_;
+
+  // DIP-Pointers
+  IFindFunctions *find_functions_;
+  IFindInitialValues *find_initial_values_;
+  IFindGlobal *find_global_;
+  IFindModules *find_modules_;
+  IFindPorts *find_ports_;
+  IFindNetlist *find_netlist_;
+  IFindProcess *find_process_;
+  IFindVariables *find_variables_;
+  IFindNewDatatype *find_new_datatype_;
+  IFindSCMain *find_sc_main_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
