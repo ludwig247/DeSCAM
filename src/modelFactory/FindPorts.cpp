@@ -69,8 +69,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
       }
       this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(),
                                                           DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(
-                                                              fieldDecl,
-                                                              (*ci_))));
+                                                              fieldDecl,ci_)));
     }
   }
   return true;
