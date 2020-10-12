@@ -24,6 +24,8 @@
 #include "IFindGlobal.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
+#include "IFindNewDatatype.h"
+#include "IModelFactory.h"
 #include "Model.h"
 #include <iostream>
 
@@ -35,22 +37,21 @@ namespace DESCAM {
 
 bool containsSubstring(std::string, std::string);
 
-class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> {
+class CheckErrors : public IModelFactory, public RecursiveASTVisitor<CheckErrors> {
  public:
-  explicit CheckErrors(CompilerInstance &ci);
-
+  explicit CheckErrors();
   ~CheckErrors() override = default;
 
-  virtual bool preFire();
+  void setup(CompilerInstance *ci) override;
 
-  virtual bool fire();
-
-  virtual bool postFire();
+  bool preFire() override;
+  bool fire() override;
+  bool postFire() override;
 
  private:
   Model *model_;
-  CompilerInstance &ci_;
-  ASTContext &context_;
+  CompilerInstance *ci_;
+  ASTContext *context_;
   llvm::raw_ostream &ostream_;
   std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
   /** Pointer to FindFunctions Class (DIP) */
@@ -60,6 +61,8 @@ class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> 
   std::unique_ptr<IFindProcess> find_process_;
   std::unique_ptr<IFindGlobal> find_global_;
   std::unique_ptr<IFindVariables> find_variables_;
+  std::unique_ptr<IFindPorts> find_ports_;
+  std::unique_ptr<IFindNewDatatype> find_new_datatype_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;

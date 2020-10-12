@@ -31,7 +31,7 @@ class Process;
  */
 class FindDataFlow : public IFindDataFlow {
  public:
-  FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance &ci, bool unsigned_flag = false);
+  FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag = false);
   //Operator
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) override;
   bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) override;
@@ -62,7 +62,7 @@ class FindDataFlow : public IFindDataFlow {
  private:
   Module *module; //! Module the dataflow is generated for
   DESCAM::Stmt *stmt; //! Represents the stmt in case of operator, values are stored in lhs and rhs
-  clang::CompilerInstance &ci;
+  clang::CompilerInstance *ci;
 
   Expr *expr;
   Expr *lhsExpr; //! Assign Operation lValue = rValue

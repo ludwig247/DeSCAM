@@ -13,14 +13,14 @@
 #include "FindDataFlowFactory.h"
 
 namespace DESCAM {
-CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance &ci, Module *module, bool sourceModule) :
+CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, bool sourceModule) :
     sourceModule(sourceModule),
     methodDecl(decl),
     ci(ci),
     module(module) {
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-  clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(),
+  clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci->getASTContext(),
                                   b);
   if (clangCFG == nullptr) {
     llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
@@ -30,7 +30,7 @@ CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance &ci, 
 }
 
 CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
-                       clang::CompilerInstance &ci,
+                       clang::CompilerInstance *ci,
                        Module *module,
                        bool sourceModule) :
 
@@ -134,7 +134,7 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
         //block->dump(clangCFG, LO, false);
         //block->getTerminator().getStmt()->dump();
         //std::string location = ci.getSourceManager().getFilename(block->getTerminator()->getLocStart());
-        std::string location = block->getTerminator()->getLocStart().printToString(ci.getSourceManager());
+        std::string location = block->getTerminator()->getLocStart().printToString(ci->getSourceManager());
         std::string errorMsg = "Error: " + location + "\n";
         errorMsg += "\tProblem with an terminator (if,while, else if) statement.\n";
         errorMsg += "\tMake sure only SystemC-PPA valid statements are used.\n";
