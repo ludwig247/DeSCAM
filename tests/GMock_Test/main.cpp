@@ -33,12 +33,12 @@ TEST(gmock_test,TestCase1){
   ASSERT_TRUE(ModelGlobal::getModel());
   ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
   auto module = ModelGlobal::getModel()->getModules().at("TestCase1");
-  print_itl.printModule(module);
+  print_itl.printModel(ModelGlobal::getModel());
 //  Only
-//  std::ofstream myfile;
-//  myfile.open(SCAM_HOME"/tests/GMock_Test/PrintITL/TestCase1.vhi");
-//  myfile << print_itl.print();
-//  myfile.close();
+  std::ofstream myfile;
+  //myfile.open(SCAM_HOME"/tests/GMock_Test/PrintITL/TestCase1.vhi");
+  //myfile << print_itl.print();
+  //myfile.close();
 
 
   ASSERT_NO_THROW(print_itl.print());
@@ -84,12 +84,12 @@ TEST(gmock_test,TestCase2){
   ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
   auto module = ModelGlobal::getModel()->getModules().at("TestCase2");
   ASSERT_TRUE(module);
-  print_itl.printModule(module);
+  print_itl.printModel(ModelGlobal::getModel());
 //  Only for generation
-  std::ofstream myfile;
-  myfile.open(SCAM_HOME"/tests/GMock_Test/tests/TestCase2.vhi");
-  myfile << print_itl.print();
-  myfile.close();
+//  std::ofstream myfile;
+//  myfile.open(SCAM_HOME"/tests/GMock_Test/tests/TestCase2.vhi");
+//  myfile << print_itl.print();
+//  myfile.close();
 
 
   ASSERT_NO_THROW(print_itl.print());
@@ -136,12 +136,12 @@ TEST(gmock_test,TestCase3){
   ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
   auto module = ModelGlobal::getModel()->getModules().at("TestCase3");
   ASSERT_TRUE(module);
-  print_itl.printModule(module);
+    print_itl.printModel(ModelGlobal::getModel());
 //  Only for generation
-  std::ofstream myfile;
-  myfile.open(SCAM_HOME"/tests/GMock_Test/tests/TestCase3.vhi");
-  myfile << print_itl.print();
-  myfile.close();
+//  std::ofstream myfile;
+//  myfile.open(SCAM_HOME"/tests/GMock_Test/tests/TestCase3.vhi");
+//  myfile << print_itl.print();
+//  myfile.close();
 
 
   ASSERT_NO_THROW(print_itl.print());

@@ -54,7 +54,9 @@ std::map<std::string, std::string> PrintITL::printModule(DESCAM::Module *node) {
 }
 
 std::string PrintITL::print() {
-    return (macros() + operations()  + functions());
+    std::stringstream ss;
+    ss << macros() << operations() << functions() << globalFunctions();
+    return ss.str();
 }
 
 std::string PrintITL::functions() {
