@@ -24,9 +24,9 @@
 #include "FindGlobal.h"
 
 //Constructor
-DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
-    ci_(ci),
-    context_(ci.getASTContext()),
+DESCAM::ModelFactory::ModelFactory() :
+    ci_(nullptr),
+    context_(nullptr),
     ostream_(llvm::errs()),
     model_(nullptr) {
 
@@ -45,7 +45,11 @@ DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
   this->find_process_ = std::make_unique<FindProcess>();
   this->find_variables_ = std::make_unique<FindVariables>();
   this->find_sc_main_ = std::make_unique<FindSCMain>();
+}
 
+void DESCAM::ModelFactory::setup(CompilerInstance *ci) {
+  this->ci_ = ci;
+  this->context_ = &ci->getASTContext();
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -54,7 +58,7 @@ bool DESCAM::ModelFactory::preFire() {
 
 bool DESCAM::ModelFactory::fire() {
   //Translation Unit
-  TranslationUnitDecl *tu = context_.getTranslationUnitDecl();
+  TranslationUnitDecl *tu = context_->getTranslationUnitDecl();
 
   //DESCAM model
   this->model_ = new Model("top_level");
@@ -199,7 +203,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
 
-  this->find_ports_->setup(decl, &ci_);
+  this->find_ports_->setup(decl, ci_);
   auto portsLocationMap = this->find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous
@@ -419,7 +423,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, &ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -516,7 +520,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, &ci_);
+  this->find_global_->setup(pDecl, ci_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);

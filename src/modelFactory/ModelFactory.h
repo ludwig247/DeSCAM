@@ -34,6 +34,7 @@
 #include "IFindNetlist.h"
 #include "IFindProcess.h"
 #include "IFindSCMain.h"
+#include "IModelFactory.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -58,18 +59,20 @@ bool containsSubstring(std::string, std::string);
  * In order to access the behavioral information  for each module we refer DESCAM::SuspensionAutomata.
  *
  */
-class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {
+class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFactory> {
  public:
-  explicit ModelFactory(CompilerInstance &ci);
+  explicit ModelFactory();
   ~ModelFactory() override = default;
 
-  virtual bool preFire();
-  virtual bool fire();
-  virtual bool postFire();
+  void setup(CompilerInstance *ci) override;
+
+  bool preFire() override;
+  bool fire() override;
+  bool postFire() override;
  private:
   Model *model_;
-  CompilerInstance &ci_;
-  ASTContext &context_;
+  CompilerInstance *ci_;
+  ASTContext *context_;
   // unused?: SourceManager &_sm;
   llvm::raw_ostream &ostream_;
   std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
@@ -101,7 +104,6 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
   void addInstances(TranslationUnitDecl *tu);
   void removeUnused();
-
 
 };
 
