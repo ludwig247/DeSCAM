@@ -1,38 +1,51 @@
 #include "CheckErrors.h"
-#include "FindInitialValues.h"
-#include "FindProcess.h"
 #include <CFGFactory.h>
-#include <FindNewDatatype.h>
 #include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include "ModuleInstance.h"
-#include "FindDataFlow.h"
-#include "FindFunctions.h"
-#include "FindGlobal.h"
 #include <OperationFactory.h>
 #include <FatalError.h>
 #include <CreateRealCFG.h>
+#include "FindDataFlow.h"
 
 #include <utility>
 #include "DescamException.h"
 
 //Constructor
-DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
-    ci_(ci),
-    context_(ci.getASTContext()),
+DESCAM::CheckErrors::CheckErrors(IFindFunctions *find_functions,
+                                 IFindInitialValues *find_initial_values,
+                                 IFindModules *find_modules,
+                                 IFindNewDatatype *find_new_datatype,
+                                 IFindPorts *find_ports,
+                                 IFindGlobal *find_global,
+                                 IFindNetlist *find_netlist,
+                                 IFindProcess *find_process,
+                                 IFindVariables *find_variables,
+                                 IFindSCMain *find_sc_main) :
+    ci_(nullptr),
+    context_(nullptr),
     ostream_(llvm::errs()),
-    model_(nullptr) {
+    model_(nullptr),
+    find_functions_(find_functions),
+    find_initial_values_(find_initial_values),
+    find_modules_(find_modules),
+    find_new_datatype_(find_new_datatype),
+    find_ports_(find_ports),
+    find_global_(find_global),
+    find_netlist_(find_netlist),
+    find_process_(find_process),
+    find_variables_(find_variables),
+    find_sc_main_(find_sc_main) {
 
-  //Compositional root
-  this->find_functions_ = std::make_unique<FindFunctions>();
-  this->find_initial_values_ = std::make_unique<FindInitialValues>();
-  this->find_process_ = std::make_unique<FindProcess>();
-  this->find_global_ = std::make_unique<FindGlobal>();
-  this->find_variables_ = std::make_unique<FindVariables>();
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
+}
+
+void DESCAM::CheckErrors::setup(CompilerInstance *ci) {
+  this->ci_ = ci;
+  this->context_ = &ci_->getASTContext();
 }
 
 bool DESCAM::CheckErrors::preFire() {
@@ -41,7 +54,7 @@ bool DESCAM::CheckErrors::preFire() {
 
 bool DESCAM::CheckErrors::fire() {
   //Translation Unit
-  TranslationUnitDecl *tu = context_.getTranslationUnitDecl();
+  TranslationUnitDecl *tu = context_->getTranslationUnitDecl();
 
   //DESCAM model
   this->model_ = new Model("top_level");
@@ -94,13 +107,13 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
   //Ports are sc_in,sc_out, sc_inout (sc_port) is considers as
   //Right now, we are not interested about the direction of the port.
 
-  DESCAM::FindPorts findPorts;
-  findPorts.setup(decl, &this->ci_);
-  auto portsLocationMap = findPorts.getLocationInfoMap();
+
+  find_ports_->setup(decl, this->ci_);
+  auto portsLocationMap = find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous
   //Input ports
-  for (auto &port: findPorts.getInPortMap()) {
+  for (auto &port: find_ports_->getInPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("blocking", "in"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -117,7 +130,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
                        module->addPort(inPort))
   }
   //Output ports
-  for (auto &port: findPorts.getOutPortMap()) {
+  for (auto &port: find_ports_->getOutPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("blocking", "out"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -136,7 +149,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
 
   //AlwaysReady
   //Input ports
-  for (auto &port: findPorts.getMasterInPortMap()) {
+  for (auto &port: find_ports_->getMasterInPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("master", "in"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -154,7 +167,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
 
   }
   //Output ports
-  for (auto &port: findPorts.getMasterOutPortMap()) {
+  for (auto &port: find_ports_->getMasterOutPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("master", "out"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -172,7 +185,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
   }
 
   //Input ports
-  for (auto &port: findPorts.getSlaveInPortMap()) {
+  for (auto &port: find_ports_->getSlaveInPortMap()) {
     Interface *interface = nullptr;
     DESCAM_ASSERT(interface = new Interface("slave", "in"))
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
@@ -190,7 +203,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
 
   }
   //Output ports
-  for (auto &port: findPorts.getSlaveOutPortMap()) {
+  for (auto &port: find_ports_->getSlaveOutPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
       TERMINATE(
           "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
@@ -209,7 +222,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
 
   //Shared ports
   //Input ports
-  for (auto &port: findPorts.getInSharedPortMap()) {
+  for (auto &port: find_ports_->getInSharedPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
       TERMINATE(
           "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
@@ -222,7 +235,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
 
   }
   //Output ports
-  for (auto &port: findPorts.getOutSharedPortMap()) {
+  for (auto &port: find_ports_->getOutSharedPortMap()) {
     if (DataTypes::isLocalDataType(port.second, module->getName())) {
       TERMINATE(
           "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
@@ -284,7 +297,7 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
      * This toggle is in place because of some legacy plugins not being aware of local/global types.
      */
     DataType *type;
-    std::string typeName = FindNewDatatype::getTypeName(variable.second);
+    std::string typeName = find_new_datatype_->getTypeName(variable.second);
     //Step 1: Check whether the DataType already exists? Set type accordingly
     bool is_local = DataTypes::isLocalDataType(typeName, module->getName());
     bool is_global = DataTypes::isDataType(typeName);
@@ -295,8 +308,8 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
       type = DataTypes::getLocalDataType(module->getName(), typeName);
     } else {
       //Step2 : Add new datatype either as local or global datatype
-      type = FindNewDatatype::getDataType(variable.second);
-      if (FindNewDatatype::isGlobal(variable.second)) {
+      type = find_new_datatype_->getDataType(variable.second);
+      if (find_new_datatype_->isGlobal(variable.second)) {
         DataTypes::addDataType(type);
       } else {
         DataTypes::addLocalDataType(module->getName(), type);
@@ -308,7 +321,7 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, &ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -344,8 +357,8 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
   //Add datatypes for functions
   auto functions_map = find_functions_->getFunctionMap();
   for (const auto &func: functions_map) {
-    auto new_type = FindNewDatatype::getDataType(func.second->getResultType());
-    if (FindNewDatatype::isGlobal(func.second->getResultType())) {
+    auto new_type = find_new_datatype_->getDataType(func.second->getResultType());
+    if (find_new_datatype_->isGlobal(func.second->getResultType())) {
       DataTypes::addDataType(new_type);
     } else DataTypes::addLocalDataType(module->getName(), new_type);
   }
@@ -393,7 +406,7 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, &ci_);
+  this->find_global_->setup(pDecl, ci_);
   for (const auto &var: find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
   }

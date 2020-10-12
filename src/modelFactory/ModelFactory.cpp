@@ -24,27 +24,39 @@
 #include "FindGlobal.h"
 
 //Constructor
-DESCAM::ModelFactory::ModelFactory(CompilerInstance &ci) :
-    ci_(ci),
-    context_(ci.getASTContext()),
+DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
+                                   IFindInitialValues *find_initial_values,
+                                   IFindModules *find_modules,
+                                   IFindNewDatatype *find_new_datatype,
+                                   IFindPorts *find_ports,
+                                   IFindGlobal *find_global,
+                                   IFindNetlist *find_netlist,
+                                   IFindProcess *find_process,
+                                   IFindVariables *find_variables,
+                                   IFindSCMain *find_sc_main) :
+    ci_(nullptr),
+    context_(nullptr),
     ostream_(llvm::errs()),
-    model_(nullptr) {
+    model_(nullptr),
+    find_functions_(find_functions),
+    find_initial_values_(find_initial_values),
+    find_modules_(find_modules),
+    find_new_datatype_(find_new_datatype),
+    find_ports_(find_ports),
+    find_global_(find_global),
+    find_netlist_(find_netlist),
+    find_process_(find_process),
+    find_variables_(find_variables),
+    find_sc_main_(find_sc_main) {
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
+}
 
-  //Compositional root
-  this->find_functions_ = std::make_unique<FindFunctions>();
-  this->find_initial_values_ = std::make_unique<FindInitialValues>();
-  this->find_modules_ = std::make_unique<FindModules>();
-  this->find_ports_ = std::make_unique<FindPorts>();
-  this->find_global_ = std::make_unique<FindGlobal>();
-  this->find_netlist_ = std::make_unique<FindNetlist>();
-  this->find_process_ = std::make_unique<FindProcess>();
-  this->find_variables_ = std::make_unique<FindVariables>();
-  this->find_sc_main_ = std::make_unique<FindSCMain>();
-
+void DESCAM::ModelFactory::setup(CompilerInstance *ci) {
+  this->ci_ = ci;
+  this->context_ = &ci->getASTContext();
 }
 
 bool DESCAM::ModelFactory::preFire() {
@@ -53,7 +65,7 @@ bool DESCAM::ModelFactory::preFire() {
 
 bool DESCAM::ModelFactory::fire() {
   //Translation Unit
-  TranslationUnitDecl *tu = context_.getTranslationUnitDecl();
+  TranslationUnitDecl *tu = context_->getTranslationUnitDecl();
 
   //DESCAM model
   this->model_ = new Model("top_level");
@@ -198,7 +210,7 @@ void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl
 
   //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
 
-  this->find_ports_->setup(decl, &ci_);
+  this->find_ports_->setup(decl, ci_);
   auto portsLocationMap = this->find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous
@@ -394,7 +406,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
      * This toggle is in place because of some legacy plugins not being aware of local/global types.
      */
     DataType *type;
-    std::string typeName = FindNewDatatype::getTypeName(variable.second);
+    std::string typeName = find_new_datatype_->getTypeName(variable.second);
     //Step 1: Check whether the DataType already exists? Set type accordingly
     bool is_local = DataTypes::isLocalDataType(typeName, module->getName());
     bool is_global = DataTypes::isDataType(typeName);
@@ -405,8 +417,8 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
       type = DataTypes::getLocalDataType(module->getName(), typeName);
     } else {
       //Step2 : Add new datatype either as local or global datatype
-      type = FindNewDatatype::getDataType(variable.second);
-      if (FindNewDatatype::isGlobal(variable.second)) {
+      type = find_new_datatype_->getDataType(variable.second);
+      if (find_new_datatype_->isGlobal(variable.second)) {
         DataTypes::addDataType(type);
       } else {
         DataTypes::addLocalDataType(module->getName(), type);
@@ -418,7 +430,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, &ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -466,8 +478,8 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
   //Add datatypes for functions
   auto functionsMap = find_functions_->getFunctionMap();
   for (const auto &func: functionsMap) {
-    auto newType = FindNewDatatype::getDataType(func.second->getResultType());
-    if (FindNewDatatype::isGlobal(func.second->getResultType())) {
+    auto newType = find_new_datatype_->getDataType(func.second->getResultType());
+    if (find_new_datatype_->isGlobal(func.second->getResultType())) {
       DataTypes::addDataType(newType);
     } else DataTypes::addLocalDataType(module->getName(), newType);
   }
@@ -515,7 +527,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, &ci_);
+  this->find_global_->setup(pDecl, ci_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);

@@ -15,15 +15,17 @@
 
 
 // PArse SystemC
-#include "FindPorts.h"
-#include "FindSCMain.h"
-#include "FindModules.h"
-#include "FindNetlist.h"
-#include "FindVariables.h"
 #include "IFindProcess.h"
 #include "IFindGlobal.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
+#include "IFindNewDatatype.h"
+#include "IModelFactory.h"
+#include "IFindModules.h"
+#include "IFindPorts.h"
+#include "IFindNetlist.h"
+#include "IFindVariables.h"
+#include "IFindSCMain.h"
 #include "Model.h"
 #include <iostream>
 
@@ -35,31 +37,44 @@ namespace DESCAM {
 
 bool containsSubstring(std::string, std::string);
 
-class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> {
+class CheckErrors : public IModelFactory, public RecursiveASTVisitor<CheckErrors> {
  public:
-  explicit CheckErrors(CompilerInstance &ci);
-
+  CheckErrors(IFindFunctions *find_functions,
+              IFindInitialValues *find_initial_values,
+              IFindModules *find_modules,
+              IFindNewDatatype *find_new_datatype,
+              IFindPorts *find_ports,
+              IFindGlobal *find_global,
+              IFindNetlist *find_netlist,
+              IFindProcess *find_process,
+              IFindVariables *find_variables,
+              IFindSCMain *find_sc_main);
   ~CheckErrors() override = default;
 
-  virtual bool preFire();
+  void setup(CompilerInstance *ci) override;
 
-  virtual bool fire();
-
-  virtual bool postFire();
+  bool preFire() override;
+  bool fire() override;
+  bool postFire() override;
 
  private:
   Model *model_;
-  CompilerInstance &ci_;
-  ASTContext &context_;
+  CompilerInstance *ci_;
+  ASTContext *context_;
   llvm::raw_ostream &ostream_;
   std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
-  /** Pointer to FindFunctions Class (DIP) */
-  std::unique_ptr<IFindFunctions> find_functions_;
-  /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindInitialValues> find_initial_values_;
-  std::unique_ptr<IFindProcess> find_process_;
-  std::unique_ptr<IFindGlobal> find_global_;
-  std::unique_ptr<IFindVariables> find_variables_;
+
+  // DIP-Pointers
+  IFindFunctions *find_functions_;
+  IFindInitialValues *find_initial_values_;
+  IFindGlobal *find_global_;
+  IFindModules *find_modules_;
+  IFindPorts *find_ports_;
+  IFindNetlist *find_netlist_;
+  IFindProcess *find_process_;
+  IFindVariables *find_variables_;
+  IFindNewDatatype *find_new_datatype_;
+  IFindSCMain *find_sc_main_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
