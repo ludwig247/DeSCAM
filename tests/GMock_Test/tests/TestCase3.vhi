@@ -239,3 +239,24 @@ prove:
 end property;
 
 
+-- GLOBAL FUNCTIONS --
+macro compute(param: unsigned;param2: signed) : unsigned :=
+	if (((param > resize(10,32)) and (param2 > resize(10,32)))) then unsigned((param + resize(1,32))(31 downto 0))
+	else unsigned((param + unsigned(param2))(31 downto 0))
+end if;
+end macro;
+
+macro compute2(param: signed;param2: unsigned) : signed :=
+	signed((((param + signed(param2))(31 downto 0) + resize(3,32))(31 downto 0) + nested(param2))(31 downto 0));
+end macro;
+
+macro compute3(param: boolean;val: unsigned) : boolean :=
+	if (param) then ((val + resize(2,32))(31 downto 0))
+	else (val)
+end if;
+end macro;
+
+macro nested(param2: unsigned) : signed :=
+	signed((signed(param2) + resize(3,32))(31 downto 0));
+end macro;
+
