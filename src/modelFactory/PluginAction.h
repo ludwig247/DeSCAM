@@ -40,8 +40,10 @@ namespace scpar {
     class LightsCameraAction : public clang::ASTFrontendAction {
     protected:
 
-        virtual clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) {
-            return new A(ci);
+        clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) override {
+          A *a = new A();
+          a->setup(&ci);
+          return a;
         };
 
     };

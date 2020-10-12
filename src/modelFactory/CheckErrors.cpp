@@ -18,9 +18,9 @@
 #include "DescamException.h"
 
 //Constructor
-DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
-    ci_(ci),
-    context_(ci.getASTContext()),
+DESCAM::CheckErrors::CheckErrors() :
+    ci_(nullptr),
+    context_(nullptr),
     ostream_(llvm::errs()),
     model_(nullptr) {
 
@@ -37,13 +37,18 @@ DESCAM::CheckErrors::CheckErrors(CompilerInstance &ci) :
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
+void DESCAM::CheckErrors::setup(CompilerInstance *ci) {
+    this->ci_ = ci;
+    this->context_ = &ci_->getASTContext();
+}
+
 bool DESCAM::CheckErrors::preFire() {
   return !DESCAM::Logger::isTerminate();
 }
 
 bool DESCAM::CheckErrors::fire() {
   //Translation Unit
-  TranslationUnitDecl *tu = context_.getTranslationUnitDecl();
+  TranslationUnitDecl *tu = context_->getTranslationUnitDecl();
 
   //DESCAM model
   this->model_ = new Model("top_level");
@@ -97,7 +102,7 @@ void DESCAM::CheckErrors::addPorts(DESCAM::Module *module, clang::CXXRecordDecl 
   //Right now, we are not interested about the direction of the port.
 
 
-  find_ports_->setup(decl, &this->ci_);
+  find_ports_->setup(decl, this->ci_);
   auto portsLocationMap = find_ports_->getLocationInfoMap();
   //Add Ports -> requires Name, Interface and DataType
   //Rendezvous
@@ -310,7 +315,7 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, &ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -395,7 +400,7 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, &ci_);
+  this->find_global_->setup(pDecl, ci_);
   for (const auto &var: find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
   }
