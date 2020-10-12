@@ -9,7 +9,6 @@
 #include "clang/AST/Type.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/DeclCXX.h"
-#include "IFindVariables.h"
 
 namespace DESCAM {
 /**

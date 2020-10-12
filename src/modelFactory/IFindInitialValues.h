@@ -5,6 +5,11 @@
 #ifndef SCAM_SRC_MODELFACTORY_IFINDINITIALVALUES_H_
 #define SCAM_SRC_MODELFACTORY_IFINDINITIALVALUES_H_
 
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "Model.h"
+
 namespace DESCAM {
 
 /**

@@ -19,7 +19,7 @@ class FindFunctions : public IFindFunctions, public clang::RecursiveASTVisitor<F
  public:
   FindFunctions();
 
-  void setup(clang::CXXRecordDecl *recordDecl) override;
+  bool setup(clang::CXXRecordDecl *recordDecl) override;
 
   bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl);
 
