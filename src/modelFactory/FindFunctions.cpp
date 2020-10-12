@@ -9,9 +9,9 @@
 
 DESCAM::FindFunctions::FindFunctions() {}
 
-void DESCAM::FindFunctions::setup(clang::CXXRecordDecl *recordDecl) {
+bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *recordDecl) {
   this->clean();
-  TraverseDecl(recordDecl);
+  return TraverseDecl(recordDecl);
 }
 
 void DESCAM::FindFunctions::clean() {
