@@ -9,16 +9,21 @@
 #include "Config.h"
 #include <vector>
 #include <PluginAction.h>
-#include <ModelFactory.h>
-#include "CheckErrors.h"
 #include "FatalError.h"
+
+#include "CheckErrors.h"
 #include "ModelFactory.h"
+
 #include "FindFunctions.h"
 #include "FindInitialValues.h"
 #include "FindNewDatatype.h"
 #include "FindGlobal.h"
 #include "FindNetlist.h"
 #include "FindPorts.h"
+#include "FindModules.h"
+#include "FindProcess.h"
+#include "FindVariables.h"
+#include "FindSCMain.h"
 
 namespace DESCAM {
 /** \brief Singleton that contains a pointer to the model
