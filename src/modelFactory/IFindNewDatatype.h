@@ -6,7 +6,7 @@
 #define SCAM_SRC_MODELFACTORY_IFINDNEWDATATYPE_H_
 
 #include "DataType.h"
-#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/AST/Type.h"
 
 namespace DESCAM {
 class IFindNewDatatype {

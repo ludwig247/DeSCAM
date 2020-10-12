@@ -19,22 +19,18 @@
 
 
 // PArse SystemC
-#include "IFindPorts.h"
-#include "FindSCMain.h"
-#include "FindModules.h"
-#include "FindProcess.h"
-#include "FindVariables.h"
 #include "Model.h"
+#include "IFindPorts.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
 #include "IFindNewDatatype.h"
-#include <iostream>
-
 #include "IFindGlobal.h"
 #include "IFindNetlist.h"
 #include "IFindProcess.h"
 #include "IFindSCMain.h"
 #include "IModelFactory.h"
+#include "IFindModules.h"
+#include "IFindVariables.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
