@@ -24,7 +24,7 @@ class FindDataFlowFactory {
    */
   static std::unique_ptr<IFindDataFlow> create(clang::Stmt *stmt,
                                                Module *module,
-                                               clang::CompilerInstance &ci,
+                                               clang::CompilerInstance *ci,
                                                bool unsigned_flag = false) {
     std::unique_ptr<IFindDataFlow> pointer(new FindDataFlow(stmt, module, ci, unsigned_flag));
     return pointer;
