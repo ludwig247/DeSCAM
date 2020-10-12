@@ -1,45 +1,51 @@
 #include "CheckErrors.h"
-#include "FindInitialValues.h"
-#include "FindProcess.h"
 #include <CFGFactory.h>
-#include <FindNewDatatype.h>
 #include <Logger/Logger.h>
 #include <ModelGlobal.h>
 #include <FunctionFactory.h>
 #include "ModuleInstance.h"
-#include "FindDataFlow.h"
-#include "FindFunctions.h"
-#include "FindGlobal.h"
 #include <OperationFactory.h>
 #include <FatalError.h>
 #include <CreateRealCFG.h>
+#include "FindDataFlow.h"
 
 #include <utility>
 #include "DescamException.h"
 
 //Constructor
-DESCAM::CheckErrors::CheckErrors() :
+DESCAM::CheckErrors::CheckErrors(IFindFunctions *find_functions,
+                                 IFindInitialValues *find_initial_values,
+                                 IFindModules *find_modules,
+                                 IFindNewDatatype *find_new_datatype,
+                                 IFindPorts *find_ports,
+                                 IFindGlobal *find_global,
+                                 IFindNetlist *find_netlist,
+                                 IFindProcess *find_process,
+                                 IFindVariables *find_variables,
+                                 IFindSCMain *find_sc_main) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
-    model_(nullptr) {
+    model_(nullptr),
+    find_functions_(find_functions),
+    find_initial_values_(find_initial_values),
+    find_modules_(find_modules),
+    find_new_datatype_(find_new_datatype),
+    find_ports_(find_ports),
+    find_global_(find_global),
+    find_netlist_(find_netlist),
+    find_process_(find_process),
+    find_variables_(find_variables),
+    find_sc_main_(find_sc_main) {
 
-  //Compositional root
-  this->find_functions_ = std::make_unique<FindFunctions>();
-  this->find_initial_values_ = std::make_unique<FindInitialValues>();
-  this->find_process_ = std::make_unique<FindProcess>();
-  this->find_global_ = std::make_unique<FindGlobal>();
-  this->find_variables_ = std::make_unique<FindVariables>();
-  this->find_new_datatype_ = std::make_unique<FindNewDatatype>();
-  this->find_ports_ = std::make_unique<FindPorts>(this->find_new_datatype_.get());
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
 void DESCAM::CheckErrors::setup(CompilerInstance *ci) {
-    this->ci_ = ci;
-    this->context_ = &ci_->getASTContext();
+  this->ci_ = ci;
+  this->context_ = &ci_->getASTContext();
 }
 
 bool DESCAM::CheckErrors::preFire() {

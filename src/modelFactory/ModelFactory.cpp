@@ -24,27 +24,34 @@
 #include "FindGlobal.h"
 
 //Constructor
-DESCAM::ModelFactory::ModelFactory() :
+DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
+                                   IFindInitialValues *find_initial_values,
+                                   IFindModules *find_modules,
+                                   IFindNewDatatype *find_new_datatype,
+                                   IFindPorts *find_ports,
+                                   IFindGlobal *find_global,
+                                   IFindNetlist *find_netlist,
+                                   IFindProcess *find_process,
+                                   IFindVariables *find_variables,
+                                   IFindSCMain *find_sc_main) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
-    model_(nullptr) {
+    model_(nullptr),
+    find_functions_(find_functions),
+    find_initial_values_(find_initial_values),
+    find_modules_(find_modules),
+    find_new_datatype_(find_new_datatype),
+    find_ports_(find_ports),
+    find_global_(find_global),
+    find_netlist_(find_netlist),
+    find_process_(find_process),
+    find_variables_(find_variables),
+    find_sc_main_(find_sc_main) {
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
-
-  //Compositional root
-  this->find_functions_ = std::make_unique<FindFunctions>();
-  this->find_initial_values_ = std::make_unique<FindInitialValues>();
-  this->find_modules_ = std::make_unique<FindModules>();
-  this->find_new_datatype_ = std::make_unique<FindNewDatatype>();
-  this->find_ports_ = std::make_unique<FindPorts>(this->find_new_datatype_.get());
-  this->find_global_ = std::make_unique<FindGlobal>();
-  this->find_netlist_ = std::make_unique<FindNetlist>();
-  this->find_process_ = std::make_unique<FindProcess>();
-  this->find_variables_ = std::make_unique<FindVariables>();
-  this->find_sc_main_ = std::make_unique<FindSCMain>();
 }
 
 void DESCAM::ModelFactory::setup(CompilerInstance *ci) {
