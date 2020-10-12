@@ -21,10 +21,6 @@
     * sudo apt-get install python3.7
 * **libtinfo**
     * sudo apt-get libtinfo-dev 
-  
-## Installation 
-Run the install.sh script within the root folder. 
-Make sure all the mentioned package are available. 
 
 ## Packages installed by DeSCAM
 
