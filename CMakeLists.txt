@@ -65,7 +65,7 @@ include(${PROJECT_SOURCE_DIR}/install/install_z3.make)
 ## GTest
 #################################
 # Do not use system GoogleTest
-set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system googletest")
+set(USE_SYSTEM_GTEST ON CACHE BOOL "Use system googletest")
 
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_gtest.make)
@@ -122,6 +122,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model/propertySuite)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/tests/)
+include_directories(${CMAKE_SOURCE_DIR}/tests/GMock_Test/tests/mocks/modelFactory)
 
 add_subdirectory(src)
 add_subdirectory(example)

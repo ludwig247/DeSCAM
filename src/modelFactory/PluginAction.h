@@ -47,7 +47,7 @@ class Relay : public clang::ASTConsumer {
  public:
   explicit Relay(clang::ASTConsumer *consumer) : consumer_(consumer) {}
 
-  void HandleTranslationUnit(ASTContext &context) override{
+  void HandleTranslationUnit(clang::ASTContext &context) override{
     consumer_->HandleTranslationUnit(context);
   };
 };
