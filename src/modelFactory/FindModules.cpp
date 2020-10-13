@@ -4,8 +4,8 @@
 namespace DESCAM {
 
 bool FindModules::VisitCXXRecordDecl(clang::CXXRecordDecl *cxxDecl) {
-  //Checks wheter the module is just a declaration and not a implementation
-  if (cxxDecl->hasDefinition() == false) {
+  //Checks whether the module is just a declaration and not a implementation
+  if (!cxxDecl->hasDefinition()) {
     return true;
   }
 
@@ -13,10 +13,10 @@ bool FindModules::VisitCXXRecordDecl(clang::CXXRecordDecl *cxxDecl) {
   if (cxxDecl->getNumBases() <= 0) {
     return true;
   }
-  //Assume: All user defined modules can be identified by a basname "class sc::core::sc_module"
+  //Assume: All user defined modules can be identified by a basename "class sc::core::sc_module"
   //Issues: doesn't filters all classes, e.g. sc_event_queue has also this basename
-  //Idea: sortout those modules by hand
-  for (clang::CXXRecordDecl::base_class_iterator bi = cxxDecl->bases_begin(), be = cxxDecl->bases_end(); bi != be; ++bi) {
+  //Idea: sort out those modules by hand
+  for (auto bi = cxxDecl->bases_begin(), be = cxxDecl->bases_end(); bi != be; ++bi) {
     clang::QualType q = bi->getType();
     //Check basename
     std::string baseName = q.getAsString();
