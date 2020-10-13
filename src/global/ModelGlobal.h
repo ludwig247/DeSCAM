@@ -55,18 +55,18 @@ class ModelGlobal {
     std::string systemc_dir = SCAM_HOME"/include/";//getenv("SYSTEMC_DIR");
     std::string scam_dir = SCAM_HOME"/";//getenv("SCAM_HOME");
     std::string root_dir = "/";//getenv("ROOT_DIR");
-    if (clang_dir == "") TERMINATE("Specfiy CLANG_DIR as environment variable");
-    if (systemc_dir == "") TERMINATE("Specfiy SYSTEMC_DIR as environment variable");
-    if (scam_dir == "") TERMINATE("Specfiy SCAM_DIR as environment variable");
-    if (root_dir == "") TERMINATE("Specfiy ROOT_DIR as environment variable");
+    if (clang_dir.empty()) TERMINATE("Specify CLANG_DIR as environment variable");
+    if (systemc_dir.empty()) TERMINATE("Specify SYSTEMC_DIR as environment variable");
+    if (scam_dir.empty()) TERMINATE("Specify SCAM_DIR as environment variable");
+    if (root_dir.empty()) TERMINATE("Specify ROOT_DIR as environment variable");
 
-    //Binaray
+    //Binary
     commandLineArugmentsVector.push_back(Binary.c_str());
 
     //SRC-File to be analyzed
     commandLineArugmentsVector.push_back(srcFile.c_str());
 
-    //Seperator n
+    //Separator n
     commandLineArugmentsVector.push_back("--");
 
     //TestCases include-dir: may not be changed
@@ -109,7 +109,7 @@ class ModelGlobal {
       std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
       isWrapper=false;
       if (!isWrapper) {
-        IModelFactory *model_factory = new ModelFactory(find_functions.get(),
+        auto model_factory = new ModelFactory(find_functions.get(),
                                                         find_initial_values.get(),
                                                         find_modules.get(),
                                                         find_new_datatype.get(),
@@ -222,6 +222,7 @@ class ModelGlobal {
     static ModelGlobal instance;
     return instance;
   }
+
   DESCAM::Model *model;
 };
 }

@@ -106,11 +106,6 @@ TEST(gmock_test, TestCase2) {
   auto module = ModelGlobal::getModel()->getModules().at("TestCase2");
   ASSERT_TRUE(module);
   print_itl.printModel(ModelGlobal::getModel());
-//  Only for generation
-//  std::ofstream myfile;
-//  myfile.open(SCAM_HOME"/tests/GMock_Test/tests/TestCase2.vhi");
-//  myfile << print_itl.print();
-//  myfile.close();
 
   ASSERT_NO_THROW(print_itl.print());
   std::cout << "Instance: " << "TestCase2" << std::endl;
@@ -157,11 +152,6 @@ TEST(gmock_test, TestCase3) {
   auto module = ModelGlobal::getModel()->getModules().at("TestCase3");
   ASSERT_TRUE(module);
     print_itl.printModel(ModelGlobal::getModel());
-//  Only for generation
-//  std::ofstream myfile;
-//  myfile.open(SCAM_HOME"/tests/GMock_Test/tests/TestCase3.vhi");
-//  myfile << print_itl.print();
-//  myfile.close();
 
   ASSERT_NO_THROW(print_itl.print());
   std::cout << "Instance: " << "TestCase3" << std::endl;
@@ -173,15 +163,6 @@ TEST(gmock_test, TestCase3) {
                       (std::istreambuf_iterator<char>()));
 
   ASSERT_EQ(content, print_itl.print()) << "Test for module " << "TestCase3" << " failed\n\n" << print_itl.print();
-//  std::cout << content << std::endl;
-//
-//  std::cout << "" << std::endl;
-//
-//  std::cout << "===========================================" << std::endl;
-//
-//  std::cout << print_itl.print() << std::endl;
-//
-//  std::cout << "DONE" << std::endl;
 
 }
 
