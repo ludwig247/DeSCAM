@@ -39,6 +39,10 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
     ci(ci),
     module(module) {
 
+  clang::LangOptions LO;
+  LO.CPlusPlus = true;
+
+
   //TODO: remove ci and methodDecl from class
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
@@ -48,6 +52,10 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
     llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
     return;
   }
+
+  assert(functionDecl != nullptr);
+
+
   this->translateToScamCFG();
 }
 
@@ -59,9 +67,6 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
  */
 void CFGFactory::translateToScamCFG() {
 
-  clang::LangOptions LO;
-  LO.CPlusPlus = true;
-//        clangCFG->dump(LO, true);
 
   clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
 
@@ -87,6 +92,7 @@ void CFGFactory::translateToScamCFG() {
     this->traverseBlocks(*entryCFGBlock->succ_begin(), entryNode);
   }
   //Clean up
+
   this->cleanEmptyBlocks();
 }
 
