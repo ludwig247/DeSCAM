@@ -405,7 +405,7 @@ std::string PrintITL::macrosForHLS()
 
 std::string PrintITL::globalFunctions() {
     std::stringstream ss;
-    if (model->getGlobalFunctionMap().empty()) return ss.str();
+    if (model == nullptr || model->getGlobalFunctionMap().empty()) return ss.str();
     ss << "-- GLOBAL FUNCTIONS --\n";
     for (auto function: model->getGlobalFunctionMap()) {
         ss << "macro " + function.first << "(";
