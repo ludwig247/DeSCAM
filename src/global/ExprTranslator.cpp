@@ -93,7 +93,7 @@ DESCAM::Expr *DESCAM::ExprTranslator::translate(z3::expr &z3_expr, const DESCAM:
     return this->translate_intern(z3_expr);
 }
 
-//is private, only enterered when the maps exists (and{TERMINATE("ExprSCAMtoZ3 did not expect SyncSignal");} when at least "int" and "bool" is a datatype
+//is private, only entered when the maps exists (and{TERMINATE("ExprSCAMtoZ3 did not expect SyncSignal");} when at least "int" and "bool" is a datatype
 DESCAM::Expr *DESCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_intern) {
 
     DESCAM::Expr *returnExpr = nullptr;
@@ -185,7 +185,7 @@ DESCAM::Expr *DESCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_i
 
 
         //Synch & DataSignals
-        for (auto port: module->getPorts()) {
+        for (const auto& port: module->getPorts()) {
             if (symbolname == port.first + "_synch") {
                 return port.second->getSynchSignal();
             }
@@ -236,7 +236,7 @@ DESCAM::Expr *DESCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_i
                 DESCAM_ASSERT(returnExpr = new DESCAM::Relational(translate_intern(lhs), relationalOperatorMap.at(oper),
                                                                 translate_intern(rhs)))
                 CHECK_EXCEPTION_AND_RETURN(returnExpr)
-            } else TERMINATE("Expecte 2 arguments for " + oper);
+            } else TERMINATE("Expected 2 arguments for " + oper);
         } else if (logicalOperatorMap.find(oper) != logicalOperatorMap.end()) {
             if (z3_expr_intern.num_args() < 2)
                 TERMINATE(
@@ -340,7 +340,7 @@ DESCAM::Expr *DESCAM::ExprTranslator::translate_intern(const z3::expr &z3_expr_i
         } else if (oper == "extract") {
 //            std::cout<<"EXprTranslator: extract " << z3_expr.is_algebraic() << "\n";
             abort = true;
-            z3::expr extract = z3_expr_intern;
+            const z3::expr& extract = z3_expr_intern;
             assert(extract.decl().name().str() == "extract" && extract.num_args() == 1 && extract.arg(0).is_const() &&
                    "Unknown apps");
             //Return something to work with
@@ -530,7 +530,7 @@ void DESCAM::ExprTranslator::visit(DESCAM::Arithmetic &node) {
             if (unsigned_flag) z3_expr = z3::urem(lhs, rhs);
             else z3_expr = z3::srem(lhs, rhs);
 
-        } catch (z3::exception e) {
+        } catch (z3::exception &e) {
 
             std::cout << lhs << "%" << rhs << std::endl;
             std::cout << e << std::endl;
@@ -622,7 +622,7 @@ void DESCAM::ExprTranslator::visit(DESCAM::Relational &node) {
 
         try {
             z3_expr = lhs == rhs;
-        } catch (z3::exception e) {
+        } catch (z3::exception &e) {
             std::cout << lhs << " == " << rhs << std::endl;
             std::cout << e << std::endl;
         }
@@ -665,15 +665,13 @@ void DESCAM::ExprTranslator::visit(DESCAM::SyncSignal &node) {
     //this is ok, since z3 automatically sees them as the same operand as long as it has the same name
     std::string name = node.getPort()->getName() + "_synch";
     z3_expr = context->bool_const(name.c_str());
-    return;
-
 }
 
 
 void DESCAM::ExprTranslator::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataType()->isCompoundType())
         TERMINATE("ExprTranslator DataSignal: Signal is not allowed to be compound type");
-    std::string name = "";
+    std::string name;
     if (node.getDataSignal()->isSubVar()) {
         name = node.getDataSignal()->getPort()->getName() + "_dataXYZ_" + node.getDataSignal()->getName();
     } else name = node.getDataSignal()->getPort()->getName() + "_dataXYZ";
@@ -700,8 +698,6 @@ void DESCAM::ExprTranslator::visit(DESCAM::DataSignalOperand &node) {
     } else {
         TERMINATE("Unsupported type: " + node.getDataType()->getName());
     }
-    return;
-
 }
 
 
