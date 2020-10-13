@@ -36,6 +36,7 @@ void FindModules::setup(clang::TranslationUnitDecl *decl) {
   this->module_map_.clear();
   assert(decl);
   TraverseDecl(decl);
+
 }
 
 }
