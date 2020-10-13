@@ -8,7 +8,7 @@
 #include "clang/Frontend/CompilerInstance.h"
 
 namespace DESCAM {
- class IModelFactory: public clang::ASTConsumer{
+class IModelFactory : public clang::ASTConsumer {
  public:
 
   ~IModelFactory() override = default;
