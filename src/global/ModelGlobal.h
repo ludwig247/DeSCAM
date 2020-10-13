@@ -47,6 +47,7 @@ class ModelGlobal {
 
   static void
   createModel(int argc, const std::string &Binary, const std::string &srcFile, bool isWrapper = false) {
+
     std::vector<std::string> result;
     std::vector<const char *> commandLineArugmentsVector;
     //Analyzing Environmental Variables          -----Default Values for Reference
@@ -106,7 +107,7 @@ class ModelGlobal {
       std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
       std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
       std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-
+      isWrapper=false;
       if (!isWrapper) {
         IModelFactory *model_factory = new ModelFactory(find_functions.get(),
                                                         find_initial_values.get(),
@@ -131,8 +132,10 @@ class ModelGlobal {
                                                       find_process.get(),
                                                       find_variables.get(),
                                                       find_sc_main.get());
-        PluginAction
-            pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, check_errors);
+
+        throw std::runtime_error("NOT ALLOWED");
+
+        PluginAction pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, check_errors);
       }
     } else TERMINATE("Wrong use of DeSCAM");
   };

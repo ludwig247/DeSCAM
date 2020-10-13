@@ -8,7 +8,6 @@
 #include <FatalError.h>
 #include <PrintITL/PrintITL.h>
 
-//TODO: no need for main
 TEST(gmock_test,TestCase1){
   std::vector<const char *> commandLineArugmentsVector;
 
@@ -154,7 +153,15 @@ TEST(gmock_test,TestCase3){
                       (std::istreambuf_iterator<char>()));
 
   ASSERT_EQ(content, print_itl.print()) << "Test for module " << "TestCase3" << " failed\n\n" << print_itl.print();
-  std::cout << "" << std::endl;
+//  std::cout << content << std::endl;
+//
+//  std::cout << "" << std::endl;
+//
+//  std::cout << "===========================================" << std::endl;
+//
+//  std::cout << print_itl.print() << std::endl;
+//
+//  std::cout << "DONE" << std::endl;
 
 }
 
