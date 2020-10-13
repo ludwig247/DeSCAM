@@ -6,9 +6,6 @@ add_executable(GMock_Test main.cpp)
 target_compile_options(GMock_Test PRIVATE -fPIC -O2 )
 
 #TODO: factory should not be included
-target_link_libraries(GMock_Test PRIVATE propertyFactory)
-target_link_libraries(GMock_Test PRIVATE modelFactory)
-target_link_libraries(GMock_Test PRIVATE optimizer)
 target_link_libraries(GMock_Test PRIVATE parser)
 
 target_link_libraries(GMock_Test PRIVATE ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)

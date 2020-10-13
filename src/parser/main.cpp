@@ -33,7 +33,9 @@ int main(int argc, const char **argv) {
     DESCAM::Logger::setPrintDecorativeFrames();
 
     //Create model
-    ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile()))
+    std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
+    DataTypes::reset();
+    ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, bin, cml.getSourceFile()))
     // write log messages to all sinks
     if (DESCAM::Logger::hasFeedback()) {
         DESCAM::Logger::log();
@@ -72,3 +74,4 @@ int main(int argc, const char **argv) {
     }
     return 0;
 }
+

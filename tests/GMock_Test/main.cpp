@@ -28,6 +28,8 @@ TEST(mock_objects, MockIFindSCMainCall) {
 }
 
 TEST(gmock_test, TestCase1) {
+  DataTypes::reset();
+
   std::vector<const char *> command_line_arguments_vector;
 
   //Binary
