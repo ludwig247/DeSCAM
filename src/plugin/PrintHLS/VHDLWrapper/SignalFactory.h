@@ -49,7 +49,8 @@ namespace DESCAM {
                 static std::string printPortMapSignal(const T &signal,
                                                       const std::string &delimiter,
                                                       const std::string &prefix,
-                                                      const std::string &suffix);
+                                                      const std::string &suffix,
+                                                      const bool &addVld = false);
 
                 template<typename T>
                 static std::string convertDataTypeName(T *type, const bool &asVector = false);
@@ -163,11 +164,16 @@ namespace DESCAM {
             std::string SignalFactory::printPortMapSignal(const T &signal,
                                                           const std::string &delimiter,
                                                           const std::string &prefix,
-                                                          const std::string &suffix) {
+                                                          const std::string &suffix,
+                                                          const bool &addVld) {
                 std::stringstream ss;
-                ss << "\t\t" << prefix << signal->getFullName("_");
-                ss << (signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned() ? "_V" : "");
-                ss << " => " << signal->getFullName(delimiter) << suffix << ",\n";
+                const auto &varSuffix = (signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned() ? "_V" : "");
+                ss << "\t\t" << prefix << signal->getFullName("_") << varSuffix
+                   << " => " << (prefix != "ap_" ? prefix : "") << signal->getFullName(delimiter) << suffix << ",\n";
+                if (addVld) {
+                    ss << "\t\t" << prefix << signal->getFullName("_") << varSuffix << "_ap_vld"
+                       << " => " << prefix << signal->getFullName("_") << "_vld,\n";
+                }
                 return ss.str();
             }
 

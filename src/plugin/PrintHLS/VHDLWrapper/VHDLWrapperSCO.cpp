@@ -117,8 +117,7 @@ void VHDLWrapperSCO::componentInst(std::stringstream &ss) {
     }
 
     ss << "\t\t" << signalFactory->getActiveOperation()->getFullName()
-       << " => " << signalFactory->getActiveOperation()->getFullName("_") << "_in\n"
-       << "\t);\n\n";
+       << " => " << signalFactory->getActiveOperation()->getFullName("_") << "_in\n\t);\n\n";
 }
 
 /*
@@ -146,13 +145,13 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream &ss) {
         ss << "\n\t-- Operation Module Outputs\n";
     }
     for (const auto &output : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
-        const auto outputName = (optimizer->hasOutputReg(output) ?
+        const auto &outputName = (optimizer->hasOutputReg(output) ?
                                  optimizer->getCorrespondingRegister(output)->getFullName() :
                                  output->getFullName());
         ss << "\t" << outputName << " <= " << output->getFullName("_") << "_out;\n";
     }
 
-    if (!optimizer->getOutputRegisterMap().empty()){
+    if (!optimizer->getOutputRegisterMap().empty()) {
         ss << "\n\t-- Output Register to Output Mapping\n";
     }
     for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
@@ -161,7 +160,8 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream &ss) {
                 ss << "\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
             }
         } else {
-            ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
+            ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName()
+               << ";\n";
         }
     }
 
@@ -173,13 +173,17 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream &ss) {
     }
 
     ss << "\n\t-- Operation Module Inputs\n";
-    ss << "\t" << signalFactory->getActiveOperation()->getFullName() << "_in <= " << signalFactory->getActiveOperation()->getFullName() << ";\n";
+    ss << "\t" << signalFactory->getActiveOperation()->getFullName() << "_in <= "
+       << signalFactory->getActiveOperation()->getFullName() << ";\n";
     for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
         ss << "\t" << signal->getFullName("_") << "_in <= " << signal->getFullName() << ";\n";
     }
 
 }
 
+/*
+ * Print main sequential process
+ */
 void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
     ss << "\n\t-- Control process\n"
        << "\tprocess (clk, rst)\n"
@@ -193,7 +197,9 @@ void VHDLWrapperSCO::controlProcess(std::stringstream &ss) {
        << "\tend process;\n\n";
 }
 
-
+/*
+ * Check, if module is empty
+ */
 bool VHDLWrapperSCO::emptyModule() {
     return optimizer->getInternalRegisterOut().empty() && optimizer->getOutputs().empty() &&
            propertySuite->getNotifySignals().empty();

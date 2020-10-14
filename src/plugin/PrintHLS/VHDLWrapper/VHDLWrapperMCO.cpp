@@ -9,12 +9,11 @@
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
 VHDLWrapperMCO::VHDLWrapperMCO(
-        Module* module,
+        Module *module,
         const std::string &moduleName,
         std::shared_ptr<PropertySuite> propertySuite,
-        std::shared_ptr<OptimizerHLS>& optimizer
-)
-{
+        std::shared_ptr<OptimizerHLS> &optimizer
+) {
     this->propertySuite = std::move(propertySuite);
     this->currentModule = module;
     this->moduleName = moduleName;
@@ -28,55 +27,57 @@ VHDLWrapperMCO::VHDLWrapperMCO(
 void VHDLWrapperMCO::signals(std::stringstream &ss) {
 
     ss << "\n\t-- Internal Registers\n";
-    for (const auto& signal : Utilities::getParents(signalFactory->getInternalRegister())) {
-        ss << SignalFactory::printSignalDefinition(signal, ".", "" , "", false, false);
+    for (const auto &signal : Utilities::getParents(signalFactory->getInternalRegister())) {
+        ss << SignalFactory::printSignalDefinition(signal, ".", "", "", false, false);
     }
-    for (const auto& signal : signalFactory->getInternalRegisterIn()) {
-        ss << SignalFactory::printSignalDefinition(signal, "_", "in_" , "", true, false);
+    for (const auto &signal : signalFactory->getInternalRegisterIn()) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "in_", "", true, false);
     }
-    for (const auto& signal : signalFactory->getInternalRegisterOut()) {
-        ss << SignalFactory::printSignalDefinition(signal, "_", "out_" , "", true, true);
+    for (const auto &signal : signalFactory->getInternalRegisterOut()) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "out_", "", true, true);
     }
 
     ss << "\n\t-- Module Inputs\n";
-    for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
-        ss << SignalFactory::printSignalDefinition(signal, "_", "" , "_in", true, false);
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "", "_in", true, false);
     }
-    ss << SignalFactory::printSignalDefinition(signalFactory->getActiveOperation(), ".", "" , "_in", true, false);
+    ss << SignalFactory::printSignalDefinition(signalFactory->getActiveOperation(), ".", "", "_in", true, false);
 
     ss << "\n\t-- Module Outputs\n";
-    for (const auto& signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
-        ss << SignalFactory::printSignalDefinition(signal, "_", "" , "_out", true, true);
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        ss << SignalFactory::printSignalDefinition(signal, "_", "", "_out", true, true);
     }
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tsignal " << notifySignal->getName() << "_out: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_vld: std_logic;\n";
         ss << "\tsignal " << notifySignal->getName() << "_reg: std_logic;\n";
     }
 
     ss << "\n\t-- Handshaking Protocol Signals (Communication between top and operations_inst)\n";
-    for (const auto& signal : signalFactory->getHandshakingProtocolSignals()) {
-        ss << SignalFactory::printSignalDefinition(signal, ".", "" , "_sig", false, false);
+    for (const auto &signal : signalFactory->getHandshakingProtocolSignals()) {
+        ss << SignalFactory::printSignalDefinition(signal, ".", "", "_sig", false, false);
     }
     ss << "\n\t-- Monitor Signals\n";
-    for (const auto& signal : signalFactory->getMonitorSignals()) {
-        ss << SignalFactory::printSignalDefinition(signal, ".", "" , "", false, false);
+    for (const auto &signal : signalFactory->getMonitorSignals()) {
+        ss << SignalFactory::printSignalDefinition(signal, ".", "", "", false, false);
     }
 }
 
 /*
  * Print Component Declaration
  */
-void VHDLWrapperMCO::component(std::stringstream& ss) {
+void VHDLWrapperMCO::component(std::stringstream &ss) {
 
     ss << "\n\tcomponent " << moduleName << "_operations is\n";
     ss << "\tport(\n";
 
     for (const auto &signal : signalFactory->getControlSignals()) {
-        ss << SignalFactory::printComponentSignal(signal, "ap_", signal->getPort()->getInterface()->getDirection(), false);
+        ss << SignalFactory::printComponentSignal(signal, "ap_", signal->getPort()->getInterface()->getDirection(),
+                                                  false);
     }
     for (const auto &signal : signalFactory->getHandshakingProtocolSignals()) {
-        ss << SignalFactory::printComponentSignal(signal, "ap_", signal->getPort()->getInterface()->getDirection(), false);
+        ss << SignalFactory::printComponentSignal(signal, "ap_", signal->getPort()->getInterface()->getDirection(),
+                                                  false);
     }
     for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
         ss << SignalFactory::printComponentSignal(signal, "", signal->getPort()->getInterface()->getDirection(), false);
@@ -91,77 +92,64 @@ void VHDLWrapperMCO::component(std::stringstream& ss) {
         ss << SignalFactory::printComponentSignal(signal, "out_", "out", true);
     }
 
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";
         ss << "\t\t" << notifySignal->getName() << "_ap_vld: out std_logic;\n";
     }
 
-    const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << ": in " << SignalFactory::convertDataTypeName(activeOp->getDataType(), true) << "\n";
+    const auto &activeOp = signalFactory->getActiveOperation();
+    ss << "\t\t" << activeOp->getFullName() << ": in "
+       << SignalFactory::convertDataTypeName(activeOp->getDataType(), true) << "\n";
 
     ss << "\t);\n"
        << "\tend component;\n";
 }
 
-// Print Component Instantiation
-void VHDLWrapperMCO::componentInst(std::stringstream& ss) {
+/*
+ * Print port map of operation component
+ */
+void VHDLWrapperMCO::componentInst(std::stringstream &ss) {
+
     ss << "\toperations_inst: " << moduleName << "_operations\n"
        << "\tport map(\n";
 
-    auto printComponentInstSignal = [&ss](
-            std::set<DataSignal *> const& signals,
-            std::string const& prefix,
-            std::string const& suffix,
-            bool const& vld) {
-        for (const auto& signal : signals) {
-            std::string type = signal->getDataType()->getName();
-            std::string moduleSuffix = (type == "int" || type == "unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << signal->getFullName("_") << moduleSuffix << " => "
-               << signal->getFullName("_") << suffix << ",\n";
-            if (vld) {
-                ss << "\t\t" << prefix << signal->getFullName("_") << moduleSuffix << "_ap_vld"
-                   << " => " << signal->getFullName("_") << "_vld,\n";
-            }
-        }
-    };
+    for (const auto &signal : signalFactory->getControlSignals()) {
+        ss << SignalFactory::printPortMapSignal(signal, "_", "ap_", "", false);
+    }
+    for (const auto &signal : signalFactory->getHandshakingProtocolSignals()) {
+        ss << SignalFactory::printPortMapSignal(signal, "_", "ap_", "_sig", false);
+    }
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << SignalFactory::printPortMapSignal(signal, "_", "", "_in", false);
+    }
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        ss << SignalFactory::printPortMapSignal(signal, "_", "", "_out", true);
+    }
+    for (const auto &signal : signalFactory->getInternalRegisterIn()) {
+        ss << SignalFactory::printPortMapSignal(signal, "_", "in_", "", false);
+    }
+    for (const auto &signal : signalFactory->getInternalRegisterOut()) {
+        ss << SignalFactory::printPortMapSignal(signal, "_", "out_", "", true);
+    }
 
-    auto printComponentInstVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix, bool const& vld) {
-        for (const auto& var : vars) {
-            std::string type = var->getDataType()->getName();
-            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix << var->getFullName("_") << suffix << " => "
-               << prefix << var->getFullName("_") << ",\n";
-            if (vld) {
-                ss << "\t\t" << prefix << var->getFullName("_") << suffix << "_ap_vld"
-                   << " => " << prefix << var->getFullName("_") << "_vld,\n";
-            }
-        }
-    };
-
-    printComponentInstSignal(signalFactory->getControlSignals(), "ap_", "", false);
-    printComponentInstSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", "_sig", false);
-    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "", "_in", false);
-    printComponentInstSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", "_out", true);
-    printComponentInstVars(signalFactory->getInternalRegisterIn(), "in_", false);
-    printComponentInstVars(signalFactory->getInternalRegisterOut(), "out_", true);
-
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << " => " << notifySignal->getName() << "_out,\n";
         ss << "\t\t" << notifySignal->getName() << "_ap_vld  => " << notifySignal->getName() << "_vld,\n";
     }
 
-    const auto& activeOp = signalFactory->getActiveOperation();
-    ss << "\t\t" << activeOp->getFullName() << " => " << activeOp->getFullName("_") <<"_in\n"
+    const auto &activeOp = signalFactory->getActiveOperation();
+    ss << "\t\t" << activeOp->getFullName() << " => " << activeOp->getFullName("_") << "_in\n"
        << "\t);\n\n";
 }
 
 /*
  * Print out a single Operation for the monitor
  */
-std::string VHDLWrapperMCO::printMonitorOperation(const Operation& op) {
+std::string VHDLWrapperMCO::printMonitorOperation(const Operation &op) {
     std::stringstream ss;
     if (!op.IsWait()) {
-        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId()) << ";\n";
+        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId())
+           << ";\n";
         ss << "\t\t\t\tnext_state <= st_" << op.getNextState()->getName() << ";\n";
         ss << "\t\t\t\twait_state <= '0';\n";
     } else {
@@ -170,39 +158,42 @@ std::string VHDLWrapperMCO::printMonitorOperation(const Operation& op) {
     return ss.str();
 }
 
-void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
-{
-    auto printOutputProcess = [&](DataSignal* dataSignal) {
+void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
+    auto printOutputProcess = [&](DataSignal *dataSignal) {
         bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
         ss << "\tprocess (rst, " << dataSignal->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName("."))
+           << "\t\t\t"
+           << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName(
+                   "."))
            << " <= " << getResetValue(dataSignal) << ";\n"
            << "\t\telsif (" << dataSignal->getFullName("_") << "_vld = \'1\') then\n"
-           << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName("."))
+           << "\t\t\t"
+           << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName(
+                   "."))
            << " <= " << dataSignal->getFullName("_") << "_out;\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
     ss << "\t-- Output_Vld Processes\n";
-    for (const auto& out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+    for (const auto &out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
         printOutputProcess(out);
     }
 
-    auto printOutputProcessRegs = [&](Variable* var) {
+    auto printOutputProcessRegs = [&](Variable *var) {
         ss << "\tprocess (rst, out_" << var->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
            << "\t\t\t" << var->getFullName(".") << " <= " << getResetValue(var) << ";\n"
-           << "\t\telsif (out_" << var->getFullName("_") <<"_vld = \'1\') then\n"
+           << "\t\telsif (out_" << var->getFullName("_") << "_vld = \'1\') then\n"
            << "\t\t\t" << var->getFullName(".") << " <= out_" << var->getFullName("_") << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
 
-    std::set<Variable * > inOutReg;
-    for (const auto& internalRegsOut : signalFactory->getInternalRegisterOut()) {
+    std::set<Variable *> inOutReg;
+    for (const auto &internalRegsOut : signalFactory->getInternalRegisterOut()) {
         auto internalRegsIn = signalFactory->getInternalRegisterIn();
         if (internalRegsIn.find(internalRegsOut) != internalRegsIn.end()) {
             inOutReg.insert(internalRegsOut);
@@ -211,7 +202,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
         printOutputProcessRegs(internalRegsOut);
     }
 
-    for (const auto& reg : inOutReg) {
+    for (const auto &reg : inOutReg) {
         bool isEnum = reg->isEnumType();
         std::string signalIn;
         std::string signalOut;
@@ -227,7 +218,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << "\t\t\t" << signalOut << " when others;\n\n";
     }
 
-    for (const auto& reg : inOutReg) {
+    for (const auto &reg : inOutReg) {
         bool isEnum = reg->isEnumType();
         std::string SignalRegister;
         std::string SignalReset;
@@ -251,7 +242,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << "\tend process;\n\n";
     }
 
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tprocess(" << notifySignal->getName() << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (" << notifySignal->getName() << "_vld = '1') then\n"
@@ -264,11 +255,11 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
        << "\tprocess(rst, done_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& registerOutputMap : optimizer->getOutputRegisterMap()) {
+    for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
         if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
-            for (const auto& output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
+            for (const auto &output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
                 if (output->isCompoundType()) {
-                    for (const auto& subVar : output->getSubVarList()) {
+                    for (const auto &subVar : output->getSubVarList()) {
                         ss << "\t\t\t" << subVar->getFullName(".") << " <= " << getResetValue(subVar) << ";\n";
                     }
                 } else {
@@ -278,7 +269,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
             }
         } else {
             if (registerOutputMap.second->isCompoundType()) {
-                for (const auto& subVar : registerOutputMap.second->getSubVarList()) {
+                for (const auto &subVar : registerOutputMap.second->getSubVarList()) {
                     ss << "\t\t\t" << subVar->getFullName(".") << " <= " << getResetValue(subVar) << ";\n";
                 }
             } else {
@@ -288,13 +279,14 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
         }
     }
     ss << "\t\telsif (done_sig = '1') then\n";
-    for (const auto& registerOutputMap : optimizer->getOutputRegisterMap()) {
+    for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
         if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
-            for (const auto& output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
+            for (const auto &output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
                 ss << "\t\t\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
             }
         } else {
-            ss << "\t\t\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
+            ss << "\t\t\t" << registerOutputMap.second->getFullName() << " <= "
+               << registerOutputMap.first->getFullName() << ";\n";
         }
     }
     ss << "\t\tend if;\n"
@@ -303,7 +295,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
     ss << "\tprocess(rst, done_sig, idle_sig)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n";
-    for (const auto& commitment : propertySuite->getResetProperty()->getCommitmentList()) {
+    for (const auto &commitment : propertySuite->getResetProperty()->getCommitmentList()) {
         // Find and print notifies from reset property commitments
         const auto &assignment = NodePeekVisitor::nodePeekAssignment((*commitment).getStatement());
         if ((assignment != nullptr) && (NodePeekVisitor::nodePeekNotify(assignment->getLhs()) != nullptr)) {
@@ -312,17 +304,17 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
     }
     ss << "\t\telse\n"
        << "\t\t\tif (done_sig = '1') then\n";
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_reg;\n";
     }
     ss << "\t\t\telsif (idle_sig = '1') then\n";
-    for (const auto& port : currentModule->getPorts()) {
+    for (const auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isMasterOut()) {
             ss << "\t\t\t\t" << port.second->getName() << "_notify <= '0';\n";
         }
     }
     ss << "\t\t\telse\n";
-    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t\t\t" << notifySignal->getName() << " <= '0';\n";
     }
     ss << "\t\t\tend if;\n"
@@ -330,46 +322,31 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
        << "\tend process;\n\n";
 }
 
-void VHDLWrapperMCO::controlProcess(std::stringstream& ss)
-{
-    auto printModuleInputSignals = [this, &ss](std::set<DataSignal*> const& dataSignals) {
-        for (const auto& dataSignal : dataSignals) {
-            if (!dataSignal->getPort()->isArrayType()) {
-                ss << "\t\t\t\t" << dataSignal->getFullName("_") << "_in <= "
-                   << (dataSignal->isEnumType() ?
-                       SignalFactory::enumToVector(dataSignal) :
-                       dataSignal->getFullName("."))
-                   << ";\n";
-            }
-        }
-    };
+void VHDLWrapperMCO::controlProcess(std::stringstream &ss) {
 
-    auto printModuleInputVars = [&ss](Variable* var, std::string const& prefix, std::string const& suffix) {
-        ss << "\t\t\t\t" << prefix << var->getFullName("_") << suffix << " <= "
-           << var->getFullName(".") << ";\n";
-    };
-
-    // Print Control Process
     ss << "\t-- Control process\n"
        << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
        << "\t\tif (rst = '1') then\n"
        << "\t\t\tstart_sig <= '0';\n"
-       << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getOperation()->getNextState()->getName() << ";\n"
+       << "\t\t\tactive_state <= st_" << propertySuite->getResetProperty()->getOperation()->getNextState()->getName()
+       << ";\n"
        << "\t\telsif (clk = '1' and clk'event) then\n"
        << "\t\t\tif ((idle_sig = '1' or ready_sig = '1') and wait_state = '0') then\n"
        << "\t\t\t\tstart_sig <= '1';\n"
        << "\t\t\t\tactive_state <= next_state;\n";
 
     ss << "\t\t\t\tactive_operation_in <= active_operation;\n";
-    printModuleInputSignals(Utilities::getSubVars(signalFactory->getOperationModuleInputs()));
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << "\t\t\t\t" << signal->getFullName("_") << "_in <= " << signal->getFullName(".") << ";\n";
+    }
 
-    for (auto&& internalRegIn : signalFactory->getInternalRegisterIn()) {
+    for (auto &&internalRegIn : signalFactory->getInternalRegisterIn()) {
         auto internalRegsOut = signalFactory->getInternalRegisterOut();
         if (internalRegsOut.find(internalRegIn) != internalRegsOut.end()) {
             continue;
         }
-        printModuleInputVars(internalRegIn, "in_", "");
+        ss << "\t\t\t\tin_" << internalRegIn->getFullName("_") << " <= " << internalRegIn->getFullName(".") << ";\n";
     }
 
     for (const auto &arrayPort : optimizer->getArrayPorts()) {
