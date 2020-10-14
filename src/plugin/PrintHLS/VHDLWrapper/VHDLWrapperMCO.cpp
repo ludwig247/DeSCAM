@@ -64,43 +64,32 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
     }
 }
 
+/*
+ * Print Component Declaration
+ */
 void VHDLWrapperMCO::component(std::stringstream& ss) {
-    // Print Component
+
     ss << "\n\tcomponent " << moduleName << "_operations is\n";
     ss << "\tport(\n";
 
-    auto printComponentSignal = [&ss](std::set<DataSignal *> const& signals, std::string const& prefix, bool const& vld) {
-        for (const auto& signal : signals) {
-            bool vectorType = signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned();
-            std::string suffix = (vectorType ? "_V" : "");
-            ss << "\t\t" << prefix << signal->getFullName("_") << suffix << ": "
-               << signal->getPort()->getInterface()->getDirection() << " " << SignalFactory::convertDataTypeName(signal->getDataType(), true)
-               << ";\n";
-            if (vld) {
-                ss << "\t\t" << prefix << signal->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
-            }
-        }
-    };
-
-    auto printComponentVars = [&ss](std::set<Variable *> const& vars, std::string const& prefix, bool const& vld) {
-        for (const auto& var : vars) {
-            std::string type = var->getDataType()->getName();
-            std::string suffix = (type=="int" || type=="unsigned" ? "_V" : "");
-            ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << ": "
-               << prefix << " " << SignalFactory::convertDataTypeName(var->getDataType(), true)
-               << ";\n";
-            if (vld) {
-                ss << "\t\t" << prefix + "_" << var->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
-            }
-        }
-    };
-
-    printComponentSignal(signalFactory->getControlSignals(), "ap_", false);
-    printComponentSignal(signalFactory->getHandshakingProtocolSignals(), "ap_", false);
-    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleInputs()), "", false);
-    printComponentSignal(Utilities::getSubVars(signalFactory->getOperationModuleOutputs()), "", true);
-    printComponentVars(signalFactory->getInternalRegisterIn(), "in", false);
-    printComponentVars(signalFactory->getInternalRegisterOut(), "out", true);
+    for (const auto &signal : signalFactory->getControlSignals()) {
+        ss << SignalFactory::printComponentSignal(signal, "ap_", signal->getPort()->getInterface()->getDirection(), false);
+    }
+    for (const auto &signal : signalFactory->getHandshakingProtocolSignals()) {
+        ss << SignalFactory::printComponentSignal(signal, "ap_", signal->getPort()->getInterface()->getDirection(), false);
+    }
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleInputs())) {
+        ss << SignalFactory::printComponentSignal(signal, "", signal->getPort()->getInterface()->getDirection(), false);
+    }
+    for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
+        ss << SignalFactory::printComponentSignal(signal, "", signal->getPort()->getInterface()->getDirection(), true);
+    }
+    for (const auto &signal : signalFactory->getInternalRegisterIn()) {
+        ss << SignalFactory::printComponentSignal(signal, "in_", "in", false);
+    }
+    for (const auto &signal : signalFactory->getInternalRegisterOut()) {
+        ss << SignalFactory::printComponentSignal(signal, "out_", "out", true);
+    }
 
     for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t\t" << notifySignal->getName() << ": out std_logic;\n";

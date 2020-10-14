@@ -40,6 +40,12 @@ namespace DESCAM {
                                                          const bool &addVld = false);
 
                 template<typename T>
+                static std::string printComponentSignal(const T &signal,
+                                                        const std::string &prefix,
+                                                        const std::string &direction,
+                                                        const bool &addVld = false);
+
+                template<typename T>
                 static std::string printPortMapSignal(const T &signal,
                                                       const std::string &delimiter,
                                                       const std::string &prefix,
@@ -134,6 +140,21 @@ namespace DESCAM {
                    << convertDataTypeName(signal->getDataType(), asVector) << ";\n";
                 if (addVld) {
                     ss << "\tsignal " << prefix << signal->getFullName(delimiter) << "_vld: std_logic;\n";
+                }
+                return ss.str();
+            }
+
+            template<typename T>
+            std::string SignalFactory::printComponentSignal(const T &signal,
+                                                            const std::string &prefix,
+                                                            const std::string &direction,
+                                                            const bool &addVld) {
+                std::stringstream ss;
+                const std::string suffix = ((signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned()) ? "_V" : "");
+                ss << "\t\t" << prefix << signal->getFullName("_") << suffix << ": "
+                   << direction << " " << convertDataTypeName(signal->getDataType(), true) << ";\n";
+                if (addVld) {
+                    ss << "\t\t" << prefix << signal->getFullName("_") << suffix << "_ap_vld: out std_logic;\n";
                 }
                 return ss.str();
             }
