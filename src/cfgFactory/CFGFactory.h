@@ -49,6 +49,7 @@ namespace DESCAM {
         clang::CXXMethodDecl *methodDecl;
         clang::CFG *clangCFG;
         clang::CompilerInstance *ci;
+        IFindDataFlow * find_data_flow_ = new FindDataFlow();
         DESCAM::Module *module;
         bool sourceModule;
 
