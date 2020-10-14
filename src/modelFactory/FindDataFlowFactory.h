@@ -22,18 +22,18 @@ class FindDataFlowFactory {
    * @param unsigned_flag ?
    * @return Smart pointer to FindDataFlow object
    */
-  static std::unique_ptr<IFindDataFlow> create(clang::Stmt *stmt,
+  static IFindDataFlow * create(clang::Stmt *stmt,
                                                Module *module,
                                                clang::CompilerInstance *ci,
                                                IFindDataFlow *find_data_flow,
                                                bool unsigned_flag = false) {
-    std::unique_ptr<IFindDataFlow> pointer(find_data_flow);
-    pointer->setup(stmt, module, ci, unsigned_flag);
-    return pointer;
+    //std::unique_ptr<IFindDataFlow> pointer(find_data_flow);
+    find_data_flow->setup(stmt, module, ci, unsigned_flag);
+    return find_data_flow;
 
   }
 
-  static std::unique_ptr<IFindDataFlow> create(clang::Stmt *stmt,
+  static IFindDataFlow * create(clang::Stmt *stmt,
                                                Module *module,
                                                clang::CompilerInstance *ci,
                                                bool unsigned_flag = false) {
