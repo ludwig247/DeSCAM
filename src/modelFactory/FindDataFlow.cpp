@@ -28,6 +28,8 @@
 
 #include "DescamException.h"
 
+#include "FindDataFlowFactory.h"
+
 bool DESCAM::FindDataFlow::isFunction = false;
 std::string DESCAM::FindDataFlow::functionName = "";
 
@@ -55,15 +57,17 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
     //Pass = 1 LHS
     //LHS Operator
     auto lhs = binaryOperator->getLHS();
-    FindDataFlow findLHS(lhs, this->module, ci, unsigned_flag);
+    auto findLHS = FindDataFlowFactory::create(lhs, this->module, ci, unsigned_flag);
+
     auto lhsLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(lhs, ci);
-    this->lhsExpr = findLHS.getExpr();
+    this->lhsExpr = findLHS->getExpr();
     //RHS Operator
     if (this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
     auto rhs = binaryOperator->getRHS();
 
-    FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
-    this->rhsExpr = findRHS.getExpr();
+    //FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
+    auto findRHS = FindDataFlowFactory::create(rhs, this->module, ci, unsigned_flag);
+    this->rhsExpr = findRHS->getExpr();
 
     auto rhsLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(rhs, ci);
 
@@ -111,15 +115,16 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shl) {
       //Special case ... shiftings depends on LHS Datatype
       if (binaryOperator->getType()->isUnsignedIntegerType()) {
-        FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, ci, true);
-        this->rhsExpr = findRHS2.getExpr();
+
+        auto findRHS2 =FindDataFlowFactory::create(binaryOperator->getRHS(), this->module, ci, true);
+        this->rhsExpr = findRHS2->getExpr();
       }
       DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "<<", this->rhsExpr, binaryOpLocationInfo));
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shr) {
       //Special case ... shiftings depends on LHS Datatype
       if (binaryOperator->getType()->isUnsignedIntegerType()) {
-        FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, ci, true);
-        this->rhsExpr = findRHS2.getExpr();
+        auto findRHS2 = FindDataFlowFactory::create(binaryOperator->getRHS(), this->module, ci, true);
+        this->rhsExpr = findRHS2->getExpr();
       }
       DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, ">>", this->rhsExpr, binaryOpLocationInfo));
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_And) {
@@ -140,12 +145,12 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
 
 bool DESCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) {
   auto condOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(conditionalOperator, ci);
-  FindDataFlow findCond(conditionalOperator->getCond(), this->module, ci, false);
-  auto condExpr = findCond.getExpr();
-  FindDataFlow findTrue(conditionalOperator->getTrueExpr(), this->module, ci, unsigned_flag);
-  auto trueExpr = findTrue.getExpr();
-  FindDataFlow findFalse(conditionalOperator->getFalseExpr(), this->module, ci, unsigned_flag);
-  auto falseExpr = findFalse.getExpr();
+  auto findCond = FindDataFlowFactory::create(conditionalOperator->getCond(), this->module, ci, false);
+  auto condExpr = findCond->getExpr();
+  auto findTrue = FindDataFlowFactory::create(conditionalOperator->getTrueExpr(), this->module, ci, unsigned_flag);
+  auto trueExpr = findTrue->getExpr();
+  auto findFalse = FindDataFlowFactory::create(conditionalOperator->getFalseExpr(), this->module, ci, unsigned_flag);
+  auto falseExpr = findFalse->getExpr();
   if (condExpr && trueExpr && falseExpr) {
     //conditionalOperator->dumpColor();
     //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
