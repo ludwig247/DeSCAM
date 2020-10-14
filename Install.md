@@ -22,6 +22,14 @@
 * **libtinfo**
     * sudo apt-get libtinfo-dev 
 
+
+## Required pre-installed packages Ubuntu 20.04
+
+* **git, agrep, cmake, gcc, g++, unzip, sed & libtinfo**
+    * sudo apt-get git agrep cmake gcc g++ unzip sed libtinfo-dev
+* **python**
+    * sudo apt install python3.8-dev python3-distutils
+
 ## Packages installed by DeSCAM
 
 Package |   Version
