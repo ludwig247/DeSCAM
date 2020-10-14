@@ -28,6 +28,7 @@
 #include "IFindSCMain.h"
 #include "Model.h"
 #include <iostream>
+#include "FindDataFlow.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -75,6 +76,7 @@ class CheckErrors : public IModelFactory, public RecursiveASTVisitor<CheckErrors
   IFindVariables *find_variables_;
   IFindNewDatatype *find_new_datatype_;
   IFindSCMain *find_sc_main_;
+  IFindDataFlow * find_data_flow_ = new FindDataFlow();
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;

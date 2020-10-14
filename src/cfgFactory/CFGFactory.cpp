@@ -13,12 +13,13 @@
 #include "FindDataFlowFactory.h"
 
 namespace DESCAM {
-CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, bool sourceModule) :
+CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, IFindDataFlow * find_data_flow, bool sourceModule) :
     sourceModule(sourceModule),
     methodDecl(decl),
     ci(ci),
+    find_data_flow_(find_data_flow),
     module(module) {
-  find_data_flow_ = new FindDataFlow();
+
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
   clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci->getASTContext(),
@@ -33,13 +34,15 @@ CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, 
 CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
                        clang::CompilerInstance *ci,
                        Module *module,
+                      IFindDataFlow * find_data_flow,
                        bool sourceModule) :
 
     sourceModule(sourceModule),
     methodDecl(nullptr),
     ci(ci),
+    find_data_flow_(find_data_flow),
     module(module) {
-  find_data_flow_ = new FindDataFlow();
+
   clang::LangOptions LO;
   LO.CPlusPlus = true;
 
