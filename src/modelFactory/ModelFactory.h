@@ -32,6 +32,7 @@
 #include "IFindModules.h"
 #include "IFindVariables.h"
 #include "FindDataFlow.h"
+#include "IFindDataFlowFactory.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -67,7 +68,8 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
                         IFindNetlist *find_netlist,
                         IFindProcess *find_process,
                         IFindVariables *find_variables,
-                        IFindSCMain *find_sc_main);
+                        IFindSCMain *find_sc_main,
+                        IFindDataFlowFactory * find_data_flow_factory);
 
   ~ModelFactory() override = default;
 
@@ -97,6 +99,7 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
   IFindVariables *find_variables_;
   IFindNewDatatype *find_new_datatype_;
   IFindSCMain *find_sc_main_;
+  IFindDataFlowFactory * find_data_flow_factory_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;
