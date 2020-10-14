@@ -33,12 +33,12 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
  public:
   FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag = false);
   //Operator
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) ;
-  bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) ;
-  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) ;
-  bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memberCallExpr) ;
-  bool VisitWhileStmt(clang::WhileStmt *whileStmt) ;
-  bool VisitIfStmt(clang::IfStmt *ifStmt) ;
+  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
+  bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator);
+  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);
+  bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memberCallExpr);
+  bool VisitWhileStmt(clang::WhileStmt *whileStmt);
+  bool VisitIfStmt(clang::IfStmt *ifStmt);
   bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *operatorCallExpr) ;
 
   bool VisitMemberExpr(clang::MemberExpr *memberExpr) ;
