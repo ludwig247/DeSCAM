@@ -261,7 +261,7 @@ void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDe
   //Process declaration
   clang::CXXMethodDecl *methodDecl = process->second.first;
   //Create blockCFG for this process
-  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, find_data_flow_, true);
+  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, true);
   TERMINATE_IF_ERROR
   DESCAM::CfgNode::node_cnt = 0;
   DESCAM::State::state_cnt = 0;
@@ -400,7 +400,7 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_, find_data_flow_);
+  this->find_global_->setup(pDecl, ci_);
   for (const auto &var: find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
   }

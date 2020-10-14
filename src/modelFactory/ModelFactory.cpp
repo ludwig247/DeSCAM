@@ -506,7 +506,7 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
     //Active searching only for functions
     FindDataFlow::functionName = function.first;
     FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, ci_, module,find_data_flow_);
+    DESCAM::CFGFactory cfgFactory(function.second, ci_, module);
     FindDataFlow::functionName = "";
     FindDataFlow::isFunction = false;
     //Transform blockCFG back to code
@@ -519,7 +519,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_, this->find_data_flow_);
+  this->find_global_->setup(pDecl, ci_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
@@ -542,7 +542,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
-      DESCAM::CFGFactory cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module, find_data_flow_);
+      DESCAM::CFGFactory cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
       //Transform blockCFG back to code
