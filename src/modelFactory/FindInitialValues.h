@@ -43,7 +43,6 @@ class FindInitialValues : public IFindInitialValues, public clang::RecursiveASTV
   int pass_;
   DESCAM::Module *module_;
   clang::CompilerInstance *ci_;
-  IFindDataFlow * find_data_flow_;
 };
 
 }

@@ -393,7 +393,7 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
     //Active searching only for functions
     FindDataFlow::functionName = function.first;
     FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, ci_, module,find_data_flow_);
+    DESCAM::CFGFactory cfgFactory(function.second, ci_, module);
     FindDataFlow::functionName = "";
     FindDataFlow::isFunction = false;
     //Transform blockCFG back to code
@@ -427,7 +427,7 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
-      DESCAM::CFGFactory cfgFactory(find_global_->getFunctionDeclMap().at(name), ci_, &module, find_data_flow_);
+      DESCAM::CFGFactory cfgFactory(find_global_->getFunctionDeclMap().at(name), ci_, &module);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
       //Transform blockCFG back to code
