@@ -12,6 +12,9 @@ target_compile_options(GMock_Test PRIVATE -fPIC -O2 )
 target_link_libraries(GMock_Test PRIVATE parser)
 
 
-target_link_libraries(GMock_Test PRIVATE ${GTEST_LIBRARY} ${GTEST_LIBRARY_MAIN} libgmock.a libgmock_main.a pthread)
+target_link_libraries(GMock_Test PRIVATE  /home/tobias/descam_test/lib/libgmock.a
+        /home/tobias/descam_test/lib/libgmock_main.a
+        /home/tobias/descam_test/lib/libgtest.a
+        /home/tobias/descam_test/lib/libgtest_main.a pthread)
 
 include_directories(tests/mocks/modelFactory)

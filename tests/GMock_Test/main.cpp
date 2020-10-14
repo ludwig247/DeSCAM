@@ -21,9 +21,9 @@ TEST(mock_objects, MockIFindSCMainCall) {
 //  ON_CALL(mock, setup(_)).WillByDefault(Return(false));
 //  ON_CALL(mock, isScMainFound).WillByDefault(Return(false));
 //  ON_CALL(mock, setup(_)).WillByDefault(Return(false));
-  EXPECT_CALL(mock, setup(_)).WillOnce(Return(true));
+//  EXPECT_CALL(mock, setup(_)).WillOnce(Return(true));
 
-  EXPECT_TRUE(mock.setup(nullptr));
+ // EXPECT_TRUE(mock.setup(nullptr));
 
 }
 
