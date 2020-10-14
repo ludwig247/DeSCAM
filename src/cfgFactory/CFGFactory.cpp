@@ -327,7 +327,7 @@ std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) 
 //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
 DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
   // traverse clang stmt and create its equivalent descam stmt
-  std::unique_ptr<DESCAM::IFindDataFlow> dataFlow = FindDataFlowFactory::create(clangStmt, module, ci, false);
+  std::unique_ptr<DESCAM::IFindDataFlow> dataFlow = FindDataFlowFactory::create(clangStmt, module, ci,find_data_flow_, false);
   return dataFlow->getStmt();
 }
 
