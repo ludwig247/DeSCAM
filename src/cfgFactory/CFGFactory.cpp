@@ -68,7 +68,7 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
  */
 void CFGFactory::translateToScamCFG() {
 
-
+  find_data_flow_ = new FindDataFlow();
   clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
 
   //Translate entry node of block
@@ -328,7 +328,7 @@ std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) 
 //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
 DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
   // traverse clang stmt and create its equivalent descam stmt
-  std::unique_ptr<DESCAM::IFindDataFlow> dataFlow = FindDataFlowFactory::create(clangStmt, module, ci,new FindDataFlow(), false);
+  auto dataFlow = FindDataFlowFactory::create(clangStmt, module, ci,find_data_flow_, false);
   return dataFlow->getStmt();
 }
 
