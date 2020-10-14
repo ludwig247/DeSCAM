@@ -65,7 +65,6 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
     if (this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
     auto rhs = binaryOperator->getRHS();
 
-    //FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
     auto findRHS = FindDataFlowFactory::create(rhs, this->module, ci, unsigned_flag);
     this->rhsExpr = findRHS->getExpr();
 
@@ -656,33 +655,33 @@ bool DESCAM::FindDataFlow::VisitUnaryOperator(clang::UnaryOperator *unaryOperato
     //Increase pass(LHS assignment)
     pass = 1;
     //Find operand the operation is performed on -> stored in LHS
-    FindDataFlow subExpr(unaryOperator->getSubExpr(), this->module, ci, unsigned_flag);
-    if (subExpr.getExpr() == nullptr)
+    auto subExpr = FindDataFlowFactory::create(unaryOperator->getSubExpr(), this->module, ci, unsigned_flag);
+    if (subExpr->getExpr() == nullptr)
       return exitVisitor("Could not translate unary operator", unaryOpLocationInfo);
     //TraverseStmt(unaryOperator->getSubExpr());
 
     switch (unaryOperator->getOpcode()) {
       case clang::UnaryOperator::Opcode::UO_PreInc:
-        if (subExpr.getExpr()->getDataType()->isUnsigned()) {
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "+", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+        if (subExpr->getExpr()->getDataType()->isUnsigned()) {
+          DESCAM_ASSERT(this->stmt = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "+", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         } else
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "+", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+          DESCAM_ASSERT(this->stmt = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "+", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         break;
-      case clang::UnaryOperator::Opcode::UO_LNot:DESCAM_ASSERT(this->expr = new UnaryExpr("not", subExpr.getExpr(), unaryOpLocationInfo))
+      case clang::UnaryOperator::Opcode::UO_LNot:DESCAM_ASSERT(this->expr = new UnaryExpr("not", subExpr->getExpr(), unaryOpLocationInfo))
         break;
       case clang::UnaryOperator::Opcode::UO_PreDec:
-        if (subExpr.getExpr()->getDataType()->isUnsigned()) {
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "-", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+        if (subExpr->getExpr()->getDataType()->isUnsigned()) {
+          DESCAM_ASSERT(this->stmt = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "-", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         } else
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "-", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+          DESCAM_ASSERT(this->stmt = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "-", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         break;
-      case clang::UnaryOperator::Opcode::UO_Minus:DESCAM_ASSERT(this->expr = new UnaryExpr("-", subExpr.getExpr(), unaryOpLocationInfo));
+      case clang::UnaryOperator::Opcode::UO_Minus:DESCAM_ASSERT(this->expr = new UnaryExpr("-", subExpr->getExpr(), unaryOpLocationInfo));
         break;
-      case clang::UnaryOperator::Opcode::UO_Not:DESCAM_ASSERT(this->expr = new UnaryExpr("~", subExpr.getExpr(), unaryOpLocationInfo))
+      case clang::UnaryOperator::Opcode::UO_Not:DESCAM_ASSERT(this->expr = new UnaryExpr("~", subExpr->getExpr(), unaryOpLocationInfo))
         break;
       default:return exitVisitor("Unkown/Unallowed unaray operator: " + opcode, unaryOpLocationInfo);
     }
@@ -696,8 +695,8 @@ bool DESCAM::FindDataFlow::VisitWhileStmt(clang::WhileStmt *whileStmt) {
     // Collecting statement location information from clang
     auto whileLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(whileStmt, ci);
 
-    FindDataFlow conditionStmt(whileStmt->getCond(), this->module, ci, false);
-    DESCAM_ASSERT(this->stmt = new While(conditionStmt.getExpr(), whileLocationInfo))
+    auto conditionStmt = FindDataFlowFactory::create(whileStmt->getCond(), this->module, ci, false);
+    DESCAM_ASSERT(this->stmt = new While(conditionStmt->getExpr(), whileLocationInfo))
   }
   if (DescamException::isExceptionHappened()) clearExpressions();
   return false;
@@ -708,10 +707,10 @@ bool DESCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
     // Collecting statement location information from clang
     auto ifLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(ifStmt, ci);
 
-    FindDataFlow conditionStmt(ifStmt->getCond(), this->module, ci, false);
-    if (conditionStmt.getExpr() == nullptr)
+    auto conditionStmt = FindDataFlowFactory::create(ifStmt->getCond(), this->module, ci, false);
+    if (conditionStmt->getExpr() == nullptr)
       return exitVisitor("Translation of condition failed)", ifLocationInfo);
-    DESCAM_ASSERT(this->stmt = new If(conditionStmt.getExpr(), ifLocationInfo))
+    DESCAM_ASSERT(this->stmt = new If(conditionStmt->getExpr(), ifLocationInfo))
   }
   if (DescamException::isExceptionHappened()) clearExpressions();
   return false;
@@ -807,10 +806,10 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
     std::map<std::string, DESCAM::Expr *> paramExprMap;
     for (int i = 0; i < callExpr->getNumArgs(); i++) {
       std::string paramName = callee->getParamDecl(i)->getName();
-      DESCAM::FindDataFlow findArgument(callExpr->getArg(i), this->module, ci, false);
-      if (findArgument.getExpr() == nullptr)
+      auto findArgument = FindDataFlowFactory::create(callExpr->getArg(i), this->module, ci, false);
+      if (findArgument->getExpr() == nullptr)
         return exitVisitor(func_name + "() has unsupported params", callLocationInfo);
-      DESCAM::Expr *paramExpr = findArgument.getExpr();
+      DESCAM::Expr *paramExpr = findArgument->getExpr();
       paramExprMap.insert(std::make_pair(paramName, paramExpr));
     }
     DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramExprMap, callLocationInfo);
@@ -828,14 +827,14 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
 bool DESCAM::FindDataFlow::VisitImplicitCastExpr(clang::ImplicitCastExpr *implicitCastExpr) {
   if (implicitCastExpr->getType()->isUnsignedIntegerType() &&
       implicitCastExpr->getType().getAsString() == "unsigned int") {
-    FindDataFlow unsigendSearch(implicitCastExpr->getSubExpr(), module, ci,
+    auto unsigendSearch= FindDataFlowFactory::create(implicitCastExpr->getSubExpr(), module, ci,
                                 implicitCastExpr->getType()->isUnsignedIntegerType());
-    if (unsigendSearch.getExpr() == nullptr) {
+    if (unsigendSearch->getExpr() == nullptr) {
       // Collecting statement location information from clang
       auto castExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitCastExpr, ci);
       return exitVisitor("Unknown unsigned value", castExprLocationInfo);
     }
-    switchPassExpr(unsigendSearch.getExpr());
+    switchPassExpr(unsigendSearch->getExpr());
     return false;
   }
   return true;
@@ -867,17 +866,17 @@ bool DESCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *stat
   //FIXME: is the restirction to casting only variables necessary? Remove if hardware is designable
   if (staticCastExpr->getType()->isUnsignedIntegerType() &&
       staticCastExpr->getType().getAsString() == "unsigned int") {
-    FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, ci, false);
-    if (subExpr.getExpr() != nullptr) {
-      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("unsigned"), castExprLocationInfo)))
+    auto subExpr = FindDataFlowFactory::create(staticCastExpr->getSubExpr(), module, ci, false);
+    if (subExpr->getExpr() != nullptr) {
+      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr->getExpr(), DataTypes::getDataType("unsigned"), castExprLocationInfo)))
     } else
       return exitVisitor("static_cast: only variables are allowed as parameter", castExprLocationInfo);
     if (DescamException::isExceptionHappened()) clearExpressions();
     return false;
   } else if (staticCastExpr->getType()->isIntegerType() && staticCastExpr->getType().getAsString() == "int") {
-    FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, ci, false);
-    if (subExpr.getExpr() != nullptr) {
-      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("int"), castExprLocationInfo)))
+    auto subExpr = FindDataFlowFactory::create(staticCastExpr->getSubExpr(), module, ci, false);
+    if (subExpr->getExpr() != nullptr) {
+      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr->getExpr(), DataTypes::getDataType("int"), castExprLocationInfo)))
     } else
       return exitVisitor("static_cast: only variables are allowed as parameter", castExprLocationInfo);
     if (DescamException::isExceptionHappened()) clearExpressions();
@@ -889,14 +888,14 @@ bool DESCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *stat
 
 bool DESCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
 
-  FindDataFlow returnExpr(returnStmt->getRetValue(), module, ci, false);
+  auto returnExpr = FindDataFlowFactory::create(returnStmt->getRetValue(), module, ci, false);
   // Collecting statement location information from clang
   auto returnLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(returnStmt, ci);
-  if (returnExpr.getExpr() == nullptr) {
+  if (returnExpr->getExpr() == nullptr) {
     return exitVisitor(" return value is null", returnLocationInfo);
   }
 
-  DESCAM_ASSERT(this->stmt = new DESCAM::Return(returnExpr.getExpr(), returnLocationInfo))
+  DESCAM_ASSERT(this->stmt = new DESCAM::Return(returnExpr->getExpr(), returnLocationInfo))
   if (DescamException::isExceptionHappened()) clearExpressions();
   return false;
 }
@@ -910,18 +909,18 @@ bool DESCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *ar
   // Collecting statement location information from clang
   auto arraySubExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(arraySubscriptExpr->getLHS(), ci);
 
-  FindDataFlow array(arraySubscriptExpr->getLHS(), module, ci, false);
+  auto array = FindDataFlowFactory::create(arraySubscriptExpr->getLHS(), module, ci, false);
 
-  if (array.getExpr() != nullptr && array.getExpr()->getDataType()->isArrayType()) {
-    if (auto varOp = NodePeekVisitor::nodePeekVariableOperand(array.getExpr())) {
-      FindDataFlow findIndex(arraySubscriptExpr->getIdx(), module, ci, false);
-      if (auto index = NodePeekVisitor::nodePeekIntegerValue(findIndex.getExpr())) {
+  if (array->getExpr() != nullptr && array->getExpr()->getDataType()->isArrayType()) {
+    if (auto varOp = NodePeekVisitor::nodePeekVariableOperand(array->getExpr())) {
+      auto findIndex = FindDataFlowFactory::create(arraySubscriptExpr->getIdx(), module, ci, false);
+      if (auto index = NodePeekVisitor::nodePeekIntegerValue(findIndex->getExpr())) {
         DESCAM_ASSERT(auto varOp2 = new DESCAM::VariableOperand(varOp->getVariable()->getSubVar(index->getValueAsString()), arraySubExprLocationInfo);
                           switchPassExpr(varOp2))
         if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
       } else {
-        DESCAM_ASSERT(auto arrOp = new ArrayOperand(varOp->getVariable(), findIndex.getExpr(), arraySubExprLocationInfo);
+        DESCAM_ASSERT(auto arrOp = new ArrayOperand(varOp->getVariable(), findIndex->getExpr(), arraySubExprLocationInfo);
                           switchPassExpr(arrOp))
         if (DescamException::isExceptionHappened()) clearExpressions();
         //TODO: Implement function for arrays.
