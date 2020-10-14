@@ -54,6 +54,7 @@ namespace DESCAM {
         clang::CompilerInstance *ci;
         DESCAM::Module *module;
         bool sourceModule;
+        IFindDataFlowFactory * find_data_flow_factory_;
 
         //Map
         std::map<int, int> entryMap; //! Contains an entry with <CFGBlockID,SusCFGBlockID>; If a block is split up it point to the first new block

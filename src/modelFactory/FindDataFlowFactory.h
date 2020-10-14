@@ -30,8 +30,9 @@ class FindDataFlowFactory: public IFindDataFlowFactory {
     return find_data_flow;
   }
   IFindDataFlow *create_new(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) override {
-    assert(false);
-    return nullptr;
+    auto find_data_flow = new FindDataFlow();
+    find_data_flow->setup(stmt, module, ci,unsigned_flag);
+    return find_data_flow;
   }
 
 };
