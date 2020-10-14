@@ -432,7 +432,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_,find_data_flow_factory_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
