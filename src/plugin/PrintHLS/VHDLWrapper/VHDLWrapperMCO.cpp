@@ -172,10 +172,8 @@ std::string VHDLWrapperMCO::printMonitorOperation(const Operation& op) {
 
 void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
 {
-    // Print Output_Vld Processes
     auto printOutputProcess = [&](DataSignal* dataSignal) {
         bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
-        bool isEnum = dataSignal->isEnumType();
         ss << "\tprocess (rst, " << dataSignal->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
@@ -193,7 +191,6 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
     }
 
     auto printOutputProcessRegs = [&](Variable* var) {
-        bool isEnum = var->isEnumType();
         ss << "\tprocess (rst, out_" << var->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
            << "\t\tif (rst = \'1\') then\n"
@@ -263,7 +260,6 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << "\tend process;\n\n";
     }
 
-    // Print Output Processes
     ss << "\t-- Output Processes\n"
        << "\tprocess(rst, done_sig)\n"
        << "\tbegin\n"
