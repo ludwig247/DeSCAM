@@ -13,6 +13,7 @@
 #include <clang/Basic/SourceManager.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include "IFindInitialValues.h"
+#include "IFindDataFlow.h"
 
 namespace DESCAM {
 /**
@@ -42,6 +43,7 @@ class FindInitialValues : public IFindInitialValues, public clang::RecursiveASTV
   int pass_;
   DESCAM::Module *module_;
   clang::CompilerInstance *ci_;
+  IFindDataFlow * find_data_flow_;
 };
 
 }
