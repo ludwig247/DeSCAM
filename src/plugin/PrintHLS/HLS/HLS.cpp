@@ -277,7 +277,10 @@ void HLS::interface() {
         } else {
             ss << "\t" << Utilities::convertDataType(reg->getDataType()->getName()) << " &";
         }
-        ss << "" << reg->getFullName();
+        if (hlsOption == HLSOption::MCO) {
+            ss << "out_";
+        }
+        ss << reg->getFullName();
         if (isArrayType) {
             ss << "[" << reg->getDataType()->getSubVarMap().size() << "]";
         }
