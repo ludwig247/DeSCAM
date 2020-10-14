@@ -18,6 +18,7 @@ class IFindDataFlow {
   virtual ~IFindDataFlow() = default;
   virtual Expr *getExpr() const = 0;
   virtual DESCAM::Stmt *getStmt() = 0;
+  virtual bool setup(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) = 0;
 };
 }
 
