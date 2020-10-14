@@ -5,14 +5,13 @@
 #ifndef SCAM_SRC_MODELFACTORY_FINDDATAFLOWFACTORY_H_
 #define SCAM_SRC_MODELFACTORY_FINDDATAFLOWFACTORY_H_
 
-#include "IFindDataFlow.h"
-#include "FindDataFlow.h"
+#include "IFindDataFlowFactory.h"
 
 namespace DESCAM {
 /**
  * @brief Factory-Class for FindDataFlow
  */
-class FindDataFlowFactory {
+class FindDataFlowFactory: public IFindDataFlowFactory {
  public:
   /**
    * @brief Creates a new instance of FindDataFlow
@@ -29,9 +28,11 @@ class FindDataFlowFactory {
     auto find_data_flow = new FindDataFlow();
     find_data_flow->setup(stmt, module, ci,unsigned_flag);
     return find_data_flow;
-
   }
-
+  IFindDataFlow *create_new(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) override {
+    assert(false);
+    return nullptr;
+  }
 
 };
 }
