@@ -25,9 +25,9 @@ class FindDataFlowFactory {
   static IFindDataFlow * create(clang::Stmt *stmt,
                                                Module *module,
                                                clang::CompilerInstance *ci,
-                                               IFindDataFlow *find_data_flow,
                                                bool unsigned_flag = false) {
-    find_data_flow->setup(stmt, module, ci, unsigned_flag);
+    auto find_data_flow = new FindDataFlow();
+    find_data_flow->setup(stmt, module, ci,unsigned_flag);
     return find_data_flow;
 
   }
