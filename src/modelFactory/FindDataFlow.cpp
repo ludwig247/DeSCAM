@@ -332,9 +332,9 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                 memberCallLocationInfo);
         } else if (interface->isShared()) {
           if (methodString == "get" && memberCallExpr->getNumArgs() == 1) {
-            DESCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, ci, false);
-            if (findArgument.getExpr() != nullptr) {
-              if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument.getExpr())) {
+            auto findArgument = FindDataFlowFactory::create(memberCallExpr->getArg(0), this->module, ci, false);
+            if (findArgument->getExpr() != nullptr) {
+              if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument->getExpr())) {
                 DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
                                                     memberCallLocationInfo))
               } else
@@ -342,11 +342,11 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
             } else
               return exitVisitor("Could not find parameter", membrLocationInfo);
           } else if (methodString == "set") {
-            DESCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, ci,
+            auto findArgument = FindDataFlowFactory::create(memberCallExpr->getArg(0), this->module, ci,
                                               operand->getDataType()->isUnsigned());
-            if (findArgument.getExpr() != nullptr) {
+            if (findArgument->getExpr() != nullptr) {
               DESCAM_ASSERT(
-                  this->stmt = new Write(operand->getPort(), findArgument.getExpr(), true, nullptr,
+                  this->stmt = new Write(operand->getPort(), findArgument->getExpr(), true, nullptr,
                                          memberCallLocationInfo))
             } else
               return exitVisitor("Could not find parameter", membrLocationInfo);
@@ -439,14 +439,14 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
   //Here only if object is LHS or RHS
   //Membercall: obj->
   if (pass == 1) {
-    FindDataFlow findMemberCall(memberCallExpr, this->module, ci, false);
-    this->lhsExpr = findMemberCall.getExpr();
+    auto findMemberCall= FindDataFlowFactory::create(memberCallExpr, this->module, ci, false);
+    this->lhsExpr = findMemberCall->getExpr();
   }
   //Case  var = x.foo(); RHS of operator
   //RHS is a Call
   if (pass == 2) {
-    FindDataFlow findMemberCall(memberCallExpr, this->module, ci, false);
-    this->rhsExpr = findMemberCall.getExpr();
+    auto  findMemberCall = FindDataFlowFactory::create(memberCallExpr, this->module, ci, false);
+    this->rhsExpr = findMemberCall->getExpr();
     return false;
   }
   return true;
@@ -469,10 +469,10 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
   const std::map<std::string, Function *> &functionMap = module->getFunctionMap();
 
   // Determine name for compound: var.x;
-  FindDataFlow findParentOfSubVar((*memberExpr->child_begin()), this->module, ci, false);
-  if (findParentOfSubVar.getExpr() != nullptr) {
+  auto findParentOfSubVar = FindDataFlowFactory::create((*memberExpr->child_begin()), this->module, ci, false);
+  if (findParentOfSubVar->getExpr() != nullptr) {
     //FIXME: Get rid of subvars by also using ArrayOperand on compound variables
-    if (auto parent = dynamic_cast<DESCAM::VariableOperand *>(findParentOfSubVar.getExpr())) {
+    if (auto parent = dynamic_cast<DESCAM::VariableOperand *>(findParentOfSubVar->getExpr())) {
       if (memberMap.find(parent->getOperandName()) != memberMap.end()) {
         //Assign value
         DESCAM_ASSERT(this->switchPassExpr(new VariableOperand(memberMap.at(parent->getOperandName())->getSubVar(name), membrLocationInfo)))
@@ -486,13 +486,13 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
         return false;
       } else
         return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
-    } else if (auto parent = dynamic_cast<DESCAM::FunctionOperand *>(findParentOfSubVar.getExpr())) {
+    } else if (auto parent = dynamic_cast<DESCAM::FunctionOperand *>(findParentOfSubVar->getExpr())) {
       if (functionMap.find(parent->getOperandName()) != functionMap.end()) {
         //Assign value
         TERMINATE("Dont remove ... if never flags ... remove!");
       } else
         return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
-    } else if (auto parent = dynamic_cast<DESCAM::ParamOperand *>(findParentOfSubVar.getExpr())) {
+    } else if (auto parent = dynamic_cast<DESCAM::ParamOperand *>(findParentOfSubVar->getExpr())) {
       auto paramMap = functionMap.find(FindDataFlow::functionName)->second->getParamMap();
       if (paramMap.find(parent->getOperandName()) != paramMap.end()) {
         //Assign value
