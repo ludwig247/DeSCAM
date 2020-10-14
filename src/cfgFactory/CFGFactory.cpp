@@ -17,7 +17,8 @@ CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, 
     sourceModule(sourceModule),
     methodDecl(decl),
     ci(ci),
-    module(module) {
+    module(module),
+    find_data_flow_factory_(find_data_flow_factory){
 
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
@@ -39,7 +40,8 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
     sourceModule(sourceModule),
     methodDecl(nullptr),
     ci(ci),
-    module(module) {
+    module(module),
+    find_data_flow_factory_(find_data_flow_factory){
 
   clang::LangOptions LO;
   LO.CPlusPlus = true;
@@ -327,7 +329,7 @@ std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) 
 //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
 DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
   // traverse clang stmt and create its equivalent descam stmt
-  auto dataFlow = FindDataFlowFactory::create(clangStmt, module, ci, false);
+  auto dataFlow = find_data_flow_factory_->create_new(clangStmt, module, ci, false);
   return dataFlow->getStmt();
 }
 
