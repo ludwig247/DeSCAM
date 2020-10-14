@@ -355,7 +355,7 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
   /*
    * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
    */
-  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module,find_data_flow_, true);
+  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, true);
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
   DESCAM::CfgNode::node_cnt = 0;
