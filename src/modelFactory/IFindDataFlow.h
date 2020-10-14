@@ -6,17 +6,14 @@
 #define SCAM_SRC_MODELFACTORY_IFINDDATAFLOW_H_
 
 //Clang
-#include "clang/AST/RecursiveASTVisitor.h"
-#include <clang/AST/Stmt.h>
 
-#include "PrintStmt.h"
 
 namespace DESCAM {
 
 /**
  * @brief processes a clang::stmt and extract all necessary information from it
  */
-class IFindDataFlow : public clang::RecursiveASTVisitor<IFindDataFlow> {
+class IFindDataFlow {
  public:
   virtual ~IFindDataFlow() = default;
 

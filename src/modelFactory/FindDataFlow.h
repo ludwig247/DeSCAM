@@ -29,32 +29,32 @@ class Process;
  * pass=1: Find LHS operator
  * pass=2: Find RHS operator
  */
-class FindDataFlow : public IFindDataFlow {
+class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<FindDataFlow> {
  public:
   FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag = false);
   //Operator
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) override;
-  bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) override;
-  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) override;
-  bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memberCallExpr) override;
-  bool VisitWhileStmt(clang::WhileStmt *whileStmt) override;
-  bool VisitIfStmt(clang::IfStmt *ifStmt) override;
-  bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *operatorCallExpr) override;
+  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) ;
+  bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) ;
+  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) ;
+  bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memberCallExpr) ;
+  bool VisitWhileStmt(clang::WhileStmt *whileStmt) ;
+  bool VisitIfStmt(clang::IfStmt *ifStmt) ;
+  bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *operatorCallExpr) ;
 
-  bool VisitMemberExpr(clang::MemberExpr *memberExpr) override;
-  bool VisitIntegerLiteral(clang::IntegerLiteral *integerLiteral) override;
-  bool VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *boolLiteralExpr) override;
-  bool VisitDeclRefExpr(clang::DeclRefExpr *varDecl) override;
-  bool VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *staticCastExpr) override;
-  bool VisitCompoundStmt(clang::CompoundStmt *compoundStmt) override;
+  bool VisitMemberExpr(clang::MemberExpr *memberExpr) ;
+  bool VisitIntegerLiteral(clang::IntegerLiteral *integerLiteral) ;
+  bool VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *boolLiteralExpr) ;
+  bool VisitDeclRefExpr(clang::DeclRefExpr *varDecl) ;
+  bool VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *staticCastExpr) ;
+  bool VisitCompoundStmt(clang::CompoundStmt *compoundStmt) ;
 
-  bool VisitCallExpr(clang::CallExpr *callExpr) override;
-  bool VisitImplicitCastExpr(clang::ImplicitCastExpr *implicitCastExpr) override;
-  bool VisitReturnStmt(clang::ReturnStmt *returnStmt) override;
+  bool VisitCallExpr(clang::CallExpr *callExpr) ;
+  bool VisitImplicitCastExpr(clang::ImplicitCastExpr *implicitCastExpr) ;
+  bool VisitReturnStmt(clang::ReturnStmt *returnStmt) ;
 
-  bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) override;
-  Expr *getExpr() const override;
-  DESCAM::Stmt *getStmt() override;
+  bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) ;
+  Expr *getExpr() const ;
+  DESCAM::Stmt *getStmt();
 
   static std::string functionName;
   static bool isFunction;
