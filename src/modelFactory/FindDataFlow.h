@@ -31,7 +31,8 @@ class Process;
  */
 class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<FindDataFlow> {
  public:
-  FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag = false);
+  FindDataFlow(clang::Stmt * _stmt, Module * _module, clang::CompilerInstance * _ci, bool _unsigned_flag = false);
+  FindDataFlow() = default;
   //Operator
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
   bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator);

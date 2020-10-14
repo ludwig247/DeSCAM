@@ -62,7 +62,6 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
     if (this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
     auto rhs = binaryOperator->getRHS();
 
-
     FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
     this->rhsExpr = findRHS.getExpr();
 
@@ -811,7 +810,7 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
     }
     DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramExprMap, callLocationInfo);
                       this->stmt = this->expr)
-    if (DescamException::isExceptionHappened()) { clearExpressions();}
+    if (DescamException::isExceptionHappened()) { clearExpressions(); }
     return false;
 
   } else {
@@ -951,7 +950,15 @@ void DESCAM::FindDataFlow::clearExpressions() {
   this->expr = nullptr;
   this->stmt = nullptr;
 }
-bool DESCAM::FindDataFlow::setup(clang::Stmt *stmt, DESCAM::Module *module, clang::CompilerInstance *ci, bool unsigned_flag) {
-  assert(false);
-  return false;
+bool DESCAM::FindDataFlow::setup(clang::Stmt *_stmt, DESCAM::Module * _module, clang::CompilerInstance * _ci, bool _unsigned_flag) {
+  this->module = _module;
+  this->ci = _ci;
+  this->stmt = nullptr;
+  this->expr = nullptr;
+  this->rhsExpr = nullptr;
+  this->lhsExpr = nullptr;
+  this->unsigned_flag = _unsigned_flag;
+  this->pass = 0;
+  TraverseStmt(_stmt);
+  return true;
 }
