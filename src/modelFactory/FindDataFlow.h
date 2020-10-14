@@ -64,6 +64,7 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   Module *module; //! Module the dataflow is generated for
   DESCAM::Stmt *stmt; //! Represents the stmt in case of operator, values are stored in lhs and rhs
   clang::CompilerInstance *ci;
+  IFindDataFlow * find_data_flow_ ;
 
   Expr *expr;
   Expr *lhsExpr; //! Assign Operation lValue = rValue
