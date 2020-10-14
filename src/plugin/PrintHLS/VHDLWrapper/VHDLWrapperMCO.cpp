@@ -183,7 +183,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << " <= " << getResetValue(dataSignal) << ";\n"
            << "\t\telsif (" << dataSignal->getFullName("_") << "_vld = \'1\') then\n"
            << "\t\t\t" << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName("."))
-           << " <= " << (isEnum ? SignalFactory::vectorToEnum(dataSignal, "_out") : dataSignal->getFullName("_")+"_out") << ";\n"
+           << " <= " << dataSignal->getFullName("_") << "_out;\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
@@ -199,9 +199,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream& ss)
            << "\t\tif (rst = \'1\') then\n"
            << "\t\t\t" << var->getFullName(".") << " <= " << getResetValue(var) << ";\n"
            << "\t\telsif (out_" << var->getFullName("_") <<"_vld = \'1\') then\n"
-           << "\t\t\t" << var->getFullName(".") << " <= " << (isEnum ?
-                                                                                SignalFactory::vectorToEnum(var, "", "out_") :
-                                                                                "out_" + var->getFullName("_")) << ";\n"
+           << "\t\t\t" << var->getFullName(".") << " <= out_" << var->getFullName("_") << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     };
