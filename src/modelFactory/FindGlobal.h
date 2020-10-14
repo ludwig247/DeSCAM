@@ -20,7 +20,7 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
 
   ~FindGlobal() override = default;
 
-  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) override;
+  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci,IFindDataFlow * find_data_flow_) override;
 
   const std::map<std::string, Variable *> &getVariableMap() const override;
 

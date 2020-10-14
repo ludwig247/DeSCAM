@@ -11,6 +11,7 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <map>
 #include <string>
+#include "IFindDataFlow.h"
 
 namespace DESCAM {
 
@@ -22,7 +23,7 @@ namespace DESCAM {
 
         virtual ~IFindGlobal() = default;
 
-        virtual bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) = 0;
+        virtual bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci, IFindDataFlow * find_data_flow_) = 0;
 
         virtual const std::map<std::string, Variable *> &getVariableMap() const = 0;
 

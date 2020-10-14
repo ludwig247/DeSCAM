@@ -27,18 +27,11 @@ class FindDataFlowFactory {
                                                clang::CompilerInstance *ci,
                                                IFindDataFlow *find_data_flow,
                                                bool unsigned_flag = false) {
-    //std::unique_ptr<IFindDataFlow> pointer(find_data_flow);
     find_data_flow->setup(stmt, module, ci, unsigned_flag);
     return find_data_flow;
 
   }
 
-  static IFindDataFlow * create(clang::Stmt *stmt,
-                                               Module *module,
-                                               clang::CompilerInstance *ci,
-                                               bool unsigned_flag = false) {
-    return FindDataFlowFactory::create(stmt,module,ci,new FindDataFlow(),unsigned_flag);
-  }
 
 };
 }
