@@ -13,7 +13,7 @@
 #include "FindDataFlowFactory.h"
 
 namespace DESCAM {
-CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, bool sourceModule) :
+CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, IFindDataFlowFactory *find_data_flow_factory, bool sourceModule) :
     sourceModule(sourceModule),
     methodDecl(decl),
     ci(ci),
@@ -33,6 +33,7 @@ CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, 
 CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
                        clang::CompilerInstance *ci,
                        Module *module,
+                       IFindDataFlowFactory *find_data_flow_factory,
                        bool sourceModule) :
 
     sourceModule(sourceModule),
@@ -55,7 +56,6 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
   }
 
   assert(functionDecl != nullptr);
-
 
   this->translateToScamCFG();
 }

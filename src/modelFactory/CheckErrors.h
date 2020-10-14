@@ -29,6 +29,7 @@
 #include "Model.h"
 #include <iostream>
 #include "FindDataFlow.h"
+#include "IFindDataFlowFactory.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
@@ -75,6 +76,7 @@ class CheckErrors : public IModelFactory, public RecursiveASTVisitor<CheckErrors
   IFindProcess *find_process_;
   IFindVariables *find_variables_;
   IFindNewDatatype *find_new_datatype_;
+  IFindDataFlowFactory * find_data_flow_factory_;
   IFindSCMain *find_sc_main_;
 
   //Methods

@@ -10,6 +10,7 @@
 namespace DESCAM {
 class IFindDataFlowFactory {
  public:
+  virtual ~IFindDataFlowFactory() = default;
   virtual IFindDataFlow *create_new(clang::Stmt *stmt,
                                Module *module,
                                clang::CompilerInstance *ci,
