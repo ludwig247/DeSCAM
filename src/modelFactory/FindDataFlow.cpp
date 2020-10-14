@@ -951,3 +951,7 @@ void DESCAM::FindDataFlow::clearExpressions() {
   this->expr = nullptr;
   this->stmt = nullptr;
 }
+bool DESCAM::FindDataFlow::setup(clang::Stmt *stmt, DESCAM::Module *module, clang::CompilerInstance *ci, bool unsigned_flag) {
+  assert(false);
+  return false;
+}

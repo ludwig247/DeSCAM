@@ -57,6 +57,7 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   DESCAM::Stmt *getStmt();
 
   static std::string functionName;
+  bool setup(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) override;
   static bool isFunction;
 
  private:
