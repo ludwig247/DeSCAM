@@ -187,8 +187,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
         //Including a wait, but onyl with SC_ZERO_TIME
         if (methodString == "wait") {
           if (memberCallExpr->getNumArgs() == 2) {
-            DESCAM::FindDataFlow firstArgument(memberCallExpr->getArg(0), this->module, ci, false);
-            DESCAM::FindDataFlow secondArgument(memberCallExpr->getArg(1), this->module, ci, false);
+            auto firstArgument = FindDataFlowFactory::create(memberCallExpr->getArg(0), this->module, ci, false);
+            auto secondArgument = FindDataFlowFactory::create(memberCallExpr->getArg(1), this->module, ci, false);
             DESCAM_ASSERT(this->stmt = new Wait(
                 calleeLocationInfo)); //FIXME: don't know how to check for the arguments or if needed to begin with
             if (DescamException::isExceptionHappened()) clearExpressions();
@@ -203,10 +203,10 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
         std::map<std::string, DESCAM::Expr *> paramValueMap;
         for (int i = 0; i < memberCallExpr->getNumArgs(); i++) {
           std::string paramName = memberCallExpr->getMethodDecl()->getParamDecl(i)->getName();
-          DESCAM::FindDataFlow findArgument(memberCallExpr->getArg(i), this->module, ci, false);
-          if (findArgument.getExpr() == nullptr)
+          auto findArgument = FindDataFlowFactory::create(memberCallExpr->getArg(i), this->module, ci, false);
+          if (findArgument->getExpr() == nullptr)
             return exitVisitor(methodString + "() has unsupported params", calleeLocationInfo);
-          DESCAM::Expr *paramExpr = findArgument.getExpr();
+          DESCAM::Expr *paramExpr = findArgument->getExpr();
           paramValueMap.insert(std::make_pair(paramName, paramExpr));
         }
         DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramValueMap, calleeLocationInfo);
@@ -240,8 +240,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
         };
 
         auto getArgument = [=](clang::Stmt *stmt) {
-          DESCAM::FindDataFlow findArgument(stmt, this->module, ci, operand->getDataType()->isUnsigned());
-          return findArgument.getExpr();
+          auto findArgument = FindDataFlowFactory::create(stmt, this->module, ci, operand->getDataType()->isUnsigned());
+          return findArgument->getExpr();
         };
 
         auto hasValidArgument = [=](clang::Stmt *stmt) {
