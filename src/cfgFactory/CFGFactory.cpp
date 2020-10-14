@@ -68,7 +68,6 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
  */
 void CFGFactory::translateToScamCFG() {
 
-  find_data_flow_ = new FindDataFlow();
   clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
 
   //Translate entry node of block

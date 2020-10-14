@@ -519,7 +519,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_);
+  this->find_global_->setup(pDecl, ci_, this->find_data_flow_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
