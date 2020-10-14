@@ -20,7 +20,7 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
 
   ~FindGlobal() override = default;
 
-  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci,IFindDataFlow * find_data_flow_) override;
+  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) override;
 
   const std::map<std::string, Variable *> &getVariableMap() const override;
 
@@ -38,7 +38,6 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
   DESCAM::DataType *getDataType(const clang::QualType &type) const;
 
   clang::TranslationUnitDecl *decl_;
-  IFindDataFlow * find_data_flow_;
   DESCAM::Module module_ = Module("placeholder");
 
   std::map<std::string, Variable *> variable_map_;

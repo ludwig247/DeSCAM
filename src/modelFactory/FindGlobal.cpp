@@ -10,7 +10,7 @@
 #include "FindNewDatatype.h"
 #include "FatalError.h"
 
-bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci,IFindDataFlow * find_data_flow_) {
+bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) {
   assert(!(decl == nullptr));
   assert(ci);
 
@@ -21,8 +21,6 @@ bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::Compiler
   this->decl_ = decl;
   this->ci_ = ci;
 
-  this->find_data_flow_ = find_data_flow_;
-  assert(this->find_data_flow_);
   return TraverseDecl(decl);
 }
 
