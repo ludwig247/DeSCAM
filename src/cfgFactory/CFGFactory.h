@@ -14,6 +14,7 @@
 
 #include "CfgBlock.h"
 #include "PrintStmt.h"
+#include "FindDataFlow.h"
 
 #include "Module.h"
 
@@ -49,7 +50,7 @@ namespace DESCAM {
         clang::CXXMethodDecl *methodDecl;
         clang::CFG *clangCFG;
         clang::CompilerInstance *ci;
-        IFindDataFlow * find_data_flow_ = new FindDataFlow();
+        IFindDataFlow * find_data_flow_;
         DESCAM::Module *module;
         bool sourceModule;
 

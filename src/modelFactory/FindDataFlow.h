@@ -31,7 +31,6 @@ class Process;
  */
 class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<FindDataFlow> {
  public:
-  //FindDataFlow(clang::Stmt * _stmt, Module * _module, clang::CompilerInstance * _ci, bool _unsigned_flag = false);
   FindDataFlow() = default;
   //Operator
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
@@ -54,8 +53,8 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   bool VisitReturnStmt(clang::ReturnStmt *returnStmt) ;
 
   bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) ;
-  Expr *getExpr() const ;
-  DESCAM::Stmt *getStmt();
+  Expr * getExpr() const override ;
+  DESCAM::Stmt * getStmt() override;
 
   static std::string functionName;
   bool setup(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) override;

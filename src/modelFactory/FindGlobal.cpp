@@ -20,6 +20,9 @@ bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::Compiler
 
   this->decl_ = decl;
   this->ci_ = ci;
+
+  this->find_data_flow_ = new FindDataFlow();
+
   return TraverseDecl(decl);
 }
 
@@ -36,7 +39,7 @@ bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
         auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
         try {
           std::unique_ptr<IFindDataFlow>
-              checkForExpr = FindDataFlowFactory::create(const_cast<clang::Expr *>(init), &module_, ci_, isUnsigned);
+              checkForExpr = FindDataFlowFactory::create(const_cast<clang::Expr *>(init), &module_, ci_,new FindDataFlow(), isUnsigned);
           Logger::clear();
           if (checkForExpr->getExpr()) {
             std::string typeName = init->getType().getAsString();

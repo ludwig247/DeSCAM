@@ -10,6 +10,7 @@
 #include <Module.h>
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <IFindGlobal.h>
+#include "FindDataFlow.h"
 
 namespace DESCAM {
 class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlobal> {
@@ -37,6 +38,7 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
   DESCAM::DataType *getDataType(const clang::QualType &type) const;
 
   clang::TranslationUnitDecl *decl_;
+  IFindDataFlow * find_data_flow_;
   DESCAM::Module module_ = Module("placeholder");
 
   std::map<std::string, Variable *> variable_map_;

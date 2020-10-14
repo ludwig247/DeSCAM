@@ -32,19 +32,6 @@
 
 bool DESCAM::FindDataFlow::isFunction = false;
 std::string DESCAM::FindDataFlow::functionName = "";
-//
-//DESCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) :
-//    module(module),
-//    ci(ci),
-//    stmt(nullptr),
-//    expr(nullptr),
-//    rhsExpr(nullptr),
-//    lhsExpr(nullptr),
-//    unsigned_flag(unsigned_flag),
-//    pass(0) {
-//  //stmt->dump();
-//  TraverseStmt(stmt);
-//}
 
 bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
   //Binary Expression is always TOP statement. In case of a substmt, new FindDataFlow object is neccesary
