@@ -1,0 +1,107 @@
+macro boolean conceptual_state :=
+    id_ready && ex_ready && lsu_ready_ex && wb_valid &&
+    !data_req_o &&                  		    //no mem ops
+    !branch_decision &&                         //no branch
+    !regfile_alu_we_fw && !regfile_we_wb &&     //no write back
+    if_stage_i/offset_fsm_cs == WAIT &&
+    empty_prefetch_buffer;
+end macro;
+
+macro unsigned max_wait_imem := 5 ; end macro;
+
+constraint bounded_wait_imem := disable iff: !rst_ni;
+    if (instr_req_o)
+        exists i in 0..(max_wait_imem-1):
+            next(instr_rvalid_i,i);
+        end exists;
+    endif;
+end constraint;
+
+macro unsigned max_wait_dmem := 5 ; end macro;
+
+constraint bounded_wait_dmem := disable iff: !rst_ni;
+    if (data_gnt_i)
+        exists i in 1..(max_wait_dmem):
+            next(data_rvalid_i,i);
+        end exists
+    endif;
+end constraint;
+
+constraint bounded_wait_dmem_gnt := disable iff: !rst_ni;
+    if (data_req_o)
+        exists i in 0..(max_wait_imem-1):
+            next(data_gnt_i,i);
+        end exists
+    endif;
+end constraint;
+
+macro boolean NOP_instr :=
+    instr_rdata_id == 23'd19;
+end macro;
+
+macro bit ALU_READY := ex_stage_i/alu_ready; end macro;
+
+constraint in_out_constraints :=
+    irq_i == 0 &&
+    irq_sec_i == 0 &&
+    irq_id_i == 0 &&
+    test_en_i == 0 &&
+    fregfile_disable_i == 1 &&
+    apu_master_req_o == 0 &&
+    debug_req_i == 0 && 
+    fetch_enable_i == 1 &&
+    id_stage_i/controller_i/debug_mode_q == 0 &&
+    if_stage_i/is_compressed_id_o == 0;
+end constraint;
+
+macro boolean empty_prefetch_buffer :=
+    if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/valid_Q   == 4'd0;
+end macro;
+
+constraint no_hwlp_case := 
+    if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/is_hwlp_Q == 2'd0 &&
+    if_stage_i/is_hwlp_id_o == 0 &&
+    if_stage_i/hwloop_controller_i/pc_is_end_addr == 0 &&
+    if_stage_i/fetch_is_hwlp == 0;
+end constraint;
+
+constraint no_unaligned_case :=
+    if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/out_addr_o[1]  == 0;
+end constraint;
+
+constraint instr_mem:=
+    !instr_req_o || (instr_req_o && instr_gnt_i && next(instr_rvalid_i));
+end constraint;
+
+constraint data_mem:=
+    !data_req_o || (data_req_o && data_gnt_i && next(data_rvalid_i));
+end constraint;
+
+constraint data_gnt:=
+    !data_gnt_i || data_gnt_i && foreach i in 1 .. max_wait_dmem: !next(data_gnt_i,i); end foreach;
+end constraint;
+
+constraint data_mem2:=
+    !data_rvalid_i || (data_rvalid_i && prev(data_req_o));
+end constraint;
+
+constraint no_data_misaligned:=
+    data_misaligned == 0;
+end constraint;
+
+constraint debug_ebreak:=
+    debug_ebreakm == 0 &&
+    debug_ebreaku == 0;
+end constraint;
+
+macro unsigned REGISTER (unsigned r) :=
+    id_stage_i/registers_i/riscv_register_file_i/mem[r];
+end macro;
+
+macro unsigned signExtend(unsigned imm) := 
+    unsigned(resize(signed(imm),32));
+end macro;
+
+
+
+

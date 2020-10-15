@@ -1,0 +1,239 @@
+//-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
+macro boolean data_out_sync := data_rvalid_i end macro;
+macro boolean data_out_notify := data_req_o end  macro;
+macro boolean instr_req_notify := instr_req_o end  macro;
+macro boolean toRegsPort_notify := (regfile_alu_we_fw || regfile_we_wb) end  macro;
+
+
+//-- DP SIGNALS --
+macro unsigned data_in_sig := 
+    case ({load_store_unit_i/data_sign_ext_q[0], load_store_unit_i/data_type_q})
+        3'b110:      // LB
+            (load_store_unit_i/rdata_offset_q == 2'b00) ? signExtend(data_rdata_i[7:0]) : ((load_store_unit_i/rdata_offset_q == 2'b01) ? signExtend(data_rdata_i[15:8]) : ((load_store_unit_i/rdata_offset_q == 2'b10) ? signExtend(data_rdata_i[23:16]) : signExtend(data_rdata_i[31:24])));
+        3'b101:      // LH
+            (load_store_unit_i/rdata_offset_q == 2'b00) ? signExtend(data_rdata_i[15:0]) : ((load_store_unit_i/rdata_offset_q == 2'b01) ? signExtend(data_rdata_i[23:8]) : ((load_store_unit_i/rdata_offset_q == 2'b10) ? signExtend(data_rdata_i[31:16]) : signExtend({data_rdata_i[7:0],data_rdata_i[31:24]})));
+        3'b010:      // LBU
+            {24'h00_0000,(load_store_unit_i/rdata_offset_q == 2'b00) ? data_rdata_i[7:0] : ((load_store_unit_i/rdata_offset_q == 2'b01) ? data_rdata_i[15:8] : ((load_store_unit_i/rdata_offset_q == 2'b10) ? data_rdata_i[23:16] : data_rdata_i[31:24]))};
+        3'b001:      // LHU
+            {16'h0000,(load_store_unit_i/rdata_offset_q == 2'b00) ? data_rdata_i[15:0] : ((load_store_unit_i/rdata_offset_q == 2'b01) ? data_rdata_i[23:8] : ((load_store_unit_i/rdata_offset_q == 2'b10) ? data_rdata_i[31:16] : {data_rdata_i[7:0],data_rdata_i[31:24]}))};
+        3'b000, 3'b100:     data_rdata_i[31:0];      // LW
+        default:    1'd0;
+    endcase;
+end macro;
+// macro unsigned data_in_sig := lsu_rdata end macro;
+// macro unsigned data_in_sig := data_rdata_i end macro;
+// macro CUtoME_IF data_out_sig :={resize(0,32), resize(0,32), mt_b, me_rd} end macro;
+macro unsigned data_out_sig_addrIn := data_addr_o end macro;
+// macro unsigned data_out_sig_dataIn := data_wdata_o end macro;
+macro unsigned data_out_sig_dataIn := alu_operand_c_ex end macro;
+macro ME_MaskType data_out_sig_mask := getMemoryMask(getInstrType(prev(encodedInstr))) end macro;
+macro ME_AccessType data_out_sig_req := 
+    if (getEncType(prev(encodedInstr)) == enc_i_l)
+        me_rd;
+    elseif(getEncType(prev(encodedInstr)) == enc_s)
+        me_wr;
+    else
+        me_x;
+    endif;
+end macro;
+macro boolean flush_in_sig := next(branch_decision) & next(branch_in_ex) end macro;
+//macro RegfileType fromRegsPort_sig :={resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32), resize(0,32)} end macro;
+macro unsigned fromRegsPort_sig_reg_file_01 := REGISTER(1)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_02 := REGISTER(2)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_03 := REGISTER(3)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_04 := REGISTER(4)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_05 := REGISTER(5)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_06 := REGISTER(6)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_07 := REGISTER(7)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_08 := REGISTER(8)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_09 := REGISTER(9)  end macro;
+macro unsigned fromRegsPort_sig_reg_file_10 := REGISTER(10) end macro;
+macro unsigned fromRegsPort_sig_reg_file_11 := REGISTER(11) end macro;
+macro unsigned fromRegsPort_sig_reg_file_12 := REGISTER(12) end macro;
+macro unsigned fromRegsPort_sig_reg_file_13 := REGISTER(13) end macro;
+macro unsigned fromRegsPort_sig_reg_file_14 := REGISTER(14) end macro;
+macro unsigned fromRegsPort_sig_reg_file_15 := REGISTER(15) end macro;
+macro unsigned fromRegsPort_sig_reg_file_16 := REGISTER(16) end macro;
+macro unsigned fromRegsPort_sig_reg_file_17 := REGISTER(17) end macro;
+macro unsigned fromRegsPort_sig_reg_file_18 := REGISTER(18) end macro;
+macro unsigned fromRegsPort_sig_reg_file_19 := REGISTER(19) end macro;
+macro unsigned fromRegsPort_sig_reg_file_20 := REGISTER(20) end macro;
+macro unsigned fromRegsPort_sig_reg_file_21 := REGISTER(21) end macro;
+macro unsigned fromRegsPort_sig_reg_file_22 := REGISTER(22) end macro;
+macro unsigned fromRegsPort_sig_reg_file_23 := REGISTER(23) end macro;
+macro unsigned fromRegsPort_sig_reg_file_24 := REGISTER(24) end macro;
+macro unsigned fromRegsPort_sig_reg_file_25 := REGISTER(25) end macro;
+macro unsigned fromRegsPort_sig_reg_file_26 := REGISTER(26) end macro;
+macro unsigned fromRegsPort_sig_reg_file_27 := REGISTER(27) end macro;
+macro unsigned fromRegsPort_sig_reg_file_28 := REGISTER(28) end macro;
+macro unsigned fromRegsPort_sig_reg_file_29 := REGISTER(29) end macro;
+macro unsigned fromRegsPort_sig_reg_file_30 := REGISTER(30) end macro;
+macro unsigned fromRegsPort_sig_reg_file_31 := REGISTER(31) end macro;
+macro unsigned instr_in_sig := instr_rdata_i end macro;
+macro unsigned instr_req_sig := instr_addr_o end macro;
+//macro RegfileWriteType toRegsPort_sig :={resize(0,32), resize(0,32)} end macro;
+macro unsigned toRegsPort_sig_dst :=  
+    if (regfile_we_wb)
+        regfile_waddr_fw_wb_o;
+    elseif(regfile_alu_we_fw)
+        regfile_alu_waddr_fw;
+    else
+        regfile_alu_waddr_fw;
+    endif; 
+end macro;
+macro unsigned toRegsPort_sig_dstData :=  
+    if (regfile_we_wb)
+        regfile_wdata;
+    elseif(regfile_alu_we_fw)
+        regfile_alu_wdata_fw;
+    else
+        regfile_alu_wdata_fw;
+    endif;
+end macro;
+
+
+//-- CONSTRAINTS --
+constraint no_reset := rst_ni == 1 ; end constraint;
+
+
+//-- VISIBLE REGISTERS --
+macro unsigned iaddr := instr_addr_o end macro;
+macro unsigned encodedInstr := instr_rdata_id end macro;
+macro unsigned pcIf := pc_if end macro;
+macro unsigned pcReg := pc_if end macro;
+macro unsigned prevInstr := instr_rdata_id end macro;
+
+
+//-- STATES --
+macro boolean IF_1 := conceptual_state end macro;
+macro boolean ID_J_2 := DECODE_ASSUMPTION end macro;
+macro boolean ID_I_J_3 := DECODE_ASSUMPTION end macro;
+macro boolean ID_3 := DECODE_ASSUMPTION end macro;
+macro boolean LOAD_4 := conceptual_state end macro;
+macro boolean STORE_5 := conceptual_state end macro;
+macro boolean EX_6 := conceptual_state end macro;
+
+//TEMP MANUAL STATE
+macro boolean DECODE_ASSUMPTION :=
+    id_ready == 1 &&
+    branch_decision == 0 &&
+    data_req_o == 0 &&
+    regfile_alu_we_fw == 0 && regfile_we_wb == 0;   //should not be needed (Jump constraint and read regfile at t_ex not t_id)
+end macro;
+
+
+//-- MANUAL ADDED MACROS --
+macro boolean conceptual_state :=
+    halt_if == 0 &&
+    id_ready && ex_ready && lsu_ready_ex && wb_valid &&
+    !data_req_o &&                  		    //no mem ops
+    !branch_decision &&                         //no branch
+    !regfile_alu_we_fw && !regfile_we_wb &&     //no write back
+    //if_stage_i/offset_fsm_cs == WAIT &&
+    empty_prefetch_buffer;
+end macro;
+
+macro boolean empty_prefetch_buffer :=
+    if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/valid_Q   == 4'd0;
+end macro;
+
+macro unsigned REGISTER (unsigned r) :=
+    id_stage_i/registers_i/riscv_register_file_i/mem[r];
+end macro;
+
+constraint in_out_constraints :=
+    irq_i == 0 &&
+    irq_sec_i == 0 &&
+    irq_id_i == 0 &&
+    test_en_i == 0 &&
+    fregfile_disable_i == 1 &&
+    apu_master_req_o == 0 &&
+    debug_req_i == 0 && 
+    fetch_enable_i == 1 &&
+    id_stage_i/controller_i/debug_mode_q == 0 &&
+    if_stage_i/is_compressed_id_o == 0;
+end constraint;
+
+constraint no_unaligned_case :=
+    if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/out_addr_o[1]  == 0;
+end constraint;
+
+constraint no_hwlp_case := 
+    if_stage_i/prefetch_32/prefetch_buffer_i/fifo_i/is_hwlp_Q == 2'd0 &&
+    if_stage_i/is_hwlp_id_o == 0 &&
+    if_stage_i/hwloop_controller_i/pc_is_end_addr == 0 &&
+    if_stage_i/fetch_is_hwlp == 0;
+end constraint;
+
+constraint instr_mem:=
+    !instr_req_o || (instr_req_o && instr_gnt_i && next(instr_rvalid_i));
+end constraint;
+
+constraint boot_addr_TEMP := 
+    boot_addr_i == 32'd0;
+end constraint;
+
+macro boolean registers_TEMP(unsigned instr) := 
+    getRdAddr(instr) < 5 && getRdAddr(instr) > 0 &&
+    getRs1Addr (instr) < 5 &&
+    getRs1Addr (instr) < 5;
+end macro;
+
+macro unsigned max_wait_dmem := 5 ; end macro;
+
+constraint bounded_wait_dmem := disable iff: !rst_ni;
+    if (data_gnt_i)
+        exists i in 1..(max_wait_dmem):
+            next(data_rvalid_i,i);
+        end exists
+    endif;
+end constraint;
+
+constraint data_gnt:=
+    !data_gnt_i || data_gnt_i && foreach i in 1 .. max_wait_dmem: !next(data_gnt_i,i); end foreach;
+end constraint;
+
+constraint bounded_wait_dmem_gnt := disable iff: !rst_ni;
+    if (data_req_o)
+        exists i in 0..(max_wait_dmem-1):
+            next(data_gnt_i,i);
+        end exists
+    endif;
+end constraint;
+
+constraint no_data_misaligned:=
+    data_misaligned == 0;
+end constraint;
+
+macro unsigned signExtend(unsigned imm) := 
+    unsigned(resize(signed(imm),32));
+end macro;
+
+macro boolean illegal_instr (unsigned instr) := 
+    !(instr[6:0] == riscv_defines::OPCODE_SYSTEM) &&
+    !(instr[6:0] == riscv_defines::OPCODE_SYSTEM) &&   
+    !(instr[6:0] == riscv_defines::OPCODE_FENCE) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_OP) &&       
+    !(instr[6:0] == riscv_defines::OPCODE_OPIMM) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_STORE) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_LOAD) &&     
+    !(instr[6:0] == riscv_defines::OPCODE_BRANCH) &&   
+    !(instr[6:0] == riscv_defines::OPCODE_JALR) &&     
+    !(instr[6:0] == riscv_defines::OPCODE_JAL) &&      
+    !(instr[6:0] == riscv_defines::OPCODE_AUIPC) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_LUI) &&      
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FP) &&    
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FMADD) && 
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FNMADD) &&
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FMSUB) && 
+    !(instr[6:0] == riscv_defines::OPCODE_OP_FNMSUB) &&
+    !(instr[6:0] == riscv_defines::OPCODE_STORE_FP) && 
+    !(instr[6:0] == riscv_defines::OPCODE_LOAD_FP) &&  
+    !(instr[6:0] == riscv_defines::OPCODE_LOAD_POST) && 
+    !(instr[6:0] == riscv_defines::OPCODE_STORE_POST) &&
+    !(instr[6:0] == riscv_defines::OPCODE_PULP_OP) &&   
+    !(instr[6:0] == riscv_defines::OPCODE_VECOP) &&     
+    !(instr[6:0] == riscv_defines::OPCODE_HWLOOP) &&
+    prev(if_stage_i/offset_fsm_cs == WAIT); //This one guarantees tha the illegal instruction is a fetched instruction  
+end macro;
+

@@ -2,12 +2,12 @@
 // Created by ludwig on 29.08.16.
 //
 
-#ifndef SCAM_DATAPATHVISITOR_H
-#define SCAM_DATAPATHVISITOR_H
+#ifndef SCAM_DATAPATHVISITORVLI_H
+#define SCAM_DATAPATHVISITORVLI_H
 
 #include <PrintStmt.h>
 
-namespace DESCAM {
+namespace SCAM {
 
     /**
      * \brief: Visitor that translates rhs of assignment in datapath
@@ -25,10 +25,10 @@ namespace DESCAM {
      * cnt = 1 + cnt_at_t
      * lcd_value = lcd_value_at_t + sensor_sig_at_t
      */
-    class DatapathVisitor : public PrintStmt {
+    class DatapathVisitorVLI : public PrintStmt {
     public:
-        DatapathVisitor() = default;
-        explicit DatapathVisitor(std::string tp);
+        DatapathVisitorVLI() = default;
+        explicit DatapathVisitorVLI(std::string tp);
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0, std::string tp = "_at_t");
 
     protected:
@@ -56,14 +56,20 @@ namespace DESCAM {
 
         void visit(class UnaryExpr &node) override;
 
-        void visit(class Ternary &node) override;
+        void visit(class Logical &node) override;
+
+        void visit(class EnumValue &node) override;
 
         bool resize_flag = false;
         std::string tp = "_at_t";
+
+    private:
+
+        std::string convertToLower(const std::string &inString);
     };
 
 
 }
 
 
-#endif //SCAM_DATAPATHVISITOR_H
+#endif //SCAM_DATAPATHVISITORVLI_H
