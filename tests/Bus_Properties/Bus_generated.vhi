@@ -81,14 +81,6 @@ prove:
 	 at t: out_slave_1_notify = false;
 	 at t: val_slave_0_notify = false;
 	 at t: val_slave_1_notify = false;
-	 at t: out_master_0_notify = false;
-	 at t: out_master_1_notify = false;
-	 at t: out_slave_0_notify = true;
-	 at t: out_slave_1_notify = true;
-	 at t: val_master_0_notify = false;
-	 at t: val_master_1_notify = false;
-	 at t: val_slave_0_notify = false;
-	 at t: val_slave_1_notify = false;
 end property;
 
 
@@ -109,8 +101,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 0;
 	at t_end: req_haddr = val_master_0_sig_haddr_at_t;
 	at t_end: req_hwdata = val_master_0_sig_hwdata_at_t;
@@ -143,8 +133,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 0;
 	at t_end: out_slave_0_sig_haddr = val_master_0_sig_haddr_at_t;
 	at t_end: out_slave_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
@@ -238,8 +226,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 0;
 	at t_end: req_haddr = val_master_0_sig_haddr_at_t;
 	at t_end: req_hwdata = val_master_0_sig_hwdata_at_t;
@@ -296,8 +282,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 0;
 	at t_end: out_slave_1_sig_haddr = val_master_0_sig_haddr_at_t;
 	at t_end: out_slave_1_sig_hwdata = val_master_0_sig_hwdata_at_t;
@@ -371,10 +355,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_slave_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
-	at t_end: val_slave_0_sig_hresp = val_slave_0_sig_hresp_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 10;
 	at t_end: out_master_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
 	at t_end: out_master_0_sig_hresp = val_slave_0_sig_hresp_at_t;
@@ -416,10 +396,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_slave_1_sig_hrdata = val_slave_1_sig_hrdata_at_t;
-	at t_end: val_slave_1_sig_hresp = val_slave_1_sig_hresp_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 10;
 	at t_end: out_master_0_sig_hrdata = val_slave_1_sig_hrdata_at_t;
 	at t_end: out_master_0_sig_hresp = val_slave_1_sig_hresp_at_t;
@@ -483,10 +459,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_slave_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
-	at t_end: val_slave_0_sig_hresp = val_slave_0_sig_hresp_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 1;
 	at t_end: out_master_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
 	at t_end: out_master_0_sig_hresp = val_slave_0_sig_hresp_at_t;
@@ -523,8 +495,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_slave_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
-	at t_end: val_slave_0_sig_hresp = val_slave_0_sig_hresp_at_t;
 	at t_end: resp_hrdata = val_slave_0_sig_hrdata_at_t;
 	at t_end: resp_hresp = val_slave_0_sig_hresp_at_t;
 	at t_end: slave_id = slave_id_at_t;
@@ -551,8 +521,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_1_sig_haddr = val_master_1_sig_haddr_at_t;
-	at t_end: val_master_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
 	at t_end: master_id = 1;
 	at t_end: req_haddr = val_master_1_sig_haddr_at_t;
 	at t_end: req_hwdata = val_master_1_sig_hwdata_at_t;
@@ -580,8 +548,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_1_sig_haddr = val_master_1_sig_haddr_at_t;
-	at t_end: val_master_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
 	at t_end: master_id = 1;
 	at t_end: req_haddr = val_master_1_sig_haddr_at_t;
 	at t_end: req_hwdata = val_master_1_sig_hwdata_at_t;
@@ -609,8 +575,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_1_sig_haddr = val_master_1_sig_haddr_at_t;
-	at t_end: val_master_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
 	at t_end: master_id = 1;
 	at t_end: out_slave_0_sig_haddr = val_master_1_sig_haddr_at_t;
 	at t_end: out_slave_0_sig_hwdata = val_master_1_sig_hwdata_at_t;
@@ -649,8 +613,6 @@ prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
 	at t_end: out_slave_0_sig_haddr = out_slave_0_sig_haddr_at_t;
-	at t_end: val_slave_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
-	at t_end: val_slave_0_sig_hresp = val_slave_0_sig_hresp_at_t;
 	at t_end: out_slave_0_sig_hwdata = out_slave_0_sig_hwdata_at_t;
 	at t_end: out_slave_0_sig_haddr = req_haddr_at_t;
 	at t_end: out_slave_0_sig_hwdata = req_hwdata_at_t;
@@ -682,8 +644,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_1_sig_haddr = val_master_1_sig_haddr_at_t;
-	at t_end: val_master_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
 	at t_end: master_id = 1;
 	at t_end: out_slave_1_sig_haddr = val_master_1_sig_haddr_at_t;
 	at t_end: out_slave_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
@@ -715,10 +675,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_1_sig_haddr = val_master_1_sig_haddr_at_t;
-	at t_end: val_slave_0_sig_hrdata = val_slave_0_sig_hrdata_at_t;
-	at t_end: val_slave_0_sig_hresp = val_slave_0_sig_hresp_at_t;
-	at t_end: val_master_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
 	at t_end: master_id = 10;
 	at t_end: out_master_1_sig_hrdata = val_slave_0_sig_hrdata_at_t;
 	at t_end: out_master_1_sig_hresp = val_slave_0_sig_hresp_at_t;
@@ -754,10 +710,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_1_sig_haddr = val_master_1_sig_haddr_at_t;
-	at t_end: val_slave_1_sig_hrdata = val_slave_1_sig_hrdata_at_t;
-	at t_end: val_slave_1_sig_hresp = val_slave_1_sig_hresp_at_t;
-	at t_end: val_master_1_sig_hwdata = val_master_1_sig_hwdata_at_t;
 	at t_end: master_id = 10;
 	at t_end: out_master_1_sig_hrdata = val_slave_1_sig_hrdata_at_t;
 	at t_end: out_master_1_sig_hresp = val_slave_1_sig_hresp_at_t;
@@ -831,10 +783,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_master_0_sig_haddr = val_master_0_sig_haddr_at_t;
-	at t_end: val_slave_1_sig_hrdata = val_slave_1_sig_hrdata_at_t;
-	at t_end: val_slave_1_sig_hresp = val_slave_1_sig_hresp_at_t;
-	at t_end: val_master_0_sig_hwdata = val_master_0_sig_hwdata_at_t;
 	at t_end: master_id = 1;
 	at t_end: out_master_0_sig_hrdata = val_slave_1_sig_hrdata_at_t;
 	at t_end: out_master_0_sig_hresp = val_slave_1_sig_hresp_at_t;
@@ -871,8 +819,6 @@ assume:
 prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
-	at t_end: val_slave_1_sig_hrdata = val_slave_1_sig_hrdata_at_t;
-	at t_end: val_slave_1_sig_hresp = val_slave_1_sig_hresp_at_t;
 	at t_end: resp_hrdata = val_slave_1_sig_hrdata_at_t;
 	at t_end: resp_hresp = val_slave_1_sig_hresp_at_t;
 	at t_end: slave_id = slave_id_at_t;
@@ -908,8 +854,6 @@ prove:
 	at t_end: start_state;
 	at t_end: fromReset = false;
 	at t_end: out_slave_1_sig_haddr = out_slave_1_sig_haddr_at_t;
-	at t_end: val_slave_1_sig_hrdata = val_slave_1_sig_hrdata_at_t;
-	at t_end: val_slave_1_sig_hresp = val_slave_1_sig_hresp_at_t;
 	at t_end: out_slave_1_sig_hwdata = out_slave_1_sig_hwdata_at_t;
 	at t_end: out_slave_1_sig_haddr = req_haddr_at_t;
 	at t_end: out_slave_1_sig_hwdata = req_hwdata_at_t;

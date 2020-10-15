@@ -17,6 +17,9 @@
 #include <ValidOperations.h>
 #include <z3++.h>
 #include <ExprTranslator.h>
+#include <chrono>
+#include <OperationOptimizations/ConditionOptimizer2.h>
+
 
 
 #include "gmock/gmock.h"
@@ -40,36 +43,41 @@ public:
     };
 
     SCAM::Module *module;
+
+    std::map<int, CfgNode *> controlFlowMapWrite0;
+    std::map<int, CfgNode *> controlFlowMapWrite1;
+    std::map<int, CfgNode *> controlFlowMapWrite2;
     std::map<int, CfgNode *> controlFlowMapRead;
-    std::map<int, CfgNode *> controlFlowMapWrite_0;
-    std::map<int, CfgNode *> controlFlowMapWrite_1;
-    std::map<int, CfgNode *> controlFlowMapWrite_2;
     std::map<int, CfgNode *> controlFlowMap;
+
+    std::vector<std::vector<SCAM::Stmt*>> pathsWrite0;
+    std::vector<std::vector<int>> pathsWrite0IDs;
+    std::vector<std::vector<SCAM::Stmt*>> pathsWrite1;
+    std::vector<std::vector<int>> pathsWrite1IDs;
+    std::vector<std::vector<SCAM::Stmt*>> pathsWrite2;
+    std::vector<std::vector<int>> pathsWrite2IDs;
+
     std::vector<std::vector<SCAM::Stmt*>> pathsRead;
     std::vector<std::vector<int>> pathsReadIDs;
-    std::vector<std::vector<SCAM::Stmt*>> pathsWrite_0;
-    std::vector<std::vector<int>> pathsWriteIDs_0;
-    std::vector<std::vector<SCAM::Stmt*>> pathsWrite_1;
-    std::vector<std::vector<int>> pathsWriteIDs_1;
-    std::vector<std::vector<SCAM::Stmt*>> pathsWrite_2;
-    std::vector<std::vector<int>> pathsWriteIDs_2;
-    std::vector<Operation*> operationsRead;
-    std::vector<Operation*> operationsWrite_0;
-    std::vector<Operation*> operationsWrite_1;
-    std::vector<Operation*> operationsWrite_2;
+
+
     std::vector<eventID> startnodes;
     std::vector<eventID> endnodes;
+
     Operation *reset_op;
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
     std::vector<Operation*> operationsFinal;
     std::vector<pathIDStmt> finalPathsOpt;
     std::vector<Operation*> operationsFinalOpt;
-    std::map<int,State*> StateMap;
     State* start_state;
     State* init;
     std::vector<std::vector<eventID>>permutations;
+    std::vector<std::string> portnames;
 
+
+    int merge_count;
+    int unreachable_count;
 
 
     std::string printCFG(std::map<int,CfgNode*> controlFlowMap) {
@@ -85,12 +93,12 @@ public:
             auto stmt = sus->getStmt();
             ss << "\t\t" << PrintStmt::toString(stmt) << "\n";
 
-            ss << "\t\tPred: ";
+            ss << "\tPred: ";
             for (auto pred: sus->getPredecessorList()) {
                 ss << "[ID" << pred->getId() << "], ";
             }
             ss << "\n";;
-            ss << "\t\tSucc: ";
+            ss << "\tSucc: ";
             for (auto succ: sus->getSuccessorList()) {
                 ss << "[ID" << succ->getId() << "], ";
             }
@@ -150,6 +158,7 @@ public:
     }
     void combinePaths(std::vector<eventID> readyQueue, std::vector<eventID> blockedFunctions) {
         static pathIDStmt currentPath;
+        bool equal_commits;
 
         //Try out all paths
         for(auto path: allPaths){
@@ -163,9 +172,23 @@ public:
                     std::vector<eventID> savedReady = readyQueue;
                     std::vector<eventID> savedBlocked = blockedFunctions;
 
-                    //add IDs and statements to global path
+                    //add IDs and statements to current path
                     currentPath.idList.insert(currentPath.idList.end(),path.idList.begin(),path.idList.end());
                     currentPath.stmtList.insert(currentPath.stmtList.end(),path.stmtList.begin(),path.stmtList.end());
+
+                    //check if resulting path is reachabble
+                    auto test_op = new Operation();
+                    test_op->setStatementsList(currentPath.stmtList);
+                    auto rOperations = new ReconstructOperations(module);
+                    rOperations->sortOperation(test_op);
+                    if(!ValidOperations::isOperationReachable(test_op)){
+                        unreachable_count++;
+                        currentPath = savedPath;
+                        readyQueue = savedReady;
+                        blockedFunctions = savedBlocked;
+                        continue;
+                    }
+
 
                     //check if path stmts contain a notify
                     for(auto p:path.idList){
@@ -218,9 +241,111 @@ public:
                     blockedFunctions = savedBlocked;
                 }
             }
-            else{
+            else {
                 //End of path reached
-                finalPaths.push_back(currentPath);
+                //Create Operation and compare commitments with all other commitments
+                auto op = new Operation();
+                if (currentPath.idList.size() > 0){
+                    //Create new Operation
+                    op->setState(start_state);
+                    op->setNextState(start_state);
+                    std::vector<SCAM::Stmt*> statementList;
+                    for(auto stmt :currentPath.stmtList){
+                        statementList.push_back(stmt);
+                    }
+                    op->setStatementsList(statementList);
+                    auto rOperations = new ReconstructOperations(module);
+                    rOperations->sortOperation(op);
+
+                    //Add sync and notify
+                    //Arrays that state if sync or notify needs to be added
+                    bool addsync[startnodes.size()];
+                    bool addnoti[startnodes.size()];
+
+                    //Sync and Notify are unset by default
+                    for(int j=0;j<startnodes.size();j++){
+                        addsync[j] = false;
+                        addnoti[j] = false;
+                    }
+
+                    for(auto id: currentPath.idList){
+                        for(int j=0; j<startnodes.size();j++){
+                            //If the startnode of a function is contained in the path, add the sync of that function
+                            if(id==startnodes.at(j).id){
+                                addsync[j]=true;
+                            }
+                            //If the endnode of a function is contained in the path, add the notify of that function
+                            if(id==endnodes.at(j).id){
+                                addnoti[j]=true;
+                            }
+                        }
+                    }
+
+                    for(int j=0; j<startnodes.size();j++){
+                        //Add Sync and Notify to Assumptions/Commitments
+                        auto sync = new SyncSignal(module->getPort(portnames.at(j)));
+                        auto noti = new Notify(module->getPort(portnames.at(j)));
+                        if(addsync[j]){
+                            op->addAssumption(sync);
+                        }
+                        else{
+                            op->addAssumption(new UnaryExpr("not",sync));
+                        }
+                        if(addnoti[j]){
+                            auto assign = new Assignment(noti,new BoolValue(true));
+                            op->addCommitment(assign);
+                        }
+                        else{
+                            auto assign = new Assignment(noti,new BoolValue(false));
+                            op->addCommitment(assign);
+                        }
+                    }
+
+                    //Compare commitments
+                    bool was_merged = false;
+                    for(auto comp_op: operationsFinalOpt){
+                        if(comp_op->getCommitmentsList().size()==op->getCommitmentsList().size()){
+                            equal_commits = true;
+                            for(int i=0; i< op->getCommitmentsList().size();i++){
+                                if(!(*comp_op->getCommitmentsList().at(i)==*op->getCommitmentsList().at(i))){
+                                    //if one pair of commitments is not equal: stop
+                                    equal_commits = false;
+                                    break;
+                                }
+                            }
+                            //if all commitments are equal, merge the AssumptionLists of both operations
+                            if(equal_commits){
+                                //Merge
+                                SCAM::Expr* combined_assump_list = new BoolValue(true);
+                                auto assump_list = op->getAssumptionsList();
+                                for(auto assump: assump_list){
+                                    combined_assump_list = new Logical(combined_assump_list,"and",assump);
+                                }
+                                SCAM::Expr* combined_assump_list2 = new BoolValue(true);
+                                auto comp_assump_list = comp_op->getAssumptionsList();
+                                for(auto assump: comp_assump_list){
+                                    combined_assump_list2 = new Logical(combined_assump_list2,"and",assump);
+                                }
+                                auto merged_assump_list = new Logical(combined_assump_list,"or",combined_assump_list2);
+                                std::vector<SCAM::Expr *> merged_assump_vector;
+                                merged_assump_vector.push_back(merged_assump_list);
+                                ModelGlobal::setModel(new Model("test"));
+                                ModelGlobal::getModel()->addModule(this->module);
+                                auto opti = new ConditionOptimizer2(merged_assump_vector,this->module);
+                                comp_op->setAssumptionsList(opti->getNewConditionList());
+                                was_merged = true;
+                                merge_count++;
+                                break;
+                            }
+                        }
+                    }
+                    //If the operation wasn't merged it is a relevant new one, so store it
+                    if(!was_merged){
+                        //if operation is reachable add it to operationsFinalOpt
+                        operationsFinalOpt.push_back(op);
+                    }
+
+                }
                 return;
             }
         }
@@ -264,13 +389,18 @@ public:
     virtual void SetUp() {
         //create variables and datatypes
         auto buffer_array = new DataType("int_32");
+        DataTypes::addDataType(buffer_array);
         buffer_array->addArray(DataTypes::getDataType("int"),3);
         auto buffer = new Variable("buffer", buffer_array);
         auto number_of_senders = new UnsignedValue(3);
-        auto cnt = new Variable("cnt",DataTypes::getDataType("unsigned"));
+//        auto cnt = new Variable("cnt",DataTypes::getDataType("unsigned"));
         auto flag_array = new DataType("bool");
-        flag_array->addArray(DataTypes::getDataType("bool"),3);
-        auto flags = new Variable("flags", flag_array);
+//        DataTypes::addDataType(flag_array);
+//        flag_array->addArray(DataTypes::getDataType("bool"),3);
+//        auto flags = new Variable("flags", flag_array);
+        auto flag0 = new Variable("flag0",DataTypes::getDataType("bool"));
+        auto flag1 = new Variable("flag1",DataTypes::getDataType("bool"));
+        auto flag2 = new Variable("flag2",DataTypes::getDataType("bool"));
         auto out = new Port("out",new Interface("blocking","out"),buffer_array);
         auto val_0 = new Port("val_0",new Interface("blocking","in"), DataTypes::getDataType("int"));
         auto val_1 = new Port("val_1",new Interface("blocking","in"), DataTypes::getDataType("int"));
@@ -278,52 +408,62 @@ public:
 
         //add Variables to Module
         module->addVariable(buffer);
-        module->addVariable(flags);
-        module->addVariable(cnt);
+//        module->addVariable(flags);
+//        module->addVariable(cnt);
+        module->addVariable(flag0);
+        module->addVariable(flag1);
+        module->addVariable(flag2);
         module->addPort(out);
         module->addPort(val_0);
         module->addPort(val_1);
         module->addPort(val_2);
-        for(auto subVar:flags->getSubVarList()){
-            module->addVariable(subVar);
-        }
+//        for(auto subVar:flags->getSubVarList()){
+//            module->addVariable(subVar);
+//        }
         for(auto subVar:buffer->getSubVarList()){
             module->addVariable(subVar);
         }
         //Read Statements
-        //while(cnt < NUMBER_OF_SENDERS) unrolled
-        auto cnt_less_NOS = new Relational(new VariableOperand(cnt),"<",number_of_senders);
-        //if(cnt<NUMBER_OF_SENDERS)
-        auto if_cnt_less_NOS = new If(cnt_less_NOS);
-        //wait(writer_notify)
-        auto writer_wait = new Wait("writer_notify");
+//        auto flags_0 = new ArrayOperand(new VariableOperand(module->getVariable("flags")),new UnsignedValue(0));
+//        auto flags_1 = new ArrayOperand(new VariableOperand(module->getVariable("flags")),new UnsignedValue(1));
+//        auto flags_2 = new ArrayOperand(new VariableOperand(module->getVariable("flags")),new UnsignedValue(2));
 
-        auto flags_0 = new VariableOperand(flags->getSubVar("0"));;
-        auto flags_1 = new VariableOperand(flags->getSubVar("1"));;
-        auto flags_2 = new VariableOperand(flags->getSubVar("2"));;
+        //if(not(flags.at(i)))
+        auto not_flags_0 = new UnaryExpr("not", new VariableOperand(flag0));
+        auto not_flags_1 = new UnaryExpr("not", new VariableOperand(flag1));
+        auto not_flags_2 = new UnaryExpr("not", new VariableOperand(flag2));
+
+        //if(cnt<NUMBER_OF_SENDERS)
+        auto if_not_flags_0 = new If(not_flags_0);
+        auto if_not_flags_1 = new If(not_flags_1);
+        auto if_not_flags_2 = new If(not_flags_2);
+        //wait(writer_notify)
+        auto writer_wait0 = new Wait("writer_notify0");
+        auto writer_wait1 = new Wait("writer_notify1");
+        auto writer_wait2 = new Wait("writer_notify2");
 
         //for(int i=0; i<number_of_senders; i++) unrolled
         //flags.at(i) = false;
         auto false_value = new BoolValue(false);
-        auto flags_0_assign_false = new Assignment(flags_0,false_value);
+        auto flags_0_assign_false = new Assignment(new VariableOperand(flag0),false_value);
         //flags[1] = false;
-        auto flags_1_assign_false = new Assignment(flags_1,false_value);
+        auto flags_1_assign_false = new Assignment(new VariableOperand(flag1),false_value);
         //flags[2] = false;
-        auto flags_2_assign_false = new Assignment(flags_2,false_value);
+        auto flags_2_assign_false = new Assignment(new VariableOperand(flag2),false_value);
         //cnt = 0
-        auto cnt_assign_0 = new Assignment(new VariableOperand(cnt),new UnsignedValue(0));
+//        auto cnt_assign_0 = new Assignment(new VariableOperand(module->getVariable("cnt")),new UnsignedValue(0));
         //for(int i=0; i<number_of_senders; i++) unrolled
         //out.at(0)=buffer.at(0)
         auto out_0 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(0));
-        auto buffer_0 = new VariableOperand(buffer->getSubVar("0"));
+        auto buffer_0 = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new UnsignedValue(0));//new VariableOperand(buffer->getSubVar("0"));
         auto out_0_assign_buffer_0 = new Assignment(out_0,buffer_0);
         //out.at(1)=buffer.at(1)
         auto out_1 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(1));
-        auto buffer_1 = new VariableOperand(buffer->getSubVar("1"));
+        auto buffer_1 = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new UnsignedValue(1));//new VariableOperand(buffer->getSubVar("1"));
         auto out_1_assign_buffer_1 = new Assignment(out_1,buffer_1);
         //out.at(2)=buffer.at(2)
         auto out_2 = new ArrayOperand(new DataSignalOperand(out->getDataSignal()),new IntegerValue(2));
-        auto buffer_2 = new VariableOperand(buffer->getSubVar("2"));
+        auto buffer_2 = new ArrayOperand(new VariableOperand(module->getVariable("buffer")),new UnsignedValue(2));//new VariableOperand(buffer->getSubVar("2"));
         auto out_2_assign_buffer_2 = new Assignment(out_2,buffer_2);
         //reader_notify.notify()
         auto notify_reader = new Notify("reader_notify");
@@ -332,68 +472,68 @@ public:
 
         //Write Expressions/Assignments id=0
         //if(flags.at(0))
-        auto if_flags_0 = new If(flags_0);
+        auto if_flags_0 = new If(new VariableOperand(flag0));
         //wait(reader_notify)
         auto reader_wait = new Wait("reader_notify");
         //flags.at(0) = true
         auto true_value = new BoolValue(true);
-        auto flags_0_assign_true = new Assignment(flags_0,true_value);
+        auto flags_0_assign_true = new Assignment(new VariableOperand(flag0),true_value);
         //buffer.at(0)=val;
         auto port_val_0 = new DataSignalOperand(val_0->getDataSignal());
         auto buffer_0_assign_port_val_0 = new Assignment(buffer_0,port_val_0);
         //cnt++
-        auto cnt_add_1 = new Arithmetic(new VariableOperand(cnt),"+",new UnsignedValue(1));
-        auto cnt_inc = new Assignment(new VariableOperand(cnt),cnt_add_1);
+//        auto cnt_add_1 = new Arithmetic(new VariableOperand(cnt),"+",new UnsignedValue(1));
+//        auto cnt_inc = new Assignment(new VariableOperand(cnt),cnt_add_1);
         //writer_notify.notify()
-        auto notify_writer = new Notify("writer_notify");
+        auto notify_writer0 = new Notify("writer_notify0");
         //return
         auto write_return = new Return("write_return");
 
         //Write Expressions/Assignments id=1
         //if(flags.at(1))
-        auto if_flags_1 = new If(flags_1);
+        auto if_flags_1 = new If(new VariableOperand(flag1));
         //wait(reader_notify)
         //already exists
         //flags.at(1) = true
-        auto flags_1_assign_true = new Assignment(flags_1,true_value);
+        auto flags_1_assign_true = new Assignment(new VariableOperand(flag1),true_value);
         //buffer.at(1)=val;
         auto port_val_1 = new DataSignalOperand(val_1->getDataSignal());
         auto buffer_1_assign_port_val_1 = new Assignment(buffer_1,port_val_1);
         //cnt++
         //already exists
         //writer_notify.notify()
-        //already exists
+        auto notify_writer1 = new Notify("writer_notify1");
         //return
         //already exists
 
         //Write Expressions/Assignments id=2
         //if(flags.at(2))
-        auto if_flags_2 = new If(flags_2);
+        auto if_flags_2 = new If(new VariableOperand(flag2));
         //wait(reader_notify)
         //already exists
         //flags.at(2) = true
-        auto flags_2_assign_true = new Assignment(flags_2,true_value);
+        auto flags_2_assign_true = new Assignment(new VariableOperand(flag2),true_value);
         //buffer.at(2)=val;
         auto port_val_2 = new DataSignalOperand(val_2->getDataSignal());
         auto buffer_2_assign_port_val_2 = new Assignment(buffer_2,port_val_2);
         //cnt++
         //already exists
         //writer_notify.notify()
-        //already exists
+        auto notify_writer2 = new Notify("writer_notify2");
         // return
         //already exists
 
         //CFG nodes Read
-        auto check_cnt_0 = new CfgNode(if_cnt_less_NOS);
-        auto wait_writer_0 = new CfgNode(writer_wait);
-        auto check_cnt_1 = new CfgNode(if_cnt_less_NOS);
-        auto wait_writer_1 = new CfgNode(writer_wait);
-        auto check_cnt_2 = new CfgNode(if_cnt_less_NOS);
-        auto wait_writer_2 = new CfgNode(writer_wait);
+        auto check_not_flag_0 = new CfgNode(if_not_flags_0);
+        auto wait_writer_0 = new CfgNode(writer_wait0);
+        auto check_not_flag_1 = new CfgNode(if_not_flags_1);
+        auto wait_writer_1 = new CfgNode(writer_wait1);
+        auto check_not_flag_2 = new CfgNode(if_not_flags_2);
+        auto wait_writer_2 = new CfgNode(writer_wait2);
         auto unset_flags_0 = new CfgNode(flags_0_assign_false);
         auto unset_flags_1 = new CfgNode(flags_1_assign_false);
         auto unset_flags_2 = new CfgNode(flags_2_assign_false);
-        auto reset_cnt = new CfgNode(cnt_assign_0);
+//        auto reset_cnt = new CfgNode(cnt_assign_0);
         auto set_output_0 = new CfgNode(out_0_assign_buffer_0);
         auto set_output_1 = new CfgNode(out_1_assign_buffer_1);
         auto set_output_2 = new CfgNode(out_2_assign_buffer_2);
@@ -401,19 +541,18 @@ public:
         auto return_read = new CfgNode(read_return);
 
         //Link CFG nodes Read
-        check_cnt_0->addSuccessor(wait_writer_0);
-        check_cnt_0->addSuccessor(check_cnt_1);
-        wait_writer_0->addSuccessor(check_cnt_1);
-        check_cnt_1->addSuccessor(wait_writer_1);
-        check_cnt_1->addSuccessor(check_cnt_2);
-        wait_writer_1->addSuccessor(check_cnt_2);
-        check_cnt_2->addSuccessor(wait_writer_2);
-        check_cnt_2->addSuccessor(unset_flags_0);
+        check_not_flag_0->addSuccessor(wait_writer_0);
+        check_not_flag_0->addSuccessor(check_not_flag_1);
+        wait_writer_0->addSuccessor(check_not_flag_1);
+        check_not_flag_1->addSuccessor(wait_writer_1);
+        check_not_flag_1->addSuccessor(check_not_flag_2);
+        wait_writer_1->addSuccessor(check_not_flag_2);
+        check_not_flag_2->addSuccessor(wait_writer_2);
+        check_not_flag_2->addSuccessor(unset_flags_0);
         wait_writer_2->addSuccessor(unset_flags_0);
         unset_flags_0->addSuccessor(unset_flags_1);
         unset_flags_1->addSuccessor(unset_flags_2);
-        unset_flags_2->addSuccessor(reset_cnt);
-        reset_cnt->addSuccessor(set_output_0);
+        unset_flags_2->addSuccessor(set_output_0);
         set_output_0->addSuccessor(set_output_1);
         set_output_1->addSuccessor(set_output_2);
         set_output_2->addSuccessor(read_notify);
@@ -421,16 +560,15 @@ public:
 
 
         //create map with CFG nodes Read
-        controlFlowMapRead.insert(std::make_pair(check_cnt_0->getId(),check_cnt_0));
+        controlFlowMapRead.insert(std::make_pair(check_not_flag_0->getId(),check_not_flag_0));
         controlFlowMapRead.insert(std::make_pair(wait_writer_0->getId(),wait_writer_0));
-        controlFlowMapRead.insert(std::make_pair(check_cnt_1->getId(),check_cnt_1));
+        controlFlowMapRead.insert(std::make_pair(check_not_flag_1->getId(),check_not_flag_1));
         controlFlowMapRead.insert(std::make_pair(wait_writer_1->getId(),wait_writer_1));
-        controlFlowMapRead.insert(std::make_pair(check_cnt_2->getId(),check_cnt_2));
+        controlFlowMapRead.insert(std::make_pair(check_not_flag_2->getId(),check_not_flag_2));
         controlFlowMapRead.insert(std::make_pair(wait_writer_2->getId(),wait_writer_2));
         controlFlowMapRead.insert(std::make_pair(unset_flags_0->getId(),unset_flags_0));
         controlFlowMapRead.insert(std::make_pair(unset_flags_1->getId(),unset_flags_1));
         controlFlowMapRead.insert(std::make_pair(unset_flags_2->getId(),unset_flags_2));
-        controlFlowMapRead.insert(std::make_pair(reset_cnt->getId(),reset_cnt));
         controlFlowMapRead.insert(std::make_pair(set_output_0->getId(),set_output_0));
         controlFlowMapRead.insert(std::make_pair(set_output_1->getId(),set_output_1));
         controlFlowMapRead.insert(std::make_pair(set_output_2->getId(),set_output_2));
@@ -438,32 +576,30 @@ public:
         controlFlowMapRead.insert(std::make_pair(return_read->getId(),return_read));
 
         //add nodes to global controlFlowMap
-        controlFlowMap.insert(std::make_pair(check_cnt_0->getId(),check_cnt_0));
+        controlFlowMap.insert(std::make_pair(check_not_flag_0->getId(),check_not_flag_0));
         controlFlowMap.insert(std::make_pair(wait_writer_0->getId(),wait_writer_0));
-        controlFlowMap.insert(std::make_pair(check_cnt_1->getId(),check_cnt_1));
+        controlFlowMap.insert(std::make_pair(check_not_flag_1->getId(),check_not_flag_1));
         controlFlowMap.insert(std::make_pair(wait_writer_1->getId(),wait_writer_1));
-        controlFlowMap.insert(std::make_pair(check_cnt_2->getId(),check_cnt_2));
+        controlFlowMap.insert(std::make_pair(check_not_flag_2->getId(),check_not_flag_2));
         controlFlowMap.insert(std::make_pair(wait_writer_2->getId(),wait_writer_2));
         controlFlowMap.insert(std::make_pair(unset_flags_0->getId(),unset_flags_0));
         controlFlowMap.insert(std::make_pair(unset_flags_1->getId(),unset_flags_1));
         controlFlowMap.insert(std::make_pair(unset_flags_2->getId(),unset_flags_2));
-        controlFlowMap.insert(std::make_pair(reset_cnt->getId(),reset_cnt));
         controlFlowMap.insert(std::make_pair(set_output_0->getId(),set_output_0));
         controlFlowMap.insert(std::make_pair(set_output_1->getId(),set_output_1));
         controlFlowMap.insert(std::make_pair(set_output_2->getId(),set_output_2));
         controlFlowMap.insert(std::make_pair(read_notify->getId(),read_notify));
         controlFlowMap.insert(std::make_pair(return_read->getId(),return_read));
 
-//        //Print CFG for Read
-//        std::cout << printCFG(controlFlowMapRead) << std::endl;
+        //Print CFG for Read
+        std::cout << printCFG(controlFlowMapRead) << std::endl;
 
         //CFG nodes Write id=0
         auto check_flags_id_0 = new CfgNode(if_flags_0);
         auto wait_reader_0 = new CfgNode(reader_wait);
         auto set_flags_id_0 = new CfgNode(flags_0_assign_true);
         auto set_buffer_id_0 = new CfgNode(buffer_0_assign_port_val_0);
-        auto cnt_increment_0 = new CfgNode(cnt_inc);
-        auto write_notify_0 = new CfgNode(notify_writer);
+        auto write_notify_0 = new CfgNode(notify_writer0);
         auto return_write_0 = new CfgNode(write_return);
 
         //CFG nodes Write id=1
@@ -471,8 +607,7 @@ public:
         auto wait_reader_1 = new CfgNode(reader_wait);
         auto set_flags_id_1 = new CfgNode(flags_1_assign_true);
         auto set_buffer_id_1 = new CfgNode(buffer_1_assign_port_val_1);
-        auto cnt_increment_1 = new CfgNode(cnt_inc);
-        auto write_notify_1 = new CfgNode(notify_writer);
+        auto write_notify_1 = new CfgNode(notify_writer1);
         auto return_write_1 = new CfgNode(write_return);
 
         //CFG nodes Write id=2
@@ -480,8 +615,7 @@ public:
         auto wait_reader_2 = new CfgNode(reader_wait);
         auto set_flags_id_2 = new CfgNode(flags_2_assign_true);
         auto set_buffer_id_2 = new CfgNode(buffer_2_assign_port_val_2);
-        auto cnt_increment_2 = new CfgNode(cnt_inc);
-        auto write_notify_2 = new CfgNode(notify_writer);
+        auto write_notify_2 = new CfgNode(notify_writer2);
         auto return_write_2 = new CfgNode(write_return);
 
         //Connect CFG nodes Write id=0
@@ -489,8 +623,7 @@ public:
         check_flags_id_0->addSuccessor(set_flags_id_0);
         wait_reader_0->addSuccessor(set_flags_id_0);
         set_flags_id_0->addSuccessor(set_buffer_id_0);
-        set_buffer_id_0->addSuccessor(cnt_increment_0);
-        cnt_increment_0->addSuccessor(write_notify_0);
+        set_buffer_id_0->addSuccessor(write_notify_0);
         write_notify_0->addSuccessor(return_write_0);
 
         //Connect CFG nodes Write id=1
@@ -498,8 +631,7 @@ public:
         check_flags_id_1->addSuccessor(set_flags_id_1);
         wait_reader_1->addSuccessor(set_flags_id_1);
         set_flags_id_1->addSuccessor(set_buffer_id_1);
-        set_buffer_id_1->addSuccessor(cnt_increment_1);
-        cnt_increment_1->addSuccessor(write_notify_1);
+        set_buffer_id_1->addSuccessor(write_notify_1);
         write_notify_1->addSuccessor(return_write_1);
 
         //Connect CFG nodes Write id=2
@@ -507,64 +639,57 @@ public:
         check_flags_id_2->addSuccessor(set_flags_id_2);
         wait_reader_2->addSuccessor(set_flags_id_2);
         set_flags_id_2->addSuccessor(set_buffer_id_2);
-        set_buffer_id_2->addSuccessor(cnt_increment_2);
-        cnt_increment_2->addSuccessor(write_notify_2);
+        set_buffer_id_2->addSuccessor(write_notify_2);
         write_notify_2->addSuccessor(return_write_2);
 
         //Create map with CFG nodes Write id=0
-        controlFlowMapWrite_0.insert(std::make_pair(check_flags_id_0->getId(),check_flags_id_0));
-        controlFlowMapWrite_0.insert(std::make_pair(wait_reader_0->getId(),wait_reader_0));
-        controlFlowMapWrite_0.insert(std::make_pair(set_flags_id_0->getId(),set_flags_id_0));
-        controlFlowMapWrite_0.insert(std::make_pair(set_buffer_id_0->getId(),set_buffer_id_0));
-        controlFlowMapWrite_0.insert(std::make_pair(cnt_increment_0->getId(),cnt_increment_0));
-        controlFlowMapWrite_0.insert(std::make_pair(write_notify_0->getId(),write_notify_0));
-        controlFlowMapWrite_0.insert(std::make_pair(return_write_0->getId(),return_write_0));
+        controlFlowMapWrite0.insert(std::make_pair(check_flags_id_0->getId(),check_flags_id_0));
+        controlFlowMapWrite0.insert(std::make_pair(wait_reader_0->getId(),wait_reader_0));
+        controlFlowMapWrite0.insert(std::make_pair(set_flags_id_0->getId(),set_flags_id_0));
+        controlFlowMapWrite0.insert(std::make_pair(set_buffer_id_0->getId(),set_buffer_id_0));
+        controlFlowMapWrite0.insert(std::make_pair(write_notify_0->getId(),write_notify_0));
+        controlFlowMapWrite0.insert(std::make_pair(return_write_0->getId(),return_write_0));
 
         //Create map with CFG nodes Write id=1
-        controlFlowMapWrite_1.insert(std::make_pair(check_flags_id_1->getId(),check_flags_id_1));
-        controlFlowMapWrite_1.insert(std::make_pair(wait_reader_1->getId(),wait_reader_1));
-        controlFlowMapWrite_1.insert(std::make_pair(set_flags_id_1->getId(),set_flags_id_1));
-        controlFlowMapWrite_1.insert(std::make_pair(set_buffer_id_1->getId(),set_buffer_id_1));
-        controlFlowMapWrite_1.insert(std::make_pair(cnt_increment_1->getId(),cnt_increment_1));
-        controlFlowMapWrite_1.insert(std::make_pair(write_notify_1->getId(),write_notify_1));
-        controlFlowMapWrite_1.insert(std::make_pair(return_write_1->getId(),return_write_1));
+        controlFlowMapWrite1.insert(std::make_pair(check_flags_id_1->getId(),check_flags_id_1));
+        controlFlowMapWrite1.insert(std::make_pair(wait_reader_1->getId(),wait_reader_1));
+        controlFlowMapWrite1.insert(std::make_pair(set_flags_id_1->getId(),set_flags_id_1));
+        controlFlowMapWrite1.insert(std::make_pair(set_buffer_id_1->getId(),set_buffer_id_1));
+        controlFlowMapWrite1.insert(std::make_pair(write_notify_1->getId(),write_notify_1));
+        controlFlowMapWrite1.insert(std::make_pair(return_write_1->getId(),return_write_1));
 
         //Create map with CFG nodes Write id=2
-        controlFlowMapWrite_2.insert(std::make_pair(check_flags_id_2->getId(),check_flags_id_2));
-        controlFlowMapWrite_2.insert(std::make_pair(wait_reader_2->getId(),wait_reader_2));
-        controlFlowMapWrite_2.insert(std::make_pair(set_flags_id_2->getId(),set_flags_id_2));
-        controlFlowMapWrite_2.insert(std::make_pair(set_buffer_id_2->getId(),set_buffer_id_2));
-        controlFlowMapWrite_2.insert(std::make_pair(cnt_increment_2->getId(),cnt_increment_2));
-        controlFlowMapWrite_2.insert(std::make_pair(write_notify_2->getId(),write_notify_2));
-        controlFlowMapWrite_2.insert(std::make_pair(return_write_2->getId(),return_write_2));
+        controlFlowMapWrite2.insert(std::make_pair(check_flags_id_2->getId(),check_flags_id_2));
+        controlFlowMapWrite2.insert(std::make_pair(wait_reader_2->getId(),wait_reader_2));
+        controlFlowMapWrite2.insert(std::make_pair(set_flags_id_2->getId(),set_flags_id_2));
+        controlFlowMapWrite2.insert(std::make_pair(set_buffer_id_2->getId(),set_buffer_id_2));
+        controlFlowMapWrite2.insert(std::make_pair(write_notify_2->getId(),write_notify_2));
+        controlFlowMapWrite2.insert(std::make_pair(return_write_2->getId(),return_write_2));
 
         //add nodes to global controlFlowMap
         controlFlowMap.insert(std::make_pair(check_flags_id_0->getId(),check_flags_id_0));
         controlFlowMap.insert(std::make_pair(wait_reader_0->getId(),wait_reader_0));
         controlFlowMap.insert(std::make_pair(set_flags_id_0->getId(),set_flags_id_0));
         controlFlowMap.insert(std::make_pair(set_buffer_id_0->getId(),set_buffer_id_0));
-        controlFlowMap.insert(std::make_pair(cnt_increment_0->getId(),cnt_increment_0));
         controlFlowMap.insert(std::make_pair(write_notify_0->getId(),write_notify_0));
         controlFlowMap.insert(std::make_pair(return_write_0->getId(),return_write_0));
         controlFlowMap.insert(std::make_pair(check_flags_id_1->getId(),check_flags_id_1));
         controlFlowMap.insert(std::make_pair(wait_reader_1->getId(),wait_reader_1));
         controlFlowMap.insert(std::make_pair(set_flags_id_1->getId(),set_flags_id_1));
         controlFlowMap.insert(std::make_pair(set_buffer_id_1->getId(),set_buffer_id_1));
-        controlFlowMap.insert(std::make_pair(cnt_increment_1->getId(),cnt_increment_1));
         controlFlowMap.insert(std::make_pair(write_notify_1->getId(),write_notify_1));
         controlFlowMap.insert(std::make_pair(return_write_1->getId(),return_write_1));
         controlFlowMap.insert(std::make_pair(check_flags_id_2->getId(),check_flags_id_2));
         controlFlowMap.insert(std::make_pair(wait_reader_2->getId(),wait_reader_2));
         controlFlowMap.insert(std::make_pair(set_flags_id_2->getId(),set_flags_id_2));
         controlFlowMap.insert(std::make_pair(set_buffer_id_2->getId(),set_buffer_id_2));
-        controlFlowMap.insert(std::make_pair(cnt_increment_2->getId(),cnt_increment_2));
         controlFlowMap.insert(std::make_pair(write_notify_2->getId(),write_notify_2));
         controlFlowMap.insert(std::make_pair(return_write_2->getId(),return_write_2));
 
 //        //Print CFG Write
-//        std::cout << printCFG(controlFlowMapWrite_0) << std::endl;
-//        std::cout << printCFG(controlFlowMapWrite_1) << std::endl;
-//        std::cout << printCFG(controlFlowMapWrite_2) << std::endl;
+        std::cout << printCFG(controlFlowMapWrite0) << std::endl;
+        std::cout << printCFG(controlFlowMapWrite1) << std::endl;
+        std::cout << printCFG(controlFlowMapWrite2) << std::endl;
 
 
         init = new State("reset");
@@ -572,7 +697,6 @@ public:
 
         //Generate Reset Operation
         reset_op = new Operation();
-        reset_op->addStatement(cnt_assign_0);
         reset_op->addStatement(flags_0_assign_false);
         reset_op->addStatement(flags_1_assign_false);
         reset_op->addStatement(flags_2_assign_false);
@@ -589,21 +713,27 @@ public:
 
         eventID temp = {0, "reader_sync"};
         startnodes.push_back(temp);
-        temp = {15,"writer_0_sync"};
+        temp = {14,"writer_0_sync"};
         startnodes.push_back(temp);
-        temp = {22,"writer_1_sync"};
+        temp = {20,"writer_1_sync"};
         startnodes.push_back(temp);
-        temp = {29,"writer_2_sync"};
+        temp = {26,"writer_2_sync"};
         startnodes.push_back(temp);
 
-        temp = {14,"reader_notify"};
+        temp = {13,"reader_notify"};
         endnodes.push_back(temp);
-        temp = {21,"writer_0_notify"};
+        temp = {19,"writer_0_notify"};
         endnodes.push_back(temp);
-        temp = {28,"writer_1_notify"};
+        temp = {25,"writer_1_notify"};
         endnodes.push_back(temp);
-        temp = {35,"writer_2_notify"};
+        temp = {31,"writer_2_notify"};
         endnodes.push_back(temp);
+
+        //Define portnames for notify and sync signals
+        portnames.push_back("out");
+        portnames.push_back("val_0");
+        portnames.push_back("val_1");
+        portnames.push_back("val_2");
 
     }
 
@@ -616,331 +746,163 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::map<int, CfgNode *> importantStatesRead;
     findImportantStates(controlFlowMapRead,&importantStatesRead);
 
-    //Find operations Read
+    //Find subpaths Read
     auto start_read = controlFlowMapRead.begin()->second;
     findPathsfromNode(start_read,&pathsRead,&pathsReadIDs);
     for(auto const& node : importantStatesRead) {
         findPathsfromNode(node.second,&pathsRead,&pathsReadIDs);
     }
 
-    //Create a map from CfgNode Id to State Read
-    std::map<int,State*> CfgIdToStateRead;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsReadIDs.begin(); path != pathsReadIDs.end(); path++){
-        if(CfgIdToStateRead.find(path->front()) == CfgIdToStateRead.end()){
-            CfgIdToStateRead.insert(std::make_pair(path->front(),new State(controlFlowMapRead.at(path->front())->getName())));
-        }
-        if(CfgIdToStateRead.find(path->back()) == CfgIdToStateRead.end()){
-            CfgIdToStateRead.insert(std::make_pair(path->back(), new State(controlFlowMapRead.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations Read
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsReadIDs.begin(); path != pathsReadIDs.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateRead.at(path->front()));
-        op->setNextState(CfgIdToStateRead.at(path->back()));
-        operationsRead.push_back(op);
-    }
-    int cnt = 0;
-    std::vector<SCAM::Stmt*> statementList;
-    for(auto op: operationsRead) {
-        for (auto stmt: pathsRead.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    //Get Assumptions and Commitments
-    auto rOperations = new ReconstructOperations(module);
-    for(auto op: this->operationsRead) {
-        rOperations->sortOperation(op);
-    }
-
     //Find important states Write 0
-    std::map<int, CfgNode *> importantStatesWrite_0;
-    findImportantStates(controlFlowMapWrite_0,&importantStatesWrite_0);
+    std::map<int, CfgNode *> importantStatesWrite0;
+    findImportantStates(controlFlowMapWrite0,&importantStatesWrite0);
     //Find important states Write 1
-    std::map<int, CfgNode *> importantStatesWrite_1;
-    findImportantStates(controlFlowMapWrite_1,&importantStatesWrite_1);
+    std::map<int, CfgNode *> importantStatesWrite1;
+    findImportantStates(controlFlowMapWrite1,&importantStatesWrite1);
     //Find important states Write 2
-    std::map<int, CfgNode *> importantStatesWrite_2;
-    findImportantStates(controlFlowMapWrite_2,&importantStatesWrite_2);
+    std::map<int, CfgNode *> importantStatesWrite2;
+    findImportantStates(controlFlowMapWrite2,&importantStatesWrite2);
 
-    //Find operations Write 0
-    auto start_write_0 = controlFlowMapWrite_0.begin()->second;
-    findPathsfromNode(start_write_0,&pathsWrite_0,&pathsWriteIDs_0);
-    for(auto const& node : importantStatesWrite_0) {
-        findPathsfromNode(node.second,&pathsWrite_0,&pathsWriteIDs_0);
+    //Find subpaths Write 0
+    auto start_write0 = controlFlowMapWrite0.begin()->second;
+    findPathsfromNode(start_write0,&pathsWrite0,&pathsWrite0IDs);
+    for(auto const& node : importantStatesWrite0) {
+        findPathsfromNode(node.second,&pathsWrite0,&pathsWrite0IDs);
     }
 
-    //Create a map from CfgNode Id to State Write 0
-    std::map<int,State*> CfgIdToStateWrite_0;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsWriteIDs_0.begin(); path != pathsWriteIDs_0.end(); path++){
-        if(CfgIdToStateWrite_0.find(path->front()) == CfgIdToStateWrite_0.end()){
-            CfgIdToStateWrite_0.insert(std::make_pair(path->front(),new State(controlFlowMapWrite_0.at(path->front())->getName())));
-        }
-        if(CfgIdToStateWrite_0.find(path->back()) == CfgIdToStateWrite_0.end()){
-            CfgIdToStateWrite_0.insert(std::make_pair(path->back(), new State(controlFlowMapWrite_0.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations Write 0
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsWriteIDs_0.begin(); path != pathsWriteIDs_0.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateWrite_0.at(path->front()));
-        op->setNextState(CfgIdToStateWrite_0.at(path->back()));
-        statementList.clear();
-
-        operationsWrite_0.push_back(op);
-    }
-    cnt = 0;
-    for(auto op: operationsWrite_0) {
-        for (auto stmt: pathsWrite_0.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    for(auto op: this->operationsWrite_0) {
-        rOperations->sortOperation(op);
-    }
-
-    //Find operations Write 1
-    auto start_write_1 = controlFlowMapWrite_1.begin()->second;
-    findPathsfromNode(start_write_1,&pathsWrite_1,&pathsWriteIDs_1);
-    for(auto const& node : importantStatesWrite_1) {
-        findPathsfromNode(node.second,&pathsWrite_1,&pathsWriteIDs_1);
-    }
-
-    //Create a map from CfgNode Id to State Write 1
-    std::map<int,State*> CfgIdToStateWrite_1;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsWriteIDs_1.begin(); path != pathsWriteIDs_1.end(); path++){
-        if(CfgIdToStateWrite_1.find(path->front()) == CfgIdToStateWrite_1.end()){
-            CfgIdToStateWrite_1.insert(std::make_pair(path->front(),new State(controlFlowMapWrite_1.at(path->front())->getName())));
-        }
-        if(CfgIdToStateWrite_1.find(path->back()) == CfgIdToStateWrite_1.end()){
-            CfgIdToStateWrite_1.insert(std::make_pair(path->back(), new State(controlFlowMapWrite_1.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations Write 1
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsWriteIDs_1.begin(); path != pathsWriteIDs_1.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateWrite_1.at(path->front()));
-        op->setNextState(CfgIdToStateWrite_1.at(path->back()));
-        statementList.clear();
-
-        operationsWrite_1.push_back(op);
-    }
-    cnt = 0;
-    for(auto op: operationsWrite_1) {
-        for (auto stmt: pathsWrite_1.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    for(auto op: this->operationsWrite_1) {
-        rOperations->sortOperation(op);
+    //Find subpaths Write 1
+    auto start_write1 = controlFlowMapWrite1.begin()->second;
+    findPathsfromNode(start_write1,&pathsWrite1,&pathsWrite1IDs);
+    for(auto const& node : importantStatesWrite1) {
+        findPathsfromNode(node.second,&pathsWrite1,&pathsWrite1IDs);
     }
 
     //Find operations Write 2
-    auto start_write_2 = controlFlowMapWrite_2.begin()->second;
-    findPathsfromNode(start_write_2,&pathsWrite_2,&pathsWriteIDs_2);
-    for(auto const& node : importantStatesWrite_2) {
-        findPathsfromNode(node.second,&pathsWrite_2,&pathsWriteIDs_2);
+    auto start_write2 = controlFlowMapWrite2.begin()->second;
+    findPathsfromNode(start_write2,&pathsWrite2,&pathsWrite2IDs);
+    for(auto const& node : importantStatesWrite2) {
+        findPathsfromNode(node.second,&pathsWrite2,&pathsWrite2IDs);
     }
 
-    //Create a map from CfgNode Id to State Write 2
-    std::map<int,State*> CfgIdToStateWrite_2;
-    //If the state for the node is not yet created, create one
-    for(auto path = pathsWriteIDs_2.begin(); path != pathsWriteIDs_2.end(); path++){
-        if(CfgIdToStateWrite_2.find(path->front()) == CfgIdToStateWrite_2.end()){
-            CfgIdToStateWrite_2.insert(std::make_pair(path->front(),new State(controlFlowMapWrite_2.at(path->front())->getName())));
-        }
-        if(CfgIdToStateWrite_2.find(path->back()) == CfgIdToStateWrite_2.end()){
-            CfgIdToStateWrite_2.insert(std::make_pair(path->back(), new State(controlFlowMapWrite_2.at(path->back())->getName())));
-        }
-    }
-
-    //Generate Operations Write 2
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = pathsWriteIDs_2.begin(); path != pathsWriteIDs_2.end(); path++){
-        auto op = new Operation();
-        op->setState(CfgIdToStateWrite_2.at(path->front()));
-        op->setNextState(CfgIdToStateWrite_2.at(path->back()));
-        statementList.clear();
-
-        operationsWrite_2.push_back(op);
-    }
-    cnt = 0;
-    for(auto op: operationsWrite_2) {
-        for (auto stmt: pathsWrite_2.at(cnt)) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    for(auto op: this->operationsWrite_2) {
-        rOperations->sortOperation(op);
-    }
-
-    //Generate final FSM
+//Generate final FSM
     std::vector<eventID> blockedFunctions;
     std::vector<eventID> readyQueue;
     std::vector<eventID> hv;
 
-    eventID read = {0,"read"};
-    eventID write_0 = {15,"write_0"};
-    eventID write_1 = {22,"write_1"};
-    eventID write_2 = {29,"write_2"};
+    //Define all possible functions and their starting nodes
+    eventID Read = {0,"Read"};
+    eventID Write0 = {14,"Write0"};
+    eventID Write1 = {20,"Write1"};
+    eventID Write2 = {26,"Write2"};
 
+    //vector of all functions that are always ready to execute
+    std::vector<eventID> always_ready;
+
+    //Vector of all functions that can be called from modules
     std::vector<eventID> functions;
-    functions.push_back(read);
-    functions.push_back(write_0);
-    functions.push_back(write_1);
-    functions.push_back(write_2);
+    functions.push_back(Read);
+    functions.push_back(Write0);
+    functions.push_back(Write1);
+    functions.push_back(Write2);
 
+    //compute all possible permutations and store them in variable permutations
     computePermutations(functions);
 
-    //construct a vector of all paths by pushing the paths from Read and Write to allPaths
+    std::cout << "Number of permutations: " <<permutations.size() << std::endl;
+
+    //add all functions from always_ready to all permuations
+    for(auto readyFunc : always_ready){
+        for(auto perm = permutations.begin(); perm != permutations.end(); ++perm){
+            perm->push_back(readyFunc);
+        }
+    }
+    //construct a vector of all paths by pushing all paths to allPaths
     for(int i=0; i<pathsReadIDs.size();i++){
         pathIDStmt p = {pathsReadIDs.at(i),pathsRead.at(i)};
         allPaths.push_back(p);
     }
-    for(int i=0; i<pathsWriteIDs_0.size();i++){
-        pathIDStmt p = {pathsWriteIDs_0.at(i),pathsWrite_0.at(i)};
+    for(int i=0; i<pathsWrite0IDs.size();i++){
+        pathIDStmt p = {pathsWrite0IDs.at(i),pathsWrite0.at(i)};
         allPaths.push_back(p);
     }
-    for(int i=0; i<pathsWriteIDs_1.size();i++){
-        pathIDStmt p = {pathsWriteIDs_1.at(i),pathsWrite_1.at(i)};
+    for(int i=0; i<pathsWrite1IDs.size();i++){
+        pathIDStmt p = {pathsWrite1IDs.at(i),pathsWrite1.at(i)};
         allPaths.push_back(p);
     }
-    for(int i=0; i<pathsWriteIDs_2.size();i++){
-        pathIDStmt p = {pathsWriteIDs_2.at(i),pathsWrite_2.at(i)};
+    for(int i=0; i<pathsWrite2IDs.size();i++){
+        pathIDStmt p = {pathsWrite2IDs.at(i),pathsWrite2.at(i)};
         allPaths.push_back(p);
     }
 
-    pathIDStmt currentPath;
+    int i = 0;
+    merge_count=0;
+    unreachable_count=0;
+    std::chrono::steady_clock::time_point begin;
+    std::chrono::steady_clock::time_point end;
 
-    // generate all Paths combining all CFGs
+    // generate all Paths combining all CFGs and store them in variable finalPaths
+    std::chrono::steady_clock::time_point begin_all = std::chrono::steady_clock::now();
     for(auto perm: permutations){
+        //set ready queue to current permutation and clear blocked queue
         readyQueue = perm;
         blockedFunctions.clear();
+        begin = std::chrono::steady_clock::now();
         combinePaths(readyQueue,blockedFunctions);
+        end = std::chrono::steady_clock::now();
+        std::cout << "Time needed for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
+        std::cout << "Number of operations: " << operationsFinalOpt.size() << std::endl;
+        //if(i>2) break;
     }
+    std::chrono::steady_clock::time_point end_all = std::chrono::steady_clock::now();
+    std::cout << "Time needed for all permutations: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_all-begin_all).count() <<" [ms]" << std::endl;
 
-    std::map<int,State*> CfgIdToState;
-    for(auto i:CfgIdToStateRead){
-        CfgIdToState.insert(i);
-    }
-    for(auto i:CfgIdToStateWrite_0){
-        CfgIdToState.insert(i);
-    }
-    for(auto i:CfgIdToStateWrite_1){
-        CfgIdToState.insert(i);
-    }
-    for(auto i:CfgIdToStateWrite_2){
-        CfgIdToState.insert(i);
-    }
+    int cnt = 0;
+    std::vector<SCAM::Stmt*> statementList;
 
+    auto rOperations = new ReconstructOperations(module);
 
-    //Generate final Operations
-    //Iterate over all paths and set State, nextState and statementList
-    for(auto path = finalPaths.begin(); path != finalPaths.end(); path++){
-        auto op = new Operation();
-        if(path->idList.size()>0){
-        op->setState(start_state);
-        op->setNextState(start_state);
-        }
-        operationsFinal.push_back(op);
-    }
-    cnt = 0;
-    for(auto op: operationsFinal) {
-        for (auto stmt: finalPaths.at(cnt).stmtList) {
-            statementList.push_back(stmt);
-        }
-        op->setStatementsList(statementList);
-        cnt++;
-        statementList.clear();
-    }
-
-    for(auto op: this->operationsFinal) {
-        rOperations->sortOperation(op);
-    }
-
-//    //Debug
-//    int num = 0;
-//    for(auto p:finalPaths){
-//        std::cout << "Path " << num << ": ";
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//        num++;
-//    }
-
-
-    //Optimize operations
-    for(int i=0; i<operationsFinal.size();i++){
-        if(ValidOperations::isOperationReachable(operationsFinal.at(i))){
-            operationsFinalOpt.push_back(operationsFinal.at(i));
-            finalPathsOpt.push_back(finalPaths.at(i));
-        }
-    }
-
-//    //Debug
-//    num = 0;
-//    for(auto p:finalPathsOpt){
-//        std::cout << "Path " << num << ": ";
-//        for(auto id:p.idList){
-//            std::cout<<id<<"\t";
-//        }
-//        std::cout<< std::endl;
-//        num++;
-//    }
-
+    //Set Incoming and Outgoing Operations
     for(auto op:operationsFinalOpt){
         op->getState()->addOutgoingOperation(op);
         op->getNextState()->addIncomingOperation(op);
     }
 
-
     //add reset operation
     rOperations->sortOperation(reset_op);
+    for(int i=0; i<startnodes.size();i++){
+        auto noti = new Notify(module->getPort(portnames.at(i)));
+        auto assign = new Assignment(noti,new BoolValue(false));
+        reset_op->addCommitment(assign);
+    }
     operationsFinalOpt.push_back(reset_op);
+    //Create empty path for reset operation
     std::vector<int> int_vec;
     std::vector<SCAM::Stmt*> stmt_vec;
-    pathIDStmt dummy = {int_vec,stmt_vec};
-    finalPathsOpt.push_back(dummy);
+    pathIDStmt temp = {int_vec,stmt_vec};
+    //finalPathsOpt.push_back(temp);
     reset_op->getState()->addOutgoingOperation(reset_op);
     reset_op->getNextState()->addIncomingOperation(reset_op);
 
     //wait operation
     auto wait_op = new Operation();
     rOperations->sortOperation(wait_op);
+    for(int i=0; i<startnodes.size();i++){
+        auto sync = new SyncSignal(module->getPort(portnames.at(i)));
+        auto noti = new Notify(module->getPort(portnames.at(i)));
+        wait_op->addAssumption(new UnaryExpr("not",sync));
+        auto assign = new Assignment(noti,new BoolValue(false));
+        wait_op->addCommitment(assign);
+    }
+
     operationsFinalOpt.push_back(wait_op);
-    finalPathsOpt.push_back(dummy);
+    //create empty path for wait operation
+    //finalPathsOpt.push_back(temp);
     wait_op->setState(start_state);
     wait_op->setNextState(start_state);
     wait_op->getState()->addOutgoingOperation(wait_op);
     wait_op->getNextState()->addIncomingOperation(wait_op);
 
-//    //Debug
+//    //Debug: Print Assumptions and Commitments for operationsFinalOpt
 //    for(auto op: operationsFinalOpt){
 //        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
 //        for(auto assump: op->getAssumptionsList()){
@@ -954,96 +916,21 @@ TEST_F(OperationGraphTest, ExtractPaths){
 //        std::cout << std::endl;
 //    }
 
-    //Generate Property Graph
-    std::stringstream ss;
-    for(auto op: operationsFinalOpt){
-        std::vector<SCAM::Stmt*> stmtList_dummy;
-        stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
-
-        for(auto succ_op: operationsFinalOpt){
-            if(!succ_op->getState()->isInit()){
-                std::vector<SCAM::Stmt*> comb_stmts;
-                comb_stmts.insert(comb_stmts.end(),stmtList_dummy.begin(),stmtList_dummy.end());
-                comb_stmts.insert(comb_stmts.end(),succ_op->getStatementsList().begin(),succ_op->getStatementsList().end());
-                auto dummy_op = new Operation();
-                dummy_op->setStatementsList(comb_stmts);
-                rOperations->sortOperation(dummy_op);
-                if(ValidOperations::isOperationReachable(dummy_op)){
-                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
-                    ss << " -> ";
-                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
-                    ss << ";" << std::endl;
-                }
-                comb_stmts.clear();
-            }
-        }
-        stmtList_dummy.clear();
-    }
-
-    std::ofstream myfile;
-    myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/PropertyGraph.gfv");
-    myfile << ss.str();
-    myfile.close();
-
-    std::vector<std::string> portnames;
-    portnames.push_back("out");
-    portnames.push_back("val_0");
-    portnames.push_back("val_1");
-    portnames.push_back("val_2");
-
-
-    bool addsync[startnodes.size()];
-    bool addnoti[startnodes.size()];
-
-    //Add sync and notify signals
-    for(int i=0;i<operationsFinalOpt.size();i++){
-        auto op = operationsFinalOpt.at(i);
-        for(int j=0;j<startnodes.size();j++){
-            addsync[j] = false;
-            addnoti[j] = false;
-        }
-        for(auto id: finalPathsOpt.at(i).idList){
-            for(int j=0; j<startnodes.size();j++){
-                if(id==startnodes.at(j).id){
-                    addsync[j]=true;
-                }
-                if(id==endnodes.at(j).id){
-                    addnoti[j]=true;
-                }
-            }
-        }
-        for(int j=0; j<startnodes.size();j++){
-            auto sync = new SyncSignal(module->getPort(portnames.at(j)));
-            auto noti = new Notify(module->getPort(portnames.at(j)));
-            if(addsync[j]){
-                op->addAssumption(sync);
-            }
-            else{
-                op->addAssumption(new UnaryExpr("not",sync));
-            }
-            if(addnoti[j]){
-                auto assign = new Assignment(noti,new BoolValue(true));
-                op->addCommitment(assign);
-            }
-            else{
-                auto assign = new Assignment(noti,new BoolValue(false));
-                op->addCommitment(assign);
-            }
-        }
-    }
-
+    //Statemap consists of a initial state Init and one state start_state
     std::map<int,State*> stateMap;
     stateMap.insert(std::make_pair(init->getStateId(),init ));
     stateMap.insert(std::make_pair(start_state->getStateId(),start_state));
-
     module->getFSM()->setStateMap(stateMap);
 
+    //Create PropertySuite
     PropertyFactory propertyFactory(module);
     module->setPropertySuite(propertyFactory.getPropertySuite());
+    //Print ITL Properties to file
     PrintITL printITL;
     auto map = printITL.printModule(module);
-    myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/Synchronizer.vhi");
-    myfile << map.at("Synchronizer.vhi") << std::endl;
+    std::ofstream myfile;
+    myfile.open(SCAM_HOME"/tests/Synchronizer_Properties/" + module->getName() + "_generated.vhi");
+    myfile << map.at(module->getName() + ".vhi") << std::endl;
     myfile.close();
 }
 

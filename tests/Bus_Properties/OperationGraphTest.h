@@ -44,30 +44,26 @@ public:
     SCAM::Module *module;
 
     std::map<int, CfgNode *> controlFlowMapAccessBus0;
-    std::map<int, CfgNode *> controlFlowMapSlaveRead0;
-    std::map<int, CfgNode *> controlFlowMapSlaveWrite0;
     std::map<int, CfgNode *> controlFlowMapAccessBus1;
+    std::map<int, CfgNode *> controlFlowMapSlaveRead0;
     std::map<int, CfgNode *> controlFlowMapSlaveRead1;
+    std::map<int, CfgNode *> controlFlowMapSlaveWrite0;
     std::map<int, CfgNode *> controlFlowMapSlaveWrite1;
     std::map<int, CfgNode *> controlFlowMapDummy;
     std::map<int, CfgNode *> controlFlowMap;
-
 
     std::vector<std::vector<SCAM::Stmt*>> pathsAccessBus0;
     std::vector<std::vector<int>> pathsAccessBus0IDs;
     std::vector<std::vector<SCAM::Stmt*>> pathsAccessBus1;
     std::vector<std::vector<int>> pathsAccessBus1IDs;
-
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveRead0;
     std::vector<std::vector<int>> pathsSlaveRead0IDs;
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveRead1;
     std::vector<std::vector<int>> pathsSlaveRead1IDs;
-
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveWrite0;
     std::vector<std::vector<int>> pathsSlaveWrite0IDs;
     std::vector<std::vector<SCAM::Stmt*>> pathsSlaveWrite1;
     std::vector<std::vector<int>> pathsSlaveWrite1IDs;
-
     std::vector<std::vector<SCAM::Stmt*>> pathsDummy;
     std::vector<std::vector<int>> pathsDummyIDs;
 
@@ -77,7 +73,6 @@ public:
     Operation *reset_op;
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
-    std::vector<Operation*> operationsFinal;
     std::vector<pathIDStmt> finalPathsOpt;
     std::vector<Operation*> operationsFinalOpt;
     State* start_state;
@@ -182,7 +177,7 @@ public:
                     std::vector<eventID> savedReady = readyQueue;
                     std::vector<eventID> savedBlocked = blockedFunctions;
 
-                    //add IDs and statements to global path
+                    //add IDs and statements to current path
                     currentPath.idList.insert(currentPath.idList.end(),path.idList.begin(),path.idList.end());
                     currentPath.stmtList.insert(currentPath.stmtList.end(),path.stmtList.begin(),path.stmtList.end());
 
@@ -410,11 +405,13 @@ public:
         auto slave_id = new Variable("slave_id",DataTypes::getDataType("unsigned"));
 
         auto bus_req_t = new DataType("bus_req_t");
+        DataTypes::addDataType(bus_req_t);
         bus_req_t->addSubVar("haddr",DataTypes::getDataType("unsigned"));
         bus_req_t->addSubVar("hwdata",DataTypes::getDataType("unsigned"));
         auto req = new Variable("req",bus_req_t);
 
         auto bus_resp_t = new DataType("bus_resp_t");
+        DataTypes::addDataType(bus_resp_t);
         bus_resp_t->addSubVar("hrdata",DataTypes::getDataType("unsigned"));
         bus_resp_t->addSubVar("hresp",DataTypes::getDataType("unsigned"));
         auto resp = new Variable("resp", bus_resp_t);
@@ -1202,7 +1199,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::chrono::steady_clock::time_point begin;
     std::chrono::steady_clock::time_point end;
 
-    // generate all Paths combining all CFGs and store them in variable finalPaths
+// generate all Paths combining all CFGs and store them in variable finalPaths
     std::chrono::steady_clock::time_point begin_all = std::chrono::steady_clock::now();
     for(auto perm: permutations){
         //set ready queue to current permutation and clear blocked queue
@@ -1212,8 +1209,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
         combinePaths(readyQueue,blockedFunctions);
         end = std::chrono::steady_clock::now();
         std::cout << "Time needed for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
-        std::cout << operationsFinalOpt.size() << std::endl;
-        //if(i>2) break;
+        std::cout << "Number of operations: " << operationsFinalOpt.size() << std::endl;
     }
     std::chrono::steady_clock::time_point end_all = std::chrono::steady_clock::now();
     std::cout << "Time needed for all permutations: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_all-begin_all).count() <<" [ms]" << std::endl;
@@ -1241,7 +1237,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::vector<int> int_vec;
     std::vector<SCAM::Stmt*> stmt_vec;
     pathIDStmt temp = {int_vec,stmt_vec};
-    //finalPathsOpt.push_back(temp);
     reset_op->getState()->addOutgoingOperation(reset_op);
     reset_op->getNextState()->addIncomingOperation(reset_op);
 
@@ -1257,62 +1252,24 @@ TEST_F(OperationGraphTest, ExtractPaths){
     }
 
     operationsFinalOpt.push_back(wait_op);
-    //create empty path for wait operation
-    //finalPathsOpt.push_back(temp);
     wait_op->setState(start_state);
     wait_op->setNextState(start_state);
     wait_op->getState()->addOutgoingOperation(wait_op);
     wait_op->getNextState()->addIncomingOperation(wait_op);
 
-    //Debug: Print Assumptions and Commitments for operationsFinalOpt
-    for(auto op: operationsFinalOpt){
-        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
-        for(auto assump: op->getAssumptionsList()){
-            std::cout << *assump << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Commitments Operation" << op->getId() <<std::endl;
-        for(auto commit: op->getCommitmentsList()){
-            std::cout << *commit << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
-//    //Generate Property Graph
-//    std::stringstream ss;
+//    //Debug: Print Assumptions and Commitments for operationsFinalOpt
 //    for(auto op: operationsFinalOpt){
-//        //Store statementList of predecessor operation in stmtList_dummy
-//        std::vector<SCAM::Stmt*> stmtList_dummy;
-//        stmtList_dummy.insert(stmtList_dummy.end(),op->getStatementsList().begin(),op->getStatementsList().end());
-//
-//        for(auto succ_op: operationsFinalOpt){
-//            if(!succ_op->getState()->isInit()){
-//                std::vector<SCAM::Stmt*> comb_stmts;
-//                //Add statementList of predecessor operation to comb_stmts
-//                comb_stmts.insert(comb_stmts.end(),stmtList_dummy.begin(),stmtList_dummy.end());
-//                //Add statementList of successor operation to comb_stmts
-//                comb_stmts.insert(comb_stmts.end(),succ_op->getStatementsList().begin(),succ_op->getStatementsList().end());
-//                //Create a dummy Operation and check if it is reachable
-//                auto dummy_op = new Operation();
-//                dummy_op->setStatementsList(comb_stmts);
-//                rOperations->sortOperation(dummy_op);
-//                if(ValidOperations::isOperationReachable(dummy_op)){
-//                    //If dummy operation is reachable, create a string: predecessor->successor
-//                    ss << op->getState()->getName() + "_" + std::to_string(op->getId());
-//                    ss << " -> ";
-//                    ss << succ_op->getState()->getName() + "_" + std::to_string(succ_op->getId());
-//                    ss << ";" << std::endl;
-//                }
-//                comb_stmts.clear();
-//            }
+//        std::cout << "Assumptions Operation " << op->getId() <<std::endl;
+//        for(auto assump: op->getAssumptionsList()){
+//            std::cout << *assump << std::endl;
 //        }
-//        stmtList_dummy.clear();
+//        std::cout << std::endl;
+//        std::cout << "Commitments Operation" << op->getId() <<std::endl;
+//        for(auto commit: op->getCommitmentsList()){
+//            std::cout << *commit << std::endl;
+//        }
+//        std::cout << std::endl;
 //    }
-    //Print PropertyGraph into a file
-    std::ofstream myfile;
-//    myfile.open(SCAM_HOME"/tests/Regfile_Properties/PropertyGraph.gfv");
-//    myfile << ss.str();
-//    myfile.close();
 
     //Statemap consists of a initial state Init and one state start_state
     std::map<int,State*> stateMap;
@@ -1326,6 +1283,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
     //Print ITL Properties to file
     PrintITL printITL;
     auto map = printITL.printModule(module);
+    std::ofstream myfile;
     myfile.open(SCAM_HOME"/tests/Bus_Properties/" + module->getName() + "_generated.vhi");
     myfile << map.at(module->getName() + ".vhi") << std::endl;
     myfile.close();

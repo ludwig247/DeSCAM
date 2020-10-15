@@ -10,16 +10,14 @@
 
 template<typename T>
 class FIFO : public sc_prim_channel,
-                virtual public FIFO_in_if<T>,          //
-                     virtual public FIFO_out_if<T> {        //
+             virtual public FIFO_in_if<T>,
+             virtual public FIFO_out_if<T> {
 public:
     FIFO(const char *name, unsigned int size);
-
-    // Consumer reads Value from FIFO (blocking)
+    // Consumer reads value from FIFO (blocking)
     void read(T &out);
-    //Producer writes Value to FIFO (blocking)
+    //Producer writes value to FIFO (blocking)
     void write(const T &val);
-
 private:
     T  * buffer;
     unsigned int fifo_size;

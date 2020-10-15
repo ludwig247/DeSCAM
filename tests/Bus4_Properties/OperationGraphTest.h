@@ -83,7 +83,6 @@ public:
     Operation *reset_op;
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
-    std::vector<Operation*> operationsFinal;
     std::vector<pathIDStmt> finalPathsOpt;
     std::vector<Operation*> operationsFinalOpt;
     State* start_state;
@@ -188,7 +187,7 @@ public:
                     std::vector<eventID> savedReady = readyQueue;
                     std::vector<eventID> savedBlocked = blockedFunctions;
 
-                    //add IDs and statements to global path
+                    //add IDs and statements to current path
                     currentPath.idList.insert(currentPath.idList.end(),path.idList.begin(),path.idList.end());
                     currentPath.stmtList.insert(currentPath.stmtList.end(),path.stmtList.begin(),path.stmtList.end());
 
@@ -416,11 +415,13 @@ public:
         auto slave_id = new Variable("slave_id",DataTypes::getDataType("unsigned"));
 
         auto bus_req_t = new DataType("bus_req_t");
+        DataTypes::addDataType(bus_req_t);
         bus_req_t->addSubVar("haddr",DataTypes::getDataType("unsigned"));
         bus_req_t->addSubVar("hwdata",DataTypes::getDataType("unsigned"));
         auto req = new Variable("req",bus_req_t);
 
         auto bus_resp_t = new DataType("bus_resp_t");
+        DataTypes::addDataType(bus_resp_t);
         bus_resp_t->addSubVar("hrdata",DataTypes::getDataType("unsigned"));
         bus_resp_t->addSubVar("hresp",DataTypes::getDataType("unsigned"));
         auto resp = new Variable("resp", bus_resp_t);
@@ -1484,7 +1485,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
         end = std::chrono::steady_clock::now();
         std::cout << "Time needed for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
         std::cout << "Number of operations: " << operationsFinalOpt.size() << std::endl;
-        //if(i>2) break;
     }
     std::chrono::steady_clock::time_point end_all = std::chrono::steady_clock::now();
     std::cout << "Time needed for all permutations: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_all-begin_all).count() <<" [ms]" << std::endl;

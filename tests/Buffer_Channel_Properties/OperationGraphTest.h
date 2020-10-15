@@ -66,7 +66,6 @@ public:
     Operation *reset_op;
     std::vector<pathIDStmt> allPaths;
     std::vector<pathIDStmt> finalPaths;
-    std::vector<Operation*> operationsFinal;
     std::vector<pathIDStmt> finalPathsOpt;
     std::vector<Operation*> operationsFinalOpt;
     State* start_state;
@@ -396,7 +395,6 @@ public:
         auto state1 = new Variable("state1", states);
         auto state2 = new Variable("state2", states);
 
-
         auto array = new DataType("int_8");
         DataTypes::addDataType(array);
         array->addArray(DataTypes::getDataType("int"),8);
@@ -404,7 +402,7 @@ public:
         auto buffer1 = new Variable("buffer1", array);
         auto buffer2 = new Variable("buffer2", array);
 
-        //        auto size = new Variable("size", DataTypes::getDataType("unsigned"));
+        //auto size = new Variable("size", DataTypes::getDataType("unsigned"));
         auto size = new IntegerValue(3);
         auto head0 = new Variable("head0", DataTypes::getDataType("int"));
         auto tail0 = new Variable("tail0", DataTypes::getDataType("int"));
@@ -1005,6 +1003,7 @@ TEST_F(OperationGraphTest, ExtractPaths){
             perm->push_back(readyFunc);
         }
     }
+
     //construct a vector of all paths by pushing all paths to allPaths
     for(int i=0; i<pathsReadIDs.size();i++){
         pathIDStmt p = {pathsReadIDs.at(i),pathsRead.at(i)};
@@ -1040,7 +1039,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
         end = std::chrono::steady_clock::now();
         std::cout << "Time needed for permutation " << ++i << ": " << std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count() <<" [ms]" << std::endl;
         std::cout << "Number of operations: " << operationsFinalOpt.size() << std::endl;
-        //if(i>2) break;
     }
     std::chrono::steady_clock::time_point end_all = std::chrono::steady_clock::now();
     std::cout << "Time needed for all permutations: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_all-begin_all).count() <<" [ms]" << std::endl;
@@ -1068,7 +1066,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     std::vector<int> int_vec;
     std::vector<SCAM::Stmt*> stmt_vec;
     pathIDStmt temp = {int_vec,stmt_vec};
-    //finalPathsOpt.push_back(temp);
     reset_op->getState()->addOutgoingOperation(reset_op);
     reset_op->getNextState()->addIncomingOperation(reset_op);
 
@@ -1084,8 +1081,6 @@ TEST_F(OperationGraphTest, ExtractPaths){
     }
 
     operationsFinalOpt.push_back(wait_op);
-    //create empty path for wait operation
-    //finalPathsOpt.push_back(temp);
     wait_op->setState(start_state);
     wait_op->setNextState(start_state);
     wait_op->getState()->addOutgoingOperation(wait_op);
