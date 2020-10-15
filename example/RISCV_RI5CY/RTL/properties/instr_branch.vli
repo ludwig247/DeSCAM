@@ -1,0 +1,237 @@
+macro boolean instr_branch_result (unsigned func3, rs1, rs2) :=
+    case (func3)
+        3'b000:     rs1 == rs2;                           // BEQ
+        3'b001:     rs1 != rs2;                           // BNE
+        3'b100:     signed(rs1) < signed(rs2);            // BLT
+        3'b101:     signed(rs1) >= signed(rs2);           // BGE
+        3'b110:     unsigned(rs1) < unsigned(rs2);        // BLTU
+        3'b111:     unsigned(rs1) >= unsigned(rs2);       // BLTU
+        default:    0;
+    endcase;    
+end macro;
+
+macro unsigned instr_branch_operator (unsigned func3) :=
+    case (func3)
+        3'b000:     riscv_defines::ALU_EQ;
+        3'b001:     riscv_defines::ALU_NE;
+        3'b100:     riscv_defines::ALU_LTS;
+        3'b101:     riscv_defines::ALU_GES;
+        3'b110:     riscv_defines::ALU_LTU;
+        3'b111:     riscv_defines::ALU_GEU;
+        default:    7'd0;
+    endcase;     
+end macro;
+
+macro boolean IR_IMEM_BRANCH (unsigned instr_imem, code3) :=
+    instr_imem[6:0] == 7'h63 &&                                    //opcode 
+    instr_imem[14:12] == code3 &&                                  //func3
+    instr_imem[19:15] <= 5'd8 &&                                   //rs1
+    instr_imem[24:20] <= 5'd8;                                     //rs2
+end macro;
+
+macro property instr_branch (unsigned code3) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode + 1,
+        t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+
+        //opcode = instr_rdata_i[6:0] @ t_fetch,
+        func3_at_t_fetch = instr_rdata_i[14:12] @ t_fetch,
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        rs2_at_t_fetch = instr_rdata_i[24:20] @ t_fetch,
+        imm_at_t_fetch = {instr_rdata_i[31], instr_rdata_i[7], instr_rdata_i[30:25], instr_rdata_i[11:8], 1'b0} @ t_fetch,
+        
+        instr_imem_at_t_decode = instr_rdata_i @ t_decode,
+
+        op1Data_at_t_decode = REGISTER (rs1_at_t_fetch) @ t_decode,
+        op2Data_at_t_decode = REGISTER (rs2_at_t_fetch) @ t_decode,
+
+        regFile_at_t_decode = id_stage_i/registers_i/riscv_register_file_i/mem @ t_decode;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_IMEM_BRANCH (instr_imem_at_t_fetch, code3); 
+        at t_decode: instr_branch_result (func3_at_t_fetch, op1Data_at_t_decode, op2Data_at_t_decode);
+
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+        //ID to EX
+        at t_execute: instr_req_o;
+        at t_execute: instr_addr_o == (pc_if_at_t_fetch + signExtend(imm_at_t_fetch))[31:0];
+        at t_execute: !data_req_o;
+        at t_execute: foreach r in 0..31: REGISTER(r) == regFile_at_t_decode[r]; end foreach;
+        
+        at t_execute: instr_rdata_id == instr_imem_at_t_decode;
+        at t_execute: pc_if == (pc_if_at_t_fetch + 32'd8)[31:0];
+
+        at t_execute: alu_operator_ex == instr_branch_operator (func3_at_t_fetch);
+        at t_execute: alu_operand_a_ex == op1Data_at_t_decode;
+        at t_execute: alu_operand_b_ex == op2Data_at_t_decode;
+        at t_execute: branch_decision == 1;
+        //WB to PC if Branch taken
+        at t_writeb: pc_if == (pc_if_at_t_fetch + signExtend(imm_at_t_fetch))[31:0];
+        
+        right_hook: t_execute;
+end macro;
+
+property instr_beq;
+    instr_branch(3'b000);
+end property;
+
+property instr_bne;
+    instr_branch(3'b001);
+end property;
+
+property instr_blt;
+    instr_branch(3'b100);
+end property;
+
+property instr_bge;
+    instr_branch(3'b101);
+end property;
+
+property instr_bltu;
+    instr_branch(3'b110);
+end property;
+
+property instr_bgeu;
+    instr_branch(3'b111);
+end property;
+
+
+macro property instr_branch_not_taken (unsigned code3) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode + 1;
+        //t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+
+        opcode = instr_rdata_i[6:0] @ t_fetch,
+        func3_at_t_fetch = instr_rdata_i[14:12] @ t_fetch,
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        rs2_at_t_fetch = instr_rdata_i[24:20] @ t_fetch,
+        imm_at_t_fetch = {instr_rdata_i[31], instr_rdata_i[7], instr_rdata_i[30:25], instr_rdata_i[11:8], 1'b0} @ t_fetch,
+        op1Data_at_t_decode = REGISTER (rs1_at_t_fetch) @ t_decode,
+        op2Data_at_t_decode = REGISTER (rs2_at_t_fetch) @ t_decode,
+        regFile_at_t_decode = id_stage_i/registers_i/riscv_register_file_i/mem @ t_decode;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_IMEM_BRANCH (instr_imem_at_t_fetch, code3); 
+        at t_decode: !instr_branch_result (func3_at_t_fetch, op1Data_at_t_decode, op2Data_at_t_decode);
+
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+        //ID to EX
+        at t_execute: alu_operator_ex == instr_branch_operator (func3_at_t_fetch);
+        at t_execute: alu_operand_a_ex == op1Data_at_t_decode;
+        at t_execute: alu_operand_b_ex == op2Data_at_t_decode;
+        at t_execute: branch_decision == 0;
+        //at t_execute: branch_decision == 1;
+
+        at t_decode: halt_if == 0;
+        at t_execute: id_ready == 1;
+        at t_execute: foreach r in 0..31: REGISTER(r) == regFile_at_t_decode[r]; end foreach;
+        at t_execute: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+        at t_execute: data_req_o == 0;
+
+        right_hook: t_decode;
+
+         local_determination_requirements:
+            at t_execute: determined(id_stage_i/registers_i/riscv_register_file_i/mem);
+        // at t_decode: determined(ALU_READY);
+        // at t_execute: determined(ALU_READY);
+        
+        
+
+end macro;
+
+property instr_beq_nt;
+    instr_branch_not_taken(3'b000);
+end property;
+
+property instr_bne_nt;
+    instr_branch_not_taken(3'b001);
+end property;
+
+property instr_blt_nt;
+    instr_branch_not_taken(3'b100);
+end property;
+
+property instr_bge_nt;
+    instr_branch_not_taken(3'b101);
+end property;
+
+property instr_bltu_nt;
+    instr_branch_not_taken(3'b110);
+end property;
+
+property instr_bgeu_nt;
+    instr_branch_not_taken(3'b111);
+end property;

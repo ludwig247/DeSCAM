@@ -1,0 +1,220 @@
+//########################## LOAD ########################
+
+macro boolean IR_IMEM_LOAD (unsigned instr_imem, code3) :=
+    instr_imem[6:0] == 7'h03 &&                                    //opcode 
+    (instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd8) &&       //rd
+    instr_imem[14:12] == code3 &&                                  //func3
+    instr_imem[19:15] <= 5'd8                                      //rs1
+end macro;
+
+macro unsigned instr_load_result (unsigned func3, data, offset) :=
+    case (func3)
+        3'b000:      // LB
+            (offset == 2'b00) ? signExtend(data[7:0]) : ((offset == 2'b01) ? signExtend(data[15:8]) : ((offset == 2'b10) ? signExtend(data[23:16]) : signExtend(data[31:24])));
+        3'b001:      // LH
+            (offset == 2'b00) ? signExtend(data[15:0]) : ((offset == 2'b01) ? signExtend(data[23:8]) : ((offset == 2'b10) ? signExtend(data[31:16]) : signExtend({data[7:0],data[31:24]})));
+        3'b100:      // LBU
+            {24'h00_0000,(offset == 2'b00) ? data[7:0] : ((offset == 2'b01) ? data[15:8] : ((offset == 2'b10) ? data[23:16] : data[31:24]))};
+        3'b101:      // LHU
+            {16'h0000,(offset == 2'b00) ? data[15:0] : ((offset == 2'b01) ? data[23:8] : ((offset == 2'b10) ? data[31:16] : {data[7:0],data[31:24]}))};
+        3'b010:     data[31:0];      // LW
+        default:    1'd0;
+    endcase;    
+end macro;
+
+macro unsigned DATA_TYPE_Q := load_store_unit_i/data_type_q; end macro;
+macro unsigned DATA_TYPE_O := id_stage_i/decoder_i/data_type_o; end macro;
+
+macro property instr_load (unsigned code3) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_hwlp_case,
+        no_unaligned_case,
+        no_data_misaligned,
+        data_gnt,
+        bounded_wait_dmem_gnt,
+        bounded_wait_dmem,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode+1..max_wait_dmem waits_for complete (data_gnt_i),
+        t_writeb = t_execute+1..max_wait_dmem waits_for complete (data_rvalid_i),
+        t_regfile = t_writeb + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+
+        rd_at_t_fetch = instr_rdata_i[11:7] @ t_fetch,
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        imm_at_t_fetch = instr_rdata_i[31:20] @ t_fetch,
+        op1Data_at_t_decode = REGISTER (rs1_at_t_fetch) @ t_decode,
+        op2Data_at_t_decode = signExtend(imm_at_t_fetch) @ t_decode,
+
+        data_type_at_decode = DATA_TYPE_O @ t_decode,
+        offset_at_t_decode = unsigned(signed(op1Data_at_t_decode) + signed(op2Data_at_t_decode))[1:0]  @ t_decode;
+
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode:   data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_IMEM_LOAD (instr_imem_at_t_fetch, code3);  
+    
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+        //ID to EX
+        at t_decode+1: alu_operator_ex == riscv_defines::ALU_ADD;
+        at t_decode+1: alu_operand_a_ex == op1Data_at_t_decode;
+        at t_decode+1: alu_operand_b_ex == op2Data_at_t_decode;
+        //Request to LSU
+        during[t_decode+1,t_execute]: data_addr_o == unsigned(signed(op1Data_at_t_decode) + signed(op2Data_at_t_decode))[31:0];
+        during[t_decode+1,t_execute]: data_req_o == 1 && data_we_o == 0;
+
+        //LSU write back
+        during[t_execute+1, t_writeb]: regfile_we_wb == 1 && regfile_waddr_fw_wb_o == rd_at_t_fetch;
+        at t_regfile: REGISTER (rd_at_t_fetch) == instr_load_result(code3, prev(data_rdata_i), offset_at_t_decode);
+
+        right_hook: t_decode;
+end macro;
+
+property instr_lw;
+    instr_load(3'b010);
+end property;
+
+property instr_lh;
+    instr_load(3'b001);
+end property;
+
+property instr_lb;
+    instr_load(3'b000);
+end property;
+
+property instr_lbu;
+    instr_load(3'b100);
+end property;
+
+property instr_lhu;
+    instr_load(3'b101);
+end property;
+
+//################## STORE #########################
+
+macro unsigned instr_store_result (unsigned func3, rs2) :=
+    case (func3)
+        3'b000:     rs2[7:0];       // SB
+        3'b001:     rs2[15:0];      // SH
+        3'b010:     rs2;            // SW
+        default:    rs2;
+    endcase;    
+end macro;
+
+macro boolean IR_IMEM_STORE (unsigned instr_imem, code3) :=
+    instr_imem[6:0] == 7'h23 &&             //opcode 
+    instr_imem[14:12] == code3 &&           //func3
+    instr_imem[19:15] <= 5'd8 &&            //rs1
+    instr_imem[24:20] <= 5'd8               //rs2
+end macro;
+
+macro property instr_store (unsigned code3) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode+1..max_wait_dmem waits_for complete (data_gnt_i);
+
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        rs2_at_t_fetch = instr_rdata_i[24:20] @ t_fetch,
+        imm_at_t_fetch = {instr_rdata_i[31:25], instr_rdata_i[11:7]} @ t_fetch,
+        op1Data_at_t_decode = REGISTER (rs1_at_t_fetch) @ t_decode,
+        op2Data_at_t_decode = signExtend(imm_at_t_fetch) @ t_decode,
+        res = unsigned(signed(op1Data_at_t_decode) + signed(op2Data_at_t_decode))[1:0] @ t_decode,
+        rs2Data_at_t_decode = instr_store_result(code3, REGISTER (rs2_at_t_fetch)) @ t_decode;
+        
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_IMEM_STORE (instr_imem_at_t_fetch, code3) &&  res[1:0] == 2'h0;  
+
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+        //ID to EX
+        at t_decode+1: alu_operator_ex == riscv_defines::ALU_ADD;
+        at t_decode+1: alu_operand_a_ex == op1Data_at_t_decode;
+        at t_decode+1: alu_operand_b_ex == op2Data_at_t_decode;
+        
+        //Request to LSU
+        during[t_decode+1,t_execute]: data_addr_o == unsigned(signed(op1Data_at_t_decode) + signed(op2Data_at_t_decode))[31:0];
+        during[t_decode+1,t_execute]: data_req_o == 1;
+        during[t_decode+1,t_execute]: data_we_o == 1;
+
+        during[t_decode+1,t_execute]: data_wdata_o[7:0] == rs2Data_at_t_decode[7:0];
+        during[t_decode+1,t_execute]: if(code3[1:0] != 2'h0) data_wdata_o[15:8] == rs2Data_at_t_decode[15:8];endif;
+        during[t_decode+1,t_execute]: if(code3[1:0] == 2'h2) data_wdata_o[31:16] == rs2Data_at_t_decode[31:16];endif;
+
+        right_hook: t_decode;
+end macro;
+
+property instr_sw;
+    instr_store(3'b010);
+end property;
+
+property instr_sb;
+    instr_store(3'b000);
+end property;
+
+property instr_sh;
+    instr_store(3'b001);
+end property;
