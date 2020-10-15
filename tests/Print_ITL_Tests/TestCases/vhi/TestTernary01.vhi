@@ -54,7 +54,7 @@ prove:
 	at t_end: output2_3;
 	at t_end: data_out_sig = valid_at_t;
 	at t_end: valid = valid_at_t;
-	at t_end: valid_out_sig = ((value_in_at_t <= 0))?0:1;
+	at t_end: valid_out_sig = ((value_in_at_t <= 0)?0:1);
 	at t_end: value_in = value_in_at_t;
 	during[t+1, t_end]: data_in_notify = false;
 	during[t+1, t_end-1]: valid_out_notify = false;
