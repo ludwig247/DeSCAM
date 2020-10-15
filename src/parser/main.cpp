@@ -11,6 +11,19 @@
 #include <Logger/FileSink.h>
 #include <FatalError.h>
 
+#include "ModelFactory.h"
+
+#include "FindFunctions.h"
+#include "FindInitialValues.h"
+#include "FindModules.h"
+#include "FindNewDatatype.h"
+#include "FindPorts.h"
+#include "FindGlobal.h"
+#include "FindNetlist.h"
+#include "FindProcess.h"
+#include "FindVariables.h"
+#include "FindSCMain.h"
+
 int main(int argc, const char **argv) {
     //Process commandline data
     CommandLineProcess cml = CommandLineProcess(argc, argv);
@@ -43,6 +56,7 @@ int main(int argc, const char **argv) {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -53,7 +67,8 @@ int main(int argc, const char **argv) {
                                         find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get());
+                                        find_sc_main.get(),
+                                        find_data_flow_factory.get());
 
   //Create model
   std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");

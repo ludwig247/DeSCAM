@@ -54,6 +54,7 @@ TEST(gmock_test, TestCase1) {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -64,7 +65,8 @@ TEST(gmock_test, TestCase1) {
                                         find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get());
+                                        find_sc_main.get(),
+                                        find_data_flow_factory.get());
 
   ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
                                                    commandLineArgumentsArray[0],
@@ -126,7 +128,7 @@ TEST(mocking_test, TestCase1) {
   //FindInitialValues
   DESCAM::IntegerValue integer_value(1337);
   DESCAM::MOCK::MockIFindInitialValues find_initial_values;
-  EXPECT_CALL(find_initial_values, setup(_, _, _, _))
+  EXPECT_CALL(find_initial_values, setup(_, _, _, _, _))
       .Times(1);
   EXPECT_CALL(find_initial_values, getInitValue())
       .Times(1)
@@ -166,6 +168,7 @@ TEST(mocking_test, TestCase1) {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
   auto model_factory = new ModelFactory(&find_functions,
                                         &find_initial_values,
@@ -176,7 +179,8 @@ TEST(mocking_test, TestCase1) {
                                         find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get());
+                                        find_sc_main.get(),
+                                        find_data_flow_factory.get());
 
   ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
                                                    commandLineArgumentsArray[0],
@@ -241,6 +245,7 @@ TEST(gmock_test, TestCase2) {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -251,7 +256,8 @@ TEST(gmock_test, TestCase2) {
                                         find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get());
+                                        find_sc_main.get(),
+                                        find_data_flow_factory.get());
 
   ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
                                                    commandLineArgumentsArray[0],
@@ -311,6 +317,7 @@ TEST(gmock_test, TestCase3) {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -321,7 +328,8 @@ TEST(gmock_test, TestCase3) {
                                         find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get());
+                                        find_sc_main.get(),
+                                        find_data_flow_factory.get());
 
   ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
                                                    commandLineArgumentsArray[0],

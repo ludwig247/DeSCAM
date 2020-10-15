@@ -12,6 +12,19 @@
 #include <FatalError.h>
 #include <PrintITL/PrintITL.h>
 
+#include "ModelFactory.h"
+
+#include "FindFunctions.h"
+#include "FindInitialValues.h"
+#include "FindModules.h"
+#include "FindNewDatatype.h"
+#include "FindPorts.h"
+#include "FindGlobal.h"
+#include "FindNetlist.h"
+#include "FindProcess.h"
+#include "FindVariables.h"
+#include "FindSCMain.h"
+
 static std::vector<DESCAM::Module *> parameter() {
 
   std::vector<const char *> commandLineArugmentsVector;
@@ -42,6 +55,7 @@ static std::vector<DESCAM::Module *> parameter() {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -52,7 +66,8 @@ static std::vector<DESCAM::Module *> parameter() {
                                         find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get());
+                                        find_sc_main.get(),
+                                        find_data_flow_factory.get());
 
 //    add optimizations
 //    std::set<std::string> optimizeOptions = {"all"};

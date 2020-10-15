@@ -13,6 +13,17 @@
 #include "Logger/Logger.h"
 #include "Logger/ConsoleSink.h"
 
+#include "FindFunctions.h"
+#include "FindInitialValues.h"
+#include "FindModules.h"
+#include "FindNewDatatype.h"
+#include "FindPorts.h"
+#include "FindGlobal.h"
+#include "FindNetlist.h"
+#include "FindProcess.h"
+#include "FindVariables.h"
+#include "FindSCMain.h"
+
 namespace py = pybind11;
 
 using namespace DESCAM;
@@ -44,8 +55,11 @@ int checkFile(int argc, const char *argv[]) {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
 
-  auto check_errors = new CheckErrors(find_functions.get(),
+  throw std::runtime_error("NOT ALLOWED");
+  // TODO Insert CheckErrors again
+  /*auto check_errors = new CheckErrors(find_functions.get(),
                                       find_initial_values.get(),
                                       find_modules.get(),
                                       find_new_datatype.get(),
@@ -54,10 +68,11 @@ int checkFile(int argc, const char *argv[]) {
                                       find_netlist.get(),
                                       find_process.get(),
                                       find_variables.get(),
-                                      find_sc_main.get());
+                                      find_sc_main.get(),
+                                      find_da);
 
   //Create model
-  ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), check_errors, true))
+  ASSERT_MODEL_CREATION(DESCAM::ModelGlobal::createModel(argc, "DESCAM", cml.getSourceFile(), check_errors, true))*/
   // write log messages to all sinks
   DESCAM::Logger::log();
   return 0;
