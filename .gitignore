@@ -3,7 +3,8 @@
 !.gitignore
 *~
 build/*
-cmake-build-debug/*
+*cmake-build-debug
+*CMakeFiles
 build_dbg/*
 backup/*
 bin/*
@@ -66,3 +67,5 @@ example/BubbleSort/RTL-Step2_Ternary/PrintSkeleton/*.mti
 example/FFT/SEQ/DeSCAM_parse
 example/FFT/PIPELINE/DeSCAM_parse
 
+#bak files
+*.bak
