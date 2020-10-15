@@ -43,8 +43,12 @@ namespace DESCAM {
 
     }
 
-    void Module::addVariable(Variable *variable) {
+    /*void Module::addVariable(Variable *variable) {
         this->variableMap.insert(std::make_pair(variable->getName(), variable));
+    }*/
+
+    void Module::addVariables(std::map<std::string, Variable *> variables) {
+      this->variableMap = std::move(variables);
     }
 
     FSM *Module::getFSM() const {

@@ -7,13 +7,17 @@
 
 #include "DataType.h"
 #include "clang/AST/Type.h"
+#include "Module.h"
+#include "clang/Frontend/CompilerInstance.h"
 
 namespace DESCAM {
 class IFindNewDatatype {
  public:
   virtual ~IFindNewDatatype() = default;
 
-  virtual DESCAM::DataType *getDataType(const clang::QualType &type) = 0;
+  virtual DESCAM::DataType *getDataType(const clang::QualType &type,
+                                        clang::CompilerInstance *ci,
+                                        DESCAM::Module *module) = 0;
   virtual std::string getTypeName(const clang::QualType &type) = 0;
   virtual bool isGlobal(const clang::QualType &type) = 0;
 };

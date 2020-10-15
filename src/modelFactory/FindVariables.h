@@ -8,6 +8,14 @@
 #include <map>
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "IFindVariables.h"
+#include "FindVariablesVisitor.h"
+#include "Logger/Logger.h"
+#include "GlobalUtilities.h"
+#include "clang/AST/Decl.h"
+#include "FindVariablesVisitor.h"
+#include "IFindNewDatatype.h"
+#include "IFindInitialValues.h"
+#include "IFindDataFlowFactory.h"
 
 namespace DESCAM {
 /**
@@ -18,22 +26,23 @@ namespace DESCAM {
   ** Types that are not supported!
  */
 
-class FindVariables : public IFindVariables, public clang::RecursiveASTVisitor<FindVariables> {
+class FindVariables : public IFindVariables {
  public:
-  FindVariables() = default;
+  explicit FindVariables(IFindNewDatatype *find_new_datatype,
+                         IFindInitialValues *find_initial_values,
+                         IFindDataFlowFactory *find_data_flow_factory);
   ~FindVariables() override = default;
-  //Visitor
-  bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
 
-  //GETTER
-  bool setup(clang::CXXRecordDecl *record_decl) override;
-  std::map<std::string, clang::QualType> getVariableTypeMap() const override;
-  const std::map<std::string, clang::FieldDecl *> &getVariableMap() const override;
+  std::map<std::string, DESCAM::Variable *> getVariableMap() override;
+  std::map<std::string, const DESCAM::DataType *> getVariableTypeMap() override;
+  bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, DESCAM::Module *module) override;
  private:
-  clang::CXXRecordDecl *record_decl_;
-  std::map<std::string, clang::FieldDecl *> member_map_; //! <NameOfField,Declaration>
-  std::map<std::string, std::string> member_type_map_; //! <NameOfField,Declaration>
+  IFindNewDatatype *find_new_datatype_;
+  IFindInitialValues *find_initial_values_;
+  IFindDataFlowFactory *find_data_flow_factory_;
 
+  clang::CXXRecordDecl *record_decl_;
+  std::map<std::string, Variable *> variable_map_;
 };
 
 }

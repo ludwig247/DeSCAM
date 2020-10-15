@@ -6,13 +6,17 @@
 #include <iostream>
 #include "FindNewDatatype.h"
 #include "FindVariables.h"
+#include "FindInitialValues.h"
+#include "FindDataFlowFactory.h"
 #include "IFindVariables.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
 namespace DESCAM {
 
-DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
+DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type,
+                                               clang::CompilerInstance *ci,
+                                               DESCAM::Module *module) {
 
   std::string typeName = FindNewDatatype::getTypeName(type);
   //DataType already exists?
@@ -33,8 +37,13 @@ DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
   } else if (type->isStructureType()) {
     auto record_decl = type->getAsCXXRecordDecl();
     // TODO inject this as dependency
-    std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
-    find_variables->setup(record_decl);
+    std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
+    std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
+    std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+    std::unique_ptr<FindVariables> find_variables = std::make_unique<FindVariables>(find_new_datatype.get(),
+                                                                                    find_initial_values.get(),
+                                                                                    find_data_flow_factory.get());
+    find_variables->setup(record_decl, ci, module);
     //Create new dataType
     new_type = new DataType(record_decl->getName().str());
     //Add sub-variables

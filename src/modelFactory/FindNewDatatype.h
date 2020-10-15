@@ -22,7 +22,9 @@ class FindNewDatatype : public IFindNewDatatype, public clang::RecursiveASTVisit
 
   ~FindNewDatatype() override = default;
 
-  DESCAM::DataType *getDataType(const clang::QualType &type) override;
+  DESCAM::DataType *getDataType(const clang::QualType &type,
+                                clang::CompilerInstance *ci,
+                                DESCAM::Module *module) override;
   std::string getTypeName(const clang::QualType &type) override;
   bool isGlobal(const clang::QualType &type) override; //! Returns true, if datatype is not defined within a module class
 
