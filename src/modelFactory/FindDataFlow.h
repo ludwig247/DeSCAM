@@ -5,22 +5,13 @@
 #ifndef SCAM_FINDDATAFLOW_H
 #define SCAM_FINDDATAFLOW_H
 
-#include <map>
-#include <iostream>
-#include <clang/AST/Stmt.h>
-#include <clang/Analysis/CFG.h>
-#include <clang/Basic/SourceManager.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include "clang/AST/RecursiveASTVisitor.h"
 
-#include <Logger/Logger.h>
-#include <Model.h>
-#include "PrintStmt.h"
 #include "IFindDataFlow.h"
 
 namespace DESCAM {
 class Module;
 class Process;
+class IFindDataFlowFactory;
 /**
  * \brief processes a clang::stmt and extract all necessary information from it
  *
@@ -57,7 +48,7 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   DESCAM::Stmt * getStmt() override;
 
   static std::string functionName;
-  bool setup(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) override;
+  bool setup(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci,IFindDataFlowFactory * find_data_flow_factory, bool unsigned_flag) override;
   static bool isFunction;
 
  private:
@@ -77,6 +68,7 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   void clearExpressions();
 
   bool unsigned_flag;
+  IFindDataFlowFactory *find_data_flow_factory_;
 };
 
 }
