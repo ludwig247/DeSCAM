@@ -1,0 +1,153 @@
+macro signed Mult_result(unsigned instr_func3, instr_func7, Ra, Rb) :=
+    case(instr_func3)
+    3'h0: signed(unsigned(Ra) * unsigned(Rb))[31:0];
+    3'h1: signed(signed(Ra)*signed(Rb))[63:32];
+    3'h2: signed(signed(Ra)*unsigned(Rb))[63:32];
+    3'h3: signed(unsigned(Ra)*unsigned(Rb))[63:32];
+    3'h4: signed(Ra) div signed(Rb);
+    3'h5: signed(unsigned(Ra) div unsigned(Rb))[31:0];
+    3'h6: signed(Ra) rem signed(Rb);
+    3'h7: unsigned(Ra) rem unsigned(Rb);
+    default:    32'h0;
+    endcase;
+end macro;
+
+//fast mult
+macro property instr_mul (unsigned instr_func3) :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait, reg_bound;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1;
+    freeze:
+        op_code = instr_rdata_i[6:0]@t_if,
+	rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        rs2 = instr_rdata_i[24:20]@t_if,
+        func7 = instr_rdata_i[31:25]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        instr_addr_at_t_if1 = instr_addr_o@t_if+1,
+        instr_addr_at_t_if2 = instr_addr_o@t_if+2,
+       	op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = id_stage_i/registers_i/rf_reg[rs2] @t_id,
+        res = Mult_result(instr_func3, func7, op1Data, op2Data)@t_id,
+	//full_res = op1Data * op2Data@t_id,
+	//res = full_res[31:0]@t_id,   
+	regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id,
+	stall = id_stage_i/controller_i/stall@t_id+1;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o ;
+        at t_if:    !data_req_o;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h33; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+        at t_if:    instr_rdata_i[14:12] ==  instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[24:20] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[31:25] == 7'h1 ;               
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == op_code;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[31:25] == func7;
+        at t_id:    instr_rdata_id[24:20] == rs2;
+
+        //WB
+        during[t_id, t_id +2]:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+	at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+	at t_id:    id_stage_i/controller_i/stall == 1'b1;
+	during[t_id, t_id +1]:    instr_req_o;
+	during[t_id, t_id +2]:    !data_req_o;
+	at t_id+1:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+	at t_id+1:    instr_addr_o == (instr_addr_at_t_if1 == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if1 + 4);
+        at t_id+2:    conceptual_state;
+	//at t_id+2:   if_stage_i/prefetch_buffer_i/fifo_i/out_valid_o || if_stage_i/prefetch_buffer_i/fifo_i/in_ready_o || if_stage_i/prefetch_buffer_i/fifo_i/out_ready_i || if_stage_i/prefetch_buffer_i/fifo_i/out_addr_o || if_stage_i/prefetch_buffer_i/fifo_i/out_rdata_o;
+        at t_id+2:    instr_req_o== (!stall ? 1:0);
+	at t_id+2:    instr_addr_o == (instr_addr_at_t_if2 == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if2 + 4);
+        at t_id+3:    id_stage_i/registers_i/rf_reg[rd] == res;
+        at t_id+3:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+	at t_id+2:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id+2;
+end macro;
+
+macro property instr_mulh (unsigned instr_func3) :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait, reg_bound;
+ //   dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait, reg_bound;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1;
+    freeze:
+        op_code = instr_rdata_i[6:0]@t_if,
+	rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        rs2 = instr_rdata_i[24:20]@t_if,
+        func7 = instr_rdata_i[31:25]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        instr_addr_at_t_if1 = instr_addr_o@t_if+1,
+        instr_addr_at_t_if2 = instr_addr_o@t_if+2,
+        instr_addr_at_t_if3 = instr_addr_o@t_if+3,
+       	op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = id_stage_i/registers_i/rf_reg[rs2] @t_id,
+        res = Mult_result(instr_func3, func7, op1Data, op2Data)@t_id,
+	divide_by_zero =  (op2Data == 0 ) ? 1'b1 : 1'b0  @t_id,
+	//full_res = op1Data * op2Data@t_id,
+	//res = full_res[31:0]@t_id,   
+	regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id,
+	stall = id_stage_i/controller_i/stall@t_id+1;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o ;
+        at t_if:    !data_req_o;
+	//at t_id:    if(instr_func3 == 3'h4 || instr_func3 == 3'h5 || instr_func3 == 3'h6 || instr_func3 == 3'h7)  !divide_by_zero; endif;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h33; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+        at t_if:    instr_rdata_i[14:12] ==  instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[24:20] < 6; //r0 to r5
+	at t_if:    if (instr_func3 == 3'h4 || instr_func3 == 3'h5 || instr_func3 == 3'h6 || instr_func3 == 3'h7) (instr_rdata_i[24:20] > 0) && !divide_by_zero; endif; //r0 to r5
+        at t_if:    instr_rdata_i[31:25] == 7'h1 ;               
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == op_code;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[31:25] == func7;
+        at t_id:    instr_rdata_id[24:20] == rs2;
+
+        //WB
+        during[t_id, t_id +3]:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+	at t_id:    id_stage_i/controller_i/stall == 1'b1;
+	at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+	at t_id+1:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+	at t_id+1:    instr_addr_o == (instr_addr_at_t_if1 == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if1 + 4);
+	during[t_id, t_id +1]:    instr_req_o;
+	at t_id+2:    instr_addr_o == (instr_addr_at_t_if2 == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if2 + 4);
+	at t_id+2:    instr_req_o== (!stall ? 1:0);
+	at t_id+3:    conceptual_state;
+        at t_id+3:    instr_req_o== (!stall ? 1:0);
+        during[t_id, t_id +3]:    !data_req_o;
+        at t_id+3:     instr_addr_o == instr_addr_at_t_if3;
+        at t_id+4:    id_stage_i/registers_i/rf_reg[rd] == res;
+        at t_id+4:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+	at t_id+3:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id+3;
+end macro;
