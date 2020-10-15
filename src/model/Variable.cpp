@@ -2,15 +2,18 @@
 #include <Stmts/EnumValue.h>
 #include <Stmts/IntegerValue.h>
 #include <Stmts/BoolValue.h>
-#include <llvm/Support/raw_ostream.h>
 #include <Stmts/UnsignedValue.h>
 #include "Variable.h"
 
-DESCAM::Variable::Variable(std::string name, const DataType *type, DESCAM::ConstValue *initialValue, DESCAM::Variable *parent, LocationInfo locationInfo) :
-        VariableTemplate(name, type, initialValue, parent,locationInfo) {
+DESCAM::Variable::Variable(const std::string &name,
+                           const DataType *type,
+                           DESCAM::ConstValue *initial_value,
+                           DESCAM::Variable *parent,
+                           LocationInfo location_info) :
+    VariableTemplate(name, type, initial_value, parent, std::move(location_info)) {
 }
 
 void DESCAM::Variable::accept(DESCAM::AbstractVisitor &visitor) {
-    visitor.visit(*this);
+  visitor.visit(*this);
 }
 

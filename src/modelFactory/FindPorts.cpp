@@ -21,6 +21,9 @@ bool containsSubstring(const std::string &full_string, const std::string &sub_st
 
 //Constructor
 FindPorts::FindPorts(IFindNewDatatype *findNewDatatype) :
+    record_decl_(nullptr),
+    pass_(0),
+    ci_(nullptr),
     find_new_datatype_(findNewDatatype) {}
 
 /*!
@@ -34,7 +37,8 @@ FindPorts::FindPorts(IFindNewDatatype *findNewDatatype) :
  */
 bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
   clang::QualType qualType = fieldDecl->getType();
-  //Synch: find by name, doesn't have a parameter
+  //Sync: find by name, doesn't have a parameter
+  //TODO: What's the templateClass used for? Line of outdated legacy code? Just checking for dyn_cast?
   if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(qualType.getTypePtr())) {
     //In order to have a port there needs to be a qualType with 3 parameters
     //Disassemble the template
@@ -65,7 +69,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
       }
       this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(),
                                                           DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(
-                                                              fieldDecl,ci_)));
+                                                              fieldDecl, ci_)));
     }
   }
   return true;
