@@ -38,6 +38,10 @@ DESCAM::CheckErrors::CheckErrors(IFindFunctions *find_functions,
     find_variables_(find_variables),
     find_sc_main_(find_sc_main) {
 
+  assert(false);
+  //FIXME: add missing interfaces
+  this->find_data_flow_factory_ = nullptr;
+
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
   this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
@@ -267,7 +271,7 @@ void DESCAM::CheckErrors::addBehavior(DESCAM::Module *module, clang::CXXRecordDe
   //Process declaration
   clang::CXXMethodDecl *methodDecl = process->second.first;
   //Create blockCFG for this process
-  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, true);
+  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module,find_data_flow_factory_, true);
   TERMINATE_IF_ERROR
   DESCAM::CfgNode::node_cnt = 0;
   DESCAM::State::state_cnt = 0;
@@ -321,7 +325,7 @@ void DESCAM::CheckErrors::addVariables(DESCAM::Module *module, clang::CXXRecordD
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_,find_data_flow_factory_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -393,7 +397,7 @@ void DESCAM::CheckErrors::addFunctions(DESCAM::Module *module, CXXRecordDecl *de
     //Active searching only for functions
     FindDataFlow::functionName = function.first;
     FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, ci_, module);
+    DESCAM::CFGFactory cfgFactory(function.second, ci_, module,find_data_flow_factory_);
     FindDataFlow::functionName = "";
     FindDataFlow::isFunction = false;
     //Transform blockCFG back to code
@@ -406,7 +410,7 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_);
+  this->find_global_->setup(pDecl, ci_,find_data_flow_factory_);
   for (const auto &var: find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
   }
@@ -427,7 +431,7 @@ void DESCAM::CheckErrors::addGlobalConstants(TranslationUnitDecl *pDecl) {
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
-      DESCAM::CFGFactory cfgFactory(find_global_->getFunctionDeclMap().at(name), ci_, &module);
+      DESCAM::CFGFactory cfgFactory(find_global_->getFunctionDeclMap().at(name), ci_, &module,find_data_flow_factory_);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
       //Transform blockCFG back to code
