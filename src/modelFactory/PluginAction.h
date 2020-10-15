@@ -91,23 +91,13 @@ class DESCAMFrontEndFactory : public FrontendActionFactory {
  * Wrapper class required to interface with the clang::Tool class.
  */
 class PluginAction {
+ private:
+  //TODO: delete this static member
+  /** length of last run source-file list because clang stores source file lists and we have to delete them */
+  static int previous_length_;
+
  public:
-  PluginAction(int argc, const char **argv, IModelFactory *model_factory) {
-
-    CommonOptionsParser OptionsParser(argc, argv);
-
-    ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
-
-    std::string output;
-    llvm::raw_string_ostream ss(output);
-    auto diagnosticOptions = new clang::DiagnosticOptions();
-    diagnosticOptions->ShowSourceRanges = 1;
-    auto diagnosticPrinter = new clang::ClangDiagnosticPrinter(ss, diagnosticOptions);
-    Tool.setDiagnosticConsumer(diagnosticPrinter);
-    Tool.run(new DESCAMFrontEndFactory(model_factory));
-    diagnosticPrinter->addDiagnosticsToLogger(std::move(ss.str()));
-  }
+  PluginAction(int argc, const char **argv, IModelFactory *model_factory);
 };
 }
-
 #endif /* _PLUGIN_ACTION_H_ */

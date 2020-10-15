@@ -25,7 +25,7 @@ class IFindInitialValues {
                      clang::FieldDecl *fieldDecl,
                      DESCAM::Module *module,
                      clang::CompilerInstance *ci,
-                     IFindDataFlowFactory * find_data_flow_factory) = 0;
+                     IFindDataFlowFactory *find_data_flow_factory) = 0;
 
   virtual ConstValue *getInitValue() = 0;
 };

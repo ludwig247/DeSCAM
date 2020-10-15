@@ -5,9 +5,8 @@ add_subdirectory(Optimizer)
 
 add_library (modelFactory SHARED
         ModelFactory.cpp
-		CheckErrors.cpp
 		ClangDiagnosticPrinter.cpp
-        PluginAction.h
+        PluginAction.cpp
         FindModules.cpp
         FindSCMain.cpp
         FindPorts.cpp

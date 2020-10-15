@@ -8,10 +8,13 @@
 #include "IFindModules.h"
 #include "gmock/gmock.h"
 
+namespace DESCAM {
+namespace MOCK {
 class MockIFindModules : public IFindModules {
  public:
   MOCK_METHOD(void, setup, (clang::TranslationUnitDecl * ), (override));
   MOCK_METHOD((const std::map<std::string, clang::CXXRecordDecl *> &), getModuleMap, (), (override));
 };
-
+}
+}
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MOCKS_MODELFACTORY_MOCKIFINDMODULES_H_
