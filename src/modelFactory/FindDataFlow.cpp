@@ -7,8 +7,6 @@
 #include <While.h>
 #include <If.h>
 #include <BoolValue.h>
-#include <SectionOperand.h>
-#include <SectionValue.h>
 #include <Arithmetic.h>
 
 #include <clang/Lex/Lexer.h>
@@ -19,7 +17,6 @@
 #include <Stmts/Logical.h>
 #include <Stmts/Relational.h>
 #include <Stmts/Cast.h>
-#include <ExprVisitor.h>
 #include <NodePeekVisitor.h>
 #include <ModelGlobal.h>
 #include "PortOperand.h"
@@ -28,107 +25,97 @@
 
 #include "DescamException.h"
 
+#include "FindDataFlowFactory.h"
+
 bool DESCAM::FindDataFlow::isFunction = false;
 std::string DESCAM::FindDataFlow::functionName = "";
 
-DESCAM::FindDataFlow::FindDataFlow(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci, bool unsigned_flag) :
-    module(module),
-    ci(ci),
-    stmt(nullptr),
-    expr(nullptr),
-    rhsExpr(nullptr),
-    lhsExpr(nullptr),
-    unsigned_flag(unsigned_flag),
-    pass(0) {
-  //stmt->dump();
-  TraverseStmt(stmt);
-}
-
 bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
   //Binary Expression is always TOP statement. In case of a substmt, new FindDataFlow object is neccesary
-  if (pass == 0) {
+  if (pass_ == 0) {
     // Collecting statement location information from clang
-    auto binaryOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(binaryOperator, ci);
+    auto binaryOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(binaryOperator, ci_);
 
     //OperationName
     std::string operationName = binaryOperator->getOpcodeStr().str();
     //Pass = 1 LHS
     //LHS Operator
     auto lhs = binaryOperator->getLHS();
-    FindDataFlow findLHS(lhs, this->module, ci, unsigned_flag);
-    auto lhsLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(lhs, ci);
-    this->lhsExpr = findLHS.getExpr();
+    auto findLHS = find_data_flow_factory_->create_new(lhs, this->module_, ci_, find_data_flow_factory_, unsigned_flag_);
+
+    auto lhsLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(lhs, ci_);
+    this->lhs_expr_ = findLHS->getExpr();
     //RHS Operator
-    if (this->lhsExpr && this->lhsExpr->getDataType()->isUnsigned()) this->unsigned_flag = true;
+    if (this->lhs_expr_ && this->lhs_expr_->getDataType()->isUnsigned()) this->unsigned_flag_ = true;
     auto rhs = binaryOperator->getRHS();
 
+    auto findRHS = find_data_flow_factory_->create_new(rhs, this->module_, ci_, find_data_flow_factory_, unsigned_flag_);
+    this->rhs_expr_ = findRHS->getExpr();
 
-    FindDataFlow findRHS(rhs, this->module, ci, unsigned_flag);
-    this->rhsExpr = findRHS.getExpr();
-
-    auto rhsLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(rhs, ci);
+    auto rhsLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(rhs, ci_);
 
     //Are LHS and RHS Valid?
-    if (this->rhsExpr == nullptr || this->lhsExpr == nullptr) {
+    if (this->rhs_expr_ == nullptr || this->lhs_expr_ == nullptr) {
       auto message = "";
-      if (!(this->rhsExpr && this->lhsExpr)) message = "Could not translate LHS and RHS of Stmts";
-      else if (!this->rhsExpr) message = "Could not translate RHS of Stmts";
+      if (!(this->rhs_expr_ && this->lhs_expr_)) message = "Could not translate LHS and RHS of Stmts";
+      else if (!this->rhs_expr_) message = "Could not translate RHS of Stmts";
       else message = "Could not translate LHS of Stmts";
       return exitVisitor(message, binaryOpLocationInfo);
     }
     //Setting location information for the lhs and rhs
-    this->lhsExpr->setStmtInfo(lhsLocationInfo);
-    this->rhsExpr->setStmtInfo(rhsLocationInfo);
+    this->lhs_expr_->setStmtInfo(lhsLocationInfo);
+    this->rhs_expr_->setStmtInfo(rhsLocationInfo);
 
     //Create new Element
     if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Assign) {
-      DESCAM_ASSERT(this->stmt = new Assignment(this->lhsExpr, this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->stmt_ = new Assignment(this->lhs_expr_, this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LAnd) {
-      DESCAM_ASSERT(this->expr = new Logical(this->lhsExpr, "and", this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Logical(this->lhs_expr_, "and", this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LOr) {
-      DESCAM_ASSERT(this->expr = new Logical(this->lhsExpr, "or", this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Logical(this->lhs_expr_, "or", this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_EQ ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_NE ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_GE ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LE ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_GT ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LT) {
-      DESCAM_ASSERT(this->expr = new Relational(this->lhsExpr, operationName, this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Relational(this->lhs_expr_, operationName, this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Add ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Div ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Rem ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Mul ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Sub) {
-      DESCAM_ASSERT(this->expr = new Arithmetic(this->lhsExpr, operationName, this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Arithmetic(this->lhs_expr_, operationName, this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_AddAssign ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_SubAssign ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_MulAssign ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_DivAssign ||
         binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_RemAssign) {
       std::string arith_operator = operationName.substr(0, 1);
-      DESCAM_ASSERT(this->stmt = new Assignment(this->lhsExpr,
-                                                new Arithmetic(this->lhsExpr, arith_operator, this->rhsExpr,
+      DESCAM_ASSERT(this->stmt_ = new Assignment(this->lhs_expr_,
+                                                new Arithmetic(this->lhs_expr_, arith_operator, this->rhs_expr_,
                                                                binaryOpLocationInfo), binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shl) {
       //Special case ... shiftings depends on LHS Datatype
       if (binaryOperator->getType()->isUnsignedIntegerType()) {
-        FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, ci, true);
-        this->rhsExpr = findRHS2.getExpr();
+
+        auto findRHS2 =find_data_flow_factory_->create_new(binaryOperator->getRHS(), this->module_, ci_,find_data_flow_factory_, true);
+        this->rhs_expr_ = findRHS2->getExpr();
       }
-      DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "<<", this->rhsExpr, binaryOpLocationInfo));
+      DESCAM_ASSERT(this->expr_ = new Bitwise(this->lhs_expr_, "<<", this->rhs_expr_, binaryOpLocationInfo));
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Shr) {
       //Special case ... shiftings depends on LHS Datatype
       if (binaryOperator->getType()->isUnsignedIntegerType()) {
-        FindDataFlow findRHS2(binaryOperator->getRHS(), this->module, ci, true);
-        this->rhsExpr = findRHS2.getExpr();
+        auto findRHS2 = find_data_flow_factory_->create_new(binaryOperator->getRHS(), this->module_, ci_,find_data_flow_factory_, true);
+        this->rhs_expr_ = findRHS2->getExpr();
       }
-      DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, ">>", this->rhsExpr, binaryOpLocationInfo));
+      DESCAM_ASSERT(this->expr_ = new Bitwise(this->lhs_expr_, ">>", this->rhs_expr_, binaryOpLocationInfo));
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_And) {
-      DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "&", this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Bitwise(this->lhs_expr_, "&", this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Or) {
-      DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "|", this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Bitwise(this->lhs_expr_, "|", this->rhs_expr_, binaryOpLocationInfo))
     } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Xor) {
-      DESCAM_ASSERT(this->expr = new Bitwise(this->lhsExpr, "^", this->rhsExpr, binaryOpLocationInfo))
+      DESCAM_ASSERT(this->expr_ = new Bitwise(this->lhs_expr_, "^", this->rhs_expr_, binaryOpLocationInfo))
     } else {
       auto msg = "Operator " + operationName + " not defined";
       this->exitVisitor(msg, binaryOpLocationInfo);
@@ -140,17 +127,17 @@ bool DESCAM::FindDataFlow::VisitBinaryOperator(clang::BinaryOperator *binaryOper
 }
 
 bool DESCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator) {
-  auto condOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(conditionalOperator, ci);
-  FindDataFlow findCond(conditionalOperator->getCond(), this->module, ci, false);
-  auto condExpr = findCond.getExpr();
-  FindDataFlow findTrue(conditionalOperator->getTrueExpr(), this->module, ci, unsigned_flag);
-  auto trueExpr = findTrue.getExpr();
-  FindDataFlow findFalse(conditionalOperator->getFalseExpr(), this->module, ci, unsigned_flag);
-  auto falseExpr = findFalse.getExpr();
+  auto condOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(conditionalOperator, ci_);
+  auto findCond = find_data_flow_factory_->create_new(conditionalOperator->getCond(), this->module_, ci_, find_data_flow_factory_,false);
+  auto condExpr = findCond->getExpr();
+  auto findTrue = find_data_flow_factory_->create_new(conditionalOperator->getTrueExpr(), this->module_, ci_, find_data_flow_factory_, unsigned_flag_);
+  auto trueExpr = findTrue->getExpr();
+  auto findFalse = find_data_flow_factory_->create_new(conditionalOperator->getFalseExpr(), this->module_, ci_, find_data_flow_factory_, unsigned_flag_);
+  auto falseExpr = findFalse->getExpr();
   if (condExpr && trueExpr && falseExpr) {
     //conditionalOperator->dumpColor();
     //std::cout << *condExpr << "?" << *trueExpr << ":" << *falseExpr << std::endl;
-    DESCAM_ASSERT(this->expr = new Ternary(condExpr, trueExpr, falseExpr, condOpLocationInfo))
+    DESCAM_ASSERT(this->expr_ = new Ternary(condExpr, trueExpr, falseExpr, condOpLocationInfo))
     if (DescamException::isExceptionHappened())
       clearExpressions();
   } else return exitVisitor("Operator not correctly used!", condOpLocationInfo);
@@ -159,9 +146,9 @@ bool DESCAM::FindDataFlow::VisitConditionalOperator(clang::ConditionalOperator *
 
 bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memberCallExpr) {
   //Call: ->write(argument)
-  if (pass == 0) {
+  if (pass_ == 0) {
     // Collecting statement location information from clang
-    auto memberCallLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr, ci);
+    auto memberCallLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr, ci_);
     //Return value:
     std::string returnValue = memberCallExpr->getCallReturnType().getAsString();
     //Callee: E.g. x.foo() -> foo() is callee
@@ -171,27 +158,27 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
     std::vector<std::string> supportedMethods = {"read", "write", "try_read", "try_write", "master_read",
                                                  "master_write", "slave_read", "slave_write", "set", "get", "wait",
                                                  "peek", "poke"};
-    auto functions = module->getFunctionMap();
+    auto functions = module_->getFunctionMap();
     if (clang::MemberExpr *memberExpr = llvm::dyn_cast<clang::MemberExpr>(memberCallExpr->getCallee())) {
       //Assign name of the method
       methodString = memberExpr->getMemberDecl()->getNameAsString();
       //Get location info of the method
-      auto calleeLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr->getCallee(), ci);
+      auto calleeLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr->getCallee(), ci_);
       //Check whether method is supported, if not -> Bad Stmts
       if (std::find(supportedMethods.begin(), supportedMethods.end(), methodString) != supportedMethods.end()) {
-//                this->pass = 1;
+//                this->pass__ = 1;
         //Including a wait, but onyl with SC_ZERO_TIME
         if (methodString == "wait") {
           if (memberCallExpr->getNumArgs() == 2) {
-            DESCAM::FindDataFlow firstArgument(memberCallExpr->getArg(0), this->module, ci, false);
-            DESCAM::FindDataFlow secondArgument(memberCallExpr->getArg(1), this->module, ci, false);
-            DESCAM_ASSERT(this->stmt = new Wait(
+            auto firstArgument = find_data_flow_factory_->create_new(memberCallExpr->getArg(0), this->module_, ci_, find_data_flow_factory_,false);
+            auto secondArgument = find_data_flow_factory_->create_new(memberCallExpr->getArg(1), this->module_, ci_, find_data_flow_factory_,false);
+            DESCAM_ASSERT(this->stmt_ = new Wait(
                 calleeLocationInfo)); //FIXME: don't know how to check for the arguments or if needed to begin with
             if (DescamException::isExceptionHappened()) clearExpressions();
             return false;
           } else
             return exitVisitor("Only wait(0) is allowed", calleeLocationInfo);
-        } else this->pass = 1;
+        } else this->pass_ = 1;
         //Function
       } else if (functions.find(methodString) != functions.end()) {
         //Analyse paramter
@@ -199,14 +186,14 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
         std::map<std::string, DESCAM::Expr *> paramValueMap;
         for (int i = 0; i < memberCallExpr->getNumArgs(); i++) {
           std::string paramName = memberCallExpr->getMethodDecl()->getParamDecl(i)->getName();
-          DESCAM::FindDataFlow findArgument(memberCallExpr->getArg(i), this->module, ci, false);
-          if (findArgument.getExpr() == nullptr)
+          auto findArgument = find_data_flow_factory_->create_new(memberCallExpr->getArg(i), this->module_, ci_, find_data_flow_factory_,false);
+          if (findArgument->getExpr() == nullptr)
             return exitVisitor(methodString + "() has unsupported params", calleeLocationInfo);
-          DESCAM::Expr *paramExpr = findArgument.getExpr();
+          DESCAM::Expr *paramExpr = findArgument->getExpr();
           paramValueMap.insert(std::make_pair(paramName, paramExpr));
         }
-        DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramValueMap, calleeLocationInfo);
-                          this->stmt = this->expr)
+        DESCAM_ASSERT(this->expr_ = new FunctionOperand(function, paramValueMap, calleeLocationInfo);
+                          this->stmt_ = this->expr_)
         if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
       } else {
@@ -220,24 +207,24 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
     auto implicitObjArg = memberCallExpr->getImplicitObjectArgument();
     TraverseStmt(implicitObjArg);
 
-    if (this->lhsExpr != nullptr) {
+    if (this->lhs_expr_ != nullptr) {
       //Get location info of the member
-      auto membrLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitObjArg, ci);
-      if (PortOperand *operand = dynamic_cast<PortOperand *>(this->lhsExpr)) {
+      auto membrLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitObjArg, ci_);
+      if (PortOperand *operand = dynamic_cast<PortOperand *>(this->lhs_expr_)) {
         //Lambda for finding the stateName
         auto getStateName = [=]() -> std::string {
           if (memberCallExpr->getNumArgs() == 2) {
-            FindStateName findStateName(memberCallExpr->getArg(1));
-            return findStateName.getStateName();
+            find_state_name_->setup(memberCallExpr->getArg(1));
+            return find_state_name_->getStateName();
           } else if (memberCallExpr->getNumArgs() == 3) {
-            FindStateName findStateName(memberCallExpr->getArg(2));
-            return findStateName.getStateName();
+            this->find_state_name_->setup(memberCallExpr->getArg(2));
+            return find_state_name_->getStateName();
           } else return "";
         };
 
         auto getArgument = [=](clang::Stmt *stmt) {
-          DESCAM::FindDataFlow findArgument(stmt, this->module, ci, operand->getDataType()->isUnsigned());
-          return findArgument.getExpr();
+          auto findArgument = find_data_flow_factory_->create_new(stmt, this->module_, ci_, find_data_flow_factory_, operand->getDataType()->isUnsigned());
+          return findArgument->getExpr();
         };
 
         auto hasValidArgument = [=](clang::Stmt *stmt) {
@@ -249,9 +236,9 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
           assert(memberCallExpr->getNumArgs() > 0 && memberCallExpr->getNumArgs() < 4 &&
               "Wrong number of arguments arguments");
           if (methodString == "peek" && memberCallExpr->getNumArgs() == 0) {
-            DESCAM_ASSERT(this->expr = new Peek(operand->getPort(), memberCallLocationInfo))
+            DESCAM_ASSERT(this->expr_ = new Peek(operand->getPort(), memberCallLocationInfo))
           } else if (methodString == "poke" && memberCallExpr->getNumArgs() == 0) {
-            DESCAM_ASSERT(this->expr = new Peek(operand->getPort(), memberCallLocationInfo))
+            DESCAM_ASSERT(this->expr_ = new Peek(operand->getPort(), memberCallLocationInfo))
           } else if (memberCallExpr->getNumArgs() > 0 && hasValidArgument(memberCallExpr->getArg((0)))) {
             //Blocking read
             if (methodString == "read") {
@@ -261,7 +248,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                 DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
                                                    memberCallLocationInfo);
                                   read->setStateName(getStateName());
-                                  this->stmt = read)
+                                  this->stmt_ = read)
               } else
                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                    memberCallLocationInfo);
@@ -270,7 +257,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
               //add variable as parameter
               if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
                   memberCallExpr->getArg((0))))) {
-                DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
+                DESCAM_ASSERT(this->stmt_ = new Read(operand->getPort(), variableOp, true, nullptr,
                                                     memberCallLocationInfo))
               } else
                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
@@ -285,7 +272,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                     DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
                                                        memberCallLocationInfo);
                                       read->setStateName(getStateName());
-                                      this->stmt = read)
+                                      this->stmt_ = read)
                   } else
                     return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                        memberCallLocationInfo);
@@ -299,12 +286,12 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                   auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)),
                                          false, nullptr, memberCallLocationInfo);
                   write->setStateName(getStateName());
-                  this->stmt = write)
+                  this->stmt_ = write)
             }
               //non Blocking write
             else if (methodString == "try_write" && memberCallExpr->getNumArgs() == 1) {
               DESCAM_ASSERT(
-                  this->stmt = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)),
+                  this->stmt_ = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)),
                                          true, nullptr, memberCallLocationInfo))
             }
               //non Blocking write with status flag
@@ -316,7 +303,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                                                        getArgument(memberCallExpr->getArg(0)),
                                                        true, statusOp, memberCallLocationInfo);
                                     write->setStateName(getStateName());
-                                    this->stmt = write)
+                                    this->stmt_ = write)
                 } else
                   return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                      memberCallLocationInfo);
@@ -328,21 +315,21 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                 memberCallLocationInfo);
         } else if (interface->isShared()) {
           if (methodString == "get" && memberCallExpr->getNumArgs() == 1) {
-            DESCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, ci, false);
-            if (findArgument.getExpr() != nullptr) {
-              if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument.getExpr())) {
-                DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
+            auto findArgument = find_data_flow_factory_->create_new(memberCallExpr->getArg(0), this->module_, ci_, find_data_flow_factory_, false);
+            if (findArgument->getExpr() != nullptr) {
+              if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument->getExpr())) {
+                DESCAM_ASSERT(this->stmt_ = new Read(operand->getPort(), variableOp, true, nullptr,
                                                     memberCallLocationInfo))
               } else
                 return exitVisitor("Read argument is not a variable!", memberCallLocationInfo);
             } else
               return exitVisitor("Could not find parameter", membrLocationInfo);
           } else if (methodString == "set") {
-            DESCAM::FindDataFlow findArgument(memberCallExpr->getArg(0), this->module, ci,
-                                              operand->getDataType()->isUnsigned());
-            if (findArgument.getExpr() != nullptr) {
+            auto findArgument = find_data_flow_factory_->create_new(memberCallExpr->getArg(0), this->module_, ci_,
+                                                            find_data_flow_factory_, operand->getDataType()->isUnsigned());
+            if (findArgument->getExpr() != nullptr) {
               DESCAM_ASSERT(
-                  this->stmt = new Write(operand->getPort(), findArgument.getExpr(), true, nullptr,
+                  this->stmt_ = new Write(operand->getPort(), findArgument->getExpr(), true, nullptr,
                                          memberCallLocationInfo))
             } else
               return exitVisitor("Could not find parameter", membrLocationInfo);
@@ -361,7 +348,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                   memberCallExpr->getArg((0))))) {
                 DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
                                                    memberCallLocationInfo);
-                                  this->stmt = read;
+                                  this->stmt_ = read;
                                   read->setStateName(getStateName()))
               } else
                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
@@ -371,7 +358,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                   auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg((0))),
                                          false, nullptr, memberCallLocationInfo);
                   write->setStateName(getStateName());
-                  this->stmt = write
+                  this->stmt_ = write
               )
             } else
               return exitVisitor(
@@ -387,7 +374,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
             if (methodString == "slave_read" && memberCallExpr->getNumArgs() == 1) {
               if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
                   memberCallExpr->getArg(0)))) {
-                DESCAM_ASSERT(this->stmt = new Read(operand->getPort(), variableOp, true, nullptr,
+                DESCAM_ASSERT(this->stmt_ = new Read(operand->getPort(), variableOp, true, nullptr,
                                                     memberCallLocationInfo))
               } else
                 return exitVisitor("Could not dynamically cast argument as VariableOperand",
@@ -402,7 +389,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                     DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
                                                        memberCallLocationInfo);
                                       read->setStateName(getStateName());
-                                      this->stmt = read)
+                                      this->stmt_ = read)
                   } else
                     return exitVisitor("Could not dynamically cast argument as VariableOperand",
                                        memberCallLocationInfo);
@@ -414,7 +401,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
             } else if (methodString == "slave_write") {
               DESCAM_ASSERT(
                   auto write = new Write(operand->getPort(), getArgument(memberCallExpr->getArg(0)));
-                  this->stmt = write)
+                  this->stmt_ = write)
             } else
               return exitVisitor(
                   "Unsupported method: " + methodString + "for interface " + interface->getName(),
@@ -425,7 +412,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
         }
 
       } else {
-        exitVisitor("couldn't dynamically cast this->lhsExpr to portOperand\n", memberCallLocationInfo);
+        exitVisitor("couldn't dynamically cast this->lhs_expr_ to portOperand\n", memberCallLocationInfo);
       }
     }
     //Object analyzed
@@ -434,15 +421,15 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
   }
   //Here only if object is LHS or RHS
   //Membercall: obj->
-  if (pass == 1) {
-    FindDataFlow findMemberCall(memberCallExpr, this->module, ci, false);
-    this->lhsExpr = findMemberCall.getExpr();
+  if (pass_ == 1) {
+    auto findMemberCall= find_data_flow_factory_->create_new(memberCallExpr, this->module_, ci_, find_data_flow_factory_, false);
+    this->lhs_expr_ = findMemberCall->getExpr();
   }
   //Case  var = x.foo(); RHS of operator
   //RHS is a Call
-  if (pass == 2) {
-    FindDataFlow findMemberCall(memberCallExpr, this->module, ci, false);
-    this->rhsExpr = findMemberCall.getExpr();
+  if (pass_ == 2) {
+    auto  findMemberCall = find_data_flow_factory_->create_new(memberCallExpr, this->module_, ci_, find_data_flow_factory_, false);
+    this->rhs_expr_ = findMemberCall->getExpr();
     return false;
   }
   return true;
@@ -452,23 +439,23 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
 bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
 
   //Get location info of the member
-  auto membrLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberExpr, ci);
+  auto membrLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberExpr, ci_);
 
   //Name of memberfield
   std::string name = memberExpr->getMemberDecl()->getName();
   if (name == "") exitVisitor("Member has no name ", membrLocationInfo);
 
   //Get mememberMap for module
-  const std::map<std::string, Variable *> &memberMap = module->getVariableMap();
+  const std::map<std::string, Variable *> &memberMap = module_->getVariableMap();
   auto globalVariableMap = ModelGlobal::getModel()->getGlobalVariableMap();
 
-  const std::map<std::string, Function *> &functionMap = module->getFunctionMap();
+  const std::map<std::string, Function *> &functionMap = module_->getFunctionMap();
 
   // Determine name for compound: var.x;
-  FindDataFlow findParentOfSubVar((*memberExpr->child_begin()), this->module, ci, false);
-  if (findParentOfSubVar.getExpr() != nullptr) {
+  auto findParentOfSubVar = find_data_flow_factory_->create_new((*memberExpr->child_begin()), this->module_, ci_, find_data_flow_factory_, false);
+  if (findParentOfSubVar->getExpr() != nullptr) {
     //FIXME: Get rid of subvars by also using ArrayOperand on compound variables
-    if (auto parent = dynamic_cast<DESCAM::VariableOperand *>(findParentOfSubVar.getExpr())) {
+    if (auto parent = dynamic_cast<DESCAM::VariableOperand *>(findParentOfSubVar->getExpr())) {
       if (memberMap.find(parent->getOperandName()) != memberMap.end()) {
         //Assign value
         DESCAM_ASSERT(this->switchPassExpr(new VariableOperand(memberMap.at(parent->getOperandName())->getSubVar(name), membrLocationInfo)))
@@ -482,13 +469,13 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
         return false;
       } else
         return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
-    } else if (auto parent = dynamic_cast<DESCAM::FunctionOperand *>(findParentOfSubVar.getExpr())) {
+    } else if (auto parent = dynamic_cast<DESCAM::FunctionOperand *>(findParentOfSubVar->getExpr())) {
       if (functionMap.find(parent->getOperandName()) != functionMap.end()) {
         //Assign value
         TERMINATE("Dont remove ... if never flags ... remove!");
       } else
         return exitVisitor(parent->getOperandName() + " is not a parent of " + name, membrLocationInfo);
-    } else if (auto parent = dynamic_cast<DESCAM::ParamOperand *>(findParentOfSubVar.getExpr())) {
+    } else if (auto parent = dynamic_cast<DESCAM::ParamOperand *>(findParentOfSubVar->getExpr())) {
       auto paramMap = functionMap.find(FindDataFlow::functionName)->second->getParamMap();
       if (paramMap.find(parent->getOperandName()) != paramMap.end()) {
         //Assign value
@@ -520,7 +507,7 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
     }
   }
   //Only the case, if the operation is Call
-  std::map<std::string, Port *> portMap = module->getPorts();
+  std::map<std::string, Port *> portMap = module_->getPorts();
   //Read/Write on Port
   if (portMap.find(name) != portMap.end()) {
     //Assign value
@@ -535,8 +522,8 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
   //States Enum
 //    if (name == "section" || name == "nextsection") {
 //        //Assign value
-//        if (name == "section") this->switchPassExpr(new SectionOperand(module->getFSM()->getSectionVariable()));
-//        else this->switchPassExpr(new SectionOperand(module->getFSM()->getNextSectionVariable()));
+//        if (name == "section") this->switchPassExpr(new SectionOperand(module_->getFSM()->getSectionVariable()));
+//        else this->switchPassExpr(new SectionOperand(module_->getFSM()->getNextSectionVariable()));
 //        return true;
 //    } else return exitVisitor("Could not analyze " + name);
   return exitVisitor("Could not analyze " + name, membrLocationInfo);
@@ -544,8 +531,8 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
 
 bool DESCAM::FindDataFlow::VisitIntegerLiteral(clang::IntegerLiteral *integerLiteral) {
 
-  auto valLocInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(integerLiteral, ci);
-  if (unsigned_flag) {
+  auto valLocInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(integerLiteral, ci_);
+  if (unsigned_flag_) {
     unsigned int ret = (unsigned int) *integerLiteral->getValue().getRawData();
     //Assign value
     DESCAM_ASSERT(auto unsignedVal = new UnsignedValue(ret, valLocInfo);
@@ -572,7 +559,7 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
   std::string name = declRefExpr->getDecl()->getNameAsString();
 
   //Get location info of the varDecl
-  auto varDeclLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(declRefExpr, ci);
+  auto varDeclLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(declRefExpr, ci_);
 
   //Check for global variables
   auto globalVars = ModelGlobal::getModel()->getGlobalVariableMap();
@@ -596,8 +583,8 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
                         this->switchPassExpr(enumVal))
       if (DescamException::isExceptionHappened()) clearExpressions();
       return false;
-    } else if (DataTypes::isLocalDataType(typeName, module->getName())) {
-      DESCAM_ASSERT(auto enumVal = new EnumValue(value, DataTypes::getLocalDataType(module->getName(), typeName), varDeclLocationInfo);
+    } else if (DataTypes::isLocalDataType(typeName, module_->getName())) {
+      DESCAM_ASSERT(auto enumVal = new EnumValue(value, DataTypes::getLocalDataType(module_->getName(), typeName), varDeclLocationInfo);
                         enumVal->setStmtInfo(varDeclLocationInfo);
                         this->switchPassExpr(enumVal))
       if (DescamException::isExceptionHappened()) clearExpressions();
@@ -607,7 +594,7 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
   }
   if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
     if (FindDataFlow::isFunction) {
-      auto moduleFuncMap = this->module->getFunctionMap();
+      auto moduleFuncMap = this->module_->getFunctionMap();
       auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
       if (moduleFuncMap.find(FindDataFlow::functionName) != moduleFuncMap.end()) {
         auto function = moduleFuncMap.find(FindDataFlow::functionName)->second;
@@ -643,42 +630,42 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
 bool DESCAM::FindDataFlow::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
 
   //Unary operator !var, var++ and var-- everything is going to result in a fault.
-  if (pass == 0) {
+  if (pass_ == 0) {
     // Collecting statement location information from clang
-    auto unaryOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(unaryOperator, ci);
+    auto unaryOpLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(unaryOperator, ci_);
 
     //Opcode as string: ++,--,!
     std::string opcode = unaryOperator->getOpcodeStr(unaryOperator->getOpcode()).str();
-    //Increase pass(LHS assignment)
-    pass = 1;
+    //Increase pass_(LHS assignment)
+    pass_ = 1;
     //Find operand the operation is performed on -> stored in LHS
-    FindDataFlow subExpr(unaryOperator->getSubExpr(), this->module, ci, unsigned_flag);
-    if (subExpr.getExpr() == nullptr)
+    auto subExpr = find_data_flow_factory_->create_new(unaryOperator->getSubExpr(), this->module_, ci_, find_data_flow_factory_, unsigned_flag_);
+    if (subExpr->getExpr() == nullptr)
       return exitVisitor("Could not translate unary operator", unaryOpLocationInfo);
     //TraverseStmt(unaryOperator->getSubExpr());
 
     switch (unaryOperator->getOpcode()) {
       case clang::UnaryOperator::Opcode::UO_PreInc:
-        if (subExpr.getExpr()->getDataType()->isUnsigned()) {
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "+", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+        if (subExpr->getExpr()->getDataType()->isUnsigned()) {
+          DESCAM_ASSERT(this->stmt_ = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "+", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         } else
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "+", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+          DESCAM_ASSERT(this->stmt_ = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "+", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         break;
-      case clang::UnaryOperator::Opcode::UO_LNot:DESCAM_ASSERT(this->expr = new UnaryExpr("not", subExpr.getExpr(), unaryOpLocationInfo))
+      case clang::UnaryOperator::Opcode::UO_LNot:DESCAM_ASSERT(this->expr_ = new UnaryExpr("not", subExpr->getExpr(), unaryOpLocationInfo))
         break;
       case clang::UnaryOperator::Opcode::UO_PreDec:
-        if (subExpr.getExpr()->getDataType()->isUnsigned()) {
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "-", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+        if (subExpr->getExpr()->getDataType()->isUnsigned()) {
+          DESCAM_ASSERT(this->stmt_ = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "-", new UnsignedValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         } else
-          DESCAM_ASSERT(this->stmt = new Assignment(subExpr.getExpr(),
-                                                    new Arithmetic(subExpr.getExpr(), "-", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
+          DESCAM_ASSERT(this->stmt_ = new Assignment(subExpr->getExpr(),
+                                                    new Arithmetic(subExpr->getExpr(), "-", new IntegerValue(1), unaryOpLocationInfo), unaryOpLocationInfo))
         break;
-      case clang::UnaryOperator::Opcode::UO_Minus:DESCAM_ASSERT(this->expr = new UnaryExpr("-", subExpr.getExpr(), unaryOpLocationInfo));
+      case clang::UnaryOperator::Opcode::UO_Minus:DESCAM_ASSERT(this->expr_ = new UnaryExpr("-", subExpr->getExpr(), unaryOpLocationInfo));
         break;
-      case clang::UnaryOperator::Opcode::UO_Not:DESCAM_ASSERT(this->expr = new UnaryExpr("~", subExpr.getExpr(), unaryOpLocationInfo))
+      case clang::UnaryOperator::Opcode::UO_Not:DESCAM_ASSERT(this->expr_ = new UnaryExpr("~", subExpr->getExpr(), unaryOpLocationInfo))
         break;
       default:return exitVisitor("Unkown/Unallowed unaray operator: " + opcode, unaryOpLocationInfo);
     }
@@ -688,26 +675,26 @@ bool DESCAM::FindDataFlow::VisitUnaryOperator(clang::UnaryOperator *unaryOperato
 }
 
 bool DESCAM::FindDataFlow::VisitWhileStmt(clang::WhileStmt *whileStmt) {
-  if (pass == 0) {
+  if (pass_ == 0) {
     // Collecting statement location information from clang
-    auto whileLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(whileStmt, ci);
+    auto whileLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(whileStmt, ci_);
 
-    FindDataFlow conditionStmt(whileStmt->getCond(), this->module, ci, false);
-    DESCAM_ASSERT(this->stmt = new While(conditionStmt.getExpr(), whileLocationInfo))
+    auto conditionStmt = find_data_flow_factory_->create_new(whileStmt->getCond(), this->module_, ci_, find_data_flow_factory_, false);
+    DESCAM_ASSERT(this->stmt_ = new While(conditionStmt->getExpr(), whileLocationInfo))
   }
   if (DescamException::isExceptionHappened()) clearExpressions();
   return false;
 }
 
 bool DESCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
-  if (pass == 0) {
+  if (pass_ == 0) {
     // Collecting statement location information from clang
-    auto ifLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(ifStmt, ci);
+    auto ifLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(ifStmt, ci_);
 
-    FindDataFlow conditionStmt(ifStmt->getCond(), this->module, ci, false);
-    if (conditionStmt.getExpr() == nullptr)
+    auto conditionStmt = find_data_flow_factory_->create_new(ifStmt->getCond(), this->module_, ci_, find_data_flow_factory_, false);
+    if (conditionStmt->getExpr() == nullptr)
       return exitVisitor("Translation of condition failed)", ifLocationInfo);
-    DESCAM_ASSERT(this->stmt = new If(conditionStmt.getExpr(), ifLocationInfo))
+    DESCAM_ASSERT(this->stmt_ = new If(conditionStmt->getExpr(), ifLocationInfo))
   }
   if (DescamException::isExceptionHappened()) clearExpressions();
   return false;
@@ -716,15 +703,15 @@ bool DESCAM::FindDataFlow::VisitIfStmt(clang::IfStmt *ifStmt) {
 bool DESCAM::FindDataFlow::VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *boolLiteralExpr) {
 
   // Collecting statement location information from clang
-  auto boolExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(boolLiteralExpr, ci);
+  auto boolExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(boolLiteralExpr, ci_);
   DESCAM_ASSERT(
-      switch (pass) {
-        case 0:this->expr = new BoolValue(boolLiteralExpr->getValue(), boolExprLocationInfo);
-          this->stmt = this->expr;
+      switch (pass_) {
+        case 0:this->expr_ = new BoolValue(boolLiteralExpr->getValue(), boolExprLocationInfo);
+          this->stmt_ = this->expr_;
           break;
         case 1:return exitVisitor("Boolean Value on LHS", boolExprLocationInfo);
-        case 2:this->expr = new BoolValue(boolLiteralExpr->getValue(), boolExprLocationInfo);
-          this->stmt = this->expr;
+        case 2:this->expr_ = new BoolValue(boolLiteralExpr->getValue(), boolExprLocationInfo);
+          this->stmt_ = this->expr_;
           break;
       }
   )
@@ -732,10 +719,10 @@ bool DESCAM::FindDataFlow::VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *bo
 }
 
 bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *operatorCallExpr) {
-  if (pass == 0) {
+  if (pass_ == 0) {
 
     // Collecting statement location information from clang
-    auto opCallLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(operatorCallExpr, ci);
+    auto opCallLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(operatorCallExpr, ci_);
 
     //Find assignemnt of structs -> which is represented as an overloaded copy
     // ComplexType foo = port[ComplexType].read()
@@ -744,18 +731,18 @@ bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *
       if (clang::OverloadedOperatorKind::OO_Equal == operatorCallExpr->getOperator()) {
         if (operatorCallExpr->getNumArgs() == 2) {
           //get foo
-          this->pass = 1;
+          this->pass_ = 1;
           TraverseStmt(operatorCallExpr->getArg(0));
-          if (this->lhsExpr == nullptr) {
+          if (this->lhs_expr_ == nullptr) {
             return exitVisitor("Unknown error: Stmts can't be processed(a)", opCallLocationInfo);
           }
           //get port.read()
-          this->pass = 2;
+          this->pass_ = 2;
           TraverseStmt(operatorCallExpr->getArg(1));
-          if (this->rhsExpr == nullptr) {
+          if (this->rhs_expr_ == nullptr) {
             return exitVisitor("Unknown error: Stmts can't be processed(b)", opCallLocationInfo);
           }
-          DESCAM_ASSERT(this->stmt = new Assignment(this->lhsExpr, this->rhsExpr, opCallLocationInfo))
+          DESCAM_ASSERT(this->stmt_ = new Assignment(this->lhs_expr_, this->rhs_expr_, opCallLocationInfo))
           if (DescamException::isExceptionHappened()) {
             clearExpressions();
             return false;
@@ -778,19 +765,19 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
   }
 
   // Collecting statement location information from clang
-  auto callLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(callExpr, ci);
+  auto callLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(callExpr, ci_);
 
   std::string func_name = callee->getNameAsString();
   if (func_name == "insert_state") {
     if (callExpr->getNumArgs() == 0) {
-      DESCAM_ASSERT(this->stmt = new Wait(callLocationInfo))
+      DESCAM_ASSERT(this->stmt_ = new Wait(callLocationInfo))
       if (DescamException::isExceptionHappened()) clearExpressions();
       return false;
     } else if (callExpr->getNumArgs() == 1) {
       DESCAM_ASSERT(auto wait = new Wait(callLocationInfo);
-                        FindStateName findStateName(callExpr->getArg(0));
-                        wait->setStateName(findStateName.getStateName());
-                        this->stmt = wait)
+                        this->find_state_name_->setup(callExpr->getArg(0));
+                        wait->setStateName(find_state_name_->getStateName());
+                        this->stmt_ = wait)
       if (DescamException::isExceptionHappened()) clearExpressions();
       return false;
     } else {
@@ -803,15 +790,15 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
     std::map<std::string, DESCAM::Expr *> paramExprMap;
     for (int i = 0; i < callExpr->getNumArgs(); i++) {
       std::string paramName = callee->getParamDecl(i)->getName();
-      DESCAM::FindDataFlow findArgument(callExpr->getArg(i), this->module, ci, false);
-      if (findArgument.getExpr() == nullptr)
+      auto findArgument = find_data_flow_factory_->create_new(callExpr->getArg(i), this->module_, ci_, find_data_flow_factory_, false);
+      if (findArgument->getExpr() == nullptr)
         return exitVisitor(func_name + "() has unsupported params", callLocationInfo);
-      DESCAM::Expr *paramExpr = findArgument.getExpr();
+      DESCAM::Expr *paramExpr = findArgument->getExpr();
       paramExprMap.insert(std::make_pair(paramName, paramExpr));
     }
-    DESCAM_ASSERT(this->expr = new FunctionOperand(function, paramExprMap, callLocationInfo);
-                      this->stmt = this->expr)
-    if (DescamException::isExceptionHappened()) { clearExpressions();}
+    DESCAM_ASSERT(this->expr_ = new FunctionOperand(function, paramExprMap, callLocationInfo);
+                      this->stmt_ = this->expr_)
+    if (DescamException::isExceptionHappened()) { clearExpressions(); }
     return false;
 
   } else {
@@ -824,14 +811,14 @@ bool DESCAM::FindDataFlow::VisitCallExpr(clang::CallExpr *callExpr) {
 bool DESCAM::FindDataFlow::VisitImplicitCastExpr(clang::ImplicitCastExpr *implicitCastExpr) {
   if (implicitCastExpr->getType()->isUnsignedIntegerType() &&
       implicitCastExpr->getType().getAsString() == "unsigned int") {
-    FindDataFlow unsigendSearch(implicitCastExpr->getSubExpr(), module, ci,
+    auto unsigendSearch= find_data_flow_factory_->create_new(implicitCastExpr->getSubExpr(), module_, ci_, find_data_flow_factory_,
                                 implicitCastExpr->getType()->isUnsignedIntegerType());
-    if (unsigendSearch.getExpr() == nullptr) {
+    if (unsigendSearch->getExpr() == nullptr) {
       // Collecting statement location information from clang
-      auto castExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitCastExpr, ci);
+      auto castExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitCastExpr, ci_);
       return exitVisitor("Unknown unsigned value", castExprLocationInfo);
     }
-    switchPassExpr(unsigendSearch.getExpr());
+    switchPassExpr(unsigendSearch->getExpr());
     return false;
   }
   return true;
@@ -839,41 +826,41 @@ bool DESCAM::FindDataFlow::VisitImplicitCastExpr(clang::ImplicitCastExpr *implic
 }
 
 void DESCAM::FindDataFlow::switchPassExpr(DESCAM::Expr *expr) {
-  if (expr == nullptr) TERMINATE(" Can't pass a nullptr");
+  if (expr == nullptr) TERMINATE(" Can't pass_ a nullptr");
 //    std::cout << PrintStmt::toString(expr) << std::endl;
-  switch (this->pass) {
-    case 0:this->expr = expr;
+  switch (this->pass_) {
+    case 0:this->expr_ = expr;
       break;
-    case 1:this->lhsExpr = expr;
+    case 1:this->lhs_expr_ = expr;
       break;
-    case 2:this->rhsExpr = expr;
+    case 2:this->rhs_expr_ = expr;
       break;
     default: TERMINATE("Pass is out of range");
   }
 }
 
 DESCAM::Expr *DESCAM::FindDataFlow::getExpr() const {
-  return expr;
+  return expr_;
 }
 
 bool DESCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *staticCastExpr) {
   // Collecting statement location information from clang
-  auto castExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(staticCastExpr, ci);
+  auto castExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(staticCastExpr, ci_);
 
   //FIXME: is the restirction to casting only variables necessary? Remove if hardware is designable
   if (staticCastExpr->getType()->isUnsignedIntegerType() &&
       staticCastExpr->getType().getAsString() == "unsigned int") {
-    FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, ci, false);
-    if (subExpr.getExpr() != nullptr) {
-      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("unsigned"), castExprLocationInfo)))
+    auto subExpr = find_data_flow_factory_->create_new(staticCastExpr->getSubExpr(), module_, ci_, find_data_flow_factory_, false);
+    if (subExpr->getExpr() != nullptr) {
+      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr->getExpr(), DataTypes::getDataType("unsigned"), castExprLocationInfo)))
     } else
       return exitVisitor("static_cast: only variables are allowed as parameter", castExprLocationInfo);
     if (DescamException::isExceptionHappened()) clearExpressions();
     return false;
   } else if (staticCastExpr->getType()->isIntegerType() && staticCastExpr->getType().getAsString() == "int") {
-    FindDataFlow subExpr(staticCastExpr->getSubExpr(), module, ci, false);
-    if (subExpr.getExpr() != nullptr) {
-      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr.getExpr(), DataTypes::getDataType("int"), castExprLocationInfo)))
+    auto subExpr = find_data_flow_factory_->create_new(staticCastExpr->getSubExpr(), module_, ci_, find_data_flow_factory_, false);
+    if (subExpr->getExpr() != nullptr) {
+      DESCAM_ASSERT(switchPassExpr(new DESCAM::Cast(subExpr->getExpr(), DataTypes::getDataType("int"), castExprLocationInfo)))
     } else
       return exitVisitor("static_cast: only variables are allowed as parameter", castExprLocationInfo);
     if (DescamException::isExceptionHappened()) clearExpressions();
@@ -885,14 +872,14 @@ bool DESCAM::FindDataFlow::VisitCXXStaticCastExpr(clang::CXXStaticCastExpr *stat
 
 bool DESCAM::FindDataFlow::VisitReturnStmt(clang::ReturnStmt *returnStmt) {
 
-  FindDataFlow returnExpr(returnStmt->getRetValue(), module, ci, false);
+  auto returnExpr = find_data_flow_factory_->create_new(returnStmt->getRetValue(), module_, ci_, find_data_flow_factory_, false);
   // Collecting statement location information from clang
-  auto returnLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(returnStmt, ci);
-  if (returnExpr.getExpr() == nullptr) {
+  auto returnLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(returnStmt, ci_);
+  if (returnExpr->getExpr() == nullptr) {
     return exitVisitor(" return value is null", returnLocationInfo);
   }
 
-  DESCAM_ASSERT(this->stmt = new DESCAM::Return(returnExpr.getExpr(), returnLocationInfo))
+  DESCAM_ASSERT(this->stmt_ = new DESCAM::Return(returnExpr->getExpr(), returnLocationInfo))
   if (DescamException::isExceptionHappened()) clearExpressions();
   return false;
 }
@@ -904,20 +891,20 @@ bool DESCAM::FindDataFlow::VisitCompoundStmt(clang::CompoundStmt *compoundStmt) 
 bool DESCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) {
 
   // Collecting statement location information from clang
-  auto arraySubExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(arraySubscriptExpr->getLHS(), ci);
+  auto arraySubExprLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(arraySubscriptExpr->getLHS(), ci_);
 
-  FindDataFlow array(arraySubscriptExpr->getLHS(), module, ci, false);
+  auto array = find_data_flow_factory_->create_new(arraySubscriptExpr->getLHS(), module_, ci_, find_data_flow_factory_, false);
 
-  if (array.getExpr() != nullptr && array.getExpr()->getDataType()->isArrayType()) {
-    if (auto varOp = NodePeekVisitor::nodePeekVariableOperand(array.getExpr())) {
-      FindDataFlow findIndex(arraySubscriptExpr->getIdx(), module, ci, false);
-      if (auto index = NodePeekVisitor::nodePeekIntegerValue(findIndex.getExpr())) {
+  if (array->getExpr() != nullptr && array->getExpr()->getDataType()->isArrayType()) {
+    if (auto varOp = NodePeekVisitor::nodePeekVariableOperand(array->getExpr())) {
+      auto findIndex = find_data_flow_factory_->create_new(arraySubscriptExpr->getIdx(), module_, ci_, find_data_flow_factory_, false);
+      if (auto index = NodePeekVisitor::nodePeekIntegerValue(findIndex->getExpr())) {
         DESCAM_ASSERT(auto varOp2 = new DESCAM::VariableOperand(varOp->getVariable()->getSubVar(index->getValueAsString()), arraySubExprLocationInfo);
                           switchPassExpr(varOp2))
         if (DescamException::isExceptionHappened()) clearExpressions();
         return false;
       } else {
-        DESCAM_ASSERT(auto arrOp = new ArrayOperand(varOp->getVariable(), findIndex.getExpr(), arraySubExprLocationInfo);
+        DESCAM_ASSERT(auto arrOp = new ArrayOperand(varOp->getVariable(), findIndex->getExpr(), arraySubExprLocationInfo);
                           switchPassExpr(arrOp))
         if (DescamException::isExceptionHappened()) clearExpressions();
         //TODO: Implement function for arrays.
@@ -934,11 +921,11 @@ bool DESCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *ar
 }
 
 DESCAM::Stmt *DESCAM::FindDataFlow::getStmt() {
-  return this->stmt;
+  return this->stmt_;
 }
 
 bool DESCAM::FindDataFlow::exitVisitor(const std::string &msg, const DESCAM::LocationInfo &stmtInfo) {
-  this->stmt = nullptr;
+  this->stmt_ = nullptr;
   //Add loggerMsg to the logger
   DESCAM::LoggerMsg loggerMsg(msg, stmtInfo, LoggerMsg::SeverityLevel::Error, LoggerMsg::ViolationType::SystemC_PPA_compliance, Logger::getCurrentProcessedLocation());
   DESCAM::Logger::addMsg(loggerMsg);
@@ -946,8 +933,26 @@ bool DESCAM::FindDataFlow::exitVisitor(const std::string &msg, const DESCAM::Loc
 }
 
 void DESCAM::FindDataFlow::clearExpressions() {
-  this->rhsExpr = nullptr;
-  this->lhsExpr = nullptr;
-  this->expr = nullptr;
-  this->stmt = nullptr;
+  this->rhs_expr_ = nullptr;
+  this->lhs_expr_ = nullptr;
+  this->expr_ = nullptr;
+  this->stmt_ = nullptr;
+}
+bool DESCAM::FindDataFlow::setup(clang::Stmt *_stmt, DESCAM::Module * _module_, clang::CompilerInstance * _ci_,IFindDataFlowFactory * find_data_flow_factory, bool _unsigned_flag) {
+  this->module_ = _module_;
+  this->ci_ = _ci_;
+  this->stmt_ = nullptr;
+  this->expr_ = nullptr;
+  this->rhs_expr_ = nullptr;
+  this->lhs_expr_ = nullptr;
+  this->unsigned_flag_ = _unsigned_flag;
+  this->pass_ = 0;
+  this->find_data_flow_factory_ = find_data_flow_factory;
+
+  TraverseStmt(_stmt);
+  return true;
+}
+DESCAM::FindDataFlow::FindDataFlow(DESCAM::IFindStateName * find_state_name):
+find_state_name_(find_state_name){
+
 }
