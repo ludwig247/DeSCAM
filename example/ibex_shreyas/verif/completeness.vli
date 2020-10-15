@@ -1,0 +1,114 @@
+completeness ibex;
+disable iff: !rst_ni;
+determination_assumptions:
+  determined(rst_ni);
+  determined(test_en_i);
+  determined(hart_id_i);
+  determined(boot_addr_i);
+  determined(instr_gnt_i);
+  determined(instr_rvalid_i);
+  determined(instr_rdata_i);
+  determined(instr_err_i);
+  determined(data_gnt_i);
+  determined(data_rvalid_i);
+  determined(data_rdata_i);
+  determined(data_err_i);
+  determined(irq_software_i);
+  determined(irq_timer_i);
+  determined(irq_external_i);
+  determined(irq_fast_i);
+  determined(irq_nm_i);
+  determined(debug_req_i);
+  determined(fetch_enable_i);
+determined(illegal_csr_insn_id);
+determined (id_stage_i/controller_i/stall);
+determined(id_stage_i/controller_i/ctrl_fsm_cs);
+//added for now
+
+//csr-related
+determined(cs_registers_i/dcsr_q);
+determined(cs_registers_i/depc_q);
+determined(cs_registers_i/dscratch0_q);
+determined(cs_registers_i/dscratch1_q);
+determined(cs_registers_i/hart_id_i);
+determined(cs_registers_i/mcause_q);
+determined(cs_registers_i/mcountinhibit);
+determined(cs_registers_i/mepc_q);
+determined(cs_registers_i/mhpmcounter_q);
+determined(cs_registers_i/mscratch_q);
+determined(cs_registers_i/mtval_q);
+determined(cs_registers_i/mtvec_q);
+determined(cs_registers_i/pmp_addr_rdata);
+determined(cs_registers_i/pmp_cfg_rdata);
+determined(csr_mtvec);
+determined(csr_depc);
+
+//debug-related
+determined(instr_fetch_err);
+determined(debug_ebreakm);
+determined(id_stage_i/controller_i/debug_mode_q);
+determined(id_stage_i/controller_i/illegal_dret);
+determined(id_stage_i/controller_i/instr_fetch_err_i);
+
+determination_requirements:
+determined(instr_req_o);
+if (instr_req_o)
+    determined(instr_addr_o)
+endif;
+
+determined(data_req_o);
+if (data_req_o)
+    determined(data_we_o)
+endif;
+
+if (data_req_o && data_we_o)
+  determined(data_be_o),
+  determined(data_addr_o),
+  determined(data_be_o == 4'h1? data_wdata_o[7:0] : data_be_o == 4'h3? data_wdata_o[15:0] : data_wdata_o)
+endif;
+
+
+local_determination_requirements:
+at right_hook: determined(pc_if);                  // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[0]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[1]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[2]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[3]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[4]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[5]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[0]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[1]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[2]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[3]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[4]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[5]); // visible register
+at right_hook: determined (if_stage_i/prefetch_buffer_i/fifo_i/valid_q[0]);
+at right_hook: determined(id_stage_i/controller_i/special_req);
+at right_hook: determined(if_stage_i/if_id_pipe_reg_we);
+at right_hook: determined(id_stage_i/controller_i/ctrl_fsm_cs);
+at right_hook: determined(instr_req_o);
+
+
+
+reset_property:
+  reset;
+
+property_graph:
+  all_instr :=  instr_ADDI, instr_SLTI, instr_SLTIU, instr_XORI, instr_ORI,
+                instr_ANDI, instr_SLLI, instr_SRLI, instr_SRAI, instr_ADD, instr_SUB,
+                instr_SLL, instr_SLT, instr_SLTU, instr_XOR, instr_SRL, instr_SRA,
+                instr_OR, instr_AND, instr_LB, instr_LH, instr_LW, instr_LBU, instr_LHU,
+                instr_SB, instr_SH, instr_SW, instr_BEQ_taken, instr_BNE_taken, instr_BLT_taken,
+                instr_BGE_taken, instr_BLTU_taken, instr_BGEU_taken, instr_BEQ_not_taken,
+                instr_BNE_not_taken, instr_BLT_not_taken, instr_BGE_not_taken, instr_BLTU_not_taken,
+                instr_BGEU_not_taken, instr_JAL, instr_JALR, instr_AUIPC, instr_LUI, 
+		instr_CSRRW, instr_CSRRWI, instr_CSRRS, instr_CSRRSI, instr_CSRRC, instr_CSRRCI,
+		instr_MUL, instr_MULH, instr_MULHSU, instr_MULHU, instr_DIV, instr_DIVU, instr_REM, instr_REMU;
+///Debug completeness
+  dret_instr := instr_DRET;
+  //dbg_instr := instr_EBREAK1;
+  reset, all_instr -> all_instr;
+  all_instr ->  instr_EBREAK_0, instr_EBREAK1;
+  instr_EBREAK1 -> dret_instr;
+  dret_instr -> all_instr;
+end completeness;

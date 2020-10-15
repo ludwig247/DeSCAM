@@ -1,0 +1,233 @@
+macro unsigned ALU_result(unsigned instr_func3, instr_func7, Ra, Rb) :=
+    case(instr_func3)
+    3'h0: instr_func7 == 0 ? unsigned(signed(Ra) + signed(Rb))[31:0] :
+            unsigned(signed(Ra) - signed(Rb))[31:0];
+    3'h1: unsigned(Ra << Rb[4:0])[31:0];
+    3'h2: signed(Ra)<signed(Rb)?32'h1:32'h0;
+    3'h3: Ra<Rb?32'h1:32'h0;
+    3'h4: Ra^Rb;
+    3'h5: instr_func7 == 0 ? unsigned(Ra >> Rb[4:0])[31:0] : unsigned(signed(Ra) >> Rb[4:0])[31:0];
+    3'h6: Ra|Rb;
+    3'h7: Ra&Rb;
+    default:    32'h0;
+    endcase;
+end macro;
+
+macro alu_op_e ALU_operator(unsigned instr_func3, instr_func7) :=
+    case(instr_func3)
+    3'h0: instr_func7 == 0 ? ALU_ADD : ALU_SUB;
+    3'h1: ALU_SLL;
+    3'h2: ALU_SLT;
+    3'h3: ALU_SLTU;
+    3'h4: ALU_XOR;
+    3'h5: instr_func7 == 0 ? ALU_SRL : ALU_SRA;
+    3'h6: ALU_OR;
+    3'h7: ALU_AND;
+    default:  ALU_ADD;
+    endcase;
+end macro;
+
+macro property instr_ALU (unsigned instr_func3, instr_func7, mode, opcode):=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        rs2 = instr_rdata_i[24:20]@t_if,
+        shamt = rs2@t_if,
+        imm = instr_rdata_i[31:20]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = mode == 0? signExtend(imm) : mode == 1? shamt : id_stage_i/registers_i/rf_reg[rs2] @t_id,
+        res = ALU_result(instr_func3, instr_func7, op1Data, op2Data)@t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        at t_if:    instr_req_o ;
+        at t_if:    !data_req_o;
+
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == opcode; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+        at t_if:    instr_rdata_i[14:12] == instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    if(mode == 2) instr_rdata_i[24:20] < 6;endif ; //r0 to r5
+        at t_if:    if(mode == 1 || mode == 2) instr_rdata_i[31:25] == instr_func7;endif ;               
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    if(mode == 0) instr_rdata_id[31:20] == imm;endif ;
+        at t_id:    if(mode == 1 || mode == 2) instr_rdata_id[24:20] == shamt;endif ;
+        at t_id:    if(mode == 1 || mode == 2) instr_rdata_id[31:25] == instr_func7;endif ;
+
+        //ID output
+        at t_id:    alu_operator_ex == ALU_operator(instr_func3, instr_func7);
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    if(mode == 0 || mode == 2) alu_operand_b_ex == op2Data;endif ;
+        at t_id:    if(mode == 1) ex_block_i/alu_i/shift_amt == op2Data;endif ;//shamt is calculated late
+
+        //EX output
+        at t_id:    regfile_wdata_ex == res;
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    id_stage_i/regfile_waddr == rd;
+
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+	at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    id_stage_i/registers_i/rf_reg[rd] == res;
+        at t_wb:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;
+
+macro property instr_ALU_imm (unsigned instr_func3, instr_func7, mode, opcode):=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        shamt = instr_rdata_i[24:20]@t_if,
+        imm = instr_rdata_i[31:20]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = mode == 0? signExtend(imm) :  shamt @t_id,
+        res = ALU_result(instr_func3, instr_func7, op1Data, op2Data)@t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o ;
+        at t_if:    !data_req_o;
+
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == opcode; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+        at t_if:    instr_rdata_i[14:12] == instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    if(mode == 1) instr_rdata_i[31:25] == instr_func7;endif ;               
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    if(mode == 0) instr_rdata_id[31:20] == imm;endif ;
+        at t_id:    if(mode == 1) instr_rdata_id[24:20] == shamt;endif ;
+        at t_id:    if(mode == 1) instr_rdata_id[31:25] == instr_func7;endif ;
+
+        //ID output
+        at t_id:    alu_operator_ex == ALU_operator(instr_func3, instr_func7);
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    if(mode == 0) alu_operand_b_ex == op2Data;endif ;
+        at t_id:    if(mode == 1) ex_block_i/alu_i/shift_amt == op2Data;endif ;//shamt is calculated late
+
+        //EX output
+        at t_id:    regfile_wdata_ex == res;
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    id_stage_i/regfile_waddr == rd;
+
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+	at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    id_stage_i/registers_i/rf_reg[rd] == res;
+        at t_wb:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;
+
+macro property instr_ALU_reg (unsigned instr_func3, instr_func7, opcode):=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        rs2 = instr_rdata_i[24:20]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = id_stage_i/registers_i/rf_reg[rs2] @t_id,
+        res = ALU_result(instr_func3, instr_func7, op1Data, op2Data)@t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o ;
+        at t_if:    !data_req_o;
+
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == opcode; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+        at t_if:    instr_rdata_i[14:12] == instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[24:20] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[31:25] == instr_func7;               
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[24:20] == rs2;
+        at t_id:    instr_rdata_id[31:25] == instr_func7;
+
+        //ID output
+        at t_id:    alu_operator_ex == ALU_operator(instr_func3, instr_func7);
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    alu_operand_b_ex == op2Data;
+
+        //EX output
+        at t_id:    regfile_wdata_ex == res;
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    id_stage_i/regfile_waddr == rd;
+
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+	at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    id_stage_i/registers_i/rf_reg[rd] == res;
+        at t_wb:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;

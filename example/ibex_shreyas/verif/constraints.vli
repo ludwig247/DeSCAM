@@ -1,0 +1,58 @@
+constraint empty_dbg :=
+//disable interrupts
+irq_software_i == 0 &&
+irq_timer_i == 0 &&
+irq_external_i == 0 &&
+irq_fast_i == 0 &&
+irq_nm_i == 0 &&
+test_en_i == 0 &&//clock gating for testing
+//debug_req_i == 0 && //debug interface
+fetch_enable_i == 1 && //enable core
+//instr_err_i == 0 && //instr mem access error
+lsu_load_err == 0 &&
+lsu_store_err == 0 &&
+if_stage_i/prefetch_buffer_i/fifo_i/out_addr_o[1] == 0;
+end constraint;
+
+constraint empty :=
+//disable interrupts
+irq_software_i == 0 &&
+irq_timer_i == 0 &&
+irq_external_i == 0 &&
+irq_fast_i == 0 &&
+irq_nm_i == 0 &&
+test_en_i == 0 && //clock gating for testing
+debug_req_i == 0 && //debug interface
+fetch_enable_i == 1 && //enable core
+instr_err_i == 0 && //instr mem access error
+lsu_load_err == 0 &&
+lsu_store_err == 0 &&
+if_stage_i/prefetch_buffer_i/fifo_i/out_addr_o[1] == 0 &&
+id_stage_i/controller_i/instr_fetch_err_i == 0 && // added for debug
+load_store_unit_i/data_addr == load_store_unit_i/data_addr_w_aligned; //alligned data memory access
+end constraint;
+
+constraint instr_mem:=
+!instr_req_o || (instr_req_o && instr_gnt_i && next(instr_rvalid_i));
+end constraint;
+
+constraint bounded_data_gnt_wait := 
+    if (data_req_o)
+        exists i in 0..(max_wait_data_mem_gnt-1):
+            next(data_gnt_i,i);
+        end exists;
+    endif;
+end constraint;
+
+constraint bounded_data_rvalid_wait := 
+        exists i in 0..(max_wait_data_mem_rvalid-1):
+            next(data_rvalid_i,i);
+        end exists;
+end constraint;
+
+constraint reg_bound :=
+	foreach r in 0..31: 
+		id_stage_i/registers_i/rf_reg[r] ==32'h0 || id_stage_i/registers_i/rf_reg[r] ==32'hFFFFFFFF || id_stage_i/registers_i/rf_reg[r] ==32'h0000FFFF 
+			|| id_stage_i/registers_i/rf_reg[r] ==32'h7FFFFFFF || id_stage_i/registers_i/rf_reg[r] ==32'h7FFF7FFF || id_stage_i/registers_i/rf_reg[r] ==32'h00007FFF;
+	end foreach;
+end constraint;
