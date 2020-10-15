@@ -7,11 +7,13 @@
 
 
 #include "IFindDataFlow.h"
+#include "FindStateName.h"
 
 namespace DESCAM {
 class Module;
 class Process;
 class IFindDataFlowFactory;
+
 /**
  * \brief processes a clang::stmt and extract all necessary information from it
  *
@@ -22,7 +24,17 @@ class IFindDataFlowFactory;
  */
 class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<FindDataFlow> {
  public:
-  FindDataFlow() = default;
+
+  FindDataFlow(DESCAM::IFindStateName * find_state_name);
+  bool setup(clang::Stmt *stmt, Module *module,
+             clang::CompilerInstance *ci,
+             IFindDataFlowFactory * find_data_flow_factory,
+             bool unsigned_flag) override;
+  Expr * getExpr() const override ;
+  DESCAM::Stmt * getStmt() override;
+
+  static std::string functionName;
+  static bool isFunction;
   //Operator
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
   bool VisitConditionalOperator(clang::ConditionalOperator *conditionalOperator);
@@ -44,31 +56,26 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   bool VisitReturnStmt(clang::ReturnStmt *returnStmt) ;
 
   bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr) ;
-  Expr * getExpr() const override ;
-  DESCAM::Stmt * getStmt() override;
 
-  static std::string functionName;
-  bool setup(clang::Stmt *stmt, Module *module, clang::CompilerInstance *ci,IFindDataFlowFactory * find_data_flow_factory, bool unsigned_flag) override;
-  static bool isFunction;
 
  private:
-  Module *module; //! Module the dataflow is generated for
-  DESCAM::Stmt *stmt; //! Represents the stmt in case of operator, values are stored in lhs and rhs
-  clang::CompilerInstance *ci;
+  Module *module_; //! Module the dataflow is generated for
+  DESCAM::Stmt * stmt_; //! Represents the stmt in case of operator, values are stored in lhs and rhs
+  clang::CompilerInstance *ci_;
+  IFindDataFlowFactory *find_data_flow_factory_;
+  IFindStateName * find_state_name_;
 
-  Expr *expr;
-  Expr *lhsExpr; //! Assign Operation lValue = rValue
-  Expr *rhsExpr;//! Assign Operation lValue = rValue
-  int pass;
+  Expr * expr_;
+  Expr *lhs_expr_; //! Assign Operation lValue = rValue
+  Expr *rhs_expr_;//! Assign Operation lValue = rValue
+  int pass_;
+  bool unsigned_flag_;
 
-  std::stringstream logStream; //! Contains every message that is generated during
+  std::stringstream log_stream_; //! Contains every message that is generated during
 
   void switchPassExpr(Expr *stmt); //! Depending on the current value of pass assigns value to stmt(pass==0), lhs(1) or rhs(2)
   bool exitVisitor(const std::string &msg, const DESCAM::LocationInfo &stmtInfo);
   void clearExpressions();
-
-  bool unsigned_flag;
-  IFindDataFlowFactory *find_data_flow_factory_;
 };
 
 }
