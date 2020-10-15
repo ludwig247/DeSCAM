@@ -11,20 +11,7 @@
 #include <PluginAction.h>
 #include "FatalError.h"
 
-#include "CheckErrors.h"
-#include "ModelFactory.h"
-
-#include "FindFunctions.h"
-#include "FindInitialValues.h"
-#include "FindNewDatatype.h"
-#include "FindGlobal.h"
-#include "FindNetlist.h"
-#include "FindPorts.h"
-#include "FindModules.h"
-#include "FindProcess.h"
-#include "FindVariables.h"
-#include "FindSCMain.h"
-#include "FindDataFlowFactory.h"
+#include "IModelFactory.h"
 
 namespace DESCAM {
 /** \brief Singleton that contains a pointer to the model
@@ -47,7 +34,8 @@ class ModelGlobal {
   };
 
   static void
-  createModel(int argc, const std::string &Binary, const std::string &srcFile, bool isWrapper = false) {
+  createModel(int argc, const std::string &Binary, const std::string &srcFile,
+              IModelFactory *model_factory) {
 
     std::vector<std::string> result;
     std::vector<const char *> commandLineArugmentsVector;
@@ -95,52 +83,10 @@ class ModelGlobal {
     for (int i = 0; i < commandLineArugmentsVector.size(); i++) {
       commandLineArgumentsArray[i] = commandLineArugmentsVector.at(i);
     }
+
     if (argc >= 1) {
-
-      //Compositional root
-      std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
-      std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
-      std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
-      std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
-      std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
-      std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
-      std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-      std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-      std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
-      std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-      std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
-      if (!isWrapper) {
-        auto model_factory = new ModelFactory(find_functions.get(),
-                                                        find_initial_values.get(),
-                                                        find_modules.get(),
-                                                        find_new_datatype.get(),
-                                                        find_ports.get(),
-                                                        find_global.get(),
-                                                        find_netlist.get(),
-                                                        find_process.get(),
-                                                        find_variables.get(),
-                                                        find_sc_main.get(),
-                                                        find_data_flow_factory.get());
-
         PluginAction
             pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, model_factory);
-
-      } else {
-        IModelFactory *check_errors = new CheckErrors(find_functions.get(),
-                                                      find_initial_values.get(),
-                                                      find_modules.get(),
-                                                      find_new_datatype.get(),
-                                                      find_ports.get(),
-                                                      find_global.get(),
-                                                      find_netlist.get(),
-                                                      find_process.get(),
-                                                      find_variables.get(),
-                                                      find_sc_main.get());
-
-        throw std::runtime_error("NOT ALLOWED");
-
-        PluginAction pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, check_errors);
-      }
     } else TERMINATE("Wrong use of DeSCAM");
   };
 
