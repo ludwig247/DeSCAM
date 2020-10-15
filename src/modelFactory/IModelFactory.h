@@ -14,10 +14,8 @@ namespace DESCAM {
   ~IModelFactory() override = default;
 
   virtual void setup(clang::CompilerInstance *ci) = 0;
-
-  virtual bool preFire() = 0;
-  virtual bool fire() = 0;
-  virtual bool postFire() = 0;
+ private:
+  void HandleTranslationUnit(clang::ASTContext &context) override = 0;
 };
 }
 

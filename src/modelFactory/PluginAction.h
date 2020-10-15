@@ -36,50 +36,68 @@ using namespace clang::tooling;
 
 namespace DESCAM {
 
-class LightsCameraAction : public clang::ASTFrontendAction {
- public:
-  explicit LightsCameraAction(IModelFactory *model_factory) :
-      model_factory_(model_factory) {}
+/**
+ * This class protects externally created ASTConsumers from being deleted by the clang::tooling framework.
+ * Without this protection, a second run of a PluginAction in the ModelGlobal will work on a nullptr,
+ * even though the Consumer and the PluginAction were created once more ? Why? Nobody knows...
+ */
+class Relay : public clang::ASTConsumer {
  private:
-  IModelFactory *model_factory_;
- protected:
-  clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) override {
-    model_factory_->setup(&ci);
-    return model_factory_;
+  clang::ASTConsumer *consumer_;
+ public:
+  explicit Relay(clang::ASTConsumer *consumer) : consumer_(consumer) {}
+
+  void HandleTranslationUnit(clang::ASTContext &context) override {
+    consumer_->HandleTranslationUnit(context);
   };
 };
 
-class DESCAMFrontEndFactory: public FrontendActionFactory{
- private:
-  LightsCameraAction *lights_camera_action_;
+/**
+ * Wrapper class required to interface with the clang::Tool class.
+ * Acts as Factory for Relay
+ */
+class DeScamAction : public clang::ASTFrontendAction {
  public:
-  explicit DESCAMFrontEndFactory(LightsCameraAction *lights_camera_action):
-  lights_camera_action_(lights_camera_action){};
-  clang::FrontendAction * create() override{
-    return lights_camera_action_;
+  explicit DeScamAction(IModelFactory *model_factory) :
+      model_factory_(model_factory) {}
+
+ private:
+  IModelFactory *model_factory_;
+
+ protected:
+  clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) override {
+    model_factory_->setup(&ci);
+    return new Relay(model_factory_);
+  };
+};
+
+/**
+ * Wrapper class required to interface with the clang::Tool class.
+ * Acts as Factory for DeScamAction
+ */
+class DESCAMFrontEndFactory : public FrontendActionFactory {
+ private:
+  IModelFactory *model_factory_;
+
+ public:
+  explicit DESCAMFrontEndFactory(IModelFactory *model_factory) : model_factory_(model_factory) {};
+
+  clang::FrontendAction *create() override {
+    return new DeScamAction(model_factory_);
   }
 };
 
+/**
+ * Wrapper class required to interface with the clang::Tool class.
+ */
 class PluginAction {
+ private:
+  //TODO: delete this static member
+  /** length of last run source-file list because clang stores source file lists and we have to delete them */
+  static int previous_length_;
+
  public:
-  PluginAction(int argc, const char **argv, IModelFactory *model_factory) {
-
-    CommonOptionsParser OptionsParser(argc, argv);
-
-    ClangTool Tool(OptionsParser.getCompilations(), OptionsParser.getSourcePathList());
-
-    std::string output;
-    llvm::raw_string_ostream ss(output);
-    auto diagnosticOptions = new clang::DiagnosticOptions();
-    diagnosticOptions->ShowSourceRanges = 1;
-    auto diagnosticPrinter = new clang::ClangDiagnosticPrinter(ss, diagnosticOptions);
-    Tool.setDiagnosticConsumer(diagnosticPrinter);
-    auto *lights_camera_action = new LightsCameraAction(model_factory);
-    FrontendActionFactory *fe = new DESCAMFrontEndFactory(lights_camera_action);
-    Tool.run(fe);
-    diagnosticPrinter->addDiagnosticsToLogger(std::move(ss.str()));
-  }
+  PluginAction(int argc, const char **argv, IModelFactory *model_factory);
 };
 }
-
 #endif /* _PLUGIN_ACTION_H_ */

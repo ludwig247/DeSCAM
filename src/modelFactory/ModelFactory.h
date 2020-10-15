@@ -67,13 +67,16 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
                         IFindProcess *find_process,
                         IFindVariables *find_variables,
                         IFindSCMain *find_sc_main);
+
   ~ModelFactory() override = default;
+
 
   void setup(CompilerInstance *ci) override;
 
-  bool preFire() override;
-  bool fire() override;
-  bool postFire() override;
+  bool preFire();
+  bool fire();
+  bool postFire();
+
  private:
   Model *model_;
   CompilerInstance *ci_;
