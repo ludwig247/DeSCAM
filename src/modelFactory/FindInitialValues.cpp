@@ -70,7 +70,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
           //Find value and store in this->value
           //If something goes wrong
           try {
-           auto findDataFlow = this->find_data_flow_factory_->create_new(initializer->getInit(), module_, ci_);
+           auto findDataFlow = this->find_data_flow_factory_->create_new(initializer->getInit(), module_, ci_,find_data_flow_factory_);
 
             auto initExpr = findDataFlow->getExpr();
             if (initExpr != nullptr) {

@@ -37,7 +37,7 @@ bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
       if (init->getType()->isBuiltinType()) {
         auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
         try {
-          auto checkForExpr = find_data_flow_factory_->create_new(const_cast<clang::Expr *>(init), &module_, ci_, isUnsigned);
+          auto checkForExpr = find_data_flow_factory_->create_new(const_cast<clang::Expr *>(init), &module_, ci_,find_data_flow_factory_, isUnsigned);
           Logger::clear();
           if (checkForExpr->getExpr()) {
             std::string typeName = init->getType().getAsString();
