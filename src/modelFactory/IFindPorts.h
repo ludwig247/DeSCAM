@@ -11,8 +11,7 @@
 #include "enums.h"
 #include "LocationInfo.h"
 
-
-class IFindPorts{
+class IFindPorts {
  public:
   virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci) = 0;
   //GETTER

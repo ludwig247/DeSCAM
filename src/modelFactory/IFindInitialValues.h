@@ -5,6 +5,13 @@
 #ifndef SCAM_SRC_MODELFACTORY_IFINDINITIALVALUES_H_
 #define SCAM_SRC_MODELFACTORY_IFINDINITIALVALUES_H_
 
+#include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "Model.h"
+
+#include "IFindDataFlowFactory.h"
+
 namespace DESCAM {
 
 /**
@@ -17,7 +24,8 @@ class IFindInitialValues {
   virtual void setup(clang::CXXRecordDecl *recordDecl,
                      clang::FieldDecl *fieldDecl,
                      DESCAM::Module *module,
-                     clang::CompilerInstance *ci) = 0;
+                     clang::CompilerInstance *ci,
+                     IFindDataFlowFactory * find_data_flow_factory) = 0;
 
   virtual ConstValue *getInitValue() = 0;
 };

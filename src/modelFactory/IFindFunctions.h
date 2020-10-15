@@ -20,7 +20,7 @@ class IFindFunctions {
    * @brief setup for the IFindFunctions class
    * @param recordDecl ?
    */
-  virtual void setup(clang::CXXRecordDecl *recordDecl) = 0;
+  virtual bool setup(clang::CXXRecordDecl *recordDecl) = 0;
 
   virtual const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const = 0;
   virtual const std::map<std::string, std::string> &getFunctionReturnTypeMap() const = 0;

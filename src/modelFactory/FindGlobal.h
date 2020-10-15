@@ -10,6 +10,8 @@
 #include <Module.h>
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <IFindGlobal.h>
+#include "FindDataFlow.h"
+#include "FindDataFlowFactory.h"
 
 namespace DESCAM {
 class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlobal> {
@@ -19,7 +21,7 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
 
   ~FindGlobal() override = default;
 
-  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) override;
+  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci, IFindDataFlowFactory * find_data_flow_factory) override;
 
   const std::map<std::string, Variable *> &getVariableMap() const override;
 
@@ -32,7 +34,7 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
   bool VisitFunctionDecl(const clang::FunctionDecl *funDecl);
 
  private:
-
+  IFindDataFlowFactory * find_data_flow_factory_;
   clang::CompilerInstance *ci_;
   DESCAM::DataType *getDataType(const clang::QualType &type) const;
 

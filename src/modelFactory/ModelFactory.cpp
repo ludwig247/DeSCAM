@@ -33,7 +33,8 @@ DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
                                    IFindNetlist *find_netlist,
                                    IFindProcess *find_process,
                                    IFindVariables *find_variables,
-                                   IFindSCMain *find_sc_main) :
+                                   IFindSCMain *find_sc_main,
+                                   IFindDataFlowFactory * find_data_flow_factory) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
@@ -47,7 +48,8 @@ DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
     find_netlist_(find_netlist),
     find_process_(find_process),
     find_variables_(find_variables),
-    find_sc_main_(find_sc_main) {
+    find_sc_main_(find_sc_main),
+    find_data_flow_factory_(find_data_flow_factory){
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
@@ -363,7 +365,7 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
   /*
    * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
    */
-  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, true);
+  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module,find_data_flow_factory_, true);
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
   DESCAM::CfgNode::node_cnt = 0;
@@ -430,7 +432,7 @@ void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecord
     } else if (type->isArrayType()) {
       DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
     } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, ci_);
+      this->find_initial_values_->setup(decl, fieldDecl, module, ci_,find_data_flow_factory_);
       ConstValue *initialValue = this->find_initial_values_->getInitValue();
       //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
       //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -514,7 +516,7 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
     //Active searching only for functions
     FindDataFlow::functionName = function.first;
     FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, ci_, module);
+    DESCAM::CFGFactory cfgFactory(function.second, ci_, module,this->find_data_flow_factory_);
     FindDataFlow::functionName = "";
     FindDataFlow::isFunction = false;
     //Transform blockCFG back to code
@@ -527,7 +529,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_);
+  this->find_global_->setup(pDecl, ci_,find_data_flow_factory_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
@@ -550,7 +552,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
-      DESCAM::CFGFactory cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module);
+      DESCAM::CFGFactory cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module,find_data_flow_factory_);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
       //Transform blockCFG back to code

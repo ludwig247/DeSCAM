@@ -5,7 +5,7 @@ add_subdirectory(CLI)
 
 add_executable(DESCAM main.cpp)
 
-target_compile_options(DESCAM PRIVATE -O2)
+target_compile_options(DESCAM PRIVATE -fPIC -O2)
 
 include(ParserLib.cmake)
 

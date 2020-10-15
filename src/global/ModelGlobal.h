@@ -122,13 +122,7 @@ class ModelGlobal {
     //Seperator n
     commandLineArugmentsVector.push_back("--");
 
-    //TestCases include-dir: may not be changed
-    //commandLineArugmentsVector.push_back("-I /usr/include");
-    //commandLineArugmentsVector.push_back("-I /usr/local/include");
-    std::string root_usr = std::string("-I" + root_dir + "usr/include/**");
-    commandLineArugmentsVector.push_back(root_usr.c_str());
-    std::string root_usr_local = std::string("-I" + root_dir + "usr/local/include/**");
-    commandLineArugmentsVector.push_back(root_usr_local.c_str());
+        throw std::runtime_error("NOT ALLOWED");
 
     //Include dirs
     std::string clang = std::string("-I" + clang_dir);
@@ -150,7 +144,7 @@ class ModelGlobal {
     if (argc >= 1) {
       PluginAction pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, model_factory);
     } else TERMINATE("Wrong use of DeSCAM");
-  }
+  };
 
  private:
   ModelGlobal() : model(nullptr) {

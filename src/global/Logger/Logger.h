@@ -43,7 +43,7 @@ namespace DESCAM {
 
         static void addSink(std::shared_ptr<DESCAM::LoggerSink> sink);
 
-        static void setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions);
+      static void setFilteringOptions(std::set<LoggerFilter::FilterOptions> filterOptions);
 
         static void setCurrentProcessedLocation(LoggerMsg::ProcessedLocation currentProcessedLocation);
 

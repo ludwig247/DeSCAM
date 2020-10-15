@@ -43,11 +43,11 @@ namespace DESCAM {
  */
 class Relay : public clang::ASTConsumer {
  private:
-  clang::ASTConsumer *consumer_;
+  clang::ASTConsumer* consumer_;
  public:
   explicit Relay(clang::ASTConsumer *consumer) : consumer_(consumer) {}
 
-  void HandleTranslationUnit(clang::ASTContext &context) override {
+  void HandleTranslationUnit(clang::ASTContext &context) override{
     consumer_->HandleTranslationUnit(context);
   };
 };
@@ -80,7 +80,7 @@ class DESCAMFrontEndFactory : public FrontendActionFactory {
   IModelFactory *model_factory_;
 
  public:
-  explicit DESCAMFrontEndFactory(IModelFactory *model_factory) : model_factory_(model_factory) {};
+  explicit DESCAMFrontEndFactory(IModelFactory *model_factory) : model_factory_(model_factory){};
 
   clang::FrontendAction *create() override {
     return new DeScamAction(model_factory_);
