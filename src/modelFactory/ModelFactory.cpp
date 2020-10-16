@@ -392,65 +392,10 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
 void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
   //Find all Variables within the Module
-  find_variables_->setup(decl);
-  //Initial Values
-  //FindInitialValues findInitialValues(decl, findVariables.getVariableMap(), module);
+  find_variables_->setup(decl, this->ci_, module);
 
-  //Add members to module
-  for (auto &&variable: find_variables_->getVariableTypeMap()) {
-    //Add Variable to Module
-    auto fieldDecl = find_variables_->getVariableMap().find(variable.first)->second;
-    auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<FieldDecl>(fieldDecl, ci_);
+  module->addVariables(find_variables_->getVariableMap());
 
-    /*
-     * Distinguish between local and global DataTypes.
-     * If a module declares a type within it's class, then it's a local datatype ... global otherwise
-     * This toggle is in place because of some legacy plugins not being aware of local/global types.
-     */
-    DataType *type;
-    std::string typeName = find_new_datatype_->getTypeName(variable.second);
-    //Step 1: Check whether the DataType already exists? Set type accordingly
-    bool is_local = DataTypes::isLocalDataType(typeName, module->getName());
-    bool is_global = DataTypes::isDataType(typeName);
-    if (is_local && is_global) TERMINATE("Variable " + variable.first + "is local and global at the same time!")
-    if (is_global) {
-      type = DataTypes::getDataType(typeName);
-    } else if (is_local) {
-      type = DataTypes::getLocalDataType(module->getName(), typeName);
-    } else {
-      //Step2 : Add new datatype either as local or global datatype
-      type = find_new_datatype_->getDataType(variable.second);
-      if (find_new_datatype_->isGlobal(variable.second)) {
-        DataTypes::addDataType(type);
-      } else {
-        DataTypes::addLocalDataType(module->getName(), type);
-      }
-    }
-    //Compound: add a new variable compound.subVar as Variable
-    if (type->isCompoundType()) {
-      DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
-    } else if (type->isArrayType()) {
-      DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)))
-    } else {
-      this->find_initial_values_->setup(decl, fieldDecl, module, ci_,find_data_flow_factory_);
-      ConstValue *initialValue = this->find_initial_values_->getInitValue();
-      //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
-      //auto initialValMap = findInitialValues.getVariableInitialMap();
-      //Variable not initialized -> initialize with default value
-      if (initialValue == nullptr) {
-        if (type == DataTypes::getDataType("int")) {
-          DESCAM_ASSERT(initialValue = new IntegerValue(0))
-        } else if (type == DataTypes::getDataType("bool")) {
-          initialValue = new BoolValue(false);
-        } else if (type == DataTypes::getDataType("unsigned")) {
-          DESCAM_ASSERT(initialValue = new UnsignedValue(0))
-        } else if (type->isEnumType()) {
-          DESCAM_ASSERT(initialValue = new EnumValue(type->getEnumValueMap().begin()->first, type))
-        } else TERMINATE("No initialValue for type " + type->getName());
-      }
-      DESCAM_ASSERT(module->addVariable(new Variable(variable.first, type, initialValue, nullptr, varLocationInfo)))
-    }
-  }
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
 

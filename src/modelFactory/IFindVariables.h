@@ -9,6 +9,8 @@
 #include "clang/AST/Type.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/DeclCXX.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "Module.h"
 
 namespace DESCAM {
 /**
@@ -22,11 +24,12 @@ namespace DESCAM {
 class IFindVariables {
  public:
   virtual ~IFindVariables() = default;
-  //GETTER
-  virtual bool setup(clang::CXXRecordDecl *record_decl) = 0;
-  virtual std::map<std::string, clang::QualType> getVariableTypeMap() const = 0;
-  virtual const std::map<std::string, clang::FieldDecl *> &getVariableMap() const = 0;
 
+  virtual bool setup(clang::CXXRecordDecl *record_decl,
+                     clang::CompilerInstance *ci,
+                     DESCAM::Module *module) = 0;
+
+  virtual std::map<std::string, DESCAM::Variable *> getVariableMap() = 0;
 };
 }
 #endif //SCAM_SRC_MODELFACTORY_IFINDVARIABLES_H_
