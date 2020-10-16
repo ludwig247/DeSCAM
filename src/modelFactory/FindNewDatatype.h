@@ -19,7 +19,6 @@ namespace DESCAM {
 
 class FindNewDatatype : public IFindNewDatatype, public clang::RecursiveASTVisitor<FindNewDatatype> {
  public:
-
   ~FindNewDatatype() override = default;
 
   DESCAM::DataType *getDataType(const clang::QualType &type) override;
