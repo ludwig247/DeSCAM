@@ -43,6 +43,37 @@ void setup(const std::string &path_to_file, const std::string &filename, IModelF
     commandLineArgumentsArray[i] = command_line_arguments_vector.at(i);
   }
 
+  ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
+                                                   commandLineArgumentsArray[0],
+                                                   commandLineArgumentsArray[1],
+                                                   model_factory));
+
+  PrintITL print_itl;
+
+  ASSERT_TRUE(ModelGlobal::getModel());
+  ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
+  auto module = ModelGlobal::getModel()->getModules().at(filename);
+  ASSERT_TRUE(module);
+  print_itl.printModel(ModelGlobal::getModel());
+
+  ASSERT_NO_THROW(print_itl.print());
+  std::cout << "Instance: " << filename << std::endl;
+  std::ifstream ifs(SCAM_HOME + path_to_file + filename + ".vhi");
+  ASSERT_TRUE(bool(ifs)) << "Can't open file";
+  std::stringstream buffer;
+  std::string content((std::istreambuf_iterator<char>(ifs)),
+                      (std::istreambuf_iterator<char>()));
+
+  ASSERT_EQ(content, print_itl.print()) << "Test for module " << filename << " failed\n\n" << print_itl.print();
+  std::cout << "" << std::endl;
+
+}
+
+/**
+ * Test without any Mock-Objects for TestCase1
+ */
+TEST(TestCase1, no_mock) /* NOLINT */{
+
   //Compositional root
   std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
   std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
@@ -74,7 +105,7 @@ void setup(const std::string &path_to_file, const std::string &filename, IModelF
 /**
  * Test with Mock-Objects for TestCase1
  */
-TEST(mocking_test, TestCase1) {
+TEST(TestCase1, full_mock) {
   using namespace ::testing;
   using ::testing::Return;
 
@@ -180,7 +211,11 @@ TEST(mocking_test, TestCase1) {
 //  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(gmock_test, TestCase2) /* NOLINT */{
+
+/**
+ * Test without any Mock-Objects for TestCase2
+ */
+TEST(TestCase2, no_mock) /* NOLINT */{
   //Compositional root
   std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
   std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
@@ -209,7 +244,10 @@ TEST(gmock_test, TestCase2) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(gmock_test, TestCase3) /* NOLINT */{
+/**
+ * Test without any Mock-Objects for TestCase3
+ */
+TEST(TestCase3, no_mock) /* NOLINT */{
 
   //Compositional root
   std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
