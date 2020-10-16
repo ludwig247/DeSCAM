@@ -24,17 +24,17 @@
 #include "FindVariables.h"
 #include "FindSCMain.h"
 
-TEST(TestCase1, full_test) {
+void setup(const std::string &path_to_file, const std::string &filename, IModelFactory *model_factory){
   DataTypes::reset();
 
   std::vector<const char *> command_line_arguments_vector;
 
   //Binary
-  std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
+  const std::string bin = std::string(SCAM_HOME"/bin/DESCAM");
   command_line_arguments_vector.push_back(bin.c_str());
 
   //SRC-File to be analyzed
-  std::string file_path = std::string(SCAM_HOME"/tests/GMock_Test/tests/TestCase1.h");
+  const std::string file_path = std::string(SCAM_HOME) + path_to_file + filename + ".h";
   command_line_arguments_vector.push_back(file_path.c_str());
 
   //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
@@ -42,6 +42,37 @@ TEST(TestCase1, full_test) {
   for (int i = 0; i < command_line_arguments_vector.size(); i++) {
     commandLineArgumentsArray[i] = command_line_arguments_vector.at(i);
   }
+
+  ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
+                                                   commandLineArgumentsArray[0],
+                                                   commandLineArgumentsArray[1],
+                                                   model_factory));
+
+  PrintITL print_itl;
+
+  ASSERT_TRUE(ModelGlobal::getModel());
+  ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
+  auto module = ModelGlobal::getModel()->getModules().at(filename);
+  ASSERT_TRUE(module);
+  print_itl.printModel(ModelGlobal::getModel());
+
+  ASSERT_NO_THROW(print_itl.print());
+  std::cout << "Instance: " << filename << std::endl;
+  std::ifstream ifs(SCAM_HOME + path_to_file + filename + ".vhi");
+  ASSERT_TRUE(bool(ifs)) << "Can't open file";
+  std::stringstream buffer;
+  std::string content((std::istreambuf_iterator<char>(ifs)),
+                      (std::istreambuf_iterator<char>()));
+
+  ASSERT_EQ(content, print_itl.print()) << "Test for module " << filename << " failed\n\n" << print_itl.print();
+  std::cout << "" << std::endl;
+
+}
+
+/**
+ * Test without any Mock-Objects for TestCase1
+ */
+TEST(TestCase1, no_mock) /* NOLINT */{
 
   //Compositional root
   std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
@@ -52,10 +83,9 @@ TEST(TestCase1, full_test) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
+  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
-  std::unique_ptr<IFindVariables> find_variables =
-      std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -69,42 +99,13 @@ TEST(TestCase1, full_test) {
                                         find_sc_main.get(),
                                         find_data_flow_factory.get());
 
-  ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
-                                                   commandLineArgumentsArray[0],
-                                                   commandLineArgumentsArray[1],
-                                                   model_factory));
-
-  PrintITL print_itl;
-
-  ASSERT_TRUE(ModelGlobal::getModel());
-  ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
-  auto module = ModelGlobal::getModel()->getModules().at("TestCase1");
-  print_itl.printModel(ModelGlobal::getModel());
-//  Only
-  std::ofstream myfile;
-  //myfile.open(SCAM_HOME"/tests/GMock_Test/PrintITL/TestCase1.vhi");
-  //myfile << print_itl.print();
-  //myfile.close();
-
-
-  ASSERT_NO_THROW(print_itl.print());
-  std::cout << "Instance: " << "TestCase1" << std::endl;
-  std::ifstream ifs(SCAM_HOME"/tests/GMock_Test/tests/TestCase1.vhi");
-  ASSERT_TRUE(bool(ifs)) << "Can't open file";
-
-  std::stringstream buffer;
-  std::string content((std::istreambuf_iterator<char>(ifs)),
-                      (std::istreambuf_iterator<char>()));
-
-  ASSERT_EQ(content, print_itl.print()) << "Test for module " << "TestCase1" << " failed\n\n" << print_itl.print();
-  std::cout << "" << std::endl;
-
+  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
 /**
  * Test with Mock-Objects for TestCase1
  */
-TEST(TestCase1, all_mock_test) {
+TEST(TestCase1, full_mock) {
   using namespace ::testing;
   using ::testing::Return;
 
@@ -167,10 +168,9 @@ TEST(TestCase1, all_mock_test) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
+  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
-  std::unique_ptr<IFindVariables> find_variables =
-      std::make_unique<FindVariables>(find_new_datatype.get(), &find_initial_values, find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(&find_functions,
                                         &find_initial_values,
@@ -194,13 +194,8 @@ TEST(TestCase1, all_mock_test) {
   ASSERT_TRUE(ModelGlobal::getModel());
   ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
   auto module = ModelGlobal::getModel()->getModules().at("TestCase1");
+  ASSERT_TRUE(module);
   print_itl.printModel(ModelGlobal::getModel());
-//  Only
-  std::ofstream myfile;
-  //myfile.open(SCAM_HOME"/tests/GMock_Test/PrintITL/TestCase1.vhi");
-  //myfile << print_itl.print();
-  //myfile.close();
-
 
   ASSERT_NO_THROW(print_itl.print());
   std::cout << "Instance: " << "TestCase1" << std::endl;
@@ -213,29 +208,14 @@ TEST(TestCase1, all_mock_test) {
 
   ASSERT_EQ(content, print_itl.print()) << "Test for module " << "TestCase1" << " failed\n\n" << print_itl.print();
   std::cout << "" << std::endl;
-
+//  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, full_test) {
 
-  DataTypes::reset();
-
-  std::vector<const char *> command_line_arguments_vector;
-
-  //Binary
-  std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
-  command_line_arguments_vector.push_back(bin.c_str());
-
-  //SRC-File to be analyzed
-  std::string file_path = std::string(SCAM_HOME"/tests/GMock_Test/tests/TestCase2.h");
-  command_line_arguments_vector.push_back(file_path.c_str());
-
-  //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-  const char *commandLineArgumentsArray[command_line_arguments_vector.size()];
-  for (int i = 0; i < command_line_arguments_vector.size(); i++) {
-    commandLineArgumentsArray[i] = command_line_arguments_vector.at(i);
-  }
-
+/**
+ * Test without any Mock-Objects for TestCase2
+ */
+TEST(TestCase2, no_mock) /* NOLINT */{
   //Compositional root
   std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
   std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
@@ -245,10 +225,9 @@ TEST(TestCase2, full_test) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
+  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
-  std::unique_ptr<IFindVariables> find_variables =
-      std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -262,52 +241,13 @@ TEST(TestCase2, full_test) {
                                         find_sc_main.get(),
                                         find_data_flow_factory.get());
 
-  ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
-                                                   commandLineArgumentsArray[0],
-                                                   commandLineArgumentsArray[1],
-                                                   model_factory));
-
-  PrintITL print_itl;
-
-  ASSERT_TRUE(ModelGlobal::getModel());
-  ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
-  auto module = ModelGlobal::getModel()->getModules().at("TestCase2");
-  ASSERT_TRUE(module);
-  print_itl.printModel(ModelGlobal::getModel());
-
-  ASSERT_NO_THROW(print_itl.print());
-  std::cout << "Instance: " << "TestCase2" << std::endl;
-  std::ifstream ifs(SCAM_HOME"/tests/GMock_Test/tests/TestCase2.vhi");
-  ASSERT_TRUE(bool(ifs)) << "Can't open file";
-
-  std::stringstream buffer;
-  std::string content((std::istreambuf_iterator<char>(ifs)),
-                      (std::istreambuf_iterator<char>()));
-
-  ASSERT_EQ(content, print_itl.print()) << "Test for module " << "TestCase2" << " failed\n\n" << print_itl.print();
-  std::cout << "" << std::endl;
-
+  setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, full_test) {
-
-  DataTypes::reset();
-
-  std::vector<const char *> command_line_arguments_vector;
-
-  //Binary
-  std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");
-  command_line_arguments_vector.push_back(bin.c_str());
-
-  //SRC-File to be analyzed
-  std::string file_path = std::string(SCAM_HOME"/tests/GMock_Test/tests/TestCase3.h");
-  command_line_arguments_vector.push_back(file_path.c_str());
-
-  //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-  const char *commandLineArgumentsArray[command_line_arguments_vector.size()];
-  for (int i = 0; i < command_line_arguments_vector.size(); i++) {
-    commandLineArgumentsArray[i] = command_line_arguments_vector.at(i);
-  }
+/**
+ * Test without any Mock-Objects for TestCase3
+ */
+TEST(TestCase3, no_mock) /* NOLINT */{
 
   //Compositional root
   std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
@@ -318,10 +258,9 @@ TEST(TestCase3, full_test) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
+  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
-  std::unique_ptr<IFindVariables> find_variables =
-      std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -335,30 +274,7 @@ TEST(TestCase3, full_test) {
                                         find_sc_main.get(),
                                         find_data_flow_factory.get());
 
-  ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
-                                                   commandLineArgumentsArray[0],
-                                                   commandLineArgumentsArray[1],
-                                                   model_factory));
-
-  PrintITL print_itl;
-
-  ASSERT_TRUE(ModelGlobal::getModel());
-  ASSERT_TRUE(ModelGlobal::getModel()->getModules().size() == 1);
-  auto module = ModelGlobal::getModel()->getModules().at("TestCase3");
-  ASSERT_TRUE(module);
-  print_itl.printModel(ModelGlobal::getModel());
-
-  ASSERT_NO_THROW(print_itl.print());
-  std::cout << "Instance: " << "TestCase3" << std::endl;
-  std::ifstream ifs(SCAM_HOME"/tests/GMock_Test/tests/TestCase3.vhi");
-  ASSERT_TRUE(bool(ifs)) << "Can't open file";
-
-  std::stringstream buffer;
-  std::string content((std::istreambuf_iterator<char>(ifs)),
-                      (std::istreambuf_iterator<char>()));
-
-  ASSERT_EQ(content, print_itl.print()) << "Test for module " << "TestCase3" << " failed\n\n" << print_itl.print();
-
+  setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }
 
 int main(int argc, char **argv) {
