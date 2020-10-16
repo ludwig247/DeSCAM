@@ -26,12 +26,12 @@ bool DESCAM::FindVariables::setup(clang::CXXRecordDecl *record_decl,
     //TODO get Module out of parameters and replace it with module name
     std::string module_name = module->getName();
 
-    FindVariablesVisitor find_variables_visitor(record_decl);
+    GetClangVariables clang_variables(record_decl);
 
     //Add members to module
-    for (auto &&variable: find_variables_visitor.getVariableTypeMap()) {
+    for (auto &&variable: clang_variables.getVariableTypeMap()) {
       //Add Variable to Module
-      auto variable_decl = find_variables_visitor.getVariableMap().find(variable.first)->second;
+      auto variable_decl = clang_variables.getVariableMap().find(variable.first)->second;
       auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(variable_decl, ci);
 
       /*

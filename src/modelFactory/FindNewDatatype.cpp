@@ -35,12 +35,12 @@ DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
   } else if (type->isStructureType()) {
     auto record_decl = type->getAsCXXRecordDecl();
 
-    FindVariablesVisitor find_variables_visitor(record_decl);
+    GetClangVariables clang_variables(record_decl);
 
     //Create new dataType
     new_type = new DataType(record_decl->getName().str());
     //Add sub-variables
-    for (const auto &var: find_variables_visitor.getVariableTypeMap()) {
+    for (const auto &var: clang_variables.getVariableTypeMap()) {
       auto sub_var_data_type = FindNewDatatype::getDataType(var.second);
       if (sub_var_data_type->isBuiltInType()) {
         new_type->addSubVar(var.first, sub_var_data_type);

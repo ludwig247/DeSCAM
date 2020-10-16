@@ -8,11 +8,11 @@
 #include <map>
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "IFindVariables.h"
-#include "FindVariablesVisitor.h"
+#include "GetClangVariables.h"
 #include "Logger/Logger.h"
 #include "GlobalUtilities.h"
 #include "clang/AST/Decl.h"
-#include "FindVariablesVisitor.h"
+#include "GetClangVariables.h"
 #include "IFindNewDatatype.h"
 #include "IFindInitialValues.h"
 #include "IFindDataFlowFactory.h"

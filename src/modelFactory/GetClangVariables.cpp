@@ -2,14 +2,14 @@
 // Created by burr on 15.10.20.
 //
 
-#include "FindVariablesVisitor.h"
+#include "GetClangVariables.h"
 
-DESCAM::FindVariablesVisitor::FindVariablesVisitor(clang::CXXRecordDecl *record_decl) {
+DESCAM::GetClangVariables::GetClangVariables(clang::CXXRecordDecl *record_decl) {
   this->record_decl_ = record_decl;
   TraverseDecl(record_decl);
 }
 
-bool DESCAM::FindVariablesVisitor::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
+bool DESCAM::GetClangVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
   if (fieldDecl->getParent()->getName().str() != record_decl_->getName().str()) return true;
   //If field is builtin-> add else make sure its tracked such that we don't miss any values
   if (fieldDecl->getType()->isBuiltinType()) {
@@ -48,13 +48,13 @@ bool DESCAM::FindVariablesVisitor::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
   return true;
 
 }
-std::map<std::string, clang::QualType> DESCAM::FindVariablesVisitor::getVariableTypeMap() const {
+std::map<std::string, clang::QualType> DESCAM::GetClangVariables::getVariableTypeMap() const {
   std::map<std::string, clang::QualType> typeMap;
   for (const auto &var:  this->getVariableMap()) {
     typeMap.insert(std::make_pair(var.first, var.second->getType()));
   }
   return typeMap;
 }
-const std::map<std::string, clang::FieldDecl *> &DESCAM::FindVariablesVisitor::getVariableMap() const {
+const std::map<std::string, clang::FieldDecl *> &DESCAM::GetClangVariables::getVariableMap() const {
   return this->member_map_;
 }

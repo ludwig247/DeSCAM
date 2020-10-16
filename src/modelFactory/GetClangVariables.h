@@ -2,8 +2,8 @@
 // Created by burr on 15.10.20.
 //
 
-#ifndef SCAM_SRC_MODELFACTORY_FINDVARIABLESVISITOR_H_
-#define SCAM_SRC_MODELFACTORY_FINDVARIABLESVISITOR_H_
+#ifndef SCAM_SRC_MODELFACTORY_GETCLANGVARIABLES_H_
+#define SCAM_SRC_MODELFACTORY_GETCLANGVARIABLES_H_
 
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "map"
@@ -11,9 +11,9 @@
 #include "Logger/Logger.h"
 
 namespace DESCAM {
-class FindVariablesVisitor : public clang::RecursiveASTVisitor<FindVariablesVisitor> {
+class GetClangVariables : public clang::RecursiveASTVisitor<GetClangVariables> {
  public:
-  explicit FindVariablesVisitor(clang::CXXRecordDecl *record_decl);
+  explicit GetClangVariables(clang::CXXRecordDecl *record_decl);
 
   //Visitor
   bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
@@ -27,4 +27,4 @@ class FindVariablesVisitor : public clang::RecursiveASTVisitor<FindVariablesVisi
 };
 }
 
-#endif //SCAM_SRC_MODELFACTORY_FINDVARIABLESVISITOR_H_
+#endif //SCAM_SRC_MODELFACTORY_GETCLANGVARIABLES_H_
