@@ -7,6 +7,8 @@
 
 #include "DataType.h"
 #include "clang/AST/Type.h"
+#include "Module.h"
+#include "clang/Frontend/CompilerInstance.h"
 
 namespace DESCAM {
 class IFindNewDatatype {
