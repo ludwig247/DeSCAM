@@ -35,7 +35,6 @@ namespace DESCAM {
         FSM *getFSM() const;
 
         //Variables
-        /*void addVariable(Variable *variable);*/
         void addVariables(std::map<std::string, Variable *> variables);
         const std::map<std::string, Variable *> &getVariableMap() const;
         Variable *getVariable(const std::string &n) const;
