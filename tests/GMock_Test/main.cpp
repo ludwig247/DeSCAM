@@ -211,6 +211,7 @@ TEST(TestCase1, full_mock) {
 //  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
+
 /**
  * Test without any Mock-Objects for TestCase2
  */
