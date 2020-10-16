@@ -3,6 +3,7 @@
 //
 
 #include "PluginAction.h"
+#include "FatalError.h"
 
 using namespace DESCAM;
 
@@ -19,6 +20,10 @@ PluginAction::PluginAction(int argc, const char **argv, IModelFactory *model_fac
     sources.erase(sources.begin(), sources.begin() + previous_length_);
   }
   previous_length_ = now_length;
+
+  if(sources.size()!=1){
+    TERMINATE("Please specify exactly one source file");
+  }
 
   ClangTool Tool(OptionsParser.getCompilations(), sources);
 
