@@ -30,7 +30,6 @@ class IFindVariables {
                      DESCAM::Module *module) = 0;
 
   virtual std::map<std::string, DESCAM::Variable *> getVariableMap() = 0;
-  virtual std::map<std::string, const DESCAM::DataType *> getVariableTypeMap() = 0;
 };
 }
 #endif //SCAM_SRC_MODELFACTORY_IFINDVARIABLES_H_

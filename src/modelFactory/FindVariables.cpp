@@ -31,8 +31,8 @@ bool DESCAM::FindVariables::setup(clang::CXXRecordDecl *record_decl,
     //Add members to module
     for (auto &&variable: find_variables_visitor.getVariableTypeMap()) {
       //Add Variable to Module
-      auto fieldDecl = find_variables_visitor.getVariableMap().find(variable.first)->second;
-      auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(fieldDecl, ci);
+      auto variable_decl = find_variables_visitor.getVariableMap().find(variable.first)->second;
+      auto varLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(variable_decl, ci);
 
       /*
        * Distinguish between local and global DataTypes.
@@ -51,7 +51,7 @@ bool DESCAM::FindVariables::setup(clang::CXXRecordDecl *record_decl,
         type = DataTypes::getLocalDataType(module_name, typeName);
       } else {
         //Step2 : Add new datatype either as local or global datatype
-        type = find_new_datatype_->getDataType(variable.second, ci, module);
+        type = find_new_datatype_->getDataType(variable.second);
         if (find_new_datatype_->isGlobal(variable.second)) {
           DataTypes::addDataType(type);
         } else {
@@ -70,7 +70,7 @@ bool DESCAM::FindVariables::setup(clang::CXXRecordDecl *record_decl,
                 std::make_pair(variable.first,
                                new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)));)
       } else {
-        this->find_initial_values_->setup(record_decl, fieldDecl, module, ci, find_data_flow_factory_);
+        this->find_initial_values_->setup(record_decl, variable_decl, module, ci, find_data_flow_factory_);
         ConstValue *initialValue = this->find_initial_values_->getInitValue();
         //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
         //auto initialValMap = findInitialValues.getVariableInitialMap();
@@ -99,12 +99,3 @@ bool DESCAM::FindVariables::setup(clang::CXXRecordDecl *record_decl,
 std::map<std::string, DESCAM::Variable *> DESCAM::FindVariables::getVariableMap() {
   return this->variable_map_;
 }
-
-std::map<std::string, const DESCAM::DataType *> DESCAM::FindVariables::getVariableTypeMap() {
-  std::map<std::string, const DESCAM::DataType *> variable_type_map;
-  for (const auto &var:  this->getVariableMap()) {
-    variable_type_map.insert(std::make_pair(var.first, var.second->getDataType()));
-  }
-  return variable_type_map;
-}
-

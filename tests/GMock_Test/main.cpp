@@ -52,9 +52,10 @@ TEST(gmock_test, TestCase1) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindVariables> find_variables =
+      std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -166,9 +167,10 @@ TEST(mocking_test, TestCase1) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindVariables> find_variables =
+      std::make_unique<FindVariables>(find_new_datatype.get(), &find_initial_values, find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(&find_functions,
                                         &find_initial_values,
@@ -243,9 +245,10 @@ TEST(gmock_test, TestCase2) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindVariables> find_variables =
+      std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),
@@ -315,9 +318,10 @@ TEST(gmock_test, TestCase3) {
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-  std::unique_ptr<IFindVariables> find_variables = std::make_unique<FindVariables>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindVariables> find_variables =
+      std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_initial_values.get(),

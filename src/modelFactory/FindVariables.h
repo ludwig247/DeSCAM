@@ -34,7 +34,6 @@ class FindVariables : public IFindVariables {
   ~FindVariables() override = default;
 
   std::map<std::string, DESCAM::Variable *> getVariableMap() override;
-  std::map<std::string, const DESCAM::DataType *> getVariableTypeMap() override;
   bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, DESCAM::Module *module) override;
  private:
   IFindNewDatatype *find_new_datatype_;
