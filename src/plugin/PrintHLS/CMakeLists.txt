@@ -8,10 +8,10 @@ add_library(PrintHLS SHARED
 
         HLS/HLS.cpp
         HLS/PrintBitOperations.cpp
-        HLS/PrintFunction.cpp
+        #HLS/PrintFunction.cpp
         HLS/PrintReset.cpp
         HLS/PrintStatement.cpp
-        #HLS/PrintStmtCPP.cpp
+        HLS/PrintStmtCPP.cpp
 
         SynthesisScript/SynthesisScripts.cpp
 

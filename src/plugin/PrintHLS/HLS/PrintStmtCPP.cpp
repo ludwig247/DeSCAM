@@ -24,6 +24,13 @@ void PrintStmtCPP::visit(DESCAM::Arithmetic &node) {
     ss << ")";
 }
 
+void PrintStmtCPP::visit(ArrayOperand &node) {
+    node.getArrayOperand()->accept(*this);
+    ss << "[";
+    node.getIdx()->accept(*this);
+    ss << "]";
+}
+
 void PrintStmtCPP::visit(DESCAM::Assignment &node) {
     node.getLhs()->accept(*this);
     ss << " = ";
@@ -51,6 +58,72 @@ void PrintStmtCPP::visit(DESCAM::Cast &node) {
     ss << "(";
     node.getSubExpr()->accept(*this);
     ss << ")";
+}
+
+void PrintStmtCPP::visit(IntegerValue &node) {
+    ss << node.getValue();
+}
+
+void PrintStmtCPP::visit(Logical &node) {
+    ss << "(";
+    node.getLhs()->accept(*this);
+    if (node.getOperation() == "or") {
+        ss << " || ";
+    } else if (node.getOperation() == "and") {
+        ss << " && ";
+    }
+    node.getRhs()->accept(*this);
+    ss << ")";
+}
+
+void PrintStmtCPP::visit(Notify &node) {
+    ss << node.getPort()->getName() << "_notify";
+}
+
+void PrintStmtCPP::visit(ParamOperand &node) {
+    if (node.getParameter()->isSubVar()) {
+        ss << node.getParameter()->getParent()->getName() << "_" << node.getParameter()->getName();
+    } else {
+        ss << node.getOperandName();
+    }
+}
+
+void PrintStmtCPP::visit(Return &node) {
+    ss << "return ";
+    node.getReturnValue()->accept(*this);
+    ss << "";
+}
+
+void PrintStmtCPP::visit(SyncSignal &node) {
+    ss << node.getPort()->getName() << "_sync";
+}
+
+void PrintStmtCPP::visit(UnaryExpr &node) {
+    ss << "(";
+    if (node.getOperation() == "not") {
+        ss << "!(";
+    } else {
+        ss << node.getOperation() << "(";
+    }
+    node.getExpr()->accept(*this);
+    ss << "))";
+}
+
+void PrintStmtCPP::visit(UnsignedValue &node) {
+    ss << node.getValue();
+}
+
+void PrintStmtCPP::visit(VariableOperand &node) {
+    if (node.getVariable()->isSubVar()) {
+        ss << node.getVariable()->getParent()->getName();
+        if (node.getVariable()->getParent()->isArrayType()) {
+            ss << "[" << node.getVariable()->getName() << "]";
+        } else {
+            ss << "_" << node.getVariable()->getName();
+        }
+    } else {
+        ss << node.getVariable()->getName();
+    }
 }
 
 std::string PrintStmtCPP::getString() {

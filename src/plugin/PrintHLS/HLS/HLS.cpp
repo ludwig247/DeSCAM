@@ -4,7 +4,7 @@
 
 #include "HLS.h"
 #include "NodePeekVisitor.h"
-#include "PrintFunction.h"
+#include "PrintStmtCPP.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
 #include <PrintHLS/Common/Utilities.h>
@@ -412,25 +412,25 @@ void HLS::visit(Function &node) {
         if (!returnValue.second.empty()) {
             if (numberOfBranches > 1) {
                 if (numberOfBranches == node.getReturnValueConditionList().size()) {
-                    ss << "\tif ((";
+                    ss << "\tif (";
                 } else {
-                    ss << "else if((";
+                    ss << "else if (";
                 }
                 for (auto condition = returnValue.second.begin();
                      condition != returnValue.second.end();
                      ++condition) {
-                    ss << PrintFunction::toString(*condition);
+                    ss << PrintStmtCPP::toString(*condition);
                     if (std::next(condition) != returnValue.second.end()) {
-                        ss << ") && (";
+                        ss << " && ";
                     }
                 }
-                ss << ")) {\n";
+                ss << ") {\n";
             }
         }
         if (node.getReturnValueConditionList().size() > 1 && numberOfBranches == 1) {
             ss << "else {\n";
         }
-        ss << PrintFunction::toString(returnValue.first, 2, 2) << ";";
+        ss << PrintStmtCPP::toString(returnValue.first, 2, 2) << ";";
         if (node.getReturnValueConditionList().size() > 1) {
             ss << "\n\t} ";
         }

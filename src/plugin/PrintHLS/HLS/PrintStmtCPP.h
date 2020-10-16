@@ -22,15 +22,15 @@ namespace DESCAM { namespace HLSPlugin { namespace HLS {
             protected:
 
                 void visit(Arithmetic &node) override;
-                //void visit(ArrayOperand &node) override;
+                void visit(ArrayOperand &node) override;
                 void visit(Assignment &node) override;
                 void visit(Bitwise &node) override;
                 void visit(Cast &node) override;
                 //void visit(CompoundExpr &node) override;
-                void visit(DataSignalOperand &node) override;
-                void visit(FunctionOperand &node) override;
+                //void visit(DataSignalOperand &node) override;
+                //void visit(FunctionOperand &node) override;
                 void visit(IntegerValue &node) override;
-                void visit(ITE &node) override;
+                //void visit(ITE &node) override;
                 void visit(Logical &node) override;
                 void visit(Notify &node) override;
                 void visit(ParamOperand &node) override;
