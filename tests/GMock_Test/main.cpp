@@ -24,7 +24,7 @@
 #include "FindVariables.h"
 #include "FindSCMain.h"
 
-TEST(gmock_test, TestCase1) {
+TEST(TestCase1, full_test) {
   DataTypes::reset();
 
   std::vector<const char *> command_line_arguments_vector;
@@ -104,7 +104,7 @@ TEST(gmock_test, TestCase1) {
 /**
  * Test with Mock-Objects for TestCase1
  */
-TEST(mocking_test, TestCase1) {
+TEST(TestCase1, all_mock_test) {
   using namespace ::testing;
   using ::testing::Return;
 
@@ -216,7 +216,7 @@ TEST(mocking_test, TestCase1) {
 
 }
 
-TEST(gmock_test, TestCase2) {
+TEST(TestCase2, full_test) {
 
   DataTypes::reset();
 
@@ -289,7 +289,7 @@ TEST(gmock_test, TestCase2) {
 
 }
 
-TEST(gmock_test, TestCase3) {
+TEST(TestCase3, full_test) {
 
   DataTypes::reset();
 
