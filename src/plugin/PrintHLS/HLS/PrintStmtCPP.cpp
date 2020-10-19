@@ -98,6 +98,16 @@ void PrintStmtCPP::visit(SyncSignal &node) {
     ss << node.getPort()->getName() << "_sync";
 }
 
+void PrintStmtCPP::visit(Ternary &node) {
+    ss << "(";
+    node.getCondition()->accept(*this);
+    ss << " ? ";
+    node.getTrueExpr()->accept(*this);
+    ss << " : ";
+    node.getFalseExpr()->accept(*this);
+    ss << ")";
+}
+
 void PrintStmtCPP::visit(UnaryExpr &node) {
     ss << "(";
     if (node.getOperation() == "not") {

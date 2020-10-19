@@ -320,3 +320,13 @@ void PrintStatement::visit(Notify &node) {
     }
     this->ss << node.getPort()->getName() << "_notify" << suffix;
 }
+
+void PrintStatement::visit(Ternary &node) {
+    this->ss << "(";
+    node.getCondition()->accept(*this);
+    this->ss << " ? ";
+    node.getTrueExpr()->accept(*this);
+    this->ss << " : ";
+    node.getFalseExpr()->accept(*this);
+    this->ss << ")";
+}

@@ -55,6 +55,7 @@ namespace DESCAM { namespace HLSPlugin { namespace HLS {
         void visit(ParamOperand &node) override;
         void visit(Return &node) override;
         void visit(SyncSignal &node) override;
+        void visit(Ternary &node) override;
         void visit(UnaryExpr &node) override;
         void visit(UnsignedValue &node) override;
         void visit(VariableOperand &node) override;
