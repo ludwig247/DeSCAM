@@ -75,7 +75,6 @@ void setup(const std::string &path_to_file, const std::string &filename, IModelF
 TEST(TestCase1, no_mock) /* NOLINT */{
 
   //Compositional root
-  std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
   std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
@@ -85,6 +84,8 @@ TEST(TestCase1, no_mock) /* NOLINT */{
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindFunctions>
+      find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
@@ -141,14 +142,13 @@ TEST(TestCase1, full_mock) {
   std::map<std::string, clang::CXXMethodDecl *> find_functions_get_function_map_map;
   std::map<std::string, std::string> find_functions_get_function_return_type_map;
   DESCAM::MOCK::MockIFindFunctions find_functions;
-  EXPECT_CALL(find_functions, setup(_))
+  EXPECT_CALL(find_functions, setup(_, _, _, _))
       .Times(1);
   EXPECT_CALL(find_functions, getFunctionMap())
-      .Times(2)
+      .Times(1)
       .WillRepeatedly(ReturnRef(find_functions_get_function_map_map));
   EXPECT_CALL(find_functions, getFunctionReturnTypeMap())
-      .Times(1)
-      .WillOnce(ReturnRef(find_functions_get_function_return_type_map));
+      .Times(0);
   EXPECT_CALL(find_functions, getFunctionParamNameMap())
       .Times(0);
   EXPECT_CALL(find_functions, getFunctionParamTypeMap())
@@ -219,7 +219,6 @@ TEST(TestCase1, full_mock) {
  */
 TEST(TestCase2, no_mock) /* NOLINT */{
   //Compositional root
-  std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
   std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
@@ -229,6 +228,8 @@ TEST(TestCase2, no_mock) /* NOLINT */{
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindFunctions>
+      find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
@@ -253,7 +254,6 @@ TEST(TestCase2, no_mock) /* NOLINT */{
 TEST(TestCase3, no_mock) /* NOLINT */{
 
   //Compositional root
-  std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
   std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
@@ -263,6 +263,8 @@ TEST(TestCase3, no_mock) /* NOLINT */{
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindFunctions>
+      find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 

@@ -20,12 +20,17 @@ class IFindFunctions {
    * @brief setup for the IFindFunctions class
    * @param recordDecl ?
    */
-  virtual bool setup(clang::CXXRecordDecl *recordDecl) = 0;
+  virtual bool setup(clang::CXXRecordDecl *record_decl,
+                     clang::CompilerInstance *ci,
+                     std::string module_name,
+                     Module *module) = 0;
 
   virtual const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const = 0;
   virtual const std::map<std::string, std::string> &getFunctionReturnTypeMap() const = 0;
   virtual const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const = 0;
   virtual const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const = 0;
+
+  virtual std::map<std::string, Function *> getFunctions() const = 0;
 };
 }
 

@@ -8,6 +8,9 @@
 #include <map>
 #include "IFindFunctions.h"
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "IFindNewDatatype.h"
+#include "IFindDataFlowFactory.h"
+#include "GetClangFunctions.h"
 
 namespace DESCAM {
 /***
@@ -15,36 +18,33 @@ namespace DESCAM {
  *
  * Functions are considered const if they are const with respect to the class and thereby don't change the state of the class.
  */
-class FindFunctions : public IFindFunctions, public clang::RecursiveASTVisitor<FindFunctions> {
+class FindFunctions : public IFindFunctions {
  public:
-  FindFunctions();
+  FindFunctions(IFindNewDatatype *find_new_datatype, IFindDataFlowFactory *find_data_flow_factory);
 
-  bool setup(clang::CXXRecordDecl *recordDecl) override;
+  bool setup(clang::CXXRecordDecl *record_decl,
+             clang::CompilerInstance *ci,
+             std::string module_name,
+             Module *module) override;
 
-  bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl);
+  //std::map<std::string, Function *> getFunctions();
 
   const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const override;
-
   const std::map<std::string, std::string> &getFunctionReturnTypeMap() const override;
-
   const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const override;
-
   const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const override;
 
+  std::map<std::string, Function *> getFunctions() const override;
+
  private:
+  IFindNewDatatype *find_new_datatype_;
+  IFindDataFlowFactory *find_data_flow_factory_;
 
-  /**
-   * Resets the object back to its initial state
-   */
-  void clean();
+  GetClangFunctions *get_clang_functions_;
 
-  std::map<std::string, clang::CXXMethodDecl *> function_map_;
-  std::map<std::string, std::string> function_return_type_map_;
+  clang::CXXRecordDecl *record_decl_{};
 
-  std::string clangToScamType(clang::QualType qualType) const;
-
-  std::map<std::string, std::vector<std::string>> function_param_name_map_;
-  std::map<std::string, std::vector<std::string>> function_param_type_map_;
+  std::map<std::string, Function *> function_map_;
 };
 }
 
