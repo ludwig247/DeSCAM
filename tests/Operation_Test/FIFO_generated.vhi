@@ -106,7 +106,13 @@ freeze:
 	state_at_t = state@t;
 assume:
 	at t: Start_State;
-	at t: ((((state = FULL) and not(out_sync)) and val_sync) or (((state = EMPTY) and out_sync) and not(val_sync)));
+	at t: ((((state = FULL)
+and not(out_sync))
+and val_sync)
+or
+(((state = EMPTY)
+and out_sync)
+and not(val_sync)));
 prove:
 	at t_end: Start_State;
 	at t_end: state = state_at_t;

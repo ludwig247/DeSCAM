@@ -181,7 +181,19 @@ freeze:
 	val_0_sig_at_t = val_0_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((not(flag0) and flag1) and not(out_sync)) and val_0_sync) and val_1_sync) and not(val_2_sync)) or (((((not(flag0) and not(flag1)) and out_sync) and val_0_sync) and not(val_1_sync)) and not(val_2_sync)));
+	at t: ((((((not(flag0)
+and flag1)
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and not(val_2_sync))
+or
+(((((not(flag0)
+and not(flag1))
+and out_sync)
+and val_0_sync)
+and not(val_1_sync))
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
@@ -279,7 +291,21 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: (((((((not(flag0) and flag1) and not(flag2)) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or ((((((not(flag0) and not(flag2)) and not(flag1)) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync));
+	at t: (((((((not(flag0)
+and flag1)
+and not(flag2))
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+((((((not(flag0)
+and not(flag2))
+and not(flag1))
+and out_sync)
+and val_0_sync)
+and not(val_1_sync))
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
@@ -340,7 +366,28 @@ freeze:
 	val_0_sig_at_t = val_0_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((not(flag0) and flag1) and flag2) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or ((((((not(flag0) and flag2) and not(flag1)) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync)) or (((((not(flag0) and flag1) and not(flag2)) and out_sync) and val_0_sync) and not(val_2_sync)));
+	at t: ((((((((not(flag0)
+and flag1)
+and flag2)
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+((((((not(flag0)
+and flag2)
+and not(flag1))
+and out_sync)
+and val_0_sync)
+and not(val_1_sync))
+and val_2_sync))
+or
+(((((not(flag0)
+and flag1)
+and not(flag2))
+and out_sync)
+and val_0_sync)
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
@@ -364,7 +411,28 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((flag0 and flag1) and not(flag2)) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or (((((flag0 and not(flag1)) and not(flag2)) and out_sync) and not(val_1_sync)) and val_2_sync)) or ((((((not(flag0) and flag1) and not(flag2)) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync));
+	at t: ((((((((flag0
+and flag1)
+and not(flag2))
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+(((((flag0
+and not(flag1))
+and not(flag2))
+and out_sync)
+and not(val_1_sync))
+and val_2_sync))
+or
+((((((not(flag0)
+and flag1)
+and not(flag2))
+and out_sync)
+and not(val_0_sync))
+and val_1_sync)
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
@@ -492,7 +560,19 @@ freeze:
 	val_1_sig_at_t = val_1_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((flag0 and not(flag1)) and not(out_sync)) and val_0_sync) and val_1_sync) and not(val_2_sync)) or (((((not(flag0) and not(flag1)) and out_sync) and not(val_0_sync)) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((flag0
+and not(flag1))
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and not(val_2_sync))
+or
+(((((not(flag0)
+and not(flag1))
+and out_sync)
+and not(val_0_sync))
+and val_1_sync)
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
@@ -581,7 +661,21 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: (((((((flag0 and not(flag1)) and not(flag2)) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or ((((((not(flag0) and not(flag1)) and not(flag2)) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync));
+	at t: (((((((flag0
+and not(flag1))
+and not(flag2))
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+((((((not(flag0)
+and not(flag1))
+and not(flag2))
+and out_sync)
+and not(val_0_sync))
+and val_1_sync)
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
@@ -604,7 +698,17 @@ freeze:
 	flag0_at_t = flag0@t;
 assume:
 	at t: start_state;
-	at t: (((((flag0 and not(out_sync)) and val_0_sync) and not(val_1_sync)) and not(val_2_sync)) or ((((not(flag0) and out_sync) and not(val_0_sync)) and not(val_1_sync)) and not(val_2_sync)));
+	at t: (((((flag0
+and not(out_sync))
+and val_0_sync)
+and not(val_1_sync))
+and not(val_2_sync))
+or
+((((not(flag0)
+and out_sync)
+and not(val_0_sync))
+and not(val_1_sync))
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: flag0 = flag0_at_t;
@@ -768,7 +872,19 @@ freeze:
 	flag2_at_t = flag2@t;
 assume:
 	at t: start_state;
-	at t: ((((((flag0 and flag2) and not(out_sync)) and val_0_sync) and not(val_1_sync)) and val_2_sync) or (((((not(flag0) and flag2) and out_sync) and not(val_0_sync)) and not(val_1_sync)) and val_2_sync));
+	at t: ((((((flag0
+and flag2)
+and not(out_sync))
+and val_0_sync)
+and not(val_1_sync))
+and val_2_sync)
+or
+(((((not(flag0)
+and flag2)
+and out_sync)
+and not(val_0_sync))
+and not(val_1_sync))
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: flag0 = flag0_at_t;
@@ -789,7 +905,19 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((flag0 and not(flag2)) and not(out_sync)) and val_0_sync) and not(val_1_sync)) and val_2_sync) or (((((not(flag0) and not(flag2)) and out_sync) and not(val_0_sync)) and not(val_1_sync)) and val_2_sync));
+	at t: ((((((flag0
+and not(flag2))
+and not(out_sync))
+and val_0_sync)
+and not(val_1_sync))
+and val_2_sync)
+or
+(((((not(flag0)
+and not(flag2))
+and out_sync)
+and not(val_0_sync))
+and not(val_1_sync))
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(2,32)) = val_2_sig_at_t;
@@ -1317,7 +1445,25 @@ freeze:
 	flag1_at_t = flag1@t;
 assume:
 	at t: start_state;
-	at t: (((((((flag0 and flag1) and not(out_sync)) and val_0_sync) and val_1_sync) and not(val_2_sync)) or (((((not(flag0) and flag1) and out_sync) and not(val_0_sync)) and val_1_sync) and not(val_2_sync))) or ((((flag0 and not(flag1)) and out_sync) and not(val_1_sync)) and not(val_2_sync)));
+	at t: (((((((flag0
+and flag1)
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and not(val_2_sync))
+or
+(((((not(flag0)
+and flag1)
+and out_sync)
+and not(val_0_sync))
+and val_1_sync)
+and not(val_2_sync)))
+or
+((((flag0
+and not(flag1))
+and out_sync)
+and not(val_1_sync))
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: flag0 = flag0_at_t;
@@ -1339,7 +1485,21 @@ freeze:
 	val_1_sig_at_t = val_1_sig@t;
 assume:
 	at t: start_state;
-	at t: (((((((not(flag0) and not(flag1)) and flag2) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or ((((((not(flag0) and not(flag1)) and not(flag2)) and out_sync) and val_0_sync) and val_1_sync) and not(val_2_sync)));
+	at t: (((((((not(flag0)
+and not(flag1))
+and flag2)
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+((((((not(flag0)
+and not(flag1))
+and not(flag2))
+and out_sync)
+and val_0_sync)
+and val_1_sync)
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(0,32)) = val_0_sig_at_t;
@@ -1400,7 +1560,28 @@ freeze:
 	val_1_sig_at_t = val_1_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((flag0 and not(flag1)) and flag2) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or ((((((not(flag0) and not(flag1)) and flag2) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync)) or (((((flag0 and not(flag1)) and not(flag2)) and out_sync) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((flag0
+and not(flag1))
+and flag2)
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+((((((not(flag0)
+and not(flag1))
+and flag2)
+and out_sync)
+and not(val_0_sync))
+and val_1_sync)
+and val_2_sync))
+or
+(((((flag0
+and not(flag1))
+and not(flag2))
+and out_sync)
+and val_1_sync)
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer(resize(1,32)) = val_1_sig_at_t;
@@ -1460,7 +1641,34 @@ freeze:
 	flag2_at_t = flag2@t;
 assume:
 	at t: start_state;
-	at t: (((((((((flag0 and flag1) and flag2) and not(out_sync)) and val_0_sync) and val_1_sync) and val_2_sync) or (((((flag0 and not(flag1)) and flag2) and out_sync) and not(val_1_sync)) and val_2_sync)) or ((((((not(flag0) and flag1) and flag2) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync)) or ((((flag0 and flag1) and not(flag2)) and out_sync) and not(val_2_sync)));
+	at t: (((((((((flag0
+and flag1)
+and flag2)
+and not(out_sync))
+and val_0_sync)
+and val_1_sync)
+and val_2_sync)
+or
+(((((flag0
+and not(flag1))
+and flag2)
+and out_sync)
+and not(val_1_sync))
+and val_2_sync))
+or
+((((((not(flag0)
+and flag1)
+and flag2)
+and out_sync)
+and not(val_0_sync))
+and val_1_sync)
+and val_2_sync))
+or
+((((flag0
+and flag1)
+and not(flag2))
+and out_sync)
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: flag0 = flag0_at_t;

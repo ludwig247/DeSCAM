@@ -664,7 +664,22 @@ freeze:
 	state2_at_t = state2@t;
 assume:
 	at t: start_state;
-	at t: ((((((((next_read = resize(1,32)) and (state1 = EMPTY)) and (state2 = FULL)) and out_sync) and not(val_0_sync)) and not(val_1_sync)) and val_2_sync) or (((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and (state1 = FULL)) and out_sync) and not(val_0_sync)) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and (state2 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and not(val_1_sync)) 
+and val_2_sync)
+or
+(((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and (state1 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: next_read = next_read_at_t;
@@ -6745,7 +6760,33 @@ freeze:
 	state2_at_t = state2@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and (state1 = FULL)) and (state2 = FULL)) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync) or ((((((((next_read = resize(1,32)) and (state1 = EMPTY)) and (state0 = FULL)) and (state2 = FULL)) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync)) or ((((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and (state0 = FULL)) and (state1 = FULL)) and out_sync) and val_0_sync) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and (state1 = FULL)) 
+and (state2 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and val_2_sync)
+or
+((((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and (state0 = FULL)) 
+and (state2 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and val_2_sync))
+or
+((((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and (state0 = FULL)) 
+and (state1 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and val_1_sync) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: next_read = next_read_at_t;
@@ -6772,7 +6813,26 @@ freeze:
 	val_1_sig_at_t = val_1_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and not((state1 = FULL))) and (((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1)) and (state2 = FULL)) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync) or (((((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and (state0 = FULL)) and not((state1 = FULL))) and (((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1)) and out_sync) and val_0_sync) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and not((state1 = FULL))) 
+and (((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1)) 
+and (state2 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and val_2_sync)
+or
+(((((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and (state0 = FULL)) 
+and not((state1 = FULL))) 
+and (((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1)) 
+and out_sync) 
+and val_0_sync) 
+and val_1_sync) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer1(head1) = val_1_sig_at_t;
@@ -6803,7 +6863,26 @@ freeze:
 	val_1_sig_at_t = val_1_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and not((state1 = FULL))) and not((((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1))) and (state2 = FULL)) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync) or (((((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and (state0 = FULL)) and not((state1 = FULL))) and not((((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1))) and out_sync) and val_0_sync) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and not((state1 = FULL))) 
+and not((((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1))) 
+and (state2 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and val_2_sync)
+or
+(((((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and (state0 = FULL)) 
+and not((state1 = FULL))) 
+and not((((resize(1,32) + head1)(31 downto 0) mod resize(3,32))(31 downto 0) = tail1))) 
+and out_sync) 
+and val_0_sync) 
+and val_1_sync) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer1(head1) = val_1_sig_at_t;
@@ -6834,7 +6913,26 @@ freeze:
 	val_0_sig_at_t = val_0_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(1,32)) and (state1 = EMPTY)) and not((state0 = FULL))) and (((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0)) and (state2 = FULL)) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync) or (((((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and not((state0 = FULL))) and (((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0)) and (state1 = FULL)) and out_sync) and val_0_sync) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and not((state0 = FULL))) 
+and (((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0)) 
+and (state2 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and val_2_sync)
+or
+(((((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and not((state0 = FULL))) 
+and (((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0)) 
+and (state1 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and val_1_sync) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer0(head0) = val_0_sig_at_t;
@@ -6959,7 +7057,26 @@ freeze:
 	val_0_sig_at_t = val_0_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(1,32)) and (state1 = EMPTY)) and not((state0 = FULL))) and not((((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0))) and (state2 = FULL)) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync) or (((((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and not((state0 = FULL))) and not((((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0))) and (state1 = FULL)) and out_sync) and val_0_sync) and val_1_sync) and not(val_2_sync)));
+	at t: ((((((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and not((state0 = FULL))) 
+and not((((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0))) 
+and (state2 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and val_2_sync)
+or
+(((((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and not((state0 = FULL))) 
+and not((((resize(1,32) + head0)(31 downto 0) mod resize(3,32))(31 downto 0) = tail0))) 
+and (state1 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and val_1_sync) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: buffer0(head0) = val_0_sig_at_t;
@@ -9459,7 +9576,21 @@ freeze:
 	state1_at_t = state1@t;
 assume:
 	at t: start_state;
-	at t: ((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and (state1 = FULL)) and out_sync) and not(val_0_sync)) and val_1_sync) and not(val_2_sync)) or (((((((next_read = resize(1,32)) and (state1 = EMPTY)) and (state0 = FULL)) and out_sync) and val_0_sync) and not(val_1_sync)) and not(val_2_sync)));
+	at t: ((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and (state1 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and not(val_2_sync))
+or
+(((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and (state0 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: next_read = next_read_at_t;
@@ -11416,7 +11547,22 @@ freeze:
 	state2_at_t = state2@t;
 assume:
 	at t: start_state;
-	at t: ((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and (state2 = FULL)) and out_sync) and not(val_0_sync)) and not(val_1_sync)) and val_2_sync) or (((((((not((next_read = resize(0,32))) and not((next_read = resize(1,32)))) and (state2 = EMPTY)) and (state0 = FULL)) and out_sync) and val_0_sync) and not(val_1_sync)) and not(val_2_sync)));
+	at t: ((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and (state2 = FULL)) 
+and out_sync) 
+and not(val_0_sync)) 
+and not(val_1_sync)) 
+and val_2_sync)
+or
+(((((((not((next_read = resize(0,32))) 
+and not((next_read = resize(1,32)))) 
+and (state2 = EMPTY)) 
+and (state0 = FULL)) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and not(val_2_sync)));
 prove:
 	at t_end: start_state;
 	at t_end: next_read = next_read_at_t;
@@ -13380,7 +13526,25 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and (state1 = FULL)) and not((state2 = FULL))) and (((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2)) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync) or (((((((((next_read = resize(1,32)) and (state1 = EMPTY)) and (state0 = FULL)) and not((state2 = FULL))) and (((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2)) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync));
+	at t: ((((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and (state1 = FULL)) 
+and not((state2 = FULL))) 
+and (((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2)) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and val_2_sync)
+or
+(((((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and (state0 = FULL)) 
+and not((state2 = FULL))) 
+and (((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2)) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: buffer2(head2) = val_2_sig_at_t;
@@ -13411,7 +13575,25 @@ freeze:
 	val_2_sig_at_t = val_2_sig@t;
 assume:
 	at t: start_state;
-	at t: ((((((((((next_read = resize(0,32)) and (state0 = EMPTY)) and (state1 = FULL)) and not((state2 = FULL))) and not((((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2))) and out_sync) and not(val_0_sync)) and val_1_sync) and val_2_sync) or (((((((((next_read = resize(1,32)) and (state1 = EMPTY)) and (state0 = FULL)) and not((state2 = FULL))) and not((((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2))) and out_sync) and val_0_sync) and not(val_1_sync)) and val_2_sync));
+	at t: ((((((((((next_read = resize(0,32)) 
+and (state0 = EMPTY)) 
+and (state1 = FULL)) 
+and not((state2 = FULL))) 
+and not((((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2))) 
+and out_sync) 
+and not(val_0_sync)) 
+and val_1_sync) 
+and val_2_sync)
+or
+(((((((((next_read = resize(1,32)) 
+and (state1 = EMPTY)) 
+and (state0 = FULL)) 
+and not((state2 = FULL))) 
+and not((((resize(1,32) + head2)(31 downto 0) mod resize(3,32))(31 downto 0) = tail2))) 
+and out_sync) 
+and val_0_sync) 
+and not(val_1_sync)) 
+and val_2_sync));
 prove:
 	at t_end: start_state;
 	at t_end: buffer2(head2) = val_2_sig_at_t;
