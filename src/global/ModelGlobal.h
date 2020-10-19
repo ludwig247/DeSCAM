@@ -85,8 +85,8 @@ class ModelGlobal {
     }
 
     if (argc >= 1) {
-        PluginAction
-            pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, model_factory);
+      PluginAction
+          pa2(commandLineArugmentsVector.size(), commandLineArgumentsArray, model_factory);
     } else TERMINATE("Wrong use of DeSCAM");
   };
 
