@@ -24,7 +24,7 @@ endforeach()
 string(REGEX REPLACE "^;" "" INCLUDE_HEADER ${INCLUDE_HEADER})
 configure_file (
         "${CMAKE_SOURCE_DIR}/example/add_example/templates/tests.h.in"
-        "${CMAKE_SOURCE_DIR}/test/tests.list"
+        "${CMAKE_SOURCE_DIR}/tests/Print_ITL_Tests/tests.list"
 )
 
 file(GLOB FUNC_TESTS "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesTernary/*.h"
