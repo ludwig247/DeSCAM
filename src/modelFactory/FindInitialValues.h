@@ -25,14 +25,14 @@ namespace DESCAM {
  */
 class FindInitialValues : public IFindInitialValues, public clang::RecursiveASTVisitor<FindInitialValues> {
  public:
-  virtual ~FindInitialValues() = default;
+  ~FindInitialValues() override = default;
   FindInitialValues();
 
   void setup(clang::CXXRecordDecl *recordDecl,
              clang::FieldDecl *fieldDecl,
              DESCAM::Module *module,
              clang::CompilerInstance *ci,
-             IFindDataFlowFactory * find_data_flow_factory);
+             IFindDataFlowFactory * find_data_flow_factory) override;
 
   ConstValue *getInitValue() override;
   //Visitor
