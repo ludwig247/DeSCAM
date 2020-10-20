@@ -33,7 +33,7 @@ struct TestBasic4 : public sc_module {
             } else {
                 --var;
             }
-            wait(SC_ZERO_TIME);
+            wait(0);
         }
     }
 };

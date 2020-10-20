@@ -30,7 +30,7 @@ struct TestBasic3 : public sc_module {
             if (nb_result) {
                 b_out->try_write(11);
             }
-            wait(SC_ZERO_TIME);
+            wait(0);
         }
     }
 };

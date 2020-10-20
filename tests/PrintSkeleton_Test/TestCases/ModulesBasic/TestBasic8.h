@@ -33,7 +33,7 @@ struct TestBasic8 : public sc_module {
             b_in->read(var);
             var = 10;
             m_out->master_write(var);
-            wait(SC_ZERO_TIME);
+            wait(0);
         }
     }
 };

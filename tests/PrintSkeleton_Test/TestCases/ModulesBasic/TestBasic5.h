@@ -32,7 +32,7 @@ struct TestBasic5 : public sc_module {
         while (true) {
             b_in->read(var);
             b_out->write(var);
-            wait(SC_ZERO_TIME);
+            wait(0);
         }
     }
 };
