@@ -32,7 +32,6 @@ struct TestBasic03 : public sc_module {
 //                b_out->nb_write(11); //state_6
                 b_out->try_write(11); //state_6
             }
-            wait(0); // not considered! should be wait(0) to be valid
         }
     }
 };

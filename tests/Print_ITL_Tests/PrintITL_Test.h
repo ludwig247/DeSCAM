@@ -15,6 +15,22 @@
 #include "../../src/global/Logger/FileSink.h"
 
 
+#include "MockIFindSCMain.h"
+#include "MockIFindInitialValues.h"
+#include "MockIFindFunctions.h"
+
+#include "ModelFactory.h"
+
+#include "FindFunctions.h"
+#include "FindInitialValues.h"
+#include "FindModules.h"
+#include "FindNewDatatype.h"
+#include "FindPorts.h"
+#include "FindGlobal.h"
+#include "FindNetlist.h"
+#include "FindProcess.h"
+#include "FindVariables.h"
+#include "FindSCMain.h"
 
 #include <PrintITL/PrintITL.h>
 
@@ -89,17 +105,58 @@ public:
         }
     };
     void SetUp() {
-        const char *commandLineArgumentsArray[2];
-
-        //Binary
-        std::string bin = std::string(SCAM_HOME"/bin/SCAM");
-        commandLineArgumentsArray[0] = (bin.c_str());
-        commandLineArgumentsArray[1] = (GetParam().FilePath.c_str());
 
 
-        //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
-        DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0], commandLineArgumentsArray[1]);
+      //Compositional root
+      std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
+      std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
+      std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
+      std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
+      std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
+      std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
+      std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
+      std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
+      std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+      std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+      std::unique_ptr<IFindVariables> find_variables =
+          std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
+      auto model_factory = new ModelFactory(find_functions.get(),
+                                            find_initial_values.get(),
+                                            find_modules.get(),
+                                            find_new_datatype.get(),
+                                            find_ports.get(),
+                                            find_global.get(),
+                                            find_netlist.get(),
+                                            find_process.get(),
+                                            find_variables.get(),
+                                            find_sc_main.get(),
+                                            find_data_flow_factory.get());
+
+
+      DataTypes::reset();
+
+      std::vector<const char *> command_line_arguments_vector;
+
+      //Binary
+      const std::string bin = std::string(SCAM_HOME"/bin/DESCAM");
+      command_line_arguments_vector.push_back(bin.c_str());
+
+
+      //SRC-File to be analyzed
+      const std::string file_path = GetParam().FilePath.c_str();
+      command_line_arguments_vector.push_back(file_path.c_str());
+
+      //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+      const char *commandLineArgumentsArray[command_line_arguments_vector.size()];
+      for (int i = 0; i < command_line_arguments_vector.size(); i++) {
+        commandLineArgumentsArray[i] = command_line_arguments_vector.at(i);
+      }
+
+      ASSERT_NO_THROW(DESCAM::ModelGlobal::createModel(command_line_arguments_vector.size(),
+                                                       commandLineArgumentsArray[0],
+                                                       commandLineArgumentsArray[1],
+                                                       model_factory));
 
         // write log messages to all sinks
         if (DESCAM::Logger::hasFeedback()) {
@@ -118,7 +175,7 @@ public:
     }
     void TearDown() {
         DESCAM::Logger::clear();
-        DESCAM::ModelGlobal::reset();
+        //DESCAM::ModelGlobal::reset(); //TODO: needed?
     }
 };
 
@@ -160,8 +217,8 @@ TEST_P(ITLTestExamples, Examples) {
         std::cout << "Instance: " << module->getName() << std::endl;
 
 //    std::ifstream ifs(SCAM_HOME"/example/" + module->getName() +"/RTL/properties/" + module->getName() + ".vhi");
-        std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
-        ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/"
+        std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/vhi/" + module->getName() + ".vhi");
+        ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/vhi/"
                                << module->getName() << ".vhi";
 
         std::stringstream buffer;
@@ -191,8 +248,8 @@ TEST_P(ITLTestFunctionality, Functionality) {
         std::cout << "Instance: " << module->getName() << std::endl;
 
         //    std::ifstream ifs(SCAM_HOME"/example/" + module->getName() +"/RTL/properties/" + module->getName() + ".vhi");
-        std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/" + module->getName() + ".vhi");
-        ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/TestCases/vhi/"
+        std::ifstream ifs(SCAM_HOME"/tests/Print_ITL_Tests/vhi/" + module->getName() + ".vhi");
+        ASSERT_TRUE(bool(ifs)) << "Can't open file: " << SCAM_HOME"/tests/Print_ITL_Tests/vhi/"
                                << module->getName() << ".vhi";
 
         std::stringstream buffer;

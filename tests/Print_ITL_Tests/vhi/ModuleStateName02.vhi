@@ -1,10 +1,10 @@
 -- SYNC AND NOTIFY SIGNALS (1-cycle macros) --
-macro m_out_notify : boolean := end macro;
+macro m_out_notify : boolean := true end  macro;
 
 
 -- DP SIGNALS --
-macro m_in_sig : signed := end macro;
-macro m_out_sig : signed := end macro;
+macro m_in_sig : signed :=resize(0,32) end macro;
+macro m_out_sig : signed :=resize(0,32) end macro;
 
 
 -- CONSTRAINTS --

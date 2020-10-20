@@ -34,7 +34,6 @@ struct TestBasic04 : public sc_module {
             } else {
                 --var;
             }
-            wait(0); // not considered! should be wait(0) to be valid
         }
     }
 };

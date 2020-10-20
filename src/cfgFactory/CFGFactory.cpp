@@ -253,7 +253,7 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
             traverseBlocks(trueSucc, cfgNode);
           } else {
             std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
-            trueSucc->dump(clangCFG, {}, true);
+            //trueSucc->dump(clangCFG, {}, true);
           }
           //TERMINATE(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
         }
