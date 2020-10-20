@@ -16,7 +16,7 @@ class MockIFindFunctions : public IFindFunctions {
   typedef std::map<std::string, std::string> string_map;
   typedef std::map<std::string, std::vector<std::string>> vector_string_map;
 
-  MOCK_METHOD(bool, setup, (clang::CXXRecordDecl * , clang::CompilerInstance *, std::string, Module *), (override));
+  MOCK_METHOD(bool, setup, (clang::CXXRecordDecl * , clang::CompilerInstance *, Module *), (override));
   MOCK_METHOD((std::map<std::string, Function *>), getFunctionDecls, (), (const, override));
   MOCK_METHOD((std::map<int, CfgBlock *>), getFunctionBody, (std::string), (const, override));
 };

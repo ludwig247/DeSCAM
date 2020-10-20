@@ -421,7 +421,7 @@ void DESCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
   //std::unique_ptr<IFindFunctions> findFunctions_ = FindFunctionsFactory::create(decl);
-  find_functions_->setup(decl, ci_, module->getName(), module);
+  find_functions_->setup(decl, ci_, module);
 
   auto functions = find_functions_->getFunctionDecls();
   module->addFunctions(functions);
