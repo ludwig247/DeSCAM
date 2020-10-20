@@ -27,7 +27,6 @@ class IFindFunctions {
    */
   virtual bool setup(clang::CXXRecordDecl *record_decl,
                      clang::CompilerInstance *ci,
-                     std::string module_name,
                      Module *module) = 0;
 
   /**

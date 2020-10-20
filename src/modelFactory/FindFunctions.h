@@ -24,7 +24,6 @@ class FindFunctions : public IFindFunctions {
 
   bool setup(clang::CXXRecordDecl *record_decl,
              clang::CompilerInstance *ci,
-             std::string module_name,
              Module *module) override;
 
   std::map<std::string, Function *> getFunctionDecls() const override;

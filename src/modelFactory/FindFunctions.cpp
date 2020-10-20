@@ -23,7 +23,6 @@ DESCAM::FindFunctions::FindFunctions(IFindNewDatatype *find_new_datatype,
 
 bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
                                   clang::CompilerInstance *ci,
-                                  std::string module_name,
                                   Module *const module) {
   assert(record_decl);
   if (record_decl_ == record_decl) {
@@ -42,14 +41,14 @@ bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
       auto newType = find_new_datatype_->getDataType(func.second->getResultType());
       if (find_new_datatype_->isGlobal(func.second->getResultType())) {
         DataTypes::addDataType(newType);
-      } else DataTypes::addLocalDataType(module_name, newType);
+      } else DataTypes::addLocalDataType(module_->getName(), newType);
     }
 
     //Add Structural description of functions to module
     for (const auto &function: get_clang_functions_->getFunctionReturnTypeMap()) {
       DataType *datatype;
-      if (DataTypes::isLocalDataType(function.second, module_name)) {
-        datatype = DataTypes::getLocalDataType(function.second, module_name);
+      if (DataTypes::isLocalDataType(function.second, module_->getName())) {
+        datatype = DataTypes::getLocalDataType(function.second, module_->getName());
       } else datatype = DataTypes::getDataType(function.second);
 
       //Parameter
