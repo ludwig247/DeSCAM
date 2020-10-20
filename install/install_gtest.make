@@ -2,7 +2,7 @@
 
 if (USE_SYSTEM_GTEST)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
-#    find_package(gtest REQUIRED)
+    #find_package(gtest REQUIRED)
 else ()
 
     set(GTEST_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/gtest/install)

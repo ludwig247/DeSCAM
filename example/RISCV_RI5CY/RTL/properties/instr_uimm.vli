@@ -1,0 +1,75 @@
+macro boolean IR_IMEM_UIMM (unsigned instr_imem, opcode) :=
+        instr_imem[6:0] == opcode &&                                 //opcode LUI
+        (instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4)       //rd
+end macro;
+
+macro property instr_uimm (unsigned opcode) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode + 1,
+        t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+
+        rd_at_t_fetch = instr_rdata_i[11:7] @ t_fetch,
+        uimm_at_t_fetch = {instr_rdata_i[31:12], 12'd0} @ t_fetch,
+        result_at_t_exec = unsigned(signed(uimm_at_t_fetch) + signed(pc_if_at_t_fetch))[31:0] @ t_execute;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_IMEM_UIMM (instr_imem_at_t_fetch, opcode);
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+        
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+        //ID to EX
+        at t_execute: alu_operator_ex == riscv_defines::ALU_ADD;
+        at t_execute: alu_operand_a_ex == (opcode == 7'h37 ? 32'b0 : pc_if_at_t_fetch);
+        at t_execute: alu_operand_b_ex == uimm_at_t_fetch;
+        //EX to REGFILE -> same cycle
+        at t_execute: regfile_alu_waddr_fw == rd_at_t_fetch;
+        at t_execute: regfile_alu_we_fw == 1;
+        at t_execute: regfile_alu_wdata_fw == (opcode == 7'h37 ? uimm_at_t_fetch : result_at_t_exec);
+        //WB to REGFILE
+        at t_writeb: id_stage_i/registers_i/riscv_register_file_i/mem[rd_at_t_fetch] == (opcode == 7'h37 ? uimm_at_t_fetch : result_at_t_exec);
+
+        right_hook: t_decode;
+end macro;
+
+property instr_lui;
+    instr_uimm(7'b0110111);
+end property;
+
+property instr_auipc;
+    instr_uimm(7'b0010111);
+end property;

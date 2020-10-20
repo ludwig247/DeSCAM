@@ -9,6 +9,8 @@ add_subdirectory(StmtNodeAlloc_Test)
 add_subdirectory(SimplifyVisitor_Test)
 add_subdirectory(Stmts_Test)
 add_subdirectory(Optimizer_Test)
+add_subdirectory(GMock_Test)
+
 
 add_subdirectory(operationFactory)
 add_subdirectory(global)
