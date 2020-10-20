@@ -19,23 +19,24 @@
 
 
 // PArse SystemC
-#include "FindPorts.h"
-#include "FindSCMain.h"
-#include "FindModules.h"
-#include "FindNetlist.h"
-#include "FindProcess.h"
-#include "FindVariables.h"
 #include "Model.h"
+#include "IFindPorts.h"
 #include "IFindFunctions.h"
 #include "IFindInitialValues.h"
-#include <iostream>
-
+#include "IFindNewDatatype.h"
 #include "IFindGlobal.h"
+#include "IFindNetlist.h"
+#include "IFindProcess.h"
+#include "IFindSCMain.h"
+#include "IModelFactory.h"
+#include "IFindModules.h"
+#include "IFindVariables.h"
+#include "FindDataFlow.h"
+#include "IFindDataFlowFactory.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace clang;
-
 
 namespace DESCAM {
 
@@ -48,38 +49,59 @@ bool containsSubstring(std::string, std::string);
  * The preFire face is unimportant for us and is automatically followed by the fire face.
  * During the fire face the clang ast is instantiated and can be accessed using visitors.
  * The clang::TranslationUnitDecl contains the hole AST and is passed to FindModules in order to extract the modules of the
- * systemc description. For each module the ports are extraced using FindPorts and so on.
- * Aferwards a netlist of all modules is extracted, starting with the sc_main().
- * Right now only two modules can be connceted and  a nested modules are not supported
+ * systemc description. For each module the ports are extracted using FindPorts and so on.
+ * Afterwards a netlist of all modules is extracted, starting with the sc_main().
+ * Right now only two modules can be connected and  a nested modules are not supported
  *
- * The model is then accessed using the DESCAM::GraphVistor. This visitors only prints the structural information of the system.
+ * The model is then accessed using the DESCAM::GraphVisitor. This visitors only prints the structural information of the system.
  * In order to access the behavioral information  for each module we refer DESCAM::SuspensionAutomata.
  *
  */
-class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory> {
+class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFactory> {
  public:
-  explicit ModelFactory(CompilerInstance &ci);
+  explicit ModelFactory(IFindFunctions *find_functions,
+                        IFindInitialValues *find_initial_values,
+                        IFindModules *find_modules,
+                        IFindNewDatatype *find_new_datatype,
+                        IFindPorts *find_ports,
+                        IFindGlobal *find_global,
+                        IFindNetlist *find_netlist,
+                        IFindProcess *find_process,
+                        IFindVariables *find_variables,
+                        IFindSCMain *find_sc_main,
+                        IFindDataFlowFactory * find_data_flow_factory);
+
   ~ModelFactory() override = default;
 
-  virtual bool preFire();
-  virtual bool fire();
-  virtual bool postFire();
+
+  void setup(CompilerInstance *ci) override;
+
+  bool preFire();
+  bool fire();
+  bool postFire();
+
  private:
-  Model *model;
-  CompilerInstance &_ci;
-  ASTContext &_context;
-  SourceManager &_sm;
-  llvm::raw_ostream &_os;
-  std::vector<std::string> unimportantModules; //! List containing unimportant modules
-  /** Pointer to FindFunctions Class (DIP) */
-  std::unique_ptr<IFindFunctions> findFunctions_;
-  /** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindInitialValues> findInitialValues_;
-/** Pointer to FindInitialValues Class (DIP) */
-  std::unique_ptr<IFindGlobal> findGlobal_;
+  Model *model_;
+  CompilerInstance *ci_;
+  ASTContext *context_;
+  // unused?: SourceManager &_sm;
+  llvm::raw_ostream &ostream_;
+  std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
 
+  // DIP-Pointers
+  IFindFunctions *find_functions_;
+  IFindInitialValues *find_initial_values_;
+  IFindGlobal *find_global_;
+  IFindModules *find_modules_;
+  IFindPorts *find_ports_;
+  IFindNetlist *find_netlist_;
+  IFindProcess *find_process_;
+  IFindVariables *find_variables_;
+  IFindNewDatatype *find_new_datatype_;
+  IFindSCMain *find_sc_main_;
+  IFindDataFlowFactory * find_data_flow_factory_;
 
-        //Methods
+  //Methods
   void HandleTranslationUnit(ASTContext &context) override;
 
   void addModules(clang::TranslationUnitDecl *decl);
@@ -92,7 +114,6 @@ class ModelFactory : public ASTConsumer, public RecursiveASTVisitor<ModelFactory
   void removeUnused();
 
 };
-
 
 }
 #endif //SCAM_CREATEMODEL_H

@@ -1,34 +1,28 @@
 #ifndef _NETLIST_GEN_H_
 #define _NETLIST_GEN_H_
 
+#include "IFindNetlist.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <map>
 
 namespace DESCAM {
 
-    /*!
-     * \brief Searches within sc_main for binding of ports
-     *     port = new port;
-     *     module.portA.bind(port)
-     *     //TODO: redo traversing of elements -> more visitors instead of dyn_cast
-     */
-    class FindNetlist : public clang::RecursiveASTVisitor<FindNetlist> {
-    public:
-        FindNetlist(clang::FunctionDecl *);
-        FindNetlist(const FindNetlist &);
-        ~FindNetlist();
+class FindNetlist : public IFindNetlist, public clang::RecursiveASTVisitor<FindNetlist> {
+ public:
 
-        virtual bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce);
+  ~FindNetlist() override = default;
 
-        //GETTER
-        std::map<std::string,std::string> getInstanceMap();
-        std::map<std::pair<std::string,std::string>,clang::DeclRefExpr*> getChannelMap();
+  virtual bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce);
 
+  bool setup(clang::FunctionDecl *decl) override;
+  //GETTER
+  std::map<std::string, std::string> getInstanceMap() override;
+  std::map<std::pair<std::string, std::string>, clang::DeclRefExpr *> getChannelMap() override;
 
-    private:
-        int _pass;
-        std::map<std::string,std::string> _instanceMap; //! <instance_name, sc_module>
-        std::map<std::pair<std::string,std::string>,clang::DeclRefExpr*> _channelMap; //! <<Instance,Port>,channelDecl >
-    };
+ private:
+  clang::FunctionDecl *decl_;
+  std::map<std::string, std::string> instance_map_; //! <instance_name, sc_module>
+  std::map<std::pair<std::string, std::string>, clang::DeclRefExpr *> channel_map_; //! <<Instance,Port>,channelDecl >
+};
 }
 #endif
