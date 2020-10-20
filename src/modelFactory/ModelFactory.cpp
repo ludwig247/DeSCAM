@@ -423,25 +423,16 @@ void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *d
   //std::unique_ptr<IFindFunctions> findFunctions_ = FindFunctionsFactory::create(decl);
   find_functions_->setup(decl, ci_, module->getName(), module);
 
-  auto functions = find_functions_->getFunctions();
+  auto functions = find_functions_->getFunctionDecls();
   module->addFunctions(functions);
 
   //Add behavioral description of function to module
-  for (const auto &function: find_functions_->getFunctionMap()) {
-    auto descam_function = functions.find(function.first);
-    if(descam_function == functions.end()){
-      TERMINATE("Function " + function.first + " is not part of module " + module->getName());
-    }
-    //Create blockCFG for this process
-    //Active searching only for functions
-    FindDataFlow::functionName = function.first;
-    FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, ci_, module, this->find_data_flow_factory_);
-    FindDataFlow::functionName = "";
-    FindDataFlow::isFunction = false;
+  for (const auto &function: functions) {
+    auto body = find_functions_->getFunctionBody(function.first);
+
     //Transform blockCFG back to code
-    FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), descam_function->second, nullptr);
-    descam_function->second->setStmtList(functionFactory.getStmtList());
+    FunctionFactory functionFactory(body, function.second, nullptr);
+    function.second->setStmtList(functionFactory.getStmtList());
   }
 
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())

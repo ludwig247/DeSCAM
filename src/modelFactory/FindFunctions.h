@@ -27,20 +27,16 @@ class FindFunctions : public IFindFunctions {
              std::string module_name,
              Module *module) override;
 
-  //std::map<std::string, Function *> getFunctions();
-
-  const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const override;
-  const std::map<std::string, std::string> &getFunctionReturnTypeMap() const override;
-  const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const override;
-  const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const override;
-
-  std::map<std::string, Function *> getFunctions() const override;
+  std::map<std::string, Function *> getFunctionDecls() const override;
+  std::map<int, CfgBlock *> getFunctionBody(std::string name) const override;
 
  private:
   IFindNewDatatype *find_new_datatype_;
   IFindDataFlowFactory *find_data_flow_factory_;
 
   GetClangFunctions *get_clang_functions_;
+  Module *module_;
+  clang::CompilerInstance *ci_;
 
   clang::CXXRecordDecl *record_decl_{};
 

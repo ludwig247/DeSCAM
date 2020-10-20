@@ -142,25 +142,9 @@ TEST(TestCase1, full_mock) {
   std::map<std::string, clang::CXXMethodDecl *> find_functions_get_function_map_map;
   std::map<std::string, std::string> find_functions_get_function_return_type_map;
   DESCAM::MOCK::MockIFindFunctions find_functions;
-  EXPECT_CALL(find_functions, setup(_, _, _, _))
-      .Times(1);
-  EXPECT_CALL(find_functions, getFunctionMap())
-      .Times(1)
-      .WillRepeatedly(ReturnRef(find_functions_get_function_map_map));
-  EXPECT_CALL(find_functions, getFunctionReturnTypeMap())
-      .Times(0);
-  EXPECT_CALL(find_functions, getFunctionParamNameMap())
-      .Times(0);
-  EXPECT_CALL(find_functions, getFunctionParamTypeMap())
-      .Times(0);
 
-  //FindModules
-  /*std::map<std::string, clang::CXXRecordDecl *> find_modules_get_module_map;
-  DESCAM::MOCK::MockIFindModules find_modules;
-  EXPECT_CALL(find_modules, setup(_))
-      .Times(1);
-  EXPECT_CALL(find_modules, getModuleMap())
-      .Times(1);*/
+
+
 
   //Compositional root
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();

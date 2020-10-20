@@ -10,7 +10,9 @@
 #include "FindNewDatatype.h"
 #include "FatalError.h"
 
-bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci,IFindDataFlowFactory * find_data_flow_factory) {
+bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl,
+                               clang::CompilerInstance *ci,
+                               IFindDataFlowFactory *find_data_flow_factory) {
   assert(!(decl == nullptr));
   assert(ci);
 
@@ -37,7 +39,8 @@ bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *varDecl) {
       if (init->getType()->isBuiltinType()) {
         auto isUnsigned = varDecl->getType()->isUnsignedIntegerType();
         try {
-          auto checkForExpr = find_data_flow_factory_->create_new(const_cast<clang::Expr *>(init), &module_, ci_,find_data_flow_factory_, isUnsigned);
+          auto checkForExpr =
+              find_data_flow_factory_->create_new(const_cast<clang::Expr *>(init), &module_, ci_, isUnsigned);
           Logger::clear();
           if (checkForExpr->getExpr()) {
             std::string typeName = init->getType().getAsString();

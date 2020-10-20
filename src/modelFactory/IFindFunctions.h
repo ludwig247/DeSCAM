@@ -6,6 +6,7 @@
 #define SCAM_SRC_MODELFACTORY_IFINDFUNCTIONS_H_
 
 #include "clang/AST/DeclCXX.h"
+#include "CfgBlock.h"
 #include <map>
 
 namespace DESCAM {
@@ -17,20 +18,29 @@ class IFindFunctions {
   virtual ~IFindFunctions() = default;
 
   /**
-   * @brief setup for the IFindFunctions class
-   * @param recordDecl ?
+   * @brief Setup for the FindFunction class. Result can be retrieved by calling getFunctionDecl
+   * @param record_decl
+   * @param ci
+   * @param module_name
+   * @param module
+   * @return
    */
   virtual bool setup(clang::CXXRecordDecl *record_decl,
                      clang::CompilerInstance *ci,
                      std::string module_name,
                      Module *module) = 0;
 
-  virtual const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const = 0;
-  virtual const std::map<std::string, std::string> &getFunctionReturnTypeMap() const = 0;
-  virtual const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const = 0;
-  virtual const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const = 0;
-
-  virtual std::map<std::string, Function *> getFunctions() const = 0;
+  /**
+  * @brief Returns all Function-declarations for the provided record_Decl
+  * @return map with function name and function object without body
+  */
+  virtual std::map<std::string, Function *> getFunctionDecls() const = 0;
+  /**
+   * @brief returns the Body of a function
+   * @param name name of the function
+   * @return body of the function
+   */
+  virtual std::map<int, CfgBlock *> getFunctionBody(std::string name) const = 0;
 };
 }
 
