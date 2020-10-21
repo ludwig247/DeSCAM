@@ -14,11 +14,13 @@
 using namespace DESCAM;
 
 DESCAM::FindFunctions::FindFunctions(IFindNewDatatype *find_new_datatype,
-                                     IFindDataFlowFactory *find_data_flow_factory):
-                                     find_new_datatype_(find_new_datatype),
-                                     find_data_flow_factory_(find_data_flow_factory),
-                                     record_decl_(nullptr),
-                                     get_clang_functions_(nullptr){
+                                     IFindDataFlowFactory *find_data_flow_factory) :
+    find_new_datatype_(find_new_datatype),
+    find_data_flow_factory_(find_data_flow_factory),
+    record_decl_(nullptr),
+    get_clang_functions_(nullptr),
+    module_(nullptr),
+    ci_(nullptr) {
   assert(find_new_datatype);
   assert(find_data_flow_factory);
 }
