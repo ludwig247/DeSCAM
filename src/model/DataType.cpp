@@ -105,7 +105,7 @@ const bool DESCAM::DataType::isBoolean() const {
 }
 
 void DESCAM::DataType::addArray(DataType *arrayType, int arraySize) {
-    assert(arrayType->isBuiltInType() && "Arraytype only allowed for built-in tpyes");
+    assert(arrayType->isBuiltInType() && "Arraytype only allowed for built-in types");
     assert(!this->isCompoundType() && "Either Array or Compound");
     for (int i = 0; i < arraySize; ++i) {
         this->subVarMap.insert(std::make_pair(std::to_string(i), arrayType));

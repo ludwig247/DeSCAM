@@ -35,11 +35,10 @@ class FindDataFlowFactory : public IFindDataFlowFactory {
   IFindDataFlow *create_new(clang::Stmt *stmt,
                             Module *module,
                             clang::CompilerInstance *ci,
-                            IFindDataFlowFactory *find_data_flow_factory,
-                            bool unsigned_flag = false) override {
+                            bool unsigned_flag) override {
     auto find_state_name = new FindStateName();
-    auto find_data_flow = new FindDataFlow(find_state_name);
-    find_data_flow->setup(stmt, module, ci, find_data_flow_factory, unsigned_flag);
+    auto find_data_flow = new FindDataFlow(find_state_name, this);
+    find_data_flow->setup(stmt, module, ci, unsigned_flag);
     return find_data_flow;
   }
 };

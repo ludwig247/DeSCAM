@@ -17,7 +17,7 @@ void DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
                                       clang::FieldDecl *fieldDecl,
                                       DESCAM::Module *module,
                                       clang::CompilerInstance *ci,
-                                      IFindDataFlowFactory * find_data_flow_factory) {
+                                      IFindDataFlowFactory *find_data_flow_factory) {
   this->clean();
   this->module_ = module;
   this->field_decl_ = fieldDecl;
@@ -28,7 +28,7 @@ void DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
   TraverseDecl(recordDecl);
 }
 
-void DESCAM::FindInitialValues::clean(){
+void DESCAM::FindInitialValues::clean() {
   field_decl_ = nullptr;
   init_value_ = nullptr;
   pass_ = 0;
@@ -70,7 +70,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
           //Find value and store in this->value
           //If something goes wrong
           try {
-           auto findDataFlow = this->find_data_flow_factory_->create_new(initializer->getInit(), module_, ci_,find_data_flow_factory_);
+            auto findDataFlow = this->find_data_flow_factory_->create_new(initializer->getInit(), module_, ci_, false);
 
             auto initExpr = findDataFlow->getExpr();
             if (initExpr != nullptr) {

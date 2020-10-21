@@ -26,7 +26,7 @@ add_library (modelFactory SHARED
 		IFindNetlist.h
 		IFindProcess.h
 		IFindVariables.h
-		IFindSCMain.h IFindDataFlowFactory.h IFindStateName.h GetClangVariables.cpp GetClangVariables.h)
+		IFindSCMain.h IFindDataFlowFactory.h IFindStateName.h GetClangVariables.cpp GetClangVariables.h GetClangFunctions.cpp GetClangFunctions.h)
 
 
 target_link_libraries(modelFactory propertyFactory)
