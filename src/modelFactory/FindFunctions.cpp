@@ -30,6 +30,8 @@ bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
                                   Module *const module) {
   std::cout << "TEST::Setup\n";
   assert(record_decl);
+  assert(module);
+  assert(ci);
   if (record_decl_ == record_decl) {
     return true;
   } else {
