@@ -7,22 +7,21 @@
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include "IFindStateName.h"
-namespace DESCAM{
+namespace DESCAM {
 class FindStateName : public DESCAM::IFindStateName, public clang::RecursiveASTVisitor<FindStateName> {
  public:
-  ~FindStateName() = default;
+  ~FindStateName() override = default;
   FindStateName() = default;
   bool setup(clang::Stmt *stmt) override;
 
-  bool hasStateName() const;
-  const std::string &getStateName() const;
+  bool hasStateName() const override;
+  const std::string &getStateName() const override;
 
   bool VisitStringLiteral(clang::StringLiteral *stringLiteral);
  private:
-  std::string state_name_ = "";
+  std::string state_name_;
   bool is_set_ = false;
 };
 }
-
 
 #endif //DESCAM_FINDSTATENAME_H
