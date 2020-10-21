@@ -2,13 +2,20 @@
 // Created by burr on 21.10.20.
 //
 
-#ifndef SCAM_TESTS_GMOCK_TEST_NOMOCKS_H_
-#define SCAM_TESTS_GMOCK_TEST_NOMOCKS_H_
+#ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDSTATENAME_H_
+#define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDSTATENAME_H_
 
-void setup(const std::string &path_to_file, const std::string &filename, IModelFactory *model_factory);
+#include "MockIFindStateName.h"
 
-TEST(TestCase1, no_mock) /* NOLINT */{
+TEST(TestCase1, FindStateName) /* NOLINT */{
+  using testing::Return;
   DataTypes::reset();
+
+  DESCAM::MOCK::MockIFindStateName find_state_name;
+  EXPECT_CALL(find_state_name, setup(_))
+      .Times(0);
+  EXPECT_CALL(find_state_name, getStateName())
+      .Times(0);
 
   //Compositional root
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
@@ -18,9 +25,8 @@ TEST(TestCase1, no_mock) /* NOLINT */{
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
-      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(&find_state_name);
   std::unique_ptr<IFindInitialValues>
       find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
   std::unique_ptr<IFindFunctions>
@@ -43,8 +49,15 @@ TEST(TestCase1, no_mock) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, no_mock) /* NOLINT */{
+TEST(TestCase2, FindStateName) /* NOLINT */{
+  using testing::Return;
   DataTypes::reset();
+
+  DESCAM::MOCK::MockIFindStateName find_state_name;
+  EXPECT_CALL(find_state_name, setup(_))
+      .Times(0);
+  EXPECT_CALL(find_state_name, getStateName())
+      .Times(0);
 
   //Compositional root
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
@@ -54,9 +67,8 @@ TEST(TestCase2, no_mock) /* NOLINT */{
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
-      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(&find_state_name);
   std::unique_ptr<IFindInitialValues>
       find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
   std::unique_ptr<IFindFunctions>
@@ -79,8 +91,17 @@ TEST(TestCase2, no_mock) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, no_mock) /* NOLINT */{
+TEST(DISABLED_TestCase3, FindStateName) /* NOLINT */{
+  using testing::Return;
   DataTypes::reset();
+
+  std::string name1 = "idle";
+  DESCAM::MOCK::MockIFindStateName find_state_name;
+  EXPECT_CALL(find_state_name, setup(_))
+      .Times(2);
+  EXPECT_CALL(find_state_name, getStateName())
+      .Times(2)
+      .WillRepeatedly(ReturnRef(name1));
 
   //Compositional root
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
@@ -90,9 +111,8 @@ TEST(TestCase3, no_mock) /* NOLINT */{
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
-      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(&find_state_name);
   std::unique_ptr<IFindInitialValues>
       find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
   std::unique_ptr<IFindFunctions>
@@ -115,4 +135,4 @@ TEST(TestCase3, no_mock) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }
 
-#endif //SCAM_TESTS_GMOCK_TEST_NOMOCKS_H_
+#endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDSTATENAME_H_

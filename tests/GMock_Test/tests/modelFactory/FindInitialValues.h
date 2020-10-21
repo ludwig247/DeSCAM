@@ -5,8 +5,10 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDINITIALVALUES_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDINITIALVALUES_H_
 
+#include "MockIFindInitialValues.h"
+
 TEST(TestCase1, FindInitialValues) /* NOLINT*/{
-  using ::testing::Return;
+  using testing::Return;
   DataTypes::reset();
 
   //Compositional root
@@ -17,7 +19,9 @@ TEST(TestCase1, FindInitialValues) /* NOLINT*/{
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+  std::unique_ptr<IFindDataFlowFactory>
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
   std::unique_ptr<IFindFunctions>
       find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
 
@@ -61,7 +65,9 @@ TEST(TestCase2, FindInitialValues) /* NOLINT */{
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+  std::unique_ptr<IFindDataFlowFactory>
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
   std::unique_ptr<IFindFunctions>
       find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
 
@@ -104,7 +110,9 @@ TEST(TestCase3, FindInitialValues) /* NOLINT */{
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-  std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+  std::unique_ptr<IFindDataFlowFactory>
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
   std::unique_ptr<IFindFunctions>
       find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
 

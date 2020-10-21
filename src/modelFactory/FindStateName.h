@@ -14,7 +14,6 @@ class FindStateName : public DESCAM::IFindStateName, public clang::RecursiveASTV
   FindStateName() = default;
   bool setup(clang::Stmt *stmt) override;
 
-  bool hasStateName() const override;
   const std::string &getStateName() const override;
 
   bool VisitStringLiteral(clang::StringLiteral *stringLiteral);

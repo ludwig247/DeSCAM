@@ -14,9 +14,6 @@ const std::string &DESCAM::FindStateName::getStateName() const {
   return state_name_;
 }
 
-bool DESCAM::FindStateName::hasStateName() const {
-  return this->is_set_;
-}
 bool DESCAM::FindStateName::setup(clang::Stmt *stmt) {
   state_name_ = "";
   is_set_ = false;
