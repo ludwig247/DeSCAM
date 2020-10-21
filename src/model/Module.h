@@ -46,6 +46,11 @@ namespace DESCAM {
         //Functions
         const std::map<std::string, Function *> &getFunctionMap() const;
         void addFunction(Function *function);
+        /**
+         * Sets functions into the module
+         * @param functions functions that should be added to module
+         */
+        void addFunctions(std::map<std::string, Function *> functions);
         bool isFunction(std::string name) const;
         Function *getFunction(std::string name);
 
@@ -68,7 +73,7 @@ namespace DESCAM {
 
         std::map<std::string, Port *> ports; //! sc_in, sc_port<Interface>, ...
         std::map<std::string, Variable *> variableMap; //! <memberName,ptrToMember>
-        std::map<std::string, Function *> functionMap;
+        std::map<std::string, Function *> function_map_;
 
         FSM *fsm;
 
