@@ -28,7 +28,6 @@ DESCAM::FindFunctions::FindFunctions(IFindNewDatatype *find_new_datatype,
 bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
                                   clang::CompilerInstance *ci,
                                   Module *const module) {
-  std::cout << "TEST::Setup\n";
   assert(record_decl);
   assert(module);
   assert(ci);
@@ -83,13 +82,6 @@ bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
 }
 
 std::map<std::string, Function *> FindFunctions::getFunctionDecls() const {
-  std::cout << "TEST::getFunctionDecls Length:" << function_map_.size();
-  for (auto const &func:function_map_) {
-    std::cout << " |Name:" << func.first << " Name2:" << func.second->getName() << " ReturnType:"
-              << func.second->getReturnType()->getName();
-    std::cout << " ParamMapLenght:" << func.second->getParamMap().size();
-  }
-  std::cout << "\n";
   return function_map_;
 }
 
@@ -105,30 +97,6 @@ std::map<int, CfgBlock *> FindFunctions::getFunctionBody(std::string name) const
   DESCAM::CFGFactory cfgFactory(function->second, ci_, module_, this->find_data_flow_factory_);
   FindDataFlow::functionName = "";
   FindDataFlow::isFunction = false;
-
-  auto flow_map = cfgFactory.getControlFlowMap();
-  std::cout << "TEST::getFunctionBody Length:" << flow_map.size();
-  for (auto const &flow:flow_map) {
-    std::cout << "\n | Flow int:" << flow.first << " BlockID:" << flow.second->getBlockID() << " ClangBlockID:"
-              << flow.second->getClangBlockID();
-    auto preList = flow.second->getPredecessorList();
-    std::cout << "\n | | PredecessorList length:" << preList.size();
-    for (auto const &pre:preList) {
-      std::cout << "\n | | | BlockID:" << pre->getBlockID();
-    }
-    auto sucList = flow.second->getSuccessorList();
-    std::cout << "\n | | SuccessorList length:" << sucList.size();
-    for (auto const &suc:sucList) {
-      std::cout << "\n | | | BlockID:" << suc->getBlockID();
-    }
-    auto stmts = flow.second->getStmtList();
-    std::cout << "\n | | StatementList Length:" << stmts.size();
-    for (auto const &stmt:stmts) {
-      std::cout << "\n | | | Statement:" << *stmt;
-    }
-    std::cout << "\n | | Has Terminator:" << flow.second->hasTerminator();
-  }
-  std::cout << "\n";
 
   return cfgFactory.getControlFlowMap();
 }
