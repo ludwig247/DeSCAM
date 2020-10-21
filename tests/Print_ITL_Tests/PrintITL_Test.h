@@ -45,7 +45,6 @@ static std::vector<DESCAM::Module *> parameter() {
 
 
   //Compositional root
-  std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
   std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
@@ -54,6 +53,8 @@ static std::vector<DESCAM::Module *> parameter() {
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+  std::unique_ptr<IFindInitialValues>
+      find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
   std::unique_ptr<IFindFunctions> find_functions =
       std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =

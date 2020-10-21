@@ -11,29 +11,30 @@
 #include "IFindDataFlow.h"
 #include "FindDataFlowFactory.h"
 
-DESCAM::FindInitialValues::FindInitialValues() {}
+DESCAM::FindInitialValues::FindInitialValues(IFindDataFlowFactory *find_data_flow_factory) :
+    find_data_flow_factory_(find_data_flow_factory),
+    module_(nullptr),
+    field_decl_(nullptr),
+    init_value_(nullptr),
+    pass_(0),
+    ci_(nullptr) {
+  assert(find_data_flow_factory);
+}
 
-void DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
+bool DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
                                       clang::FieldDecl *fieldDecl,
                                       DESCAM::Module *module,
-                                      clang::CompilerInstance *ci,
-                                      IFindDataFlowFactory *find_data_flow_factory) {
-  this->clean();
+                                      clang::CompilerInstance *ci) {
+  assert(module);
+  assert(fieldDecl);
+  assert(ci);
+
   this->module_ = module;
   this->field_decl_ = fieldDecl;
   this->init_value_ = nullptr;
   this->pass_ = 0;
   this->ci_ = ci;
-  this->find_data_flow_factory_ = find_data_flow_factory;
-  TraverseDecl(recordDecl);
-}
-
-void DESCAM::FindInitialValues::clean() {
-  field_decl_ = nullptr;
-  init_value_ = nullptr;
-  pass_ = 0;
-  module_ = nullptr;
-  ci_ = nullptr;
+  return TraverseDecl(recordDecl);
 }
 
 bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {

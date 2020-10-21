@@ -21,11 +21,10 @@ class IFindInitialValues {
  public:
   virtual ~IFindInitialValues() = default;
 
-  virtual void setup(clang::CXXRecordDecl *recordDecl,
+  virtual bool setup(clang::CXXRecordDecl *recordDecl,
                      clang::FieldDecl *fieldDecl,
                      DESCAM::Module *module,
-                     clang::CompilerInstance *ci,
-                     IFindDataFlowFactory *find_data_flow_factory) = 0;
+                     clang::CompilerInstance *ci) = 0;
 
   virtual ConstValue *getInitValue() = 0;
 };

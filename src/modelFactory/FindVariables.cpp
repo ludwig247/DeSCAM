@@ -72,7 +72,7 @@ bool DESCAM::FindVariables::setup(clang::CXXRecordDecl *record_decl,
                   std::make_pair(variable.first,
                                  new Variable(variable.first, type, nullptr, nullptr, varLocationInfo)));)
         } else {
-          this->find_initial_values_->setup(record_decl, variable_decl, module, ci, find_data_flow_factory_);
+          this->find_initial_values_->setup(record_decl, variable_decl, module, ci);
           ConstValue *initialValue = this->find_initial_values_->getInitValue();
           //FindInitialValues findInitialValues(decl, findVariables.getVariableMap().find(variable.first)->second , module);
           //auto initialValMap = findInitialValues.getVariableInitialMap();
