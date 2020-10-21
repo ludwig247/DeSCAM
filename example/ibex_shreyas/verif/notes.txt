@@ -1,0 +1,74 @@
+
+//CORE
+  // CSR control
+  logic        csr_access;
+  csr_op_e     csr_op;
+  csr_num_e    csr_addr;
+  logic [31:0] csr_rdata;
+  logic [31:0] csr_wdata;
+  logic        illegal_csr_insn_id;    // CSR access to non-existent register,
+                                       // with wrong priviledge level,
+                                       // or missing write permissions
+  // Interrupts
+  logic        irq_pending;
+  logic        csr_msip;
+  logic        csr_mtip;
+  logic        csr_meip;
+  logic [14:0] csr_mfip;
+  logic        csr_mstatus_mie;
+  logic [31:0] csr_mepc, csr_depc;
+
+
+  // debug mode and dcsr configuration
+  logic        debug_mode;
+  dbg_cause_e  debug_cause;
+  logic        debug_csr_save;
+  logic        debug_single_step;
+  logic        debug_ebreakm;
+
+//IF
+      // CSRs
+      .csr_mepc_i               ( csr_mepc               ), // exception return address
+      .csr_depc_i               ( csr_depc               ), // debug return address
+      .csr_mtvec_i              ( csr_mtvec              ), // trap-vector base address
+      .csr_mtvec_init_o         ( csr_mtvec_init         ),
+
+
+        // instruction to read/modify CSR
+          csr_access_o        = 1'b1;
+          regfile_wdata_sel_o = RF_WD_CSR;
+          regfile_we          = 1'b1;
+          alu_op_b_mux_sel_o  = OP_B_IMM;
+          imm_a_mux_sel_o     = IMM_A_Z;
+          imm_b_mux_sel_o     = IMM_B_I;  // CSR address is encoded in I imm
+
+          if (instr[14]) begin
+            // rs1 field is used as immediate
+            alu_op_a_mux_sel_o = OP_A_IMM;
+          end else begin
+            alu_op_a_mux_sel_o = OP_A_REG_A;
+          end
+
+          unique case (instr[13:12])
+            2'b01:   csr_op = CSR_OP_WRITE;
+            2'b10:   csr_op = CSR_OP_SET;
+            2'b11:   csr_op = CSR_OP_CLEAR;
+            default: csr_illegal = 1'b1;
+          endcase
+
+          illegal_insn = csr_illegal;
+        end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,142 @@
+macro property instr_jump :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        Bimm3 = instr_rdata_i[19:12]@t_if,
+        Bimm2 = instr_rdata_i[20]@t_if,
+        Bimm1 = instr_rdata_i[30:21]@t_if,
+        Bimm4 = instr_rdata_i[31]@t_if,
+        Bimm = {Bimm4, Bimm3, Bimm2, Bimm1, 1'b0}@t_if,
+        opcode = instr_rdata_i[6:0]@t_if,
+        rd = instr_rdata_i[11:7]@t_if,
+        imm = instr_rdata_i[31:12]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        instr_addr_at_t_id = instr_addr_o@t_id,
+        op1Data = pc_id@t_id,
+        op2Data = signExtend(Bimm)@t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id,
+	stall = id_stage_i/controller_i/stall@t_id+1;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o ;
+        at t_if:    !data_req_o;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h6f; //set opcode
+        at t_if:    instr_rdata_i[11:7] == 1 || instr_rdata_i[11:7] == 5; //r1 or r5 or r0
+                             
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] == rd;
+        at t_id:    instr_rdata_id[31:12] == imm;
+
+	//ID output
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    alu_operand_b_ex == op2Data;
+
+        //EX output
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    instr_req_o == 1;
+        at t_id:    data_req_o == 0;
+        
+	//WB
+        at t_id:    pc_mux_id == PC_JUMP;
+        at t_id:    jump_target_ex == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+	at t_id:    instr_addr_o == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+	//at t_wb:   	if_stage_i/have_instr && id_in_ready ;
+	at t_wb:    conceptual_state;
+	at t_wb:   if_stage_i/prefetch_buffer_i/fifo_i/out_valid_o || if_stage_i/prefetch_buffer_i/fifo_i/in_ready_o || if_stage_i/prefetch_buffer_i/fifo_i/out_ready_i || if_stage_i/prefetch_buffer_i/fifo_i/out_addr_o || if_stage_i/prefetch_buffer_i/fifo_i/out_rdata_o;
+	at t_wb:    instr_req_o== (!stall ? 1:0);        
+        at t_wb:    !data_req_o;
+        at t_wb:    instr_addr_o == (instr_addr_at_t_id == 32'hfffffffc ? 32'h0 : instr_addr_at_t_id + 4);
+	at t_wb:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+	at t_wb+1:  foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == (r == rd ? (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4) : regFile_at_t_id[r]); end foreach;
+        
+        //PC
+        at t_id:  pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+        at t_wb:  pc_if == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+    right_hook: t_wb;
+
+end macro;
+
+macro property instr_jump_reg :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        Bimm = instr_rdata_i[31:20]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        opcode = instr_rdata_i[6:0]@t_if,
+        rd = instr_rdata_i[11:7]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        imm = instr_rdata_i[31:20]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        instr_addr_at_t_id = instr_addr_o@t_id,
+	op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = signExtend(Bimm)@t_id,
+	res = {unsigned(signed(op1Data) + op2Data)[31:1], 1'b0}@t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o;
+        at t_if:    !data_req_o;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h67; //set opcode
+        at t_if:    instr_rdata_i[11:7] == 1 || instr_rdata_i[11:7] == 5; //r1 or r5 or r0
+	at t_if:    instr_rdata_i[14:12] == 3'h0; //set func3
+	at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+                             
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[11:7] == rd;
+        at t_id:    instr_rdata_id[31:20] == imm;
+
+	//ID output
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    alu_operand_b_ex == op2Data;
+
+        //EX output
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    instr_req_o == 1;
+        at t_id:    data_req_o == 0;
+        
+	//WB
+        at t_id:    pc_mux_id == PC_JUMP;
+        at t_id:    jump_target_ex == res;
+	at t_id:    instr_addr_o == res;
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+	at t_wb:    instr_addr_o == (instr_addr_at_t_id == 32'hfffffffc ? 32'h0 : instr_addr_at_t_id + 4);	
+	//at t_wb:    instr_addr_o == (res == 32'hfffffffc ? 32'h0 : res + 4);
+	at t_wb:    conceptual_state;
+        at t_wb:    instr_req_o;
+        at t_wb:    !data_req_o;
+	at t_wb:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        //at t_wb+1:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;	
+	at t_wb+1:  foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == (r == rd ? (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4) : regFile_at_t_id[r]); end foreach;
+        
+        //PC
+        at t_id:  pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+        at t_wb:  pc_if == res;
+    right_hook: t_wb;
+
+end macro;
+

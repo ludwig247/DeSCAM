@@ -1,0 +1,31 @@
+macro boolean conceptual_state := 
+	((if_stage_i/prefetch_buffer_i/fifo_i/valid_q[0])^ instr_req_o )&&
+	//if_stage_i/prefetch_buffer_i/fifo_i/out_ready_i == 1 &&
+	id_stage_i/controller_i/special_req == (id_stage_i/controller_i/ctrl_fsm_cs == FIRST_FETCH? 1 : 0) &&
+	if_stage_i/if_id_pipe_reg_we == ((data_req_o)? 0 : 1); //IF to ID write enable
+end macro;
+
+macro unsigned max_wait_inst_mem_gnt := 1 ; end macro; 
+macro unsigned max_wait_inst_mem_rvalid := 1 ; end macro;
+macro unsigned max_wait_data_mem_gnt := 2 ; end macro; 
+macro unsigned max_wait_data_mem_rvalid := 2 ; end macro;
+
+macro boolean bounded_inst_gnt_wait := 
+    if (instr_req_o)
+        exists i in 0..(max_wait_inst_mem_gnt-1):
+            next(instr_gnt_i,i);
+        end exists;
+    endif;
+end macro;
+
+macro boolean bounded_inst_rvalid_wait := 
+        exists i in 0..(max_wait_inst_mem_rvalid-1):
+            next(instr_rvalid_i,i);
+        end exists;
+end macro;
+
+macro unsigned signExtend(unsigned imm) := 
+    unsigned(resize(signed(imm),32));
+end macro;
+
+
