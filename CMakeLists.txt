@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_HOME_DIRECTORY}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 
 # TODO: project name and supported languages
 project(SCAM CXX)
@@ -30,76 +30,72 @@ message(STATUS "Cmake command: ${CMAKE_COMMAND}")
 ################################
 # Unzip the files
 ################################
-execute_process(
-        COMMAND unzip -n ${CMAKE_CURRENT_SOURCE_DIR}/install/install_new.zip -d ${CMAKE_CURRENT_SOURCE_DIR}/install/tmp
-)
+#execute_process(
+#        COMMAND unzip -n ${CMAKE_CURRENT_SOURCE_DIR}/install/install_new.zip -d ${CMAKE_CURRENT_SOURCE_DIR}/install/tmp
+#)
+#
+#
+## Delete std::gets line from systemc because it is not supported in c++11 and newer
+#execute_process(
+#        COMMAND sed -i "s@using\ std::gets;@//using\ //std::gets;@g" ${CMAKE_CURRENT_SOURCE_DIR}/install/tmp/systemc-2.3.1/src/systemc.h
+#)
+#
+## Create the file with the location of the home folder
+#execute_process(
+#        COMMAND echo "#ifndef SCAM_CONFIG_HOME_H\n#define SCAM_CONFIG_HOME_H\n#define SCAM_HOME \"${PROJECT_SOURCE_DIR}\"\n#endif"
+#        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
+#)
 
-
-# Delete std::gets line from systemc because it is not supported in c++11 and newer
-execute_process(
-        COMMAND sed -i "s@using\ std::gets;@//using\ //std::gets;@g" ${CMAKE_CURRENT_SOURCE_DIR}/install/tmp/systemc-2.3.1/src/systemc.h
-)
-
-# Create the file with the location of the home folder
-execute_process(
-        COMMAND echo "#ifndef SCAM_CONFIG_HOME_H\n#define SCAM_CONFIG_HOME_H\n#define SCAM_HOME \"${PROJECT_SOURCE_DIR}\"\n#endif"
-        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
-)
-### Z3 - Cmake, repo (https://github.com/Z3Prover/z3 commit: e518d4a5fe3b824d5e9deb3d16eb1faa248a52d8)
-### Z3 version 4.4.2.1
-### Z3 date 30 Jun 2016
-### Z3 starting from 4.6.0 does not need pythong for the installation
 #################################
 ## Z3
 #################################
 # Do not use system's z3
 set(USE_SYSTEM_Z3 OFF CACHE BOOL "Use system z3")
-
+set(Z3_STABLE 4.8.6)
+set(Z3_DEV 4.8.6)
+set(Z3_VERSIONS ${Z3_STABLE} )
 # Include the ExternalProject compilation
-include(${PROJECT_SOURCE_DIR}/install/install_z3.make)
-
-# Include compiled binaries
-#include_directories( ${Z3_INCLUDES} )
+include(${PROJECT_SOURCE_DIR}/install/install_z3.cmake)
 
 #################################
 ## GTest
 #################################
 # Do not use system GoogleTest
 set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system googletest")
-
+# Set the Version you want
+set(GTEST_STABLE 1.10.0)
+set(GTEST_DEV 1.10.0)
+set(GTEST_VERSIONS ${GTEST_STABLE} )
 # Include the ExternalProject compilation
-include(${PROJECT_SOURCE_DIR}/install/install_gtest.make)
+include(${PROJECT_SOURCE_DIR}/install/install_gtest.cmake)
 
-# Include the binary
-#include_directories( ${GTEST_INCLUDES} )
-
-
-## SystemC - Cmake, repo (https://github.com/accellera-official/systemc.git commit: 925838a21a90d4b98bde44a7cd5120361bd699a3
 ################################
 # SystemC
 ################################
 # Do not use system SystemC
 set(USE_SYSTEM_SYSTEMC OFF CACHE BOOL "Use system SystemC")
 
+set(SYSTEMC_STABLE 2.3.1a)
+set(SYSTEMC_DEV 2.3.1a)
+set(SYSTEMC_VERSIONS ${SYSTEMC_STABLE} )
 # Include the ExternalProject compilation
-include(${PROJECT_SOURCE_DIR}/install/install_systemc.make)
+include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
 
-# Include the binary
-#include_directories( ${SYSTEMC_INCLUDES} )
 
-## llvm - Cmake, repo (https://github.com/llvm/llvm-project.git) tag: release/3.4.x | path: llvm-project/llvm/
 ################################
 # llvm
 ################################
 # Do not use system LLVM
+set(LLVM_STABLE 3.4.2)
+set(LLVM_DEV 11.0.0)
+set(LLVM_VERSIONS ${LLVM_STABLE} ${LLVM_DEV})
 set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
 
 # Include the ExternalProject compilation
-include(${PROJECT_SOURCE_DIR}/install/install_llvm.make)
+include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
 
 # Include the binary
-include_directories( ${LLVM_INCLUDES} )
-
+include_directories(${LLVM_INCLUDES})
 
 
 # TODO: forget commands like add_compile_options, include_directories, link_directories, link_libraries
@@ -130,9 +126,16 @@ add_subdirectory(tests)
 add_subdirectory(doc)
 
 
-add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
-add_custom_command(TARGET SCAM
-                   POST_BUILD
-                   COMMAND cmake --build ${CMAKE_SOURCE_DIR}/build/ --target DESCAM -- -j 4)
+
+add_custom_target(SCAM-STABLE DEPENDS LLVM-${LLVM_STABLE} SYSTEMC-${SYSTEMC_STABLE} GTEST-${GTEST_STABLE} Z3-${Z3_STABLE})
+add_custom_target(SCAM-DEV DEPENDS LLVM-${LLVM_DEV} SYSTEMC-${SYSTEMC_DEV} GTEST-${GTEST_DEV} Z3-${Z3_DEV})
 
 
+#FIXME The naming of this target seems incorrect / SCAM <-> DESCAM. Maybe This should just be called 'install'?
+add_custom_command(TARGET SCAM-STABLE
+        POST_BUILD
+        COMMAND cmake --build ${CMAKE_SOURCE_DIR}/build/ --target DESCAM -- -j 4)
+
+add_custom_command(TARGET SCAM-DEV
+        POST_BUILD
+        COMMAND cmake --build ${CMAKE_SOURCE_DIR}/build/ --target DESCAM -- -j 4)
