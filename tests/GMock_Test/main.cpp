@@ -64,9 +64,15 @@ void setup(const std::string &path_to_file, const std::string &filename, IModelF
   std::string content((std::istreambuf_iterator<char>(ifs)),
                       (std::istreambuf_iterator<char>()));
 
+
+/* generating test files  auto result = print_itl.print();
+  std::ofstream moduleString;
+  moduleString.open(SCAM_HOME"/tests/GMock_Test/" + filename);
+  moduleString << result;
+  moduleString.close(); */
+
   ASSERT_EQ(content, print_itl.print()) << "Test for module " << filename << " failed\n\n" << print_itl.print();
   std::cout << "" << std::endl;
-
 }
 
 /**

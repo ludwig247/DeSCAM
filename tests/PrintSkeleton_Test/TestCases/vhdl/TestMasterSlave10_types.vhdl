@@ -3,5 +3,5 @@ use IEEE.numeric_std.all;
 use work.top_level_types.all;
 
 package TestMasterSlave10_types is
-type Sections is (SECTION_A, SECTION_B);
+type Phases is (SECTION_A, SECTION_B);
 end package TestMasterSlave10_types;

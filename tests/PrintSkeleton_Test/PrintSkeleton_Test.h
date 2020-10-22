@@ -99,6 +99,7 @@ public:
         }
     };
     virtual void SetUp() override {
+      DESCAM::DataTypes::reset();
         const char *commandLineArgumentsArray[2];
 
         //Binary
@@ -145,7 +146,6 @@ public:
     }
 
      for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
-//            results.push_back(module.second);
             {
                 CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
                 CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
@@ -189,6 +189,7 @@ public:
     }
     void TearDown() {
         DESCAM::Logger::clear();
+
         //DESCAM::ModelGlobal::reset();
     }
 protected:    std::vector<DESCAM::Module *> results;

@@ -101,4 +101,10 @@ enum req_status_t  {EMPTY_STATUS, REQ_STATUS, ADDR_STATUS, DATA_STAUS};
 //enum trans_t { SINGLE_READ, SINGLE_WRITE};
 struct result_t {int data; bool err; };
 
+struct record_t{int x; unsigned int y;};
+
+
+
+
+
 #endif //PROJECT_TYPES_H
