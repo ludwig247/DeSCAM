@@ -35,7 +35,8 @@ DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
   } else if (type->isStructureType()) {
     auto record_decl = type->getAsCXXRecordDecl();
 
-    GetClangVariables clang_variables(record_decl);
+    bool success = true;
+    GetClangVariables clang_variables(success, record_decl);
 
     //Create new dataType
     new_type = new DataType(record_decl->getName().str());

@@ -14,6 +14,8 @@ namespace DESCAM {
  */
 class FindDataFlowFactory : public IFindDataFlowFactory {
  public:
+  explicit FindDataFlowFactory(IFindStateName *find_state_name) :
+      find_state_name_(find_state_name) {};
   /**
    * @brief Creates a new instance of FindDataFlow
    * @param stmt ?
@@ -36,11 +38,12 @@ class FindDataFlowFactory : public IFindDataFlowFactory {
                             Module *module,
                             clang::CompilerInstance *ci,
                             bool unsigned_flag) override {
-    auto find_state_name = new FindStateName();
-    auto find_data_flow = new FindDataFlow(find_state_name, this);
+    auto find_data_flow = new FindDataFlow(find_state_name_, this);
     find_data_flow->setup(stmt, module, ci, unsigned_flag);
     return find_data_flow;
   }
+ private:
+  IFindStateName *find_state_name_;
 };
 }
 

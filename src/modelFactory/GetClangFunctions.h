@@ -9,9 +9,14 @@
 #include "map"
 
 namespace DESCAM {
-class GetClangFunctions: public clang::RecursiveASTVisitor<GetClangFunctions>  {
+class GetClangFunctions : public clang::RecursiveASTVisitor<GetClangFunctions> {
  public:
-  explicit GetClangFunctions(clang::CXXRecordDecl* record_decl);
+  /**
+   * Traverses the Clang AST to find all functions
+   * @param success true if traversed successfully
+   * @param record_decl clang RecordDecl, that should be traversed;
+   */
+  explicit GetClangFunctions(bool &success, clang::CXXRecordDecl *record_decl);
 
   virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl);
 

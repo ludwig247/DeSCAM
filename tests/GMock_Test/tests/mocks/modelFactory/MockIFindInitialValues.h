@@ -17,10 +17,10 @@ namespace MOCK {
 class MockIFindInitialValues : public IFindInitialValues {
  public:
 
-  MOCK_METHOD(void,
+  MOCK_METHOD(bool,
               setup,
               (clang::CXXRecordDecl * recordDecl, clang::FieldDecl * fieldDecl, DESCAM::Module * module,
-                  clang::CompilerInstance * ci, IFindDataFlowFactory * find_data_flow_factory),
+                  clang::CompilerInstance * ci),
               (override));
 
   MOCK_METHOD((ConstValue * ), getInitValue, (), (override));

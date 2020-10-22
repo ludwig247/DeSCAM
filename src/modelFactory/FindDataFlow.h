@@ -6,7 +6,7 @@
 #define SCAM_FINDDATAFLOW_H
 
 #include "IFindDataFlow.h"
-#include "FindStateName.h"
+#include "IFindStateName.h"
 
 namespace DESCAM {
 class Module;

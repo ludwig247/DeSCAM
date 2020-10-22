@@ -13,7 +13,12 @@
 namespace DESCAM {
 class GetClangVariables : public clang::RecursiveASTVisitor<GetClangVariables> {
  public:
-  explicit GetClangVariables(clang::CXXRecordDecl *record_decl);
+  /**
+   * Traverses the Clang AST to find all variables
+   * @param success true if traversed successfully
+   * @param record_decl clang RecordDecl, that should be traversed;
+   */
+  explicit GetClangVariables(bool &success, clang::CXXRecordDecl *record_decl);
 
   //Visitor
   bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
