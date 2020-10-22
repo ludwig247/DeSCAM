@@ -4,9 +4,9 @@
 
 #include "GetClangVariables.h"
 
-DESCAM::GetClangVariables::GetClangVariables(clang::CXXRecordDecl *record_decl) {
-  this->record_decl_ = record_decl;
-  TraverseDecl(record_decl);
+DESCAM::GetClangVariables::GetClangVariables(bool &success, clang::CXXRecordDecl *record_decl) :
+    record_decl_(record_decl) {
+  success = TraverseDecl(record_decl);
 }
 
 bool DESCAM::GetClangVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {

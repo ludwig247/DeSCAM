@@ -31,8 +31,8 @@ bool DESCAM::GetClangFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodD
 
   return true;
 }
-DESCAM::GetClangFunctions::GetClangFunctions(clang::CXXRecordDecl *record_decl) {
-  TraverseDecl(record_decl);
+DESCAM::GetClangFunctions::GetClangFunctions(bool &success, clang::CXXRecordDecl *record_decl) {
+  success = TraverseDecl(record_decl);
 }
 const std::map<std::string, clang::CXXMethodDecl *> &DESCAM::GetClangFunctions::getFunctionMap() const {
   return function_map_;
