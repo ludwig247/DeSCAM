@@ -64,9 +64,7 @@ static std::vector<DESCAM::Module *> parameter() {
       std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
-                                        find_initial_values.get(),
                                         find_modules.get(),
-                                        find_new_datatype.get(),
                                         find_ports.get(),
                                         find_global.get(),
                                         find_netlist.get(),

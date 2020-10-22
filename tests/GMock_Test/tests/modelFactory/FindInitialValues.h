@@ -38,9 +38,7 @@ TEST(TestCase1, FindInitialValues) /* NOLINT*/{
       std::make_unique<FindVariables>(find_new_datatype.get(), &find_initial_values, find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
-                                        &find_initial_values,
                                         find_modules.get(),
-                                        find_new_datatype.get(),
                                         find_ports.get(),
                                         find_global.get(),
                                         find_netlist.get(),
@@ -83,9 +81,7 @@ TEST(TestCase2, FindInitialValues) /* NOLINT */{
       std::make_unique<FindVariables>(find_new_datatype.get(), &find_initial_values, find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
-                                        &find_initial_values,
                                         find_modules.get(),
-                                        find_new_datatype.get(),
                                         find_ports.get(),
                                         find_global.get(),
                                         find_netlist.get(),
@@ -128,9 +124,7 @@ TEST(TestCase3, FindInitialValues) /* NOLINT */{
       std::make_unique<FindVariables>(find_new_datatype.get(), &find_initial_values, find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(find_functions.get(),
-                                        &find_initial_values,
                                         find_modules.get(),
-                                        find_new_datatype.get(),
                                         find_ports.get(),
                                         find_global.get(),
                                         find_netlist.get(),
