@@ -53,7 +53,7 @@ message(STATUS "Cmake command: ${CMAKE_COMMAND}")
 set(USE_SYSTEM_Z3 OFF CACHE BOOL "Use system z3")
 set(Z3_STABLE 4.8.6)
 set(Z3_DEV 4.8.6)
-set(Z3_VERSIONS ${Z3_STABLE} )
+set(Z3_VERSIONS ${Z3_STABLE})
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_z3.cmake)
 
@@ -65,7 +65,7 @@ set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system googletest")
 # Set the Version you want
 set(GTEST_STABLE 1.10.0)
 set(GTEST_DEV 1.10.0)
-set(GTEST_VERSIONS ${GTEST_STABLE} )
+set(GTEST_VERSIONS ${GTEST_STABLE})
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_gtest.cmake)
 
@@ -77,7 +77,7 @@ set(USE_SYSTEM_SYSTEMC OFF CACHE BOOL "Use system SystemC")
 
 set(SYSTEMC_STABLE 2.3.1a)
 set(SYSTEMC_DEV 2.3.1a)
-set(SYSTEMC_VERSIONS ${SYSTEMC_STABLE} )
+set(SYSTEMC_VERSIONS ${SYSTEMC_STABLE})
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
 
@@ -124,7 +124,6 @@ add_subdirectory(src)
 add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
-
 
 
 add_custom_target(SCAM-STABLE DEPENDS LLVM-${LLVM_STABLE} SYSTEMC-${SYSTEMC_STABLE} GTEST-${GTEST_STABLE} Z3-${Z3_STABLE})
