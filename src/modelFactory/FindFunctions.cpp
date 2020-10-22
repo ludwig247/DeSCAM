@@ -3,82 +3,101 @@
 //
 
 #include <iostream>
+#include <GlobalUtilities.h>
 #include "FindFunctions.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "FindDataFlow.h"
+#include "CFGFactory.h"
+#include "FunctionFactory.h"
 
-DESCAM::FindFunctions::FindFunctions() {}
+using namespace DESCAM;
 
-bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *recordDecl) {
-  this->clean();
-  return TraverseDecl(recordDecl);
+DESCAM::FindFunctions::FindFunctions(IFindNewDatatype *find_new_datatype,
+                                     IFindDataFlowFactory *find_data_flow_factory) :
+    find_new_datatype_(find_new_datatype),
+    find_data_flow_factory_(find_data_flow_factory),
+    record_decl_(nullptr),
+    get_clang_functions_(nullptr),
+    module_(nullptr),
+    ci_(nullptr) {
+  assert(find_new_datatype);
+  assert(find_data_flow_factory);
 }
 
-void DESCAM::FindFunctions::clean() {
-  function_map_.clear();
-  function_return_type_map_.clear();
-  function_param_name_map_.clear();
-  function_param_type_map_.clear();
-}
+bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
+                                  clang::CompilerInstance *ci,
+                                  Module *const module) {
+  assert(record_decl);
+  assert(module);
+  assert(ci);
+  if (record_decl_ == record_decl) {
+    return true;
+  } else {
+    delete get_clang_functions_;
+    function_map_.clear();
 
-bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
+    bool success = true;
+    this->module_ = module;
+    this->ci_ = ci;
+    this->get_clang_functions_ = new GetClangFunctions(success, record_decl);
 
-  if (methodDecl->isConst()) {
-    std::string name = methodDecl->getName().str();
+    if (success) {
+      //Add datatypes for functions
+      auto functionsMap = get_clang_functions_->getFunctionMap();
+      for (const auto &func: functionsMap) {
+        auto newType = find_new_datatype_->getDataType(func.second->getResultType());
+        if (find_new_datatype_->isGlobal(func.second->getResultType())) {
+          DataTypes::addDataType(newType);
+        } else DataTypes::addLocalDataType(module_->getName(), newType);
+      }
 
-    if (methodDecl->getResultType()->isVoidType()) TERMINATE("Method: " + name + " is type void! Void is not allowed");
-    this->function_map_.insert(std::make_pair(name, methodDecl));
+      //Add Structural description of functions to module
+      for (const auto &function: get_clang_functions_->getFunctionReturnTypeMap()) {
+        DataType *datatype;
+        if (DataTypes::isLocalDataType(function.second, module_->getName())) {
+          datatype = DataTypes::getLocalDataType(function.second, module_->getName());
+        } else datatype = DataTypes::getDataType(function.second);
 
-    //Return type
-    this->function_return_type_map_.insert(std::make_pair(name, this->clangToScamType(methodDecl->getResultType())));
-
-    //Param name and param type
-    std::vector<std::string> paramNameList;
-    std::vector<std::string> paramTypeList;
-    for (int i = 0; i < methodDecl->getNumParams(); i++) {
-      auto param = methodDecl->getParamDecl(i);
-      paramNameList.push_back(param->getName().str());
-      paramTypeList.push_back(this->clangToScamType(param->getType()));
+        //Parameter
+        std::map<std::string, Parameter *> paramMap;
+        auto paramList = get_clang_functions_->getFunctionParamNameMap().find(function.first)->second;
+        auto paramTypeList = get_clang_functions_->getFunctionParamTypeMap().find(function.first)->second;
+        if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
+        for (int i = 0; i < paramList.size(); i++) {
+          auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
+          paramMap.insert(std::make_pair(paramList.at(i), param));
+        }
+        Function *new_function = nullptr;
+        DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
+                        new_function =
+                            new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
+                                functionsMap[function.first], ci));
+                      else new_function = new Function(function.first, datatype, paramMap);
+                          function_map_.insert(std::make_pair(function.first, new_function)))
+      }
     }
-    this->function_param_name_map_.insert(std::make_pair(name, paramNameList));
-    this->function_param_type_map_.insert(std::make_pair(name, paramTypeList));
-
+    return success;
   }
-
-  return true;
-
 }
 
-const std::map<std::string, clang::CXXMethodDecl *> &DESCAM::FindFunctions::getFunctionMap() const {
+std::map<std::string, Function *> FindFunctions::getFunctionDecls() const {
   return function_map_;
 }
 
-std::string DESCAM::FindFunctions::clangToScamType(clang::QualType qualType) const {
-  auto return_type = qualType.getAsString();
-  if (qualType->isRecordType()) {
-    return_type = qualType->getAsCXXRecordDecl()->getName();
-  } else if (qualType->isBuiltinType()) {
-    if (qualType->isBooleanType()) {
-      return_type = "bool";
-    } else if (qualType->isUnsignedIntegerType()) {
-      return_type = "unsigned";
-    }
-  } else if (qualType->isEnumeralType()) {
-    const clang::EnumType *enumType = qualType->getAs<clang::EnumType>();
-    return_type = enumType->getDecl()->getName().str();
+std::map<int, CfgBlock *> FindFunctions::getFunctionBody(std::string name) const {
+  auto functions = get_clang_functions_->getFunctionMap();
+  auto function = functions.find(name);
+  if (function == functions.end()) {
+    TERMINATE("Function " + name + " is not part of module " + module_->getName());
   }
-  return return_type;
-}
 
-const std::map<std::string, std::string> &DESCAM::FindFunctions::getFunctionReturnTypeMap() const {
-  return function_return_type_map_;
-}
+  FindDataFlow::functionName = name;
+  FindDataFlow::isFunction = true;
+  DESCAM::CFGFactory cfgFactory(function->second, ci_, module_, this->find_data_flow_factory_);
+  FindDataFlow::functionName = "";
+  FindDataFlow::isFunction = false;
 
-const std::map<std::string, std::vector<std::string>> &DESCAM::FindFunctions::getFunctionParamNameMap() const {
-  return function_param_name_map_;
-}
-
-const std::map<std::string, std::vector<std::string>> &DESCAM::FindFunctions::getFunctionParamTypeMap() const {
-  return function_param_type_map_;
+  return cfgFactory.getControlFlowMap();
 }
 

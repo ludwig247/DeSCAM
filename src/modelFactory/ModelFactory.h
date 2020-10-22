@@ -60,16 +60,14 @@ bool containsSubstring(std::string, std::string);
 class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFactory> {
  public:
   explicit ModelFactory(IFindFunctions *find_functions,
-                        IFindInitialValues *find_initial_values,
                         IFindModules *find_modules,
-                        IFindNewDatatype *find_new_datatype,
                         IFindPorts *find_ports,
                         IFindGlobal *find_global,
                         IFindNetlist *find_netlist,
                         IFindProcess *find_process,
                         IFindVariables *find_variables,
                         IFindSCMain *find_sc_main,
-                        IFindDataFlowFactory * find_data_flow_factory);
+                        IFindDataFlowFactory *find_data_flow_factory);
 
   ~ModelFactory() override = default;
 
@@ -90,14 +88,12 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
 
   // DIP-Pointers
   IFindFunctions *find_functions_;
-  IFindInitialValues *find_initial_values_;
   IFindGlobal *find_global_;
   IFindModules *find_modules_;
   IFindPorts *find_ports_;
   IFindNetlist *find_netlist_;
   IFindProcess *find_process_;
   IFindVariables *find_variables_;
-  IFindNewDatatype *find_new_datatype_;
   IFindSCMain *find_sc_main_;
   IFindDataFlowFactory * find_data_flow_factory_;
 

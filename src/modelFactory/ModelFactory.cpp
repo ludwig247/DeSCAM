@@ -25,31 +25,27 @@
 
 //Constructor
 DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
-                                   IFindInitialValues *find_initial_values,
                                    IFindModules *find_modules,
-                                   IFindNewDatatype *find_new_datatype,
                                    IFindPorts *find_ports,
                                    IFindGlobal *find_global,
                                    IFindNetlist *find_netlist,
                                    IFindProcess *find_process,
                                    IFindVariables *find_variables,
                                    IFindSCMain *find_sc_main,
-                                   IFindDataFlowFactory * find_data_flow_factory) :
+                                   IFindDataFlowFactory *find_data_flow_factory) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
     model_(nullptr),
     find_functions_(find_functions),
-    find_initial_values_(find_initial_values),
     find_modules_(find_modules),
-    find_new_datatype_(find_new_datatype),
     find_ports_(find_ports),
     find_global_(find_global),
     find_netlist_(find_netlist),
     find_process_(find_process),
     find_variables_(find_variables),
     find_sc_main_(find_sc_main),
-    find_data_flow_factory_(find_data_flow_factory){
+    find_data_flow_factory_(find_data_flow_factory) {
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
@@ -357,35 +353,10 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
 
   //Find the process describing the behavior
-  find_process_->setup(decl);
-  clang::CXXMethodDecl *methodDecl;
-  if (find_process_->isValidProcess()) {
-    methodDecl = find_process_->getProcess();
-  }
-  /*
-   * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
-   */
-  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module,find_data_flow_factory_, true);
+  find_process_->setup(decl, ci_, module, model_);
+  module->setCFG(find_process_->getCfgArg());
+  module->setPropertySuite(find_process_->getPropertySuite());
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
-  if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
-  DESCAM::CfgNode::node_cnt = 0;
-  DESCAM::State::state_cnt = 0;
-  DESCAM::Operation::operations_cnt = 0;
-  auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
-
-  if (!optOptionsSet.empty()) {
-    DESCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model_, optOptionsSet);
-    module->setCFG(opt.getCFG());
-    DESCAM::OperationFactory operationFactory(opt.getCFG(), module);
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-  } else {
-    DESCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
-    module->setCFG(test.getCFG());
-    DESCAM::OperationFactory operationFactory(test.getCFG(), module);
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-  }
 }
 
 //! Adds every Member of a sc_module to the DESCAM::Module
@@ -421,60 +392,28 @@ void DESCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
 void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
   //std::unique_ptr<IFindFunctions> findFunctions_ = FindFunctionsFactory::create(decl);
-  find_functions_->setup(decl);
-  //Add datatypes for functions
-  auto functionsMap = find_functions_->getFunctionMap();
-  for (const auto &func: functionsMap) {
-    auto newType = find_new_datatype_->getDataType(func.second->getResultType());
-    if (find_new_datatype_->isGlobal(func.second->getResultType())) {
-      DataTypes::addDataType(newType);
-    } else DataTypes::addLocalDataType(module->getName(), newType);
-  }
+  find_functions_->setup(decl, ci_, module);
 
-  //Add Structural description of functions to module
-  for (const auto &function: find_functions_->getFunctionReturnTypeMap()) {
-    DataType *datatype;
-    if (DataTypes::isLocalDataType(function.second, module->getName())) {
-      datatype = DataTypes::getLocalDataType(function.second, module->getName());
-    } else datatype = DataTypes::getDataType(function.second);
+  auto functions = find_functions_->getFunctionDecls();
+  module->addFunctions(functions);
 
-    //Parameter
-    std::map<std::string, Parameter *> paramMap;
-    auto paramList = find_functions_->getFunctionParamNameMap().find(function.first)->second;
-    auto paramTypeList = find_functions_->getFunctionParamTypeMap().find(function.first)->second;
-    if (paramList.size() != paramTypeList.size()) TERMINATE("Parameter: # of names and types not equal");
-    for (int i = 0; i < paramList.size(); i++) {
-      auto param = new Parameter(paramList.at(i), DataTypes::getDataType(paramTypeList.at(i)));
-      paramMap.insert(std::make_pair(paramList.at(i), param));
-    }
-    Function *new_function = nullptr;
-    DESCAM_ASSERT(if (functionsMap.find(function.first) != functionsMap.end())
-                    new_function = new Function(function.first, datatype, paramMap, GlobalUtilities::getLocationInfo(
-                        functionsMap[function.first], ci_));
-                  else new_function = new Function(function.first, datatype, paramMap);
-                      module->addFunction(new_function))
-  }
-  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   //Add behavioral description of function to module
-  for (const auto &function: find_functions_->getFunctionMap()) {
-    //Create blockCFG for this process
-    //Active searching only for functions
-    FindDataFlow::functionName = function.first;
-    FindDataFlow::isFunction = true;
-    DESCAM::CFGFactory cfgFactory(function.second, ci_, module,this->find_data_flow_factory_);
-    FindDataFlow::functionName = "";
-    FindDataFlow::isFunction = false;
+  for (const auto &function: functions) {
+    auto body = find_functions_->getFunctionBody(function.first);
+
     //Transform blockCFG back to code
-    FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), module->getFunction(function.first), nullptr);
-    module->getFunction(function.first)->setStmtList(functionFactory.getStmtList());
+    FunctionFactory functionFactory(body, function.second, nullptr);
+    function.second->setStmtList(functionFactory.getStmtList());
   }
+
+  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
 
 void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_,find_data_flow_factory_);
+  this->find_global_->setup(pDecl, ci_, find_data_flow_factory_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);
@@ -497,7 +436,8 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
       FindDataFlow::functionName = func.first;
       FindDataFlow::isFunction = true;
       auto module = Module("placeholder");
-      DESCAM::CFGFactory cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module,find_data_flow_factory_);
+      DESCAM::CFGFactory
+          cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module, find_data_flow_factory_);
       FindDataFlow::functionName = "";
       FindDataFlow::isFunction = false;
       //Transform blockCFG back to code

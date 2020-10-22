@@ -13,12 +13,16 @@
 #include "FindDataFlowFactory.h"
 
 namespace DESCAM {
-CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, IFindDataFlowFactory *find_data_flow_factory, bool sourceModule) :
+CFGFactory::CFGFactory(clang::CXXMethodDecl *decl,
+                       clang::CompilerInstance *ci,
+                       Module *module,
+                       IFindDataFlowFactory *find_data_flow_factory,
+                       bool sourceModule) :
     sourceModule(sourceModule),
     methodDecl(decl),
     ci(ci),
     module(module),
-    find_data_flow_factory_(find_data_flow_factory){
+    find_data_flow_factory_(find_data_flow_factory) {
 
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
@@ -41,7 +45,7 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
     methodDecl(nullptr),
     ci(ci),
     module(module),
-    find_data_flow_factory_(find_data_flow_factory){
+    find_data_flow_factory_(find_data_flow_factory) {
 
   clang::LangOptions LO;
   LO.CPlusPlus = true;
@@ -66,7 +70,7 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
  * \brief Generates an simple blockCFG for a given clang::blockCFG
  *
  * 1)Find entry point in blockCFG(block w/o predecessors)
- * 2)Traverse every sucessor of current block
+ * 2)Traverse every successor of current block
  */
 void CFGFactory::translateToScamCFG() {
 
@@ -158,7 +162,7 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
   //Initial case: do not add parent ->
   if (parent != nullptr) parent->addSuccessor(cfgNode);
 
-  //Defines a pair <CFGBlockID,SuspensionCFBlockID> connectig a cfgBlock to a supensionBlock. Neededv in case cfgBlock is split
+  //Defines a pair <CFGBlockID,SuspensionCFBlockID> connecting a cfgBlock to a suspension Block. Needed in case cfgBlock is split
   this->entryMap.insert(std::make_pair(block->getBlockID(), cfgNode->getBlockID()));
   this->controlFlowMap.insert(std::make_pair(blockID, cfgNode));
 
@@ -329,7 +333,7 @@ std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) 
 //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
 DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
   // traverse clang stmt and create its equivalent descam stmt
-  auto dataFlow = find_data_flow_factory_->create_new(clangStmt, module, ci, find_data_flow_factory_, false);
+  auto dataFlow = find_data_flow_factory_->create_new(clangStmt, module, ci, false);
   return dataFlow->getStmt();
 }
 

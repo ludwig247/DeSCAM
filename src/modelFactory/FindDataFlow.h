@@ -6,7 +6,7 @@
 #define SCAM_FINDDATAFLOW_H
 
 #include "IFindDataFlow.h"
-#include "FindStateName.h"
+#include "IFindStateName.h"
 
 namespace DESCAM {
 class Module;
@@ -24,10 +24,9 @@ class IFindDataFlowFactory;
 class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<FindDataFlow> {
  public:
 
-  explicit FindDataFlow(DESCAM::IFindStateName *find_state_name);
+  FindDataFlow(DESCAM::IFindStateName *find_state_name, IFindDataFlowFactory *find_data_flow_factory);
   bool setup(clang::Stmt *stmt, Module *module,
              clang::CompilerInstance *ci,
-             IFindDataFlowFactory *find_data_flow_factory,
              bool unsigned_flag) override;
   Expr *getExpr() const override;
   DESCAM::Stmt *getStmt() override;

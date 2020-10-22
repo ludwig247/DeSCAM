@@ -7,7 +7,7 @@
 #include "CreateInitSection2.h"
 
 
-std::vector<DESCAM::Stmt *> DESCAM::CreateInitSection2::createInitSection2(const DESCAM::Module *module) {
+std::vector<DESCAM::Stmt *> DESCAM::CreateInitSection2::createInitSection2(const DESCAM::Module *const module) {
     //Create empty StmtList
     std::vector<DESCAM::Stmt *> initList;
 
