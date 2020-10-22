@@ -52,11 +52,11 @@ int main(int argc, const char **argv) {
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+  std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(find_data_flow_factory.get());
   std::unique_ptr<IFindInitialValues>
       find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
   std::unique_ptr<IFindFunctions> find_functions =

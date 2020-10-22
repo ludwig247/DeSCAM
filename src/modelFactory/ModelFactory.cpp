@@ -357,35 +357,10 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
 
   //Find the process describing the behavior
-  find_process_->setup(decl);
-  clang::CXXMethodDecl *methodDecl;
-  if (find_process_->isValidProcess()) {
-    methodDecl = find_process_->getProcess();
-  }
-  /*
-   * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
-   */
-  DESCAM::CFGFactory cfgFactory(methodDecl, ci_, module, find_data_flow_factory_, true);
+  find_process_->setup(decl, ci_, module, model_);
+  module->setCFG(find_process_->getCfgArg());
+  module->setPropertySuite(find_process_->getPropertySuite());
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
-  if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
-  DESCAM::CfgNode::node_cnt = 0;
-  DESCAM::State::state_cnt = 0;
-  DESCAM::Operation::operations_cnt = 0;
-  auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
-
-  if (!optOptionsSet.empty()) {
-    DESCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, this->model_, optOptionsSet);
-    module->setCFG(opt.getCFG());
-    DESCAM::OperationFactory operationFactory(opt.getCFG(), module);
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-  } else {
-    DESCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
-    module->setCFG(test.getCFG());
-    DESCAM::OperationFactory operationFactory(test.getCFG(), module);
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-  }
 }
 
 //! Adds every Member of a sc_module to the DESCAM::Module
