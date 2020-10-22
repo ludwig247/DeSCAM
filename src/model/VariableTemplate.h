@@ -27,7 +27,7 @@ namespace DESCAM {
 
         virtual std::vector<T *> getSubVarList() const final;
 
-        std::string getFullName() const;
+        std::string getFullName(const std::string& delimiter = ".") const;
 
         bool isConstant() const;
         void setConstant(bool isConstant);
