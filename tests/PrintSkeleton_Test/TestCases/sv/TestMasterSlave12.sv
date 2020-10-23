@@ -8,19 +8,19 @@ module TestMasterSlave12 (
 	input logic s_in_sync,
 	input integer s_in2,
 	input logic s_in2_sync,
-	output integer s_out
+	output integer sh_out
 	);
 
-	Sections nextsection_signal;
-	Sections section_signal;
+	Phases nextphase_signal;
+	Phases phase_signal;
 	bit succ_signal;
 	integer val_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
-			section_signal <= section_a;
+			nextphase_signal <= section_a;
+			phase_signal <= section_a;
 			succ_signal <= 1'b0;
 			val_signal <= 0;
 		end else begin

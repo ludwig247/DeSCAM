@@ -11,5 +11,5 @@ include_directories(/import/lab/users/ovsthus/SCAM/example/RISCV_commons)
 include_directories(/import/lab/users/ovsthus/SCAM/include/)
 link_directories(/import/lab/users/ovsthus/SCAM/lib/)
 
-add_executable(UART main.cpp)
+add_executable(UART_Simulation main.cpp)
 target_link_libraries(UART systemc)
