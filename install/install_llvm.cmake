@@ -4,9 +4,8 @@ if (USE_SYSTEM_LLVM)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
     find_package(llvm REQUIRED)
 else ()
-    if (LLVM_STABLE VERSION_LESS 4.00)
-        message(STATUS "legacy")
-    endif ()
+
+    set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     # Set the Version you want
     foreach (LLVM_VERSION IN LISTS LLVM_VERSIONS)
         include(ExternalProject)
@@ -59,14 +58,16 @@ else ()
                 ALWAYS TRUE
                 )
 
+        if(LLVM_VERSION VERSION_LESS 4.0.0)
         ExternalProject_Add_Step(LLVM-${LLVM_VERSION} CLANG
                 DEPENDEES download
                 DEPENDERS build
-                # FIXME Here should be an 'if (LLVM_VERSION VERSION_LESS X.X.X)' guard because this step becomes obsolete at some point. If guard does not work for some reason!?
-                COMMENT "Copying clang folder into 'LLVM' ${LLVM_VERSION} project (legacy install)"
+                COMMENT "Copying clang folder into 'LLVM' ${LLVM_VERSION} project [legacy install]"
                 # Create symbolic links for the chosen version. Change the link when switching versions.
                 COMMAND cp -r <SOURCE_DIR>/clang <SOURCE_DIR>/llvm/tools
                 )
+        ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} CLANG)
+        endif()
 
     endforeach ()
 
