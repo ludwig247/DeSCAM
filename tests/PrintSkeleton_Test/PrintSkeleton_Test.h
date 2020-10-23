@@ -279,7 +279,7 @@ protected:
 };
 
 
-INSTANTIATE_TEST_CASE_P(Basic, PrintSkeletonParam,
+INSTANTIATE_TEST_SUITE_P(Basic, PrintSkeletonParam,
         ::testing::ValuesIn(parameter(SCAM_HOME"/tests/PrintSkeleton_Test/Tests.list")),
         ::PrintSkeletonParam::PrintToStringParamName());
 
