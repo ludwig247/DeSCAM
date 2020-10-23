@@ -21,6 +21,7 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
                                 Module *module,
                                 Model *model) {
   std::cout << "TEST::setup\n";
+  std::cout << " | ModuleName:" << module->getName() << "\n";
   assert(record_decl);
   if (record_decl_ == record_decl) {
     return true;
@@ -76,5 +77,25 @@ std::map<int, DESCAM::CfgNode *> DESCAM::FindProcess::getCfgArg() const {
 }
 std::shared_ptr<DESCAM::PropertySuite> DESCAM::FindProcess::getPropertySuite() const {
   std::cout << "TEST::getPropertySuite Name:" << property_suite_->getName() << "\n";
+  std::cout << " | SyncSignals:" << property_suite_->getSyncSignals().size()<< "\n";
+  for(auto signal:property_suite_->getSyncSignals()){
+    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
+  }
+  std::cout << " | NotifySignals:" << property_suite_->getNotifySignals().size()<< "\n";
+  for(auto signal:property_suite_->getNotifySignals()){
+    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
+  }
+  std::cout << " | DPSignals:" << property_suite_->getDpSignals().size()<< "\n";
+  for(auto signal:property_suite_->getDpSignals()){
+    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
+  }
+  std::cout << " | VisibleRegisters:" << property_suite_->getVisibleRegisters().size()<< "\n";
+  for(auto signal:property_suite_->getVisibleRegisters()){
+    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
+  }
+  std::cout << " | States:" << property_suite_->getStates().size()<< "\n";
+  for(auto signal:property_suite_->getStates()){
+    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
+  }
   return this->property_suite_;
 }

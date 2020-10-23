@@ -64,23 +64,37 @@ TEST(DISABLED_TestCase1, FindProcess) /* NOLINT*/{
       .Times(1);
   EXPECT_CALL(find_process, getCfgArg)
       .Times(1)
-      .WillOnce(Invoke([&getCfgArg, &find_variables, &find_ports, &node1]() {
+      .WillOnce(Invoke([&getCfgArg, &find_variables, &find_ports, &node1, &node3, &node4]() {
         auto vars = find_variables->getVariableMap();
         auto var = vars.find("var")->second;
 
         auto port_map = find_ports->getPortMap();
-
         auto b_in = port_map.find("b_in");
         auto m_out = port_map.find("m_out");
 
         node1.setStmt(new Assignment(new VariableOperand(var), new IntegerValue(1337)));
-        node3.setStmt(new Read(b_in->second,var));
+        node3.setStmt(new Read(b_in->second, new VariableOperand(var)));
+        node4.setStmt(new Write(m_out->second, new VariableOperand(var)));
 
         return getCfgArg;
       }));
   EXPECT_CALL(find_process, getPropertySuite)
       .Times(1)
-      .WillOnce(Return(propertySuite));
+      .WillOnce(Invoke([&propertySuite,&find_ports, &find_modules](){
+        auto port_map = find_ports->getPortMap();
+        auto b_in = port_map.find("b_in");
+        auto m_out = port_map.find("m_out");
+
+        auto module = find_modules->getModuleMap().find("TestCase1")->second;
+        //module
+
+        propertySuite->addSyncSignal(std::make_shared<PropertyMacro>(new SyncSignal(b_in->second)));
+        propertySuite->addNotifySignal(std::make_shared<PropertyMacro>(new Notify(b_in->second)));
+        propertySuite->addNotifySignal(std::make_shared<PropertyMacro>(new Notify(m_out->second)));
+        propertySuite->addDpSignal(std::make_shared<PropertyMacro>(b_in->second->getDataSignal()));
+        propertySuite->addDpSignal(std::make_shared<PropertyMacro>(m_out->second->getDataSignal()));
+        return propertySuite;
+      }));
 
   auto model_factory = new ModelFactory(find_functions.get(),
                                         find_modules.get(),
