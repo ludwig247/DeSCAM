@@ -5,41 +5,47 @@
 #ifndef PROJECT_FINDCOMBINATIONALFUNCTION_H
 #define PROJECT_FINDCOMBINATIONALFUNCTION_H
 
-
-#include <clang/AST/RecursiveASTVisitor.h>
 #include <map>
+#include "IFindFunctions.h"
+#include "clang/AST/RecursiveASTVisitor.h"
 
 namespace DESCAM {
-    /***
-     * \brief Finds all "combinational" functions of a module
-     *
-     * Functions are considered const if they are const with respect to the class and thereby don't change the state of the class.
-     */
-    class FindFunctions : public clang::RecursiveASTVisitor<FindFunctions> {
-    public:
-        FindFunctions(clang::CXXRecordDecl * recordDecl);
-        virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl * methodDecl);
+/***
+ * \brief Finds all "combinational" functions of a module
+ *
+ * Functions are considered const if they are const with respect to the class and thereby don't change the state of the class.
+ */
+class FindFunctions : public IFindFunctions, public clang::RecursiveASTVisitor<FindFunctions> {
+ public:
+  FindFunctions();
 
-        const std::map<std::string, clang::CXXMethodDecl*> &getFunctionMap() const;
+  bool setup(clang::CXXRecordDecl *recordDecl) override;
 
-        const std::map<std::string, std::string> &getFunctionReturnTypeMap() const;
+  bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl);
 
-        const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const;
+  const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const override;
 
-        const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const;
+  const std::map<std::string, std::string> &getFunctionReturnTypeMap() const override;
 
-    private:
+  const std::map<std::string, std::vector<std::string>> &getFunctionParamNameMap() const override;
 
-        std::map<std::string,clang::CXXMethodDecl*> functionMap;
-        std::map<std::string,std::string> functionReturnTypeMap;
+  const std::map<std::string, std::vector<std::string>> &getFunctionParamTypeMap() const override;
 
-        std::string clangToScamType(clang::QualType qualType);
+ private:
 
+  /**
+   * Resets the object back to its initial state
+   */
+  void clean();
 
-        std::map<std::string,std::vector<std::string>> functionParamNameMap;
-        std::map<std::string,std::vector<std::string>> functionParamTypeMap;
-    };
+  std::map<std::string, clang::CXXMethodDecl *> function_map_;
+  std::map<std::string, std::string> function_return_type_map_;
+
+  std::string clangToScamType(clang::QualType qualType) const;
+
+  std::map<std::string, std::vector<std::string>> function_param_name_map_;
+  std::map<std::string, std::vector<std::string>> function_param_type_map_;
+};
 }
-
 
 #endif //PROJECT_FINDCOMBINATIONALFUNCTION_H

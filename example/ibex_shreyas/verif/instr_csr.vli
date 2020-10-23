@@ -1,0 +1,176 @@
+macro unsigned CSR_read(unsigned csr) :=
+    case(csr)
+	//CSR_MHARTID
+	12'hF14: cs_registers_i/hart_id_i;
+	//CSR_MSCRATCH
+	12'h340:  cs_registers_i/mscratch_q;
+	//CSR_MTVEC
+	12'h305:  cs_registers_i/mtvec_q;
+	//CSR_MEPC
+	12'h341:  cs_registers_i/mepc_q;
+	//CSR_MCAUSE
+	12'h342:  {cs_registers_i/mcause_q[5], 26'b0, cs_registers_i/mcause_q[4:0]};
+	//CSR_MTVAL
+	12'h343:  cs_registers_i/mtval_q;
+	//CSR_PMPCFG0
+	12'h3A0: {cs_registers_i/pmp_cfg_rdata[3],  cs_registers_i/pmp_cfg_rdata[2], cs_registers_i/pmp_cfg_rdata[1],  cs_registers_i/pmp_cfg_rdata[0]};
+	//CSR_PMPCFG1
+	12'h3A1: {cs_registers_i/pmp_cfg_rdata[7],  cs_registers_i/pmp_cfg_rdata[6], cs_registers_i/pmp_cfg_rdata[5],  cs_registers_i/pmp_cfg_rdata[4]};
+        //CSR_PMPCFG2
+	12'h3A2:   {cs_registers_i/pmp_cfg_rdata[11], cs_registers_i/pmp_cfg_rdata[10], cs_registers_i/pmp_cfg_rdata[9],  cs_registers_i/pmp_cfg_rdata[8]};
+        //CSR_PMPCFG3
+	12'h3A3:   {cs_registers_i/pmp_cfg_rdata[15], cs_registers_i/pmp_cfg_rdata[14], cs_registers_i/pmp_cfg_rdata[13], cs_registers_i/pmp_cfg_rdata[12]};
+        //CSR_PMPADDR0
+	12'h3B0:  cs_registers_i/pmp_addr_rdata[0];
+        //CSR_PMPADDR1
+	12'h3B1:  cs_registers_i/pmp_addr_rdata[1];
+        //CSR_PMPADDR2
+	12'h3B2:  cs_registers_i/pmp_addr_rdata[2];
+        //CSR_PMPADDR3
+	12'h3B3:  cs_registers_i/pmp_addr_rdata[3];
+        //CSR_PMPADDR4
+	12'h3B4:  cs_registers_i/pmp_addr_rdata[4];
+        //CSR_PMPADDR5
+	12'h3B5:  cs_registers_i/pmp_addr_rdata[5];
+        //CSR_PMPADDR6
+	12'h3B6:   cs_registers_i/pmp_addr_rdata[6];
+        //CSR_PMPADDR7
+	12'h3B7:   cs_registers_i/pmp_addr_rdata[7];
+        //CSR_PMPADDR8
+	12'h3B8:   cs_registers_i/pmp_addr_rdata[8];
+        //CSR_PMPADDR9
+	12'h3B9:   cs_registers_i/pmp_addr_rdata[9];
+        //CSR_PMPADDR10
+	12'h3BA:  cs_registers_i/pmp_addr_rdata[10];
+        //CSR_PMPADDR11
+	12'h3BB:  cs_registers_i/pmp_addr_rdata[11];
+       // CSR_PMPADDR12
+	12'h3BC:  cs_registers_i/pmp_addr_rdata[12];
+        //CSR_PMPADDR13
+	12'h3BD:  cs_registers_i/pmp_addr_rdata[13];
+        //CSR_PMPADDR14
+	12'h3BE:  cs_registers_i/pmp_addr_rdata[14];
+        //CSR_PMPADDR15
+	12'h3BF:  cs_registers_i/pmp_addr_rdata[15];
+	//CSR_MCOUNTINHIBIT
+	12'h320:  cs_registers_i/mcountinhibit;
+        //CSR_MCYCLE
+	12'hB00:  cs_registers_i/mhpmcounter_q[0][31: 0];
+        //CSR_MCYCLEH
+	12'hB80: cs_registers_i/mhpmcounter_q[0][63:32];
+        //CSR_MINSTRET
+	12'hB02:  cs_registers_i/mhpmcounter_q[2][31: 0];
+        //CSR_MINSTRETH
+	12'hB82: cs_registers_i/mhpmcounter_q[2][63:32];
+	//CSR_MSTATUS
+        //12'h300: {19'h0, logic'(cs_registers_i/mstatus_q.mpp), 3'h0, cs_registers_i/mstatus_q.mpie, 3'h0, cs_registers_i/mstatus_q.mie, 3'h0};
+	//CSR_MISA: csr_rdata_int = MISA_VALUE;
+	//CSR_DCSR
+        //12'h7B0:  cs_registers_i/dcsr_q;
+	//CSR_DPC
+        //12'h7B1: cs_registers_i/depc_q;
+       //CSR_DSCRATCH0
+       //12'h7B2: cs_registers_i/dscratch0_q;
+       //CSR_DSCRATCH1
+        //12'h7B3:  cs_registers_i/dscratch1_q;
+
+       default:    32'h0;
+    endcase;
+end macro;
+
+macro unsigned CSR_write(unsigned mode, write_data, read_data) :=
+    case(mode)
+    2'h0 : write_data;
+    2'h1: write_data;
+    2'h2: write_data | read_data;
+    2'h3: ~write_data & read_data;
+    default:  write_data;
+    endcase;
+end macro;
+
+macro csr_op_e CSR_operator(unsigned instr_mode) :=
+    case(instr_mode)
+    2'h0: CSR_OP_READ;
+    2'h1: CSR_OP_WRITE;
+    2'h2: CSR_OP_SET;
+    2'h3: CSR_OP_CLEAR;
+    default:  CSR_OP_READ;
+    endcase;
+end macro;
+
+macro property instr_csr(unsigned instr_imm, instr_mode) :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+	mode = instr_rdata_i[13:12]@t_if,
+	imm = instr_rdata_i[19:15]@t_if,
+        csr = instr_rdata_i[31:20]@t_if,
+	opcode = instr_rdata_i[6:0]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+	op1Data = instr_imm == 1 ? {27'b0,imm} : id_stage_i/registers_i/rf_reg[rs1]@t_id ,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id,
+	csr_data_at_t_id = csr_rdata@t_id,
+	csr_read_data = CSR_read (csr)@t_id,
+	csr_write_data = CSR_write(mode, op1Data, csr_data_at_t_id)@t_id;
+
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o;
+        at t_if:    !data_req_o;
+	at t_id:    !illegal_csr_insn_id;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h73; //set opcode
+	at t_if:	csr !=12'h300 & csr !=12'h304 & csr !=12'h301 & csr !=12'h344;//MSTATUS,MIE,MISA
+	at t_if:	 csr!= 12'h7B0 &  csr!= 12'h7B1 & csr!= 12'h7B2 & csr!= 12'h7B3; //flush ==1 if csr == DCSR,DPC,DSCRATCH*
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[13:12] == instr_mode; //set write
+	at t_if:    instr_rdata_i[14] == instr_imm; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    if(instr_mode == 2'h2 || instr_mode ==2'h3) instr_rdata_i[19:15] > 0;endif;
+     
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[13:12] == mode;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[19:15] == imm;
+        at t_id:    instr_rdata_id[31:20] == csr;
+
+        //ID output
+	at t_id :   alu_operand_b_ex == signExtend(csr);
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_CSR;
+	at t_id:    csr_addr == csr;
+	at t_id:	 csr_access == 1'b1;
+	at t_id:    csr_op == CSR_operator(instr_mode);
+	at t_id:	 csr_wdata == op1Data;
+	at t_id:	 cs_registers_i/csr_wdata_int == csr_write_data;
+        //CSR output
+        at t_id:    id_stage_i/regfile_waddr == rd;
+	
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+        at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id+1:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:  if (rd != 0) id_stage_i/registers_i/rf_reg[rd] == csr_read_data; endif;
+	at t_wb:  if (rd == 0) id_stage_i/registers_i/rf_reg[rd] == 0; endif;
+        at t_wb:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        //at t_wb:   foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == (r == rd ? (r == 0 ? 0 : csr_data_at_t_id) : regFile_at_t_id[r]); end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;

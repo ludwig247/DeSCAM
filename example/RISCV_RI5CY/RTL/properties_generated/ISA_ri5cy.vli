@@ -1,0 +1,703 @@
+//-- OPERATIONS --
+property reset;
+assume:
+	 reset_sequence;
+prove:
+	 at t: IF_1;
+	 at t: encodedInstr == resize(0,32);
+	 at t: iaddr == resize(0,32);
+	 at t: instr_req_sig == resize(0,32);
+	 at t: pcIf == resize(0,32);
+	 at t: prevInstr == resize(0,32);
+	 at t: data_out_notify == false;
+	 at t: instr_req_notify == true;
+	 at t: toRegsPort_notify == false;
+end property;
+
+
+property EX_5_18;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: EX_5;
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property ID_2_10;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_b);
+	at t: !(branchDecisionCalculation(getALUresult(getALUfunc(getInstrType(encodedInstr)),readRegfile(fromRegsPort_sig_reg_file_01,fromRegsPort_sig_reg_file_02,fromRegsPort_sig_reg_file_03,fromRegsPort_sig_reg_file_04,fromRegsPort_sig_reg_file_05,fromRegsPort_sig_reg_file_06,fromRegsPort_sig_reg_file_07,fromRegsPort_sig_reg_file_08,fromRegsPort_sig_reg_file_09,fromRegsPort_sig_reg_file_10,fromRegsPort_sig_reg_file_11,fromRegsPort_sig_reg_file_12,fromRegsPort_sig_reg_file_13,fromRegsPort_sig_reg_file_14,fromRegsPort_sig_reg_file_15,fromRegsPort_sig_reg_file_16,fromRegsPort_sig_reg_file_17,fromRegsPort_sig_reg_file_18,fromRegsPort_sig_reg_file_19,fromRegsPort_sig_reg_file_20,fromRegsPort_sig_reg_file_21,fromRegsPort_sig_reg_file_22,fromRegsPort_sig_reg_file_23,fromRegsPort_sig_reg_file_24,fromRegsPort_sig_reg_file_25,fromRegsPort_sig_reg_file_26,fromRegsPort_sig_reg_file_27,fromRegsPort_sig_reg_file_28,fromRegsPort_sig_reg_file_29,fromRegsPort_sig_reg_file_30,fromRegsPort_sig_reg_file_31,getRs1Addr(encodedInstr)),readRegfile(fromRegsPort_sig_reg_file_01,fromRegsPort_sig_reg_file_02,fromRegsPort_sig_reg_file_03,fromRegsPort_sig_reg_file_04,fromRegsPort_sig_reg_file_05,fromRegsPort_sig_reg_file_06,fromRegsPort_sig_reg_file_07,fromRegsPort_sig_reg_file_08,fromRegsPort_sig_reg_file_09,fromRegsPort_sig_reg_file_10,fromRegsPort_sig_reg_file_11,fromRegsPort_sig_reg_file_12,fromRegsPort_sig_reg_file_13,fromRegsPort_sig_reg_file_14,fromRegsPort_sig_reg_file_15,fromRegsPort_sig_reg_file_16,fromRegsPort_sig_reg_file_17,fromRegsPort_sig_reg_file_18,fromRegsPort_sig_reg_file_19,fromRegsPort_sig_reg_file_20,fromRegsPort_sig_reg_file_21,fromRegsPort_sig_reg_file_22,fromRegsPort_sig_reg_file_23,fromRegsPort_sig_reg_file_24,fromRegsPort_sig_reg_file_25,fromRegsPort_sig_reg_file_26,fromRegsPort_sig_reg_file_27,fromRegsPort_sig_reg_file_28,fromRegsPort_sig_reg_file_29,fromRegsPort_sig_reg_file_30,fromRegsPort_sig_reg_file_31,getRs2Addr(encodedInstr))),encodedInstr));
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property ID_2_11;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_u);
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
+	at t_end: toRegsPort_sig_dstData == getEncUALUresult(encodedInstr_at_t,pcIf_at_t);
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end-1]: toRegsPort_notify == false;
+	at t_end: toRegsPort_notify == true;
+end property;
+
+
+property ID_2_12;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_j);
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
+	at t_end: toRegsPort_sig_dstData == (4 + pcIf_at_t)[31:0];
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end-1]: toRegsPort_notify == false;
+	at t_end: toRegsPort_notify == true;
+end property;
+
+
+property ID_2_13;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_i_j);
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
+	at t_end: toRegsPort_sig_dstData == (4 + pcIf_at_t)[31:0];
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end-1]: toRegsPort_notify == false;
+	at t_end: toRegsPort_notify == true;
+end property;
+
+
+property ID_2_14;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: !((getEncType(encodedInstr) == enc_r));
+	at t: !((getEncType(encodedInstr) == enc_i_i));
+	at t: !((getEncType(encodedInstr) == enc_i_l));
+	at t: !((getEncType(encodedInstr) == enc_s));
+	at t: !((getEncType(encodedInstr) == enc_b));
+	at t: !((getEncType(encodedInstr) == enc_u));
+	at t: !((getEncType(encodedInstr) == enc_j));
+	at t: !((getEncType(encodedInstr) == enc_i_j));
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property ID_2_15;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: (getInstrType(encodedInstr) == instr_unknown);
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property ID_2_5;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	iaddr_at_t = iaddr@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_r);
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
+	at t_end: toRegsPort_sig_dstData == getALUresult(getALUfunc(getInstrType(encodedInstr_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(encodedInstr_at_t)));
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end-1]: toRegsPort_notify == false;
+	at t_end: toRegsPort_notify == true;
+end property;
+
+
+property ID_2_6;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	iaddr_at_t = iaddr@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_i_i);
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
+	at t_end: toRegsPort_sig_dstData == getALUresult(getALUfunc(getInstrType(encodedInstr_at_t)),readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),getImmediate(encodedInstr_at_t));
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end-1]: toRegsPort_notify == false;
+	at t_end: toRegsPort_notify == true;
+end property;
+
+
+property ID_2_7;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	iaddr_at_t = iaddr@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_i_l);
+prove:
+	at t_end: LOAD_3;
+	at t_end: data_out_sig_addrIn == getALUresult(alu_add,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),getImmediate(encodedInstr_at_t));
+	at t_end: data_out_sig_dataIn == 0;
+	at t_end: data_out_sig_mask == getMemoryMask(getInstrType(encodedInstr_at_t));
+	at t_end: data_out_sig_req == me_rd;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end-1]: data_out_notify == false;
+	at t_end: data_out_notify == true;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property ID_2_8;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	iaddr_at_t = iaddr@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_s);
+prove:
+	at t_end: STORE_4;
+	at t_end: data_out_sig_addrIn == getALUresult(alu_add,readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(encodedInstr_at_t)),getImmediate(encodedInstr_at_t));
+	at t_end: data_out_sig_dataIn == readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs2Addr(encodedInstr_at_t));
+	at t_end: data_out_sig_mask == getMemoryMask(getInstrType(encodedInstr_at_t));
+	at t_end: data_out_sig_req == me_wr;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == iaddr_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end-1]: data_out_notify == false;
+	at t_end: data_out_notify == true;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property ID_2_9;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: ID_2;
+	at t: !((getInstrType(encodedInstr) == instr_unknown));
+	at t: (getEncType(encodedInstr) == enc_b);
+	at t: branchDecisionCalculation(getALUresult(getALUfunc(getInstrType(encodedInstr)),readRegfile(fromRegsPort_sig_reg_file_01,fromRegsPort_sig_reg_file_02,fromRegsPort_sig_reg_file_03,fromRegsPort_sig_reg_file_04,fromRegsPort_sig_reg_file_05,fromRegsPort_sig_reg_file_06,fromRegsPort_sig_reg_file_07,fromRegsPort_sig_reg_file_08,fromRegsPort_sig_reg_file_09,fromRegsPort_sig_reg_file_10,fromRegsPort_sig_reg_file_11,fromRegsPort_sig_reg_file_12,fromRegsPort_sig_reg_file_13,fromRegsPort_sig_reg_file_14,fromRegsPort_sig_reg_file_15,fromRegsPort_sig_reg_file_16,fromRegsPort_sig_reg_file_17,fromRegsPort_sig_reg_file_18,fromRegsPort_sig_reg_file_19,fromRegsPort_sig_reg_file_20,fromRegsPort_sig_reg_file_21,fromRegsPort_sig_reg_file_22,fromRegsPort_sig_reg_file_23,fromRegsPort_sig_reg_file_24,fromRegsPort_sig_reg_file_25,fromRegsPort_sig_reg_file_26,fromRegsPort_sig_reg_file_27,fromRegsPort_sig_reg_file_28,fromRegsPort_sig_reg_file_29,fromRegsPort_sig_reg_file_30,fromRegsPort_sig_reg_file_31,getRs1Addr(encodedInstr)),readRegfile(fromRegsPort_sig_reg_file_01,fromRegsPort_sig_reg_file_02,fromRegsPort_sig_reg_file_03,fromRegsPort_sig_reg_file_04,fromRegsPort_sig_reg_file_05,fromRegsPort_sig_reg_file_06,fromRegsPort_sig_reg_file_07,fromRegsPort_sig_reg_file_08,fromRegsPort_sig_reg_file_09,fromRegsPort_sig_reg_file_10,fromRegsPort_sig_reg_file_11,fromRegsPort_sig_reg_file_12,fromRegsPort_sig_reg_file_13,fromRegsPort_sig_reg_file_14,fromRegsPort_sig_reg_file_15,fromRegsPort_sig_reg_file_16,fromRegsPort_sig_reg_file_17,fromRegsPort_sig_reg_file_18,fromRegsPort_sig_reg_file_19,fromRegsPort_sig_reg_file_20,fromRegsPort_sig_reg_file_21,fromRegsPort_sig_reg_file_22,fromRegsPort_sig_reg_file_23,fromRegsPort_sig_reg_file_24,fromRegsPort_sig_reg_file_25,fromRegsPort_sig_reg_file_26,fromRegsPort_sig_reg_file_27,fromRegsPort_sig_reg_file_28,fromRegsPort_sig_reg_file_29,fromRegsPort_sig_reg_file_30,fromRegsPort_sig_reg_file_31,getRs2Addr(encodedInstr))),encodedInstr);
+prove:
+	at t_end: EX_5;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == (pcIf_at_t + getImmediate(encodedInstr_at_t))[31:0];
+	at t_end: instr_req_sig == (pcIf_at_t + getImmediate(encodedInstr_at_t))[31:0];
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end-1]: instr_req_notify == false;
+	at t_end: instr_req_notify == true;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property IF_1_1;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	instr_in_sig_at_t = instr_in_sig@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: IF_1;
+	at t: flush_in_sig;
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == instr_in_sig_at_t;
+	at t_end: iaddr == ((4294967292 + pcIf_at_t)[31:0] + getImmediate(prevInstr_at_t))[31:0];
+	at t_end: instr_req_sig == ((4294967292 + pcIf_at_t)[31:0] + getImmediate(prevInstr_at_t))[31:0];
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == instr_in_sig_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end-1]: instr_req_notify == false;
+	at t_end: instr_req_notify == true;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property IF_1_2;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	instr_in_sig_at_t = instr_in_sig@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: IF_1;
+	at t: !(flush_in_sig);
+	at t: (getEncType(instr_in_sig) == enc_j);
+prove:
+	at t_end: ID_2;
+	at t_end: encodedInstr == instr_in_sig_at_t;
+	at t_end: iaddr == (pcIf_at_t + getImmediate(instr_in_sig_at_t))[31:0];
+	at t_end: instr_req_sig == (pcIf_at_t + getImmediate(instr_in_sig_at_t))[31:0];
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end-1]: instr_req_notify == false;
+	at t_end: instr_req_notify == true;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property IF_1_3;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	fromRegsPort_sig_reg_file_01_at_t = fromRegsPort_sig_reg_file_01@t,
+	fromRegsPort_sig_reg_file_02_at_t = fromRegsPort_sig_reg_file_02@t,
+	fromRegsPort_sig_reg_file_03_at_t = fromRegsPort_sig_reg_file_03@t,
+	fromRegsPort_sig_reg_file_04_at_t = fromRegsPort_sig_reg_file_04@t,
+	fromRegsPort_sig_reg_file_05_at_t = fromRegsPort_sig_reg_file_05@t,
+	fromRegsPort_sig_reg_file_06_at_t = fromRegsPort_sig_reg_file_06@t,
+	fromRegsPort_sig_reg_file_07_at_t = fromRegsPort_sig_reg_file_07@t,
+	fromRegsPort_sig_reg_file_08_at_t = fromRegsPort_sig_reg_file_08@t,
+	fromRegsPort_sig_reg_file_09_at_t = fromRegsPort_sig_reg_file_09@t,
+	fromRegsPort_sig_reg_file_10_at_t = fromRegsPort_sig_reg_file_10@t,
+	fromRegsPort_sig_reg_file_11_at_t = fromRegsPort_sig_reg_file_11@t,
+	fromRegsPort_sig_reg_file_12_at_t = fromRegsPort_sig_reg_file_12@t,
+	fromRegsPort_sig_reg_file_13_at_t = fromRegsPort_sig_reg_file_13@t,
+	fromRegsPort_sig_reg_file_14_at_t = fromRegsPort_sig_reg_file_14@t,
+	fromRegsPort_sig_reg_file_15_at_t = fromRegsPort_sig_reg_file_15@t,
+	fromRegsPort_sig_reg_file_16_at_t = fromRegsPort_sig_reg_file_16@t,
+	fromRegsPort_sig_reg_file_17_at_t = fromRegsPort_sig_reg_file_17@t,
+	fromRegsPort_sig_reg_file_18_at_t = fromRegsPort_sig_reg_file_18@t,
+	fromRegsPort_sig_reg_file_19_at_t = fromRegsPort_sig_reg_file_19@t,
+	fromRegsPort_sig_reg_file_20_at_t = fromRegsPort_sig_reg_file_20@t,
+	fromRegsPort_sig_reg_file_21_at_t = fromRegsPort_sig_reg_file_21@t,
+	fromRegsPort_sig_reg_file_22_at_t = fromRegsPort_sig_reg_file_22@t,
+	fromRegsPort_sig_reg_file_23_at_t = fromRegsPort_sig_reg_file_23@t,
+	fromRegsPort_sig_reg_file_24_at_t = fromRegsPort_sig_reg_file_24@t,
+	fromRegsPort_sig_reg_file_25_at_t = fromRegsPort_sig_reg_file_25@t,
+	fromRegsPort_sig_reg_file_26_at_t = fromRegsPort_sig_reg_file_26@t,
+	fromRegsPort_sig_reg_file_27_at_t = fromRegsPort_sig_reg_file_27@t,
+	fromRegsPort_sig_reg_file_28_at_t = fromRegsPort_sig_reg_file_28@t,
+	fromRegsPort_sig_reg_file_29_at_t = fromRegsPort_sig_reg_file_29@t,
+	fromRegsPort_sig_reg_file_30_at_t = fromRegsPort_sig_reg_file_30@t,
+	fromRegsPort_sig_reg_file_31_at_t = fromRegsPort_sig_reg_file_31@t,
+	instr_in_sig_at_t = instr_in_sig@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: IF_1;
+	at t: !(flush_in_sig);
+	at t: (getEncType(instr_in_sig) == enc_i_j);
+prove:
+	at t_end: ID_2;
+	at t_end: encodedInstr == instr_in_sig_at_t;
+	at t_end: iaddr == ((readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(instr_in_sig_at_t)) + getImmediate(instr_in_sig_at_t))[31:0] & 4294967294);
+	at t_end: instr_req_sig == ((readRegfile(fromRegsPort_sig_reg_file_01_at_t,fromRegsPort_sig_reg_file_02_at_t,fromRegsPort_sig_reg_file_03_at_t,fromRegsPort_sig_reg_file_04_at_t,fromRegsPort_sig_reg_file_05_at_t,fromRegsPort_sig_reg_file_06_at_t,fromRegsPort_sig_reg_file_07_at_t,fromRegsPort_sig_reg_file_08_at_t,fromRegsPort_sig_reg_file_09_at_t,fromRegsPort_sig_reg_file_10_at_t,fromRegsPort_sig_reg_file_11_at_t,fromRegsPort_sig_reg_file_12_at_t,fromRegsPort_sig_reg_file_13_at_t,fromRegsPort_sig_reg_file_14_at_t,fromRegsPort_sig_reg_file_15_at_t,fromRegsPort_sig_reg_file_16_at_t,fromRegsPort_sig_reg_file_17_at_t,fromRegsPort_sig_reg_file_18_at_t,fromRegsPort_sig_reg_file_19_at_t,fromRegsPort_sig_reg_file_20_at_t,fromRegsPort_sig_reg_file_21_at_t,fromRegsPort_sig_reg_file_22_at_t,fromRegsPort_sig_reg_file_23_at_t,fromRegsPort_sig_reg_file_24_at_t,fromRegsPort_sig_reg_file_25_at_t,fromRegsPort_sig_reg_file_26_at_t,fromRegsPort_sig_reg_file_27_at_t,fromRegsPort_sig_reg_file_28_at_t,fromRegsPort_sig_reg_file_29_at_t,fromRegsPort_sig_reg_file_30_at_t,fromRegsPort_sig_reg_file_31_at_t,getRs1Addr(instr_in_sig_at_t)) + getImmediate(instr_in_sig_at_t))[31:0] & 4294967294);
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end-1]: instr_req_notify == false;
+	at t_end: instr_req_notify == true;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property IF_1_4;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	iaddr_at_t = iaddr@t,
+	instr_in_sig_at_t = instr_in_sig@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: IF_1;
+	at t: !(flush_in_sig);
+	at t: !((getEncType(instr_in_sig) == enc_j));
+	at t: !((getEncType(instr_in_sig) == enc_i_j));
+prove:
+	at t_end: ID_2;
+	at t_end: encodedInstr == instr_in_sig_at_t;
+	at t_end: iaddr == (4 + iaddr_at_t)[31:0];
+	at t_end: instr_req_sig == (4 + iaddr_at_t)[31:0];
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end-1]: instr_req_notify == false;
+	at t_end: instr_req_notify == true;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property LOAD_3_16;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	data_in_sig_at_t = data_in_sig@t,
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: LOAD_3;
+	at t: data_out_sync;
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	at t_end: toRegsPort_sig_dst == getRdAddr(encodedInstr_at_t);
+	at t_end: toRegsPort_sig_dstData == data_in_sig_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end-1]: toRegsPort_notify == false;
+	at t_end: toRegsPort_notify == true;
+end property;
+
+
+property STORE_4_17;
+dependencies: no_reset;
+for timepoints:
+	t_end = t+1;
+freeze:
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: STORE_4;
+	at t: data_out_sync;
+prove:
+	at t_end: IF_1;
+	at t_end: encodedInstr == encodedInstr_at_t;
+	at t_end: iaddr == iaddr_at_t;
+	at t_end: pcIf == pcIf_at_t;
+	at t_end: prevInstr == prevInstr_at_t;
+	during[t+1, t_end]: data_out_notify == false;
+	during[t+1, t_end]: instr_req_notify == false;
+	during[t+1, t_end]: toRegsPort_notify == false;
+end property;
+
+
+property wait_LOAD_3;
+dependencies: no_reset;
+freeze:
+	data_out_sig_at_t = data_out_sig@t,
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: LOAD_3;
+	at t: !(data_out_sync);
+prove:
+	at t+1: LOAD_3;
+	at t+1: data_out_sig == data_out_sig_at_t;
+	at t+1: encodedInstr == encodedInstr_at_t;
+	at t+1: iaddr == iaddr_at_t;
+	at t+1: pcIf == pcIf_at_t;
+	at t+1: prevInstr == prevInstr_at_t;
+	at t+1: data_out_notify == true;
+	at t+1: instr_req_notify == false;
+	at t+1: toRegsPort_notify == false;
+end property;
+
+
+property wait_STORE_4;
+dependencies: no_reset;
+freeze:
+	data_out_sig_at_t = data_out_sig@t,
+	encodedInstr_at_t = encodedInstr@t,
+	iaddr_at_t = iaddr@t,
+	pcIf_at_t = pcIf@t,
+	prevInstr_at_t = prevInstr@t;
+assume:
+	at t: STORE_4;
+	at t: !(data_out_sync);
+prove:
+	at t+1: STORE_4;
+	at t+1: data_out_sig == data_out_sig_at_t;
+	at t+1: encodedInstr == encodedInstr_at_t;
+	at t+1: iaddr == iaddr_at_t;
+	at t+1: pcIf == pcIf_at_t;
+	at t+1: prevInstr == prevInstr_at_t;
+	at t+1: data_out_notify == true;
+	at t+1: instr_req_notify == false;
+	at t+1: toRegsPort_notify == false;
+end property;
+
+

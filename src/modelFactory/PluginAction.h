@@ -14,7 +14,6 @@
 #ifndef _PLUGIN_ACTION_H_
 #define _PLUGIN_ACTION_H_
 
-
 #include <iostream>
 #include <GlobalUtilities.h>
 #include <Logger/Logger.h>
@@ -30,63 +29,75 @@
 #include "clang/Tooling/Tooling.h"
 #include "ClangDiagnosticPrinter.h"
 
+#include "IModelFactory.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
 
+namespace DESCAM {
 
-namespace scpar {
-    template<typename A>
-    class LightsCameraAction : public clang::ASTFrontendAction {
-    protected:
+/**
+ * This class protects externally created ASTConsumers from being deleted by the clang::tooling framework.
+ * Without this protection, a second run of a PluginAction in the ModelGlobal will work on a nullptr,
+ * even though the Consumer and the PluginAction were created once more ? Why? Nobody knows...
+ */
+class Relay : public clang::ASTConsumer {
+ private:
+  clang::ASTConsumer* consumer_;
+ public:
+  explicit Relay(clang::ASTConsumer *consumer) : consumer_(consumer) {}
 
-        virtual clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) {
-            return new A(ci);
-        };
-
-    };
-
-}
-
-using namespace scpar;
-
-template<typename A>
-class PluginAction {
-public:
-    PluginAction(int argc, const char **argv) {
-
-        std::vector<std::string> arg;
-
-     //Ensures that only the specified file paths given as arguments in command line are passed to CLang at a time
-        for(int i=1; i < argc ; i++) {
-            if(!(std::string(argv[i]) == "--")){
-                arg.push_back(argv[i]);
-//                std::cout << "ARG: " << arg[i-1] << std::endl;
-            }
-            else break;
-        };
-
-        CommonOptionsParser OptionsParser (argc, argv);
-
-        //Print to screen file paths given to compiler through CommonOptionsParser
-//        for(auto src: OptionsParser.getSourcePathList()){
-//            std::cout << "OP:" << src << std::endl;
-//        }
-
-
-		ClangTool Tool (OptionsParser.getCompilations (), arg);
-
-        std::string output;
-        llvm::raw_string_ostream ss(output);
-        auto diagnosticOptions = new clang::DiagnosticOptions();
-        diagnosticOptions->ShowSourceRanges = 1;
-        auto diagnosticPrinter = new clang::ClangDiagnosticPrinter(ss, diagnosticOptions);
-        Tool.setDiagnosticConsumer(diagnosticPrinter);
-        FrontendActionFactory *fe = newFrontendActionFactory<LightsCameraAction<A> >();
-        Tool.run(fe);
-        diagnosticPrinter->addDiagnosticsToLogger(std::move(ss.str()));
-    }
-
+  void HandleTranslationUnit(clang::ASTContext &context) override{
+    consumer_->HandleTranslationUnit(context);
+  };
 };
 
+/**
+ * Wrapper class required to interface with the clang::Tool class.
+ * Acts as Factory for Relay
+ */
+class DeScamAction : public clang::ASTFrontendAction {
+ public:
+  explicit DeScamAction(IModelFactory *model_factory) :
+      model_factory_(model_factory) {}
+
+ private:
+  IModelFactory *model_factory_;
+
+ protected:
+  clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) override {
+    model_factory_->setup(&ci);
+    return new Relay(model_factory_);
+  };
+};
+
+/**
+ * Wrapper class required to interface with the clang::Tool class.
+ * Acts as Factory for DeScamAction
+ */
+class DESCAMFrontEndFactory : public FrontendActionFactory {
+ private:
+  IModelFactory *model_factory_;
+
+ public:
+  explicit DESCAMFrontEndFactory(IModelFactory *model_factory) : model_factory_(model_factory){};
+
+  clang::FrontendAction *create() override {
+    return new DeScamAction(model_factory_);
+  }
+};
+
+/**
+ * Wrapper class required to interface with the clang::Tool class.
+ */
+class PluginAction {
+ private:
+  //TODO: delete this static member
+  /** length of last run source-file list because clang stores source file lists and we have to delete them */
+  static int previous_length_;
+
+ public:
+  PluginAction(int argc, const char **argv, IModelFactory *model_factory);
+};
+}
 #endif /* _PLUGIN_ACTION_H_ */

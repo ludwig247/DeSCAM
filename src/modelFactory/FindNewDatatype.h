@@ -9,19 +9,21 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <DataType.h>
 #include <DataTypes.h>
+#include "IFindNewDatatype.h"
 
 /*!
  * \brief Maps clang:Qualtypes to DESCAM:Datatypes
  */
 
-namespace DESCAM{
+namespace DESCAM {
 
-class FindNewDatatype : public clang::RecursiveASTVisitor<FindNewDatatype> {
-public:
+class FindNewDatatype : public IFindNewDatatype, public clang::RecursiveASTVisitor<FindNewDatatype> {
+ public:
+  ~FindNewDatatype() override = default;
 
-    static DESCAM::DataType*  getDataType(const clang::QualType& type);
-    static std::string getTypeName(const clang::QualType& type);
-    static bool isGlobal(const clang::QualType& type); //! Returns true, if datatype is not defined within a module class
+  DESCAM::DataType *getDataType(const clang::QualType &type) override;
+  std::string getTypeName(const clang::QualType &type) override;
+  bool isGlobal(const clang::QualType &type) override; //! Returns true, if datatype is not defined within a module class
 
 };
 

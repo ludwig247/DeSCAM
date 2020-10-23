@@ -54,7 +54,9 @@ std::map<std::string, std::string> PrintITL::printModule(DESCAM::Module *node) {
 }
 
 std::string PrintITL::print() {
-    return (macros() + operations()  + functions());
+    std::stringstream ss;
+    ss << macros() << operations() << functions() << globalFunctions();
+    return ss.str();
 }
 
 std::string PrintITL::functions() {
@@ -403,7 +405,7 @@ std::string PrintITL::macrosForHLS()
 
 std::string PrintITL::globalFunctions() {
     std::stringstream ss;
-    if (model->getGlobalFunctionMap().empty()) return ss.str();
+    if (model == nullptr || model->getGlobalFunctionMap().empty()) return ss.str();
     ss << "-- GLOBAL FUNCTIONS --\n";
     for (auto function: model->getGlobalFunctionMap()) {
         ss << "macro " + function.first << "(";

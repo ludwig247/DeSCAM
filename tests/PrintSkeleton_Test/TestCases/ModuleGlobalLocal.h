@@ -8,7 +8,16 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-#include "Types.h"
+
+
+struct global_compound_type {
+  unsigned w;
+  bool b;
+};
+
+enum global_enum{A,B};
+enum class global_enum_class{M,N};
+
 
 
 struct GlobalLocal : public sc_module {

@@ -3,43 +3,53 @@
 
 namespace DESCAM {
 
-    FindSCMain::FindSCMain(clang::TranslationUnitDecl *tuDecl):
-            pass(0),
-            scMainFound(false),
-            _scmainFunctionDecl(NULL){
-        assert (!(tuDecl == NULL));
-        //Find sc_main
-        TraverseDecl(tuDecl);
-        //Is found
+bool FindSCMain::VisitFunctionDecl(clang::FunctionDecl *functionDecl) {
+
+  /// Find sc_main.
+  /// There are three conditions to satisfy this:
+  /// 1. Must have sc_main in its name.
+  /// 2. Must have a body
+  /// 3. Must *not* be a first declaration. (This is because systemc.h includes a null definition of sc_main.
+  if ((functionDecl->getNameInfo().getAsString() == "sc_main") && (functionDecl->hasBody())) {
+    //Pass the null definition of main
+    if (pass_ == 0) {
+      // This is the null definition - skip
+      pass_++;
     }
-
-    bool FindSCMain::VisitFunctionDecl(clang::FunctionDecl *functionDecl) {
-
-        /// Find sc_main.
-        /// There are three conditions to satisfy this:
-        /// 1. Must have sc_main in its name.
-        /// 2. Must have a body
-        /// 3. Must *not* be a first declaration. (This is becuase systemc.h includes a null definition of sc_main.
-        if ((functionDecl->getNameInfo().getAsString() == "sc_main") && (functionDecl->hasBody())) {
-            //Pass the null definition of main
-            if(pass == 1){
-                _scmainFunctionDecl = functionDecl;
-                scMainFound = true;
-                return false;
-            }
-            pass = 1;
-        }
-        return true;
+    if (pass_ == 1) {
+      // This finds the actual sc_main
+      scmain_function_decl_ = functionDecl;
+      sc_main_found_ = true;
+      return false;
+    } else {
+      // If we get to here, something in the SC files went wrong. Multiple sc_main definitions.
+      // TODO implement actual exception handling here. This is a user created error.
+      assert(false && "Multiple sc_main definitions found");
     }
+  }
+  return true;
+}
 
+clang::FunctionDecl *FindSCMain::getSCMainFunctionDecl() {
+  assert (scmain_function_decl_);
+  return scmain_function_decl_;
+}
 
-    clang::FunctionDecl *FindSCMain::getSCMainFunctionDecl() {
-        assert (!(_scmainFunctionDecl == NULL));
-        return _scmainFunctionDecl;
-    }
+bool FindSCMain::isScMainFound() const {
+  return sc_main_found_;
+}
 
-    bool FindSCMain::isScMainFound() const {
-        return scMainFound;
-    }
+bool FindSCMain::setup(clang::TranslationUnitDecl *unit_decl) {
+  assert (unit_decl);
+  if (unit_decl == unit_decl_) {
+    return true;
+  } else {
+    pass_ = 0;
+    sc_main_found_ = false;
+    scmain_function_decl_ = nullptr;
+    //Find sc_main
+    return TraverseDecl(unit_decl);
+  }
+}
 
 }

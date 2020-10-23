@@ -1,0 +1,112 @@
+
+macro property instr_const :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        rd = instr_rdata_i[11:7]@t_if,
+        imm = instr_rdata_i[31:12]@t_if,
+	Bimm = {imm, 12'b0}@t_if,
+	opcode = instr_rdata_i[6:0]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o;
+        at t_if:    !data_req_o;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h37; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[31:12] == imm;
+
+        //ID output
+
+        //EX output
+        at t_id:    regfile_wdata_ex == Bimm;
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    id_stage_i/regfile_waddr == rd;
+
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+        at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    id_stage_i/registers_i/rf_reg[rd] == Bimm;
+        at t_wb:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;
+
+
+macro property instr_const_pc :=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        rd = instr_rdata_i[11:7]@t_if,
+        imm = instr_rdata_i[31:12]@t_if,
+	Bimm = {imm, 12'b0}@t_if,
+	opcode = instr_rdata_i[6:0]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o;
+        at t_if:    !data_req_o;
+	//at t_if: 	!if_stage_i/prefetch_buffer_i/fifo_i/valid_q;
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h17; //set opcode
+        at t_if:    instr_rdata_i[11:7] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[11:7] > 0; //no wb to r0
+
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] ==rd;
+        at t_id:    instr_rdata_id[31:12] == imm;
+
+        //ID output
+        at t_id:    alu_operand_a_ex == PC_at_t_if;
+        at t_id:    alu_operand_b_ex == Bimm;
+        
+	//EX output
+        at t_id:    regfile_wdata_ex == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    id_stage_i/regfile_waddr == rd;
+
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+        at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb:    id_stage_i/registers_i/rf_reg[rd] == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+        at t_wb:    foreach r in 0..31: if(r != rd) id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r];endif; end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;

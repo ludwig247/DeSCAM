@@ -12,7 +12,7 @@ module TestBasic21 (
 	);
 
 	CompoundType compoundType_signal;
-	Sections section_signal;
+	Phases phase_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
@@ -20,7 +20,7 @@ module TestBasic21 (
 			compoundType_signal.mode <= read;
 			compoundType_signal.x <= 0;
 			compoundType_signal.y <= 1'b0;
-			section_signal <= section_a;
+			phase_signal <= section_a;
 			b_out_notify <= 1'b1;
 			m_out_notify <= 1'b0;
 		end else begin

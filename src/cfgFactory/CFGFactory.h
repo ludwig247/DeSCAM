@@ -14,8 +14,11 @@
 
 #include "CfgBlock.h"
 #include "PrintStmt.h"
+#include "FindDataFlow.h"
 
 #include "Module.h"
+
+#include "IFindDataFlowFactory.h"
 
 
 namespace DESCAM {
@@ -26,8 +29,8 @@ namespace DESCAM {
      */
     class CFGFactory {
     public:
-        CFGFactory(clang::CXXMethodDecl *, clang::CompilerInstance &ci, Module *module, bool sourceModule = false);
-        CFGFactory(const clang::FunctionDecl  * , clang::CompilerInstance &ci, Module *module, bool sourceModule = false);
+        CFGFactory(clang::CXXMethodDecl *, clang::CompilerInstance *ci, Module *module, IFindDataFlowFactory * find_data_flow_factory,  bool sourceModule = false);
+        CFGFactory(const clang::FunctionDecl  *, clang::CompilerInstance *ci, Module *module, IFindDataFlowFactory * find_data_flow_factory, bool sourceModule = false);
         ~CFGFactory() = default;
 
         const std::map<int, CfgBlock *> &getControlFlowMap() const;
@@ -48,9 +51,10 @@ namespace DESCAM {
         //Members
         clang::CXXMethodDecl *methodDecl;
         clang::CFG *clangCFG;
-        clang::CompilerInstance &ci;
+        clang::CompilerInstance *ci;
         DESCAM::Module *module;
         bool sourceModule;
+        IFindDataFlowFactory * find_data_flow_factory_;
 
         //Map
         std::map<int, int> entryMap; //! Contains an entry with <CFGBlockID,SusCFGBlockID>; If a block is split up it point to the first new block

@@ -2,7 +2,7 @@ project(PrintITL_Test_Run CXX)
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_executable(PrintITL_Test_Run tests.cpp TestCases/ModulesTernary.h)
+add_executable(PrintITL_Test_Run tests.cpp)
 target_compile_options(PrintITL_Test_Run PRIVATE -fPIC -O2 )
 
 #TODO: factory should not be included
@@ -24,17 +24,17 @@ endforeach()
 string(REGEX REPLACE "^;" "" INCLUDE_HEADER ${INCLUDE_HEADER})
 configure_file (
         "${CMAKE_SOURCE_DIR}/example/add_example/templates/tests.h.in"
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests.list"
+        "${CMAKE_SOURCE_DIR}/tests/Print_ITL_Tests/tests.list"
 )
 
-file(GLOB FUNC_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesTernary/*.h"
-                     "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModuleArrays_new/*.h"
-                     "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModuleStateNames/*.h"
-                     "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesBasic/*.h"
-                     "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesMasterSlave_new/*.h"
-                     "${CMAKE_CURRENT_SOURCE_DIR}/TestCases/ModulesGlobal/*.h"
+file(GLOB FUNC_TESTS "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesTernary/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModuleArrays_new/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModuleStateNames/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesBasic/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesMasterSlave_new/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesGlobal/*.h"
         )
 #message(STATUS "${INCLUDE_HEADER}")
-list(REMOVE_ITEM FUNC_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/TestCases/Types.h)
+list(REMOVE_ITEM FUNC_TESTS ${CMAKE_SOURCE_DIR}/test/TestCases/Types.h)
 string(REPLACE ";" "\n" FUNC_TESTS "${FUNC_TESTS}")
 file(WRITE functionality_tests.list "${FUNC_TESTS}")

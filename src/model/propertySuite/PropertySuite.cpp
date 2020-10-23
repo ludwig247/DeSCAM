@@ -140,7 +140,6 @@ namespace DESCAM {
     }
 
     std::shared_ptr<PropertyMacro> PropertySuite::findSignal(Variable * var) const {
-
         for (auto visibleRegister : visibleRegisters) {
             if (var == visibleRegister->getVariable()) {
                 return visibleRegister;
@@ -208,14 +207,39 @@ namespace DESCAM {
 
     void PropertySuite::addProperty(std::shared_ptr<Property> property) {
         this->propertyList.push_back(property);
+
+        if (property->getOperation()->IsWait()) {
+            this->waitPropertyList.push_back(property);
+        } else {
+            this->operationPropertyList.push_back(property);
+        }
+
         std::sort(propertyList.begin(), propertyList.end(), [](std::shared_ptr<Property> a, std::shared_ptr<Property> b){return a->getName() < b->getName();});
+        std::sort(operationPropertyList.begin(), operationPropertyList.end(), [](std::shared_ptr<Property> a, std::shared_ptr<Property> b){return a->getName() < b->getName();});
+        std::sort(waitPropertyList.begin(), waitPropertyList.end(), [](std::shared_ptr<Property> a, std::shared_ptr<Property> b){return a->getName() < b->getName();});
     }
 
     const std::vector<std::shared_ptr<Property>> &PropertySuite::getProperties() const {
         return propertyList;
     }
 
-    // ------------------------------------------------------------------------------
+    const std::vector<std::shared_ptr<Property>> &PropertySuite::getOperationProperties() const {
+        return operationPropertyList;
+    }
+
+    const std::vector<std::shared_ptr<Property>> &PropertySuite::getWaitProperties() const {
+        return waitPropertyList;
+    }
+bool PropertySuite::hasSignal(Variable *var) const {
+  for (auto visibleRegister : visibleRegisters) {
+    if (var == visibleRegister->getVariable()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ------------------------------------------------------------------------------
     //                                StateMap
     // ------------------------------------------------------------------------------
 /*

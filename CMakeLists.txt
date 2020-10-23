@@ -35,7 +35,7 @@ execute_process(
 )
 
 
-# Detele std::gets line from systemc because it is not supported in c++11 and newer
+# Delete std::gets line from systemc because it is not supported in c++11 and newer
 execute_process(
         COMMAND sed -i "s@using\ std::gets;@//using\ //std::gets;@g" ${CMAKE_CURRENT_SOURCE_DIR}/install/tmp/systemc-2.3.1/src/systemc.h
 )
@@ -122,6 +122,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model/propertySuite)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/tests/)
+include_directories(${CMAKE_SOURCE_DIR}/tests/GMock_Test/tests/mocks/modelFactory)
 
 add_subdirectory(src)
 add_subdirectory(example)

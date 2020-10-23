@@ -1,0 +1,90 @@
+macro boolean IR_SYSTEM (unsigned instr_imem, opcode, func12) :=
+        instr_imem[6:0] == opcode &&    
+        instr_imem[19:7] == 13'd0 && 
+        instr_imem[31:20] == func12                     
+end macro;
+
+macro property instr_sys (unsigned opcode, func12) :=
+disable iff: !rst_ni;
+    dependencies:
+        debug_ebreak,
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode + 1,
+        t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+
+        regFile_at_t_decode = id_stage_i/registers_i/riscv_register_file_i/mem @ t_decode;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_SYSTEM (instr_imem_at_t_fetch, opcode, func12);
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+        
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+        at t_decode: csr_save_id == 1'b1;
+        at t_decode: csr_save_cause == 1'b1;
+        at t_decode: (func12 == 12'd0 ? (csr_cause == riscv_defines::EXC_CAUSE_ECALL_UMODE || csr_cause == riscv_defines::EXC_CAUSE_ECALL_MMODE) : csr_cause == riscv_defines::EXC_CAUSE_BREAKPOINT);
+
+        //ID to EX
+        at t_execute: instr_req_o;
+        at t_execute: instr_addr_o == (instr_addr_at_t_fetch + 32'd8)[31:0];
+        at t_execute: !data_req_o;
+        at t_execute: foreach r in 0..31: REGISTER(r) == regFile_at_t_decode[r]; end foreach;
+        
+        at t_execute: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_execute: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+
+        at t_execute: is_decoding == 1'b0;
+        at t_execute: halt_if == 1'b1;
+        at t_execute: id_valid == 1'b0;
+
+        //EX to WB
+        at t_writeb: is_decoding == 1'b0;
+        at t_writeb: halt_if == 1'b1;
+        at t_writeb: id_valid == 1'b0;
+        at t_writeb: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+
+        right_hook: t_execute;
+end macro;
+
+property instr_ecall;
+    instr_sys(7'b1110011, 12'd0);
+end property;
+
+property instr_ebreak;
+    instr_sys(7'b1110011, 12'd1);
+end property;
+

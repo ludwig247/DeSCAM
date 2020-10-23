@@ -90,8 +90,6 @@ struct Bus : public sc_module {
                 resp.data = 0;
             }
             master_out->write(resp,"master_out");
-
-            wait(SC_ZERO_TIME);
         }
     }
 };
