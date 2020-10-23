@@ -16,14 +16,14 @@ port(
 end TestBasic20;
 
 architecture TestBasic20_arch of TestBasic20 is
-	signal section_signal: Sections;
+	signal phase_signal: Phases;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			section_signal <= SECTION_A;
+			phase_signal <= SECTION_A;
 			b_out_notify <= true;
 		else
 			 -- FILL OUT HERE;

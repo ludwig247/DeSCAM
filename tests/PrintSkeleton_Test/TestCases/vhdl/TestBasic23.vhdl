@@ -18,7 +18,7 @@ port(
 end TestBasic23;
 
 architecture TestBasic23_arch of TestBasic23 is
-	signal section_signal: Sections;
+	signal phase_signal: Phases;
 	signal val_signed_signal: signed(31 downto 0);
 	signal val_unsigned_signal: unsigned (31 downto 0);
 
@@ -27,7 +27,7 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			section_signal <= SECTION_A;
+			phase_signal <= SECTION_A;
 			val_signed_signal <= to_signed(-7, 32);
 			val_unsigned_signal <= to_unsigned(13, 32);
 			b_out_notify <= true;

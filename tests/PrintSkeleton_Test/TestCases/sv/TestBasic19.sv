@@ -10,12 +10,12 @@ module TestBasic19 (
 	input CompoundType m_in
 	);
 
-	Sections section_signal;
+	Phases phase_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			section_signal <= section_a;
+			phase_signal <= section_a;
 			b_out_notify <= 1'b1;
 		end else begin
 				// FILL OUT HERE

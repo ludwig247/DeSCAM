@@ -1,0 +1,177 @@
+property reset;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    freeze:
+        boot_addr = { boot_addr_i[31:8], 8'h80 }@t+1;
+    assume:
+        reset_sequence;
+        during[t,t+2]: rst_ni;
+    prove:
+        at t:       !instr_req_o;
+        during[t, t+2]:       !data_req_o;
+        during[t+1, t+2]:     instr_req_o;
+        at t+1:     instr_addr_o == { boot_addr[31:8], 8'h80 };
+        at t+2:     conceptual_state;
+        at t+2:     id_stage_i/controller_i/ctrl_fsm_cs == FIRST_FETCH;
+        at t+2:     instr_addr_o == { boot_addr[31:8], 8'h80 } + 4;
+        at t+2:     pc_if == { boot_addr[31:8], 8'h80 };
+        at t+2:     foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == 0; end foreach;
+        at t+3:     foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == 0; end foreach;
+
+right_hook: t+2;
+end property;
+
+property instr_SB;
+    instr_ST(3'h0);
+end property;
+
+property instr_SH;
+    instr_ST(3'h1);
+end property;
+
+property instr_SW;
+    instr_ST(3'h2);
+end property;
+
+property instr_LB;
+    instr_LD(3'h0);
+end property;
+
+property instr_LH;
+    instr_LD(3'h1);
+end property;
+
+property instr_LW;
+    instr_LD(3'h2);
+end property;
+
+property instr_LBU;
+    instr_LD(3'h4);
+end property;
+
+property instr_LHU;
+    instr_LD(3'h5);
+end property;
+
+property instr_BEQ_taken;
+    instr_branch_taken(3'h0);
+end property;
+
+property instr_BNE_taken;
+    instr_branch_taken(3'h1);
+end property;
+
+property instr_BLT_taken;
+    instr_branch_taken(3'h4);
+end property;
+
+property instr_BGE_taken;
+    instr_branch_taken(3'h5);
+end property;
+
+property instr_BLTU_taken;
+    instr_branch_taken(3'h6);
+end property;
+
+property instr_BGEU_taken;
+    instr_branch_taken(3'h7);
+end property;
+
+property instr_BEQ_not_taken;
+    instr_branch_not_taken(3'h0);
+end property;
+
+property instr_BNE_not_taken;
+    instr_branch_not_taken(3'h1);
+end property;
+
+property instr_BLT_not_taken;
+    instr_branch_not_taken(3'h4);
+end property;
+
+property instr_BGE_not_taken;
+    instr_branch_not_taken(3'h5);
+end property;
+
+property instr_BLTU_not_taken;
+    instr_branch_not_taken(3'h6);
+end property;
+
+property instr_BGEU_not_taken;
+    instr_branch_not_taken(3'h7);
+end property;
+
+property instr_ADDI;
+    instr_ALU(3'h0,0,0, 7'h13);
+end property;
+
+property instr_SLTI;
+    instr_ALU(3'h2,0,0, 7'h13);
+end property;
+
+property instr_SLTIU;
+    instr_ALU(3'h3,0,0, 7'h13);
+end property;
+
+property instr_XORI;
+    instr_ALU(3'h4,0,0, 7'h13);
+end property;
+
+property instr_ORI;
+    instr_ALU(3'h6,0,0, 7'h13);
+end property;
+
+property instr_ANDI;
+    instr_ALU(3'h7,0,0, 7'h13);
+end property;
+
+property instr_SLLI;
+    instr_ALU(3'h1, 7'h0, 1, 7'h13);
+end property;
+
+property instr_SRLI;
+    instr_ALU(3'h5, 7'h0, 1, 7'h13);
+end property;
+
+property instr_SRAI;
+    instr_ALU(3'h5, 7'h20, 1, 7'h13);
+end property;
+
+property instr_ADD;
+    instr_ALU(3'h0, 7'h0, 2, 7'h33);
+end property;
+
+property instr_SUB;
+    instr_ALU(3'h0, 7'h20, 2, 7'h33);
+end property;
+
+property instr_SLL;
+    instr_ALU(3'h1, 7'h0, 2, 7'h33);
+end property;
+
+property instr_SLT;
+    instr_ALU(3'h2, 7'h0, 2, 7'h33);
+end property;
+
+property instr_SLTU;
+    instr_ALU(3'h3, 7'h0, 2, 7'h33);
+end property;
+
+property instr_XOR;
+    instr_ALU(3'h4, 7'h0, 2, 7'h33);
+end property;
+
+property instr_SRL;
+    instr_ALU(3'h5, 7'h0, 2, 7'h33);
+end property;
+
+property instr_SRA;
+    instr_ALU(3'h5, 7'h20, 2, 7'h33);
+end property;
+
+property instr_OR;
+    instr_ALU(3'h6, 7'h0, 2, 7'h33);
+end property;
+
+property instr_AND;
+    instr_ALU(3'h7, 7'h0, 2, 7'h33);
+end property;
