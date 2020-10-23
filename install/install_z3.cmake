@@ -9,7 +9,7 @@ else ()
     include(ExternalProject)
     ExternalProject_add(Z3-${Z3_VERSION}
             # Location for external project with standard folder structure. Distinct by version
-            PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/z3/${Z3_VERSION}
+            PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/z3/${Z3_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
             GIT_REPOSITORY https://github.com/Z3Prover/z3.git
             GIT_TAG z3-${Z3_VERSION}

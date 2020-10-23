@@ -46,6 +46,9 @@ message(STATUS "Cmake command: ${CMAKE_COMMAND}")
 #        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
 #)
 
+set(CMAKE_EXTERNAL_PROJECT_DIR ${SCAM_SOURCE_DIR}/3rdParty)
+file(MAKE_DIRECTORY ${CMAKE_EXTERNAL_PROJECT_DIR})
+
 #################################
 ## Z3
 #################################
@@ -126,15 +129,10 @@ add_subdirectory(tests)
 add_subdirectory(doc)
 
 
-add_custom_target(SCAM-STABLE DEPENDS LLVM-${LLVM_STABLE} SYSTEMC-${SYSTEMC_STABLE} GTEST-${GTEST_STABLE} Z3-${Z3_STABLE})
-add_custom_target(SCAM-DEV DEPENDS LLVM-${LLVM_DEV} SYSTEMC-${SYSTEMC_DEV} GTEST-${GTEST_DEV} Z3-${Z3_DEV})
-
-
-#FIXME The naming of this target seems incorrect / SCAM <-> DESCAM. Maybe This should just be called 'install'?
-add_custom_command(TARGET SCAM-STABLE
-        POST_BUILD
-        COMMAND cmake --build ${CMAKE_SOURCE_DIR}/build/ --target DESCAM -- -j 4)
-
-add_custom_command(TARGET SCAM-DEV
-        POST_BUILD
-        COMMAND cmake --build ${CMAKE_SOURCE_DIR}/build/ --target DESCAM -- -j 4)
+include(${PROJECT_SOURCE_DIR}/install/utils.cmake)
+blue_green_deployment(
+        DESCAM
+        GMock_Test
+        PrintITL_Test_Run
+        PrintSkeleton_Test_Run
+)

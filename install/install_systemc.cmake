@@ -14,7 +14,7 @@ else ()
     include(ExternalProject)
     ExternalProject_add(SYSTEMC-${SYSTEMC_VERSION}
             # Location for external project with standard folder structure. Distinct by version
-            PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/systemc/${SYSTEMC_VERSION}
+            PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/systemc/${SYSTEMC_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
             GIT_REPOSITORY https://github.com/accellera-official/systemc.git
             GIT_TAG ${SYSTEMC_VERSION}

@@ -13,3 +13,4 @@ target_link_libraries(PrintITL_Test_Run PRIVATE parser)
 
 target_link_libraries(PrintITL_Test_Run PRIVATE ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgtest_main.a pthread)
 
+

@@ -11,7 +11,7 @@ else ()
         include(ExternalProject)
         ExternalProject_add(LLVM-${LLVM_VERSION}
                 # Location for external project with standard folder structure. Distinct by version
-                PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}
+                PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}
                 # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
                 GIT_REPOSITORY https://github.com/llvm/llvm-project.git
                 GIT_TAG llvmorg-${LLVM_VERSION}
@@ -43,8 +43,8 @@ else ()
                 COMMENT "Enabling RTTI for 'LLVM' ${LLVM_VERSION}"
                 # Insert RTTI requirement into CMakeLists.txt
                 # FIXME This inserts the RTTI repeatedly. Check if it's already in the file.
-                COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt > tmp
-                COMMAND mv tmp ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt
+                COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt > tmp
+                COMMAND mv tmp ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt
                 )
         ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} RTTI)
 

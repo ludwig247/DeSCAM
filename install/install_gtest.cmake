@@ -10,7 +10,7 @@ else ()
 
     ExternalProject_add(GTEST-${GTEST_VERSION}
             # Location for external project with standard folder structure. Distinct by version
-            PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/googletest/${GTEST_VERSION}
+            PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/googletest/${GTEST_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
             GIT_REPOSITORY https://github.com/google/googletest.git
             GIT_TAG release-${GTEST_VERSION}
