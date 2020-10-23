@@ -20,6 +20,7 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
                                 clang::CompilerInstance *ci,
                                 Module *module,
                                 Model *model) {
+  std::cout << "TEST::setup\n";
   assert(record_decl);
   if (record_decl_ == record_decl) {
     return true;
@@ -64,9 +65,16 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
     return success;
   }
 }
-std::map<int, DESCAM::CfgNode *> DESCAM::FindProcess::getCfgArg() {
+std::map<int, DESCAM::CfgNode *> DESCAM::FindProcess::getCfgArg() const {
+  std::cout << "TEST::getCfgArg\n";
+  std::cout << " | Size:" << cfg_arg_.size() << "\n";
+  for (auto node:cfg_arg_) {
+    std::cout << " | | Int:" << node.first << " NodeName:" << node.second->getName() << " Stmt:"
+              << node.second->print();
+  }
   return this->cfg_arg_;
 }
-std::shared_ptr<DESCAM::PropertySuite> DESCAM::FindProcess::getPropertySuite() {
+std::shared_ptr<DESCAM::PropertySuite> DESCAM::FindProcess::getPropertySuite() const {
+  std::cout << "TEST::getPropertySuite Name:" << property_suite_->getName() << "\n";
   return this->property_suite_;
 }

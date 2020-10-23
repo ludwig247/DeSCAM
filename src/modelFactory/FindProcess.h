@@ -33,8 +33,8 @@ class FindProcess : public IFindProcess {
 
   bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module, Model *model) override;
   //Getter
-  std::map<int, DESCAM::CfgNode *> getCfgArg() override;
-  std::shared_ptr<PropertySuite> getPropertySuite() override;
+  std::map<int, DESCAM::CfgNode *> getCfgArg() const override;
+  std::shared_ptr<PropertySuite> getPropertySuite() const override;
 
  private:
   clang::CXXRecordDecl *record_decl_;

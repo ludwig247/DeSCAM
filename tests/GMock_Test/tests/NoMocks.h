@@ -41,7 +41,7 @@ TEST(TestCase1, no_mock) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, no_mock) /* NOLINT */{
+TEST(DISABLED_TestCase2, no_mock) /* NOLINT */{
   DataTypes::reset();
 
   //Compositional root
@@ -75,7 +75,7 @@ TEST(TestCase2, no_mock) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, no_mock) /* NOLINT */{
+TEST(DISABLED_TestCase3, no_mock) /* NOLINT */{
   DataTypes::reset();
 
   //Compositional root

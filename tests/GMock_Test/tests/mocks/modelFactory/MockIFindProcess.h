@@ -9,6 +9,7 @@
 #include <gmock/gmock.h>
 
 namespace DESCAM {
+namespace MOCK {
 
 /**
  * TODO Comment
@@ -16,16 +17,16 @@ namespace DESCAM {
 class MockIFindProcess : public IFindProcess {
  public:
 
-  MOCK_METHOD(bool, setup, (clang::CXXRecordDecl * recordDecl), (override));
-  //Getter
-  MOCK_METHOD((const std::map<std::string, std::pair<clang::CXXMethodDecl *, PROCESS_TYPE>> &),
-              getProcessMap,
-              (),
+  MOCK_METHOD(bool,
+              setup,
+              (clang::CXXRecordDecl * recordDecl, clang::CompilerInstance * ci, Module * module, Model * model),
               (override));
-  MOCK_METHOD(bool, isValidProcess, (), (const, override));
-  MOCK_METHOD((clang::CXXMethodDecl * ), getProcess, (), (const, override));
+  //Getter
+  MOCK_METHOD((std::map<int, DESCAM::CfgNode *>), getCfgArg, (), (const, override));
+  MOCK_METHOD((std::shared_ptr<PropertySuite>), getPropertySuite, (), (const, override));
 
 };
+}
 }
 
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MOCKS_MODELFACTORY_MOCKIFINDPROCESS_H_

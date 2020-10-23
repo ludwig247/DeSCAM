@@ -23,8 +23,8 @@ class IFindProcess {
   virtual ~IFindProcess() = default;
 
   virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci, Module *module, Model *model) = 0;
-  virtual std::map<int, DESCAM::CfgNode *> getCfgArg() = 0;
-  virtual std::shared_ptr<PropertySuite> getPropertySuite() = 0;
+  virtual std::map<int, DESCAM::CfgNode *> getCfgArg() const = 0;
+  virtual std::shared_ptr<PropertySuite> getPropertySuite() const = 0;
 };
 }
 
