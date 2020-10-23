@@ -68,15 +68,13 @@ TEST(DISABLED_TestCase1, FindProcess) /* NOLINT*/{
         auto vars = find_variables->getVariableMap();
         auto var = vars.find("var")->second;
 
-        auto in_port_map = find_ports->getInPortMap();
-        auto out_port_map = find_ports->getMasterOutPortMap();
+        auto port_map = find_ports->getPortMap();
 
-        auto b_in = in_port_map.find("b_in");
-        auto m_out = out_port_map.find("m_out");
+        auto b_in = port_map.find("b_in");
+        auto m_out = port_map.find("m_out");
 
         node1.setStmt(new Assignment(new VariableOperand(var), new IntegerValue(1337)));
-
-        //node3.setStmt(new Read(b_in,var));
+        node3.setStmt(new Read(b_in->second,var));
 
         return getCfgArg;
       }));

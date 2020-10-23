@@ -6,166 +6,167 @@
 #include "Logger/Logger.h"
 
 namespace DESCAM {
-/*!
-* \brief Methods that checks whether a subString is contained in a given String
- */
-bool containsSubstring(const std::string &full_string, const std::string &sub_string) {
-  if (full_string.empty()) {
-    return false;
-  }
-  if (full_string.find(sub_string) < full_string.size()) {
-    return true;
-  }
-  return false;
-}
 
 //Constructor
-FindPorts::FindPorts(IFindNewDatatype *findNewDatatype) :
+FindPorts::FindPorts(IFindNewDatatype *find_new_datatype) :
     record_decl_(nullptr),
-    pass_(0),
-    ci_(nullptr),
-    find_new_datatype_(findNewDatatype) {}
+    find_new_datatype_(find_new_datatype){}
 
-/*!
- * \brief Visits every FieldDecl and check whether a fieldDecl represents a port
- *
- * Ports are:
- * sc_port<rendezvous_out_if<TYPE> >
- * sc_port<rendezvous_in_if<TYPE> >
- * sc_port<shared_out_if<TYPE> >
- * sc_port<shared_in_if<TYPE> >
- */
-bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
-  clang::QualType qualType = fieldDecl->getType();
-  //Sync: find by name, doesn't have a parameter
-  //TODO: What's the templateClass used for? Line of outdated legacy code? Just checking for dyn_cast?
-  if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(qualType.getTypePtr())) {
-    //In order to have a port there needs to be a qualType with 3 parameters
-    //Disassemble the template
-    port_templates_.clear();
-    this->recursiveTemplateVisitor(qualType);
-    //Determine type of port:
-    if (port_templates_.size() == 2) {
-      //if (port_templates_.at(0) == "sc_port" && port_templates_.at(1) == "rendezvous_out_if") {
-      if (port_templates_.at(0) == "blocking_out") {
-        this->out_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else if (port_templates_.at(0) == "blocking_in") {
-        this->in_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else if (port_templates_.at(0) == "master_out") {
-        this->master_out_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else if (port_templates_.at(0) == "master_in") {
-        this->master_in_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else if (port_templates_.at(0) == "slave_in") {
-        this->slave_in_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else if (port_templates_.at(0) == "slave_out") {
-        this->slave_out_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else if (port_templates_.at(0) == "shared_in") {
-        this->in_shared_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-
-      } else if (port_templates_.at(0) == "shared_out") {
-        this->out_shared_port_map_.insert(std::make_pair(fieldDecl->getNameAsString(), port_templates_.at(1)));
-      } else {
-        TERMINATE("Unknown interface: " + port_templates_.at(0));
-      }
-      this->port_location_info_map_.insert(std::make_pair(fieldDecl->getNameAsString(),
-                                                          DESCAM::GlobalUtilities::getLocationInfo<clang::FieldDecl>(
-                                                              fieldDecl, ci_)));
-    }
-  }
-  return true;
-}
-
-void FindPorts::recursiveTemplateVisitor(clang::QualType qual_type) {
-  //Is there another template class?
-  if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
-      qual_type.getTypePtr())) {
-
-    //Get name of the template class
-    std::string templateName;
-    llvm::raw_string_ostream templateNameStream(templateName);
-    //Dump name into stream
-    templateClass->getTemplateName().dump(templateNameStream);
-    //Get string from stream and add to vector
-    this->port_templates_.push_back(templateNameStream.str());
-    for (int i = 0; i < templateClass->getNumArgs(); i++) {
-      clang::TemplateArgument templateArgument = templateClass->getArg(i);
-      if (templateArgument.getKind() == clang::TemplateArgument::ArgKind::Expression) {
-        clang::Expr *expr = templateArgument.getAsExpr();
-        if (const clang::IntegerLiteral *value = llvm::dyn_cast<clang::IntegerLiteral>(expr)) {
-          //if(this->port_templates_.at(0) != "sc_uint") TERMINATE("Type: " + this->port_templates_.at(0) + " is not allowed");
-          this->port_templates_.push_back(std::to_string(value->getValue().getSExtValue()));
-        } else TERMINATE("Expr is not an integer");
-      } else {
-        this->recursiveTemplateVisitor(templateArgument.getAsType());
-      }
-    }
-  }
-    //Type of port int, bool, struct ...
-  else if (qual_type.isCanonical()) {
-    this->port_templates_.push_back(find_new_datatype_->getTypeName(qual_type));
-  }
-}
-
-const std::map<std::string, std::string> &FindPorts::getInPortMap() const {
-  return in_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getOutPortMap() const {
-  return out_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getInSharedPortMap() const {
-  return in_shared_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getOutSharedPortMap() const {
-  return out_shared_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getSlaveInPortMap() const {
-  return slave_in_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getSlaveOutPortMap() const {
-  return slave_out_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getMasterInPortMap() const {
-  return master_in_port_map_;
-}
-
-const std::map<std::string, std::string> &FindPorts::getMasterOutPortMap() const {
-  return master_out_port_map_;
-}
-
-const std::map<std::string, DESCAM::LocationInfo> &FindPorts::getLocationInfoMap() const {
-  return this->port_location_info_map_;
-}
-bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci) {
+bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module) {
   assert(record_decl);
   assert(ci);
-  if (record_decl == record_decl_ && ci == ci_) {
+  assert(module);
+  if (record_decl == record_decl_) {
     return true;
   } else {
-    pass_ = 0;
-    ci_ = ci;
     record_decl_ = record_decl;
-    this->clear();
-    return TraverseDecl(record_decl);
+
+    bool success = true;
+    GetClangPorts get_clang_ports(success, find_new_datatype_, ci, record_decl);
+    if(!success)return success;
+
+    auto portsLocationMap = get_clang_ports.getLocationInfoMap();
+    //Add Ports -> requires Name, Interface and DataType
+    //Rendezvous
+    //Input ports
+    for (auto &port: get_clang_ports.getInPortMap()) {
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("blocking", "in"))
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Port *inPort = nullptr;
+      DESCAM_ASSERT (if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                       inPort = new Port(port.first, interface,
+                                         DataTypes::getDataType(
+                                             port.second),
+                                         portsLocationMap[port.first]);
+                     else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                         port_map.insert(std::make_pair(port.first,inPort)))
+    }
+    //Output ports
+    for (auto &port: get_clang_ports.getOutPortMap()) {
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("blocking", "out"))
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Port *outPort = nullptr;
+      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                      outPort = new Port(port.first, interface,
+                                         DataTypes::getDataType(
+                                             port.second),
+                                         portsLocationMap[port.first]);
+                    else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,outPort)))
+    }
+
+    //AlwaysReady
+    //Input ports
+    for (auto &port: get_clang_ports.getMasterInPortMap()) {
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("master", "in"))
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Port *inPort = nullptr;
+      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                      inPort = new Port(port.first, interface,
+                                        DataTypes::getDataType(
+                                            port.second),
+                                        portsLocationMap[port.first]);
+                    else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,inPort)))
+
+    }
+    //Output ports
+    for (auto &port: get_clang_ports.getMasterOutPortMap()) {
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("master", "out"))
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Port *outPort = nullptr;
+      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                      outPort = new Port(port.first, interface,
+                                         DataTypes::getDataType(
+                                             port.second),
+                                         portsLocationMap[port.first]);
+                    else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,outPort)))
+    }
+
+    //Input ports
+    for (auto &port: get_clang_ports.getSlaveInPortMap()) {
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("slave", "in"))
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Port *inPort = nullptr;
+      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                      inPort = new Port(port.first, interface,
+                                        DataTypes::getDataType(
+                                            port.second),
+                                        portsLocationMap[port.first]);
+                    else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,inPort)))
+
+    }
+    //Output ports
+    for (auto &port: get_clang_ports.getSlaveOutPortMap()) {
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("slave", "out"))
+      Port *outPort = nullptr;
+      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
+                      outPort = new Port(port.first, interface,
+                                         DataTypes::getDataType(
+                                             port.second),
+                                         portsLocationMap[port.first]);
+                    else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,outPort)))
+    }
+
+    //Shared ports
+    //Input ports
+    for (auto &port: get_clang_ports.getInSharedPortMap()) {
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE("No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("shared", "in"))
+      Port *inPort = nullptr;
+      DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,inPort)))
+
+    }
+    //Output ports
+    for (auto &port: get_clang_ports.getOutSharedPortMap()) {
+      if (DataTypes::isLocalDataType(port.second, module->getName())) {
+        TERMINATE(
+            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
+      }
+      Interface *interface = nullptr;
+      DESCAM_ASSERT(interface = new Interface("shared", "out"))
+      Port *inPort = nullptr;
+      DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
+                        port_map.insert(std::make_pair(port.first,inPort)))
+    }
+
+    return success;
   }
 }
-
-void FindPorts::clear() {
-  this->port_location_info_map_.clear();
-  this->in_port_map_.clear();
-  this->out_port_map_.clear();
-  this->master_in_port_map_.clear();
-  this->master_out_port_map_.clear();
-  this->slave_in_port_map_.clear();
-  this->slave_out_port_map_.clear();
-  this->out_shared_port_map_.clear();
-  this->in_shared_port_map_.clear();
-  this->port_templates_.clear();
+std::map<std::string, Port *> FindPorts::getPortMap() const{
+  return this->port_map;
 }
 
 }

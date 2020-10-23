@@ -32,7 +32,8 @@ add_library (modelFactory SHARED
 		GetClangVariables.cpp
 		GetClangVariables.h
 		GetClangFunctions.cpp
-		GetClangProcess.cpp)
+		GetClangProcess.cpp
+		GetClangPorts.cpp)
 
 
 target_link_libraries(modelFactory propertyFactory)
