@@ -7,7 +7,7 @@
 
 #include "systemc.h"
 #include "Interfaces.h"
-#include "CPU_Interfaces.h"
+#include "env/CPU_Interfaces.h"
 #include "Utilities.h"
 #include "Defines.h"
 

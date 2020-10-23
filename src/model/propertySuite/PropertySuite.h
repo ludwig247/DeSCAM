@@ -60,6 +60,8 @@ namespace DESCAM {
 
         std::shared_ptr<PropertyMacro> findSignal(Variable *var) const;
 
+        bool hasSignal(Variable *var) const;
+
         // Functions
         void addFunction(Function *function);
 

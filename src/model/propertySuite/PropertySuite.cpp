@@ -140,7 +140,6 @@ namespace DESCAM {
     }
 
     std::shared_ptr<PropertyMacro> PropertySuite::findSignal(Variable * var) const {
-
         for (auto visibleRegister : visibleRegisters) {
             if (var == visibleRegister->getVariable()) {
                 return visibleRegister;
@@ -231,8 +230,16 @@ namespace DESCAM {
     const std::vector<std::shared_ptr<Property>> &PropertySuite::getWaitProperties() const {
         return waitPropertyList;
     }
+bool PropertySuite::hasSignal(Variable *var) const {
+  for (auto visibleRegister : visibleRegisters) {
+    if (var == visibleRegister->getVariable()) {
+      return true;
+    }
+  }
+  return false;
+}
 
-    // ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
     //                                StateMap
     // ------------------------------------------------------------------------------
 /*

@@ -6,8 +6,9 @@
 #define RISCV_ISA_H_
 
 #include "systemc.h"
-#include "Interfaces.h"
-#include "CPU_Interfaces.h"
+//#include "Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
+#include "env/CPU_Interfaces.h"
 #include "../../RISCV_commons/Utilities.h"
 #include "../../RISCV_commons/Memory_Interfaces.h"
 
@@ -27,8 +28,6 @@ public:
             toMemoryPort("toMemoryPort"),
             toRegsPort("toRegsPort"),
             fromRegsPort("fromRegsPort"),
-            section(fetch),
-            nextsection(fetch),
             pcReg(0) {
         SC_THREAD(run);
     }
@@ -50,11 +49,11 @@ public:
     RegfileType regfile;
     
     // ISA sections
-    enum Sections {
-        fetch,              // fetch next instruction from memory
-        execute             // decode the fetched instruction and do all the manipulations till writing back to the register file
+    enum Phases {
+        fetch_PH,              // fetch next instruction from memory
+        execute_PH             // decode the fetched instruction and do all the manipulations till writing back to the register file
     };
-    Sections section, nextsection;
+    Phases phase, nextphase;
 
     // Other control signals:
     unsigned int encodedInstr;
@@ -95,33 +94,34 @@ public:
 
 void ISA::run() {
 
+    nextphase = Phases::fetch_PH;
     while (true) {
+        phase = nextphase;
+        // fetch next instruc   tion
+        if (phase == Phases::fetch_PH) {
 
-        // fetch next instruction 
-        if (section == Sections::fetch) {
             // Set up memory access
             memoryAccess.req = ME_RD;
             memoryAccess.mask = MT_W; // always for instructions
             memoryAccess.addrIn = pcReg;
             memoryAccess.dataIn = 0;    // not relevant
-            
+
             toMemoryPort->write(memoryAccess); //Send request to memory
-            
             fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
-            
+
             encodedInstr = fromMemoryData.loadedData;
 
 #if SCAM == 0
             // Terminate if: Addi $0,$0,0 (NOP) is read. Just for debug
-            if (fromMemoryData.loadedData == 0x13) {
+            if (fromMemoryData.loadedData == 0x100073) {
                 sc_stop();
-                wait(SC_ZERO_TIME);
+                wait(WAIT_TIME, SC_PS);
             }
 #endif
-            nextsection = Sections::execute;
+            nextphase = Phases::execute_PH;
         }
 
-        if (section == Sections::execute) {
+        else if (phase == Phases::execute_PH) {
 
 #ifdef LOGTOFILE
             fromRegsPort->read(regfile);
@@ -135,7 +135,7 @@ void ISA::run() {
                 //|  ID (RF_READ)   |        EX       |    ---------    |  WB (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->read(regfile); //Read register contents
+                fromRegsPort->master_read(regfile); //Read register contents
 
                 //Set-up operands for alu by reading from regfile
                 aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
@@ -150,7 +150,7 @@ void ISA::run() {
                 regfileWrite.dst = getRdAddr(encodedInstr);
                 regfileWrite.dstData = aluResult;
 
-                toRegsPort->write(regfileWrite); //Perform write back
+                toRegsPort->master_write(regfileWrite); //Perform write back
 
                 //Set-up PC
                 pcReg = pcReg + 4;
@@ -160,7 +160,7 @@ void ISA::run() {
                 //|  ID (RF_READ)   |        EX       |    ---------    |    ---------    |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->read(regfile); //Read register contents
+                fromRegsPort->master_read(regfile); //Read register contents
 
                 //Set-up operands for alu by reading from regfile
                 aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
@@ -179,7 +179,7 @@ void ISA::run() {
                 //|  ID (RF_READ)   |        EX       |       MEM       |    ---------    |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->read(regfile); //Read register contents
+                fromRegsPort->master_read(regfile); //Read register contents
 
                 //Set-up operands for alu by reading from regfile
                 aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
@@ -215,7 +215,7 @@ void ISA::run() {
                 regfileWrite.dst = getRdAddr(encodedInstr); //Compute destination
                 regfileWrite.dstData = getEncUALUresult(encodedInstr, pcReg);
 
-                toRegsPort->write(regfileWrite); //Perform write back
+                toRegsPort->master_write(regfileWrite); //Perform write back
 
                 //Set-up PC
                 pcReg = pcReg + 4;
@@ -229,7 +229,7 @@ void ISA::run() {
                 regfileWrite.dst = getRdAddr(encodedInstr);
                 regfileWrite.dstData = pcReg + 4; //Compute result
 
-                toRegsPort->write(regfileWrite); //Perform write back
+                toRegsPort->master_write(regfileWrite); //Perform write back
 
                 //Set-up PC
                 pcReg = pcReg + getImmediate(encodedInstr);
@@ -239,7 +239,8 @@ void ISA::run() {
                 //|  ID (RF_READ)   |        EX       |    ---------    |  WB (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->read(regfile); //Read register contents
+                fromRegsPort->master_read(regfile); //Read register contents
+
                 //Set-up operands for alu by reading from regfile
                 aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
                 aluOp2 = getImmediate(encodedInstr);
@@ -254,7 +255,7 @@ void ISA::run() {
                 regfileWrite.dst = getRdAddr(encodedInstr);
                 regfileWrite.dstData = aluResult; //Compute result
 
-                toRegsPort->write(regfileWrite); //Perform write back
+                toRegsPort->master_write(regfileWrite); //Perform write back
 
                 //Set-up PC
                 pcReg = pcReg + 4;
@@ -264,7 +265,7 @@ void ISA::run() {
                 //|  ID (RF_READ)   |        EX       |       MEM       |  ID (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->read(regfile); //Read register contents
+                fromRegsPort->master_read(regfile); //Read register contents
 
                 //Set-up operands for alu by reading from regfile
                 aluOp1 = readRegfile(getRs1Addr(encodedInstr), regfile);
@@ -293,7 +294,7 @@ void ISA::run() {
                 regfileWrite.dstData = fromMemoryData.loadedData;
 
                 //Perform write back
-                toRegsPort->write(regfileWrite);
+                toRegsPort->master_write(regfileWrite);
 
                 //Set-up PC
                 pcReg = pcReg + 4;
@@ -303,14 +304,14 @@ void ISA::run() {
                 //|  ID (RF_READ)   |    ---------    |    ---------    |  WB (RF_WRITE)  |//
                 /////////////////////////////////////////////////////////////////////////////
 
-                fromRegsPort->read(regfile); //Read register contents
+                fromRegsPort->master_read(regfile); //Read register contents
 
                 //Set up write back
                 regfileWrite.dst = getRdAddr(encodedInstr);
                 regfileWrite.dstData = pcReg + 4; //Compute result
 
                 //Perform write back
-                toRegsPort->write(regfileWrite);
+                toRegsPort->master_write(regfileWrite);
 
                 //Set-up PC
                 pcReg = readRegfile(getRs1Addr(encodedInstr), regfile) + getImmediate(encodedInstr);
@@ -322,15 +323,13 @@ void ISA::run() {
                 if (getInstrType(encodedInstr) == InstrType::INSTR_UNKNOWN) {
                     std::cout << "Unknown INST" << std::endl;
                     sc_stop();
-                    wait(SC_ZERO_TIME);
+                    wait(WAIT_TIME, SC_PS);
                 }
 #endif
             }
 
-            nextsection = Sections::fetch; // Fetch next instruction
+            nextphase = Phases::fetch_PH; // Fetch next instruction
         }
-
-        section = nextsection; // Set next section
     }
 }
 
@@ -474,9 +473,7 @@ InstrType ISA::getInstrType(unsigned int encodedInstr) const {
 unsigned int ISA::getRs1Addr(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_I ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_L ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
+        OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
         OPCODE_FIELD(encodedInstr) == OPCODE_S   ||
         OPCODE_FIELD(encodedInstr) == OPCODE_B) {
         return RS1_FIELD(encodedInstr);
@@ -499,11 +496,8 @@ unsigned int ISA::getRs2Addr(unsigned int encodedInstr) const {
 unsigned int ISA::getRdAddr(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_I ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_L ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_U1  ||
-        OPCODE_FIELD(encodedInstr) == OPCODE_U2  ||
+        OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
+        OPCODE_FIELD(encodedInstr) == OPCODE_U1  || OPCODE_FIELD(encodedInstr) == OPCODE_U2  ||
         OPCODE_FIELD(encodedInstr) == OPCODE_J) {
         return RD_FIELD(encodedInstr);
     } else {

@@ -15,11 +15,11 @@ struct marker_t {
 };
 
 struct Framer : public sc_module {
-    enum Sections {
+    enum Phases {
         INITIALISE, SEARCH, FIND_SYNC, SYNC, MISS
     };
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
     //Constructor
     SC_HAS_PROCESS(Framer);
 
@@ -30,9 +30,7 @@ struct Framer : public sc_module {
             oof("oof"),
             WORDS_IN_FRAME(64),
             frm_cnt(63),
-            FRM_PULSE_POS(0),
-            section(INITIALISE),
-            nextsection(INITIALISE) {
+            FRM_PULSE_POS(0) {
         SC_THREAD(fsm);
     }
 
@@ -58,45 +56,48 @@ struct Framer : public sc_module {
     bool is_align;
 
     void fsm() {
+        nextphase = INITIALISE;
         while (true) {
-            section = nextsection;
-            if (section == INITIALISE) {
+            phase = nextphase;
+            if (phase == INITIALISE) {
                 oof->set(true);
-                nextsection = SEARCH;
+                nextphase = SEARCH;
             }
 
-            if (section == SEARCH) {
+            else if (phase == SEARCH) {
                 //std::cout << "SEARCH" << std::endl;
-                newDataWord = data_word->nb_read(data_word_tmp);
+                wait(WAIT_TIME, SC_PS);//state
+                data_word->slave_read(data_word_tmp, newDataWord);
                 if (newDataWord) {
                     if (frm_cnt == FRM_PULSE_POS) {
-                        frame_pulse->write(true); //should set frm_pulse_notify active for 1 cycle (independent of frm_pulse_sync)
+                        frame_pulse->master_write(true); //should set frm_pulse_notify active for 1 cycle (independent of frm_pulse_sync)
                     }
                     if (data_word_tmp.isMarker) {
                         align = data_word_tmp.markerAlignment;
                         frm_cnt = 0; //the marker is defined to be the word 0 in the frame
-                        nextsection = FIND_SYNC;
+                        nextphase = FIND_SYNC;
                     } else {
                         ++frm_cnt;
                         frm_cnt = frm_cnt % WORDS_IN_FRAME;
                     }
                 }
             }
-            if (section == FIND_SYNC) {
+            else if (phase == FIND_SYNC) {
                 //std::cout << "FIND_SYNC" << std::endl;
-                newDataWord = data_word->nb_read(data_word_tmp);
+                wait(WAIT_TIME, SC_PS);//state
+                data_word->slave_read(data_word_tmp, newDataWord);
                 if (newDataWord) {
                     //Notify monitor for 1 clock cycle
                     if (frm_cnt == FRM_PULSE_POS) {
-                        frame_pulse->write(true);
+                        frame_pulse->master_write(true, "find_sync");
                     }
                     is_pos = ((frm_cnt + 1) % WORDS_IN_FRAME) == 0;
                     is_align = data_word_tmp.isMarker && align == data_word_tmp.markerAlignment;
                     if (is_pos) {
                         if (!is_align) {
-                            nextsection = SEARCH;
+                            nextphase = SEARCH;
                         } else {
-                            nextsection = SYNC;
+                            nextphase = SYNC;
                             oof->set(false);
                         }
                     }
@@ -105,49 +106,51 @@ struct Framer : public sc_module {
                     frm_cnt = frm_cnt % WORDS_IN_FRAME;
                 }
             }
-            if (section == SYNC) {
+            else if (phase == SYNC) {
                 //std::cout << "SYNC" << std::endl;
-                newDataWord = data_word->nb_read(data_word_tmp);
+                wait(WAIT_TIME, SC_PS);//state
+                data_word->slave_read(data_word_tmp, newDataWord);
                 if (newDataWord) {
 
                     if (frm_cnt == FRM_PULSE_POS) {
-                        frame_pulse->write(true);
+                        frame_pulse->master_write(true);
                     }
                     is_pos = ((frm_cnt + 1) % WORDS_IN_FRAME) == 0;
                     is_align = data_word_tmp.isMarker && align == data_word_tmp.markerAlignment;
                     if (is_pos) {
                         if (!is_align) {
-                            nextsection = MISS;
+                            nextphase = MISS;
                         } else {
-                            nextsection = SYNC;
+                            nextphase = SYNC;
                         }
                     }
                     ++frm_cnt; //update to point to match the current word id
                     frm_cnt = frm_cnt % WORDS_IN_FRAME;
                 }
             }
-            if (section == MISS) {
+            else if (phase == MISS) {
                 //std::cout << "MISS" << std::endl;
-                newDataWord = data_word->nb_read(data_word_tmp);
+                wait(WAIT_TIME, SC_PS);//state
+                data_word->slave_read(data_word_tmp, newDataWord);
                 if (newDataWord) {
                     if (frm_cnt == FRM_PULSE_POS) {
-                        frame_pulse->write(true);
+                        frame_pulse->master_write(true);
                     }
                     is_pos = ((frm_cnt + 1) % WORDS_IN_FRAME) == 0;
                     is_align = data_word_tmp.isMarker && align == data_word_tmp.markerAlignment;
                     if (is_pos) {
                         if (!is_align) {
                             oof->set(true);
-                            nextsection = SEARCH;
+                            nextphase = SEARCH;
                         } else {
-                            nextsection = SYNC;
+                            nextphase = SYNC;
                         }
                     }
                     ++frm_cnt; //update to point to match the current word id
                     frm_cnt = frm_cnt % WORDS_IN_FRAME;
                 }
             }
-            wait(SC_ZERO_TIME);
+            else{}
         }
     }
 
