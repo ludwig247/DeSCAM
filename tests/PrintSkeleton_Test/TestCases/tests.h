@@ -6,10 +6,6 @@
 #define SCAM_TESTS_H
 
 #include "ModuleGlobalLocal.h"
-//#include "ModulesBasic.h"
-//#include "ModuleArrays.h"
-//#include "ModuleFunctions.h"
-//#include "ModulesMasterSlave.h"
 
 
 #endif //SCAM_TESTS_H

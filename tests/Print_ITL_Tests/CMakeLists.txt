@@ -28,13 +28,13 @@ configure_file (
 )
 
 file(GLOB FUNC_TESTS "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesTernary/*.h"
-                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModuleArrays_new/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModuleArrays/*.h"
                      "${CMAKE_SOURCE_DIR}/tests/TestCases/ModuleStateNames/*.h"
                      "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesBasic/*.h"
-                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesMasterSlave_new/*.h"
+                     "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesMasterSlave/*.h"
                      "${CMAKE_SOURCE_DIR}/tests/TestCases/ModulesGlobal/*.h"
         )
-#message(STATUS "${INCLUDE_HEADER}")
+#message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
 list(REMOVE_ITEM FUNC_TESTS ${CMAKE_SOURCE_DIR}/test/TestCases/Types.h)
 string(REPLACE ";" "\n" FUNC_TESTS "${FUNC_TESTS}")
 file(WRITE functionality_tests.list "${FUNC_TESTS}")

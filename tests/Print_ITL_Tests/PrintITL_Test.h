@@ -184,7 +184,7 @@ class ITLTestExamples : public ITLTest {};
 
 class ITLTestFunctionality : public ITLTest {};
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 //        DISABLED_Examples,
         Examples,
         ITLTestExamples,
@@ -192,7 +192,7 @@ INSTANTIATE_TEST_CASE_P(
         ITLTest::PrintToStringParamName()
                 );
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
 //        DISABLED_Functionality,
         Functionality,
         ITLTestFunctionality,
