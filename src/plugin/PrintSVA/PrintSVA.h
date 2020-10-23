@@ -34,7 +34,7 @@ private:
 
     std::string globalFunctions();
 
-    std::string dataTypes();
+    std::string dataTypes(std::map<std::basic_string<char>, DataType *> dataTypes);
 
     std::string signals();
 
@@ -57,6 +57,12 @@ private:
     std::string tolower(std::string str);
 
     std::string macros();
+
+    std::string dataTypesEnum(std::map<std::basic_string<char>, DataType *> dataTypeMap);
+
+    std::string dataTypesStruct(std::map<std::basic_string<char>, DataType *> dataTypeMap);
+
+    std::string dataTypesArray(std::map<std::basic_string<char>, DataType *> dataTypeMap);
 };
 
 #endif //DESCAM_PRINTSVA_H

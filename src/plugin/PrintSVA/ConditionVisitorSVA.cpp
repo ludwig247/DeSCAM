@@ -7,7 +7,9 @@
 
 void DESCAM::ConditionVisitorSVA::visit(DESCAM::VariableOperand &node) {
     if (node.getVariable()->isSubVar() && node.getVariable()->getParent()->isArrayType()){
-        this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
+        //this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
+        this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
+        this->ss << "()";
     }else if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
         this->ss << "()";
