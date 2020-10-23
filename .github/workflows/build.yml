@@ -1,6 +1,9 @@
 name: DESCAM-BUILD
 
+<<<<<<< HEAD
 #on: [push, pull_request]
+=======
+>>>>>>> Create build.yml
 on:
   [push, pull_request]
 
