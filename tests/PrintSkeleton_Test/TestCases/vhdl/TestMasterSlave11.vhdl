@@ -10,14 +10,14 @@ port(
 	rst:		in std_logic;
 	s_in:		in signed(31 downto 0);
 	s_in_sync:		in bool;
-	s_out:		out signed(31 downto 0);
-	shared_in:		in bool
+	sh_in:		in bool;
+	sh_out:		out signed(31 downto 0)
 );
 end TestMasterSlave11;
 
 architecture TestMasterSlave11_arch of TestMasterSlave11 is
-	signal nextsection_signal: Sections;
-	signal section_signal: Sections;
+	signal nextphase_signal: Phases;
+	signal phase_signal: Phases;
 	signal val_signal: signed(31 downto 0);
 
 begin
@@ -25,8 +25,8 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nextsection_signal <= SECTION_A;
-			section_signal <= SECTION_A;
+			nextphase_signal <= SECTION_A;
+			phase_signal <= SECTION_A;
 			val_signal <= to_signed(0, 32);
 		else
 			 -- FILL OUT HERE;

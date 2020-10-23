@@ -1,0 +1,171 @@
+macro boolean branch_dec(unsigned instr_func3, Ra, Rb) :=
+    case(instr_func3)
+    3'h0: Ra == Rb;
+    3'h1: Ra != Rb;
+    3'h2: 0 ;
+    3'h3: 0;
+    3'h4: signed(Ra) < signed(Rb);
+    3'h5: signed(Ra) >= signed(Rb);
+    3'h6: Ra < Rb;
+    3'h7: Ra >= Rb;
+    default:    0;
+    endcase;
+end macro;
+
+macro alu_op_e branch_operator(unsigned instr_func3) :=
+    case(instr_func3)
+    3'h0: ALU_EQ;
+    3'h1: ALU_NE;
+    3'h2: ALU_ADD;
+    3'h3: ALU_ADD;
+    3'h4: ALU_LT;
+    3'h5: ALU_GE;
+    3'h6: ALU_LTU;
+    3'h7: ALU_GEU;
+    default:  ALU_ADD;
+    endcase;
+end macro;
+
+macro property instr_branch_taken (unsigned instr_func3):=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        Bimm3 = instr_rdata_i[7]@t_if,
+        Bimm1 = instr_rdata_i[11:8]@t_if,
+        Bimm2 = instr_rdata_i[30:25]@t_if,
+        Bimm4 = instr_rdata_i[31]@t_if,
+        Bimm = {Bimm4, Bimm3, Bimm2, Bimm1, 1'b0}@t_if,
+        opcode = instr_rdata_i[6:0]@t_if,
+        rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        rs2 = instr_rdata_i[24:20]@t_if,
+        imm = instr_rdata_i[31:20]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        instr_addr_at_t_wb = instr_addr_o@t_wb,
+        op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = id_stage_i/registers_i/rf_reg[rs2] @t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o;
+        at t_if:    !data_req_o;
+
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h63; //set opcode
+        at t_if:    instr_rdata_i[14:12] == instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[24:20] < 6; //r0 to r5
+        at t_id:    branch_dec(instr_func3, op1Data, op2Data);
+                              
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] == rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[31:20] == imm;
+
+        //ID output
+        at t_id:    alu_operator_ex == branch_operator(instr_func3);
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    alu_operand_b_ex == op2Data;
+
+        //EX output
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+        at t_id:    instr_req_o == 1;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_id:    data_req_o == 0;
+        //WB
+        at t_wb:    pc_mux_id == PC_JUMP;
+        at t_wb:    jump_target_ex == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+        at t_wb:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_wb:    instr_req_o;
+        at t_wb:    !data_req_o;
+        at t_wb:    instr_addr_o == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+        at t_wb+1:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_wb+1:    conceptual_state;
+        at t_wb+1:    instr_req_o;
+        at t_wb+1:    !data_req_o;
+        at t_wb+1:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_wb+1:    instr_addr_o == (instr_addr_at_t_wb == 32'hfffffffc ? 32'h0 : instr_addr_at_t_wb + 4);
+        at t_wb+2:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        
+        //PC
+        at t_wb:  pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+        at t_wb+1:  pc_if == unsigned(signed(PC_at_t_if) + signed(Bimm))[31:0];
+    right_hook: t_wb+1;
+end macro;
+
+macro property instr_branch_not_taken (unsigned instr_func3):=
+disable iff: !rst_ni;
+    dependencies: empty, instr_mem, bounded_data_gnt_wait, bounded_data_rvalid_wait;
+    for timepoints:
+        t_if = t,
+        t_id = t_if+1,
+        t_wb = t_id+1;
+    freeze:
+        Bimm3 = instr_rdata_i[7]@t_if,
+        Bimm1 = instr_rdata_i[11:8]@t_if,
+        Bimm2 = instr_rdata_i[30:25]@t_if,
+        Bimm4 = instr_rdata_i[31]@t_if,
+        Bimm = {Bimm4, Bimm3, Bimm2, Bimm1, 1'b0}@t_if,
+        opcode = instr_rdata_i[6:0]@t_if,
+        rd = instr_rdata_i[11:7]@t_if,
+        func3 = instr_rdata_i[14:12]@t_if,
+        rs1 = instr_rdata_i[19:15]@t_if,
+        rs2 = instr_rdata_i[24:20]@t_if,
+        imm = instr_rdata_i[31:20]@t_if,
+        PC_at_t_if = pc_if@t_if,
+        instr_addr_at_t_if = instr_addr_o@t_if,
+        op1Data = id_stage_i/registers_i/rf_reg[rs1]@t_id,
+        op2Data = id_stage_i/registers_i/rf_reg[rs2] @t_id,
+        regFile_at_t_id = id_stage_i/registers_i/rf_reg@t_id;
+    assume:
+        //core state
+        at t_if:    conceptual_state;
+        at t_if:    instr_req_o;
+        at t_if:    !data_req_o;
+
+        //inputs
+        at t_if:    instr_rdata_i[6:0] == 7'h63; //set opcode
+        at t_if:    instr_rdata_i[14:12] == instr_func3; //set func
+        at t_if:    instr_rdata_i[19:15] < 6; //r0 to r5
+        at t_if:    instr_rdata_i[24:20] < 6; //r0 to r5
+        at t_id:    !branch_dec(instr_func3, op1Data, op2Data);
+                              
+    prove:
+        //IF output
+        at t_id:    instr_rdata_id[6:0] == opcode;
+        at t_id:    instr_rdata_id[11:7] == rd;
+        at t_id:    instr_rdata_id[14:12] == func3;
+        at t_id:    instr_rdata_id[19:15] == rs1;
+        at t_id:    instr_rdata_id[31:20] == imm;
+
+        //ID output
+        at t_id:    alu_operator_ex == branch_operator(instr_func3);
+        at t_id:    alu_operand_a_ex == op1Data;
+        at t_id:    alu_operand_b_ex == op2Data;
+
+        //EX output
+        at t_id:    id_stage_i/regfile_wdata_sel == RF_WD_EX;
+
+        //WB
+        at t_id:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        at t_id:    conceptual_state;
+        at t_id:    instr_req_o;
+        at t_id:    !data_req_o;
+        at t_id:    id_stage_i/controller_i/ctrl_fsm_cs == DECODE;
+        at t_id:    instr_addr_o == (instr_addr_at_t_if == 32'hfffffffc ? 32'h0 : instr_addr_at_t_if + 4);
+        at t_wb:    foreach r in 0..31: id_stage_i/registers_i/rf_reg[r] == regFile_at_t_id[r]; end foreach;
+        
+        //PC
+        at t_id:    pc_if == (PC_at_t_if == 32'hfffffffc ? 32'h0 : PC_at_t_if + 4);
+    right_hook: t_id;
+end macro;

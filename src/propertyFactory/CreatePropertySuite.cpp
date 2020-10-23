@@ -59,12 +59,12 @@ void DESCAM::CreatePropertySuite::addVisibleRegisters(const Module *module, std:
             Variable *parent = var.second->getParent();
             std::shared_ptr<PropertyMacro> parentMacro;
             //TODO: remove try/Write
-            try {
-                parentMacro = propertySuite->findSignal(parent);
-            } catch (const std::runtime_error &e) {
-                // If not, add macro for parent
-                parentMacro = std::make_shared<PropertyMacro>(parent);
-                propertySuite->addVisibleRegister(parentMacro);
+            if(propertySuite->hasSignal(parent)){
+              parentMacro = propertySuite->findSignal(parent);
+            }else{
+              // If not, add macro for parent
+              parentMacro = std::make_shared<PropertyMacro>(parent);
+              propertySuite->addVisibleRegister(parentMacro);
             }
             auto pm = std::make_shared<PropertyMacro>(var.second);
             propertySuite->addVisibleRegister(pm);

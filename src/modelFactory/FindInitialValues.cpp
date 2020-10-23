@@ -11,24 +11,29 @@
 #include "IFindDataFlow.h"
 #include "FindDataFlowFactory.h"
 
-DESCAM::FindInitialValues::FindInitialValues(clang::CompilerInstance &ci) : ci(ci) {}
+DESCAM::FindInitialValues::FindInitialValues() {}
 
 void DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
                                       clang::FieldDecl *fieldDecl,
-                                      DESCAM::Module *module) {
+                                      DESCAM::Module *module,
+                                      clang::CompilerInstance *ci,
+                                      IFindDataFlowFactory * find_data_flow_factory) {
   this->clean();
-  this->module = module;
-  this->fieldDecl = fieldDecl;
-  this->initValue = nullptr;
-  this->pass = 0;
+  this->module_ = module;
+  this->field_decl_ = fieldDecl;
+  this->init_value_ = nullptr;
+  this->pass_ = 0;
+  this->ci_ = ci;
+  this->find_data_flow_factory_ = find_data_flow_factory;
   TraverseDecl(recordDecl);
 }
 
 void DESCAM::FindInitialValues::clean(){
-  fieldDecl = nullptr;
-  initValue = nullptr;
-  pass = 0;
-  module = nullptr;
+  field_decl_ = nullptr;
+  init_value_ = nullptr;
+  pass_ = 0;
+  module_ = nullptr;
+  ci_ = nullptr;
 }
 
 bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
@@ -41,9 +46,9 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
                            "\n Please use a section to initialize your systems instead of the constructor body\n");
   }
   //Only one Constructor allowed
-  if (pass == 0) {
+  if (pass_ == 0) {
     //Increase pass
-    pass = 1;
+    pass_ = 1;
     //Iterate over each initializer of initializerlist
     for (clang::CXXConstructorDecl::init_iterator initList = constructorDecl->init_begin();
          initList != constructorDecl->init_end(); initList++) {
@@ -53,7 +58,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
         //Name of member
         std::string varName = initializer->getMember()->getNameAsString();
         //Find Variable in Variable(not ports) and assign initial value
-        auto variable = fieldDecl;
+        auto variable = field_decl_;
         //If type is compound -> skip
         //Find values
         if (varName == variable->getName().str()) {
@@ -65,8 +70,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
           //Find value and store in this->value
           //If something goes wrong
           try {
-            std::unique_ptr<IFindDataFlow>
-                findDataFlow = FindDataFlowFactory::create(initializer->getInit(), module, ci);
+           auto findDataFlow = this->find_data_flow_factory_->create_new(initializer->getInit(), module_, ci_,find_data_flow_factory_);
 
             auto initExpr = findDataFlow->getExpr();
             if (initExpr != nullptr) {
@@ -75,9 +79,9 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
               Variable place_holder_variable("foo", place_holder_type);
               VariableOperand variableOperand(&place_holder_variable);
               auto assignment = Assignment(&variableOperand, findDataFlow->getExpr());
-              auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module);
+              auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module_);
               if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
-                this->initValue = valueT;
+                this->init_value_ = valueT;
               } else TERMINATE("All intializer are required to have a constant value");
 
             } else std::cout << "-I- Default init value for variable " << varName << std::endl;
@@ -94,7 +98,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
 }
 
 DESCAM::ConstValue *DESCAM::FindInitialValues::getInitValue() {
-  return initValue;
+  return init_value_;
 }
 
 

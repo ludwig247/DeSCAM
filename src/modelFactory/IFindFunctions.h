@@ -5,14 +5,14 @@
 #ifndef SCAM_SRC_MODELFACTORY_IFINDFUNCTIONS_H_
 #define SCAM_SRC_MODELFACTORY_IFINDFUNCTIONS_H_
 
-#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/AST/DeclCXX.h"
 #include <map>
 
 namespace DESCAM {
 /**
  * @brief Finds all "combinational" functions of a module
  */
-class IFindFunctions : public clang::RecursiveASTVisitor<IFindFunctions> {
+class IFindFunctions {
  public:
   virtual ~IFindFunctions() = default;
 
@@ -20,9 +20,7 @@ class IFindFunctions : public clang::RecursiveASTVisitor<IFindFunctions> {
    * @brief setup for the IFindFunctions class
    * @param recordDecl ?
    */
-  virtual void setup(clang::CXXRecordDecl *recordDecl) = 0;
-
-  virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) = 0;
+  virtual bool setup(clang::CXXRecordDecl *recordDecl) = 0;
 
   virtual const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const = 0;
   virtual const std::map<std::string, std::string> &getFunctionReturnTypeMap() const = 0;

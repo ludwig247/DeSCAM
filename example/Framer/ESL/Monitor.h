@@ -17,12 +17,12 @@ struct Config {
 
 struct Monitor : public sc_module {
     //
-    enum Sections {
-        LOF, N_LOF
+    enum Phases {
+        Monitor_LOF, Monitor_N_LOF
     };
 
-    Sections section;
-    Sections nextsection;
+    Phases phase;
+    Phases nextphase;
 
 
     //Constructor
@@ -35,9 +35,7 @@ struct Monitor : public sc_module {
             cnt(0),
             oof_var(false),
             LOFreset(8),
-            LOFset(8),
-            section(N_LOF),
-            nextsection(N_LOF) {
+            LOFset(8) {
         SC_THREAD(fsm);
     }
 
@@ -56,10 +54,12 @@ struct Monitor : public sc_module {
     shared_out<bool> lof;
 
     void fsm() {
+        nextphase = Monitor_N_LOF;
         while (true) {
-            section = nextsection;
-            if (section == LOF) {
-                tmp = frame_pulse->nb_read(tmp);
+            phase = nextphase;
+            if (phase == Monitor_LOF) {
+                wait(WAIT_TIME, SC_PS);//state
+                frame_pulse->slave_read(tmp, tmp);
                 config_in->get(config);
                 if (tmp) {
                     oof->get(oof_var);
@@ -73,13 +73,14 @@ struct Monitor : public sc_module {
                         } else {
                             cnt = 0;
                             lof->set(false);
-                            nextsection = N_LOF;
+                            nextphase = Monitor_N_LOF;
                         }
                     }
                 }
             }
-            if (section == N_LOF) {
-                tmp = frame_pulse->nb_read(tmp);
+            if (phase == Monitor_N_LOF) {
+                wait(WAIT_TIME, SC_PS);//state
+                frame_pulse->slave_read(tmp, tmp);
                 config_in->get(config);
                 if (tmp) {
                     oof->get(oof_var);
@@ -88,7 +89,7 @@ struct Monitor : public sc_module {
                             ++cnt;
                             lof->set(false);
                         } else {
-                            nextsection = LOF;
+                            nextphase = Monitor_LOF;
                             lof->set(true);
                             cnt = 0;
                         }
@@ -99,7 +100,7 @@ struct Monitor : public sc_module {
                 }
 
             }
-            wait(SC_ZERO_TIME);
+            //wait(SC_ZERO_TIME);
         }
     }
 

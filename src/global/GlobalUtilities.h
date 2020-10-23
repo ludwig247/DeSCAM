@@ -51,15 +51,15 @@ namespace DESCAM {
         static std::string removeIndentation(const std::string &str);
 
         template<class T>
-        static DESCAM::LocationInfo getLocationInfo(T *clangDataStructure, clang::CompilerInstance &ci) {
+        static DESCAM::LocationInfo getLocationInfo(T *clangDataStructure, clang::CompilerInstance *ci) {
             // Getting location information from clang
             std::string statement = clang::Lexer::getSourceText(
                     clang::CharSourceRange::getTokenRange(clangDataStructure->getSourceRange()),
-                    ci.getSourceManager(), ci.getLangOpts()).str();
+                    ci->getSourceManager(), ci->getLangOpts()).str();
             auto locStartVec = DESCAM::GlobalUtilities::stringSplit(
-                    clangDataStructure->getLocStart().printToString(ci.getSourceManager()), ':');
+                    clangDataStructure->getLocStart().printToString(ci->getSourceManager()), ':');
             auto locEndVec = DESCAM::GlobalUtilities::stringSplit(
-                    clangDataStructure->getLocEnd().printToString(ci.getSourceManager()), ':');
+                    clangDataStructure->getLocEnd().printToString(ci->getSourceManager()), ':');
             auto fileDir = locStartVec[0];
             auto rowStartNum = std::stoi(locStartVec[1]);
             auto rowEndNum = std::stoi(locEndVec[1]);
