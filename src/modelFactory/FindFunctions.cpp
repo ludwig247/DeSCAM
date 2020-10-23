@@ -9,16 +9,16 @@
 
 DESCAM::FindFunctions::FindFunctions() {}
 
-void DESCAM::FindFunctions::setup(clang::CXXRecordDecl *recordDecl) {
+bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *recordDecl) {
   this->clean();
-  TraverseDecl(recordDecl);
+  return TraverseDecl(recordDecl);
 }
 
 void DESCAM::FindFunctions::clean() {
-  functionMap.clear();
-  functionReturnTypeMap.clear();
-  functionParamNameMap.clear();
-  functionParamTypeMap.clear();
+  function_map_.clear();
+  function_return_type_map_.clear();
+  function_param_name_map_.clear();
+  function_param_type_map_.clear();
 }
 
 bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
@@ -27,10 +27,10 @@ bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl)
     std::string name = methodDecl->getName().str();
 
     if (methodDecl->getResultType()->isVoidType()) TERMINATE("Method: " + name + " is type void! Void is not allowed");
-    this->functionMap.insert(std::make_pair(name, methodDecl));
+    this->function_map_.insert(std::make_pair(name, methodDecl));
 
     //Return type
-    this->functionReturnTypeMap.insert(std::make_pair(name, this->clangToScamType(methodDecl->getResultType())));
+    this->function_return_type_map_.insert(std::make_pair(name, this->clangToScamType(methodDecl->getResultType())));
 
     //Param name and param type
     std::vector<std::string> paramNameList;
@@ -40,8 +40,8 @@ bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl)
       paramNameList.push_back(param->getName().str());
       paramTypeList.push_back(this->clangToScamType(param->getType()));
     }
-    this->functionParamNameMap.insert(std::make_pair(name, paramNameList));
-    this->functionParamTypeMap.insert(std::make_pair(name, paramTypeList));
+    this->function_param_name_map_.insert(std::make_pair(name, paramNameList));
+    this->function_param_type_map_.insert(std::make_pair(name, paramTypeList));
 
   }
 
@@ -50,7 +50,7 @@ bool DESCAM::FindFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl)
 }
 
 const std::map<std::string, clang::CXXMethodDecl *> &DESCAM::FindFunctions::getFunctionMap() const {
-  return functionMap;
+  return function_map_;
 }
 
 std::string DESCAM::FindFunctions::clangToScamType(clang::QualType qualType) const {
@@ -71,14 +71,14 @@ std::string DESCAM::FindFunctions::clangToScamType(clang::QualType qualType) con
 }
 
 const std::map<std::string, std::string> &DESCAM::FindFunctions::getFunctionReturnTypeMap() const {
-  return functionReturnTypeMap;
+  return function_return_type_map_;
 }
 
 const std::map<std::string, std::vector<std::string>> &DESCAM::FindFunctions::getFunctionParamNameMap() const {
-  return functionParamNameMap;
+  return function_param_name_map_;
 }
 
 const std::map<std::string, std::vector<std::string>> &DESCAM::FindFunctions::getFunctionParamTypeMap() const {
-  return functionParamTypeMap;
+  return function_param_type_map_;
 }
 

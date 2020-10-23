@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(Whisbone_hierarchy C CXX)
+project(Whishbone_hierarchy C CXX)
 
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
 set (CMAKE_MODULE_LINKER_FLAGS "-L/usr/lib -L/usr/local/lib   -rt -dl -tinfo -pthread -z")
@@ -9,11 +9,14 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces/)
 
-include_directories(Interfaces)
 
-FILE(GLOB R_SRC *.cpp *.hpp *.h)
+add_subdirectory(env)
+get_directory_property(ENV_SRC DIRECTORY env/ DEFINITION ENV_SRC)
+file(GLOB R_SRC *.cpp *.hpp *.h)
+list(APPEND R_SRC ${ENV_SRC})
 
-add_executable(Whisbone_hierarchy ${R_SRC}
+add_executable(Whishbone_hierarchy_Simulation ${R_SRC}
         ${CMAKE_SOURCE_DIR}/example/Interfaces/Interfaces.h
-        MasterAgent.h SlaveAgent.h Interconnect.h MasterDummy.h SlaveDummy.h )
-target_link_libraries(Whisbone_hierarchy systemc)
+        MasterAgent.h SlaveAgent.h Interconnect.h env/MasterDummy.h env/SlaveDummy.h)
+
+target_link_libraries(Whishbone_hierarchy_Simulation systemc)

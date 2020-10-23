@@ -13,14 +13,16 @@
 #include "FindDataFlowFactory.h"
 
 namespace DESCAM {
-CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance &ci, Module *module, bool sourceModule) :
+CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, IFindDataFlowFactory *find_data_flow_factory, bool sourceModule) :
     sourceModule(sourceModule),
     methodDecl(decl),
     ci(ci),
-    module(module) {
+    module(module),
+    find_data_flow_factory_(find_data_flow_factory){
+
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-  clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci.getASTContext(),
+  clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci->getASTContext(),
                                   b);
   if (clangCFG == nullptr) {
     llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
@@ -30,14 +32,20 @@ CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance &ci, 
 }
 
 CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
-                       clang::CompilerInstance &ci,
+                       clang::CompilerInstance *ci,
                        Module *module,
+                       IFindDataFlowFactory *find_data_flow_factory,
                        bool sourceModule) :
 
     sourceModule(sourceModule),
     methodDecl(nullptr),
     ci(ci),
-    module(module) {
+    module(module),
+    find_data_flow_factory_(find_data_flow_factory){
+
+  clang::LangOptions LO;
+  LO.CPlusPlus = true;
+
 
   //TODO: remove ci and methodDecl from class
   //Create Control flow graph(blockCFG)
@@ -48,6 +56,9 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
     llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
     return;
   }
+
+  assert(functionDecl != nullptr);
+
   this->translateToScamCFG();
 }
 
@@ -58,10 +69,6 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
  * 2)Traverse every sucessor of current block
  */
 void CFGFactory::translateToScamCFG() {
-
-  clang::LangOptions LO;
-  LO.CPlusPlus = true;
-//        clangCFG->dump(LO, true);
 
   clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
 
@@ -87,6 +94,7 @@ void CFGFactory::translateToScamCFG() {
     this->traverseBlocks(*entryCFGBlock->succ_begin(), entryNode);
   }
   //Clean up
+
   this->cleanEmptyBlocks();
 }
 
@@ -134,7 +142,7 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
         //block->dump(clangCFG, LO, false);
         //block->getTerminator().getStmt()->dump();
         //std::string location = ci.getSourceManager().getFilename(block->getTerminator()->getLocStart());
-        std::string location = block->getTerminator()->getLocStart().printToString(ci.getSourceManager());
+        std::string location = block->getTerminator()->getLocStart().printToString(ci->getSourceManager());
         std::string errorMsg = "Error: " + location + "\n";
         errorMsg += "\tProblem with an terminator (if,while, else if) statement.\n";
         errorMsg += "\tMake sure only SystemC-PPA valid statements are used.\n";
@@ -245,7 +253,7 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
             traverseBlocks(trueSucc, cfgNode);
           } else {
             std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
-            trueSucc->dump(clangCFG, {}, true);
+            //trueSucc->dump(clangCFG, {}, true);
           }
           //TERMINATE(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
         }
@@ -321,7 +329,7 @@ std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) 
 //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
 DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
   // traverse clang stmt and create its equivalent descam stmt
-  std::unique_ptr<DESCAM::IFindDataFlow> dataFlow = FindDataFlowFactory::create(clangStmt, module, ci, false);
+  auto dataFlow = find_data_flow_factory_->create_new(clangStmt, module, ci, find_data_flow_factory_, false);
   return dataFlow->getStmt();
 }
 

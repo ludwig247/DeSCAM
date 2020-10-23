@@ -6,7 +6,7 @@
 #define PROJECT_SLAVEAGENT_H
 #include "systemc.h"
 #include "../../Interfaces/Interfaces.h"
-#include "types_reduced.h"
+#include "env/types_reduced.h"
 
 
 struct SlaveAgent : public sc_module {

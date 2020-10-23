@@ -122,6 +122,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model/propertySuite)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory)
 include_directories(${CMAKE_SOURCE_DIR}/src/modelFactory/CFG)#why include this directory?
 include_directories(${CMAKE_SOURCE_DIR}/tests/)
+include_directories(${CMAKE_SOURCE_DIR}/tests/GMock_Test/tests/mocks/modelFactory)
 
 add_subdirectory(src)
 add_subdirectory(example)

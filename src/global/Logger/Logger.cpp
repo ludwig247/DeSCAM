@@ -128,4 +128,5 @@ const std::vector<DESCAM::LoggerMsg> &DESCAM::Logger::getMsgsMap() {
 void DESCAM::Logger::setPrintDecorativeFrames() {
     Logger::getInstance().printDecorativeFrames = true;
 }
+
 #endif

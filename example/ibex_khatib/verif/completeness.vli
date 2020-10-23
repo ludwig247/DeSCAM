@@ -1,0 +1,77 @@
+completeness ibex;
+disable iff: !rst_ni;
+determination_assumptions:
+  determined(rst_ni);
+  determined(test_en_i);
+  determined(hart_id_i);
+  determined(boot_addr_i);
+  determined(instr_gnt_i);
+  determined(instr_rvalid_i);
+  determined(instr_rdata_i);
+  determined(instr_err_i);
+  determined(data_gnt_i);
+  determined(data_rvalid_i);
+  determined(data_rdata_i);
+  determined(data_err_i);
+  determined(irq_software_i);
+  determined(irq_timer_i);
+  determined(irq_external_i);
+  determined(irq_fast_i);
+  determined(irq_nm_i);
+  determined(debug_req_i);
+  determined(fetch_enable_i);
+
+
+determination_requirements:
+determined(instr_req_o);
+if (instr_req_o)
+    determined(instr_addr_o)
+endif;
+
+determined(data_req_o);
+if (data_req_o)
+    determined(data_we_o)
+endif;
+
+if (data_req_o && data_we_o)
+  determined(data_be_o),
+  determined(data_addr_o),
+  determined(data_be_o == 4'h1? data_wdata_o[7:0] : data_be_o == 4'h3? data_wdata_o[15:0] : data_wdata_o)
+endif;
+
+
+local_determination_requirements:
+at right_hook: determined(pc_if);                  // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[0]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[1]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[2]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[3]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[4]); // visible register
+at right_hook: determined(id_stage_i/registers_i/rf_reg[5]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[0]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[1]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[2]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[3]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[4]); // visible register
+at right_hook+1: determined(id_stage_i/registers_i/rf_reg[5]); // visible register
+at right_hook: determined(if_stage_i/prefetch_buffer_i/fifo_i/valid_q);
+at right_hook: determined(id_stage_i/controller_i/special_req);
+at right_hook: determined(if_stage_i/if_id_pipe_reg_we);
+at right_hook: determined(id_stage_i/controller_i/ctrl_fsm_cs);
+
+
+
+reset_property:
+  reset;
+
+property_graph:
+  all_instr :=  instr_ADDI, instr_SLTI, instr_SLTIU, instr_XORI, instr_ORI,
+                instr_ANDI, instr_SLLI, instr_SRLI, instr_SRAI, instr_ADD, instr_SUB,
+                instr_SLL, instr_SLT, instr_SLTU, instr_XOR, instr_SRL, instr_SRA,
+                instr_OR, instr_AND, instr_LB, instr_LH, instr_LW, instr_LBU, instr_LHU,
+                instr_SB, instr_SH, instr_SW, instr_BEQ_taken, instr_BNE_taken, instr_BLT_taken,
+                instr_BGE_taken, instr_BLTU_taken, instr_BGEU_taken, instr_BEQ_not_taken,
+                instr_BNE_not_taken, instr_BLT_not_taken, instr_BGE_not_taken, instr_BLTU_not_taken,
+                instr_BGEU_not_taken;
+  reset, all_instr -> all_instr;
+end completeness;
