@@ -16,8 +16,8 @@ end TestBasic11;
 
 architecture TestBasic11_arch of TestBasic11 is
 	signal compoundType_signal: CompoundType;
-	signal nextsection_signal: Sections;
-	signal section_signal: Sections;
+	signal nextphase_signal: Phases;
+	signal phase_signal: Phases;
 
 begin
 	process(clk)
@@ -27,8 +27,8 @@ begin
 			compoundType_signal.mode <= READ;
 			compoundType_signal.x <= to_signed(0, 32);
 			compoundType_signal.y <= false;
-			nextsection_signal <= SECTION_A;
-			section_signal <= SECTION_A;
+			nextphase_signal <= SECTION_A;
+			phase_signal <= SECTION_A;
 			b_out_notify <= true;
 		else
 			 -- FILL OUT HERE;

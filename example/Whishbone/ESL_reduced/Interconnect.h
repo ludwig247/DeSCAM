@@ -8,7 +8,7 @@
 
 #include "systemc.h"
 #include "../../Interfaces/Interfaces.h"
-#include "types_reduced.h"
+#include "env/types_reduced.h"
 
 struct Interconnect : public sc_module {
     //Sections

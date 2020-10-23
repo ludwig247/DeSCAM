@@ -13,15 +13,15 @@ module TestBasic16 (
 	);
 
 	CompoundType compoundType_signal;
-	Sections nextsection_signal;
-	Sections section_signal;
+	Phases nextphase_signal;
+	Phases phase_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
 			compoundType_signal.x <= 0;
-			nextsection_signal <= section_a;
-			section_signal <= section_a;
+			nextphase_signal <= section_a;
+			phase_signal <= section_a;
 			b_in_notify <= 1'b1;
 			b_out_notify <= 1'b0;
 		end else begin

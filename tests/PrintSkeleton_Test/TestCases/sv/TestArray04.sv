@@ -1,0 +1,26 @@
+import top_level_types::*;
+import testarray04_types::*;
+
+module TestArray04 (
+	input logic clk,
+	input logic rst,
+	input integer m_in,
+	input logic m_in_sync,
+	output logic m_in_notify,
+	output int_5 m_out,
+	input logic m_out_sync,
+	output logic m_out_notify
+	);
+
+	int_5 myArray_signal;
+
+
+	always_ff @(posedge clk, posedge rst) begin
+		if (rst) begin
+			m_in_notify <= 1'b1;
+			m_out_notify <= 1'b0;
+		end else begin
+				// FILL OUT HERE
+		end
+	end
+endmodule

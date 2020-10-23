@@ -1,3 +1,0 @@
-Framer/ESL/Bus_new.h
-Bus/ESL/Bus_new.h
-FPI/ESL/Bus_new.h

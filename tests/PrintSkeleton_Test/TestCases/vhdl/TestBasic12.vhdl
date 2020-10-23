@@ -17,14 +17,14 @@ port(
 end TestBasic12;
 
 architecture TestBasic12_arch of TestBasic12 is
-	signal section_signal: Sections;
+	signal phase_signal: Phases;
 
 begin
 	process(clk)
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			section_signal <= SECTION_A;
+			phase_signal <= SECTION_A;
 			b_in_notify <= true;
 			m_out_notify <= false;
 		else

@@ -12,12 +12,12 @@ module TestBasic10 (
 	output logic b_out_notify
 	);
 
-	Sections section_signal;
+	Phases phase_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			section_signal <= section_a;
+			phase_signal <= section_a;
 			b_in_notify <= 1'b1;
 			b_out_notify <= 1'b0;
 		end else begin

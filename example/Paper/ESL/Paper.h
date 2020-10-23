@@ -6,19 +6,20 @@
 #define PROJECT_PAPER_H
 //Enum Datatype
 #include "systemc.h"
-#include "Interfaces.h"
+#include "../../Interfaces/Interfaces.h"
 
 
 enum status_t{in_frame,oof_frame};
 struct msg_t{status_t status;int data;};
 
-struct Example : public sc_module {
+struct Paper : public sc_module {
 	//Constructor
-	SC_CTOR(Example):
-			nextsection(idle){SC_THREAD(fsm)};
+	SC_CTOR(Paper) {
+	    SC_THREAD(fsm);
+	}
 	//Sections
-	enum Sections  {idle,frame_start,frame_data};
-	Sections section,nextsection;
+	enum Phase{idle,frame_start,frame_data};
+	Phase currentPhase, nextPhase;
 	//Ports
 	blocking_in<msg_t> b_in;
 	master_out<int>m_out;
@@ -26,29 +27,32 @@ struct Example : public sc_module {
 	//Variables
 	int cnt;bool ready;msg_t msg;
 	void fsm(){
+		nextPhase = idle;
 		while(true) {
-			section = nextsection;
-			if (section == idle) {
+			currentPhase = nextPhase;
+			if (currentPhase == idle) {
 				s_out->set(false);
 				b_in->read(msg);
 				if (msg.status == in_frame) {
 					s_out->set(true);
-					nextsection = frame_start;
+					nextPhase = frame_start;
 					cnt = 3;
 				}
-			} else if (section == frame_start) {
-				m_out->write(cnt);
+			} else if (currentPhase == frame_start) {
+				m_out->master_write(cnt);
 				cnt=cnt-1;
 				if (cnt == 0) {
 					cnt = 15;
-					nextsection = frame_data;
+					nextPhase = frame_data;
 				}
-			} else if (section == frame_data) {
-				ready = b_in->nb_read(msg);
+			} else if (currentPhase == frame_data) {
+                b_in->try_read(msg,ready);
 				if (!ready) {
-					m_out->write(msg.data);
-					if (cnt == 0) { nextsection = idle; }
-					cnt = cnt - 1;
+					m_out->master_write(msg.data);
+                    cnt = cnt - 1;
+                    if (cnt == 0) {
+                        nextPhase = idle;
+                    }
 				}
 			}
 		}}};
