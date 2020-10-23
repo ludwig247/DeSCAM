@@ -20,24 +20,11 @@ else ()
                 GIT_PROGRESS TRUE
                 GIT_CONFIG advice.detachedHead=false
 
-                #            if(${LLVM_VERSION} VERSION_LESS 4.0.0})
-                #                COMMENT "Moving clang into 'LLVM' ${LLVM_VERSION} Project (legacy install)"
-                COMMAND cp <SOURCE_DIR>/clang <SOURCE_DIR>/llvm/tools
-                #           endif()
 
                 # LLVM CMakeList.txt is located in a subdirectory
                 SOURCE_SUBDIR llvm
                 # Do not update the project, as we intentionally checked out a specific version.
                 UPDATE_COMMAND ""
-
-                # Insert RTTI requirement into CMakeLists.txt
-                # FIXME This inserts the RTTI repeatedly. Check if it's already in the file.
-                set (LLVM_CMAKE_LIST ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/CMakeLists.txt)
-                set {LLVM_CMAKE_TEMP ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/tmp.txt}
-                COMMAND touch tmp>
-
-                COMMAND echo 'set (LLVM_REQUIRES_RTTI 1) ' | cat - ${LLVM_CMAKE_LIST} > tmp
-                COMMAND mv tmp ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/CMakeLists.txt
 
                 # Install locally in the project
                 CMAKE_ARGS
@@ -50,12 +37,25 @@ else ()
                 INSTALL_COMMAND make install
                 )
 
+        ExternalProject_Add_Step(LLVM-${LLVM_VERSION} RTTI
+                DEPENDEES download
+                DEPENDERS build
+
+                COMMENT "Enabling RTTI for 'LLVM' ${LLVM_VERSION}"
+                # Insert RTTI requirement into CMakeLists.txt
+                # FIXME This inserts the RTTI repeatedly. Check if it's already in the file.
+                COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt > tmp
+                COMMAND mv tmp ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt
+                )
+        ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} RTTI)
+
         ExternalProject_Add_Step(LLVM-${LLVM_VERSION} SYMLINK
                 DEPENDEES install
                 COMMENT "Using libraries and headers of 'LLVM' ${LLVM_VERSION}"
                 # Create symbolic links for the chosen version. Change the link when switching versions.
                 COMMAND cp -a <INSTALL_DIR>/include/. ${CMAKE_CURRENT_SOURCE_DIR}/include/
                 COMMAND cp -a <INSTALL_DIR>/lib/. ${CMAKE_CURRENT_SOURCE_DIR}/lib/
+                # TODO Maybe we need to copy the includes from lib/clang to include
                 ALWAYS TRUE
                 )
 
