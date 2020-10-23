@@ -21,6 +21,7 @@ function delete_artifacts {
 
 function save_envvariables {
 	SELF_DIR=$(pwd)
+	TEST_DIR = $(pwd)
 	echo Current Dir: $SELF_DIR
 	SC_HOME="$SELF_DIR/include"
 	SCAM_HOME="$SELF_DIR"
