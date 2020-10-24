@@ -91,7 +91,8 @@ include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
 # Do not use system LLVM
 set(LLVM_STABLE 3.4.2)
 set(LLVM_DEV 11.0.0)
-set(LLVM_VERSIONS ${LLVM_STABLE} ${LLVM_DEV})
+}#set(LLVM_VERSIONS ${LLVM_STABLE})
+set(LLVM_VERSIONS ${LLVM_DEV})
 set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
 
 # Include the ExternalProject compilation
@@ -128,11 +129,12 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
+add_dependencies(DESCAM LLVM-${LLVM_VERSIONS} SYSTEMC-${SYSTEMC_VERSIONS} GTEST-${GTEST_VERSIONS} Z3-${Z3_VERSIONS})
 
-include(${PROJECT_SOURCE_DIR}/install/utils.cmake)
-blue_green_deployment(
-        DESCAM
-        GMock_Test
-        PrintITL_Test_Run
-        PrintSkeleton_Test_Run
-)
+#include(${PROJECT_SOURCE_DIR}/install/utils.cmake)
+#blue_green_deployment(
+#        DESCAM
+#        GMock_Test
+#        PrintITL_Test_Run
+#        PrintSkeleton_Test_Run
+#)
