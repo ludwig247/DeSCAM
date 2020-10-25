@@ -37,6 +37,8 @@ std::map<std::string, std::string> PrintSVA::printModule(DESCAM::Module *node) {
     return pluginOutput;
 }
 
+const std::string PrintSVA::freezeSigSuffix = "_f";
+
 ////////////////
 std::string PrintSVA::Text_ipc() {
     std::stringstream result;
@@ -319,13 +321,13 @@ std::string PrintSVA::operations() {
         if (!op->getFreezeSignals().empty()) {
             for (auto f : op->getFreezeSignals()) {
                 std::cout << f.first->getFullName("_") << std::endl;
-                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
+                //ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
+                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << freezeSigSuffix << ";\n";
             }
             for (auto f : op->getFreezeSignals()) {
                 if(f.first->isSubVar() && f.first->getParentDataType()->isArrayType()){
-                    //ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getParentName() << "("  << f.first->getSubVarName() <<")) and\n";
-                    ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getParentName() << "_"  << f.first->getSubVarName() <<"()) and\n";
-                }else ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
+                    ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << freezeSigSuffix << ", " << f.first->getParentName() << "_"  << f.first->getSubVarName() <<"()) and\n";
+                }else ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << freezeSigSuffix << ", " << f.first->getFullName("_") << "()) and\n";
             }
         }
 

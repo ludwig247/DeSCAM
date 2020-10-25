@@ -20,6 +20,8 @@ public:
 
     std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
+    static const std::string freezeSigSuffix;
+
 private:
     std::stringstream ss;
     Model *model;

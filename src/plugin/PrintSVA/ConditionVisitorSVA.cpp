@@ -7,9 +7,7 @@
 
 void DESCAM::ConditionVisitorSVA::visit(DESCAM::VariableOperand &node) {
     if (node.getVariable()->isSubVar() && node.getVariable()->getParent()->isArrayType()){
-        //this->ss << node.getVariable()->getParent()->getName() << "(" << node.getVariable()->getName() << ")";
-        this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
-        this->ss << "()";
+        this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName() << "()";
     }else if (node.getVariable()->isSubVar()) {
         this->ss << node.getVariable()->getParent()->getName() << "_" << node.getVariable()->getName();
         this->ss << "()";
@@ -27,7 +25,7 @@ void DESCAM::ConditionVisitorSVA::visit(DESCAM::SyncSignal &node) {
 
 void DESCAM::ConditionVisitorSVA::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar() && node.getDataSignal()->getParent()->isArrayType()) {
-        this->ss << node.getDataSignal()->getParent()->getName() << "(" << node.getDataSignal()->getName() << ")";
+        this->ss << node.getDataSignal()->getParent()->getName() << "_" << node.getDataSignal()->getName() << "()";
     }else if (node.getDataSignal()->isSubVar()) {
         this->ss << node.getDataSignal()->getParent()->getName() << "_" << node.getDataSignal()->getName();
         this->ss << "()";
@@ -250,9 +248,9 @@ void DESCAM::ConditionVisitorSVA::visit(DESCAM::Ternary &node) {
 void DESCAM::ConditionVisitorSVA::visit(DESCAM::ArrayOperand &node) {
         useParenthesesFlag = true;
         this->ss << node.getArrayOperand()->getOperandName();
-        this->ss << "(";
+        this->ss << "[";
         node.getIdx()->accept(*this);
-        this->ss << ")";
+        this->ss << "]";
 }
 
 
