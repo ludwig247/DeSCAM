@@ -16,7 +16,7 @@ jobs:
       PYTHON3: "python3"
       SCAM_HOME: "/home/runner/work/DeSCAM/DeSCAM/"
       SYSTEMC_DIR: "/home/runner/work/DeSCAM/DeSCAM/include/"
-      CLANG_DIR: "/home/runner/work/DeSCAM/DeSCAM/include/clang/3.4.2/include"
+      CLANG_DIR: "/home/runner/work/DeSCAM/DeSCAM/include/clang/"
       ROOT_DIR: "/"
     steps:
       - uses: actions/checkout@v1
@@ -29,14 +29,15 @@ jobs:
         run: |
           $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
           $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GMock_Test -- -j4
       - name: Run Tests
         run: |
           $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
           $GITHUB_WORKSPACE/bin/PrintSkeleton_Test_Run
+          $GITHUB_WORKSPACE/bin/GMock_Test
       - name: Clean up
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/3rdParty
-          rm -rf $GITHUB_WORKSPACE/install/tmp
+          rm -rf $GITHUB_WORKSPACE/3rdParty
 ## APPIMAGE WORKFLOW
 #      - name: Docker Build
 #        run: docker build --tag myimage:1.0 .
