@@ -29,7 +29,7 @@ set(Z3_VERSION 4.8.6)
 # Create the file with the location of the home folder
 execute_process(
         COMMAND echo ${LLVM_VERSION}
-        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
+        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/build_info
 )
 
 
