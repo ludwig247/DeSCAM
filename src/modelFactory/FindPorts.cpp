@@ -10,7 +10,7 @@ namespace DESCAM {
 //Constructor
 FindPorts::FindPorts(IFindNewDatatype *find_new_datatype) :
     record_decl_(nullptr),
-    find_new_datatype_(find_new_datatype){}
+    find_new_datatype_(find_new_datatype) {}
 
 bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module) {
   assert(record_decl);
@@ -20,10 +20,11 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
     return true;
   } else {
     record_decl_ = record_decl;
+    port_map.clear();
 
     bool success = true;
     GetClangPorts get_clang_ports(success, find_new_datatype_, ci, record_decl);
-    if(!success)return success;
+    if (!success)return success;
 
     auto portsLocationMap = get_clang_ports.getLocationInfoMap();
     //Add Ports -> requires Name, Interface and DataType
@@ -43,7 +44,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
                                              port.second),
                                          portsLocationMap[port.first]);
                      else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                         port_map.insert(std::make_pair(port.first,inPort)))
+                         port_map.insert(std::make_pair(port.first, inPort)))
     }
     //Output ports
     for (auto &port: get_clang_ports.getOutPortMap()) {
@@ -60,7 +61,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
                                              port.second),
                                          portsLocationMap[port.first]);
                     else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,outPort)))
+                        port_map.insert(std::make_pair(port.first, outPort)))
     }
 
     //AlwaysReady
@@ -79,7 +80,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
                                             port.second),
                                         portsLocationMap[port.first]);
                     else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,inPort)))
+                        port_map.insert(std::make_pair(port.first, inPort)))
 
     }
     //Output ports
@@ -97,7 +98,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
                                              port.second),
                                          portsLocationMap[port.first]);
                     else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,outPort)))
+                        port_map.insert(std::make_pair(port.first, outPort)))
     }
 
     //Input ports
@@ -115,7 +116,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
                                             port.second),
                                         portsLocationMap[port.first]);
                     else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,inPort)))
+                        port_map.insert(std::make_pair(port.first, inPort)))
 
     }
     //Output ports
@@ -133,7 +134,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
                                              port.second),
                                          portsLocationMap[port.first]);
                     else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,outPort)))
+                        port_map.insert(std::make_pair(port.first, outPort)))
     }
 
     //Shared ports
@@ -146,7 +147,7 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
       DESCAM_ASSERT(interface = new Interface("shared", "in"))
       Port *inPort = nullptr;
       DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,inPort)))
+                        port_map.insert(std::make_pair(port.first, inPort)))
 
     }
     //Output ports
@@ -159,13 +160,13 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
       DESCAM_ASSERT(interface = new Interface("shared", "out"))
       Port *inPort = nullptr;
       DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first,inPort)))
+                        port_map.insert(std::make_pair(port.first, inPort)))
     }
 
     return success;
   }
 }
-std::map<std::string, Port *> FindPorts::getPortMap() const{
+std::map<std::string, Port *> FindPorts::getPortMap() const {
   return this->port_map;
 }
 
