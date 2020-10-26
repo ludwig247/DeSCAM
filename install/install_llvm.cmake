@@ -24,7 +24,7 @@ else ()
 
                 # Install locally in the project
                 CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+                -DCMAKE_INSTALL_PREFIX:PATH=${SCAM_DIR}/lib
                 -DCMAKE_BUILD_TYPE=Release
                 -DLLVM_INCLUDE_TESTS=OFF
                 -DLLVM_ENABLE_PROJECTS=clang
@@ -45,15 +45,15 @@ else ()
                 )
         #ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} RTTI)
 
-        ExternalProject_Add_Step(LLVM-${LLVM_VERSION} SYMLINK
-                DEPENDEES install
-                COMMENT "Using libraries and headers of 'LLVM' ${LLVM_VERSION}"
-                # Create symbolic links for the chosen version. Change the link when switching versions.
-                COMMAND cp -a <INSTALL_DIR>/include/. ${CMAKE_CURRENT_SOURCE_DIR}/include/
-                COMMAND cp -a <INSTALL_DIR>/lib/. ${CMAKE_CURRENT_SOURCE_DIR}/lib/
-                # TODO Maybe we need to copy the includes from lib/clang to include
-                ALWAYS TRUE
-                )
+#        ExternalProject_Add_Step(LLVM-${LLVM_VERSION} SYMLINK
+#                DEPENDEES install
+#                COMMENT "Using libraries and headers of 'LLVM' ${LLVM_VERSION}"
+#                # Create symbolic links for the chosen version. Change the link when switching versions.
+#                COMMAND cp -a <INSTALL_DIR>/include/. ${CMAKE_CURRENT_SOURCE_DIR}/include/
+#                COMMAND cp -a <INSTALL_DIR>/lib/. ${CMAKE_CURRENT_SOURCE_DIR}/lib/
+#                # TODO Maybe we need to copy the includes from lib/clang to include
+#                ALWAYS TRUE
+#                )
 
         if(LLVM_VERSION VERSION_LESS 4.0.0)
         ExternalProject_Add_Step(LLVM-${LLVM_VERSION} CLANG
