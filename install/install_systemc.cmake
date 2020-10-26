@@ -51,5 +51,4 @@ else ()
             COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib/lib-linux64/
             ALWAYS TRUE
             )
-
 endif ()

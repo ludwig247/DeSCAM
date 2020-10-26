@@ -34,6 +34,4 @@ else ()
             COMMENT "Installing Z3-${Z3_VERSION}"
             ALWAYS TRUE
             )
-
-
 endif ()

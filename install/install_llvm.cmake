@@ -4,7 +4,6 @@ if (USE_SYSTEM_LLVM)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
     find_package(llvm REQUIRED)
 else ()
-
     #set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     include(ExternalProject)
     ExternalProject_add(LLVM
