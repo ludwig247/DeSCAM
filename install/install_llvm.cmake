@@ -24,7 +24,7 @@ else ()
 
                 # Install locally in the project
                 CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX:PATH=${SCAM_DIR}/lib
+                -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
                 -DCMAKE_BUILD_TYPE=Release
                 -DLLVM_INCLUDE_TESTS=OFF
                 -DLLVM_ENABLE_PROJECTS=clang
