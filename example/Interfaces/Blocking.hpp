@@ -63,9 +63,8 @@ void Blocking<T>::read(T &out) {
         assert(available_data && "blocking_read: data hasn't been written yet!");
     }
 //    std::cout << "@" << this->name() << ": blocking->read: reading\n";
+    out = *shared_data;
 
-    memcpy(out, *shared_data, sizeof(T));
-    //out = *shared_data;
     available_data = false;
     reader_notify.notify();
 }
@@ -114,9 +113,7 @@ void Blocking<T>::try_read(T &out) {
         insert_state();
     }
     if (available_data) {
-
-        memcpy(out, *shared_data, sizeof(T));
-        //out = *shared_data;
+        out = *shared_data;
         available_data = false;
         reader_notify.notify();
     }
@@ -152,9 +149,7 @@ void Blocking<T>::try_read(T &out, bool &success) {
         insert_state();
     }
     if (available_data) {
-
-        memcpy(out, *shared_data, sizeof(T));
-        //out = *shared_data;
+        out = *shared_data;
         available_data = false;
         reader_notify.notify();
         success = true; // i.e. readerPort_sync

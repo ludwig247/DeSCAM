@@ -8,7 +8,6 @@
 
 //#ifndef PROJECT_BUS_H
 //#define PROJECT_BUS_H
-
 #define ARRAY_SIZE 256
 
 using namespace std;
@@ -17,15 +16,22 @@ struct BubbleSort : public sc_module {
 
     //Variables
     phases phase_algorithm;
-    int data_algorithm[ARRAY_SIZE];
-
     int i; //counter for outer loop
     int j; //counter for inner loop
     int swap; //buffer for swapping values
 
     //data
-    blocking_in<int[ARRAY_SIZE]> data_in;
-    blocking_out<int[ARRAY_SIZE]> data_out;
+#define SLOW
+#ifndef SLOW
+    blocking_in< int*> data_in;
+    blocking_out<int*> data_out;
+    int data_ptr[ARRAY_SIZE];
+    int * data_algorithm = data_ptr;
+#else
+    std::array<int,ARRAY_SIZE> data_algorithm;
+    blocking_in< std::array<int,ARRAY_SIZE> >data_in;
+    blocking_out< std::array<int,ARRAY_SIZE>> data_out;
+#endif
 
 
     SC_HAS_PROCESS(BubbleSort);
@@ -46,6 +52,7 @@ struct BubbleSort : public sc_module {
             if(phase_algorithm == IDLE) {
 
                 data_in->read(data_algorithm,"data_in");
+
                 phase_algorithm = RUN;
                 i = 0;
                 j = 0;
@@ -56,6 +63,12 @@ struct BubbleSort : public sc_module {
                         if (data_algorithm[j] > data_algorithm[j+1]){
 
                             swap = data_algorithm[j];
+//                            data_algorithm[j] = data_algorithm[j+1];
+//                            for(auto w = 0;w<ARRAY_SIZE-1;w++){
+//                                if(j == w){
+//                                    data_algorithm[w] = data_algorithm[w+1];
+//                                }
+//                            }
 
                             data_algorithm[0] = j==0 ?  data_algorithm[1] : data_algorithm[0];
                             data_algorithm[1] = j==1 ?  data_algorithm[2] : data_algorithm[1];
@@ -313,6 +326,14 @@ struct BubbleSort : public sc_module {
                             data_algorithm[253] = j==253 ?  data_algorithm[254] : data_algorithm[253];
                             data_algorithm[254] = j==254 ?  data_algorithm[255] : data_algorithm[254];
 
+
+//                            data_algorithm[j+1] = swap;
+//                            for(auto w=0;w<ARRAY_SIZE-1;w++){
+//                                if(w==j){
+//                                    data_algorithm[w+1] = swap;
+//                                }
+//                            }
+
                             data_algorithm[1] = j==0 ?  swap : data_algorithm[1];
                             data_algorithm[2] = j==1 ?  swap : data_algorithm[2];
                             data_algorithm[3] = j==2 ?  swap : data_algorithm[3];
@@ -388,14 +409,14 @@ struct BubbleSort : public sc_module {
                             data_algorithm[73] = j==72 ?  swap : data_algorithm[73];
                             data_algorithm[74] = j==73 ?  swap : data_algorithm[74];
                             data_algorithm[75] = j==74 ?  swap : data_algorithm[75];
-                            data_algorithm[76] = j==75 ?  swap : data_algorithm[76];
+                            data_algorithm[76] = j==75 ?  swap : data_algorithm[76];                                //data_algorithm[1] = j==0 ?  swap : data_algorithm[1];
                             data_algorithm[77] = j==76 ?  swap : data_algorithm[77];
                             data_algorithm[78] = j==77 ?  swap : data_algorithm[78];
                             data_algorithm[79] = j==78 ?  swap : data_algorithm[79];
                             data_algorithm[80] = j==79 ?  swap : data_algorithm[80];
                             data_algorithm[81] = j==80 ?  swap : data_algorithm[81];
                             data_algorithm[82] = j==81 ?  swap : data_algorithm[82];
-                            data_algorithm[83] = j==82 ?  swap : data_algorithm[83];
+                            data_algorithm[83] = j==82 ?  swap : data_algorithm[83];                                //data_algorithm[1] = j==0 ?  swap : data_algorithm[1];
                             data_algorithm[84] = j==83 ?  swap : data_algorithm[84];
                             data_algorithm[85] = j==84 ?  swap : data_algorithm[85];
                             data_algorithm[86] = j==85 ?  swap : data_algorithm[86];
@@ -580,9 +601,7 @@ struct BubbleSort : public sc_module {
                     insert_state("loop");
 
                 }else{
-
                     data_out->write(data_algorithm, "data_out");
-
                     phase_algorithm = IDLE;
 
                 }
