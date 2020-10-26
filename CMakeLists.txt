@@ -26,7 +26,13 @@ set(Z3_VERSION 4.8.6)
 
 # Remove old build folder after changing library version
 # TODO currently only checks for LLVM
-file(TOUCH build_info)
+# Create the file with the location of the home folder
+execute_process(
+        COMMAND echo ${LLVM_VERSION}
+        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
+)
+
+
 
 file(READ build_info LLVM_PREVIOUS_BUILD)
 if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
@@ -86,6 +92,15 @@ include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
 include_directories(${LLVM_INCLUDES})
 
 
+################################
+# DESCAM
+################################
+# Create the file with the location of the home folder
+execute_process(
+        COMMAND echo "#ifndef SCAM_CONFIG_HOME_H\n#define SCAM_CONFIG_HOME_H\n#define SCAM_HOME \"${PROJECT_SOURCE_DIR}\"\n#endif"
+        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
+)
+
 # TODO: forget commands like add_compile_options, include_directories, link_directories, link_libraries
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces)
@@ -125,6 +140,3 @@ add_dependencies(global ${EXTERNAL_LIBS})
 add_dependencies(PrintSystemC ${EXTERNAL_LIBS})
 add_dependencies(PrintHLS ${EXTERNAL_LIBS})
 add_dependencies(PrintSVA ${EXTERNAL_LIBS})
-
-
-

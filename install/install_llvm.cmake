@@ -17,7 +17,6 @@ else ()
                 GIT_PROGRESS TRUE
                 GIT_CONFIG advice.detachedHead=false
 
-
                 # LLVM CMakeList.txt is located in a subdirectory
                 SOURCE_SUBDIR llvm
                 # Do not update the project, as we intentionally checked out a specific version.
