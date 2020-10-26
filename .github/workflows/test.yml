@@ -24,7 +24,7 @@ jobs:
       - name: Build System Generation
         run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
       - name: Build DESCAM
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j 4
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j 4
       - name: Build Tests
         run: |
           $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
