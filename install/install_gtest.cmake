@@ -21,18 +21,15 @@ else ()
 
             # Install locally in the project
             CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
 
             INSTALL_COMMAND make install
 
             )
 
-    ExternalProject_Add_Step(GTEST-${GTEST_VERSION} SYMLINK
-            DEPENDEES install
-
-            COMMENT "Using libraries and headers of 'GTEST' ${GTEST_VERSION}"
-            COMMAND cp -a <INSTALL_DIR>/include/. ${CMAKE_CURRENT_SOURCE_DIR}/include
-            COMMAND cp -a <INSTALL_DIR>/lib/. ${CMAKE_CURRENT_SOURCE_DIR}/lib
+    ExternalProject_Add_Step(GTEST-${GTEST_VERSION} FORCED_INSTALL
+            DEPENDERS install
+            COMMAND ${CMAKE_COMMAND} -E echo "Forcing the re-install of GTEST-${GTEST_VERSION}"
             ALWAYS TRUE
             )
 endif ()

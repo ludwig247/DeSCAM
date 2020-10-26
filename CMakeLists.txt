@@ -22,17 +22,16 @@ set(SYSTEMC_VERSION 2.3.1a)
 set(LLVM_VERSION 3.4.2)
 #set(LLVM_VERSION 11.0.0)
 set(GTEST_VERSION 1.10.0)
+#set(GTEST_VERSION 1.8.0)
 set(Z3_VERSION 4.8.6)
 
 # Remove old build folder after changing library version
 # TODO currently only checks for LLVM
 # Create the file with the location of the home folder
-execute_process(
-        COMMAND echo ${LLVM_VERSION}
-        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/build_info
-)
-
-
+#execute_process(
+#        COMMAND echo ${LLVM_VERSION}
+#        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/build_info
+#)
 
 file(READ build_info LLVM_PREVIOUS_BUILD)
 if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
@@ -140,3 +139,8 @@ add_dependencies(global ${EXTERNAL_LIBS})
 add_dependencies(PrintSystemC ${EXTERNAL_LIBS})
 add_dependencies(PrintHLS ${EXTERNAL_LIBS})
 add_dependencies(PrintSVA ${EXTERNAL_LIBS})
+add_dependencies(Stmts ${EXTERNAL_LIBS})
+add_dependencies(operationFactory ${EXTERNAL_LIBS})
+add_dependencies(MakeStyles ${EXTERNAL_LIBS})
+add_dependencies(Behavior ${EXTERNAL_LIBS})
+add_dependencies(propertySuite ${EXTERNAL_LIBS})
