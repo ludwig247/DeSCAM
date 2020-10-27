@@ -23,13 +23,15 @@ jobs:
 # DEFAULT WORKFLOW
       - name: Build System Generation
         run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+      - name: Build 3rdParty libraries
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LIBS -- -j8
       - name: Build DESCAM
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j 4
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j8
       - name: Build Tests
         run: |
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GMock_Test -- -j4
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j8
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j8
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GMock_Test -- -j8
       - name: Run Tests
         run: |
           $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
