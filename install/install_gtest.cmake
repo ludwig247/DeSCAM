@@ -6,7 +6,7 @@ if (USE_SYSTEM_GTEST)
 else ()
 
     include(ExternalProject)
-    ExternalProject_add(GTEST-${GTEST_VERSION}
+    ExternalProject_add(GTEST
             # Location for external project with standard folder structure. Distinct by version
             PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/googletest/${GTEST_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
@@ -26,10 +26,14 @@ else ()
             INSTALL_COMMAND make install
 
             )
-
-    ExternalProject_Add_Step(GTEST-${GTEST_VERSION} FORCED_INSTALL
+    if(NOT GTEST_VERSION VERSION_EQUAL GTEST_PREVIOUS_BUILD)
+    #if(HAS_NEW_LIBS)
+    ExternalProject_Add_Step(GTEST FORCED_INSTALL
             DEPENDERS install
-            COMMAND ${CMAKE_COMMAND} -E echo "Forcing the re-install of GTEST-${GTEST_VERSION}"
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing GTEST-${GTEST_VERSION}"
+            COMMENT "Installing GTEST-${GTEST_VERSION}"
             ALWAYS TRUE
             )
+    ExternalProject_Add_StepTargets(GTEST FORCED_INSTALL)
+    endif()
 endif ()

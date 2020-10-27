@@ -6,7 +6,7 @@ if (USE_SYSTEM_Z3)
 else ()
 
     include(ExternalProject)
-    ExternalProject_add(Z3-${Z3_VERSION}
+    ExternalProject_add(Z3
             # Location for external project with standard folder structure. Distinct by version
             PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/z3/${Z3_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
@@ -27,11 +27,14 @@ else ()
 
             INSTALL_COMMAND make install
             )
-    ExternalProject_Add_Step(Z3-${Z3_VERSION} FORCED_INSTALL
+    if(NOT Z3_VERSION VERSION_EQUAL Z3_PREVIOUS_BUILD)
+    ExternalProject_Add_Step(Z3 FORCED_INSTALL
             DEPENDERS install
-            COMMAND ${CMAKE_COMMAND} -E echo "Forcing the re-install of Z3-${Z3_VERSION}"
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing Z3-${Z3_VERSION}"
+            COMMENT "Installing Z3-${Z3_VERSION}"
             ALWAYS TRUE
             )
+    endif()
 #    ExternalProject_Add_Step(Z3-${Z3_VERSION} SYMLINK
 #            DEPENDEES install
 #            COMMENT "Using libraries and headers of 'Z3' ${Z3_VERSION}"

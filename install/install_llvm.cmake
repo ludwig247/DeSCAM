@@ -7,7 +7,7 @@ else ()
 
     set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     include(ExternalProject)
-    ExternalProject_add(LLVM-${LLVM_VERSION}
+    ExternalProject_add(LLVM
             # Location for external project with standard folder structure. Distinct by version
             PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
@@ -33,7 +33,7 @@ else ()
             INSTALL_COMMAND make install
             )
 
-    ExternalProject_Add_Step(LLVM-${LLVM_VERSION} RTTI
+    ExternalProject_Add_Step(LLVM RTTI
             DEPENDEES download
             DEPENDERS build
 
@@ -45,11 +45,14 @@ else ()
             )
 
     #ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} RTTI)
-    ExternalProject_Add_Step(LLVM-${LLVM_VERSION} FORCED_INSTALL
+    if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
+    ExternalProject_Add_Step(LLVM FORCED_INSTALL
             DEPENDERS install
-            COMMAND ${CMAKE_COMMAND} -E echo "Forcing the re-install of LLVM-${LLVM_VERSION}"
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing LLVM-${LLVM_VERSION}"
+            COMMENT "Installing  LLVM-${LLVM_VERSION}"
             ALWAYS TRUE
             )
+    endif()
     #        ExternalProject_Add_Step(LLVM-${LLVM_VERSION} SYMLINK
     #                DEPENDEES install
     #                COMMENT "Using libraries and headers of 'LLVM' ${LLVM_VERSION}"
@@ -61,7 +64,7 @@ else ()
     #                )
 
     if (LLVM_VERSION VERSION_LESS 4.0.0)
-        ExternalProject_Add_Step(LLVM-${LLVM_VERSION} CLANG
+        ExternalProject_Add_Step(LLVM CLANG
                 DEPENDEES download
                 DEPENDERS build
                 COMMENT "Copying clang folder into 'LLVM' ${LLVM_VERSION} project [legacy install]"

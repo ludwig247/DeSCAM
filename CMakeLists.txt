@@ -12,6 +12,7 @@ set(VERSION_PATCH 0)
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
 message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
+
 # TODO: get rid of CMAKE_CXX_STANDARD
 set(CMAKE_CXX_STANDARD 14) # C++14...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
@@ -25,22 +26,30 @@ set(GTEST_VERSION 1.10.0)
 #set(GTEST_VERSION 1.8.0)
 set(Z3_VERSION 4.8.6)
 
-# Remove old build folder after changing library version
-# TODO currently only checks for LLVM
-# Create the file with the location of the home folder
-#execute_process(
-#        COMMAND echo ${LLVM_VERSION}
-#        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/build_info
-#)
+# READ the library version of a previous build.
+file(READ build_info INFO)
+string(REGEX MATCH "LLVM (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
+set(LLVM_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 
-file(READ build_info LLVM_PREVIOUS_BUILD)
-if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
-    file(WRITE build_info ${LLVM_VERSION})
-    file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR})
-    # TODO This enforces new libraries. otherwise a partial build with mixed libraries is possible.
-    file(REMOVE_RECURSE ${SCAM_SOURCE_DIR}/lib)
-    file(REMOVE_RECURSE ${SCAM_SOURCE_DIR}/include)
+string(REGEX MATCH "Z3 (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
+set(Z3_PREVIOUS_BUILD ${CMAKE_MATCH_1})
+
+string(REGEX MATCH "GTEST (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
+set(GTEST_PREVIOUS_BUILD ${CMAKE_MATCH_1})
+
+string(REGEX MATCH "SYSTEMC (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
+set(SYSTEMC_PREVIOUS_BUILD ${CMAKE_MATCH_1})
+
+message(STATUS "PREVIOUS VERSION is ${LLVM_PREVIOUS_BUILD}")
+message(STATUS "CURRENT VERSION is ${LLVM_VERSION}")
+
+if(TRUE)
+    file(WRITE build_info "LLVM ${LLVM_VERSION}\n")
+    file(APPEND build_info "Z3 ${Z3_VERSION}\n")
+    file(APPEND build_info "SYSTEMC ${SYSTEMC_VERSION}\n")
+    file(APPEND build_info "GTEST ${GTEST_VERSION}\n")
 endif()
+
 file(MAKE_DIRECTORY lib)
 file(MAKE_DIRECTORY include)
 ################################
@@ -127,20 +136,9 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
-set(EXTERNAL_LIBS LLVM-${LLVM_VERSION} SYSTEMC-${SYSTEMC_VERSION} GTEST-${GTEST_VERSION} Z3-${Z3_VERSION})
+add_custom_target(LIBS DEPENDS SYSTEMC GTEST Z3 LLVM)
+add_custom_command(TARGET LIBS
+        POST_BUILD
+        COMMAND echo "3rdParty libraries installed")
 
-# TODO some dependencies might be missing, some might be unnecessary.
-add_dependencies(DESCAM ${EXTERNAL_LIBS})
-add_dependencies(GMock_Test ${EXTERNAL_LIBS})
-add_dependencies(PrintSkeleton ${EXTERNAL_LIBS})
-add_dependencies(PrintITL ${EXTERNAL_LIBS})
-add_dependencies(parser ${EXTERNAL_LIBS})
-add_dependencies(global ${EXTERNAL_LIBS})
-add_dependencies(PrintSystemC ${EXTERNAL_LIBS})
-add_dependencies(PrintHLS ${EXTERNAL_LIBS})
-add_dependencies(PrintSVA ${EXTERNAL_LIBS})
-add_dependencies(Stmts ${EXTERNAL_LIBS})
-add_dependencies(operationFactory ${EXTERNAL_LIBS})
-add_dependencies(MakeStyles ${EXTERNAL_LIBS})
-add_dependencies(Behavior ${EXTERNAL_LIBS})
-add_dependencies(propertySuite ${EXTERNAL_LIBS})
+# TODO maybe for safety erase build folder each time LIBS is build?

@@ -11,7 +11,7 @@ else ()
             CXXFLAGS=${CMAKE_CXX_FLAGS})
 
     include(ExternalProject)
-    ExternalProject_add(SYSTEMC-${SYSTEMC_VERSION}
+    ExternalProject_add(SYSTEMC
             # Location for external project with standard folder structure. Distinct by version
             PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/systemc/${SYSTEMC_VERSION}
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
@@ -35,13 +35,14 @@ else ()
 
             INSTALL_COMMAND make install
             )
-
-    ExternalProject_Add_Step(SYSTEMC-${SYSTEMC_VERSION} FORCED_INSTALL
+    if(NOT SYSTEMC_VERSION VERSION_EQUAL SYSTEMC_PREVIOUS_BUILD)
+    ExternalProject_Add_Step(SYSTEMC FORCED_INSTALL
             DEPENDERS install
-            COMMAND ${CMAKE_COMMAND} -E echo "Forcing the re-install of SYSTEMC-${SYSTEMC_VERSION}"
+            COMMAND ${CMAKE_COMMAND} -E echo "Installing SYSTEMC-${SYSTEMC_VERSION}"
+            COMMENT "Installing SYSTEMC-${SYSTEMC_VERSION}"
             ALWAYS TRUE
             )
-
+    endif()
 #    ExternalProject_Add_Step(SYSTEMC-${SYSTEMC_VERSION} SYMLINK
 #            DEPENDEES install
 #            COMMENT "Using libraries and headers of 'SYSTEMC' ${SYSTEMC_VERSION}"
