@@ -42,16 +42,18 @@ else ()
             # FIXME This inserts the RTTI repeatedly. Check if it's already in the file.
             COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM/llvm/CMakeLists.txt > tmp
             COMMAND mv tmp ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM/llvm/CMakeLists.txt
+            ALWAYS TRUE
             )
+    ExternaLProject_Add_StepTargets(LLVM RTTI)
 
-    if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
+
     ExternalProject_Add_Step(LLVM FORCED_INSTALL
             DEPENDERS install
             COMMAND ${CMAKE_COMMAND} -E echo "Installing LLVM-${LLVM_VERSION}"
             COMMENT "Installing  LLVM-${LLVM_VERSION}"
             ALWAYS TRUE
             )
-    endif()
+
 
     if (LLVM_VERSION VERSION_LESS 4.0.0)
         ExternalProject_Add_Step(LLVM CLANG

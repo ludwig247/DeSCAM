@@ -1,5 +1,6 @@
 name: DESCAM-BUILD
 
+#on: [push, pull_request]
 on:
   [push, pull_request]
 
@@ -15,20 +16,28 @@ jobs:
       PYTHON3: "python3"
       SCAM_HOME: "/home/runner/work/DeSCAM/DeSCAM/"
       SYSTEMC_DIR: "/home/runner/work/DeSCAM/DeSCAM/include/"
-      CLANG_DIR: "/home/runner/work/DeSCAM/DeSCAM/include/clang/3.4.2/include"
+      CLANG_DIR: "/home/runner/work/DeSCAM/DeSCAM/include/clang/"
       ROOT_DIR: "/"
     steps:
       - uses: actions/checkout@v1
-# DEFAULT WORKFLOW
+      # DEFAULT WORKFLOW
       - name: Build System Generation
         run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+      - name: Build GTEST
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j8
+      - name: Build Z3
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j8
+      - name: Build SYSTEMC
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j8
+      - name: Build LLVM
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j8
       - name: Build DESCAM
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SCAM -- -j4
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j8
       - name: Build Tests
         run: |
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j4
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j4
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GMock_Test -- -j4
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Test_Run -- -j8
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Test_Run -- -j8
+          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GMock_Test -- -j8
       - name: Run Tests
         run: |
           $GITHUB_WORKSPACE/bin/PrintITL_Test_Run
@@ -36,5 +45,4 @@ jobs:
           $GITHUB_WORKSPACE/bin/GMock_Test
       - name: Clean up
         run: |
-          rm -rf $GITHUB_WORKSPACE/build/3rdParty
-          rm -rf $GITHUB_WORKSPACE/install/tmp
+          rm -rf $GITHUB_WORKSPACE/3rdParty

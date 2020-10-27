@@ -25,8 +25,7 @@ else ()
             UPDATE_COMMAND ""
 
             # Install locally in the project
-            CONFIGURE_COMMAND <SOURCE_DIR>/configure
-            --prefix=${CMAKE_SOURCE_DIR}/lib
+            CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_SOURCE_DIR}/lib
 
             CMAKE_ARGS
             -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
@@ -35,13 +34,19 @@ else ()
 
             INSTALL_COMMAND make install
             )
-    if(NOT SYSTEMC_VERSION VERSION_EQUAL SYSTEMC_PREVIOUS_BUILD)
+
     ExternalProject_Add_Step(SYSTEMC FORCED_INSTALL
             DEPENDERS install
             COMMAND ${CMAKE_COMMAND} -E echo "Installing SYSTEMC-${SYSTEMC_VERSION}"
             COMMENT "Installing SYSTEMC-${SYSTEMC_VERSION}"
             ALWAYS TRUE
             )
-    endif()
+    ExternaLProject_Add_StepTargets(SYSTEMC FORCED_INSTALL)
+
+    ExternalProject_Add_Step(SYSTEMC MOVE_INCLUDES
+            DEPENDEES install
+            COMMAND mv  -f ${CMAKE_SOURCE_DIR}/lib/include ${CMAKE_SOURCE_DIR}/include
+            ALWAYS TRUE
+            )
 
 endif ()

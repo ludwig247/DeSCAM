@@ -27,13 +27,13 @@ else ()
 
             INSTALL_COMMAND make install
             )
-    if(NOT Z3_VERSION VERSION_EQUAL Z3_PREVIOUS_BUILD)
+
     ExternalProject_Add_Step(Z3 FORCED_INSTALL
             DEPENDERS install
             COMMAND ${CMAKE_COMMAND} -E echo "Installing Z3-${Z3_VERSION}"
             COMMENT "Installing Z3-${Z3_VERSION}"
             ALWAYS TRUE
             )
-    endif()
+
 
 endif ()

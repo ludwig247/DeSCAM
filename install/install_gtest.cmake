@@ -26,7 +26,7 @@ else ()
             INSTALL_COMMAND make install
 
             )
-    if(NOT GTEST_VERSION VERSION_EQUAL GTEST_PREVIOUS_BUILD)
+
     ExternalProject_Add_Step(GTEST FORCED_INSTALL
             DEPENDERS install
             COMMAND ${CMAKE_COMMAND} -E echo "Installing GTEST-${GTEST_VERSION}"
@@ -34,5 +34,5 @@ else ()
             ALWAYS TRUE
             )
     ExternalProject_Add_StepTargets(GTEST FORCED_INSTALL)
-    endif()
+
 endif ()
