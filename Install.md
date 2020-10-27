@@ -40,7 +40,7 @@ z3      |   4.8.6
 llvm    |   3.5.4
 
 # Build DESCAM
-   * mkdir build
-   * cd build
-   * cmake ../
-   * make
+   * `mkdir build`
+   * `cd build`
+   * `cmake ../`
+   * `make SCAM`
