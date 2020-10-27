@@ -44,7 +44,6 @@ else ()
             COMMAND mv tmp ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt
             )
 
-    #ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} RTTI)
     if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
     ExternalProject_Add_Step(LLVM FORCED_INSTALL
             DEPENDERS install
@@ -53,15 +52,6 @@ else ()
             ALWAYS TRUE
             )
     endif()
-    #        ExternalProject_Add_Step(LLVM-${LLVM_VERSION} SYMLINK
-    #                DEPENDEES install
-    #                COMMENT "Using libraries and headers of 'LLVM' ${LLVM_VERSION}"
-    #                # Create symbolic links for the chosen version. Change the link when switching versions.
-    #                COMMAND cp -a <INSTALL_DIR>/include/. ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    #                COMMAND cp -a <INSTALL_DIR>/lib/. ${CMAKE_CURRENT_SOURCE_DIR}/lib/
-    #                # TODO Maybe we need to copy the includes from lib/clang to include
-    #                ALWAYS TRUE
-    #                )
 
     if (LLVM_VERSION VERSION_LESS 4.0.0)
         ExternalProject_Add_Step(LLVM CLANG

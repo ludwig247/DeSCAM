@@ -35,12 +35,5 @@ else ()
             ALWAYS TRUE
             )
     endif()
-#    ExternalProject_Add_Step(Z3-${Z3_VERSION} SYMLINK
-#            DEPENDEES install
-#            COMMENT "Using libraries and headers of 'Z3' ${Z3_VERSION}"
-#            # Create symbolic links for the chosen version. Change the link when switching versions.
-#            COMMAND cp -a <INSTALL_DIR>/include/. ${CMAKE_CURRENT_SOURCE_DIR}/include/
-#            COMMAND cp -a <INSTALL_DIR>/lib/. ${CMAKE_CURRENT_SOURCE_DIR}/lib/
-#            ALWAYS TRUE
-#            )
+
 endif ()

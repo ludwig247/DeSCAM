@@ -27,7 +27,6 @@ else ()
 
             )
     if(NOT GTEST_VERSION VERSION_EQUAL GTEST_PREVIOUS_BUILD)
-    #if(HAS_NEW_LIBS)
     ExternalProject_Add_Step(GTEST FORCED_INSTALL
             DEPENDERS install
             COMMAND ${CMAKE_COMMAND} -E echo "Installing GTEST-${GTEST_VERSION}"
