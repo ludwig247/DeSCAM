@@ -5,7 +5,7 @@ if (USE_SYSTEM_LLVM)
     find_package(llvm REQUIRED)
 else ()
 
-    set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
+    #set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     include(ExternalProject)
     ExternalProject_add(LLVM
             # Location for external project with standard folder structure. Distinct by version

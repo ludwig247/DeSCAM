@@ -33,6 +33,7 @@ else ()
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}/lib
 
             INSTALL_COMMAND make install
+
             )
 
     ExternalProject_Add_Step(SYSTEMC FORCED_INSTALL
@@ -41,11 +42,13 @@ else ()
             COMMENT "Installing SYSTEMC-${SYSTEMC_VERSION}"
             ALWAYS TRUE
             )
-    ExternaLProject_Add_StepTargets(SYSTEMC FORCED_INSTALL)
 
     ExternalProject_Add_Step(SYSTEMC MOVE_INCLUDES
             DEPENDEES install
-            COMMAND mv  -f ${CMAKE_SOURCE_DIR}/lib/include ${CMAKE_SOURCE_DIR}/include
+            COMMAND cp -a ${CMAKE_SOURCE_DIR}/lib/include/. ${SYSTEMC_INCLUDE_DIR}
+            COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib/include/
+            COMMAND cp -a ${CMAKE_SOURCE_DIR}/lib/lib-linux64/. ${CMAKE_SOURCE_DIR}/lib/
+            COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib/lib-linux64/
             ALWAYS TRUE
             )
 

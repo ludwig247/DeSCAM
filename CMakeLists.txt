@@ -87,6 +87,7 @@ include(${PROJECT_SOURCE_DIR}/install/install_gtest.cmake)
 ################################
 # Do not use system SystemC
 set(USE_SYSTEM_SYSTEMC OFF CACHE BOOL "Use system SystemC")
+set(SYSTEMC_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
 
@@ -95,6 +96,8 @@ include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
 ################################
 # Do not use system LLVM
 set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
+set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
 
@@ -105,10 +108,16 @@ include_directories(${LLVM_INCLUDES})
 ################################
 # DESCAM
 ################################
+message(STATUS "SYSTEMC_INCLUDE_DIR: ${SYSTEMC_INCLUDE_DIR}")
 # Create the file with the location of the home folder
 execute_process(
-        COMMAND echo "#ifndef SCAM_CONFIG_HOME_H\n#define SCAM_CONFIG_HOME_H\n#define SCAM_HOME \"${PROJECT_SOURCE_DIR}\"\n#endif"
-        OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
+COMMAND echo "#ifndef SCAM_CONFIG_HOME_H
+#define SCAM_CONFIG_HOME_H\n
+#define SCAM_HOME \"${PROJECT_SOURCE_DIR}\"
+#define LLVM_BINARY_DIR \"${LLVM_BINARY_DIR}\"
+#define SYSTEMC_INCLUDE_DIR \"${SYSTEMC_INCLUDE_DIR}\"
+\n#endif //SCAM_CONFIG_HOME_H"
+OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
 )
 
 # TODO: forget commands like add_compile_options, include_directories, link_directories, link_libraries

@@ -41,8 +41,8 @@ class ModelGlobal {
     std::vector<const char *> command_line_arguments_vector;
     //Analyzing Environmental Variables          -----Default Values for Reference
 //    std::string clang_dir = SCAM_HOME"/include/clang/3.4.2/include";//getenv("CLANG_DIR");
-    std::string clang_dir = SCAM_HOME"/bin";
-    std::string systemc_dir = SCAM_HOME"/include/";//getenv("SYSTEMC_DIR");
+    std::string clang_dir = LLVM_BINARY_DIR;
+    std::string systemc_dir = SYSTEMC_INCLUDE_DIR;//getenv("SYSTEMC_DIR");
     std::string scam_dir = SCAM_HOME"/";//getenv("SCAM_HOME");
     std::string root_dir = "/";//getenv("ROOT_DIR");
     if (clang_dir.empty()) TERMINATE("Specify CLANG_DIR as environment variable");
