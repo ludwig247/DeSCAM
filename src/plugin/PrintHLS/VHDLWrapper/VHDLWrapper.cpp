@@ -135,18 +135,19 @@ std::string VHDLWrapper::printDataTypes(const DataType *dataType) {
                            << Utilities::intToBinary(i, vectorSize) << "\";\n";
             i++;
         }
+        dataTypeStream << "\n";
     } else if (dataType->isCompoundType()) {
         dataTypeStream << "\ttype " + SignalFactory::convertDataTypeName(dataType) << " is record\n";
         for (const auto &subVar: dataType->getSubVarMap()) {
             dataTypeStream << "\t\t" + subVar.first << ": " << SignalFactory::convertDataTypeName(subVar.second)
                            << ";\n";
         }
-        dataTypeStream << "\tend record;\n";
+        dataTypeStream << "\tend record;\n\n";
     } else if (dataType->isArrayType()) {
         dataTypeStream << "\ttype " << dataType->getName() << " is array (" << (dataType->getSubVarMap().size() - 1)
                        << " downto 0) of "
                        << SignalFactory::convertDataTypeName(dataType->getSubVarMap().begin()->second)
-                       << ";\n";
+                       << ";\n\n";
     }
 
     return dataTypeStream.str();
