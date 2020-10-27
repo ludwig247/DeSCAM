@@ -40,8 +40,10 @@ set(GTEST_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 string(REGEX MATCH "SYSTEMC (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
 set(SYSTEMC_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 
-message(STATUS "PREVIOUS VERSION is ${LLVM_PREVIOUS_BUILD}")
-message(STATUS "CURRENT VERSION is ${LLVM_VERSION}")
+message(STATUS "Building with LLVM ${LLVM_VERSION}")
+message(STATUS "Building with Z3 ${Z3_VERSION}")
+message(STATUS "Building with GTEST ${GTEST_VERSION}")
+message(STATUS "Building with SYSTEMC ${SYSTEMC_VERSION}")
 
 if(TRUE)
     file(WRITE build_info "LLVM ${LLVM_VERSION}\n")
@@ -136,9 +138,6 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
-add_custom_target(LIBS DEPENDS SYSTEMC GTEST Z3 LLVM)
-add_custom_command(TARGET LIBS
-        POST_BUILD
-        COMMAND echo "3rdParty libraries installed")
+#add_custom_target(DESCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
 
 # TODO maybe for safety erase build folder each time LIBS is build?
