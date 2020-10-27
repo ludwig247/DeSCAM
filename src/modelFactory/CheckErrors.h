@@ -15,61 +15,86 @@
 
 
 // PArse SystemC
-#include "FindPorts.h"
-#include "FindSCMain.h"
-#include "FindCall.h"
-#include "FindModules.h"
-#include "FindNetlist.h"
-#include "FindProcess.h"
-#include "FindVariables.h"
+#include "IFindProcess.h"
+#include "IFindGlobal.h"
+#include "IFindFunctions.h"
+#include "IFindInitialValues.h"
+#include "IFindNewDatatype.h"
+#include "IModelFactory.h"
+#include "IFindModules.h"
+#include "IFindPorts.h"
+#include "IFindNetlist.h"
+#include "IFindVariables.h"
+#include "IFindSCMain.h"
 #include "Model.h"
 #include <iostream>
+#include "FindDataFlow.h"
+#include "IFindDataFlowFactory.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
 using namespace clang;
 
-
 namespace DESCAM {
 
-    bool containsSubstring(std::string, std::string);
+bool containsSubstring(std::string, std::string);
 
-    class CheckErrors : public ASTConsumer, public RecursiveASTVisitor<CheckErrors> {
-    public:
-        explicit CheckErrors(CompilerInstance &ci);
+class CheckErrors : public IModelFactory, public RecursiveASTVisitor<CheckErrors> {
+ public:
+  CheckErrors(IFindFunctions *find_functions,
+              IFindInitialValues *find_initial_values,
+              IFindModules *find_modules,
+              IFindNewDatatype *find_new_datatype,
+              IFindPorts *find_ports,
+              IFindGlobal *find_global,
+              IFindNetlist *find_netlist,
+              IFindProcess *find_process,
+              IFindVariables *find_variables,
+              IFindSCMain *find_sc_main);
+  ~CheckErrors() override = default;
 
-        ~CheckErrors() override = default;
+  void setup(CompilerInstance *ci) override;
 
-        virtual bool preFire();
+  bool preFire();
+  bool fire();
+  bool postFire();
 
-        virtual bool fire();
+ private:
+  Model *model_;
+  CompilerInstance *ci_;
+  ASTContext *context_;
+  llvm::raw_ostream &ostream_;
+  std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
 
-        virtual bool postFire();
+  // DIP-Pointers
+  IFindFunctions *find_functions_;
+  IFindInitialValues *find_initial_values_;
+  IFindGlobal *find_global_;
+  IFindModules *find_modules_;
+  IFindPorts *find_ports_;
+  IFindNetlist *find_netlist_;
+  IFindProcess *find_process_;
+  IFindVariables *find_variables_;
+  IFindNewDatatype *find_new_datatype_;
+  IFindDataFlowFactory * find_data_flow_factory_;
+  IFindSCMain *find_sc_main_;
 
-    private:
-        Model *model;
-        CompilerInstance &_ci;
-        ASTContext &_context;
-        SourceManager &_sm;
-        llvm::raw_ostream &_os;
-        std::vector<std::string> unimportantModules; //! List containing unimportant modules
+  //Methods
+  void HandleTranslationUnit(ASTContext &context) override;
 
-        //Methods
-        void HandleTranslationUnit(ASTContext &context) override;
+  void addModules(clang::TranslationUnitDecl *decl);
 
-        void addModules(clang::TranslationUnitDecl *decl);
+  void addGlobalConstants(TranslationUnitDecl *pDecl);
 
-        void addGlobalConstants(TranslationUnitDecl *pDecl);
+  void addPorts(Module *module, clang::CXXRecordDecl *decl);
 
-        void addPorts(Module *module, clang::CXXRecordDecl *decl);
+  void addFunctions(Module *module, CXXRecordDecl *decl);
 
-        void addFunctions(Module *module, CXXRecordDecl *decl);
+  void addBehavior(Module *module, clang::CXXRecordDecl *decl);
 
-        void addBehavior(Module *module, clang::CXXRecordDecl *decl);
+  void addVariables(Module *module, clang::CXXRecordDecl *decl);
 
-        void addVariables(Module *module, clang::CXXRecordDecl *decl);
-    };
-
+};
 
 }
 #endif //DESCAM_CHECKERRORS_H

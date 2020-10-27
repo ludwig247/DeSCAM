@@ -5,56 +5,43 @@
 #ifndef SCAM_FINDPROCESS_H
 #define SCAM_FINDPROCESS_H
 
+#include "IFindProcess.h"
+
 #include <vector>
 #include <string>
 #include <map>
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "GetClangProcess.h"
+#include "IFindDataFlowFactory.h"
 
 #include "enums.h"
 
+namespace DESCAM {
+/*!
+ * \brief Class searches for process declartions within a sc_module
+ *
+ * For now, only modules with one thread are allowed. This should be changed in future!
+ * BUT: a merge between the suspension automats of the differnt methods has to be done
+ *
+ * //TODO: rethink finding of proccesses? Too complicated
+ * //TODO: only allow threads
+ */
+class FindProcess : public IFindProcess {
+ public:
+  explicit FindProcess(IFindDataFlowFactory *find_data_flow_factory);
+  ~FindProcess() override = default;
 
-namespace DESCAM{
-    /*!
-     * \brief Class searches for process declartions within a sc_module
-     *
-     * For now, only modules with one thread are allowed. This should be changed in future!
-     * BUT: a merge between the suspension automats of the differnt methods has to be done
-     *
-     * //TODO: rethink finding of proccesses? Too complicated
-     * //TODO: only allow threads
-     */
-    class FindProcess: public clang::RecursiveASTVisitor<FindProcess>  {
-    public:
+  bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module, Model *model) override;
+  //Getter
+  std::map<int, DESCAM::CfgNode *> getCfgArg() override;
+  std::shared_ptr<PropertySuite> getPropertySuite() override;
 
-        FindProcess(clang::CXXRecordDecl* recordDecl);
-        virtual ~FindProcess();
-
-        /// Virtual methods from RecursiveASTVisitor
-        virtual bool VisitStringLiteral(clang::StringLiteral *s);
-        virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *md);
-        virtual bool VisitMemberExpr(clang::MemberExpr *e);
-
-        //Getter
-        const std::map<std::string, std::pair<clang::CXXMethodDecl *, PROCESS_TYPE>>& getProcessMap();
-        bool isValidProcess() const;
-        clang::CXXMethodDecl * getProcess() const;
-
-
-    private:
-        clang::CXXRecordDecl* recordDecl;
-        PROCESS_TYPE processType; //! Method, Thread, Process
-        clang::Stmt *_constructorStmt;
-
-        std::map<std::string, std::pair<clang::CXXMethodDecl*, PROCESS_TYPE> > processMap; //! <processName, <MethodDecl, processType> >
-        std::vector<clang::CXXMethodDecl*> otherFunctions;
-
-        int _pass;
-
-
-    };
+ private:
+  clang::CXXRecordDecl *record_decl_;
+  IFindDataFlowFactory *find_data_flow_factory_;
+  std::map<int, DESCAM::CfgNode *> cfg_arg_;
+  std::shared_ptr<PropertySuite> property_suite_;
+};
 }
-
-
-
 
 #endif //SCAM_FINDPROCESS_H

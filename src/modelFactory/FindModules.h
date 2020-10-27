@@ -3,29 +3,31 @@
 
 #include <map>
 #include <string>
+
+#include "IFindModules.h"
 #include "clang/AST/RecursiveASTVisitor.h"
-//#include "FindModule.h"
+
 
 namespace DESCAM {
 
-    /*
-     * \brief Finds all modules defined by the user
-     *
-     * Ignores modules that are defined by system_c
-     *
-     */
-    class FindModules : public clang::RecursiveASTVisitor<FindModules> {
-    public:
+/*
+ * \brief Finds all modules defined by the user
+ *
+ * Ignores modules that are defined by system_c
+ *
+ */
 
-        FindModules(clang::TranslationUnitDecl *);
+class FindModules : public IFindModules, public clang::RecursiveASTVisitor<FindModules> {
+ public:
+  FindModules() = default;
 
-        virtual bool VisitCXXRecordDecl(clang::CXXRecordDecl *);
+  void setup(clang::TranslationUnitDecl *decl) override;
+  bool VisitCXXRecordDecl(clang::CXXRecordDecl *);
+  const std::map<std::string, clang::CXXRecordDecl *> &getModuleMap() override;
 
-        const std::map<std::string, clang::CXXRecordDecl *> & getModuleMap();
+ private:
+  std::map<std::string, clang::CXXRecordDecl *> module_map_;
 
-    private:
-        std::map<std::string, clang::CXXRecordDecl *> _moduleMap;
-
-    };
+};
 }
 #endif

@@ -5,139 +5,68 @@
 #include "FindProcess.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "CFGFactory.h"
+#include "CommandLineParameter.h"
+#include "Optimizer/Optimizer.h"
+#include "OperationFactory.h"
+#include "PropertyFactory.h"
 
-
-DESCAM::FindProcess::FindProcess(clang::CXXRecordDecl* recordDecl):
-        recordDecl(recordDecl),
-        processType(PROCESS_TYPE ::NONE),
-        _constructorStmt (NULL),
-        _pass(1){
-
-    /// Pass 1:
-    /// Find the constructor definition, and the Stmt* that has the code for it.
-    /// Set the _constructorStmt pointer.
-    //  _os << "\n>>>> PASS 1\n";
-
-    TraverseDecl (recordDecl);
-    //  _os << "\n EntryFunctions found: " << _entryFunctions.size() << "\n";
-    _pass = 2;
-
-    //    _os << "\n>>>> PASS 2\n";
-    /// Pass 2:
-    /// Get the entry function name from constructor
-    TraverseStmt (_constructorStmt);
-    _pass = 3;
-
-    /// Pass 3:
-    /// Find the CXXMethodDecl* to the entry function
-    TraverseDecl (recordDecl);
-    _pass = 4;
+DESCAM::FindProcess::FindProcess(DESCAM::IFindDataFlowFactory *find_data_flow_factory) :
+    find_data_flow_factory_(find_data_flow_factory) {
 
 }
 
-DESCAM::FindProcess::~FindProcess() {
-
-}
-
-/* ! First visitor that is called
- * 	Find the constructor definition, and the Stmts* that has the code for it.
- * 	set the _constructorStmt pointer.
- * 	*/
-bool DESCAM::FindProcess::VisitCXXMethodDecl(clang::CXXMethodDecl *md) {
-
-    //Track all methods
-    otherFunctions.push_back (md);
-
-    switch (_pass){
-        case 1:{
-            /// Check if method is a constructor
-            if (clang::CXXConstructorDecl * cd = clang::dyn_cast<clang::CXXConstructorDecl>(md))            {
-                const clang::FunctionDecl * fd = NULL;
-                cd->getBody (fd);
-                if (cd->hasBody ()){
-                    _constructorStmt = cd->getBody ();
-                }
-            }
-            break;
-        }
-        case 2:break;
-        case 3:{
-            /// Check if name is the same as in processMap
-            for (auto& process: this->processMap){
-                if (md->getNameAsString () == process.first){
-                    if (md != NULL){
-                        process.second.first = md;
-                    }
-                }
-            }
-            break;
-        }
-    }
+bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
+                                clang::CompilerInstance *ci,
+                                Module *module,
+                                Model *model) {
+  assert(record_decl);
+  if (record_decl_ == record_decl) {
     return true;
-}
+  } else {
+    record_decl_ = record_decl;
+    bool success = true;
+    GetClangProcess get_clang_process(success, record_decl_);
 
-/*!
- * \brief second visitor that is called
- */
-bool DESCAM::FindProcess::VisitMemberExpr(clang::MemberExpr *e) {
-    switch (_pass){
-        case 2:{
-            std::string	memberName = e->getMemberDecl ()->getNameAsString ();
-            if (memberName == "create_method_process"){
-                processType = PROCESS_TYPE ::METHOD;
-            }
-            else if (memberName == "create_thread_process"){
-                processType = PROCESS_TYPE ::THREAD;
-            }
-            else if (memberName == "create_cthread_process"){
-                processType = PROCESS_TYPE ::CTHREAD;
-            }
-            break;
-        }
-        default:break;
+    if (!success) return success;
+
+    clang::CXXMethodDecl *methodDecl;
+    if (get_clang_process.isValidProcess()) {
+      methodDecl = get_clang_process.getProcess();
     }
-    return true;
-}
+    /*
+     * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
+     */
+    DESCAM::CFGFactory cfgFactory(methodDecl, ci, module, find_data_flow_factory_, true);
 
-/*!
- * \brief The third visitor that is called
- */
-bool DESCAM::FindProcess::VisitStringLiteral(clang::StringLiteral *s){
-    switch (_pass){
-        case 2:{
-            //Create new entry for process
-            std::string processName = s->getString();
-            auto innerEntry = std::pair<clang::CXXMethodDecl*, DESCAM::PROCESS_TYPE>(nullptr, processType);
-            auto entry = std::pair<std::string, std::pair<clang::CXXMethodDecl*, DESCAM::PROCESS_TYPE> >(processName,innerEntry);
+    if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
+    DESCAM::CfgNode::node_cnt = 0;
+    DESCAM::State::state_cnt = 0;
+    DESCAM::Operation::operations_cnt = 0;
+    auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
 
-            /// Create the object to handle multiple entry functions.
-            if (processType != 0){
-                this->processMap.insert(entry);
-            }
-            break;
-        }
-        default:break;
+    if (!optOptionsSet.empty()) {
+      DESCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, model, optOptionsSet);
+      this->cfg_arg_ = opt.getCFG();
+      DESCAM::OperationFactory operationFactory(this->cfg_arg_, module);
+      PropertyFactory propertyFactory(module);
+
+      this->property_suite_ = propertyFactory.getPropertySuite();
+    } else {
+      DESCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
+      this->cfg_arg_ = test.getCFG();
+      DESCAM::OperationFactory operationFactory(this->cfg_arg_, module);
+      PropertyFactory propertyFactory(module);
+
+      this->property_suite_ = propertyFactory.getPropertySuite();
     }
-    return true;
+
+    return success;
+  }
 }
-
-
-const std::map<std::string, std::pair<clang::CXXMethodDecl *, DESCAM::PROCESS_TYPE>> & DESCAM::FindProcess::getProcessMap() {
-    return this->processMap;
+std::map<int, DESCAM::CfgNode *> DESCAM::FindProcess::getCfgArg() {
+  return this->cfg_arg_;
 }
-
-bool DESCAM::FindProcess::isValidProcess() const {
-    if(this->processMap.size() == 1){
-        auto process = (*this->processMap.begin());
-        if(process.second.second == DESCAM::PROCESS_TYPE::THREAD){
-            return true;
-        }else TERMINATE("Process: "+process.first+ " is not an SC_THREAD");
-    }else TERMINATE(" Multiple proccess defined. Only one allowed");
-}
-
-
-clang::CXXMethodDecl* DESCAM::FindProcess::getProcess() const {
-    if(this->processMap.size() == 1){
-        return this->processMap.begin()->second.first;
-    }else TERMINATE(" Zero or >2 proccesses defined. Exactly one process is required");
+std::shared_ptr<DESCAM::PropertySuite> DESCAM::FindProcess::getPropertySuite() {
+  return this->property_suite_;
 }

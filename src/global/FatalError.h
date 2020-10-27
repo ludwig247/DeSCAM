@@ -17,11 +17,11 @@ namespace DESCAM {
      *  When this an object of this class is thrown, it is only caught in the main,
      *  this guarantees that stack unwinding happens correctly and all destructors are called
      */
-    class FatalError {
+ class FatalError : public std::exception {
     public:
-        FatalError() noexcept = default;;
+        FatalError() noexcept = default;
 
-        ~FatalError() noexcept = default;;
+        ~FatalError() noexcept override = default;
     };
 
 /** A macro wrapping try catch blocks for handling FatalError */
