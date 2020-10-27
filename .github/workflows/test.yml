@@ -23,8 +23,14 @@ jobs:
 # DEFAULT WORKFLOW
       - name: Build System Generation
         run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
-      - name: Build 3rdParty libraries
-        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LIBS -- -j8
+      - name: Build GTEST
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j8
+      - name: Build Z3
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target Z3 -- -j8
+      - name: Build SYSTEMC
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target SYSTEMC -- -j8
+      - name: Build LLVM
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target LLVM -- -j8
       - name: Build DESCAM
         run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target DESCAM -- -j8
       - name: Build Tests
