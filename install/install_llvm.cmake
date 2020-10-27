@@ -40,8 +40,8 @@ else ()
             COMMENT "Enabling RTTI for 'LLVM' ${LLVM_VERSION}"
             # Insert RTTI requirement into CMakeLists.txt
             # FIXME This inserts the RTTI repeatedly. Check if it's already in the file.
-            COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt > tmp
-            COMMAND mv tmp ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM-${LLVM_VERSION}/llvm/CMakeLists.txt
+            COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM/llvm/CMakeLists.txt > tmp
+            COMMAND mv tmp ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM/llvm/CMakeLists.txt
             )
 
     if(NOT LLVM_VERSION VERSION_EQUAL LLVM_PREVIOUS_BUILD)
