@@ -19,7 +19,7 @@ TEST(TestCase1, FindPorts) /* NOLINT*/{
   getPortMap.insert(std::make_pair("b_in", &port1));
   getPortMap.insert(std::make_pair("m_out", &port2));
 
-  MockIFindPorts find_ports;
+  DESCAM::MOCK::MockIFindPorts find_ports;
   EXPECT_CALL(find_ports, setup(_, _, _))
       .Times(1);
   EXPECT_CALL(find_ports, getPortMap())
@@ -68,7 +68,7 @@ TEST(TestCase2, FindPorts) /* NOLINT*/{
   getPortMap.insert(std::make_pair("test_in", &port1));
   getPortMap.insert(std::make_pair("test_out", &port2));
 
-  MockIFindPorts find_ports;
+  DESCAM::MOCK::MockIFindPorts find_ports;
   EXPECT_CALL(find_ports, setup(_, _, _))
       .Times(1);
   EXPECT_CALL(find_ports, getPortMap())
@@ -117,7 +117,7 @@ TEST(TestCase3, FindPorts) /* NOLINT*/{
   getPortMap.insert(std::make_pair("test_in", &port1));
   getPortMap.insert(std::make_pair("test_out", &port2));
 
-  MockIFindPorts find_ports;
+  DESCAM::MOCK::MockIFindPorts find_ports;
   EXPECT_CALL(find_ports, setup(_, _, _))
       .Times(1);
   EXPECT_CALL(find_ports, getPortMap())

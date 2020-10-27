@@ -10,13 +10,14 @@ namespace DESCAM {
 //Constructor
 FindPorts::FindPorts(IFindNewDatatype *find_new_datatype) :
     record_decl_(nullptr),
-    find_new_datatype_(find_new_datatype) {}
+    find_new_datatype_(find_new_datatype) {
+  assert(find_new_datatype);
+}
 
 bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module) {
   assert(record_decl);
   assert(ci);
   assert(module);
-  std::cout << "TEST::Setup\n";
   if (record_decl == record_decl_) {
     return true;
   } else {
@@ -168,13 +169,6 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
   }
 }
 std::map<std::string, Port *> FindPorts::getPortMap() const {
-  std::cout << "TEST::getPortMap()\n";
-  for (auto &port:this->port_map) {
-    std::cout << " | String:" << port.first << "\n";
-    std::cout << " | | Port:" << port.second->getName() << " DataType:" << port.second->getDataType()->getName() << "\n";
-    std::cout << " | | | Interface:" << port.second->getInterface()->getName() << " Direction:"
-              << port.second->getInterface()->getDirection() << "\n";
-  }
   return this->port_map;
 }
 

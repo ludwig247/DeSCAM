@@ -23,6 +23,7 @@
 //Tests
 using namespace ::testing;
 #include "GMock_Test/tests/NoMocks.h"
+#include "GMock_Test/tests/modelFactory/FindDataFlow.h"
 #include "GMock_Test/tests/modelFactory/FindFunctions.h"
 #include "GMock_Test/tests/modelFactory/FindInitialValues.h"
 #include "GMock_Test/tests/modelFactory/FindNewDatatype.h"

@@ -15,7 +15,9 @@ namespace DESCAM {
 class FindDataFlowFactory : public IFindDataFlowFactory {
  public:
   explicit FindDataFlowFactory(IFindStateName *find_state_name) :
-      find_state_name_(find_state_name) {};
+      find_state_name_(find_state_name) {
+    assert(find_state_name);
+  };
   /**
    * @brief Creates a new instance of FindDataFlow
    * @param stmt ?
@@ -33,7 +35,6 @@ class FindDataFlowFactory : public IFindDataFlowFactory {
 //    find_data_flow->setup(stmt, module, ci, find_data_flow_factory, unsigned_flag);
 //    return find_data_flow;
 //  }
-  //FIXME: No default values on virtual methods
   IFindDataFlow *create_new(clang::Stmt *stmt,
                             Module *module,
                             clang::CompilerInstance *ci,

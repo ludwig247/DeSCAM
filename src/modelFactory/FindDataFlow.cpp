@@ -1020,20 +1020,33 @@ void DESCAM::FindDataFlow::clearExpressions() {
   this->expr_ = nullptr;
   this->stmt_ = nullptr;
 }
-bool DESCAM::FindDataFlow::setup(clang::Stmt *_stmt,
-                                 DESCAM::Module *_module_,
-                                 clang::CompilerInstance *_ci_,
-                                 bool _unsigned_flag) {
-  this->module_ = _module_;
-  this->ci_ = _ci_;
-  this->unsigned_flag_ = _unsigned_flag;
-  this->pass_ = 0;
 
-  clearExpressions();
-  TraverseStmt(_stmt);
+bool DESCAM::FindDataFlow::setup(clang::Stmt *stmt,
+                                 DESCAM::Module *module,
+                                 clang::CompilerInstance *ci,
+                                 bool _unsigned_flag) {
+  assert(module);
+  assert(ci);
+  assert(stmt);
+  this->module_ = module;
+  this->ci_ = ci;
+  this->unsigned_flag_ = _unsigned_flag;
+
+  TraverseStmt(stmt);
   return true;
 }
 DESCAM::FindDataFlow::FindDataFlow(DESCAM::IFindStateName *find_state_name,
                                    IFindDataFlowFactory *find_data_flow_factory) :
     find_state_name_(find_state_name),
-    find_data_flow_factory_(find_data_flow_factory) {}
+    find_data_flow_factory_(find_data_flow_factory),
+    pass_(0),
+    module_(nullptr),
+    stmt_(nullptr),
+    ci_(nullptr),
+    expr_(nullptr),
+    lhs_expr_(nullptr),
+    rhs_expr_(nullptr),
+    unsigned_flag_(false) {
+  assert(find_state_name);
+  assert(find_data_flow_factory);
+}

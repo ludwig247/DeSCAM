@@ -1,0 +1,11 @@
+//
+// Created by burr on 27.10.20.
+//
+
+#ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOW_H_
+#define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOW_H_
+
+#include "MockIFindDataFlow.h"
+#include "MockIFindDataFlowFactory.h"
+
+#endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOW_H_
