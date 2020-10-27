@@ -11,6 +11,7 @@
 #include "Module.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "enums.h"
+#include "CfgBlock.h"
 
 namespace DESCAM {
 
@@ -23,8 +24,7 @@ class IFindProcess {
   virtual ~IFindProcess() = default;
 
   virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci, Module *module, Model *model) = 0;
-  virtual std::map<int, DESCAM::CfgNode *> getCfgArg() const = 0;
-  virtual std::shared_ptr<PropertySuite> getPropertySuite() const = 0;
+  virtual const std::map<int, CfgBlock *> &getCFG() const = 0;
 };
 }
 

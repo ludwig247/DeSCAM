@@ -26,6 +26,7 @@ using namespace ::testing;
 #include "GMock_Test/tests/modelFactory/FindFunctions.h"
 #include "GMock_Test/tests/modelFactory/FindInitialValues.h"
 #include "GMock_Test/tests/modelFactory/FindNewDatatype.h"
+#include "GMock_Test/tests/modelFactory/FindPorts.h"
 #include "GMock_Test/tests/modelFactory/FindProcess.h"
 #include "GMock_Test/tests/modelFactory/FindStateName.h"
 #include "GMock_Test/tests/modelFactory/FindVariables.h"

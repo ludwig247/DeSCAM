@@ -5,23 +5,22 @@
 #include "FindProcess.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
-#include "CFGFactory.h"
 #include "CommandLineParameter.h"
 #include "Optimizer/Optimizer.h"
 #include "OperationFactory.h"
 #include "PropertyFactory.h"
+#include "CFGFactory.h"
 
 DESCAM::FindProcess::FindProcess(DESCAM::IFindDataFlowFactory *find_data_flow_factory) :
-    find_data_flow_factory_(find_data_flow_factory) {
-
-}
+    find_data_flow_factory_(find_data_flow_factory),
+    record_decl_(nullptr) {}
 
 bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
                                 clang::CompilerInstance *ci,
                                 Module *module,
                                 Model *model) {
-  std::cout << "TEST::setup\n";
-  std::cout << " | ModuleName:" << module->getName() << "\n";
+  /*std::cout << "TEST::setup\n";
+  std::cout << " | ModuleName:" << module->getName() << "\n";*/
   assert(record_decl);
   if (record_decl_ == record_decl) {
     return true;
@@ -40,62 +39,16 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
      * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
      */
     DESCAM::CFGFactory cfgFactory(methodDecl, ci, module, find_data_flow_factory_, true);
-
-    if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
-    DESCAM::CfgNode::node_cnt = 0;
-    DESCAM::State::state_cnt = 0;
-    DESCAM::Operation::operations_cnt = 0;
-    auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
-
-    if (!optOptionsSet.empty()) {
-      DESCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, model, optOptionsSet);
-      this->cfg_arg_ = opt.getCFG();
-      DESCAM::OperationFactory operationFactory(this->cfg_arg_, module);
-      PropertyFactory propertyFactory(module);
-
-      this->property_suite_ = propertyFactory.getPropertySuite();
-    } else {
-      DESCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
-      this->cfg_arg_ = test.getCFG();
-      DESCAM::OperationFactory operationFactory(this->cfg_arg_, module);
-      PropertyFactory propertyFactory(module);
-
-      this->property_suite_ = propertyFactory.getPropertySuite();
-    }
+    this->cfg_ = cfgFactory.getControlFlowMap();
 
     return success;
   }
 }
-std::map<int, DESCAM::CfgNode *> DESCAM::FindProcess::getCfgArg() const {
-  std::cout << "TEST::getCfgArg\n";
-  std::cout << " | Size:" << cfg_arg_.size() << "\n";
-  for (auto node:cfg_arg_) {
-    std::cout << " | | Int:" << node.first << " NodeName:" << node.second->getName() << " Stmt:"
-              << node.second->print();
-  }
-  return this->cfg_arg_;
-}
-std::shared_ptr<DESCAM::PropertySuite> DESCAM::FindProcess::getPropertySuite() const {
-  std::cout << "TEST::getPropertySuite Name:" << property_suite_->getName() << "\n";
-  std::cout << " | SyncSignals:" << property_suite_->getSyncSignals().size()<< "\n";
-  for(auto signal:property_suite_->getSyncSignals()){
-    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
-  }
-  std::cout << " | NotifySignals:" << property_suite_->getNotifySignals().size()<< "\n";
-  for(auto signal:property_suite_->getNotifySignals()){
-    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
-  }
-  std::cout << " | DPSignals:" << property_suite_->getDpSignals().size()<< "\n";
-  for(auto signal:property_suite_->getDpSignals()){
-    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
-  }
-  std::cout << " | VisibleRegisters:" << property_suite_->getVisibleRegisters().size()<< "\n";
-  for(auto signal:property_suite_->getVisibleRegisters()){
-    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
-  }
-  std::cout << " | States:" << property_suite_->getStates().size()<< "\n";
-  for(auto signal:property_suite_->getStates()){
-    std::cout << " | | Name:"<< signal->getFullName() << " IsSub:"<< signal->isSubVar() << "\n";
-  }
-  return this->property_suite_;
+const std::map<int, DESCAM::CfgBlock *> &DESCAM::FindProcess::getCFG() const {
+  /*std::cout << "TEST::getCFG" << "\n";
+  std::cout << " | Size:" << this->cfg_.size() << "\n";aw
+  for (auto &block:this->cfg_) {
+    std::cout << " | | Int:" << block.first << ", Block:" << "\n" << block.second->print() << "\n";
+  }*/
+  return this->cfg_;
 }

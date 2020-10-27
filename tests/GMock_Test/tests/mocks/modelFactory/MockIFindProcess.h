@@ -22,9 +22,7 @@ class MockIFindProcess : public IFindProcess {
               (clang::CXXRecordDecl * recordDecl, clang::CompilerInstance * ci, Module * module, Model * model),
               (override));
   //Getter
-  MOCK_METHOD((std::map<int, DESCAM::CfgNode *>), getCfgArg, (), (const, override));
-  MOCK_METHOD((std::shared_ptr<PropertySuite>), getPropertySuite, (), (const, override));
-
+  MOCK_METHOD((const std::map<int, DESCAM::CfgBlock *> &), getCFG, (), (const, override));
 };
 }
 }

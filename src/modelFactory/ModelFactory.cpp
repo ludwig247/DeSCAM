@@ -219,8 +219,27 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
 
   //Find the process describing the behavior
   find_process_->setup(decl, ci_, module, model_);
-  module->setCFG(find_process_->getCfgArg());
-  module->setPropertySuite(find_process_->getPropertySuite());
+  auto cfg = find_process_->getCFG();
+
+  if (cfg.empty()) TERMINATE("CFG is empty!");
+  DESCAM::CfgNode::node_cnt = 0;
+  DESCAM::State::state_cnt = 0;
+  DESCAM::Operation::operations_cnt = 0;
+  auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
+
+  if (!optOptionsSet.empty()) {
+    DESCAM::Optimizer opt(cfg, module, model_, optOptionsSet);
+    module->setCFG(opt.getCFG());
+    DESCAM::OperationFactory operationFactory(opt.getCFG(), module);
+    PropertyFactory propertyFactory(module);
+    module->setPropertySuite(propertyFactory.getPropertySuite());
+  } else {
+    DESCAM::CreateRealCFG test(cfg);
+    module->setCFG(test.getCFG());
+    DESCAM::OperationFactory operationFactory(test.getCFG(), module);
+    PropertyFactory propertyFactory(module);
+    module->setPropertySuite(propertyFactory.getPropertySuite());
+  }
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
 
