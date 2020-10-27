@@ -40,10 +40,15 @@ set(GTEST_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 string(REGEX MATCH "SYSTEMC (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
 set(SYSTEMC_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 
+<<<<<<< HEAD
 message(STATUS "Building with LLVM ${LLVM_VERSION}")
 message(STATUS "Building with Z3 ${Z3_VERSION}")
 message(STATUS "Building with GTEST ${GTEST_VERSION}")
 message(STATUS "Building with SYSTEMC ${SYSTEMC_VERSION}")
+=======
+message(STATUS "PREVIOUS VERSION is ${LLVM_PREVIOUS_BUILD}")
+message(STATUS "CURRENT VERSION is ${LLVM_VERSION}")
+>>>>>>> CMake External libraries now install directly to the correct destination folder
 
 if(TRUE)
     file(WRITE build_info "LLVM ${LLVM_VERSION}\n")

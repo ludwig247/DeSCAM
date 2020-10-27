@@ -27,7 +27,6 @@ else ()
 
             INSTALL_COMMAND make install
             )
-
     ExternalProject_Add_Step(Z3 FORCED_INSTALL
             DEPENDERS install
             COMMAND ${CMAKE_COMMAND} -E echo "Installing Z3-${Z3_VERSION}"

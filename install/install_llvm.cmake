@@ -53,7 +53,6 @@ else ()
             ALWAYS TRUE
             )
 
-
     if (LLVM_VERSION VERSION_LESS 4.0.0)
         ExternalProject_Add_Step(LLVM CLANG
                 DEPENDEES download
