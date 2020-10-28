@@ -260,7 +260,7 @@ void DESCAM::CreatePropertySuite::addOperations(const Module *module, std::share
                 if (interface->isSlaveOut()) continue;
                 if (interface->isMasterIn()) continue;
 
-/*                if (module->isSlave()) {
+                if (module->isSlave()) {
                     if (usedPortsList.find(port.second) != usedPortsList.end()) {
                         auto commitment = new Assignment(port.second->getNotify(), new BoolValue(true));
                         newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
@@ -268,7 +268,7 @@ void DESCAM::CreatePropertySuite::addOperations(const Module *module, std::share
                         auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
                         newProperty->addCommitment(new TemporalExpr(t_plus_1, commitment));
                     }
-                } else {*/
+                } else {
                     if (port.second == operation->getNextState()->getCommunicationPort()) { //if NextState is a wait state it will have null_ptr as CommunicationPort
                         auto commitment1 = new Assignment(port.second->getNotify(), new BoolValue(false));
                         auto commitment2 = new Assignment(port.second->getNotify(), new BoolValue(true));
@@ -283,7 +283,7 @@ void DESCAM::CreatePropertySuite::addOperations(const Module *module, std::share
                         auto commitment = new Assignment(port.second->getNotify(), new BoolValue(false));
                         newProperty->addCommitment(new TemporalExpr(t_plus_1, t_end, commitment));
                     }
-//                }
+                }
             }
             propertySuite->addProperty(newProperty);
         }
