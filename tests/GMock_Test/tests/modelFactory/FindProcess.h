@@ -52,7 +52,7 @@ TEST(TestCase1, FindProcess) /* NOLINT*/{
   getCfgMap.insert(std::make_pair(3, &block3));
   getCfgMap.insert(std::make_pair(4, &block4));
 
-  block2.addStmt(new While(new BoolValue(true)));
+  block2.setTerminator(new While(new BoolValue(true)));
 
   DESCAM::MOCK::MockIFindProcess find_process;
   EXPECT_CALL(find_process, setup(_, _, _, _))
@@ -138,7 +138,7 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
   getCfgMap.insert(std::make_pair(5, &block5));
   getCfgMap.insert(std::make_pair(6, &block6));
 
-  block2.addStmt(new While(new BoolValue(true)));
+  block2.setTerminator(new While(new BoolValue(true)));
 
   DESCAM::MOCK::MockIFindProcess find_process;
   EXPECT_CALL(find_process, setup(_, _, _, _))
@@ -176,11 +176,6 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
                                                       "+",
                                                       new FunctionOperand(test_var, paramMap)))));
         block4.addStmt(new Write(test_out, new VariableOperand(bar)));
-        std::cout << "getCfgMap" << "\n";
-        std::cout << " | Size:" << getCfgMap.size() << "\n";
-        for (auto &block:getCfgMap) {
-          std::cout << " | | Int:" << block.first << ", Block:" << "\n" << block.second->print() << "\n";
-        }
 
         return getCfgMap;
       }));
@@ -198,7 +193,7 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(DISABLED_TestCase3, FindProcess) /* NOLINT*/{
+TEST(TestCase3, FindProcess) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -253,32 +248,53 @@ TEST(DISABLED_TestCase3, FindProcess) /* NOLINT*/{
   getCfgMap.insert(std::make_pair(5, &block5));
   getCfgMap.insert(std::make_pair(6, &block6));
 
-  block2.addStmt(new While(new BoolValue(true)));
+  block2.setTerminator(new While(new BoolValue(true)));
+
+  DESCAM::Model *model_ = nullptr;
+  DESCAM::Module *module_ = nullptr;
 
   DESCAM::MOCK::MockIFindProcess find_process;
   EXPECT_CALL(find_process, setup(_, _, _, _))
-      .Times(1);
+      .Times(1)
+      .WillOnce(Invoke([&module_, &model_](Unused, Unused, DESCAM::Module *module, DESCAM::Model *model) {
+        module_ = module;
+        model_ = model;
+        return true;
+      }));
   EXPECT_CALL(find_process, getCFG())
       .Times(1)
-      .WillOnce(Invoke([&getCfgMap, &find_variables, &find_global, &find_ports, &find_functions, &block1, &block3, &block4]() -> const std::map<
+      .WillOnce(Invoke([&getCfgMap, &block1, &block3, &block4, &block6, &module_, &model_]() -> const std::map<
           int,
           DESCAM::CfgBlock *> & {
-        auto bar = find_variables->getVariableMap().find("bar")->second;
-        auto foo = find_variables->getVariableMap().find("foo")->second;
-        auto list = find_variables->getVariableMap().find("list")->second;
-        auto test_in = find_ports->getPortMap().find("test_in")->second;
-        auto test_out = find_ports->getPortMap().find("test_out")->second;
-        auto compute2 = find_functions->getFunctionDecls().find("compute2")->second;
-        auto compute = find_functions->getFunctionDecls().find("compute")->second;
+        auto bar = module_->getVariable("bar");
+        auto foo = module_->getVariable("foo");
+        auto list = module_->getVariable("list");
+        auto test_in = module_->getPort("test_in");
+        auto test_out = module_->getPort("test_out");
+        auto compute3 = model_->getGlobalFunctionMap().find("compute3")->second;
+        auto compute2 = model_->getGlobalFunctionMap().find("compute2")->second;
+        auto compute = model_->getGlobalFunctionMap().find("compute")->second;
 
         block1.addStmt(new Assignment(new VariableOperand(bar), new UnsignedValue(0)));
         block1.addStmt(new Assignment(new VariableOperand(foo), new IntegerValue(0)));
-        block1.addStmt(new Assignment(new ArrayOperand(list, new IntegerValue(0)), new UnsignedValue(0)));
-        block1.addStmt(new Assignment(new ArrayOperand(list, new IntegerValue(1)), new UnsignedValue(0)));
-        block1.addStmt(new Assignment(new ArrayOperand(list, new IntegerValue(2)), new UnsignedValue(0)));
-        block1.addStmt(new Assignment(new ArrayOperand(list, new IntegerValue(3)), new UnsignedValue(0)));
-        block1.addStmt(new Assignment(new ArrayOperand(list, new IntegerValue(4)), new UnsignedValue(0)));
-        block3.addStmt(new Read(test_in, new VariableOperand(foo)));
+        auto subVar = list->getSubVar("0");
+        auto subVarOp = new VariableOperand(subVar);
+        block1.addStmt(new Assignment(subVarOp, new UnsignedValue(0)));
+        subVar = list->getSubVar("1");
+        subVarOp = new VariableOperand(subVar);
+        block1.addStmt(new Assignment(subVarOp, new UnsignedValue(0)));
+        subVar = list->getSubVar("2");
+        subVarOp = new VariableOperand(subVar);
+        block1.addStmt(new Assignment(subVarOp, new UnsignedValue(0)));
+        subVar = list->getSubVar("3");
+        subVarOp = new VariableOperand(subVar);
+        block1.addStmt(new Assignment(subVarOp, new UnsignedValue(0)));
+        subVar = list->getSubVar("4");
+        subVarOp = new VariableOperand(subVar);
+        block1.addStmt(new Assignment(subVarOp, new UnsignedValue(0)));
+        auto *read = new Read(test_in, new VariableOperand(foo));
+        read->setStateName("idle");
+        block3.addStmt(read);
 
         std::map<std::string, DESCAM::Expr *> functionParamMap1;
         functionParamMap1.insert(std::make_pair("param", new VariableOperand(foo)));
@@ -295,13 +311,28 @@ TEST(DISABLED_TestCase3, FindProcess) /* NOLINT*/{
         std::map<std::string, DESCAM::Expr *> functionParamMap2_1;
         functionParamMap2_1.insert(std::make_pair("param", new UnsignedValue(3)));
         functionParamMap2_1.insert(std::make_pair("param2", new FunctionOperand(compute2, functionParamMap2_0)));
-        block3.addStmt(new Assignment(new VariableOperand(bar),new Arithmetic(new VariableOperand(bar),"+",new FunctionOperand(compute,functionParamMap2_1))));
+        block3.addStmt(new Assignment(new VariableOperand(bar),
+                                      new Arithmetic(new VariableOperand(bar),
+                                                     "+",
+                                                     new FunctionOperand(compute, functionParamMap2_1))));
+        std::map<std::string, DESCAM::Expr *> functionParamMap3;
+        subVar = list->getSubVar("0");
+        functionParamMap3.insert(std::make_pair("param", new VariableOperand(subVar)));
+        functionParamMap3.insert(std::make_pair("param2", new IntegerValue(5)));
+        block3.addStmt(new Assignment(new VariableOperand(bar),
+                                      new Arithmetic(new VariableOperand(bar),
+                                                     "+",
+                                                     new FunctionOperand(compute, functionParamMap3))));
 
-        std::cout << "getCfgMap" << "\n";
-        std::cout << " | Size:" << getCfgMap.size() << "\n";
-        for (auto &block:getCfgMap) {
-          std::cout << " | | Int:" << block.first << ", Block:" << "\n" << block.second->print() << "\n";
-        }
+        std::map<std::string, DESCAM::Expr *> functionParamMap4;
+        functionParamMap4.insert(std::make_pair("param",
+                                                new Relational(new VariableOperand(foo), ">", new IntegerValue(5))));
+        functionParamMap4.insert(std::make_pair("val", new VariableOperand(bar)));
+        block3.setTerminator(new If(new FunctionOperand(compute3, functionParamMap4)));
+
+        block4.addStmt(new Write(test_out, new VariableOperand(bar)));
+
+        block6.addStmt(new Write(test_out, new Arithmetic(new VariableOperand(bar), "+", new UnsignedValue(1))));
 
         return getCfgMap;
       }));

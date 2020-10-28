@@ -19,8 +19,6 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
                                 clang::CompilerInstance *ci,
                                 Module *module,
                                 Model *model) {
-  /*std::cout << "TEST::setup\n";
-  std::cout << " | ModuleName:" << module->getName() << "\n";*/
   assert(record_decl);
   if (record_decl_ == record_decl) {
     return true;
@@ -45,10 +43,5 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
   }
 }
 const std::map<int, DESCAM::CfgBlock *> &DESCAM::FindProcess::getCFG() const {
-  /*std::cout << "TEST::getCFG" << "\n";
-  std::cout << " | Size:" << this->cfg_.size() << "\n";aw
-  for (auto &block:this->cfg_) {
-    std::cout << " | | Int:" << block.first << ", Block:" << "\n" << block.second->print() << "\n";
-  }*/
   return this->cfg_;
 }
