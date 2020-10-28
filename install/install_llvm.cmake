@@ -63,6 +63,6 @@ else ()
                 # Create symbolic links for the chosen version. Change the link when switching versions.
                 COMMAND cp -r <SOURCE_DIR>/clang <SOURCE_DIR>/llvm/tools
                 )
-        #ExternalProject_Add_StepTargets(LLVM-${LLVM_VERSION} CLANG)
+        #ExternalProject_Add_StepTargets(LLVM CLANG)
     endif ()
 endif ()

@@ -33,6 +33,6 @@ else ()
             COMMENT "Installing GTEST-${GTEST_VERSION}"
             ALWAYS TRUE
             )
-    ExternalProject_Add_StepTargets(GTEST FORCED_INSTALL)
+    #ExternalProject_Add_StepTargets(GTEST FORCED_INSTALL)
 
 endif ()

@@ -147,6 +147,9 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
-#add_custom_target(DESCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
+add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
+add_custom_command(TARGET SCAM
+        POST_BUILD
+        COMMAND cmake --build ${PROJECT_BINARY_DIR}/ --target DESCAM -- -j 4)
 
 # TODO maybe for safety erase build folder each time LIBS is build?
