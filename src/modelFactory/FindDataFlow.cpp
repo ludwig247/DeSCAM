@@ -903,6 +903,7 @@ void DESCAM::FindDataFlow::switchPassExpr(DESCAM::Expr *expr) {
 }
 
 DESCAM::Expr *DESCAM::FindDataFlow::getExpr() const {
+  /*std::cout << "FindDataFlow::getExpr\n";*/
   return expr_;
 }
 
@@ -999,6 +1000,7 @@ bool DESCAM::FindDataFlow::VisitArraySubscriptExpr(clang::ArraySubscriptExpr *ar
 }
 
 DESCAM::Stmt *DESCAM::FindDataFlow::getStmt() {
+  /*std::cout << "FindDataFlow::getStmt\n";*/
   return this->stmt_;
 }
 
@@ -1025,6 +1027,7 @@ bool DESCAM::FindDataFlow::setup(clang::Stmt *stmt,
                                  DESCAM::Module *module,
                                  clang::CompilerInstance *ci,
                                  bool _unsigned_flag) {
+  /*std::cout << "FindDataFlow::Setup\n";*/
   assert(module);
   assert(ci);
   assert(stmt);
@@ -1050,3 +1053,5 @@ DESCAM::FindDataFlow::FindDataFlow(DESCAM::IFindStateName *find_state_name,
   assert(find_state_name);
   assert(find_data_flow_factory);
 }
+
+/*int DESCAM::FindDataFlow::count = 0;*/

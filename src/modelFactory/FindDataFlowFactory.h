@@ -39,6 +39,8 @@ class FindDataFlowFactory : public IFindDataFlowFactory {
                             Module *module,
                             clang::CompilerInstance *ci,
                             bool unsigned_flag) override {
+    /*FindDataFlow::count++;
+    std::cout << "FACTORY::CREATE Nr:" << FindDataFlow::count << "\n";*/
     auto find_data_flow = new FindDataFlow(find_state_name_, this);
     find_data_flow->setup(stmt, module, ci, unsigned_flag);
     return find_data_flow;
