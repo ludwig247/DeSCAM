@@ -1,0 +1,35 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function b_out_sync;
+	b_out_sync = TestArray06.b_out_sync_d;
+endfunction
+function b_out_notify;
+	b_out_notify = TestArray06.b_out_notify_d;
+endfunction
+
+// DP SIGNALS //
+function bit[31:0] b_out_sig;
+	b_out_sig = TestArray06.b_out;
+endfunction
+function unsigned_4 m_in_sig;
+	m_in_sig = TestArray06.m_in;
+endfunction
+function bit[31:0] m_in_sig_0;
+	m_in_sig_0 = TestArray06.m_in[0];
+endfunction
+function bit[31:0] m_in_sig_1;
+	m_in_sig_1 = TestArray06.m_in[1];
+endfunction
+function bit[31:0] m_in_sig_2;
+	m_in_sig_2 = TestArray06.m_in[2];
+endfunction
+function bit[31:0] m_in_sig_3;
+	m_in_sig_3 = TestArray06.m_in[3];
+endfunction
+
+// VISIBLE REGISTERS //
+
+// STATES //
+function state_1;
+	state_1 = 1'b1;
+endfunction
