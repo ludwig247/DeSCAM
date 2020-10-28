@@ -38,3 +38,9 @@ gtest   |   1.8.0
 systemc |   2.3.1
 z3      |   4.8.6
 llvm    |   3.5.4
+
+# Build DESCAM
+   * `mkdir build`
+   * `cd build`
+   * `cmake ../`
+   * `make SCAM`
