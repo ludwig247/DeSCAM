@@ -23,4 +23,5 @@ class FindInstances: public IFindInstances {
 };
 }
 
+
 #endif //SCAM_SRC_MODELFACTORY_FINDINSTANCES_H_

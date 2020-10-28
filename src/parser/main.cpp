@@ -19,10 +19,10 @@
 #include "FindNewDatatype.h"
 #include "FindPorts.h"
 #include "FindGlobal.h"
-#include "GetClangNetlist.h"
+#include "FindInstances.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
-#include "GetClangMain.h"
+
 #include "FindStateName.h"
 #include "FindInstances.h"
 
