@@ -321,8 +321,10 @@ std::string PrintSVA::operations() {
         if (!op->getFreezeSignals().empty()) {
             for (auto f : op->getFreezeSignals()) {
                 std::cout << f.first->getFullName("_") << std::endl;
-                //ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
-                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << freezeSigSuffix << ";\n";
+                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << freezeSigSuffix;
+                if (f.first->getDataType()->isArrayType())
+                    ss << " [" << f.first->getDataType()->getArraySize() - 1 << ":0]";
+                ss << ";\n";
             }
             for (auto f : op->getFreezeSignals()) {
                 if(f.first->isSubVar() && f.first->getParentDataType()->isArrayType()){
