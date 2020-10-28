@@ -23,7 +23,6 @@ class IFindDataFlowFactory;
  */
 class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<FindDataFlow> {
  public:
-  /*static int count;*/
 
   FindDataFlow(DESCAM::IFindStateName *find_state_name, IFindDataFlowFactory *find_data_flow_factory);
   bool setup(clang::Stmt *stmt, Module *module,

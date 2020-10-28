@@ -1053,5 +1053,3 @@ DESCAM::FindDataFlow::FindDataFlow(DESCAM::IFindStateName *find_state_name,
   assert(find_state_name);
   assert(find_data_flow_factory);
 }
-
-/*int DESCAM::FindDataFlow::count = 0;*/
