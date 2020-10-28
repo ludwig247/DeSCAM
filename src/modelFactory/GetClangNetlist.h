@@ -1,23 +1,22 @@
 #ifndef _NETLIST_GEN_H_
 #define _NETLIST_GEN_H_
 
-#include "IFindNetlist.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include <map>
 
 namespace DESCAM {
 
-class GetClangNetlist : public IFindNetlist, public clang::RecursiveASTVisitor<GetClangNetlist> {
+class GetClangNetlist : public clang::RecursiveASTVisitor<GetClangNetlist> {
  public:
 
-  ~GetClangNetlist() override = default;
+  ~GetClangNetlist()  = default;
 
   virtual bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce);
 
-  bool setup(clang::FunctionDecl *decl) override;
+  bool setup(clang::FunctionDecl *decl) ;
   //GETTER
-  std::map<std::string, std::string> getInstanceMap() override;
-  std::map<std::pair<std::string, std::string>, clang::DeclRefExpr *> getChannelMap() override;
+  std::map<std::string, std::string> getInstanceMap() ;
+  std::map<std::pair<std::string, std::string>, clang::DeclRefExpr *> getChannelMap() ;
 
  private:
   clang::FunctionDecl *decl_;

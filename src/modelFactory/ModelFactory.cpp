@@ -29,11 +29,10 @@ DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
                                    IFindModules *find_modules,
                                    IFindPorts *find_ports,
                                    IFindGlobal *find_global,
-                                   IFindNetlist *find_netlist,
                                    IFindProcess *find_process,
                                    IFindVariables *find_variables,
-                                   IFindSCMain *find_sc_main,
-                                   IFindDataFlowFactory *find_data_flow_factory) :
+                                   IFindDataFlowFactory *find_data_flow_factory,
+                                   IFindInstances * find_instances) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
@@ -42,11 +41,10 @@ DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
     find_modules_(find_modules),
     find_ports_(find_ports),
     find_global_(find_global),
-    find_netlist_(find_netlist),
     find_process_(find_process),
     find_variables_(find_variables),
-    find_sc_main_(find_sc_main),
-    find_data_flow_factory_(find_data_flow_factory) {
+    find_data_flow_factory_(find_data_flow_factory),
+    find_instances_(find_instances){
 
   //Unimportant modules
   this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
@@ -129,80 +127,9 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
 //! Add structure ...
 void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
+  find_instances_->setup(tu,this->model_);
+  this->model_->addTopInstance(find_instances_->getModuleInstance());
 
-  find_sc_main_->setup(tu);
-
-  DESCAM::IFindInstances * find_instances = new FindInstances();
-  find_instances->setup(tu,this->model_);
-  this->model_->addTopInstance(find_instances->getModuleInstance());
-
-//
-//  //The top instance is the sc_main. It doesn't contain any ports
-//  //Create empty dummy module for sc_main
-//  auto sc_main = new Module("main");
-//  //this->model->addModule(sc_main);
-//  //Create instance for sc_main and add to model
-//  auto top_instance = new ModuleInstance("TopInstance", sc_main);
-//  //std::cout << model->getModuleInstance() << std::cout;
-//  model_->addTopInstance(top_instance);
-//  if (!find_sc_main_->isScMainFound()) {
-//    std::cout << "" << std::endl;
-//    std::cout << "======================" << std::endl;
-//    std::cout << "Instances:" << std::endl;
-//    std::cout << "----------------------" << std::endl;
-//    std::cout << "-I- No main found, can't create netlist" << std::endl;
-//    return;
-//  }
-//
-//  find_netlist_->setup(find_sc_main_->getSCMainFunctionDecl());
-//  //findNetlist.getInstanceMap() = std::map<string instance_name,string sc_module>
-//  for (const auto &instance: find_netlist_->getInstanceMap()) {
-//    //Search for pointer in module map
-//    Module *module = model_->getModules().find(instance.second)->second;
-//    //In case module is not found -> error!
-//    if (!module) {TERMINATE("ModelFactory::addInstances module not found"); }
-//    //Add instance to model
-//    top_instance->addModuleInstance(new ModuleInstance(instance.first, module));
-//  }
-//  //ChannelMap = <<Instance,Port>, channelDecl*> >
-//  //Create exactly one channel for each channelDecl and attach respective ports to this channel
-//  for (const auto &channel: find_netlist_->getChannelMap()) {
-//    //Search instance in model ( instanceName = channel.first.first)
-//    std::string instanceName = channel.first.first;
-//    ModuleInstance *instance;
-//    instance = top_instance->getModuleInstances().find(instanceName)->second;
-//
-//    //Channel name and type
-//    std::string channel_name = channel.second->getNameInfo().getAsString();
-//
-//    //Check whether channel is already created
-//    //If channel does not already exist
-//    if (top_instance->getChannelMap().count(channel_name) == 0) {
-//      //Create new channel
-//      //Add to channelMap of instance
-//      top_instance->addChannel(new Channel(channel_name));
-//    }
-//    //Otherwise receive current channel
-//    Channel *current_channel = top_instance->getChannelMap().find(channel_name)->second;
-//
-//    //Add port to channel
-//    //Search search port in instance.module ( portName = channel.first.second )
-//    std::string port_name = channel.first.second;
-//    Port *port = instance->getStructure()->getPorts().find(port_name)->second;
-//
-//    //Differ between in/output port
-//    std::string direction = port->getInterface()->getDirection();
-//    //Bind Port to Channel
-//    if (direction == "in") {
-//      current_channel->setToPort(port);
-//      current_channel->setToInstance(instance);
-//    } else if (direction == "out") {
-//      current_channel->setFromPort(port);
-//      current_channel->setFromInstance(instance);
-//    } else {TERMINATE("Interface direction not supported"); }
-//    //Add instance to channel
-//
-//  }
 }
 
 //! Use FindPorts and FindNetlist in order to add the ports to the model
@@ -566,3 +493,4 @@ void DESCAM::ModelFactory::removeUnused() {
     }
   }
 }
+
