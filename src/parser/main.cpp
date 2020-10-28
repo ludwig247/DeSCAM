@@ -19,10 +19,10 @@
 #include "FindNewDatatype.h"
 #include "FindPorts.h"
 #include "FindGlobal.h"
-#include "FindNetlist.h"
+#include "GetClangNetlist.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
-#include "FindSCMain.h"
+#include "GetClangMain.h"
 #include "FindStateName.h"
 
 int main(int argc, const char **argv) {
@@ -51,8 +51,8 @@ int main(int argc, const char **argv) {
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
+  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());

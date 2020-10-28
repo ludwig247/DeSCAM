@@ -1,9 +1,9 @@
-#include "FindNetlist.h"
+#include "GetClangNetlist.h"
 //#include <iostream>
 
 namespace DESCAM {
 
-bool FindNetlist::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce) {
+bool GetClangNetlist::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce) {
   bool foundME = false;
   std::string moduleName;
   std::string instanceName;
@@ -38,15 +38,15 @@ bool FindNetlist::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce) {
   return true;
 }
 
-std::map<std::string, std::string> FindNetlist::getInstanceMap() {
+std::map<std::string, std::string> GetClangNetlist::getInstanceMap() {
   return this->instance_map_;
 }
 
-std::map<std::pair<std::string, std::string>, clang::DeclRefExpr *> FindNetlist::getChannelMap() {
+std::map<std::pair<std::string, std::string>, clang::DeclRefExpr *> GetClangNetlist::getChannelMap() {
   return this->channel_map_;
 }
 
-bool FindNetlist::setup(clang::FunctionDecl *decl) {
+bool GetClangNetlist::setup(clang::FunctionDecl *decl) {
   assert(decl);
   if (decl == this->decl_) { return true; }
   this->decl_ = decl;

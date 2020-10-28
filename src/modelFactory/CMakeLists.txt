@@ -8,9 +8,9 @@ add_library (modelFactory SHARED
 		ClangDiagnosticPrinter.cpp
         PluginAction.cpp
         FindModules.cpp
-        FindSCMain.cpp
+        GetClangMain.cpp
         FindPorts.cpp
-        FindNetlist.cpp
+        GetClangNetlist.cpp
         FindProcess.cpp
         FindVariables.cpp
         FindDataFlow.cpp
@@ -32,7 +32,7 @@ add_library (modelFactory SHARED
 		GetClangVariables.cpp
 		GetClangVariables.h
 		GetClangFunctions.cpp
-		GetClangProcess.cpp)
+		GetClangProcess.cpp FindInstances.cpp FindInstances.h IFindInstances.cpp IFindInstances.h)
 
 
 target_link_libraries(modelFactory propertyFactory)

@@ -1,9 +1,9 @@
 #include <iostream>
-#include "FindSCMain.h"
+#include "GetClangMain.h"
 
 namespace DESCAM {
 
-bool FindSCMain::VisitFunctionDecl(clang::FunctionDecl *functionDecl) {
+bool GetClangMain::VisitFunctionDecl(clang::FunctionDecl *functionDecl) {
 
   /// Find sc_main.
   /// There are three conditions to satisfy this:
@@ -30,16 +30,16 @@ bool FindSCMain::VisitFunctionDecl(clang::FunctionDecl *functionDecl) {
   return true;
 }
 
-clang::FunctionDecl *FindSCMain::getSCMainFunctionDecl() {
+clang::FunctionDecl *GetClangMain::getSCMainFunctionDecl() {
   assert (scmain_function_decl_);
   return scmain_function_decl_;
 }
 
-bool FindSCMain::isScMainFound() const {
+bool GetClangMain::isScMainFound() const {
   return sc_main_found_;
 }
 
-bool FindSCMain::setup(clang::TranslationUnitDecl *unit_decl) {
+bool GetClangMain::setup(clang::TranslationUnitDecl *unit_decl) {
   assert (unit_decl);
   if (unit_decl == unit_decl_) {
     return true;

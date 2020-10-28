@@ -8,9 +8,9 @@ namespace DESCAM {
 /*!
  * \brief Finds the sc_main within a TranslationUnit
  */
-class FindSCMain : public IFindSCMain, public clang::RecursiveASTVisitor<FindSCMain> {
+class GetClangMain : public IFindSCMain, public clang::RecursiveASTVisitor<GetClangMain> {
  public:
-  ~FindSCMain() override = default;
+  ~GetClangMain() override = default;
 
   virtual bool VisitFunctionDecl(clang::FunctionDecl *functionDecl);
 

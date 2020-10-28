@@ -25,8 +25,8 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
+  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -74,8 +74,8 @@ TEST(TestCase2, FindNewDatatype) /* NOLINT */{
       .WillOnce(Return(true));
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
+  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -127,8 +127,8 @@ TEST(TestCase3, FindNewDatatype) /* NOLINT */{
       .WillOnce(Return(true));
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
+  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());

@@ -7,10 +7,10 @@
 
 namespace DESCAM {
 
-class FindNetlist : public IFindNetlist, public clang::RecursiveASTVisitor<FindNetlist> {
+class GetClangNetlist : public IFindNetlist, public clang::RecursiveASTVisitor<GetClangNetlist> {
  public:
 
-  ~FindNetlist() override = default;
+  ~GetClangNetlist() override = default;
 
   virtual bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce);
 
