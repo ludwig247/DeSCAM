@@ -7,6 +7,7 @@
 
 #include <PluginFactory.h>
 #include <sstream>
+#include <list>
 #include "Model.h"
 
 /*
@@ -86,6 +87,8 @@ private:
     void insertRegister(std::stringstream &ss, const std::string &name, const std::string &type);
 
     void insertNonblockingAssignment(std::stringstream &ss, const std::string &name, const std::string &value, int indentation);
+
+    bool arrayHasBeenReset(std::list<std::string> resetArrayList, std::string arrayName);
 
 
 };
