@@ -19,11 +19,13 @@
 #include "GetClangMain.h"
 #include "FindStateName.h"
 #include "ModelFactory.h"
+#include "FindInstances.h"
 
 //Tests
 using namespace ::testing;
 #include "GMock_Test/tests/NoMocks.h"
-//#include "GMock_Test/tests/modelFactory/FindFunctions.h"
+#include "GMock_Test/tests/modelFactory/FindInstancesMocked.h"
+#include "GMock_Test/tests/modelFactory/FindFunctions.h"
 //#include "GMock_Test/tests/modelFactory/FindInitialValues.h"
 //#include "GMock_Test/tests/modelFactory/FindNewDatatype.h"
 //#include "GMock_Test/tests/modelFactory/FindStateName.h"
