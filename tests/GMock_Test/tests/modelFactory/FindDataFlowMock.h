@@ -2,13 +2,13 @@
 // Created by burr on 27.10.20.
 //
 
-#ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOW_H_
-#define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOW_H_
+#ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_
+#define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_
 
 #include "MockIFindDataFlow.h"
 #include "MockIFindDataFlowFactory.h"
 
-TEST(DISABLED_TestCase1, FindDataFlow) /* NOLINT */{
+TEST(TestCase1, FindDataFlow) /* NOLINT */{
   using testing::Return;
   DataTypes::reset();
 
@@ -21,9 +21,33 @@ TEST(DISABLED_TestCase1, FindDataFlow) /* NOLINT */{
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
 
+  int expected = 850;
+  int times = 0;
+
+  DESCAM::Expr *getExpr[expected];
+  DESCAM::Stmt *getStmt[expected];
+
+  DESCAM::MOCK::MockIFindDataFlow find_data_flow;
+  EXPECT_CALL(find_data_flow, setup(_, _, _, _))
+      .Times(0);
+  EXPECT_CALL(find_data_flow, getExpr())
+      .Times(expected)
+      .WillRepeatedly(Invoke([&getExpr, &times]() {
+        return getExpr[times];
+      }));
+  EXPECT_CALL(find_data_flow, getStmt())
+      .Times(expected)
+      .WillRepeatedly(Invoke([&getStmt, &times]() {
+        return getStmt[times];
+      }));
+
   DESCAM::MOCK::MockIFindDataFlowFactory find_data_flow_factory;
-
-
+  EXPECT_CALL(find_data_flow_factory, create_new(_, _, _, _))
+      .Times(expected)
+      .WillRepeatedly(Invoke([&find_data_flow, &times](Unused, Unused, Unused, Unused) {
+        times++;
+        return &find_data_flow;
+      }));
 
   std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(&find_data_flow_factory);
   std::unique_ptr<IFindInitialValues>
@@ -46,4 +70,4 @@ TEST(DISABLED_TestCase1, FindDataFlow) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-#endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOW_H_
+#endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_

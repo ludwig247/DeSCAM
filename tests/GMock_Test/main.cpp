@@ -23,14 +23,14 @@
 //Tests
 using namespace ::testing;
 #include "GMock_Test/tests/NoMocks.h"
-#include "GMock_Test/tests/modelFactory/FindDataFlow.h"
-#include "GMock_Test/tests/modelFactory/FindFunctions.h"
-#include "GMock_Test/tests/modelFactory/FindInitialValues.h"
-#include "GMock_Test/tests/modelFactory/FindNewDatatype.h"
-#include "GMock_Test/tests/modelFactory/FindPorts.h"
-#include "GMock_Test/tests/modelFactory/FindProcess.h"
-#include "GMock_Test/tests/modelFactory/FindStateName.h"
-#include "GMock_Test/tests/modelFactory/FindVariables.h"
+#include "GMock_Test/tests/modelFactory/FindDataFlowMock.h"
+#include "GMock_Test/tests/modelFactory/FindFunctionsMock.h"
+#include "GMock_Test/tests/modelFactory/FindInitialValuesMock.h"
+#include "GMock_Test/tests/modelFactory/FindNewDatatypeMock.h"
+#include "GMock_Test/tests/modelFactory/FindPortsMock.h"
+#include "GMock_Test/tests/modelFactory/FindProcessMock.h"
+#include "GMock_Test/tests/modelFactory/FindStateNameMock.h"
+#include "GMock_Test/tests/modelFactory/FindVariablesMock.h"
 
 void setup(const std::string &path_to_file, const std::string &filename, IModelFactory *model_factory) {
 
