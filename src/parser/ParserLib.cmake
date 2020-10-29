@@ -23,7 +23,7 @@ foreach (clang_lib ${CLANG_LIBS})
 endforeach ()
 
 foreach (llvm_lib ${LLVM_LIBS})
-    target_link_libraries(parser ${CMAKE_SOURCE_DIR}/lib/lib${llvm_lib}.a)
+    target_link_libraries(parser ${CMAKE_SOURCE_DIR}/lib/${llvm_lib})
 endforeach ()
 
 foreach (other ${OTHERS})
