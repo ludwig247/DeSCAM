@@ -24,10 +24,10 @@
 #include "FindNewDatatype.h"
 #include "FindPorts.h"
 #include "FindGlobal.h"
-#include "FindNetlist.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
-#include "FindSCMain.h"
+#include "FindInstances.h"
+#include "FindStateName.h"
 
 struct Param
 {
@@ -109,31 +109,32 @@ public:
 
 
       //Compositional root
-      std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
-      std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
       std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
       std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
       std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
       std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
-      std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-      std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-      std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-      std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+      std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
+      std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+      std::unique_ptr<IFindDataFlowFactory>
+          find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+      std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(find_data_flow_factory.get());
+      std::unique_ptr<IFindInitialValues>
+          find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
+      std::unique_ptr<IFindFunctions> find_functions =
+          std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
       std::unique_ptr<IFindVariables> find_variables =
           std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
       auto model_factory = new ModelFactory(find_functions.get(),
-                                            find_initial_values.get(),
                                             find_modules.get(),
-                                            find_new_datatype.get(),
                                             find_ports.get(),
                                             find_global.get(),
-                                            find_netlist.get(),
                                             find_process.get(),
                                             find_variables.get(),
-                                            find_sc_main.get(),
-                                            find_data_flow_factory.get());
-        //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
+                                            find_data_flow_factory.get(),
+                                            find_instances.get());
+
+      //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
     DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0], commandLineArgumentsArray[1], model_factory);
 
 
@@ -208,31 +209,32 @@ protected:
 
         //Creates an instance of ModelFactory and calls ModelFactory::HandleTranslationUnit
       //Compositional root
-      std::unique_ptr<IFindFunctions> find_functions = std::make_unique<FindFunctions>();
-      std::unique_ptr<IFindInitialValues> find_initial_values = std::make_unique<FindInitialValues>();
       std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
       std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
       std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
       std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
-      std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-      std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>();
-      std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
-      std::unique_ptr<IFindDataFlowFactory> find_data_flow_factory = std::make_unique<FindDataFlowFactory>();
+      std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
+      std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+      std::unique_ptr<IFindDataFlowFactory>
+          find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+      std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(find_data_flow_factory.get());
+      std::unique_ptr<IFindInitialValues>
+          find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
+      std::unique_ptr<IFindFunctions> find_functions =
+          std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
       std::unique_ptr<IFindVariables> find_variables =
           std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
       auto model_factory = new ModelFactory(find_functions.get(),
-                                            find_initial_values.get(),
                                             find_modules.get(),
-                                            find_new_datatype.get(),
                                             find_ports.get(),
                                             find_global.get(),
-                                            find_netlist.get(),
                                             find_process.get(),
                                             find_variables.get(),
-                                            find_sc_main.get(),
-                                            find_data_flow_factory.get());
-        DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
+                                            find_data_flow_factory.get(),
+                                            find_instances.get());
+
+      DESCAM::ModelGlobal::createModel(2, commandLineArgumentsArray[0],
                                          commandLineArgumentsArray[1],model_factory);
 
 
