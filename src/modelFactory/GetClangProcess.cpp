@@ -98,7 +98,7 @@ bool DESCAM::GetClangProcess::VisitStringLiteral(clang::StringLiteral *s) {
   switch (pass_) {
     case 2: {
       //Create new entry for process
-      std::string processName = s->getString();
+      std::string processName = s->getString().str();
       auto innerEntry = std::pair<clang::CXXMethodDecl *, DESCAM::PROCESS_TYPE>(nullptr, process_type_);
       auto entry =
           std::pair<std::string, std::pair<clang::CXXMethodDecl *, DESCAM::PROCESS_TYPE> >(processName, innerEntry);
@@ -119,12 +119,12 @@ bool DESCAM::GetClangProcess::isValidProcess() const {
     auto process = (*this->process_map_.begin());
     if (process.second.second == DESCAM::PROCESS_TYPE::THREAD) {
       return true;
-    } else TERMINATE("Process: " + process.first + " is not an SC_THREAD");
-  } else TERMINATE(" Multiple processes defined. Only one allowed");
+    } else TERMINATE("Process: " + process.first + " is not an SC_THREAD")
+  } else TERMINATE(" Multiple processes defined. Only one allowed")
 }
 
 clang::CXXMethodDecl *DESCAM::GetClangProcess::getProcess() const {
   if (this->process_map_.size() == 1) {
     return this->process_map_.begin()->second.first;
-  } else TERMINATE(" Zero or >2 processes defined. Exactly one process is required");
+  } else TERMINATE(" Zero or >2 processes defined. Exactly one process is required")
 }

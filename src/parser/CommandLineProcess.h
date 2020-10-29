@@ -53,6 +53,8 @@ namespace DESCAM {
                 int dir_err = mkdir(d.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 return -1 != dir_err;
             }
+            //TODO
+            // return true/false?
         }
 
         static bool isDirectory(const std::string &d) {

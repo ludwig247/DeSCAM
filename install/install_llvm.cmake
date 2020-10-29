@@ -26,7 +26,10 @@ else ()
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
             -DCMAKE_BUILD_TYPE=Release
             -DLLVM_INCLUDE_TESTS=OFF
-            -DLLVM_ENABLE_PROJECTS=clang
+            -DLLVM_ENABLE_PROJECTS=clang;clang-tools-extra;openmp
+            -DLLVM_BUILD_LLVM_DYLIB=ON
+            -DLLVM_USE_PERF=ON
+            -DLLVM_ENABLE_ZLIB=OFF
             # MAC OS may also need libcxx;libcxxabi"
 
             INSTALL_COMMAND make install
