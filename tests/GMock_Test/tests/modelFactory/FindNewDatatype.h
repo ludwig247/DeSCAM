@@ -25,8 +25,7 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
   std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -42,11 +41,10 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
                                         find_modules.get(),
                                         find_ports.get(),
                                         find_global.get(),
-                                        find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+                                        find_data_flow_factory.get(),
+                                        find_instances.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
@@ -74,8 +72,7 @@ TEST(TestCase2, FindNewDatatype) /* NOLINT */{
       .WillOnce(Return(true));
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -91,11 +88,10 @@ TEST(TestCase2, FindNewDatatype) /* NOLINT */{
                                         find_modules.get(),
                                         find_ports.get(),
                                         find_global.get(),
-                                        find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+                                        find_data_flow_factory.get(),
+                                        find_instances.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
@@ -127,8 +123,7 @@ TEST(TestCase3, FindNewDatatype) /* NOLINT */{
       .WillOnce(Return(true));
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<GetClangNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<GetClangMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -144,11 +139,10 @@ TEST(TestCase3, FindNewDatatype) /* NOLINT */{
                                         find_modules.get(),
                                         find_ports.get(),
                                         find_global.get(),
-                                        find_netlist.get(),
                                         find_process.get(),
                                         find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+                                        find_data_flow_factory.get(),
+                                        find_instances.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }
