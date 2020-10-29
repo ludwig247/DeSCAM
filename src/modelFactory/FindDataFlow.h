@@ -2,8 +2,8 @@
 // Created by tobias on 23.10.15.
 //
 
-#ifndef SCAM_FINDDATAFLOW_H
-#define SCAM_FINDDATAFLOW_H
+#ifndef SCAM_FIND_DATAFLOW_H
+#define SCAM_FIND_DATAFLOW_H
 
 #include "IFindDataFlow.h"
 #include "IFindStateName.h"
@@ -56,19 +56,17 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
   bool VisitArraySubscriptExpr(clang::ArraySubscriptExpr *arraySubscriptExpr);
 
  private:
-  Module *module_; //! Module the dataflow is generated for
-  DESCAM::Stmt *stmt_; //! Represents the stmt in case of operator, values are stored in lhs and rhs
-  clang::CompilerInstance *ci_;
+  Module *module_{}; //! Module the dataflow is generated for
+  DESCAM::Stmt *stmt_{}; //! Represents the stmt in case of operator, values are stored in lhs and rhs
+  clang::CompilerInstance *ci_{};
   IFindDataFlowFactory *find_data_flow_factory_;
   IFindStateName *find_state_name_;
 
-  Expr *expr_;
-  Expr *lhs_expr_; //! Assign Operation lValue = rValue
-  Expr *rhs_expr_;//! Assign Operation lValue = rValue
-  int pass_;
-  bool unsigned_flag_;
-
-  std::stringstream log_stream_; //! Contains every message that is generated during
+  Expr *expr_{};
+  Expr *lhs_expr_{}; //! Assign Operation lValue = rValue
+  Expr *rhs_expr_{};//! Assign Operation lValue = rValue
+  int pass_{};
+  bool unsigned_flag_{};
 
   void switchPassExpr(Expr *stmt); //! Depending on the current value of pass assigns value to stmt(pass==0), lhs(1) or rhs(2)
   bool exitVisitor(const std::string &msg, const DESCAM::LocationInfo &stmtInfo);
@@ -77,4 +75,4 @@ class FindDataFlow : public IFindDataFlow, public clang::RecursiveASTVisitor<Fin
 
 }
 
-#endif //SCAM_FINDDATAFLOW_H
+#endif //SCAM_FIND_DATAFLOW_H

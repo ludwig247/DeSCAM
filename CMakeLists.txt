@@ -20,8 +20,8 @@ set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SYSTEMC_VERSION 2.3.1a)
-set(LLVM_VERSION 3.4.2)
-#set(LLVM_VERSION 11.0.0)
+#set(LLVM_VERSION 3.4.2)
+set(LLVM_VERSION 11.0.0)
 set(GTEST_VERSION 1.10.0)
 #set(GTEST_VERSION 1.8.0)
 set(Z3_VERSION 4.8.6)

@@ -1,5 +1,4 @@
 #include "FindNetlist.h"
-//#include <iostream>
 
 namespace DESCAM {
 
@@ -14,7 +13,7 @@ bool FindNetlist::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce) {
     if (auto *e = llvm::dyn_cast<clang::Expr>(*it)) {
       if (auto *me = llvm::dyn_cast<clang::MemberExpr>(e->IgnoreImpCasts())) {
         if (auto *de = llvm::dyn_cast<clang::DeclRefExpr>(me->getBase()->IgnoreImpCasts())) {
-          moduleName = de->getDecl()->getType().getBaseTypeIdentifier()->getName();
+          moduleName = de->getDecl()->getType().getBaseTypeIdentifier()->getName().str();
           instanceName = de->getFoundDecl()->getNameAsString();
         }
         portName = me->getMemberDecl()->getNameAsString();
