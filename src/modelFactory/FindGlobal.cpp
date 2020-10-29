@@ -159,7 +159,7 @@ const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunction
   return function_map_;
 }
 
-const std::vector<DESCAM::Stmt *> DESCAM::FindGlobal::getFunctionBody(std::string function_name,
+std::vector<DESCAM::Stmt *> DESCAM::FindGlobal::getFunctionBody(std::string function_name,
                                                                       DESCAM::Function *function) const {
 
   //Create blockCFG for this process

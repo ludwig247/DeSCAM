@@ -29,8 +29,8 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
 
   const std::map<std::string, Function *> &getFunctionMap() const override;
 
-  const std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
-                                                    DESCAM::Function *function) const override;
+  std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
+                                              DESCAM::Function *function) const override;
 
   bool VisitVarDecl(const clang::VarDecl *varDecl);
 

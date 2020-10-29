@@ -32,8 +32,8 @@ class IFindGlobal {
 
   virtual const std::map<std::string, Function *> &getFunctionMap() const = 0;
 
-  virtual const std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
-                                                            DESCAM::Function *function) const = 0;
+  virtual std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
+                                                      DESCAM::Function *function) const = 0;
 };
 }
 
