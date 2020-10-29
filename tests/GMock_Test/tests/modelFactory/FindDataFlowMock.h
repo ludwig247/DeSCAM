@@ -8,7 +8,7 @@
 #include "MockIFindDataFlow.h"
 #include "MockIFindDataFlowFactory.h"
 
-TEST(TestCase1, FindDataFlow) /* NOLINT */{
+/*TEST(TestCase1, FindDataFlow) *//* NOLINT *//*{
   using testing::Return;
   DataTypes::reset();
 
@@ -68,6 +68,6 @@ TEST(TestCase1, FindDataFlow) /* NOLINT */{
                                         &find_data_flow_factory);
 
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
-}
+}*/
 
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_

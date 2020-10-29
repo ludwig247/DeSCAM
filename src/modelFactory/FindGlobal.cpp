@@ -9,6 +9,7 @@
 #include "FindDataFlowFactory.h"
 #include "FindNewDatatype.h"
 #include "FatalError.h"
+#include "CFGFactory.h"
 
 bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl,
                                clang::CompilerInstance *ci,
@@ -19,7 +20,7 @@ bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl,
   this->find_data_flow_factory_ = find_data_flow_factory;
   this->variable_map_.clear();
   this->function_map_.clear();
-  this->functionDeclMap.clear();
+  this->function_decl_map_.clear();
 
   this->decl_ = decl;
   this->ci_ = ci;
@@ -137,7 +138,7 @@ bool DESCAM::FindGlobal::VisitFunctionDecl(const clang::FunctionDecl *funDecl) {
     std::string name = funDecl->getNameAsString();
     auto function = new Function(name, getDataType(funDecl->getResultType()), parameterMap);
     this->function_map_.insert(std::make_pair(name, function));
-    this->functionDeclMap.insert(std::make_pair(name, funDecl));
+    this->function_decl_map_.insert(std::make_pair(name, funDecl));
   }
   return true;
 }
@@ -158,8 +159,25 @@ const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunction
   return function_map_;
 }
 
-const std::map<std::string, const clang::FunctionDecl *> &DESCAM::FindGlobal::getFunctionDeclMap() const {
-  return functionDeclMap;
+const std::vector<DESCAM::Stmt *> DESCAM::FindGlobal::getFunctionBody(std::string function_name,
+                                                                      DESCAM::Function *function) const {
+
+  //Create blockCFG for this process
+  //Active searching only for functions
+  //If fails ... function is not SystemC-PPA compliant
+  //don't add body to function
+  // TODO: Replace type deduction through flags by strong types and overloaded function
+  FindDataFlow::functionName = function_name;
+  FindDataFlow::isFunction = true;
+  auto module = Module("placeholder");
+  DESCAM::CFGFactory
+      cfgFactory(this->function_decl_map_.at(function_name), ci_, &module, find_data_flow_factory_);
+  FindDataFlow::functionName = "";
+  FindDataFlow::isFunction = false;
+//Transform blockCFG back to code
+  FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), function, nullptr);
+  auto stmts = functionFactory.getStmtList();
+  return stmts;
 }
 
 

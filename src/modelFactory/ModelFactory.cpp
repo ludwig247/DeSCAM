@@ -311,22 +311,8 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
 
   for (auto func: this->find_global_->getFunctionMap()) {
     try {
-      std::string name = func.first;
-      //Create blockCFG for this process
-      //Active searching only for functions
-      //If fails ... function is not SystemC-PPA compliant
-      //don't add body to function
-      // TODO: Replace type deduction through flags by strong types and overloaded function
-      FindDataFlow::functionName = func.first;
-      FindDataFlow::isFunction = true;
-      auto module = Module("placeholder");
-      DESCAM::CFGFactory
-          cfgFactory(this->find_global_->getFunctionDeclMap().at(name), ci_, &module, find_data_flow_factory_);
-      FindDataFlow::functionName = "";
-      FindDataFlow::isFunction = false;
-      //Transform blockCFG back to code
-      FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), func.second, nullptr);
-      func.second->setStmtList(functionFactory.getStmtList());
+      auto stmts = find_global_->getFunctionBody(func.first, func.second);
+      func.second->setStmtList(stmts);
       Logger::tagTempMsgs(func.first);
     } catch (std::runtime_error &e) {
       this->model_->removeGlobalFunction(func.second);

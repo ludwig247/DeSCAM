@@ -21,20 +21,23 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
 
   ~FindGlobal() override = default;
 
-  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci, IFindDataFlowFactory * find_data_flow_factory) override;
+  bool setup(clang::TranslationUnitDecl *decl,
+             clang::CompilerInstance *ci,
+             IFindDataFlowFactory *find_data_flow_factory) override;
 
   const std::map<std::string, Variable *> &getVariableMap() const override;
 
   const std::map<std::string, Function *> &getFunctionMap() const override;
 
-  const std::map<std::string, const clang::FunctionDecl *> &getFunctionDeclMap() const override;
+  const std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
+                                                    DESCAM::Function *function) const override;
 
   bool VisitVarDecl(const clang::VarDecl *varDecl);
 
   bool VisitFunctionDecl(const clang::FunctionDecl *funDecl);
 
  private:
-  IFindDataFlowFactory * find_data_flow_factory_;
+  IFindDataFlowFactory *find_data_flow_factory_;
   clang::CompilerInstance *ci_;
   DESCAM::DataType *getDataType(const clang::QualType &type) const;
 
@@ -43,7 +46,7 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
 
   std::map<std::string, Variable *> variable_map_;
   std::map<std::string, Function *> function_map_;
-  std::map<std::string, const clang::FunctionDecl *> functionDeclMap;
+  std::map<std::string, const clang::FunctionDecl *> function_decl_map_;
 
 };
 }
