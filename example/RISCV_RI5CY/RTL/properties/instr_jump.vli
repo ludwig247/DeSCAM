@@ -1,0 +1,83 @@
+macro boolean IR_JUMP (unsigned instr_imem, opcode) :=
+        instr_imem[6:0] == opcode &&  
+        (opcode == 7'h67 ? instr_imem[14:12] == 3'b000 : 1) &&        //JALR                             
+        (instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4)       //rd
+end macro;
+
+macro property instr_jump (unsigned opcode) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode + 1,
+        t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+
+        rd_at_t_fetch = instr_rdata_i[11:7] @ t_fetch,
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        rs1Data_at_t_fetch = REGISTER(rs1_at_t_fetch) @ t_decode,
+        jal_imm_at_at_fetch = { {12 {instr_rdata_i[31]}}, instr_rdata_i[19:12], instr_rdata_i[20], instr_rdata_i[30:21], 1'b0 } @ t_fetch,
+        jalr_imm_at_t_fetch = { {20 {instr_rdata_i[31]}}, instr_rdata_i[31:20] } @ t_fetch,
+        imm_at_t_fetch = (opcode == 7'h6F ? jal_imm_at_at_fetch : jalr_imm_at_t_fetch) @ t_fetch,
+        op2_at_t_fetch = (opcode == 7'h6F ? pc_if_at_t_fetch : rs1Data_at_t_fetch) @ t_decode,
+        result_at_t_fetch = unsigned(signed(imm_at_t_fetch) + op2_at_t_fetch)[31:0] @ t_decode;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_JUMP (instr_imem_at_t_fetch, opcode);
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        //at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: instr_addr_o == {result_at_t_fetch[31:1], 1'b0};
+        at t_decode: !data_req_o;
+        
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+        //at t_decode: pc_if == result_at_t_fetch; 
+
+        //ID to EX
+        at t_execute: alu_operator_ex == riscv_defines::ALU_ADD;
+        at t_execute: alu_operand_a_ex == pc_if_at_t_fetch;
+        at t_execute: alu_operand_b_ex == 32'd4;
+        //EX to REGFILE -> same cycle
+        at t_execute: regfile_alu_waddr_fw == rd_at_t_fetch;
+        at t_execute: regfile_alu_we_fw == 1;
+        at t_execute: regfile_alu_wdata_fw == (pc_if_at_t_fetch + 32'd4)[31:0];
+        //WB to REGFILE
+        at t_writeb: REGISTER(rd_at_t_fetch) == (pc_if_at_t_fetch + + 32'd4)[31:0];
+
+        right_hook: t_decode;
+end macro;
+
+property instr_jal;
+    instr_jump(7'b1101111);
+end property;
+
+property instr_jalr;
+    instr_jump(7'b1100111);
+end property;

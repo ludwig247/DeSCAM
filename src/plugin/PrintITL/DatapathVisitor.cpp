@@ -156,5 +156,15 @@ void DESCAM::DatapathVisitor::visit(DESCAM::UnaryExpr &node) {
         this->ss << ")";
 }
 
+void DESCAM::DatapathVisitor::visit(DESCAM::Ternary & node) {
+    this->ss << "(";
+    node.getCondition()->accept(*this);
+    this->ss << "?";
+    node.getTrueExpr()->accept(*this);
+    this->ss << ":";
+    node.getFalseExpr()->accept(*this);
+    this->ss << ")";
+}
+
 
 

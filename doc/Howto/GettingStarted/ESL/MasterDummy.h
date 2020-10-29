@@ -34,7 +34,7 @@ public:
         while (true) {
             if(cnt == SIMULATION_LIMIT){
                 std::cout << "Simulated " << cnt << " bus cycles" << std::endl;
-                sc_assert(false);
+                sc_assert(false); //Leads to SIGABRT
             }else{
                 std::cout << round((cnt/SIMULATION_LIMIT)*100) << "%" << std::endl;
             }

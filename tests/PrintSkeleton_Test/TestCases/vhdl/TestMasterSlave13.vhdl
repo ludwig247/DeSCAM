@@ -15,15 +15,15 @@ port(
 	s_in_sync:		in bool;
 	s_in2:		in signed(31 downto 0);
 	s_in2_sync:		in bool;
-	s_out:		out signed(31 downto 0);
-	shared_out:		out signed(31 downto 0)
+	sh_out:		out signed(31 downto 0);
+	sh_out2:		out signed(31 downto 0)
 );
 end TestMasterSlave13;
 
 architecture TestMasterSlave13_arch of TestMasterSlave13 is
-	signal nextsection_signal: Sections;
+	signal nextphase_signal: Phases;
+	signal phase_signal: Phases;
 	signal save_val_signal: signed(31 downto 0);
-	signal section_signal: Sections;
 	signal succ_signal: bool;
 	signal val_signal: signed(31 downto 0);
 
@@ -32,9 +32,9 @@ begin
 	begin
 	if(clk='1' and clk'event) then
 		if rst = '1' then
-			nextsection_signal <= SECTION_A;
+			nextphase_signal <= SECTION_A;
+			phase_signal <= SECTION_A;
 			save_val_signal <= to_signed(0, 32);
-			section_signal <= SECTION_A;
 			succ_signal <= false;
 			val_signal <= to_signed(0, 32);
 			m_out_notify <= false;

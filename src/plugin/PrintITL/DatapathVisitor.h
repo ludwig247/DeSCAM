@@ -56,6 +56,8 @@ namespace DESCAM {
 
         void visit(class UnaryExpr &node) override;
 
+        void visit(class Ternary &node) override;
+
         bool resize_flag = false;
         std::string tp = "_at_t";
     };

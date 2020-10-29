@@ -18,13 +18,17 @@
     * sudo apt-get install software-properties-common
     * sudo add-apt-repository ppa:deadsnakes/ppa
     * sudo apt-get update
-    * sudo apt-get install python3.7
+    * sudo apt-get install python3.7-dev
 * **libtinfo**
     * sudo apt-get libtinfo-dev 
-  
-## Installation 
-Run the install.sh script within the root folder. 
-Make sure all the mentioned package are available. 
+
+
+## Required pre-installed packages Ubuntu 20.04
+
+* **git, agrep, cmake, gcc, g++, unzip, sed & libtinfo**
+    * sudo apt install git agrep cmake gcc g++ unzip sed libtinfo-dev
+* **python**
+    * sudo apt install python3.8-dev python3-distutils
 
 ## Packages installed by DeSCAM
 
@@ -34,3 +38,9 @@ gtest   |   1.8.0
 systemc |   2.3.1
 z3      |   4.8.6
 llvm    |   3.5.4
+
+# Build DESCAM
+   * `mkdir build`
+   * `cd build`
+   * `cmake ../`
+   * `make SCAM`

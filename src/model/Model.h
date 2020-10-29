@@ -41,12 +41,13 @@ namespace DESCAM {
         const std::map<std::string, Function *> &getGlobalFunctionMap() const;
 
         const std::map<std::string, ModuleInstance *> &getModuleInstanceMap() const;
+        void clear();
 
     private:
-        std::map<std::string, Module *> moduleMap; //! Contains the structural describtion of each _module
+        std::map<std::string, Module *> moduleMap; //! Contains the structural description of each _module
         std::map<std::string, Variable*> globalVariableMap; //! Contains variables that are used throughout the model
         std::map<std::string, Function*> globalFunctionMap; //! Contains variables that are used throughout the model
-        std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains the structural describtion of each _module
+        std::map<std::string, ModuleInstance *> moduleInstanceMap; //! Contains the structural description of each _module
 
         ModuleInstance *topInstance;
 
