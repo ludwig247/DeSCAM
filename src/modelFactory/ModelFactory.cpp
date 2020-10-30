@@ -93,7 +93,7 @@ bool DESCAM::ModelFactory::fire() {
 */
 void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
-  this->find_modules_->setup(decl);
+  this->find_modules_->setup(decl, this->ci_);
 
   //Fill the model with modules(structural description)
   for (auto &scpar_module: find_modules_->getModuleMap()) {
@@ -112,10 +112,9 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
     std::cout << "Module: " << name << std::endl;
     std::cout << "############################" << std::endl;
     //DataTypes::reset();//FIXME:
-    auto module = new Module(scpar_module.first, module_location_info);
+    auto module = find_modules_->createModule(scpar_module.second, scpar_module.first, module_location_info);
+
     model_->addModule(module);
-    //Members
-    this->addVariables(module, scpar_module.second);
     //Ports
     this->addPorts(module, scpar_module.second);
     //Combinational Functions
@@ -123,6 +122,8 @@ void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
     //Processes
     this->addBehavior(module, scpar_module.second);
     //this->addCommunicationFSM(module);
+
+    EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   }
 }
 
@@ -240,17 +241,6 @@ void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordD
     PropertyFactory propertyFactory(module);
     module->setPropertySuite(propertyFactory.getPropertySuite());
   }
-  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
-}
-
-//! Adds every Member of a sc_module to the DESCAM::Module
-void DESCAM::ModelFactory::addVariables(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
-  Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Variables);
-  //Find all Variables within the Module
-  find_variables_->setup(decl, this->ci_, module);
-
-  module->addVariables(find_variables_->getVariableMap());
-
   EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
 

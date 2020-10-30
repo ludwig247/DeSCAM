@@ -105,7 +105,6 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
   void addPorts(Module *module, clang::CXXRecordDecl *decl);
   void addFunctions(Module *module, CXXRecordDecl *decl);
   void addBehavior(Module *module, clang::CXXRecordDecl *decl);
-  void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
   void addInstances(TranslationUnitDecl *tu);
   void removeUnused();
 
