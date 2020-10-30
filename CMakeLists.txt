@@ -69,7 +69,7 @@ file(MAKE_DIRECTORY ${CMAKE_EXTERNAL_PROJECT_DIR})
 set(USE_SYSTEM_Z3 OFF CACHE BOOL "Use system z3")
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_z3.cmake)
-message(STATUS "z3 install dir ${Z3_INSTALL_DIR}")
+message(STATUS "z3 library dir ${Z3_LIB_DIR}")
 message(STATUS "z3 include dir ${Z3_INCLUDE_DIR}")
 include_directories(${Z3_INCLUDE_DIR})
 
