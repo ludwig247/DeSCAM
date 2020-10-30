@@ -4,10 +4,13 @@
 
 #ifndef PROJECT_SLAVEAGENT_H
 #define PROJECT_SLAVEAGENT_H
+
+
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
-#include "Compound_Bus.h"
+#include "Interfaces.h"
+#include "env/Compound_Bus.h"
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
+
 
 
 struct SlaveAgent : public sc_module {
@@ -82,7 +85,7 @@ struct SlaveAgent : public sc_module {
                 nextsection = DONE;
             }
             if (section == DONE) {
-               important_state
+                important_state
                 bus_to_agent->get(wb_in);
 
                 if(wb_in.cyc == false && wb_in.stb == false){

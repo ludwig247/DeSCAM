@@ -6,19 +6,19 @@ module TestMasterSlave11 (
 	input logic rst,
 	input integer s_in,
 	input logic s_in_sync,
-	output integer s_out,
-	input bit shared_in
+	input bit sh_in,
+	output integer sh_out
 	);
 
-	Sections nextsection_signal;
-	Sections section_signal;
+	Phases nextphase_signal;
+	Phases phase_signal;
 	integer val_signal;
 
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
-			nextsection_signal <= section_a;
-			section_signal <= section_a;
+			nextphase_signal <= section_a;
+			phase_signal <= section_a;
 			val_signal <= 0;
 		end else begin
 				// FILL OUT HERE

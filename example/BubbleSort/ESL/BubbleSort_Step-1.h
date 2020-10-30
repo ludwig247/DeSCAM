@@ -25,6 +25,7 @@ struct BubbleSort : public sc_module {
 
     //data
     blocking_in<int[ARRAY_SIZE]> data_in;
+    blocking_in<std::array<int,32>> data_in;
     blocking_out<int[ARRAY_SIZE]> data_out;
 
 

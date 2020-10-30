@@ -19,10 +19,9 @@
 #include "FindNewDatatype.h"
 #include "FindPorts.h"
 #include "FindGlobal.h"
-#include "FindNetlist.h"
+#include "FindInstances.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
-#include "FindSCMain.h"
 #include "FindStateName.h"
 
 int main(int argc, const char **argv) {
@@ -49,8 +48,7 @@ int main(int argc, const char **argv) {
   //Compositional root
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -68,8 +66,7 @@ int main(int argc, const char **argv) {
   auto model_factory = new ModelFactory(
       find_modules.get(),
       find_global.get(),
-      find_netlist.get(),
-      find_sc_main.get());
+      find_instances.get());
 
   //Create model
   std::string bin = std::string(SCAM_HOME"/bin/DESCAM ");

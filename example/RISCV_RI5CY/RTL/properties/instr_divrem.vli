@@ -1,0 +1,127 @@
+macro unsigned instr_divrem_result (unsigned func3, rs1, rs2) :=
+    case (func3)
+        3'b100:     unsigned(signed(rs1) div signed(rs2));      // DIV
+        3'b101:     unsigned(rs1) div unsigned(rs2);            // DIVU
+        3'b110:     unsigned(signed(rs1) rem signed(rs2));      // REM
+        3'b111:     unsigned(rs1) rem unsigned(rs2);            // REMU
+        default:    32'd0;
+    endcase;    
+end macro;
+
+macro unsigned instr_divrem_operator (unsigned func3) :=
+    case (func3)
+        3'b100:     riscv_defines::ALU_DIV;         // DIV
+        3'b101:     riscv_defines::ALU_DIVU;        // DIVU
+        3'b110:     riscv_defines::ALU_REM;         // REM
+        3'b111:     riscv_defines::ALU_REMU;        // REMU
+        default:    riscv_defines::ALU_DIV;
+    endcase;    
+end macro;
+
+macro boolean IR_IMEM_DIVREM (unsigned instr_imem, func3, func7) :=
+    instr_imem[6:0] == 7'h33 &&                                     //opcode 
+    (instr_imem[11:7] > 5'd0 && instr_imem[11:7] <= 5'd4) &&       //rd
+    instr_imem[14:12] == func3 &&                                   //func3
+    instr_imem[19:15] <= 5'd4 &&                                   //rs1
+    instr_imem[24:20] <= 5'd4 &&                                   //rs2
+    instr_imem[31:25] == func7                                     //func7
+end macro;
+
+macro property instr_divrem (unsigned func3, func7) :=
+disable iff: !rst_ni;
+    dependencies:
+        in_out_constraints,
+        no_unaligned_case,
+        no_hwlp_case,
+        instr_mem;
+    for timepoints:
+        t_fetch = t,
+        t_decode = t_fetch + 1,
+        t_execute = t_decode+2..34 waits_for complete ALU_READY,
+        t_writeb = t_execute + 1;
+    freeze:
+        instr_imem_at_t_fetch = instr_rdata_i @ t_fetch,
+        instr_addr_at_t_fetch = instr_addr_o @ t_fetch,
+        pc_if_at_t_fetch = pc_if @ t_fetch,
+
+        //opcode = instr_rdata_i[6:0] @ t_fetch,
+        rd_at_t_fetch = instr_rdata_i[11:7] @ t_fetch,
+        rs1_at_t_fetch = instr_rdata_i[19:15] @ t_fetch,
+        rs2_at_t_fetch = instr_rdata_i[24:20] @ t_fetch,
+
+
+        op2Data_at_t_decode = REGISTER (rs2_at_t_fetch) @ t_decode,
+        op1Data_at_t_decode = REGISTER (rs1_at_t_fetch) @ t_decode,
+
+        res_at_t_decode = instr_divrem_result(func3, op1Data_at_t_decode, op2Data_at_t_decode) @ t_decode;
+    assume:
+        //conceptual state
+        at t_fetch: conceptual_state;
+        at t_fetch: halt_if == 0;
+
+        at t_decode: id_ready == 1;
+        at t_decode: branch_decision == 0;
+        at t_decode: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+        //output
+        at t_fetch:    instr_req_o;
+        at t_fetch:    !data_req_o;
+        at t_decode: data_req_o == 0;
+
+        //Trigger
+        at t_fetch:	IR_IMEM_DIVREM (instr_imem_at_t_fetch, func3, func7);
+        at t_decode: op2Data_at_t_decode != 32'd0;
+        
+    prove:
+        at t_decode: conceptual_state;
+
+        //Outputs
+        at t_decode: instr_req_o;
+        at t_decode: instr_addr_o == (instr_addr_at_t_fetch + 32'd4)[31:0];
+        at t_decode: !data_req_o;
+        
+        during[t_decode+2,t_execute-1]: !ALU_READY;
+        at t_execute: ALU_READY;
+
+        //IF to ID
+        at t_decode: instr_rdata_id == instr_imem_at_t_fetch;
+        at t_decode: pc_if == (pc_if_at_t_fetch + 32'd4)[31:0];
+
+        at t_decode+1: regfile_alu_we_fw == 1;
+
+        //ID to EX
+        at t_execute: alu_operator_ex == instr_divrem_operator(func3);
+        at t_execute: alu_operand_a_ex == op2Data_at_t_decode;
+        at t_execute: alu_operand_b_ex == op1Data_at_t_decode;
+        //EX to REGFILE -> same cycle
+        at t_execute: regfile_alu_waddr_fw == rd_at_t_fetch;
+        at t_execute: regfile_alu_we_fw == 1;
+        at t_execute: regfile_alu_wdata_fw == res_at_t_decode;
+        //WB to REGFILE
+        at t_writeb: REGISTER(rd_at_t_fetch) == res_at_t_decode;
+
+        right_hook: t_decode;
+
+        //local_determination_requirements: 
+        //    at t_execute: determined(ex_stage_i/alu_ready);
+
+        
+
+end macro;
+
+property instr_div;
+    instr_divrem(3'b100, 7'b0000001);
+end property;
+
+property instr_divu;
+    instr_divrem(3'b101, 7'b0000001);
+end property;
+
+property instr_rem;
+    instr_divrem(3'b110, 7'b0000001);
+end property;
+
+property instr_remu;
+    instr_divrem(3'b111, 7'b0000001);
+end property;
+

@@ -13,12 +13,11 @@
 #include "FindNewDatatype.h"
 #include "FindPorts.h"
 #include "FindGlobal.h"
-#include "FindNetlist.h"
 #include "FindProcess.h"
 #include "FindVariables.h"
-#include "FindSCMain.h"
 #include "FindStateName.h"
 #include "ModelFactory.h"
+#include "FindInstances.h"
 
 //Tests
 using namespace ::testing;
@@ -27,6 +26,7 @@ using namespace ::testing;
 #include "GMock_Test/tests/modelFactory/FindFunctionsMock.h"
 #include "GMock_Test/tests/modelFactory/FindGlobalMock.h"
 #include "GMock_Test/tests/modelFactory/FindInitialValuesMock.h"
+#include "GMock_Test/tests/modelFactory/FindInstancesMocked.h"
 #include "GMock_Test/tests/modelFactory/FindModulesMock.h"
 #include "GMock_Test/tests/modelFactory/FindNewDatatypeMock.h"
 #include "GMock_Test/tests/modelFactory/FindPortsMock.h"

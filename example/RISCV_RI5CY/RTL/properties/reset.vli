@@ -1,0 +1,38 @@
+property reset;
+dependencies:
+    in_out_constraints,
+    no_unaligned_case,
+    instr_mem;
+for timepoints:
+	t_fetch = t,
+    t_decode = t_fetch+1,
+    t_execute = t_decode+1,
+    t_writeb = t_execute+1;
+freeze:
+    boot_addr = {boot_addr_i[31:1], 1'b0} @ t_decode;
+assume:
+    reset_sequence;
+    during [t_fetch,t_writeb]: rst_ni;
+prove:
+    // conceptual state
+    at t_execute: conceptual_state;
+    at t_execute: halt_if == 0;
+
+    at t_writeb: id_ready == 1 && branch_decision == 0;
+    at t_writeb: regfile_alu_we_fw == 0 && regfile_we_wb == 0;
+
+    //Outputs
+    at t_fetch: !instr_req_o;
+    during[t_decode,t_execute]: instr_req_o;
+
+    at t_decode: instr_addr_o == boot_addr;
+    at t_execute: instr_addr_o == (boot_addr + 32'd4)[31:0];
+
+    during[t_fetch,t_decode]: pc_if == 0;
+    at t_execute: pc_if == boot_addr;
+   
+    during[t_fetch,t_writeb]: !data_req_o;
+    during[t_fetch,t_writeb]: foreach r in 0..31: REGISTER(r) == 0; end foreach;
+
+    right_hook: t_execute;
+end property;

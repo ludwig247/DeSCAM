@@ -6,9 +6,10 @@
 #define PROJECT_MASTERAGENT_H
 
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
-#include "Compound_Bus.h"
+#include "Interfaces.h"
+#include "env/Compound_Bus.h"
 #include "../../SingleMasterMultiSlave/ESL/Compound.h"
+
 
 
 struct MasterAgent : public sc_module {
@@ -81,7 +82,7 @@ struct MasterAgent : public sc_module {
             }
             if (section == WAITING) {
 //                std::cout << this->name() << " - WAIT " << std::endl;
-                insert_state();
+                important_state
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == true){
                     agent_to_bus_resp.ack = OK;
@@ -104,7 +105,7 @@ struct MasterAgent : public sc_module {
             }
             if(section == DONE){
 //                std::cout << this->name() << " - DONE " << std::endl;
-                insert_state();
+                important_state
                 bus_to_agent->get(wb_in);
                 if(wb_in.ack == false){
                     agent_to_master->write(agent_to_bus_resp);
@@ -118,6 +119,5 @@ struct MasterAgent : public sc_module {
 
 
 };
-
 
 #endif //PROJECT_MASTERAGENT_H

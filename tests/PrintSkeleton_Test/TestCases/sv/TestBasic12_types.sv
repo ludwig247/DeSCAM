@@ -4,6 +4,6 @@ package testbasic12_types;
 	typedef enum logic {
 		section_a,
 		section_b
-	} Sections;
+	} Phases;
 
 endpackage
