@@ -201,7 +201,8 @@ set(CLANG_LIBS
         )
 
 set(OTHERS
-        ${CMAKE_SOURCE_DIR}/lib/libz3.so
+        #${CMAKE_SOURCE_DIR}/lib/libz3.so
+        ${Z3_LIB_DIR}/libz3.so
         rt
         dl
         tinfo

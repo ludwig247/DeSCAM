@@ -23,7 +23,7 @@ else ()
 
             # Install locally in the project
             CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
+#            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
             -DCMAKE_BUILD_TYPE=Release
             -DLLVM_INCLUDE_TESTS=OFF
             -DLLVM_ENABLE_PROJECTS=clang;clang-tools-extra;openmp
@@ -34,6 +34,10 @@ else ()
 
             INSTALL_COMMAND make install
             )
+
+    set(LLVM_INCLUDE_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/include)
+    set(LLVM_BINARY_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/bin)
+    set(LLVM_LIB_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/lib)
 
     ExternalProject_Add_Step(LLVM RTTI
             DEPENDEES download

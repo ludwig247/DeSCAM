@@ -9,9 +9,14 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 # TODO: detect operating system and host processor
-message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
-message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+file(READ /etc/os-release OS)
+string(REGEX MATCH "NAME=\"([A-z]+)+" _ ${OS})
+set(OS_NAME ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_ID=\"(([0-9]+.)?([0-9]+.)?([0-9]+))" _ ${OS})
+set(OS_VERSION ${CMAKE_MATCH_1})
+message(STATUS "We are on ${OS_NAME} ${OS_VERSION}  / ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
 
+message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
 # TODO: get rid of CMAKE_CXX_STANDARD
 set(CMAKE_CXX_STANDARD 14) # C++14...
@@ -62,9 +67,11 @@ file(MAKE_DIRECTORY ${CMAKE_EXTERNAL_PROJECT_DIR})
 #################################
 # Do not use system's z3
 set(USE_SYSTEM_Z3 OFF CACHE BOOL "Use system z3")
-message(STATUS "Building with Z3 ${Z3_VERSION}")
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_z3.cmake)
+message(STATUS "z3 install dir ${Z3_INSTALL_DIR}")
+message(STATUS "z3 include dir ${Z3_INCLUDE_DIR}")
+include_directories(${Z3_INCLUDE_DIR})
 
 #################################
 ## GTest
@@ -88,20 +95,21 @@ set(SYSTEMC_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
 message(STATUS "SYSTEMC include dir: ${SYSTEMC_INCLUDE_DIR}")
 include_directories(SYSTEMC_INCLUDE_DIR)
+
 ################################
 # llvm
 ################################
 # Do not use system LLVM
 set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
 message(STATUS "Building with LLVM ${LLVM_VERSION}")
-set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
-
-# Include the binary
-include_directories(${LLVM_INCLUDES})
-message(STATUS "Var LLVM_INCLUDES: ${LLVM_INCLUDES}")
+set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
+message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
+message(STATUS "LLVM binary dir: ${LLVM_BINARY_DIR}")
+message(STATUS "LLVM library dir: ${LLVM_LIB_DIR}")
 
 ################################
 # DESCAM
@@ -120,7 +128,6 @@ OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
 
 # TODO: forget commands like add_compile_options, include_directories, link_directories, link_libraries
 include_directories(${CMAKE_SOURCE_DIR}/include)
-
 
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces)
 include_directories(${CMAKE_SOURCE_DIR}/src/plugin)
