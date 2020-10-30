@@ -17,13 +17,11 @@ namespace DESCAM {
 class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlobal> {
  public:
 
-  FindGlobal() = default;
+  explicit FindGlobal(IFindDataFlowFactory *find_data_flow_factory);
 
   ~FindGlobal() override = default;
 
-  bool setup(clang::TranslationUnitDecl *decl,
-             clang::CompilerInstance *ci,
-             IFindDataFlowFactory *find_data_flow_factory) override;
+  bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) override;
 
   const std::map<std::string, Variable *> &getVariableMap() const override;
 

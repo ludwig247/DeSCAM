@@ -29,7 +29,6 @@ class FindModules : public IFindModules, public clang::RecursiveASTVisitor<FindM
 
   void setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci, DESCAM::Model *model) override;
   bool VisitCXXRecordDecl(clang::CXXRecordDecl *);
-  const std::map<std::string, clang::CXXRecordDecl *> &getModuleMap() override;
   std::vector<DESCAM::Module *> getModules() override;
 
  private:

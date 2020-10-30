@@ -12,8 +12,11 @@ namespace DESCAM {
 namespace MOCK {
 class MockIFindModules : public IFindModules {
  public:
-  MOCK_METHOD(void, setup, (clang::TranslationUnitDecl * ), (override));
-  MOCK_METHOD((const std::map<std::string, clang::CXXRecordDecl *> &), getModuleMap, (), (override));
+  MOCK_METHOD(void,
+              setup,
+              (clang::TranslationUnitDecl * , clang::CompilerInstance * ci, DESCAM::Model * model),
+              (override));
+  MOCK_METHOD((std::vector<DESCAM::Module *>), getModules, (), (override));
 };
 }
 }

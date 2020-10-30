@@ -11,13 +11,16 @@
 #include "FatalError.h"
 #include "CFGFactory.h"
 
-bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl,
-                               clang::CompilerInstance *ci,
-                               IFindDataFlowFactory *find_data_flow_factory) {
-  assert(!(decl == nullptr));
+DESCAM::FindGlobal::FindGlobal(DESCAM::IFindDataFlowFactory *find_data_flow_factory) :
+    find_data_flow_factory_(find_data_flow_factory),
+    ci_(nullptr) {
+  assert(find_data_flow_factory);
+}
+
+bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) {
+  assert(decl);
   assert(ci);
 
-  this->find_data_flow_factory_ = find_data_flow_factory;
   this->variable_map_.clear();
   this->function_map_.clear();
   this->function_decl_map_.clear();
@@ -160,7 +163,7 @@ const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunction
 }
 
 std::vector<DESCAM::Stmt *> DESCAM::FindGlobal::getFunctionBody(std::string function_name,
-                                                                      DESCAM::Function *function) const {
+                                                                DESCAM::Function *function) const {
 
   //Create blockCFG for this process
   //Active searching only for functions

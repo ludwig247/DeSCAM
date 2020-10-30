@@ -60,15 +60,11 @@ bool containsSubstring(std::string, std::string);
 class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFactory> {
  public:
   explicit ModelFactory(IFindModules *find_modules,
-                        IFindPorts *find_ports,
                         IFindGlobal *find_global,
                         IFindNetlist *find_netlist,
-                        IFindProcess *find_process,
-                        IFindSCMain *find_sc_main,
-                        IFindDataFlowFactory *find_data_flow_factory);
+                        IFindSCMain *find_sc_main);
 
   ~ModelFactory() override = default;
-
 
   void setup(CompilerInstance *ci) override;
 
@@ -86,11 +82,8 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
   // DIP-Pointers
   IFindGlobal *find_global_;
   IFindModules *find_modules_;
-  IFindPorts *find_ports_;
   IFindNetlist *find_netlist_;
-  IFindProcess *find_process_;
   IFindSCMain *find_sc_main_;
-  IFindDataFlowFactory * find_data_flow_factory_;
 
   //Methods
   void HandleTranslationUnit(ASTContext &context) override;

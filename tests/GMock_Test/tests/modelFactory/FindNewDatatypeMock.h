@@ -12,7 +12,7 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
   DataTypes::reset();
 
 //Compositional root
-  std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
+
 
   DESCAM::MOCK::MockIFindNewDatatype find_new_datatype;
   EXPECT_CALL(find_new_datatype, getDataType(_))
@@ -24,7 +24,6 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
       .Times(0);
 
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(&find_new_datatype);
-  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
   std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
   std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
@@ -37,15 +36,15 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
       find_functions = std::make_unique<FindFunctions>(&find_new_datatype, find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(&find_new_datatype, find_initial_values.get(), find_data_flow_factory.get());
+  std::unique_ptr<IFindModules> find_modules =
+      std::make_unique<FindModules>(find_variables.get(), find_ports.get(), find_functions.get(), find_process.get());
+  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>(find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(
       find_modules.get(),
-      find_ports.get(),
       find_global.get(),
       find_netlist.get(),
-      find_process.get(),
-      find_sc_main.get(),
-      find_data_flow_factory.get());
+      find_sc_main.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
@@ -55,8 +54,6 @@ TEST(TestCase2, FindNewDatatype) /* NOLINT */{
   DataTypes::reset();
 
 //Compositional root
-  std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
-  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
 
   DESCAM::MOCK::MockIFindNewDatatype find_new_datatype;
   EXPECT_CALL(find_new_datatype, getDataType(_))
@@ -85,15 +82,15 @@ TEST(TestCase2, FindNewDatatype) /* NOLINT */{
       find_functions = std::make_unique<FindFunctions>(&find_new_datatype, find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(&find_new_datatype, find_initial_values.get(), find_data_flow_factory.get());
+  std::unique_ptr<IFindModules> find_modules =
+      std::make_unique<FindModules>(find_variables.get(), find_ports.get(), find_functions.get(), find_process.get());
+  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>(find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(
       find_modules.get(),
-      find_ports.get(),
       find_global.get(),
       find_netlist.get(),
-      find_process.get(),
-      find_sc_main.get(),
-      find_data_flow_factory.get());
+      find_sc_main.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
@@ -103,8 +100,6 @@ TEST(TestCase3, FindNewDatatype) /* NOLINT */{
   DataTypes::reset();
 
   //Compositional root
-  std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>();
-  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>();
 
   DESCAM::DataType type1("unsigned_5");
   type1.addArray(DataTypes::getDataType("unsigned"), 5);
@@ -137,15 +132,15 @@ TEST(TestCase3, FindNewDatatype) /* NOLINT */{
       find_functions = std::make_unique<FindFunctions>(&find_new_datatype, find_data_flow_factory.get());
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(&find_new_datatype, find_initial_values.get(), find_data_flow_factory.get());
+  std::unique_ptr<IFindModules> find_modules =
+      std::make_unique<FindModules>(find_variables.get(), find_ports.get(), find_functions.get(), find_process.get());
+  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>(find_data_flow_factory.get());
 
   auto model_factory = new ModelFactory(
       find_modules.get(),
-      find_ports.get(),
       find_global.get(),
       find_netlist.get(),
-      find_process.get(),
-      find_sc_main.get(),
-      find_data_flow_factory.get());
+      find_sc_main.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }

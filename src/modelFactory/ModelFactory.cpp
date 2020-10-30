@@ -25,23 +25,17 @@
 
 //Constructor
 DESCAM::ModelFactory::ModelFactory(IFindModules *find_modules,
-                                   IFindPorts *find_ports,
                                    IFindGlobal *find_global,
                                    IFindNetlist *find_netlist,
-                                   IFindProcess *find_process,
-                                   IFindSCMain *find_sc_main,
-                                   IFindDataFlowFactory *find_data_flow_factory) :
+                                   IFindSCMain *find_sc_main) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
     model_(nullptr),
     find_modules_(find_modules),
-    find_ports_(find_ports),
     find_global_(find_global),
     find_netlist_(find_netlist),
-    find_process_(find_process),
-    find_sc_main_(find_sc_main),
-    find_data_flow_factory_(find_data_flow_factory) {
+    find_sc_main_(find_sc_main){
 }
 
 void DESCAM::ModelFactory::setup(CompilerInstance *ci) {
@@ -191,7 +185,7 @@ void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {
   Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::GlobalConstants);
 
   //Find all global functions and variables
-  this->find_global_->setup(pDecl, ci_, find_data_flow_factory_);
+  this->find_global_->setup(pDecl, ci_);
 
   for (const auto &var: this->find_global_->getVariableMap()) {
     this->model_->addGlobalVariable(var.second);

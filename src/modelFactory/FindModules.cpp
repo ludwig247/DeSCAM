@@ -55,10 +55,6 @@ bool FindModules::VisitCXXRecordDecl(clang::CXXRecordDecl *cxxDecl) {
   return true;
 }
 
-const std::map<std::string, clang::CXXRecordDecl *> &FindModules::getModuleMap() {
-  return module_map_;
-}
-
 void FindModules::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci, DESCAM::Model *model) {
   this->module_map_.clear();
   this->modules.clear();
