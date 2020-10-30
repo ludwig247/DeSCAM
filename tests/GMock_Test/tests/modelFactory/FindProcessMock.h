@@ -72,15 +72,14 @@ TEST(TestCase1, FindProcess) /* NOLINT*/{
         return getCfgMap;
       }));
 
-  auto model_factory = new ModelFactory(find_functions.get(),
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        &find_process,
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      &find_process,
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
@@ -180,15 +179,14 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
         return getCfgMap;
       }));
 
-  auto model_factory = new ModelFactory(find_functions.get(),
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        &find_process,
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      &find_process,
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
@@ -337,15 +335,14 @@ TEST(TestCase3, FindProcess) /* NOLINT*/{
         return getCfgMap;
       }));
 
-  auto model_factory = new ModelFactory(find_functions.get(),
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        &find_process,
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      &find_process,
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }

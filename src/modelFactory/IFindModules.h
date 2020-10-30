@@ -12,11 +12,9 @@
 
 class IFindModules {
  public:
-  virtual void setup(clang::TranslationUnitDecl *, clang::CompilerInstance *ci) = 0;
+  virtual void setup(clang::TranslationUnitDecl *, clang::CompilerInstance *ci, DESCAM::Model *model) = 0;
   virtual const std::map<std::string, clang::CXXRecordDecl *> &getModuleMap() = 0;
-  virtual DESCAM::Module *createModule(clang::CXXRecordDecl *record_decl,
-                                       std::string name,
-                                       DESCAM::LocationInfo locationInfo) = 0;
+  virtual std::vector<DESCAM::Module *> getModules() = 0;
 };
 
 #endif //SCAM_SRC_MODELFACTORY_IFINDMODULES_H_

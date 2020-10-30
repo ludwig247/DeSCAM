@@ -38,15 +38,14 @@ TEST(TestCase1, FindFunctions) /* NOLINT */{
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
-  auto model_factory = new ModelFactory(&find_functions,
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        find_process.get(),
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      find_process.get(),
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
@@ -109,15 +108,14 @@ TEST(TestCase2, FindFunctions) /* NOLINT */{
         return getFunctionBody;
       }));
 
-  auto model_factory = new ModelFactory(&find_functions,
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        find_process.get(),
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      find_process.get(),
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
@@ -153,15 +151,14 @@ TEST(TestCase3, FindFunctions) /* NOLINT */{
   EXPECT_CALL(find_functions, getFunctionBody(_))
       .Times(0);
 
-  auto model_factory = new ModelFactory(&find_functions,
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        find_process.get(),
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      find_process.get(),
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }

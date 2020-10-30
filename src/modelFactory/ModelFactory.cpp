@@ -24,32 +24,24 @@
 #include "FindGlobal.h"
 
 //Constructor
-DESCAM::ModelFactory::ModelFactory(IFindFunctions *find_functions,
-                                   IFindModules *find_modules,
+DESCAM::ModelFactory::ModelFactory(IFindModules *find_modules,
                                    IFindPorts *find_ports,
                                    IFindGlobal *find_global,
                                    IFindNetlist *find_netlist,
                                    IFindProcess *find_process,
-                                   IFindVariables *find_variables,
                                    IFindSCMain *find_sc_main,
                                    IFindDataFlowFactory *find_data_flow_factory) :
     ci_(nullptr),
     context_(nullptr),
     ostream_(llvm::errs()),
     model_(nullptr),
-    find_functions_(find_functions),
     find_modules_(find_modules),
     find_ports_(find_ports),
     find_global_(find_global),
     find_netlist_(find_netlist),
     find_process_(find_process),
-    find_variables_(find_variables),
     find_sc_main_(find_sc_main),
     find_data_flow_factory_(find_data_flow_factory) {
-
-  //Unimportant modules
-  this->unimportant_modules_.emplace_back("sc_event_queue");//! Not important for the abstract model:
-  this->unimportant_modules_.emplace_back("Testbench");//! Not important for the abstract model:
 }
 
 void DESCAM::ModelFactory::setup(CompilerInstance *ci) {
@@ -93,38 +85,14 @@ bool DESCAM::ModelFactory::fire() {
 */
 void DESCAM::ModelFactory::addModules(clang::TranslationUnitDecl *decl) {
 
-  this->find_modules_->setup(decl, this->ci_);
+  this->find_modules_->setup(decl, this->ci_, this->model_);
+  auto modules = this->find_modules_->getModules();
 
-  //Fill the model with modules(structural description)
-  for (auto &scpar_module: find_modules_->getModuleMap()) {
-
-    //Module Name
-    std::string name = scpar_module.first;
-    auto module_location_info = DESCAM::GlobalUtilities::getLocationInfo<CXXRecordDecl>(scpar_module.second, ci_);
-
-    //Module is on the unimportant module list -> skip
-    if (std::find(this->unimportant_modules_.begin(), this->unimportant_modules_.end(), name) !=
-        this->unimportant_modules_.end()) {
-      //Skip this module
-      continue;
-    }
-    std::cout << "############################" << std::endl;
-    std::cout << "Module: " << name << std::endl;
-    std::cout << "############################" << std::endl;
-    //DataTypes::reset();//FIXME:
-    auto module = find_modules_->createModule(scpar_module.second, scpar_module.first, module_location_info);
-
+  for (auto &module:modules) {
     model_->addModule(module);
-    //Ports
-    this->addPorts(module, scpar_module.second);
-    //Combinational Functions
-    this->addFunctions(module, scpar_module.second);
-    //Processes
-    this->addBehavior(module, scpar_module.second);
-    //this->addCommunicationFSM(module);
-
-    EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
   }
+
+  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
 
 //! Add structure ...
@@ -200,50 +168,6 @@ void DESCAM::ModelFactory::addInstances(TranslationUnitDecl *tu) {
   }
 }
 
-//! Use FindPorts and FindNetlist in order to add the ports to the model
-void DESCAM::ModelFactory::addPorts(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
-  Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Ports);
-  //Parse ports from CXXRecordDecl
-  //Ports are sc_in,sc_out, sc_inout (sc_port) is considers as
-  //Right now, we are not interested about the direction of the port.
-
-  //DESCAM::FindPorts this->find_ports_(this->_context, _ci);
-
-  this->find_ports_->setup(decl, ci_, module);
-  module->addPorts(find_ports_->getPortMap());
-  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
-}
-
-//! Adds processes to the model
-void DESCAM::ModelFactory::addBehavior(DESCAM::Module *module, clang::CXXRecordDecl *decl) {
-  Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Behavior);
-
-  //Find the process describing the behavior
-  find_process_->setup(decl, ci_, module, model_);
-  auto cfg = find_process_->getCFG();
-
-  if (cfg.empty()) TERMINATE("CFG is empty!");
-  DESCAM::CfgNode::node_cnt = 0;
-  DESCAM::State::state_cnt = 0;
-  DESCAM::Operation::operations_cnt = 0;
-  auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
-
-  if (!optOptionsSet.empty()) {
-    DESCAM::Optimizer opt(cfg, module, model_, optOptionsSet);
-    module->setCFG(opt.getCFG());
-    DESCAM::OperationFactory operationFactory(opt.getCFG(), module);
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-  } else {
-    DESCAM::CreateRealCFG test(cfg);
-    module->setCFG(test.getCFG());
-    DESCAM::OperationFactory operationFactory(test.getCFG(), module);
-    PropertyFactory propertyFactory(module);
-    module->setPropertySuite(propertyFactory.getPropertySuite());
-  }
-  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
-}
-
 bool DESCAM::ModelFactory::postFire() {
   return false;
 }
@@ -261,26 +185,6 @@ void DESCAM::ModelFactory::HandleTranslationUnit(ASTContext &context) {
     } else {
     }
   }
-}
-
-void DESCAM::ModelFactory::addFunctions(DESCAM::Module *module, CXXRecordDecl *decl) {
-  Logger::setCurrentProcessedLocation(LoggerMsg::ProcessedLocation::Functions);
-  //std::unique_ptr<IFindFunctions> findFunctions_ = FindFunctionsFactory::create(decl);
-  find_functions_->setup(decl, ci_, module);
-
-  auto functions = find_functions_->getFunctionDecls();
-  module->addFunctions(functions);
-
-  //Add behavioral description of function to module
-  for (const auto &function: functions) {
-    auto body = find_functions_->getFunctionBody(function.first);
-
-    //Transform blockCFG back to code
-    FunctionFactory functionFactory(body, function.second, nullptr);
-    function.second->setStmtList(functionFactory.getStmtList());
-  }
-
-  EXECUTE_TERMINATE_IF_ERROR(this->removeUnused())
 }
 
 void DESCAM::ModelFactory::addGlobalConstants(TranslationUnitDecl *pDecl) {

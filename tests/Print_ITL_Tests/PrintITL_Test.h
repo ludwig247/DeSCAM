@@ -62,17 +62,18 @@ static std::vector<DESCAM::Module *> parameter() {
   std::unique_ptr<IFindVariables> find_variables =
       std::make_unique<FindVariables>(find_new_datatype.get(), find_initial_values.get(), find_data_flow_factory.get());
 
-  std::unique_ptr<IFindModules> find_modules = std::make_unique<FindModules>(find_variables.get());
+  std::unique_ptr<IFindModules>
+      find_modules =
+      std::make_unique<FindModules>(find_variables.get(), find_ports.get(), find_functions.get(), find_process.get());
 
-  auto model_factory = new ModelFactory(find_functions.get(),
-                                        find_modules.get(),
-                                        find_ports.get(),
-                                        find_global.get(),
-                                        find_netlist.get(),
-                                        find_process.get(),
-                                        find_variables.get(),
-                                        find_sc_main.get(),
-                                        find_data_flow_factory.get());
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_ports.get(),
+      find_global.get(),
+      find_netlist.get(),
+      find_process.get(),
+      find_sc_main.get(),
+      find_data_flow_factory.get());
 
 //    add optimizations
 //    std::set<std::string> optimizeOptions = {"all"};
@@ -86,7 +87,7 @@ static std::vector<DESCAM::Module *> parameter() {
   }
 
   std::vector<DESCAM::Module *> result;
-  for (auto module: DESCAM::ModelGlobal::getModel()->getModules()) {
+  for (auto &module: DESCAM::ModelGlobal::getModel()->getModules()) {
     result.push_back(module.second);
   }
   return result;
