@@ -14,8 +14,7 @@ TEST(TestCase1, FindProcess) /* NOLINT*/{
   //Compositional root
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -77,8 +76,7 @@ TEST(TestCase1, FindProcess) /* NOLINT*/{
   auto model_factory = new ModelFactory(
       find_modules.get(),
       find_global.get(),
-      find_netlist.get(),
-      find_sc_main.get());
+      find_instances.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
@@ -90,8 +88,7 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
   //Compositional root
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -183,8 +180,7 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
   auto model_factory = new ModelFactory(
       find_modules.get(),
       find_global.get(),
-      find_netlist.get(),
-      find_sc_main.get());
+      find_instances.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
@@ -196,8 +192,7 @@ TEST(TestCase3, FindProcess) /* NOLINT*/{
   //Compositional root
   std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
   std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
-  std::unique_ptr<IFindNetlist> find_netlist = std::make_unique<FindNetlist>();
-  std::unique_ptr<IFindSCMain> find_sc_main = std::make_unique<FindSCMain>();
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
   std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
   std::unique_ptr<IFindDataFlowFactory>
       find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
@@ -338,8 +333,7 @@ TEST(TestCase3, FindProcess) /* NOLINT*/{
   auto model_factory = new ModelFactory(
       find_modules.get(),
       find_global.get(),
-      find_netlist.get(),
-      find_sc_main.get());
+      find_instances.get());
 
   setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
 }
