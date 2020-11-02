@@ -167,7 +167,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
     // Collecting statement location information from clang
     auto memberCallLocationInfo = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(memberCallExpr, ci_);
     //Return value:
-    std::string returnValue = memberCallExpr->getCallReturnType(ci_->getASTContext()).getAsString();
+//    std::string returnValue = memberCallExpr->getCallReturnType(ci_->getASTContext()).getAsString();
     //Callee: E.g. x.foo() -> foo() is callee
     //Assign CalleeOperator later for now store string
     std::string methodString;
@@ -777,7 +777,7 @@ bool DESCAM::FindDataFlow::VisitCXXBoolLiteralExpr(clang::CXXBoolLiteralExpr *bo
       }
   )
   if (DescamException::isExceptionHappened()) clearExpressions();
-  return false;
+//  return false;
 }
 
 bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *operatorCallExpr) {
@@ -814,8 +814,9 @@ bool DESCAM::FindDataFlow::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *
 
       } else
         return exitVisitor("Unknown error: Stmts can't be processed(d)", opCallLocationInfo);
-    } else
-      return exitVisitor("Unknown error: Stmts can't be processed(e)", opCallLocationInfo);
+    }
+    //else
+     // return exitVisitor("Unknown error: Stmts can't be processed(e)", opCallLocationInfo);
   }
   return true;
 }
