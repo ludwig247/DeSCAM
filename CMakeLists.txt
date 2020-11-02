@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0042 NEW)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 
@@ -20,8 +21,8 @@ set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SYSTEMC_VERSION 2.3.1a)
-set(LLVM_VERSION 3.4.2)
-#set(LLVM_VERSION 11.0.0)
+#set(LLVM_VERSION 3.4.2)
+set(LLVM_VERSION 11.0.0)
 set(GTEST_VERSION 1.10.0)
 #set(GTEST_VERSION 1.8.0)
 set(Z3_VERSION 4.8.6)
@@ -148,8 +149,11 @@ add_subdirectory(tests)
 add_subdirectory(doc)
 
 add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
+
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL Darwin) #There is no cmake command in standard macos
 add_custom_command(TARGET SCAM
         POST_BUILD
         COMMAND cmake --build ${PROJECT_BINARY_DIR}/ --target DESCAM -- -j 4)
+endif()
 
 # TODO maybe for safety erase build folder each time LIBS is build?
