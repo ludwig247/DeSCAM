@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0042 NEW)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 
