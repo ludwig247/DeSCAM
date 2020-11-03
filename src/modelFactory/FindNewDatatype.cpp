@@ -73,7 +73,7 @@ std::string FindNewDatatype::getTypeName(const clang::QualType &type) {
     else TERMINATE("Built-in type: " + type_name + " is not allowed!");
   } else if (type->isEnumeralType()) {
     const clang::EnumType *enumType = type->getAs<clang::EnumType>();
-    return enumType->getDecl()->getName();
+    return enumType->getDecl()->getName().str();
   } else if (type->isStructureType()) {
     return type->getAsCXXRecordDecl()->getName().str();
   } else if (type->isConstantArrayType()) {

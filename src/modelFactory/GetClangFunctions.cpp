@@ -6,26 +6,26 @@
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
-bool DESCAM::GetClangFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl) {
-  if (methodDecl->isConst()) {
-    std::string name = methodDecl->getName().str();
-
-    if (methodDecl->getResultType()->isVoidType()) TERMINATE("Method: " + name + " is type void! Void is not allowed");
-    this->function_map_.insert(std::make_pair(name, methodDecl));
+bool DESCAM::GetClangFunctions::VisitCXXMethodDecl(clang::CXXMethodDecl *method_decl) {
+  if (method_decl->isConst()) {
+    std::string name = method_decl->getName().str();
+    // TODO check for correct call: getCallResultType or getReturnType
+    if (method_decl->getCallResultType()->isVoidType()) TERMINATE("Method: " + name + " is type void! Void is not allowed")
+    this->function_map_.insert(std::make_pair(name, method_decl));
 
     //Return type
-    this->function_return_type_map_.insert(std::make_pair(name, this->clangToScamType(methodDecl->getResultType())));
+    this->function_return_type_map_.insert(std::make_pair(name, this->clangToScamType(method_decl->getCallResultType())));
 
     //Param name and param type
-    std::vector<std::string> paramNameList;
-    std::vector<std::string> paramTypeList;
-    for (int i = 0; i < methodDecl->getNumParams(); i++) {
-      auto param = methodDecl->getParamDecl(i);
-      paramNameList.push_back(param->getName().str());
-      paramTypeList.push_back(this->clangToScamType(param->getType()));
+    std::vector<std::string> param_name_list;
+    std::vector<std::string> param_type_list;
+    for (int i = 0; i < method_decl->getNumParams(); i++) {
+      auto param = method_decl->getParamDecl(i);
+      param_name_list.push_back(param->getName().str());
+      param_type_list.push_back(this->clangToScamType(param->getType()));
     }
-    this->function_param_name_map_.insert(std::make_pair(name, paramNameList));
-    this->function_param_type_map_.insert(std::make_pair(name, paramTypeList));
+    this->function_param_name_map_.insert(std::make_pair(name, param_name_list));
+    this->function_param_type_map_.insert(std::make_pair(name, param_type_list));
 
   }
 
@@ -46,18 +46,18 @@ const std::map<std::string, std::vector<std::string>> &DESCAM::GetClangFunctions
 const std::map<std::string, std::vector<std::string>> &DESCAM::GetClangFunctions::getFunctionParamTypeMap() const {
   return function_param_type_map_;
 }
-std::string DESCAM::GetClangFunctions::clangToScamType(clang::QualType qualType) const {
-  auto return_type = qualType.getAsString();
-  if (qualType->isRecordType()) {
-    return_type = qualType->getAsCXXRecordDecl()->getName();
-  } else if (qualType->isBuiltinType()) {
-    if (qualType->isBooleanType()) {
+std::string DESCAM::GetClangFunctions::clangToScamType(clang::QualType qual_type) {
+  auto return_type = qual_type.getAsString();
+  if (qual_type->isRecordType()) {
+    return_type = qual_type->getAsCXXRecordDecl()->getName().str();
+  } else if (qual_type->isBuiltinType()) {
+    if (qual_type->isBooleanType()) {
       return_type = "bool";
-    } else if (qualType->isUnsignedIntegerType()) {
+    } else if (qual_type->isUnsignedIntegerType()) {
       return_type = "unsigned";
     }
-  } else if (qualType->isEnumeralType()) {
-    const clang::EnumType *enumType = qualType->getAs<clang::EnumType>();
+  } else if (qual_type->isEnumeralType()) {
+    const clang::EnumType *enumType = qual_type->getAs<clang::EnumType>();
     return_type = enumType->getDecl()->getName().str();
   }
   return return_type;

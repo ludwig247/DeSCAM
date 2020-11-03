@@ -40,7 +40,8 @@ bool DESCAM::FindInitialValues::setup(clang::CXXRecordDecl *recordDecl,
 bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl) {
   //Check whether constructor body is empty
   int cnt = 0;
-  for (auto it = constructorDecl->getBody()->children().first; it != constructorDecl->getBody()->children().second;
+  // TODO This might be replaceable with an children.empty() statement.
+  for (auto it = constructorDecl->getBody()->children().begin(); it != constructorDecl->getBody()->children().end();
        it++) {
     cnt++;
     if (cnt > 2) TERMINATE("The body of the constructor has to remain empty and is not analyzed."

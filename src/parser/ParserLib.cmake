@@ -19,11 +19,11 @@ target_link_libraries(parser pthread)
 #include LLVM,z3,SystemC CLANG
 include(DefineLibs.cmake)
 foreach (clang_lib ${CLANG_LIBS})
-    target_link_libraries(parser ${CMAKE_SOURCE_DIR}/lib/lib${clang_lib}.a)
+    target_link_libraries(parser ${LLVM_LIB_DIR}/${clang_lib})
 endforeach ()
 
 foreach (llvm_lib ${LLVM_LIBS})
-    target_link_libraries(parser ${CMAKE_SOURCE_DIR}/lib/lib${llvm_lib}.a)
+    target_link_libraries(parser ${LLVM_LIB_DIR}/${llvm_lib})
 endforeach ()
 
 foreach (other ${OTHERS})

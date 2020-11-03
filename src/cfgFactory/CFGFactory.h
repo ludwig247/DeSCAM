@@ -47,9 +47,9 @@ class CFGFactory {
  private:
   //Methods
   void translateToScamCFG(); //! Top method: initiates generation of the suspensionCFG
-  bool exprContainedInIf(clang::CFGBlock *inner, clang::CFGBlock *outer);
+  static bool exprContainedInIf(clang::CFGBlock *inner, clang::CFGBlock *outer);
 
-  std::vector<clang::Stmt *> getCleanStmtList(clang::CFGBlock *block); //! Returns a list without nested stmts
+  static std::vector<clang::Stmt *> getCleanStmtList(clang::CFGBlock *block); //! Returns a list without nested stmts
   CfgBlock *createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *parent); //! Iterates over each statement of a block
   void traverseBlocks(clang::CFGBlock *block, CfgBlock *parent); //! Traveres each block of the CFG
   void cleanEmptyBlocks(); //! Removes blocks from the susCFG that don't contain stmts or conditions
@@ -57,16 +57,16 @@ class CFGFactory {
   DESCAM::Stmt *getScamStmt(clang::Stmt *clangStmt); //Return the respective DESCAM::Stmts for a clang clang::Stmts
   //Members
   clang::CXXMethodDecl *methodDecl;
-  clang::CFG *clangCFG;
-  clang::CompilerInstance *ci;
-  DESCAM::Module *const module;
-  bool sourceModule;
+  std::unique_ptr<clang::CFG> clang_cfg_;
+  clang::CompilerInstance *ci_;
+  DESCAM::Module *const module_;
+  bool source_module_;
   IFindDataFlowFactory *find_data_flow_factory_;
 
   //Map
   std::map<int, int>
-      entryMap; //! Contains an entry with <CFGBlockID,SusCFGBlockID>; If a block is split up it point to the first new block
-  std::map<int, CfgBlock *> controlFlowMap; //! Contains an entry for every blockId in the CFG
+      entry_map_; //! Contains an entry with <CFGBlockID,SusCFGBlockID>; If a block is split up it point to the first new block
+  std::map<int, CfgBlock *> control_flow_map_; //! Contains an entry for every blockId in the CFG
 
 };
 }

@@ -30,14 +30,14 @@ class FindGlobal : public IFindGlobal, public clang::RecursiveASTVisitor<FindGlo
   std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
                                               DESCAM::Function *function) const override;
 
-  bool VisitVarDecl(const clang::VarDecl *varDecl);
+  bool VisitVarDecl(const clang::VarDecl *var_decl);
 
-  bool VisitFunctionDecl(const clang::FunctionDecl *funDecl);
+  bool VisitFunctionDecl(const clang::FunctionDecl *function_decl);
 
  private:
   IFindDataFlowFactory *find_data_flow_factory_;
   clang::CompilerInstance *ci_;
-  DESCAM::DataType *getDataType(const clang::QualType &type) const;
+  static DESCAM::DataType *getDataType(const clang::QualType &type) ;
 
   clang::TranslationUnitDecl *decl_;
   DESCAM::Module module_ = Module("placeholder");

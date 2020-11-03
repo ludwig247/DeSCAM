@@ -57,5 +57,4 @@ else ()
             COMMAND rm -rf ${SYSTEMC_LIB_DIR}
             ALWAYS TRUE
             )
-
 endif ()

@@ -9,9 +9,14 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 # TODO: detect operating system and host processor
-message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
-message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+file(READ /etc/os-release OS)
+string(REGEX MATCH "NAME=\"([A-z]+)+" _ ${OS})
+set(OS_NAME ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_ID=\"(([0-9]+.)?([0-9]+.)?([0-9]+))" _ ${OS})
+set(OS_VERSION ${CMAKE_MATCH_1})
+message(STATUS "We are on ${OS_NAME} ${OS_VERSION}  / ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
 
+message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
 # TODO: get rid of CMAKE_CXX_STANDARD
 set(CMAKE_CXX_STANDARD 14) # C++14...
@@ -20,10 +25,8 @@ set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SYSTEMC_VERSION 2.3.1a)
-#set(LLVM_VERSION 3.4.2)
 set(LLVM_VERSION 11.0.0)
 set(GTEST_VERSION 1.10.0)
-#set(GTEST_VERSION 1.8.0)
 set(Z3_VERSION 4.8.6)
 
 # READ the library version of a previous build.
@@ -40,17 +43,10 @@ set(GTEST_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 string(REGEX MATCH "SYSTEMC (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
 set(SYSTEMC_PREVIOUS_BUILD ${CMAKE_MATCH_1})
 
-message(STATUS "Building with LLVM ${LLVM_VERSION}")
-message(STATUS "Building with Z3 ${Z3_VERSION}")
-message(STATUS "Building with GTEST ${GTEST_VERSION}")
-message(STATUS "Building with SYSTEMC ${SYSTEMC_VERSION}")
-
-if(TRUE)
-    file(WRITE build_info "LLVM ${LLVM_VERSION}\n")
-    file(APPEND build_info "Z3 ${Z3_VERSION}\n")
-    file(APPEND build_info "SYSTEMC ${SYSTEMC_VERSION}\n")
-    file(APPEND build_info "GTEST ${GTEST_VERSION}\n")
-endif()
+file(WRITE build_info "LLVM ${LLVM_VERSION}\n")
+file(APPEND build_info "Z3 ${Z3_VERSION}\n")
+file(APPEND build_info "SYSTEMC ${SYSTEMC_VERSION}\n")
+file(APPEND build_info "GTEST ${GTEST_VERSION}\n")
 
 file(MAKE_DIRECTORY lib)
 file(MAKE_DIRECTORY include)
@@ -73,42 +69,52 @@ file(MAKE_DIRECTORY ${CMAKE_EXTERNAL_PROJECT_DIR})
 set(USE_SYSTEM_Z3 OFF CACHE BOOL "Use system z3")
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_z3.cmake)
+message(STATUS "z3 library dir ${Z3_LIB_DIR}")
+message(STATUS "z3 include dir ${Z3_INCLUDE_DIR}")
+include_directories(${Z3_INCLUDE_DIR})
 
 #################################
 ## GTest
 #################################
+message(STATUS "Building with GTEST ${GTEST_VERSION}")
 # Do not use system GoogleTest
 set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system googletest")
+set(SYSTEMC_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_gtest.cmake)
 
 ################################
 # SystemC
 ################################
+
+message(STATUS "Building with SYSTEMC ${SYSTEMC_VERSION}")
 # Do not use system SystemC
 set(USE_SYSTEM_SYSTEMC OFF CACHE BOOL "Use system SystemC")
 set(SYSTEMC_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_systemc.cmake)
+message(STATUS "SYSTEMC include dir: ${SYSTEMC_INCLUDE_DIR}")
+include_directories(SYSTEMC_INCLUDE_DIR)
 
 ################################
 # llvm
 ################################
 # Do not use system LLVM
 set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
-set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
+message(STATUS "Building with LLVM ${LLVM_VERSION}")
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
-
-# Include the binary
-include_directories(${LLVM_INCLUDES})
-
+set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
+message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
+message(STATUS "LLVM binary dir: ${LLVM_BINARY_DIR}")
+message(STATUS "LLVM library dir: ${LLVM_LIB_DIR}")
 
 ################################
 # DESCAM
 ################################
-message(STATUS "SYSTEMC_INCLUDE_DIR: ${SYSTEMC_INCLUDE_DIR}")
+
 # Create the file with the location of the home folder
 execute_process(
 COMMAND echo "#ifndef SCAM_CONFIG_HOME_H
@@ -122,6 +128,7 @@ OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
 
 # TODO: forget commands like add_compile_options, include_directories, link_directories, link_libraries
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
 include_directories(${CMAKE_SOURCE_DIR}/example/Interfaces)
 include_directories(${CMAKE_SOURCE_DIR}/src/plugin)
 include_directories(${CMAKE_SOURCE_DIR}/src/parser)
