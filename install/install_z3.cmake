@@ -4,36 +4,43 @@ if (USE_SYSTEM_Z3)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
     find_package(z3 REQUIRED)
 else ()
-
     include(ExternalProject)
-    ExternalProject_add(Z3
-            # Location for external project with standard folder structure. Distinct by version
-            PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/z3/${Z3_VERSION}
-            # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
-            GIT_REPOSITORY https://github.com/Z3Prover/z3.git
-            GIT_TAG z3-${Z3_VERSION}
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-            GIT_CONFIG advice.detachedHead=false
-
-            # Do not update the project, as we intentionally checked out a specific version.
-            UPDATE_COMMAND ""
-
-            # Install locally in the project
-            CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
-#            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-            -DCMAKE_BUILD_TYPE=Release
-
-            INSTALL_COMMAND make install
-            )
-
-    ExternalProject_Add_Step(Z3 FORCED_INSTALL
-            DEPENDERS install
-            COMMAND ${CMAKE_COMMAND} -E echo "Installing Z3-${Z3_VERSION}"
-            COMMENT "Installing Z3-${Z3_VERSION}"
-            ALWAYS TRUE
-            )
-
-
+    if (APPLE)
+        if (OS_VERSION VERSION_GREATER_EQUAL 10)
+            ExternalProject_Add(Z3
+                    PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/z3
+                    URL https://github.com/Z3Prover/z3/releases/download/z3-4.8.6/z3-4.8.6-x64-osx-10.14.6.zip
+                    # TODO this is not the correct hash
+                    URL_HASH SHA512=6bcf63270c4bb6a3f13e1fd4bc2496493a3422a848494c3cc27598feaa2c0f8011170a31a4f2b11c89b8cfe05d0bab9cfee8baf4ef8a7e69807f5711f667d803
+                    CONFIGURE_COMMAND ""
+                    BUILD_COMMAND ""
+                    INSTALL_COMMAND ""
+                    )
+        else ()
+            message(STATUS "Prebuild Z3 installation not configured for MacOS. Building from source.")
+            set(Z3_FROM_SOURCE TRUE)
+            include(${PROJECT_SOURCE_DIR}/install/install_z3_git.cmake)
+            set(Z3_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+            set(Z3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+        endif ()
+    elseif (UNIX)
+        if (OS_VERSION VERSION_GREATER_EQUAL 16.04)
+            ExternalProject_Add(Z3
+                    PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/z3
+                    URL http://github.com/Z3Prover/z3/releases/download/z3-4.8.6/z3-4.8.6-x64-ubuntu-16.04.zip
+                    URL_HASH SHA512=6bcf63270c4bb6a3f13e1fd4bc2496493a3422a848494c3cc27598feaa2c0f8011170a31a4f2b11c89b8cfe05d0bab9cfee8baf4ef8a7e69807f5711f667d803
+                    CONFIGURE_COMMAND ""
+                    BUILD_COMMAND ""
+                    INSTALL_COMMAND ""
+                    )
+            set(Z3_LIB_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/z3/src/Z3/bin)
+            set(Z3_INCLUDE_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/z3/src/Z3/include)
+        else ()
+            message(STATUS "Prebuild Z3 installation not available for Ubuntu < 16.04. Building from source.")
+            set(Z3_FROM_SOURCE TRUE)
+            include(${PROJECT_SOURCE_DIR}/install/install_z3_git.cmake)
+            set(Z3_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+            set(Z3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+        endif ()
+    endif ()
 endif ()

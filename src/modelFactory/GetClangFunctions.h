@@ -18,7 +18,7 @@ class GetClangFunctions : public clang::RecursiveASTVisitor<GetClangFunctions> {
    */
   explicit GetClangFunctions(bool &success, clang::CXXRecordDecl *record_decl);
 
-  virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *methodDecl);
+  virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *method_decl);
 
   const std::map<std::string, clang::CXXMethodDecl *> &getFunctionMap() const;
 
@@ -32,7 +32,7 @@ class GetClangFunctions : public clang::RecursiveASTVisitor<GetClangFunctions> {
   std::map<std::string, clang::CXXMethodDecl *> function_map_;
   std::map<std::string, std::string> function_return_type_map_;
 
-  std::string clangToScamType(clang::QualType qualType) const;
+  static std::string clangToScamType(clang::QualType qual_type) ;
 
   std::map<std::string, std::vector<std::string>> function_param_name_map_;
   std::map<std::string, std::vector<std::string>> function_param_type_map_;

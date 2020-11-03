@@ -9,9 +9,10 @@ using namespace DESCAM;
 
 int PluginAction::previous_length_ = 0;
 
-PluginAction::PluginAction(int argc, const char **argv, IModelFactory *model_factory) {
+static llvm::cl::OptionCategory DescamCategory("descam options");
 
-  CommonOptionsParser OptionsParser(argc, argv);
+PluginAction::PluginAction(int argc, const char **argv, IModelFactory *model_factory) {
+  CommonOptionsParser OptionsParser(argc, argv, DescamCategory);
 
   // Delete files of previous runs
   auto sources = OptionsParser.getSourcePathList();
@@ -22,7 +23,7 @@ PluginAction::PluginAction(int argc, const char **argv, IModelFactory *model_fac
   previous_length_ = now_length;
 
   if(sources.size()!=1){
-    TERMINATE("Please specify exactly one source file");
+    TERMINATE("Please specify exactly one source file")
   }
 
   ClangTool Tool(OptionsParser.getCompilations(), sources);
@@ -34,5 +35,5 @@ PluginAction::PluginAction(int argc, const char **argv, IModelFactory *model_fac
   auto diagnosticPrinter = new clang::ClangDiagnosticPrinter(ss, diagnosticOptions);
   Tool.setDiagnosticConsumer(diagnosticPrinter);
   Tool.run(new DESCAMFrontEndFactory(model_factory));
-  diagnosticPrinter->addDiagnosticsToLogger(std::move(ss.str()));
+  clang::ClangDiagnosticPrinter::addDiagnosticsToLogger(ss.str());
 }
