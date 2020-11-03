@@ -26,6 +26,7 @@
 #include "DescamException.h"
 
 #include "FindDataFlowFactory.h"
+#include "clangCastVisitor.h"
 
 bool DESCAM::FindDataFlow::isFunction = false;
 std::string DESCAM::FindDataFlow::functionName;
@@ -176,7 +177,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                                                  "master_write", "slave_read", "slave_write", "set", "get", "wait",
                                                  "peek", "poke"};
     auto functions = module_->getFunctionMap();
-    if (auto *memberExpr = llvm::dyn_cast<clang::MemberExpr>(memberCallExpr->getCallee())) {
+//    if (auto *memberExpr = clangCastVisitor<clang::MemberExpr>(memberCallExpr->getCallee()).Get()) {
+    if (auto *memberExpr = clangCastVisitor(memberCallExpr->getCallee()).GetMemberExpr()) {
       //Assign name of the method
       methodString = memberExpr->getMemberDecl()->getNameAsString();
       //Get location info of the method
@@ -612,7 +614,7 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
   }
 
   //Check for state values
-  if (auto enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
+  if (auto enumDecl = clangCastVisitor(declRefExpr->getDecl()).GetEnumConstantDecl()) {
 
     //Regular enum-value
     std::string typeName = enumDecl->getType()->getAs<clang::EnumType>()->getDecl()->getName().str();
@@ -633,7 +635,8 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
     }
 
   }
-  if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
+//  if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
+  if (auto parmVarDecl = clangCastVisitor(declRefExpr->getDecl()).GetParmVarDecl()) {
     if (FindDataFlow::isFunction) {
       auto moduleFuncMap = this->module_->getFunctionMap();
       auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();

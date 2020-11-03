@@ -5,6 +5,7 @@
 #include "GetClangProcess.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "clangCastVisitor.h"
 
 DESCAM::GetClangProcess::GetClangProcess(bool &success, clang::CXXRecordDecl *record_decl) :
     record_decl_(record_decl),
@@ -43,7 +44,7 @@ bool DESCAM::GetClangProcess::VisitCXXMethodDecl(clang::CXXMethodDecl *md) {
   switch (pass_) {
     case 1: {
       /// Check if method is a constructor
-      if (auto *cd = clang::dyn_cast<clang::CXXConstructorDecl>(md)) {
+      if (auto *cd = clangCastVisitor(md).GetCxxConstructorDecl()) {
         const clang::FunctionDecl *fd = nullptr;
         cd->getBody(fd);
         if (cd->hasBody()) {

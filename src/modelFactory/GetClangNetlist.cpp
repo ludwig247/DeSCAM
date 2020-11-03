@@ -1,4 +1,5 @@
 #include "GetClangNetlist.h"
+#include "clangCastVisitor.h"
 
 namespace DESCAM {
 
@@ -10,16 +11,16 @@ bool GetClangNetlist::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *ce) {
 
   for (clang::Stmt::child_iterator it = ce->IgnoreImpCasts()->child_begin(), eit = ce->IgnoreImpCasts()->child_end();
        it != eit; it++) {
-    if (auto *e = llvm::dyn_cast<clang::Expr>(*it)) {
-      if (auto *me = llvm::dyn_cast<clang::MemberExpr>(e->IgnoreImpCasts())) {
-        if (auto *de = llvm::dyn_cast<clang::DeclRefExpr>(me->getBase()->IgnoreImpCasts())) {
+    if (auto *e = clangCastVisitor(*it).GetExpr()) {
+      if (auto *me = clangCastVisitor(e->IgnoreImpCasts()).GetMemberExpr()) {
+        if (auto *de = clangCastVisitor(me->getBase()->IgnoreImpCasts()).GetDeclRefExpr()) {
           moduleName = de->getDecl()->getType().getBaseTypeIdentifier()->getName().str();
           instanceName = de->getFoundDecl()->getNameAsString();
         }
         portName = me->getMemberDecl()->getNameAsString();
         foundME = true;
       }
-      if (auto *channelDecl = llvm::dyn_cast<clang::DeclRefExpr>(e->IgnoreImpCasts())) {
+      if (auto *channelDecl = clangCastVisitor(e->IgnoreImpCasts()).GetDeclRefExpr()) {
         if (foundME) {
           //Instance Map: containing an entry for each instance of an module
           this->instance_map_.insert(std::make_pair(instanceName, moduleName));

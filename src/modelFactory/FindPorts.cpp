@@ -4,6 +4,7 @@
 #include "FindNewDatatype.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "clangCastVisitor.h"
 
 namespace DESCAM {
 
