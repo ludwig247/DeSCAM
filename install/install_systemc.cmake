@@ -43,7 +43,7 @@ else ()
             ALWAYS TRUE
             )
 
-    if (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    if (APPLE)
         set(SYSTEMC_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/lib-macosx64/)
     else ()
         set(SYSTEMC_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/lib-linux64/)

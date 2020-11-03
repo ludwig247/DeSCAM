@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 
@@ -9,12 +10,19 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 # TODO: detect operating system and host processor
-file(READ /etc/os-release OS)
-string(REGEX MATCH "NAME=\"([A-z]+)+" _ ${OS})
-set(OS_NAME ${CMAKE_MATCH_1})
-string(REGEX MATCH "VERSION_ID=\"(([0-9]+.)?([0-9]+.)?([0-9]+))" _ ${OS})
-set(OS_VERSION ${CMAKE_MATCH_1})
-message(STATUS "We are on ${OS_NAME} ${OS_VERSION}  / ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+if (APPLE)
+    message(STATUS "We are on MacOS - ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+elseif(UNIX)
+    file(READ /etc/os-release OS)
+    string(REGEX MATCH "NAME=\"([A-z]+)+" _ ${OS})
+    set(OS_NAME ${CMAKE_MATCH_1})
+    string(REGEX MATCH "VERSION_ID=\"(([0-9]+.)?([0-9]+.)?([0-9]+))" _ ${OS})
+    set(OS_VERSION ${CMAKE_MATCH_1})
+    message(STATUS "We are on ${OS_NAME} ${OS_VERSION}  / ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+    else()
+    message(WARNING "Unsupported OS")
+endif ()
+
 
 message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
