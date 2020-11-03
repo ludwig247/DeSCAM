@@ -4,6 +4,7 @@
 #include "FindNewDatatype.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include "clangCastVisitor.h"
 
 namespace DESCAM {
 /*!
@@ -36,14 +37,14 @@ FindPorts::FindPorts(IFindNewDatatype *findNewDatatype) :
  * sc_port<shared_in_if<TYPE> >
  */
 bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
-  clang::QualType qualType = fieldDecl->getType();
+  clang::QualType qual_type = fieldDecl->getType();
   //Sync: find by name, doesn't have a parameter
   //TODO: What's the templateClass used for? Line of outdated legacy code? Just checking for dyn_cast?
-  if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(qualType.getTypePtr())) {
+  if (const auto *templateClass = clangCastVisitor(qual_type).GetTemplateSpecializationType()) {
     //In order to have a port there needs to be a qualType with 3 parameters
     //Disassemble the template
     port_templates_.clear();
-    this->recursiveTemplateVisitor(qualType);
+    this->recursiveTemplateVisitor(qual_type);
     //Determine type of port:
     if (port_templates_.size() == 2) {
       //if (port_templates_.at(0) == "sc_port" && port_templates_.at(1) == "rendezvous_out_if") {
@@ -77,9 +78,7 @@ bool FindPorts::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
 
 void FindPorts::recursiveTemplateVisitor(clang::QualType qual_type) {
   //Is there another template class?
-  if (const auto *templateClass = llvm::dyn_cast<clang::TemplateSpecializationType>(
-      qual_type.getTypePtr())) {
-
+  if (const auto *templateClass = clangCastVisitor(qual_type).GetTemplateSpecializationType()) {
     //Get name of the template class
     std::string templateName;
     llvm::raw_string_ostream templateNameStream(templateName);
@@ -91,7 +90,7 @@ void FindPorts::recursiveTemplateVisitor(clang::QualType qual_type) {
       clang::TemplateArgument templateArgument = templateClass->getArg(i);
       if (templateArgument.getKind() == clang::TemplateArgument::ArgKind::Expression) {
         clang::Expr *expr = templateArgument.getAsExpr();
-        if (const clang::IntegerLiteral *value = llvm::dyn_cast<clang::IntegerLiteral>(expr)) {
+        if (const clang::IntegerLiteral *value = clangCastVisitor(expr).GetIntegerLiteral()) {
           //if(this->port_templates_.at(0) != "sc_uint") TERMINATE("Type: " + this->port_templates_.at(0) + " is not allowed");
           this->port_templates_.push_back(std::to_string(value->getValue().getSExtValue()));
         } else TERMINATE("Expr is not an integer");
