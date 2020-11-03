@@ -46,8 +46,12 @@ bool DESCAM::FindFunctions::setup(clang::CXXRecordDecl *record_decl,
       //Add datatypes for functions
       auto functionsMap = get_clang_functions_->getFunctionMap();
       for (const auto &func: functionsMap) {
-        auto newType = find_new_datatype_->getDataType(func.second->getResultType());
-        if (find_new_datatype_->isGlobal(func.second->getResultType())) {
+        // TODO clean
+        //auto newType = find_new_datatype_->getDataType(func.second->getResultType());
+        auto newType = find_new_datatype_->getDataType(func.second->getCallResultType());
+        //TODO maybe this is the correct call? If not clean
+        //auto newType = find_new_datatype_->getDataType(func.second->getReturnType());
+        if (find_new_datatype_->isGlobal(func.second->getCallResultType())) {
           DataTypes::addDataType(newType);
         } else DataTypes::addLocalDataType(module_->getName(), newType);
       }

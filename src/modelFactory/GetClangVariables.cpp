@@ -20,17 +20,17 @@ bool DESCAM::GetClangVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
       typeName = "unsigned";
     } else if (fieldDecl->getType()->isIntegerType()) {
       typeName = "int";
-    } else TERMINATE("unsupported type");
+    } else TERMINATE("unsupported type")
     this->member_map_.insert(std::make_pair(fieldDecl->getName(), fieldDecl));
     this->member_type_map_.insert(std::make_pair(fieldDecl->getName(), typeName));
 
   } else if (fieldDecl->getType()->isStructureType()) {
     this->member_map_.insert(std::make_pair(fieldDecl->getName(), fieldDecl));
-    std::string typeName = fieldDecl->getType()->getAsCXXRecordDecl()->getName();
+    std::string typeName = fieldDecl->getType()->getAsCXXRecordDecl()->getName().str();
     this->member_type_map_.insert(std::make_pair(fieldDecl->getName(), typeName));
 
   } else if (fieldDecl->getType()->isEnumeralType()) {
-    //if (fieldDecl->getName() == "section" || fieldDecl->getName() == "nextsection") return true;
+    //if (fieldDecl->getName() == "section" || fieldDecl->getName() == "next_section") return true;
 
     const clang::EnumType *enumType = fieldDecl->getType()->getAs<clang::EnumType>();
     std::string typeName = enumType->getDecl()->getName().str();
@@ -43,7 +43,7 @@ bool DESCAM::GetClangVariables::VisitFieldDecl(clang::FieldDecl *fieldDecl) {
     this->member_type_map_.insert(std::make_pair(fieldDecl->getName(), "array"));
   } else {
 
-    //TODO: is every fieldDecl catched? -> maybe first store all in a list in work off that list afterwards
+    //TODO: is every fieldDecl caught? -> maybe first store all in a list in work off that list afterwards
   }
   return true;
 
