@@ -38,15 +38,15 @@ namespace DESCAM {
 
                 std::string printMonitorOperation(const Operation &op) override;
 
-                template<typename T>
-                std::string printOutputRegister(const T &signal);
+                std::string printRegisterProcess (const std::string &regName,
+                                                  const std::string &resetValue,
+                                                  const std::string &vldName,
+                                                  const std::string &inputName);
 
                 template<typename T>
-                std::string printOutputProcess(const T &signal);
+                std::string printOutputProcesses(const T &signal);
 
-                std::string printNotifyRegister(const std::shared_ptr<PropertyMacro> &notify);
-
-                std::string printNotifyProcess(const std::shared_ptr<PropertyMacro> &notify);
+                std::string printNotifyProcesses(const std::shared_ptr<PropertyMacro> &notify);
 
                 void moduleOutputHandling(std::stringstream &ss) override;
 
@@ -55,7 +55,7 @@ namespace DESCAM {
 
 
             template<typename T>
-            std::string VHDLWrapperMCO::printOutputRegister(const T &signal) {
+            std::string VHDLWrapperMCO::printOutputProcesses(const T &signal) {
                 std::stringstream ss;
 
                 std::string opOutputSignal;
@@ -75,39 +75,7 @@ namespace DESCAM {
                     opOutputSignal += "_out";
                 }
 
-                ss << "\tprocess (clk, rst)\n"
-                   << "\tbegin\n"
-                   << "\t\tif (rst = \'1\') then\n"
-                   << "\t\t\t" << registerName << " <= " << getResetValue(signal) << ";\n"
-                   << "\t\telsif (clk = \'1\' and clk\'event) then\n"
-                   << "\t\t\tif (" << opOutputValidSignal << " = \'1\') then\n"
-                   << "\t\t\t\t" << registerName << " <= " << opOutputSignal << ";\n"
-                   << "\t\t\tend if;\n"
-                   << "\t\tend if;\n"
-                   << "\tend process;\n\n";
-                return ss.str();
-            }
-
-            template<typename T>
-            std::string VHDLWrapperMCO::printOutputProcess(const T &signal) {
-                std::stringstream ss;
-
-                std::string opOutputSignal;
-                std::string registerName;
-                const auto &output = (signal->isSubVar() ? signal->getParent() : signal);
-                opOutputSignal = (optimizer->hasOutputReg(output)
-                              ? ("out_" + optimizer->getCorrespondingRegister(output)->getName())
-                              : output->getName());
-                if (signal->isSubVar()) {
-                    registerName = signal->getFullName("_reg.");
-                    opOutputSignal += "_" + signal->getName();
-                } else {
-                    registerName = signal->getFullName() + "_reg";
-                }
-                std::string opOutputValidSignal = opOutputSignal + "_vld";
-                if (!(optimizer->hasOutputReg(output))) {
-                    opOutputSignal += "_out";
-                }
+                ss << printRegisterProcess(registerName, getResetValue(signal), opOutputValidSignal, opOutputSignal);
 
                 ss << "\tprocess (clk, done_sig, "<< opOutputValidSignal << ")\n"
                    << "\tbegin\n"

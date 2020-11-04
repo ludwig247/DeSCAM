@@ -163,30 +163,45 @@ std::string VHDLWrapperMCO::printMonitorOperation(const Operation &op) {
     return ss.str();
 }
 
-//TODO: Remove/Merge with PrintOutputRegister
-std::string VHDLWrapperMCO::printNotifyRegister(const std::shared_ptr<PropertyMacro> &notify) {
-
+/*
+ * Print a sequential process
+ *
+ * Used for Output Registers
+ */
+std::string VHDLWrapperMCO::printRegisterProcess(const std::string &regName,
+                                                 const std::string &resetValue,
+                                                 const std::string &vldName,
+                                                 const std::string &inputName) {
     std::stringstream ss;
-    std::string resetValue = SignalFactory::findAssignedValue(propertySuite->getResetProperty(), notify);
-
     ss << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
        << "\t\tif (rst = \'1\') then\n"
-       << "\t\t\t" << notify->getName() << "_reg <= " << resetValue << ";\n"
+       << "\t\t\t" << regName << " <= " << resetValue << ";\n"
        << "\t\telsif (clk = \'1\' and clk\'event) then\n"
-       << "\t\t\tif (" << notify->getName() << "_vld = \'1\') then\n"
-       << "\t\t\t\t" << notify->getName() << "_reg <= " << notify->getName() << "_out;\n"
+       << "\t\t\tif (" << vldName << " = \'1\') then\n"
+       << "\t\t\t\t" << regName << " <= " << inputName << ";\n"
        << "\t\t\tend if;\n"
        << "\t\tend if;\n"
        << "\tend process;\n\n";
     return ss.str();
 }
 
-//TODO: Remove/Merge
-std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMacro> &notify) {
+/*
+ * Print Processes for the given notify signal
+ *
+ * The first process is sequential, describing the register to save the signals value
+ * The second process is combinatorial, specifying the output of the module
+ */
+std::string VHDLWrapperMCO::printNotifyProcesses(const std::shared_ptr<PropertyMacro> &notify) {
 
     std::stringstream ss;
     std::string resetValue = SignalFactory::findAssignedValue(propertySuite->getResetProperty(), notify);
+
+    // Print sequential process
+    ss << printRegisterProcess(notify->getName()+"_reg",
+                               resetValue,
+                               notify->getName()+"_vld",
+                               notify->getName()+"_out");
 
     // Find wait states for which the notify signal is active
     std::vector<std::string> activeStates;
@@ -197,6 +212,7 @@ std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMac
         }
     }
 
+    // Print combinatorial process
     ss << "\tprocess (rst, done_sig, "
        << (activeStates.empty() ? "" : "idle_sig, ")
        << notify->getName() << "_vld)\n"
@@ -242,37 +258,20 @@ std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMac
 
 void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
 
-
-    ss << "\t-- Output Registers\n";
-    for (const auto &output : signalFactory->getOutputs()) {
-        if (output->isCompoundType()) {
-            for (const auto &subVar : output->getSubVarList()) {
-                ss << printOutputRegister(subVar);
-            }
-        } else {
-            ss << printOutputRegister(output);
-        }
-    }
-
     ss << "\t-- Output Processes\n";
     for (const auto &output : signalFactory->getOutputs()) {
         if (output->isCompoundType()) {
             for (const auto &subVar : output->getSubVarList()) {
-                ss << printOutputProcess(subVar);
+                ss << printOutputProcesses(subVar);
             }
         } else {
-            ss << printOutputProcess(output);
+            ss << printOutputProcesses(output);
         }
-    }
-
-    ss << "\t-- Notify Registers\n";
-    for (const auto &notify : propertySuite->getNotifySignals()) {
-        ss << printNotifyRegister(notify);
     }
 
     ss << "\t-- Notify Processes\n";
     for (const auto &notify : propertySuite->getNotifySignals()) {
-        ss << printNotifyProcess(notify);
+        ss << printNotifyProcesses(notify);
     }
 
 
