@@ -165,24 +165,9 @@ std::string VHDLWrapperMCO::printMonitorOperation(const Operation &op) {
 
 //TODO: Remove/Merge with PrintOutputRegister
 std::string VHDLWrapperMCO::printNotifyRegister(const std::shared_ptr<PropertyMacro> &notify) {
-    std::stringstream ss;
 
-    // Find reset value of notify signal
-    std::string resetValue;
-    for (const auto &commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        const auto &assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-        if (assignment == nullptr) {
-            continue;
-        }
-        const auto &lhs = NodePeekVisitor::nodePeekNotify(assignment->getLhs());
-        if (lhs == nullptr) {
-            continue;
-        }
-        if (notify->getFullName() == PrintStmtVHDL::toString(lhs)) {
-            resetValue = PrintStmtVHDL::toString(assignment->getRhs());
-            break;
-        }
-    }
+    std::stringstream ss;
+    std::string resetValue = SignalFactory::findAssignedValue(propertySuite->getResetProperty(), notify);
 
     ss << "\tprocess (clk, rst)\n"
        << "\tbegin\n"
@@ -199,44 +184,14 @@ std::string VHDLWrapperMCO::printNotifyRegister(const std::shared_ptr<PropertyMa
 
 //TODO: Remove/Merge
 std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMacro> &notify) {
-    std::stringstream ss;
 
-    // Find reset value of notify signal
-    std::string resetValue;
-    //TODO: Pack this below in an Utility function? -> Find an assigned value in a list of commitments
-    for (const auto &commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        const auto &assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-        if (assignment == nullptr) {
-            continue;
-        }
-        const auto &lhs = NodePeekVisitor::nodePeekNotify(assignment->getLhs());
-        if (lhs == nullptr) {
-            continue;
-        }
-        if (notify->getFullName() == PrintStmtVHDL::toString(lhs)) {
-            resetValue = PrintStmtVHDL::toString(assignment->getRhs());
-            break;
-        }
-    }
+    std::stringstream ss;
+    std::string resetValue = SignalFactory::findAssignedValue(propertySuite->getResetProperty(), notify);
 
     // Find wait states for which the notify signal is active
     std::vector<std::string> activeStates;
     for (const auto &waitProperty : propertySuite->getWaitProperties()) {
-        std::string assignedValue;
-        for (const auto &commitment : waitProperty->getCommitmentList()) {
-            const auto &assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
-            if (assignment == nullptr) {
-                continue;
-            }
-            const auto &lhs = NodePeekVisitor::nodePeekNotify(assignment->getLhs());
-            if (lhs == nullptr) {
-                continue;
-            }
-            if (notify->getFullName() == PrintStmtVHDL::toString(lhs)) {
-                assignedValue = PrintStmtVHDL::toString(assignment->getRhs());
-                break;
-            }
-        }
+        std::string assignedValue = SignalFactory::findAssignedValue(waitProperty, notify);
         if (assignedValue == "\'1\'") {
             activeStates.push_back(waitProperty->getOperation()->getState()->getName());
         }

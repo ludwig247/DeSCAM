@@ -62,6 +62,8 @@ namespace DESCAM {
                 template<typename T>
                 static std::string enumToVector(T *dataSignal);
 
+                static std::string findAssignedValue(const std::shared_ptr<Property> &property, const std::shared_ptr<PropertyMacro> &notify);
+
                 static std::string convertReturnType (const DataType &type);
 
                 std::set<Variable *> getInternalRegister() const;

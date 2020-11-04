@@ -6,6 +6,7 @@
 #include <tuple>
 #include "Logger/Logger.h"
 #include "SignalFactory.h"
+#include "PrintStmtVHDL.h"
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
@@ -155,4 +156,26 @@ std::string SignalFactory::convertReturnType(const DataType &type) {
     } else {
         return type.getName();
     }
+}
+
+/*
+ * Find the assigned value of a notify signal in the given properties' commitments
+ */
+std::string SignalFactory::findAssignedValue(const std::shared_ptr<Property> &property, const std::shared_ptr<PropertyMacro> &notify) {
+    std::string assignedValue;
+    for (const auto &commitment : property->getCommitmentList()) {
+        const auto &assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
+        if (assignment == nullptr) {
+            continue;
+        }
+        const auto &lhs = NodePeekVisitor::nodePeekNotify(assignment->getLhs());
+        if (lhs == nullptr) {
+            continue;
+        }
+        if (notify->getFullName() == PrintStmtVHDL::toString(lhs)) {
+            assignedValue = PrintStmtVHDL::toString(assignment->getRhs());
+            break;
+        }
+    }
+    return assignedValue;
 }
