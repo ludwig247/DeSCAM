@@ -151,7 +151,8 @@ void VHDLWrapperMCO::componentInst(std::stringstream &ss) {
 std::string VHDLWrapperMCO::printMonitorOperation(const Operation &op) {
     std::stringstream ss;
     if (!op.IsWait()) {
-        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId()) << ";\n";
+        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId())
+           << ";\n";
         ss << "\t\t\t\tnext_state <= st_" << op.getNextState()->getName() << ";\n";
         ss << "\t\t\t\twait_state <= '0';\n";
     } else {
@@ -241,7 +242,9 @@ std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMac
         }
     }
 
-    ss << "\tprocess (rst, done_sig, idle_sig, " << notify->getName() << "_vld)\n"
+    ss << "\tprocess (rst, done_sig, "
+       << (activeStates.empty() ? "" : "idle_sig, ")
+       << notify->getName() << "_vld)\n"
        << "\tbegin\n"
        << "\t\tif (rst = \'1\') then\n"
        << "\t\t\t" << notify->getName() << " <= " << resetValue << ";\n"
@@ -250,19 +253,17 @@ std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMac
        << "\t\t\t\t" << notify->getName() << " <= " << notify->getName() << "_out;\n"
        << "\t\t\telse\n"
        << "\t\t\t\t" << notify->getName() << " <= " << notify->getName() << "_reg;\n"
-       << "\t\t\tend if;\n"
-       << "\t\telsif (idle_sig = \'1\') then\n";
+       << "\t\t\tend if;\n";
 
-    if (activeStates.empty()) {
-        ss << "\t\t\t" << notify->getName() << " <= \'0\';\n";
-    } else {
+    if (!(activeStates.empty())) {
+        ss << "\t\telsif (idle_sig = \'1\') then\n";
         ss << "\t\t\tif ";
         if (activeStates.size() > 1) {
             ss << "(";
         }
         for (auto state = activeStates.begin(); state != activeStates.end(); state++) {
             ss << "(active_state = st_" << (*state) << ")";
-            if (state != (activeStates.end()-1)) {
+            if (state != (activeStates.end() - 1)) {
                 ss << " or ";
             }
         }
@@ -287,12 +288,10 @@ std::string VHDLWrapperMCO::printNotifyProcess(const std::shared_ptr<PropertyMac
 void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
 
 
-
-
     ss << "\t-- Output Registers\n";
     for (const auto &output : signalFactory->getOutputs()) {
         if (output->isCompoundType()) {
-            for (const auto &subVar : output->getSubVarList()){
+            for (const auto &subVar : output->getSubVarList()) {
                 ss << printOutputRegister(subVar);
             }
         } else {
@@ -303,7 +302,7 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
     ss << "\t-- Output Processes\n";
     for (const auto &output : signalFactory->getOutputs()) {
         if (output->isCompoundType()) {
-            for (const auto &subVar : output->getSubVarList()){
+            for (const auto &subVar : output->getSubVarList()) {
                 ss << printOutputProcess(subVar);
             }
         } else {
@@ -320,10 +319,6 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
     for (const auto &notify : propertySuite->getNotifySignals()) {
         ss << printNotifyProcess(notify);
     }
-
-
-
-
 
 
     ss << "\t-- Internal Variables\n";
