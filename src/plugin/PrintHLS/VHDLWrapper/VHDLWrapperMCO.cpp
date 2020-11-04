@@ -148,11 +148,12 @@ void VHDLWrapperMCO::componentInst(std::stringstream &ss) {
 std::string VHDLWrapperMCO::printMonitorOperation(const Operation &op) {
     std::stringstream ss;
     if (!op.IsWait()) {
-        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId())
-           << ";\n";
+        ss << "\t\t\t\tactive_operation <= op_" << op.getState()->getName() << "_" << std::to_string(op.getId()) << ";\n";
         ss << "\t\t\t\tnext_state <= st_" << op.getNextState()->getName() << ";\n";
         ss << "\t\t\t\twait_state <= '0';\n";
     } else {
+        ss << "\t\t\t\tactive_operation <= op_state_wait;\n";
+        ss << "\t\t\t\tnext_state <= st_" << op.getState()->getName() << ";\n";
         ss << "\t\t\t\twait_state <= '1';\n";
     }
     return ss.str();
