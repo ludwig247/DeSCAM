@@ -200,11 +200,22 @@ set(CLANG_LIBS
         libclangTransformer.a
         )
 
-set(OTHERS
-        #${CMAKE_SOURCE_DIR}/lib/libz3.so
-        ${Z3_LIB_DIR}/libz3.a
-        rt
-        dl
-        tinfo
-        pthread
-        )
+if (APPLE)
+    set(OTHERS
+            #${CMAKE_SOURCE_DIR}/lib/libz3.so
+            ${Z3_LIB_DIR}/libz3.a
+            rt
+            dl
+            tinfo
+            pthread
+            )
+elseif ()
+    set(OTHERS
+            #${CMAKE_SOURCE_DIR}/lib/libz3.so
+            ${Z3_LIB_DIR}/libz3.so
+            rt
+            dl
+            tinfo
+            pthread
+            )
+endif ()
