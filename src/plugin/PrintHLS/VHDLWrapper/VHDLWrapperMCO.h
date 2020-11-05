@@ -2,8 +2,8 @@
 // Created by johannes on 02.11.19.
 //
 
-#ifndef SCAM_VHDLWrapperMultiClkCycle_H
-#define SCAM_VHDLWrapperMultiClkCycle_H
+#ifndef SCAM_VHDLWrapperMCO_H
+#define SCAM_VHDLWrapperMCO_H
 
 #include <memory>
 #include <string>
@@ -38,10 +38,10 @@ namespace DESCAM {
 
                 std::string printMonitorOperation(const Operation &op) override;
 
-                std::string printRegisterProcess (const std::string &regName,
-                                                  const std::string &resetValue,
-                                                  const std::string &vldName,
-                                                  const std::string &inputName);
+                static std::string printRegisterProcess(const std::string &regName,
+                                                        const std::string &resetValue,
+                                                        const std::string &vldName,
+                                                        const std::string &inputName);
 
                 template<typename T>
                 std::string printOutputProcesses(const T &signal);
@@ -54,6 +54,12 @@ namespace DESCAM {
             };
 
 
+            /*
+             * Print Processes for the given notify signal
+             *
+             * The first process is sequential, describing the register to save the signals value
+             * The second process is combinatorial, specifying the output of the module
+             */
             template<typename T>
             std::string VHDLWrapperMCO::printOutputProcesses(const T &signal) {
                 std::stringstream ss;
@@ -62,8 +68,8 @@ namespace DESCAM {
                 std::string registerName;
                 const auto &output = (signal->isSubVar() ? signal->getParent() : signal);
                 opOutputSignal = (optimizer->hasOutputReg(output)
-                              ? ("out_" + optimizer->getCorrespondingRegister(output)->getName())
-                              : output->getName());
+                                  ? ("out_" + optimizer->getCorrespondingRegister(output)->getName())
+                                  : output->getName());
                 if (signal->isSubVar()) {
                     registerName = signal->getFullName("_reg.");
                     opOutputSignal += "_" + signal->getName();
@@ -77,11 +83,11 @@ namespace DESCAM {
 
                 ss << printRegisterProcess(registerName, getResetValue(signal), opOutputValidSignal, opOutputSignal);
 
-                ss << "\tprocess (clk, done_sig, "<< opOutputValidSignal << ")\n"
+                ss << "\tprocess (clk, done_sig, " << opOutputValidSignal << ")\n"
                    << "\tbegin\n"
                    << "\t\tif (rst = \'1\') then\n"
                    << "\t\t\t" << signal->getFullName() << " <= " << getResetValue(signal) << ";\n"
-                   << "\t\telsif ((done_sig = \'1\') and ("<< opOutputValidSignal << " = \'1\')) then\n"
+                   << "\t\telsif ((done_sig = \'1\') and (" << opOutputValidSignal << " = \'1\')) then\n"
                    << "\t\t\t" << signal->getFullName() << " <= " << opOutputSignal << ";\n"
                    << "\t\telse\n"
                    << "\t\t\t" << signal->getFullName() << " <= " << registerName << ";\n"
@@ -94,4 +100,4 @@ namespace DESCAM {
     }
 }
 
-#endif //SCAM_VHDLWrapperMultiClkCycle_H
+#endif //SCAM_VHDLWrapperMCO_H

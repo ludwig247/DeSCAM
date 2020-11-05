@@ -198,10 +198,10 @@ std::string VHDLWrapperMCO::printNotifyProcesses(const std::shared_ptr<PropertyM
     std::string resetValue = SignalFactory::findAssignedValue(propertySuite->getResetProperty(), notify);
 
     // Print sequential process
-    ss << printRegisterProcess(notify->getName()+"_reg",
+    ss << printRegisterProcess(notify->getName() + "_reg",
                                resetValue,
-                               notify->getName()+"_vld",
-                               notify->getName()+"_out");
+                               notify->getName() + "_vld",
+                               notify->getName() + "_out");
 
     // Find wait states for which the notify signal is active
     std::vector<std::string> activeStates;
@@ -255,7 +255,9 @@ std::string VHDLWrapperMCO::printNotifyProcesses(const std::shared_ptr<PropertyM
     return ss.str();
 }
 
-
+/*
+ * Print Processes for Module Registers and Outputs
+ */
 void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
 
     ss << "\t-- Output Processes\n";
@@ -276,37 +278,6 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
 
 
     ss << "\t-- Internal Variables\n";
-
-
-
-
-
-
-
-
-
-/*    auto printOutputProcess = [&](DataSignal *dataSignal) {
-        bool hasOutputReg = optimizer->hasOutputReg(dataSignal);
-        ss << "\tprocess (rst, " << dataSignal->getFullName("_") << "_vld)\n"
-           << "\tbegin\n"
-           << "\t\tif (rst = \'1\') then\n"
-           << "\t\t\t"
-           << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName(
-                   "."))
-           << " <= " << getResetValue(dataSignal) << ";\n"
-           << "\t\telsif (" << dataSignal->getFullName("_") << "_vld = \'1\') then\n"
-           << "\t\t\t"
-           << (hasOutputReg ? optimizer->getCorrespondingRegister(dataSignal)->getFullName() : dataSignal->getFullName(
-                   "."))
-           << " <= " << dataSignal->getFullName("_") << "_out;\n"
-           << "\t\tend if;\n"
-           << "\tend process;\n\n";
-    };
-    ss << "\t-- Output_Vld Processes\n";
-    for (const auto &out : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
-        printOutputProcess(out);
-    }*/
-
     auto printOutputProcessRegs = [&](Variable *var) {
         ss << "\tprocess (rst, out_" << var->getFullName("_") << "_vld)\n"
            << "\tbegin\n"
@@ -367,87 +338,11 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     }
-/*
-    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\tprocess(" << notifySignal->getName() << "_vld)\n"
-           << "\tbegin\n"
-           << "\t\tif (" << notifySignal->getName() << "_vld = '1') then\n"
-           << "\t\t\t" << notifySignal->getName() << "_reg <= " << notifySignal->getName() << "_out;\n"
-           << "\t\tend if;\n"
-           << "\tend process;\n\n";
-    }
-
-    ss << "\t-- Output Processes\n"
-       << "\tprocess(rst, done_sig)\n"
-       << "\tbegin\n"
-       << "\t\tif (rst = '1') then\n";
-    for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
-        if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
-            for (const auto &output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
-                if (output->isCompoundType()) {
-                    for (const auto &subVar : output->getSubVarList()) {
-                        ss << "\t\t\t" << subVar->getFullName(".") << " <= " << getResetValue(subVar) << ";\n";
-                    }
-                } else {
-                    ss << "\t\t\t" << registerOutputMap.second->getFullName(".") << " <= "
-                       << getResetValue(registerOutputMap.second) << ";\n";
-                }
-            }
-        } else {
-            if (registerOutputMap.second->isCompoundType()) {
-                for (const auto &subVar : registerOutputMap.second->getSubVarList()) {
-                    ss << "\t\t\t" << subVar->getFullName(".") << " <= " << getResetValue(subVar) << ";\n";
-                }
-            } else {
-                ss << "\t\t\t" << registerOutputMap.second->getFullName(".") << " <= "
-                   << getResetValue(registerOutputMap.second) << ";\n";
-            }
-        }
-    }
-    ss << "\t\telsif (done_sig = '1') then\n";
-    for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
-        if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
-            for (const auto &output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
-                ss << "\t\t\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
-            }
-        } else {
-            ss << "\t\t\t" << registerOutputMap.second->getFullName() << " <= "
-               << registerOutputMap.first->getFullName() << ";\n";
-        }
-    }
-    ss << "\t\tend if;\n"
-       << "\tend process;\n\n";
-
-    ss << "\tprocess(rst, done_sig, idle_sig)\n"
-       << "\tbegin\n"
-       << "\t\tif (rst = '1') then\n";
-    for (const auto &commitment : propertySuite->getResetProperty()->getCommitmentList()) {
-        // Find and print notifies from reset property commitments
-        const auto &assignment = NodePeekVisitor::nodePeekAssignment((*commitment).getStatement());
-        if ((assignment != nullptr) && (NodePeekVisitor::nodePeekNotify(assignment->getLhs()) != nullptr)) {
-            ss << "\t\t\t" << PrintStmtVHDL::toString((*commitment).getStatement()) << ";\n";
-        }
-    }
-    ss << "\t\telse\n"
-       << "\t\t\tif (done_sig = '1') then\n";
-    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t\t\t\t" << notifySignal->getName() << " <= " << notifySignal->getName() << "_reg;\n";
-    }
-    ss << "\t\t\telsif (idle_sig = '1') then\n";
-    for (const auto &port : currentModule->getPorts()) {
-        if (port.second->getInterface()->isMasterOut()) {
-            ss << "\t\t\t\t" << port.second->getName() << "_notify <= '0';\n";
-        }
-    }
-    ss << "\t\t\telse\n";
-    for (const auto &notifySignal : propertySuite->getNotifySignals()) {
-        ss << "\t\t\t\t" << notifySignal->getName() << " <= '0';\n";
-    }
-    ss << "\t\t\tend if;\n"
-       << "\t\tend if;\n"
-       << "\tend process;\n\n";*/
 }
 
+/*
+ * Print sequential control process
+ */
 void VHDLWrapperMCO::controlProcess(std::stringstream &ss) {
 
     ss << "\t-- Control process\n"
