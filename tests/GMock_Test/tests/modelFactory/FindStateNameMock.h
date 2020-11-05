@@ -7,7 +7,7 @@
 
 #include "MockIFindStateName.h"
 
-TEST(TestCase1, FindStateName) /* NOLINT */{
+TEST(TestCase1, FindStateName_mocked) /* NOLINT */{
   using testing::Return;
   DataTypes::reset();
 
@@ -42,7 +42,7 @@ TEST(TestCase1, FindStateName) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindStateName) /* NOLINT */{
+TEST(TestCase2, FindStateName_mocked) /* NOLINT */{
   using testing::Return;
   DataTypes::reset();
 
@@ -77,7 +77,7 @@ TEST(TestCase2, FindStateName) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindStateName) /* NOLINT */{
+TEST(TestCase3, FindStateName_mocked) /* NOLINT */{
   using testing::Return;
   DataTypes::reset();
 

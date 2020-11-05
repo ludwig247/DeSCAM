@@ -7,7 +7,7 @@
 
 #include "MockIFindNewDataType.h"
 
-TEST(TestCase1, FindNewDatatype) /* NOLINT */{
+TEST(TestCase1, FindNewDatatype_mocked) /* NOLINT */{
   using testing::Return;
   DataTypes::reset();
 
@@ -45,7 +45,7 @@ TEST(TestCase1, FindNewDatatype) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindNewDatatype) /* NOLINT */{
+TEST(TestCase2, FindNewDatatype_mocked) /* NOLINT */{
   using ::testing::Return;
   DataTypes::reset();
 
@@ -89,7 +89,7 @@ TEST(TestCase2, FindNewDatatype) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindNewDatatype) /* NOLINT */{
+TEST(TestCase3, FindNewDatatype_mocked) /* NOLINT */{
   using ::testing::Return;
   DataTypes::reset();
 

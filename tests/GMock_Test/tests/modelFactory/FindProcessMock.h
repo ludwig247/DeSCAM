@@ -7,7 +7,7 @@
 
 #include "MockIFindProcess.h"
 
-TEST(TestCase1, FindProcess) /* NOLINT*/{
+TEST(TestCase1, FindProcess_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -81,7 +81,7 @@ TEST(TestCase1, FindProcess) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindProcess) /* NOLINT*/{
+TEST(TestCase2, FindProcess_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -185,7 +185,7 @@ TEST(TestCase2, FindProcess) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindProcess) /* NOLINT*/{
+TEST(TestCase3, FindProcess_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 

@@ -7,7 +7,7 @@
 
 #include "MockIFindVariables.h"
 
-TEST(TestCase1, FindVariables) /* NOLINT*/{
+TEST(TestCase1, FindVariables_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -47,7 +47,7 @@ TEST(TestCase1, FindVariables) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindVariables) /* NOLINT*/{
+TEST(TestCase2, FindVariables_mocked) /* NOLINT*/{
   using ::testing::Return;
   DataTypes::reset();
 
@@ -93,7 +93,7 @@ TEST(TestCase2, FindVariables) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindVariables) /* NOLINT*/{
+TEST(TestCase3, FindVariables_mocked) /* NOLINT*/{
   using ::testing::Return;
   DataTypes::reset();
 

@@ -7,7 +7,7 @@
 
 #include "MockIFindPorts.h"
 
-TEST(TestCase1, FindPorts) /* NOLINT*/{
+TEST(TestCase1, FindPorts_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -51,7 +51,7 @@ TEST(TestCase1, FindPorts) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindPorts) /* NOLINT*/{
+TEST(TestCase2, FindPorts_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -95,7 +95,7 @@ TEST(TestCase2, FindPorts) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindPorts) /* NOLINT*/{
+TEST(TestCase3, FindPorts_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 

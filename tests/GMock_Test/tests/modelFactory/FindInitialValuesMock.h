@@ -7,7 +7,7 @@
 
 #include "MockIFindInitialValues.h"
 
-TEST(TestCase1, FindInitialValues) /* NOLINT*/{
+TEST(TestCase1, FindInitialValues_mocked) /* NOLINT*/{
   using testing::Return;
   DataTypes::reset();
 
@@ -45,7 +45,7 @@ TEST(TestCase1, FindInitialValues) /* NOLINT*/{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindInitialValues) /* NOLINT */{
+TEST(TestCase2, FindInitialValues_mocked) /* NOLINT */{
   using ::testing::Return;
 
   DataTypes::reset();
@@ -83,7 +83,7 @@ TEST(TestCase2, FindInitialValues) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindInitialValues) /* NOLINT */{
+TEST(TestCase3, FindInitialValues_mocked) /* NOLINT */{
   using ::testing::Return;
 
   DataTypes::reset();

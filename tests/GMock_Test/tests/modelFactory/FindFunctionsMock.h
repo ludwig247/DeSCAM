@@ -7,7 +7,7 @@
 
 #include "MockIFindFunctions.h"
 
-TEST(TestCase1, FindFunctions) /* NOLINT */{
+TEST(TestCase1, FindFunctions_mocked) /* NOLINT */{
   using testing::Return;
   DataTypes::reset();
 
@@ -45,7 +45,7 @@ TEST(TestCase1, FindFunctions) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
 }
 
-TEST(TestCase2, FindFunctions) /* NOLINT */{
+TEST(TestCase2, FindFunctions_mocked) /* NOLINT */{
   using ::testing::Return;
   DataTypes::reset();
 
@@ -111,7 +111,7 @@ TEST(TestCase2, FindFunctions) /* NOLINT */{
   setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
 }
 
-TEST(TestCase3, FindFunctions) /* NOLINT */{
+TEST(TestCase3, FindFunctions_mocked) /* NOLINT */{
   using ::testing::Return;
   DataTypes::reset();
 
