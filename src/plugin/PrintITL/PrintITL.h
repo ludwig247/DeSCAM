@@ -15,41 +15,46 @@
 #include "PluginFactory.h"
 #include "TimePointVisitor.h"
 
-
 class PrintITL : public PluginFactory {
 
-public:
-    PrintITL();
-    ~PrintITL() = default;
+ public:
+  PrintITL();
+  ~PrintITL() = default;
 
-    std::map<std::string, std::string> printModel(Model *node);
-    std::map<std::string, std::string> printModule(DESCAM::Module *node);
+  std::map<std::string, std::string> printModel(Model *node) override;
+  std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
-    std::string print();
+  std::string print();
 
-private:
+//  std::map<std::string, bool> getOptionMap() override {
+//    return CommandLineParameter::getOptionMap("PrintITL");
+////    std::map<std::string, bool> options_map;
+////    options_map.insert(std::make_pair("PrintITL",true));
+////    return options_map;
+//  }
 
-    std::string functions();
-    std::string globalFunctions();
+ private:
 
-    std::string convertDataType(std::string dataTypeName);
-    std::string convertDataTypeForHLS(std::string dataTypeName);
+  std::string functions();
+  std::string globalFunctions();
 
-    std::string location(bool loc);
+  std::string convertDataType(std::string dataTypeName);
+  std::string convertDataTypeForHLS(std::string dataTypeName);
 
-    std::string printTemporalExpr(TemporalExpr* temporalExpr);
+  std::string location(bool loc);
 
-    std::string printProperty(std::shared_ptr<Property> property);
+  std::string printTemporalExpr(TemporalExpr *temporalExpr);
 
-    std::string macros();
-    std::string macrosForHLS();
-    std::string operations();
+  std::string printProperty(std::shared_ptr<Property> property);
 
-    DESCAM::Module *module = nullptr;
-    Model *model = nullptr;
+  std::string macros();
+  std::string macrosForHLS();
+  std::string operations();
 
-    std::function<std::string()> macroFunction;
+  DESCAM::Module *module_ = nullptr;
+  Model *model_ = nullptr;
+
+  std::function<std::string()> macro_function_;
 };
-
 
 #endif //SCAM_SYNTHESIZE_H

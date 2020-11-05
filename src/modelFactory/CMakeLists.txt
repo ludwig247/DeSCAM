@@ -31,7 +31,13 @@ add_library (modelFactory SHARED
 		GetClangVariables.cpp
 		GetClangVariables.h
 		GetClangFunctions.cpp
-		GetClangProcess.cpp FindInstances.cpp FindInstances.h IFindInstances.cpp IFindInstances.h clangCastVisitor.cpp clangCastVisitor.h)
+		GetClangProcess.cpp
+		FindInstances.cpp
+		FindInstances.h
+		IFindInstances.cpp
+		IFindInstances.h
+		clangCastVisitor.cpp
+		clangCastVisitor.h)
 
 
 target_link_libraries(modelFactory propertyFactory)

@@ -26,73 +26,73 @@ namespace DESCAM {
 
     protected:
 
-        virtual void visit(VariableOperand &node);
+        void visit(VariableOperand &node) override;
 
-        virtual void visit(IntegerValue &node);
+        void visit(IntegerValue &node) override;
 
-        virtual void visit(UnsignedValue &node);
+        void visit(UnsignedValue &node) override;
 
-        virtual void visit(BoolValue &node);
+        void visit(BoolValue &node) override;
 
-        virtual void visit(CompoundValue &node);
+        void visit(CompoundValue &node) override;
 
-        virtual void visit(Assignment &node);
+        void visit(Assignment &node) override;
 
-        virtual void visit(EnumValue &node);
+        void visit(EnumValue &node) override;
 
-        virtual void visit(PortOperand &node);
+        void visit(PortOperand &node) override;
 
-        virtual void visit(UnaryExpr &node);
+        void visit(UnaryExpr &node) override;
 
-        virtual void visit(While &node);
+        void visit(While &node) override;
 
-        virtual void visit(If &node);
+        void visit(If &node) override;
 
-        virtual void visit(SectionOperand &node);
+        void visit(SectionOperand &node) override;
 
-        virtual void visit(SectionValue &node);
+        void visit(SectionValue &node) override;
 
-        virtual void visit(ITE &node);
+        void visit(ITE &node) override;
 
-        virtual void visit(Arithmetic &node);
+        void visit(Arithmetic &node) override;
 
-        virtual void visit(Logical &node);
+        void visit(Logical &node) override;
 
-        virtual void visit(Relational &node);
+        void visit(Relational &node) override;
 
-        virtual void visit(Bitwise &node);
+        void visit(Bitwise &node) override;
 
-        virtual void visit(Read &node);
+        void visit(Read &node) override;
 
-        virtual void visit(Write &node);
+        void visit(Write &node) override;
 
-        virtual void visit(SyncSignal &node);
+        void visit(SyncSignal &node) override;
 
-        virtual void visit(DataSignalOperand &node);
+        void visit(DataSignalOperand &node) override;
 
-        virtual void visit(Cast &node) override;
+        void visit(Cast &node) override;
 
-        virtual void visit(FunctionOperand &node);
+        void visit(FunctionOperand &node) override;
 
-        virtual void visit(ArrayOperand &node);
+        void visit(ArrayOperand &node) override;
 
-        virtual void visit(CompoundExpr &node);
+        void visit(CompoundExpr &node) override;
 
-        virtual void visit(ParamOperand &node);
+        void visit(ParamOperand &node) override;
 
-        virtual void visit(Return &node);
+        void visit(Return &node) override;
 
-        virtual void visit(Notify &node);
+        void visit(Notify &node) override;
 
-        virtual void visit(Wait &node);
+        void visit(Wait &node) override;
 
-        virtual void visit(Peek &node) override;
+        void visit(Peek &node) override;
 
-        virtual void visit(ArrayExpr &node);
+        void visit(ArrayExpr &node) override;
 
-        virtual void visit(TimePointOperand &node);
+        void visit(TimePointOperand &node) override;
 
-        virtual void visit(Ternary &node);
+        void visit(Ternary &node) override;
 
     protected:
 

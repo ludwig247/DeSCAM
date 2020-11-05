@@ -98,8 +98,7 @@ void PrintStatement::visit(DataSignalOperand &node) {
 //                    if (arrayPort.first->getDataSignal()->getName() == node.getDataSignal()->getParent()->getName()) {
 //                        uint32_t pos = 0;
 //                        for (const auto &expr : arrayPort.second) {
-//                            if (NodePeekVisitor::nodePeekDataSignalOperand(expr)) {
-//                                if (dynamic_cast<DataSignalOperand* >(expr) == &node) {
+//                            if (StmtCastVisitor<DataSignalOperand>(expr).Get() == &node) {
 //                                    this->ss << "_" << pos;
 //                                    return;
 //                                }

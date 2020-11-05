@@ -8,6 +8,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <PrintStmt.h>
 #include "CfgBlock.h"
+#include "StmtCastVisitor.h"
 
 namespace DESCAM {
 //Constructor
@@ -89,13 +90,11 @@ namespace DESCAM {
 
     bool CfgBlock::hasIf() {
         if (this->hasTerminator()) {
-            if (DESCAM::If *stmt = dynamic_cast<DESCAM::If *>(this->terminator)) {
+            if (DESCAM::If *stmt = StmtCastVisitor<DESCAM::If>(this->terminator).Get()) {
                 return true;
             }
-
         }
         return false;
-
     }
 
     //! Replaces a successor with a new value

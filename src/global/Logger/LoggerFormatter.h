@@ -22,7 +22,7 @@ namespace DESCAM {
             TEXT, JSON,
         };
         LoggerFormatter() = default;
-        static const std::string formatMessages(std::vector<DESCAM::LoggerMsg> loggerMessages, FormatOption formatOption = FormatOption::JSON);
+        static std::string formatMessages(const std::vector<DESCAM::LoggerMsg>& loggerMessages, FormatOption formatOption = FormatOption::JSON);
         static std::string getFormatFileType(FormatOption formatOption);
     private:
         static std::string getMessages(std::vector<DESCAM::LoggerMsg> loggerMessages);

@@ -17,3 +17,4 @@ add_library(operationFactory SHARED
 
 
 target_link_libraries(operationFactory propertySuite)
+#target_compile_options(operationFactory PRIVATE -fno-rtti)

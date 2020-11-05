@@ -82,6 +82,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
               VariableOperand variableOperand(&place_holder_variable);
               auto assignment = Assignment(&variableOperand, findDataFlow->getExpr());
               auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module_);
+              //todo constvalue is not in StmtCastVisitor
               if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
                 this->init_value_ = valueT;
               } else TERMINATE("All intializer are required to have a constant value");

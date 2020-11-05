@@ -22,7 +22,8 @@ message(STATUS "The host processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 set(CMAKE_CXX_STANDARD 14) # C++14...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE DEBUG)
+#set(CMAKE_CXX_FLAGS "-fno-rtti")
 
 set(SYSTEMC_VERSION 2.3.1a)
 set(LLVM_VERSION 11.0.0)
@@ -104,9 +105,9 @@ set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
 message(STATUS "Building with LLVM ${LLVM_VERSION}")
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
-set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
-set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
+#set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+#set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+#set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
 message(STATUS "LLVM binary dir: ${LLVM_BINARY_DIR}")
 message(STATUS "LLVM library dir: ${LLVM_LIB_DIR}")

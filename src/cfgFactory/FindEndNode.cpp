@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include "FindEndNode.h"
-#include <algorithm>
 #include <assert.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
@@ -32,7 +32,7 @@ DESCAM::FindEndNode::FindEndNode(DESCAM::CfgBlock *startNode) :
     assert(startNode != nullptr);
     assert(startNode->hasTerminator());
     //Either starteNode is a while(true) with 1 successor or an if two successors ...
-    assert((startNode->getSuccessorList().size() == 1 && dynamic_cast<DESCAM::While *>(startNode->getTerminator()) != nullptr) ||
+    assert((startNode->getSuccessorList().size() == 1 && StmtCastVisitor<DESCAM::While>(startNode->getTerminator()).Get() != nullptr) ||
            startNode->getSuccessorList().size() == 2);
 
     //CASE: While of thread
