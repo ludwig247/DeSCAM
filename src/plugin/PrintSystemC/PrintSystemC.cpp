@@ -246,7 +246,7 @@ void PrintSystemC::visit(Channel &node) {
     else if (node.getFromPort()->getInterface()->isShared())
         this->ss << "Shared";
     else
-        TERMINATE("UNKNOWN CHANNEL TYPE");
+        TERMINATE("UNKNOWN CHANNEL TYPE")
 
     this->ss << "<"
              << node.getFromPort()->getDataType()->getName() // should I check if (FromPort<datatype> == ToPort<datatype>) ??
@@ -271,7 +271,7 @@ void PrintSystemC::visit(Variable &node) {
      * */
 
     if (!node.isCompoundType() && node.getInitialValue() == nullptr)
-        TERMINATE("Variable " + node.getName() + " does not have an initial value");
+        TERMINATE("Variable " + node.getName() + " does not have an initial value")
 
     printSpace(this->indent);
     this->ss << node.getDataType()->getName() << " " << node.getName();
@@ -364,7 +364,7 @@ void PrintSystemC::visit(DataType &node) {
 }
 
 void PrintSystemC::visit(DESCAM::DataSignal &node) {
-    TERMINATE("NEVER GO HERE");
+    TERMINATE("NEVER GO HERE")
 }
 
 void PrintSystemC::visit(Interface &node) {
@@ -400,4 +400,8 @@ void PrintSystemC::visit(Parameter &node) {
 
 void PrintSystemC::visit(Timepoint &node) {
     throw (std::runtime_error("Not implemented yet."));
+}
+
+std::map<std::string, bool> PrintSystemC::getOptionMap() {
+  return CommandLineParameter::getOptionMap("PrintSystemC");
 }

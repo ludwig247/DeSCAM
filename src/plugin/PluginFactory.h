@@ -12,14 +12,15 @@
 using namespace DESCAM;
 
 class PluginFactory {
-public:
-    PluginFactory() = default;
 
-    ~PluginFactory() = default;
+ public:
+  PluginFactory() = default;
 
-    virtual std::map<std::string, std::string> printModel(Model *node) = 0;
+  ~PluginFactory() = default;
 
-    static PluginFactory *create(std::string type);
+  virtual std::map<std::string, std::string> printModel(Model *node) = 0;
+
+  static PluginFactory *create(std::string type);
 
     virtual std::map<std::string, bool> getOptionMap() {
         int status;
@@ -27,7 +28,9 @@ public:
         return CommandLineParameter::getOptionMap(pluginName);
     }
 
-    std::map<std::string, std::string> pluginOutput;
+//  virtual std::map<std::string, bool> getOptionMap() = 0;
+
+  std::map<std::string, std::string> pluginOutput;
 };
 
 #endif //PROJECT_STYLEFACTORY_H

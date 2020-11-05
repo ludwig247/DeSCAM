@@ -5,6 +5,7 @@
 #include <clang/Lex/Lexer.h>
 #include <Logger/Logger.h>
 #include <GlobalUtilities.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "CreateInitSection2.h"
 #include "FatalError.h"
 #include "CFGFactory.h"
@@ -134,10 +135,6 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
   //Check if Terminator is a branch or just a nested  boolean statement
   ////If CFGBlock has a terminator -> assign to last node in nodeList
   if (block->getTerminator().getStmt() != nullptr) {
-/*    TODO clean this commented code block after verification
-    if (block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::IfStmtClass ||
-        block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass)
-        */
     if (block->getTerminatorStmt()->getStmtClass() == clang::Stmt::StmtClass::IfStmtClass ||
         block->getTerminatorStmt()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass) {
       //Translate clang::Stmts to DESCAM::Stmts

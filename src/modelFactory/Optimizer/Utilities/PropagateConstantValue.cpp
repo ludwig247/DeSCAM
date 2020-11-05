@@ -2,6 +2,7 @@
 // Created by M.I.Alkoudsi on 28.05.19.
 //
 
+#include <Stmts/StmtCastVisitor.h>
 #include "PropagateConstantValue.h"
 #include "FindVariablesAndFunctionsInStatement.h"
 
@@ -29,16 +30,16 @@ namespace DESCAM {
             }
         }
         //check if all last assignments to the variable on all paths
-        bool Propagtionvalid = true;
+        bool propagation_valid = true;
         if (!this->LastAssignmentMap.empty()) {
             Expr *lastVarValInFirstPath = this->LastAssignmentMap.begin()->second;
             for (auto assignment : this->LastAssignmentMap) {
                 if (!(*assignment.second == *lastVarValInFirstPath)) {
-                    Propagtionvalid = false;
+                  propagation_valid = false;
                     break;
                 }
             }
-            if (Propagtionvalid) {
+            if (propagation_valid) {
                 DESCAM::DetectCounterVariable counterDetector(this->variable->getFullName(), lastVarValInFirstPath);
                 if (counterDetector.isCounterVariable()) {
                     this->propagatedValue = nullptr;
@@ -86,7 +87,7 @@ namespace DESCAM {
         }
         if (variable->getDataType()->isCompoundType()) {
             for (const auto &subVar: variable->getDataType()->getSubVarMap()) {
-                //check that there is no missing assignment to the subvariable or datatype mismatch
+                //check that there is no missing assignment to the sub-variable or datatype mismatch
                 if (variableValueMap.find(subVar.first) == variableValueMap.end() ||
                     (variableValueMap.find(subVar.first) != variableValueMap.end() &&
                      variableValueMap.find(subVar.first)->second->getDataType() != subVar.second)) {
@@ -96,7 +97,7 @@ namespace DESCAM {
             return new CompoundExpr(variableValueMap, variable->getDataType());
         } else if (variable->getDataType()->isArrayType()) {
             for (const auto &subVar: variable->getDataType()->getSubVarMap()) {
-                //check that there is no missing assignment to the subvariable or datatype mismatch
+                //check that there is no missing assignment to the sub-variable or datatype mismatch
                 if (variableValueMap.find(subVar.first) == variableValueMap.end() ||
                     (variableValueMap.find(subVar.first) != variableValueMap.end() &&
                      variableValueMap.find(subVar.first)->second->getDataType() != subVar.second)) {
@@ -106,7 +107,7 @@ namespace DESCAM {
             return new ArrayExpr(variableValueMap, variable->getDataType());
         } else if (variableValueMap.size() == 1) { //variable is not a compound variable or array
             if (variableValueMap.begin()->second->getDataType() != this->variable->getDataType()) {
-                TERMINATE("propagated values and variable are of different datatypes");
+                TERMINATE("propagated values and variable are of different datatypes")
             }
             return variableValueMap.begin()->second;
         } else {
@@ -124,7 +125,7 @@ namespace DESCAM {
     }
 
     void PropagateConstantValue::visit(DESCAM::Assignment &node) {
-        if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(node.getLhs())) { //var is not sectionOperand
+        if (auto varOp = StmtCastVisitor<DESCAM::VariableOperand>(node.getLhs()).Get()) { //var is not sectionOperand
             std::string varOpName = varOp->getVariable()->getFullName();
             if (varOpName == this->variable->getFullName()) {
                 addOrSubstituteVariableValue(varOpName, node.getRhs());
@@ -166,7 +167,7 @@ namespace DESCAM {
     }
 
     void PropagateConstantValue::visit(DESCAM::ITE &node) {
-        TERMINATE("ITE not allowed");
+        TERMINATE("ITE not allowed")
 
     }
 
@@ -231,7 +232,7 @@ namespace DESCAM {
 
 
     void DESCAM::PropagateConstantValue::visit(DESCAM::Return &node) {
-        TERMINATE("return not expected in the module CFG");
+        TERMINATE("return not expected in the module CFG")
     }
 
     DESCAM::Expr *PropagateConstantValue::getPropagatedValue() const {
@@ -251,7 +252,7 @@ namespace DESCAM {
         if (!findVars.getVariablesInStmtSet().empty()) {// a new assignment to the variable from another variable
             this->wasRhsVarOp = true;
             std::set<int> assignmentsIds;
-            for (auto varName : findVars.getVariablesInStmtSet()) {
+            for (const auto& varName : findVars.getVariablesInStmtSet()) {
                 if (this->rhsVariableAssignmentsIds.find(varName) == this->rhsVariableAssignmentsIds.end()) {
                     this->rhsVariableAssignmentsIds.insert(
                             std::make_pair(varName, assignmentsIds));

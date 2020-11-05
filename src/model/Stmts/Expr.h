@@ -23,6 +23,7 @@ class Expr : public Stmt {
   std::ostream &print(std::ostream &ostream) const override;
 
   bool isDataType(std::string n) const;
+
   void accept(StmtAbstractVisitor &visitor) override = 0;
 
  private:

@@ -10,39 +10,43 @@
 
 class PrintTemplate : public PluginFactory, public AbstractVisitor {
 
-public:
-    PrintTemplate() = default;
+ public:
+  PrintTemplate() = default;
 
-    ~PrintTemplate() = default;
+  ~PrintTemplate() = default;
 
-    std::map<std::string, std::string> printModel(Model *node);
+  std::map<std::string, std::string> printModel(Model *node);
 
-private:
-    void visit(Model &node) {};
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintTemplate");
+  }
 
-    void visit(Module &node) {};
+ private:
+  void visit(Model &node) {};
 
-    void visit(Port &node) {};
+  void visit(Module &node) {};
 
-    void visit(Variable &node) {};
+  void visit(Port &node) {};
 
-    void visit(Function &node) {};
+  void visit(Variable &node) {};
 
-    void visit(Parameter &node) {};
+  void visit(Function &node) {};
 
-    void visit(FSM &node) {};
+  void visit(Parameter &node) {};
 
-    void visit(DataType &node) {};
+  void visit(FSM &node) {};
 
-    void visit(ModuleInstance &node) {};
+  void visit(DataType &node) {};
 
-    void visit(Channel &node) {};
+  void visit(ModuleInstance &node) {};
 
-    void visit(DataSignal &node) {};
+  void visit(Channel &node) {};
 
-    void visit(Interface &node) {};
+  void visit(DataSignal &node) {};
 
-    void visit(Timepoint &node) {};
+  void visit(Interface &node) {};
+
+  void visit(Timepoint &node) {};
 
 };
 

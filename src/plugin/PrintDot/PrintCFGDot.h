@@ -20,6 +20,9 @@ public:
 
     static std::string printCFG_Spurious(std::map<int, DESCAM::CfgNode *> cfg, std::vector<DESCAM::CfgNode *> importantStates, std::vector<DESCAM::CfgNode *> spuriousPath);
 
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintCFGDot");
+  }
 private:
     std::stringstream ss;
 

@@ -48,7 +48,7 @@ namespace DESCAM {
         MarginValue marginValue;
         std::map<std::string, std::string> marginalValuesMap;
 
-        void addToMarginalValuesMap(std::string varName);
+        void addToMarginalValuesMap(const std::string& varName);
 
         //visitors
         void visit(struct VariableOperand &node) override {};

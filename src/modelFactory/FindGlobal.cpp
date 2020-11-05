@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <FunctionFactory.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "FindGlobal.h"
 #include "IFindDataFlow.h"
 #include "FindDataFlowFactory.h"

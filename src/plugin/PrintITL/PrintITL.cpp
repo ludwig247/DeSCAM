@@ -15,20 +15,20 @@ using namespace DESCAM;
 PrintITL::PrintITL()
 {
     if (getOptionMap().at("hls-sco") || getOptionMap().at("hls-mco")) {
-        macroFunction = std::bind(&PrintITL::macrosForHLS, this);
+      macro_function_ = std::bind(&PrintITL::macrosForHLS, this);
     }
     else {
-        macroFunction = std::bind(&PrintITL::macros, this);
+      macro_function_ = std::bind(&PrintITL::macros, this);
     }
 }
 
 std::map<std::string, std::string> PrintITL::printModel(Model *node) {
-    this->model = node;
+    this->model_ = node;
     for (auto &module: node->getModules()) {
 
-        this->module = module.second;
+        this->module_ = module.second;
 
-        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macroFunction()));
+        pluginOutput.insert(std::make_pair(module.first + "_macros.vhi", macro_function_()));
         pluginOutput.insert(std::make_pair(module.first + ".vhi", operations()));
         std::string funString = functions();
         if (!funString.empty())
@@ -45,9 +45,9 @@ std::map<std::string, std::string> PrintITL::printModel(Model *node) {
 
 std::map<std::string, std::string> PrintITL::printModule(DESCAM::Module *node) {
 
-    this->module = node;
+    this->module_ = node;
 
-    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macroFunction() + operations()));
+    pluginOutput.insert(std::make_pair(node->getName() + ".vhi", macro_function_() + operations()));
     pluginOutput.insert(std::make_pair(node->getName() + "_functions.vhi", functions()));
 
     return pluginOutput;
@@ -61,9 +61,9 @@ std::string PrintITL::print() {
 
 std::string PrintITL::functions() {
     std::stringstream ss;
-    if (module->getFunctionMap().empty()) return ss.str();
+    if (module_->getFunctionMap().empty()) return ss.str();
     ss << "-- FUNCTIONS --\n";
-    for (auto function: module->getFunctionMap()) {
+    for (auto function: module_->getFunctionMap()) {
         ss << "macro " + function.first << "(";
         auto paramMap = function.second->getParamMap();
         for (auto param = paramMap.begin(); param != paramMap.end(); ++param) {
@@ -252,7 +252,7 @@ std::string PrintITL::printProperty(std::shared_ptr<Property> property) {
 }
 
 std::string PrintITL::macros() {
-    std::shared_ptr<PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<PropertySuite> ps = this->module_->getPropertySuite();
 
     std::stringstream ss;
 
@@ -311,7 +311,7 @@ std::string PrintITL::macros() {
 
 std::string PrintITL::operations() {
 
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module_->getPropertySuite();
 
     std::stringstream ss;
 
@@ -337,7 +337,7 @@ std::string PrintITL::operations() {
 
 std::string PrintITL::macrosForHLS()
 {
-    std::shared_ptr<DESCAM::PropertySuite> ps = this->module->getPropertySuite();
+    std::shared_ptr<DESCAM::PropertySuite> ps = this->module_->getPropertySuite();
     std::stringstream ss;
 
     ss << "-- SYNC AND NOTIFY SIGNALS (1-cycle macros) --" << std::endl;
@@ -405,9 +405,9 @@ std::string PrintITL::macrosForHLS()
 
 std::string PrintITL::globalFunctions() {
     std::stringstream ss;
-    if (model == nullptr || model->getGlobalFunctionMap().empty()) return ss.str();
+    if (model_ == nullptr || model_->getGlobalFunctionMap().empty()) return ss.str();
     ss << "-- GLOBAL FUNCTIONS --\n";
-    for (auto function: model->getGlobalFunctionMap()) {
+    for (auto function: model_->getGlobalFunctionMap()) {
         ss << "macro " + function.first << "(";
         auto paramMap = function.second->getParamMap();
         for (auto param = paramMap.begin(); param != paramMap.end(); ++param) {

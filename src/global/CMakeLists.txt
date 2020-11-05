@@ -1,6 +1,5 @@
 add_compile_options(-D__STDC_CONSTANT_MACROS)
 add_compile_options(-D__STDC_LIMIT_MACROS)
-
 add_subdirectory(tinyxml)
 
 file(GLOB LoggerSrc "Logger/*.cpp" "Logger/LoggerFilter.h")
@@ -21,3 +20,5 @@ add_library(global SHARED
         Completeness.cpp
         ${LoggerSrc}
         FatalError.h GlobalUtilities.h)
+
+#target_compile_options(global PRIVATE -fno-rtti)
