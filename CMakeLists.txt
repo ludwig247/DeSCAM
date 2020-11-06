@@ -9,8 +9,10 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 # TODO: detect operating system and host processor
-if (APPLE)
+set(MACOSX FALSE)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message(STATUS "We are on MacOS - ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+    set(MACOSX TRUE)
 elseif(UNIX)
     file(READ /etc/os-release OS)
     string(REGEX MATCH "NAME=\"([A-z]+)+" _ ${OS})
@@ -163,7 +165,7 @@ add_subdirectory(doc)
 
 add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
 
-if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL Darwin) #There is no cmake command in standard macos
+if (NOT ${MACOSX}) #There is no cmake command in standard macos
 add_custom_command(TARGET SCAM
         POST_BUILD
         COMMAND cmake --build ${PROJECT_BINARY_DIR}/ --target DESCAM -- -j 4)

@@ -1,4 +1,4 @@
-if (APPLE)
+if (MACOSX)
     set(LLVM_LIBS
             libLLVM.dylib
             libLLVMAArch64AsmParser.a
