@@ -129,14 +129,14 @@ namespace DESCAM {
         }
     }
 
-    FindCfgPaths::FindCfgPaths(const FindCfgPaths &FCP) : Pathsmap(FCP.getPathsMap()),
+    FindCfgPaths::FindCfgPaths(const FindCfgPaths &FCP) : pathsmap_(FCP.getPathsMap()),
                                                           nodeAndAllPathsReachingItMap(
                                                                   FCP.getNodeAndAllPathsReachingItMap()) {
 
     }
 
     void FindCfgPaths::setPathsMap(const std::map<int, CfgPath> &pathsMap) {
-        this->Pathsmap = pathsMap;
+        this->pathsmap_ = pathsMap;
     }
 
     void
@@ -147,7 +147,7 @@ namespace DESCAM {
 
     const std::map<int, CfgPath> &FindCfgPaths::getPathsMap() const {
 
-        return this->Pathsmap;
+        return this->pathsmap_;
 
     }
 
@@ -159,14 +159,14 @@ namespace DESCAM {
 
     void FindCfgPaths::addPathToPathsMap(const int &pathID, CfgPath &path) {
 
-        this->Pathsmap.insert(std::make_pair(pathID, path));
+        this->pathsmap_.insert(std::make_pair(pathID, path));
     }
 
     std::map<int, std::vector<CfgNode *>> FindCfgPaths::makeResetPathsToNode(int nodeId) {
         int cnt = 1;
         std::map<int, std::vector<CfgNode *>> pathsToNode;
         for (auto pathid : nodeAndAllPathsReachingItMap.at(nodeId)) {
-            std::vector<CfgNode *> path = Pathsmap.at(pathid).makePathToNode(nodeId);
+            std::vector<CfgNode *> path = pathsmap_.at(pathid).makePathToNode(nodeId);
             bool foundPath = false;
             for (const auto &pathInMap : pathsToNode) {
                 if (path == pathInMap.second) {
@@ -186,7 +186,7 @@ namespace DESCAM {
         std::map<int, std::vector<CfgNode *>> pathsToNode;
         pathsToNode = makeResetPathsToNode(nodeId);
         cnt = (*pathsToNode.rbegin()).first + 1;
-        for (const auto &path : Pathsmap) { pathsToNode.insert(std::make_pair(cnt++, path.second.getPath())); }
+        for (const auto &path : pathsmap_) { pathsToNode.insert(std::make_pair(cnt++, path.second.getPath())); }
         return pathsToNode;
     }
 

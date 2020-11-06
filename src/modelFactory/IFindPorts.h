@@ -15,6 +15,7 @@
 
 class IFindPorts {
  public:
+  virtual ~IFindPorts() = default;
   virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci, DESCAM::Module *module) = 0;
 
   virtual std::map<std::string, DESCAM::Port *> getPortMap() const = 0;

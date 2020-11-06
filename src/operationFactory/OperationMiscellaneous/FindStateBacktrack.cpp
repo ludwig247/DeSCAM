@@ -7,6 +7,7 @@
 #include <PrintStmt.h>
 #include "FatalError.h"
 #include "Logger/Logger.h"
+#include <stack>
 
 
 //#define DEBUG_FINDSTATEASSUMPTIONS

@@ -12,6 +12,7 @@
 
 class IFindModules {
  public:
+  virtual ~IFindModules() = default;
   virtual void setup(clang::TranslationUnitDecl *, clang::CompilerInstance *ci, DESCAM::Model *model) = 0;
   virtual std::vector<DESCAM::Module *> getModules() = 0;
 };

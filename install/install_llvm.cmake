@@ -10,7 +10,6 @@ else ()
         set(PERF_TOGGLE)
     endif ()
 
-    MESSAGE(PERF TOGGLE: ${PERF_TOGGLE})
     #set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     include(ExternalProject)
     ExternalProject_add(LLVM

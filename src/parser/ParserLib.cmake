@@ -1,5 +1,5 @@
 
-add_library(parser SHARED
+add_library(parser STATIC
         CommandLineProcess.cpp
         CommandLineParameter.cpp
         CommandLineParametersConfig.cpp)
