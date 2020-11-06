@@ -202,7 +202,7 @@ if (MACOSX)
             libclangToolingSyntax.a
             libclangTransformer.a
             )
-elseif ()
+else ()
     set(LLVM_LIBS
             libLLVM.so
             libLLVM-11.0.0.so
