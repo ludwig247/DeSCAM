@@ -30,7 +30,7 @@ if(LLVM_FROM_SOURCE)
     endforeach ()
 else()
     #set(CMAKE_MODULE_PATH ${PATH_TO_LLVM}/lib/cmake/llvm/LLVMConfig.cmake)
-    set(LLVM_DIR ${PATH_TO_LLVM}/lib/cmake/llvm/LLVMConfig.cmake)
+    set(LLVM_DIR ${PATH_TO_LLVM}/lib/cmake/llvm/)
 
     set (search_paths
             ${PATH_TO_LLVM}
