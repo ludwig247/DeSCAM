@@ -47,3 +47,5 @@ else ()
     endif ()
 
 endif ()
+
+set(LLVM_DIR ${PATH_TO_LLVM}/lib/cmake/llvm/)

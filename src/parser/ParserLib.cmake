@@ -29,8 +29,7 @@ if(LLVM_FROM_SOURCE)
         target_link_libraries(parser ${LLVM_LIB_DIR}/${llvm_lib})
     endforeach ()
 else()
-    #set(CMAKE_MODULE_PATH ${PATH_TO_LLVM}/lib/cmake/llvm/LLVMConfig.cmake)
-    set(LLVM_DIR ${PATH_TO_LLVM}/lib/cmake/llvm/)
+    set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}3rdParty/LLVM/src/LLVM/lib/cmake/llvm)
 
     set (search_paths
             ${PATH_TO_LLVM}
