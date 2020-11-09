@@ -83,31 +83,14 @@ void DESCAM::FindVariablesValues::addValToVariableValuesMap(DESCAM::Variable *va
 template<class T>
 void DESCAM::FindVariablesValues::addSubVariablesToValuesMap(DESCAM::VariableOperand *varOp,
                                                              const std::map<std::string, T *> &compoundValuesMap) {
+  //FIXME this is not covered by our current test cases!
+  //TODO Refactor. purpose of loop structure unclear
   auto valItr = compoundValuesMap.begin();
   for (auto &subVar : varOp->getVariable()->getSubVarList()) {
-    if (valItr == compoundValuesMap.end()) { break; }
-    //TODO Cannot use StmtCastVisitor to cast to Expr because it is abstract
-    //TODO refactor
-    auto subVarVal = dynamic_cast<DESCAM::Expr *>((*valItr).second);
-//    assert(subVarVal == StmtCastVisitor<DESCAM::Expr>((*valItr).second).Get());
-    valItr++;
-    if (subVarVal) {
-      addValToVariableValuesMap(subVar, subVarVal);
+    if (valItr != compoundValuesMap.end()) {
+      if (auto subVarVal = StmtCastVisitor<DESCAM::Expr>((*valItr++).second).Get()) {
+        addValToVariableValuesMap(subVar, subVarVal);
+      }
     }
   }
 }
-/*
-void DESCAM::FindVariablesValues::addSubVariablesToValuesMap(
-        DESCAM::VariableOperand* varOp,
-        const std::map<std::string, DESCAM::Expr *> &compoundValuesMap) {
-    auto valItr = compoundValuesMap.begin();
-    for (auto &subVar : varOp->getVariable()->getSubVarList()) {
-        if (valItr == compoundValuesMap.end()) { break; }
-        auto subVarVal = (*valItr).second;
-        valItr++;
-        if (subVarVal) {
-            addValToVariableValuesMap(subVar, subVarVal);
-        }
-    }
-}
-*/

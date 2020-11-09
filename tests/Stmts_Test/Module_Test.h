@@ -18,11 +18,18 @@ protected:
     }
 
     virtual void SetUp() {
-        DESCAM::Variable variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
-        module.addVariable(&variable);
+        variable_ = new Variable("unsigned_var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100));
+        std::map<std::string, DESCAM::Variable*> var_map;
+        var_map.insert(std::make_pair("unsigned_var", variable_));
+        module.addVariables(var_map);
     }
 
-    virtual void TearDown() {}
+    virtual void TearDown() {
+      delete variable_;
+    }
+
+    std::map<std::string, DESCAM::Variable*> var_map;
+    DESCAM::Variable *variable_;
     DESCAM::Module module;
 };
 
@@ -31,7 +38,7 @@ TEST_F(ModuleTest,CreateUnsignedVar){
 }
 
 TEST_F(ModuleTest,AddUnsignedVar){
-    ASSERT_NO_THROW(module.addVariable(new DESCAM::Variable("unsiged_Var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100))));
+    ASSERT_NO_THROW(module.addVariables(var_map));
 }
 
 TEST_F(ModuleTest,GetUnsignedVar){

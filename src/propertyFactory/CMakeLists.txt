@@ -4,3 +4,4 @@ add_library(propertyFactory SHARED
         PropertyFactory.cpp )
 
 target_link_libraries(propertyFactory Model)
+target_compile_options(propertyFactory PRIVATE -fno-rtti)

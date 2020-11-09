@@ -14,9 +14,13 @@ set(GLOBAL_FILES
         ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
         ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
         ${CMAKE_SOURCE_DIR}/src/global/ExprVisitor.cpp
-       )
+        StmtCastVisitor.cpp
+        )
 
 add_executable(Stmts_Test ${SOURCE_FILES} ${GLOBAL_FILES})
 target_link_libraries(Stmts_Test Stmts)
 target_link_libraries(Stmts_Test Model)
+target_link_libraries(Stmts_Test parser)
+target_link_libraries(Stmts_Test global)
+
 target_link_libraries(Stmts_Test ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a pthread)
