@@ -8,7 +8,6 @@ set(AST_FILES
         Interface.cpp
         Variable.cpp
         FSM.cpp
-        AbstractVisitor.cpp
         DataType.cpp
         DataSignal.cpp
         Function.cpp
@@ -29,4 +28,3 @@ add_subdirectory(Stmts)
 target_link_libraries(Model  propertySuite)
 target_link_libraries(Model  Behavior)
 target_link_libraries(Model  Stmts)
-#add_subdirectory(operationGraph)

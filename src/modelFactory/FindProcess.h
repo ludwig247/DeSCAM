@@ -32,15 +32,13 @@ class FindProcess : public IFindProcess {
   ~FindProcess() override = default;
 
   bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module, Model *model) override;
-  //Getter
-  std::map<int, DESCAM::CfgNode *> getCfgArg() override;
-  std::shared_ptr<PropertySuite> getPropertySuite() override;
+  const std::map<int, CfgBlock *> &getCFG() const override;
 
  private:
   clang::CXXRecordDecl *record_decl_;
   IFindDataFlowFactory *find_data_flow_factory_;
-  std::map<int, DESCAM::CfgNode *> cfg_arg_;
-  std::shared_ptr<PropertySuite> property_suite_;
+
+  std::map<int, CfgBlock *> cfg_;
 };
 }
 

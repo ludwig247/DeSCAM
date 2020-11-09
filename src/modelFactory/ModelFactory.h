@@ -58,17 +58,11 @@ bool containsSubstring(std::string, std::string);
  */
 class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFactory> {
  public:
-  explicit ModelFactory(IFindFunctions *find_functions,
-                        IFindModules *find_modules,
-                        IFindPorts *find_ports,
+  explicit ModelFactory(IFindModules *find_modules,
                         IFindGlobal *find_global,
-                        IFindProcess *find_process,
-                        IFindVariables *find_variables,
-                        IFindDataFlowFactory *find_data_flow_factory,
                         IFindInstances * find_instances);
 
   ~ModelFactory() override = default;
-
 
   void setup(CompilerInstance *ci) override;
 
@@ -82,16 +76,10 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
   ASTContext *context_;
   // unused?: SourceManager &_sm;
   llvm::raw_ostream &ostream_;
-  std::vector<std::string> unimportant_modules_; //! List containing unimportant modules
 
   // DIP-Pointers
-  IFindFunctions *find_functions_;
   IFindGlobal *find_global_;
   IFindModules *find_modules_;
-  IFindPorts *find_ports_;
-  IFindProcess *find_process_;
-  IFindVariables *find_variables_;
-  IFindDataFlowFactory * find_data_flow_factory_;
   IFindInstances * find_instances_;
 
   //Methods
@@ -99,10 +87,6 @@ class ModelFactory : public IModelFactory, public RecursiveASTVisitor<ModelFacto
 
   void addModules(clang::TranslationUnitDecl *decl);
   void addGlobalConstants(TranslationUnitDecl *pDecl);
-  void addPorts(Module *module, clang::CXXRecordDecl *decl);
-  void addFunctions(Module *module, CXXRecordDecl *decl);
-  void addBehavior(Module *module, clang::CXXRecordDecl *decl);
-  void addVariables(Module *module, clang::CXXRecordDecl *decl); //!Adds variable to module
   void addInstances(TranslationUnitDecl *tu);
   void removeUnused();
 

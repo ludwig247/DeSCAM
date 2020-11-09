@@ -110,7 +110,7 @@ if(NOT (CMAKE_VERSION VERSION_LESS 3.0))  # CMake >= 3.0
   target_link_libraries(module INTERFACE pybind11::pybind11)
   if(WIN32 OR CYGWIN)
     target_link_libraries(module INTERFACE $<BUILD_INTERFACE:${PYTHON_LIBRARIES}>)
-  elseif(APPLE)
+  elseif(MACOSX)
     target_link_libraries(module INTERFACE "-undefined dynamic_lookup")
   endif()
 

@@ -1,0 +1,13 @@
+//
+// Created by burr on 27.10.20.
+//
+
+#ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_
+#define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_
+
+#include "MockIFindDataFlow.h"
+#include "MockIFindDataFlowFactory.h"
+
+// Not testable atm
+
+#endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_

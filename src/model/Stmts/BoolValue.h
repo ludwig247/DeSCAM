@@ -11,17 +11,17 @@ namespace DESCAM {
 
     class BoolValue : public ConstValue {
     public:
-        BoolValue(bool value, LocationInfo stmtLocationInfo = LocationInfo());
+        explicit BoolValue(bool value, LocationInfo stmtLocationInfo = LocationInfo());
 
         //GETTER
         bool getValue();
 
-        virtual std::string getValueAsString() const override;
+        std::string getValueAsString() const override;
 
         //ACCEPT
-        virtual void accept(StmtAbstractVisitor &visitor);
+        void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
     private:
         bool value;

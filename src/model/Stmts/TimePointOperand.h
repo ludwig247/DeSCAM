@@ -10,26 +10,25 @@
 #include "Timepoint.h"
 
 namespace DESCAM {
-    /**
-     * \brief Points to a TimeExpr
-     *
-     */
-    class TimePointOperand : public Operand {
-    public:
-        explicit TimePointOperand(Timepoint * timepoint, LocationInfo stmtLocationInfo = LocationInfo());
+/**
+ * \brief Points to a TimeExpr
+ *
+ */
+class TimePointOperand : public Operand {
+ public:
+  explicit TimePointOperand(Timepoint *timepoint, LocationInfo stmtLocationInfo = LocationInfo());
 
-        Timepoint *getTimepoint() const;
+  Timepoint *getTimepoint() const;
 
-        virtual void accept(StmtAbstractVisitor &visitor);
+  void accept(StmtAbstractVisitor &visitor) override;
 
-        std::string getOperandName() const override ;
+  std::string getOperandName() const override;
 
-        virtual bool operator==(const Stmt &other) const override ;
+  bool operator==(const Stmt &other) const override;
 
-    private:
-        Timepoint * timepoint;
-    };
-
+ private:
+  Timepoint *timepoint;
+};
 
 }
 #endif //DESCAM_TIMEPOINTOPERAND_H

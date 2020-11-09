@@ -9,22 +9,24 @@
 
 namespace DESCAM {
 
-    class CompoundValue : public ConstValue {
-    public:
-        CompoundValue(const std::vector<ConstValue *> &values, const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
+class CompoundValue : public ConstValue {
+ public:
+  CompoundValue(const std::vector<ConstValue *> &values,
+                const DataType *dataType,
+                LocationInfo stmtLocationInfo = LocationInfo());
 
-        //GETTER
-        const std::map<std::string, ConstValue *> &getValues() const;
+  //GETTER
+  const std::map<std::string, ConstValue *> &getValues() const;
 
-        virtual std::string getValueAsString() const override;
+  virtual std::string getValueAsString() const override;
 
-        //VISITOR
-        virtual void accept(StmtAbstractVisitor &visitor);
+  //VISITOR
+  void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+  bool operator==(const Stmt &other) const override;
 
-    private:
-        std::map<std::string, ConstValue *> values;
-    };
+ private:
+  std::map<std::string, ConstValue *> values;
+};
 };
 #endif //PROJECT_COMPOUNDVALUE_H

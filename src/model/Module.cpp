@@ -22,6 +22,12 @@ void Module::addPort(Port *port) {
   this->ports.insert(std::make_pair(port->getName(), port));
 }
 
+void Module::addPorts(const std::map<std::string, Port *> &new_ports) {
+  for (auto port:new_ports) {
+    this->ports.insert(port);
+  }
+}
+
 const std::map<std::string, Port *> &Module::getPorts() const {
   return this->ports;
 }
@@ -163,7 +169,7 @@ void Module::addFunction(Function *function) {
 }
 
 void Module::addFunctions(std::map<std::string, Function *> functions) {
-  for(const auto &function:functions){
+  for (const auto &function:functions) {
     this->function_map_.insert(function);
   }
 }
