@@ -172,4 +172,5 @@ add_custom_command(TARGET SCAM
         COMMAND cmake --build ${PROJECT_BINARY_DIR}/ --target DESCAM -- -j 4)
 endif()
 
+include(${PROJECT_SOURCE_DIR}/install/create_dependency_graph.cmake)
 # TODO maybe for safety erase build folder each time LIBS is build?

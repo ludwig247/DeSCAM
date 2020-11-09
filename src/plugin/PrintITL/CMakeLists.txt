@@ -6,4 +6,5 @@ add_library(PrintITL SHARED
         PrintITL.cpp)
 
 target_link_libraries(PrintITL Model)
+target_link_libraries(PrintITL global)
 #target_compile_options(PrintITL PRIVATE -fno-rtti)

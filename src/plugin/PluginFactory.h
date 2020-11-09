@@ -7,7 +7,6 @@
 
 #include "../parser/CommandLineParameter.h"
 #include <Model.h>
-#include <cxxabi.h>
 
 using namespace DESCAM;
 
@@ -22,13 +21,7 @@ class PluginFactory {
 
   static PluginFactory *create(std::string type);
 
-    virtual std::map<std::string, bool> getOptionMap() {
-        int status;
-        char *pluginName = abi::__cxa_demangle(typeid(*this).name(), nullptr, nullptr, &status);
-        return CommandLineParameter::getOptionMap(pluginName);
-    }
-
-//  virtual std::map<std::string, bool> getOptionMap() = 0;
+  virtual std::map<std::string, bool> getOptionMap() = 0;
 
   std::map<std::string, std::string> pluginOutput;
 };

@@ -26,26 +26,23 @@ class PrintITL : public PluginFactory {
 
   std::string print();
 
-//  std::map<std::string, bool> getOptionMap() override {
-//    return CommandLineParameter::getOptionMap("PrintITL");
-////    std::map<std::string, bool> options_map;
-////    options_map.insert(std::make_pair("PrintITL",true));
-////    return options_map;
-//  }
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintITL");
+  }
 
  private:
 
   std::string functions();
   std::string globalFunctions();
 
-  std::string convertDataType(std::string dataTypeName);
-  std::string convertDataTypeForHLS(std::string dataTypeName);
+  static std::string convertDataType(std::string dataTypeName);
+  static std::string convertDataTypeForHLS(std::string dataTypeName);
 
   std::string location(bool loc);
 
-  std::string printTemporalExpr(TemporalExpr *temporalExpr);
+  static std::string printTemporalExpr(TemporalExpr *temporalExpr);
 
-  std::string printProperty(std::shared_ptr<Property> property);
+  std::string printProperty(const std::shared_ptr<Property>& property);
 
   std::string macros();
   std::string macrosForHLS();

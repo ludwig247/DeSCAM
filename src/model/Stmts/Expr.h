@@ -16,7 +16,7 @@ class Expr : public Stmt {
  public:
   Expr() = delete;
   explicit Expr(const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
-  ~Expr() = default;
+  virtual ~Expr() = default;
 
   const DataType *getDataType() const;
 
