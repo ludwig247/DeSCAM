@@ -12,104 +12,102 @@
 #include "Behavior/State.h"
 #include "Behavior/Operation.h"
 
-namespace DESCAM{
-class TernaryOptimizer: public RecursiveVisitor {
-public:
-    TernaryOptimizer() = delete;
-    TernaryOptimizer(Stmt * stmt,std::vector<Expr*> assumptionList, Module * module);
-    TernaryOptimizer(Stmt * stmt, Module * module);
+namespace DESCAM {
+class TernaryOptimizer : public RecursiveVisitor {
+ public:
+  TernaryOptimizer() = delete;
+  TernaryOptimizer(Stmt *stmt, std::vector<Expr *> assumptionList, Module *module);
+  TernaryOptimizer(Stmt *stmt, Module *module);
 
-    Stmt *getStmt() const;
+  Stmt *getStmt() const;
 
-    Expr *getExpr() const;
+  Expr *getExpr() const;
 
-    static bool isTrivialTrue(const std::vector<Expr *> &assumptionList, Expr *expr);
+  static bool isTrivialTrue(const std::vector<Expr *> &assumptionList, Expr *expr);
 
-    static bool isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr);
+  static bool isTrivialFalse(const std::vector<Expr *> &assumptionList, Expr *expr);
 
-private:
-    virtual void visit(struct VariableOperand &node);
+ private:
+  void visit(struct VariableOperand &node) override;
 
-    virtual void visit(struct IntegerValue &node);
+  void visit(struct IntegerValue &node) override;
 
-    virtual void visit(struct UnsignedValue &node);
+  void visit(struct UnsignedValue &node) override;
 
-    virtual void visit(struct BoolValue &node);
+  void visit(struct BoolValue &node) override;
 
-    virtual void visit(struct EnumValue &node);
+  void visit(struct EnumValue &node) override;
 
-    virtual void visit(struct CompoundValue &node);
+  void visit(struct CompoundValue &node) override;
 
-    virtual void visit(struct PortOperand &node);
+  void visit(struct PortOperand &node) override;
 
-    virtual void visit(struct Assignment &node);
+  void visit(struct Assignment &node) override;
 
-    virtual void visit(struct UnaryExpr &node);
+  void visit(struct UnaryExpr &node) override;
 
-    virtual void visit(struct While &node);
+  void visit(struct While &node) override;
 
-    virtual void visit(struct If &node);
+  void visit(struct If &node) override;
 
-    virtual void visit(struct SectionOperand &node);
+  void visit(struct SectionOperand &node) override;
 
-    virtual void visit(struct SectionValue &node);
+  void visit(struct SectionValue &node) override;
 
-    virtual void visit(struct ITE &node);
+  void visit(struct ITE &node) override;
 
-    virtual void visit(struct Branch &node);
+  void visit(struct Branch &node) override;
 
-    virtual void visit(struct Arithmetic &node);
+  void visit(struct Arithmetic &node) override;
 
-    virtual void visit(struct Logical &node);
+  void visit(struct Logical &node) override;
 
-    virtual void visit(struct Relational &node);
+  void visit(struct Relational &node) override;
 
-    virtual void visit(struct Bitwise &node);
+  void visit(struct Bitwise &node) override;
 
-    virtual void visit(struct Read &node);
+  void visit(struct Read &node) override;
 
-    virtual void visit(struct Write &node);
+  void visit(struct Write &node) override;
 
-    virtual void visit(struct ArrayExpr &node) override;
+  void visit(struct ArrayExpr &node) override;
 
-    virtual void visit(struct SyncSignal &node);
+  void visit(struct SyncSignal &node) override;
 
-    virtual void visit(struct DataSignalOperand &node);
+  void visit(struct DataSignalOperand &node) override;
 
-    virtual void visit(struct Cast &node);
+  void visit(struct Cast &node) override;
 
-    virtual void visit(struct DESCAM::FunctionOperand &node);
+  void visit(struct DESCAM::FunctionOperand &node) override;
 
-    virtual void visit(struct ArrayOperand &node);
+  void visit(struct ArrayOperand &node) override;
 
-    virtual void visit(struct CompoundExpr &node);
+  void visit(struct CompoundExpr &node) override;
 
-    virtual void visit(struct Return &node);
+  void visit(struct Return &node) override;
 
-    virtual void visit(struct ParamOperand &node);
+  void visit(struct ParamOperand &node) override;
 
-    virtual void visit(struct Notify &node);
+  void visit(struct Notify &node) override;
 
-    virtual void visit(struct Wait &node);
+  void visit(struct Wait &node) override;
 
-    virtual void visit(struct Peek &node);
+  void visit(struct Peek &node) override;
 
-    virtual void visit(struct TimePointOperand &node);
+  void visit(struct TimePointOperand &node) override;
 
-    virtual void visit(struct Ternary &node) override ;
+  void visit(struct Ternary &node) override;
 
-    Expr *  expr = nullptr;
-    Stmt * stmt = nullptr;
+  Expr *expr = nullptr;
+  Stmt *stmt = nullptr;
 
-    bool isTrue(DESCAM::Expr *expr) const;
-    bool isFalse(DESCAM::Expr *expr) const;
+  bool isTrue(DESCAM::Expr *expr) const;
+  bool isFalse(DESCAM::Expr *expr) const;
 
-    std::vector<Expr*> assumptionList;
+  std::vector<Expr *> assumptionList;
 
-    Module * module;
+  Module *module;
 };
 }
-
-
 
 #endif //DESCAM_TERNARYOPTIMIZER_H

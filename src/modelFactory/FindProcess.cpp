@@ -5,16 +5,15 @@
 #include "FindProcess.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
-#include "CFGFactory.h"
 #include "CommandLineParameter.h"
 #include "Optimizer/Optimizer.h"
 #include "OperationFactory.h"
 #include "PropertyFactory.h"
+#include "CFGFactory.h"
 
 DESCAM::FindProcess::FindProcess(DESCAM::IFindDataFlowFactory *find_data_flow_factory) :
-    find_data_flow_factory_(find_data_flow_factory) {
-
-}
+    find_data_flow_factory_(find_data_flow_factory),
+    record_decl_(nullptr) {}
 
 bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
                                 clang::CompilerInstance *ci,
@@ -38,35 +37,11 @@ bool DESCAM::FindProcess::setup(clang::CXXRecordDecl *record_decl,
      * TODO What happens when methodDecl is not initialized? Does it violate the contract of cfgFactory? maybe else part?
      */
     DESCAM::CFGFactory cfgFactory(methodDecl, ci, module, find_data_flow_factory_, true);
-
-    if (cfgFactory.getControlFlowMap().empty()) TERMINATE("CFG is empty!");
-    DESCAM::CfgNode::node_cnt = 0;
-    DESCAM::State::state_cnt = 0;
-    DESCAM::Operation::operations_cnt = 0;
-    auto optOptionsSet = CommandLineParameter::getOptimizeOptionsSet();
-
-    if (!optOptionsSet.empty()) {
-      DESCAM::Optimizer opt(cfgFactory.getControlFlowMap(), module, model, optOptionsSet);
-      this->cfg_arg_ = opt.getCFG();
-      DESCAM::OperationFactory operationFactory(this->cfg_arg_, module);
-      PropertyFactory propertyFactory(module);
-
-      this->property_suite_ = propertyFactory.getPropertySuite();
-    } else {
-      DESCAM::CreateRealCFG test(cfgFactory.getControlFlowMap());
-      this->cfg_arg_ = test.getCFG();
-      DESCAM::OperationFactory operationFactory(this->cfg_arg_, module);
-      PropertyFactory propertyFactory(module);
-
-      this->property_suite_ = propertyFactory.getPropertySuite();
-    }
+    this->cfg_ = cfgFactory.getControlFlowMap();
 
     return success;
   }
 }
-std::map<int, DESCAM::CfgNode *> DESCAM::FindProcess::getCfgArg() {
-  return this->cfg_arg_;
-}
-std::shared_ptr<DESCAM::PropertySuite> DESCAM::FindProcess::getPropertySuite() {
-  return this->property_suite_;
+const std::map<int, DESCAM::CfgBlock *> &DESCAM::FindProcess::getCFG() const {
+  return this->cfg_;
 }

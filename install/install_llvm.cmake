@@ -4,6 +4,12 @@ if (USE_SYSTEM_LLVM)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
     find_package(llvm REQUIRED)
 else ()
+    if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+        set(PERF_TOGGLE -DLLVM_USE_PERF=ON)
+    else ()
+        set(PERF_TOGGLE)
+    endif ()
+
     #set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     include(ExternalProject)
     ExternalProject_add(LLVM
@@ -26,18 +32,18 @@ else ()
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
             -DCMAKE_BUILD_TYPE=Release
             -DLLVM_INCLUDE_TESTS=OFF
-            -DLLVM_ENABLE_PROJECTS=clang;clang-tools-extra;openmp
+            -DLLVM_ENABLE_PROJECTS=clang-tools-extra$<SEMICOLON>clang$<SEMICOLON>openmp#$<SEMICOLON>libcxx$<SEMICOLON>libcxxabi
             -DLLVM_BUILD_LLVM_DYLIB=ON
-            -DLLVM_USE_PERF=ON
+            ${PERF_TOGGLE}
             -DLLVM_ENABLE_ZLIB=OFF
             # MAC OS may also need libcxx;libcxxabi"
 
             INSTALL_COMMAND make install
             )
 
-#    set(LLVM_INCLUDE_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/include)
-#    set(LLVM_BINARY_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/bin)
-#    set(LLVM_LIB_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/lib)
+    #    set(LLVM_INCLUDE_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/include)
+    #    set(LLVM_BINARY_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/bin)
+    #    set(LLVM_LIB_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/lib)
     set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
     set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
     set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)

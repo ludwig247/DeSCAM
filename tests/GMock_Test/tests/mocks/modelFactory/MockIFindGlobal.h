@@ -22,7 +22,7 @@ class MockIFindGlobal : public IFindGlobal {
 
   MOCK_METHOD((const std::map<std::string, Function *> &), getFunctionMap, (), (const, override));
 
-  MOCK_METHOD((const std::map<std::string, const clang::FunctionDecl *> &), getFunctionDeclMap, (), (const, override));
+  MOCK_METHOD((std::vector<DESCAM::Stmt *>), getFunctionBody, (std::string, DESCAM::Function *), (const, override));
 };
 }
 }

@@ -43,12 +43,18 @@ else ()
             ALWAYS TRUE
             )
 
+    if (APPLE)
+        set(SYSTEMC_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/lib-macosx64/)
+    else ()
+        set(SYSTEMC_LIB_DIR ${CMAKE_SOURCE_DIR}/lib/lib-linux64/)
+    endif ()
+
     ExternalProject_Add_Step(SYSTEMC MOVE_INCLUDES
             DEPENDEES install
             COMMAND cp -a ${CMAKE_SOURCE_DIR}/lib/include/. ${SYSTEMC_INCLUDE_DIR}
             COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib/include/
-            COMMAND cp -a ${CMAKE_SOURCE_DIR}/lib/lib-linux64/. ${CMAKE_SOURCE_DIR}/lib/
-            COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib/lib-linux64/
+            COMMAND cp -a ${SYSTEMC_LIB_DIR}. ${CMAKE_SOURCE_DIR}/lib/
+            COMMAND rm -rf ${SYSTEMC_LIB_DIR}
             ALWAYS TRUE
             )
 endif ()

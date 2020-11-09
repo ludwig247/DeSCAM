@@ -9,14 +9,18 @@
 #include "FindDataFlowFactory.h"
 #include "FindNewDatatype.h"
 #include "FatalError.h"
+#include "CFGFactory.h"
 
-bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl,
-                               clang::CompilerInstance *ci,
-                               IFindDataFlowFactory *find_data_flow_factory) {
-  assert(!(decl == nullptr));
+DESCAM::FindGlobal::FindGlobal(DESCAM::IFindDataFlowFactory *find_data_flow_factory) :
+    find_data_flow_factory_(find_data_flow_factory),
+    ci_(nullptr) {
+  assert(find_data_flow_factory);
+}
+
+bool DESCAM::FindGlobal::setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) {
+  assert(decl);
   assert(ci);
 
-  this->find_data_flow_factory_ = find_data_flow_factory;
   this->variable_map_.clear();
   this->function_map_.clear();
   this->function_decl_map_.clear();
@@ -161,8 +165,25 @@ const std::map<std::string, DESCAM::Function *> &DESCAM::FindGlobal::getFunction
   return function_map_;
 }
 
-const std::map<std::string, const clang::FunctionDecl *> &DESCAM::FindGlobal::getFunctionDeclMap() const {
-  return function_decl_map_;
+std::vector<DESCAM::Stmt *> DESCAM::FindGlobal::getFunctionBody(std::string function_name,
+                                                                DESCAM::Function *function) const {
+
+  //Create blockCFG for this process
+  //Active searching only for functions
+  //If fails ... function is not SystemC-PPA compliant
+  //don't add body to function
+  // TODO: Replace type deduction through flags by strong types and overloaded function
+  FindDataFlow::functionName = function_name;
+  FindDataFlow::isFunction = true;
+  auto module = Module("placeholder");
+  DESCAM::CFGFactory
+      cfgFactory(this->function_decl_map_.at(function_name), ci_, &module, find_data_flow_factory_);
+  FindDataFlow::functionName = "";
+  FindDataFlow::isFunction = false;
+//Transform blockCFG back to code
+  FunctionFactory functionFactory(cfgFactory.getControlFlowMap(), function, nullptr);
+  auto stmts = functionFactory.getStmtList();
+  return stmts;
 }
 
 

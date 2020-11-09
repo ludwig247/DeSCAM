@@ -19,7 +19,6 @@ add_library (modelFactory SHARED
         FindFunctions.cpp
         FindGlobal.cpp
 		FindStateName.cpp
-		IFindInstances.cpp
 		FindStateName.h
 		IFindGlobal.h
 		IFindModules.h
@@ -28,10 +27,14 @@ add_library (modelFactory SHARED
 		IFindVariables.h
 		IFindDataFlowFactory.h
 		IFindStateName.h
+		IFindInstances.h
 		GetClangVariables.cpp
 		GetClangVariables.h
 		GetClangFunctions.cpp
-		GetClangProcess.cpp FindInstances.cpp FindInstances.h IFindInstances.cpp IFindInstances.h clangCastVisitor.cpp clangCastVisitor.h)
+		GetClangProcess.cpp
+		GetClangPorts.cpp
+		FindInstances.cpp
+		clangCastVisitor.cpp)
 
 
 target_link_libraries(modelFactory propertyFactory)

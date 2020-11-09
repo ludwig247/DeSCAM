@@ -60,7 +60,7 @@ namespace DESCAM {
         std::vector<bool> isVisted;
         std::vector<int> nodeInSuccVec;
         std::map<int, CfgNode *> Cfg;
-        std::map<int, CfgPath> Pathsmap;
+        std::map<int, CfgPath> pathsmap_;
         std::map<int, std::vector<int>> nodeAndAllPathsReachingItMap;
         bool pathEmpty;
 
