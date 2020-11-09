@@ -25,13 +25,15 @@ protected:
     virtual void TearDown() {}
     DESCAM::Module module;
 };
+
 TEST_F(ModuleTest,CreateUnsignedVar){
     ASSERT_NO_THROW(DESCAM::Variable variable("unsiged_Var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100)));
 }
+
 TEST_F(ModuleTest,AddUnsignedVar){
     ASSERT_NO_THROW(module.addVariable(new DESCAM::Variable("unsiged_Var",DESCAM::DataTypes::getDataType("unsigned"),new UnsignedValue(100))));
-
 }
+
 TEST_F(ModuleTest,GetUnsignedVar){
     ASSERT_NO_THROW(module.getVariable("unsigned_var"));
 }
