@@ -6,7 +6,7 @@ add_library(parser SHARED
         )
 
 SET_TARGET_PROPERTIES(parser PROPERTIES LINKER_LANGUAGE CXX)
-add_dependencies(parser LLVM)
+
 
 target_link_libraries(parser PluginFactory)
 target_link_libraries(parser modelFactory)
