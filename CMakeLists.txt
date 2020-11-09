@@ -92,7 +92,7 @@ set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system googletest")
 set(SYSTEMC_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_gtest.cmake)
-
+include_directories(${SYSTEMC_INCLUDE_DIR})
 ################################
 # SystemC
 ################################
@@ -120,7 +120,7 @@ include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
 message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
 message(STATUS "LLVM binary dir: ${LLVM_BINARY_DIR}")
 message(STATUS "LLVM library dir: ${LLVM_LIB_DIR}")
-
+include_directories(${LLVM_INCLUDE_DIR})
 ################################
 # DESCAM
 ################################
