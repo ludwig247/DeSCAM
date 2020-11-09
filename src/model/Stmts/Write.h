@@ -9,6 +9,7 @@
 #include "PortOperand.h"
 #include "Communication.h"
 
+
 namespace DESCAM {
 class Write : public Communication, public Stmt {
  public:
