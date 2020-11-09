@@ -69,7 +69,7 @@ bool DESCAM::FindGlobal::VisitVarDecl(const clang::VarDecl *var_decl) {
             //Types have to be equivalent
             if (check_for_expr->getExpr()->getDataType() == descam_type) {
               //set initial && create new global constant variable
-              if (auto init_val = dynamic_cast<ConstValue *>(check_for_expr->getExpr())) {
+              if (auto init_val = StmtCastVisitor<ConstValue>(check_for_expr->getExpr()).Get()) {
                 auto var = new Variable(name, descam_type, init_val);
                 var->setConstant(true);
                 this->variable_map_.insert(std::make_pair(name, var));

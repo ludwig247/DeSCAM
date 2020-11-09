@@ -32,25 +32,25 @@ namespace DESCAM {
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0, std::string tp = "_at_t");
 
     protected:
-        virtual void visit(class VariableOperand &node);
+        void visit(class VariableOperand &node) override;
 
-        void visit(class SyncSignal &node);
+        void visit(class SyncSignal &node) override;
 
-        void visit(class Arithmetic &node);
+        void visit(class Arithmetic &node) override;
 
-        void visit(class Bitwise &node);
+        void visit(class Bitwise &node) override;
 
-        void visit(class Relational &node);
+        void visit(class Relational &node) override;
 
-        void visit(class DataSignalOperand &node);
+        void visit(class DataSignalOperand &node) override;
 
-        void visit(class IntegerValue &node);
+        void visit(class IntegerValue &node) override;
 
-        void visit(class UnsignedValue &node);
+        void visit(class UnsignedValue &node) override;
 
-        void visit(class Cast &node);
+        void visit(class Cast &node) override;
 
-        void visit(class CompoundExpr &node);
+        void visit(class CompoundExpr &node) override;
 
         void visit(class ArrayOperand &node) override;
 

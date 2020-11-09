@@ -39,6 +39,7 @@ add_library (modelFactory SHARED
 		clangCastVisitor.cpp
 		clangCastVisitor.h)
 
+target_compile_options(modelFactory PRIVATE -fno-rtti)
 
 target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)

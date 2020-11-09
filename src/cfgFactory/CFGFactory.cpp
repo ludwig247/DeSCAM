@@ -126,7 +126,7 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
     DESCAM::Stmt *scam_stmt = this->getScamStmt(clangStmt);
     //Check that the stmt is not null and the statement is not an Expr*
     //In case of an Expr* skips the statement, because the statement_list should only contain Statements
-    if (scam_stmt != nullptr && dynamic_cast<Expr *>(scam_stmt) == nullptr) {
+    if (scam_stmt != nullptr && StmtCastVisitor<Expr>(scam_stmt).Get() == nullptr) {
       cfgNode->addStmt(this->getScamStmt(clangStmt));
     }
   }
