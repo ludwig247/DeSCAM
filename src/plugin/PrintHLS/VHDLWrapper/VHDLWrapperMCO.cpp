@@ -300,41 +300,20 @@ void VHDLWrapperMCO::moduleOutputHandling(std::stringstream &ss) {
     }
 
     for (const auto &reg : inOutReg) {
-        bool isEnum = reg->isEnumType();
-        std::string signalIn;
-        std::string signalOut;
-        if (isEnum) {
-            signalIn = SignalFactory::vectorToEnum(reg, "", "in_");
-            signalOut = SignalFactory::vectorToEnum(reg, "", "out_");
-        } else {
-            signalIn = "in_" + reg->getFullName("_");
-            signalOut = "out_" + reg->getFullName("_");
-        }
+        std::string signalIn = "in_" + reg->getFullName("_");
+        std::string signalOut = "out_" + reg->getFullName("_");
         ss << "\twith out_" << reg->getFullName("_") << "_vld select\n"
            << "\t\t" << reg->getFullName(".") << " <= " << signalIn << " when '0',\n"
            << "\t\t\t" << signalOut << " when others;\n\n";
     }
 
     for (const auto &reg : inOutReg) {
-        bool isEnum = reg->isEnumType();
-        std::string SignalRegister;
-        std::string SignalReset;
-        if (isEnum) {
-            SignalRegister = SignalFactory::enumToVector(reg);
-            SignalReset = SignalRegister;
-            std::string replaceWith = getResetValue(reg);
-            std::string toReplace = reg->getFullName(".");
-            SignalReset.replace(SignalReset.find(toReplace), toReplace.length(), replaceWith);
-        } else {
-            SignalRegister = reg->getFullName(".");
-            SignalReset = getResetValue(reg);
-        }
         ss << "\tprocess(clk, rst)\n"
            << "\tbegin\n"
            << "\t\tif (rst = '1') then\n"
-           << "\t\t\tin_" << reg->getFullName("_") << " <= " << SignalReset << ";\n"
+           << "\t\t\tin_" << reg->getFullName("_") << " <= " << getResetValue(reg) << ";\n"
            << "\t\telsif (clk = '1' and clk'event) then\n"
-           << "\t\t\tin_" << reg->getFullName("_") << " <= " << SignalRegister << ";\n"
+           << "\t\t\tin_" << reg->getFullName("_") << " <= " << reg->getFullName(".") << ";\n"
            << "\t\tend if;\n"
            << "\tend process;\n\n";
     }

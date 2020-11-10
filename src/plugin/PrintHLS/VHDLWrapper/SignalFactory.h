@@ -55,13 +55,6 @@ namespace DESCAM {
                 template<typename T>
                 static std::string convertDataTypeName(T *type, const bool &asVector = false);
 
-                template<typename T>
-                static std::string
-                vectorToEnum(T *dataSignal, const std::string &suffix, const std::string &prefix = "");
-
-                template<typename T>
-                static std::string enumToVector(T *dataSignal);
-
                 static std::string findAssignedValue(const std::shared_ptr<Property> &property, const std::shared_ptr<PropertyMacro> &notify);
 
                 static std::string convertReturnType (const DataType &type);
@@ -198,23 +191,6 @@ namespace DESCAM {
                     }
                 }
 
-            }
-
-            template<typename T>
-            std::string
-            SignalFactory::vectorToEnum(T *dataSignal, const std::string &suffix, const std::string &prefix) {
-                return (dataSignal->getDataType()->getName() + "'val(to_integer(unsigned(" + prefix +
-                        dataSignal->getFullName("_") + suffix + ")))");
-            }
-
-            template<typename T>
-            std::string SignalFactory::enumToVector(T *dataSignal) {
-                uint32_t vectorSize = ceil(log2(dataSignal->getDataType()->getEnumValueMap().size()));
-                if (vectorSize == 0) {
-                    vectorSize++;
-                }
-                return "std_logic_vector(to_unsigned(" + dataSignal->getDataType()->getName() + "\'pos(" +
-                       dataSignal->getFullName(".") + "), " + std::to_string(vectorSize) + "))";
             }
 
             std::shared_ptr<Variable> SignalFactory::getActiveOperation() const {
