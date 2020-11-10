@@ -22,7 +22,6 @@ namespace DESCAM { namespace HLSPlugin {
     class OptimizerHLS {
 
     public:
-        //OptimizerHLS(std::shared_ptr<PropertySuiteHelper> propertyHelper, Module* module);
         OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module* module);
         ~OptimizerHLS() = default;
 
@@ -57,7 +56,6 @@ namespace DESCAM { namespace HLSPlugin {
         const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
 
     private:
-        //std::shared_ptr<PropertySuiteHelper> propertySuiteHelper;
         std::shared_ptr<PropertySuite> propertySuite;
         Module* module;
 
@@ -98,9 +96,6 @@ namespace DESCAM { namespace HLSPlugin {
         optional replaceDataSignals(Assignment *assignment);
         optional replaceByOutputRegister(Assignment *assignment);
         void arraySlicing();
-
-        std::multimap<Variable *, DataSignal *> getParentMap(const std::multimap<Variable *, DataSignal *> &multimap);
-        DataSignal* getCombinedDataSignal(const std::vector<DataSignal *> &dataSignals);
 
         template <typename Key, typename Value>
         std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
