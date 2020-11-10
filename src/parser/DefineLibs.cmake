@@ -1,5 +1,8 @@
 set(LLVM_ALL
-        libclang.so
+        libc++.a
+        libc++abi.a
+#        libclang.so
+#        libclang-cpp.so
         libclangAnalysis.a
         libclangApplyReplacements.a
         libclangARCMigrate.a
