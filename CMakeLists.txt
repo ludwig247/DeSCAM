@@ -51,6 +51,11 @@ file(APPEND build_info "GTEST ${GTEST_VERSION}\n")
 
 file(MAKE_DIRECTORY lib)
 file(MAKE_DIRECTORY include)
+
+set(CMAKE_EXTERNAL_PROJECT_DIR ${SCAM_SOURCE_DIR}/3rdParty)
+file(MAKE_DIRECTORY ${CMAKE_EXTERNAL_PROJECT_DIR})
+
+
 ################################
 # Debugging cmake
 ################################
@@ -60,8 +65,17 @@ message(STATUS "Project source dir: ${PROJECT_SOURCE_DIR}")
 message(STATUS "Project binary dir: ${PROJECT_BINARY_DIR}")
 message(STATUS "Cmake command: ${CMAKE_COMMAND}")
 
-set(CMAKE_EXTERNAL_PROJECT_DIR ${SCAM_SOURCE_DIR}/3rdParty)
-file(MAKE_DIRECTORY ${CMAKE_EXTERNAL_PROJECT_DIR})
+
+#################################
+## ZLIB
+#################################
+# Do not use system's z3
+set(USE_SYSTEM_ZLIB OFF CACHE BOOL "Use system zlib")
+# Include the ExternalProject compilation
+include(${PROJECT_SOURCE_DIR}/install/install_zlib.cmake)
+message(STATUS "zlib library dir ${ZLIB_LIB_DIR}")
+message(STATUS "zlib include dir ${ZLIB_INCLUDE_DIR}")
+include_directories(${ZLIB_INCLUDE_DIR})
 
 #################################
 ## Z3

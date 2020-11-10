@@ -7,9 +7,7 @@
   # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
   GIT_REPOSITORY https://github.com/llvm/llvm-project.git
   GIT_TAG llvmorg-${LLVM_VERSION}
-  GIT_SHALLOW TRUE
   GIT_PROGRESS TRUE
-  GIT_CONFIG advice.detachedHead=false
 
   # LLVM CMakeList.txt is located in a subdirectory
   SOURCE_SUBDIR llvm
