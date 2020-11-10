@@ -14,7 +14,7 @@ else ()
 
     elseif (UNIX)
 
-        if (OS_VERSION VERSION_GREATER_EQUAL 30.04)
+        if (OS_VERSION VERSION_GREATER_EQUAL 20.04)
             ExternalProject_Add(LLVM
                     PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM
                     URL https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
