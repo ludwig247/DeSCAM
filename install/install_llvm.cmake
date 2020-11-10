@@ -20,7 +20,7 @@ else ()
         set(PATH_TO_LLVM ${CMAKE_SOURCE_DIR})
 
     elseif (UNIX)
-
+#todo remove code duplicate
         if (OS_VERSION VERSION_GREATER_EQUAL 20.04)
             ExternalProject_Add(LLVM
                     PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM
@@ -53,7 +53,7 @@ else ()
             set(PATH_TO_LLVM ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM/src/LLVM)
             ExternalProject_Add_Step(LLVM COPY
                     DEPENDEES install
-                    COMMAND cp -r <SOURCE_DIR>/clang ${CMAKE_SOURCE_DIR}/lib/
+                    COMMAND cp -r <SOURCE_DIR>/lib/clang ${CMAKE_SOURCE_DIR}/lib/
                     )
 
         else ()
