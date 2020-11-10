@@ -52,7 +52,7 @@ else ()
 
             set(PATH_TO_LLVM ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM/src/LLVM)
             ExternalProject_Add_Step(LLVM COPY
-                    DEPENDEES INSTALL
+                    DEPENDEES install
                     COMMAND cp -r <SOURCE_DIR>/clang ${CMAKE_SOURCE_DIR}/lib/
                     )
 
