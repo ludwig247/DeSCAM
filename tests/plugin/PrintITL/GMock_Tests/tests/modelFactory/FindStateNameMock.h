@@ -5,7 +5,7 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDSTATENAMEMOCK_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDSTATENAMEMOCK_H_
 
-#include "MockIFindStateName.h"
+#include "modelFactory/MockIFindStateName.h"
 
 TEST(TestCase1, FindStateName_mocked) /* NOLINT */{
   using testing::Return;
@@ -39,7 +39,7 @@ TEST(TestCase1, FindStateName_mocked) /* NOLINT */{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase1", model_factory);
 }
 
 TEST(TestCase2, FindStateName_mocked) /* NOLINT */{
@@ -74,7 +74,7 @@ TEST(TestCase2, FindStateName_mocked) /* NOLINT */{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase2", model_factory);
 }
 
 TEST(TestCase3, FindStateName_mocked) /* NOLINT */{
@@ -111,7 +111,7 @@ TEST(TestCase3, FindStateName_mocked) /* NOLINT */{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase3", model_factory);
 }
 
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDSTATENAMEMOCK_H_

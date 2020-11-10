@@ -5,7 +5,7 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDNEWDATATYPEMOCK_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDNEWDATATYPEMOCK_H_
 
-#include "MockIFindNewDataType.h"
+#include "modelFactory/MockIFindNewDataType.h"
 
 TEST(TestCase1, FindNewDatatype_mocked) /* NOLINT */{
   using testing::Return;
@@ -42,7 +42,7 @@ TEST(TestCase1, FindNewDatatype_mocked) /* NOLINT */{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase1", model_factory);
 }
 
 TEST(TestCase2, FindNewDatatype_mocked) /* NOLINT */{
@@ -86,7 +86,7 @@ TEST(TestCase2, FindNewDatatype_mocked) /* NOLINT */{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase2", model_factory);
 }
 
 TEST(TestCase3, FindNewDatatype_mocked) /* NOLINT */{
@@ -134,7 +134,7 @@ TEST(TestCase3, FindNewDatatype_mocked) /* NOLINT */{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase3", model_factory);
 }
 
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDNEWDATATYPEMOCK_H_
