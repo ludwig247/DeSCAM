@@ -9,12 +9,12 @@
 #include "gmock/gmock.h"
 #include <Module.h>
 #include "Model.h"
-#include <toPPA/CreateInitSection.h>
+
 #include <Stmts_all.h>
-#include <toPPA/ValuePropagation.h>
-#include <toPPA/SectionToPaths.h>
-#include <toPPA/OnlyBlockingComm.h>
-#include <toPPA/CommToCommNew.h>
+//#include <toPPA/ValuePropagation.h>
+//#include <toPPA/SectionToPaths.h>
+//#include <toPPA/OnlyBlockingComm.h>
+//#include <toPPA/CommToCommNew.h>
 
 
 using namespace DESCAM;

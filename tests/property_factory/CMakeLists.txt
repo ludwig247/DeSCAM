@@ -1,26 +1,29 @@
-project(Module_Test C CXX)
+project(PropertyFactory_Tests C CXX)
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ${LLVM_CXX_FLAGS} ")
 
 
-#DIRECTORIES
-set(SOURCE_FILES tests.cpp
-        ${CMAKE_SOURCE_DIR}/src/propertyFactory/Path.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
-       )
+#find_package(GTest REQUIRED)
+set (GTEST_LIBRARY ${CMAKE_SOURCE_DIR}/lib/libgtest.a)
+set (GTEST_LIBRARY_MAIN ${CMAKE_SOURCE_DIR}/lib/libgtest.a)
+#find_package(GMock REQUIRED)
+set (GMOCK_LIBRARY ${CMAKE_SOURCE_DIR}/lib/libgmock.a)
+set (GMOCK_LIBRARY_MAIN ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a)
 
 set(GLOBAL_FILES
         ${CMAKE_SOURCE_DIR}/src/global/DataTypes.cpp
         ${CMAKE_SOURCE_DIR}/src/global/PrintStmt.cpp
-        ${CMAKE_SOURCE_DIR}/src/global/ExprTranslator.cpp
         ${CMAKE_SOURCE_DIR}/src/global/ExprVisitor.cpp
-        CleanUpPaths.h)
+        ${CMAKE_SOURCE_DIR}/src/global/SimplifyVisitor.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/Logger.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/LoggerMsg.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/LoggerFormatter.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/FileSink.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/ConsoleSink.cpp)
 
-add_executable(PropertyFactory_Test ${SOURCE_FILES} ${GLOBAL_FILES} InitiSectionTest.h ValuePropagationTest.h DataPathOptimizerTest.h ConditionOptimizerTest.h)
-target_link_libraries(PropertyFactory_Test propertyFactory)
-target_link_libraries(PropertyFactory_Test Stmts)
-target_link_libraries(PropertyFactory_Test Model)
-target_link_libraries(PropertyFactory_Test ${CMAKE_SOURCE_DIR}/lib/libz3.so)
-target_link_libraries(PropertyFactory_Test ${CMAKE_SOURCE_DIR}/lib/libgtest.a ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a pthread)
+
+add_executable(PropertyFactory_Tests tests.cpp ${GLOBAL_FILES} )
+target_link_libraries(PropertyFactory_Tests PRIVATE parser)
+target_link_libraries(PropertyFactory_Tests PRIVATE ${GTEST_LIBRARY} ${GTEST_LIBRARY_MAIN} ${GMOCK_LIBRARY} ${GMOCK_LIBRARY_MAIN} pthread)

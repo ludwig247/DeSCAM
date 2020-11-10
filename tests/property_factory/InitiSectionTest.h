@@ -9,7 +9,7 @@
 #include "gmock/gmock.h"
 #include <Module.h>
 #include "Model.h"
-#include <toPPA/CreateInitSection.h>
+
 #include <Stmts/UnsignedValue.h>
 
 using namespace DESCAM;
