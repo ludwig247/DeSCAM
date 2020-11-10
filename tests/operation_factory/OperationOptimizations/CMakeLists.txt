@@ -19,11 +19,11 @@ set(GLOBAL_FILES
         ${CMAKE_SOURCE_DIR}/src/global/StmtNodeAlloc.cpp
         ${CMAKE_SOURCE_DIR}/src/global/NodePeekVisitor.cpp
         ${CMAKE_SOURCE_DIR}/src/global/RecursiveVisitor.cpp
-        /home/tobias/install_test/src/global/Logger/Logger.cpp
-        /home/tobias/install_test/src/global/Logger/LoggerMsg.cpp
-        /home/tobias/install_test/src/global/Logger/LoggerFormatter.cpp
-        /home/tobias/install_test/src/global/Logger/FileSink.cpp
-        /home/tobias/install_test/src/global/Logger/ConsoleSink.cpp)
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/Logger.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/LoggerMsg.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/LoggerFormatter.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/FileSink.cpp
+        ${CMAKE_SOURCE_DIR}/src/global/Logger/ConsoleSink.cpp)
 
 
 add_executable(TernaryOptimizerTest tests.cpp ${GLOBAL_FILES}
