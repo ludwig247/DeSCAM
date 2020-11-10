@@ -158,10 +158,6 @@ std::string PrintSkeleton::generateGlobalTypes() {
 
 std::string PrintSkeleton::generateHDLSkeleton() {
 
-  if (this->module->getName() == "TestBasic16") {
-    std::cout << "TestBasic16" << std::endl;
-  }
-
   std::stringstream skeletonStream;
 
   header(skeletonStream);
@@ -400,10 +396,14 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
       if (arrayHasBeenReset(resetArraysList, variable.first))
         continue;
-      if (variable.second->getDataType()->getArrayType()->isInteger()) {
+      if (variable.second->getDataType()->getArrayType()->isInteger() || variable.second->getDataType()->getArrayType()->isUnsigned()) {
         std::string arrayDefaultValue;
         if (language == VHDL) {
-          arrayDefaultValue = "(others => to_signed(0, 32))";
+          if (variable.second->getDataType()->getArrayType()->isInteger()) {
+            arrayDefaultValue = "(others => to_signed(0, 32))";
+          } else if (variable.second->getDataType()->getArrayType()->isUnsigned()) {
+            arrayDefaultValue = "(others => to_unsigned(0, 32))";
+          }
         } else if (language == SV) {
           arrayDefaultValue = "'{default:0}";
         }
@@ -418,10 +418,14 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
       if (arrayHasBeenReset(resetArraysList, variable.second->getParent()->getFullName()))
         continue;
-      if (variable.second->getParent()->getDataType()->getArrayType()->isInteger()) {
+      if (variable.second->getParent()->getDataType()->getArrayType()->isInteger() || variable.second->getParent()->getDataType()->getArrayType()->isUnsigned()) {
         std::string arrayDefaultValue;
         if (language == VHDL) {
-          arrayDefaultValue = "(others => to_signed(0, 32))";
+          if (variable.second->getParent()->getDataType()->getArrayType()->isInteger()) {
+            arrayDefaultValue = "(others => to_signed(0, 32))";
+          } else if (variable.second->getParent()->getDataType()->getArrayType()->isUnsigned()) {
+            arrayDefaultValue = "(others => to_unsigned(0, 32))";
+          }
         } else if (language == SV) {
           arrayDefaultValue = "'{default:0}";
         }
