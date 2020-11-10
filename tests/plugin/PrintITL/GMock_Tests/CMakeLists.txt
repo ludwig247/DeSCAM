@@ -10,10 +10,7 @@ set (GMOCK_LIBRARY ${CMAKE_SOURCE_DIR}/lib/libgmock.a)
 set (GMOCK_LIBRARY_MAIN ${CMAKE_SOURCE_DIR}/lib/libgmock_main.a)
 
 #TODO main should not need a main. The _main libraries from GTest/Mock should suffice.
-add_executable(GMock_Tests main.cpp
-        tests/NoMocks.h
-        tests/modelFactory/FindInstancesMocked.h
-        tests/modelFactory/FindNewDatatype.h)
+add_executable(GMock_Tests main.cpp)
 target_compile_options(GMock_Tests PRIVATE -fPIC -O2 )
 
 target_include_directories(GMock_Tests PUBLIC ${CMAKE_SOURCE_DIR}/mocks/)
