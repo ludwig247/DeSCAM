@@ -146,8 +146,8 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream &ss) {
     }
     for (const auto &output : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
         const auto &outputName = (optimizer->hasOutputReg(output) ?
-                                 optimizer->getCorrespondingRegister(output)->getFullName() :
-                                 output->getFullName());
+                                  optimizer->getCorrespondingRegister(output)->getFullName() :
+                                  output->getFullName());
         ss << "\t" << outputName << " <= " << output->getFullName("_") << "_out;\n";
     }
 
@@ -155,14 +155,8 @@ void VHDLWrapperSCO::moduleOutputHandling(std::stringstream &ss) {
         ss << "\n\t-- Output Register to Output Mapping\n";
     }
     for (const auto &registerOutputMap : optimizer->getOutputRegisterMap()) {
-        if (optimizer->hasMultipleOutputs(registerOutputMap.second)) {
-            for (const auto &output : optimizer->getCorrespondingTopSignals(registerOutputMap.second)) {
-                ss << "\t" << output->getFullName() << " <= " << registerOutputMap.first->getFullName() << ";\n";
-            }
-        } else {
-            ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName()
-               << ";\n";
-        }
+        ss << "\t" << registerOutputMap.second->getFullName() << " <= " << registerOutputMap.first->getFullName()
+           << ";\n";
     }
 
     if (!propertySuite->getNotifySignals().empty()) {

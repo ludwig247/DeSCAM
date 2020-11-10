@@ -27,7 +27,6 @@ namespace DESCAM { namespace HLSPlugin {
 
         bool hasOutputReg(DataSignal* dataSignal);
         bool isConstant(Variable* variable) const;
-        bool hasMultipleOutputs(DataSignal *dataSignal) const;
 
         Variable* getCorrespondingRegister(DataSignal* dataSignal) ;
         std::set<Variable *> getOutputRegister();
@@ -45,7 +44,6 @@ namespace DESCAM { namespace HLSPlugin {
 
         inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
         inline std::map<Variable *, DataSignal *> getOutputRegisterMap() const;
-        inline std::vector<DataSignal *> getCorrespondingTopSignals(DataSignal *dataSignal) const;
 
         std::vector<Assignment *> getNotifyStatements(std::shared_ptr<Property> property) const;
 
@@ -72,8 +70,6 @@ namespace DESCAM { namespace HLSPlugin {
 
         std::map<Variable *, DataSignal *> registerToOutputMap;
         std::map<DataSignal *, Variable *> outputToRegisterMap;
-        std::map<DataSignal *, std::vector<DataSignal *>> moduleToTopSignalMap;
-        std::map<DataSignal*, DataSignal*> oldToNewDataSignalMap;
 
         std::map<std::shared_ptr<Property>, std::vector<Assignment*>> simplifiedCommitments;
 
@@ -93,7 +89,6 @@ namespace DESCAM { namespace HLSPlugin {
         bool isSelfAssignments(Assignment *assignment);
         bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
 
-        optional replaceDataSignals(Assignment *assignment);
         optional replaceByOutputRegister(Assignment *assignment);
         void arraySlicing();
 
@@ -103,10 +98,6 @@ namespace DESCAM { namespace HLSPlugin {
 
     std::map<Port *, std::list<Expr *>> OptimizerHLS::getArrayPorts() const {
         return arrayPorts;
-    }
-
-    std::vector<DataSignal *> OptimizerHLS::getCorrespondingTopSignals(DataSignal *dataSignal) const {
-        return moduleToTopSignalMap.at(dataSignal);
     }
 
     std::set<const DataType *> OptimizerHLS::getEnumTypes() const {

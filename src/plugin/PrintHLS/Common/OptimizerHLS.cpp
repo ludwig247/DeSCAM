@@ -239,14 +239,13 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
 
 }
 
+/*
+ * Check if the given data signal has an output register
+ */
 bool OptimizerHLS::hasOutputReg(DataSignal *dataSignal) {
     const auto &subVarMap = getSubVarMap(outputToRegisterMap);
     return (outputToRegisterMap.find(dataSignal) != outputToRegisterMap.end() ||
             subVarMap.find(dataSignal) != subVarMap.end());
-}
-
-bool OptimizerHLS::hasMultipleOutputs(DataSignal *dataSignal) const {
-    return (moduleToTopSignalMap.find(dataSignal) != moduleToTopSignalMap.end());
 }
 
 Variable *OptimizerHLS::getCorrespondingRegister(DataSignal *dataSignal) {
@@ -267,11 +266,7 @@ void OptimizerHLS::simplifyCommitments() {
                 continue;
             }
             auto newAssignment = commitment;
-            auto replacedAssignment = replaceDataSignals(newAssignment);
-            if (replacedAssignment.valid) {
-                newAssignment = replacedAssignment.value;
-            }
-            replacedAssignment = replaceByOutputRegister(newAssignment);
+            auto replacedAssignment = replaceByOutputRegister(newAssignment);
             if (replacedAssignment.valid) {
                 newAssignment = replacedAssignment.value;
             }
@@ -289,19 +284,6 @@ void OptimizerHLS::simplifyCommitments() {
 
 bool OptimizerHLS::isSelfAssignments(Assignment *assignment) {
     return (*assignment->getLhs() == *assignment->getRhs());
-}
-
-optional OptimizerHLS::replaceDataSignals(Assignment *assignment) {
-    if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
-        auto dataSignal = dynamic_cast<DataSignalOperand *>(assignment->getLhs())->getDataSignal();
-        for (const auto subVar : getSubVarMap(oldToNewDataSignalMap)) {
-            if (dataSignal == subVar.first) {
-                auto newAssignment = new Assignment(new DataSignalOperand(subVar.second), assignment->getRhs());
-                return {true, newAssignment};
-            }
-        }
-    }
-    return {false, nullptr};
 }
 
 optional OptimizerHLS::replaceByOutputRegister(Assignment *assignment) {
@@ -453,18 +435,6 @@ std::vector<DataSignal *> OptimizerHLS::getConstantOutputs() {
             }
         } else {
             nonConstantOutputs.insert(var.second);
-        }
-    }
-    for (const auto &moduleToTopSignal : moduleToTopSignalMap) {
-        auto topSignals = moduleToTopSignal.second;
-        for (const auto topSignal : topSignals) {
-            if (topSignal->isCompoundType()) {
-                for (auto &&subVar : topSignal->getSubVarList()) {
-                    nonConstantOutputs.insert(subVar);
-                }
-            } else {
-                nonConstantOutputs.insert(topSignal);
-            }
         }
     }
     std::vector<DataSignal *> constantOutputs;
