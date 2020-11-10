@@ -32,31 +32,11 @@ set(CMAKE_CXX_STANDARD 14) # C++14...
 set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
 set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
 set(CMAKE_BUILD_TYPE DEBUG)
-#set(CMAKE_CXX_FLAGS "-fno-rtti")
 
 set(SYSTEMC_VERSION 2.3.1a)
 set(LLVM_VERSION 11.0.0)
 set(GTEST_VERSION 1.10.0)
 set(Z3_VERSION 4.8.6)
-
-# READ the library version of a previous build.
-file(READ build_info INFO)
-string(REGEX MATCH "LLVM (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
-set(LLVM_PREVIOUS_BUILD ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "Z3 (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
-set(Z3_PREVIOUS_BUILD ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "GTEST (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
-set(GTEST_PREVIOUS_BUILD ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "SYSTEMC (([0-9]+.)?([0-9]+.)?([0-9]+))" out ${INFO})
-set(SYSTEMC_PREVIOUS_BUILD ${CMAKE_MATCH_1})
-
-file(WRITE build_info "LLVM ${LLVM_VERSION}\n")
-file(APPEND build_info "Z3 ${Z3_VERSION}\n")
-file(APPEND build_info "SYSTEMC ${SYSTEMC_VERSION}\n")
-file(APPEND build_info "GTEST ${GTEST_VERSION}\n")
 
 file(MAKE_DIRECTORY lib)
 file(MAKE_DIRECTORY include)
@@ -73,7 +53,6 @@ message(STATUS "Cmake generator: ${CMAKE_GENERATOR}")
 message(STATUS "Project source dir: ${PROJECT_SOURCE_DIR}")
 message(STATUS "Project binary dir: ${PROJECT_BINARY_DIR}")
 message(STATUS "Cmake command: ${CMAKE_COMMAND}")
-
 
 #################################
 ## ZLIB
@@ -107,6 +86,7 @@ set(SYSTEMC_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_gtest.cmake)
 include_directories(${SYSTEMC_INCLUDE_DIR})
+
 ################################
 # SystemC
 ################################
@@ -128,13 +108,11 @@ set(USE_SYSTEM_LLVM OFF CACHE BOOL "Use system LLVM")
 message(STATUS "Building with LLVM ${LLVM_VERSION}")
 # Include the ExternalProject compilation
 include(${PROJECT_SOURCE_DIR}/install/install_llvm.cmake)
-#set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-#set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
-#set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 message(STATUS "LLVM include dir: ${LLVM_INCLUDE_DIR}")
 message(STATUS "LLVM binary dir: ${LLVM_BINARY_DIR}")
 message(STATUS "LLVM library dir: ${LLVM_LIB_DIR}")
 include_directories(${LLVM_INCLUDE_DIR})
+
 ################################
 # DESCAM
 ################################
@@ -145,6 +123,7 @@ COMMAND echo "#ifndef SCAM_CONFIG_HOME_H
 #define SCAM_CONFIG_HOME_H\n
 #define SCAM_HOME \"${PROJECT_SOURCE_DIR}\"
 #define LLVM_BINARY_DIR \"${LLVM_BINARY_DIR}\"
+#define LLVM_INCLUDE_DIR \"${LLVM_INCLUDE_DIR}\"
 #define SYSTEMC_INCLUDE_DIR \"${SYSTEMC_INCLUDE_DIR}\"
 \n#endif //SCAM_CONFIG_HOME_H"
 OUTPUT_FILE ${PROJECT_SOURCE_DIR}/src/global/Config.h
@@ -178,7 +157,7 @@ add_subdirectory(example)
 add_subdirectory(tests)
 add_subdirectory(doc)
 
-add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM)
+add_custom_target(SCAM DEPENDS SYSTEMC GTEST Z3 LLVM ZLIB)
 
 if (NOT ${MACOSX}) #There is no cmake command in standard macos
 add_custom_command(TARGET SCAM
