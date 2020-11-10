@@ -225,6 +225,9 @@ void Module::removeFunction(std::string functionName) {
 void Module::setVariableMap(const std::map<std::string, Variable *> &variableMap) {
   Module::variableMap = variableMap;
 }
+void Module::addVariable(Variable *variable) {
+  this->variableMap.insert(std::make_pair(variable->getName(),variable));
+}
 
 //    void Module::setCFG_Original(std::map<int, DESCAM::CfgNode *> blockCFG) {
 //        this->cfg_Original = std::move(blockCFG);
