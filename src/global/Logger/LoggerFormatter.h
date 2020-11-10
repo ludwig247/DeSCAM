@@ -10,7 +10,8 @@
 #include <vector>
 #include <memory>
 #include "LoggerMsg.h"
-
+#include <sstream>
+#include <algorithm>
 
 namespace DESCAM {
 /*!

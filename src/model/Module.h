@@ -15,73 +15,77 @@
 #include "FSM.h"
 #include "Function.h"
 
+
 namespace DESCAM {
-class Module : public AbstractNode {
- public:
-  Module() = delete;
-  explicit Module(std::string name, LocationInfo locationInfo = LocationInfo());
-  ~Module() = default;
+    class Module : public AbstractNode {
+    public:
+        Module() = delete;
+        explicit  Module(std::string name, LocationInfo locationInfo = LocationInfo());
+        ~Module() = default;
 
   //Ports
   void addPort(Port *port);
   void addPorts(const std::map<std::string, Port *> &new_ports);
 
-  const std::map<std::string, Port *> &getPorts() const;
-  Port *getPort(const std::string &n) const;
-  bool isPort(const std::string &n) const;
-  bool isSlave() const;
+        const std::map<std::string, Port *> &getPorts() const;
+        Port * getPort(const std::string &n) const;
+        bool isPort(const std::string &n) const;
+        bool isSlave() const;
 
-  //FSM
-  FSM *getFSM() const;
+        //FSM
+        FSM *getFSM() const;
 
-  //Variables
-  void addVariables(std::map<std::string, Variable *> variables);
-  const std::map<std::string, Variable *> &getVariableMap() const;
-  Variable *getVariable(const std::string &n) const;
-  bool isVariable(const std::string &n) const;
-  void removeVariable(Variable *variable);
-  void removeFunction(std::string functionName);
-  void setVariableMap(const std::map<std::string, Variable *> &variableMap);
 
-  //Functions
-  const std::map<std::string, Function *> &getFunctionMap() const;
-  void addFunction(Function *function);
-  /**
-   * Sets functions into the module
-   * @param functions functions that should be added to module
-   */
-  void addFunctions(std::map<std::string, Function *> functions);
-  bool isFunction(std::string name) const;
-  Function *getFunction(std::string name);
+      //Variables
+      void addVariables(std::map<std::string, Variable *> variables);
+      void addVariable(Variable *variable);
+      const std::map<std::string, Variable *> &getVariableMap() const;
+      Variable *getVariable(const std::string &n) const;
+      bool isVariable(const std::string &n) const;
+      void removeVariable(Variable *variable);
+        void removeFunction(std::string functionName);
+        void setVariableMap(const std::map<std::string, Variable *> &variableMap);
 
-  //Accept
-  void accept(AbstractVisitor &visitor);
+        //Functions
+        const std::map<std::string, Function *> &getFunctionMap() const;
+        void addFunction(Function *function);
+        /**
+         * Sets functions into the module
+         * @param functions functions that should be added to module
+         */
+        void addFunctions(std::map<std::string, Function *> functions);
+        bool isFunction(std::string name) const;
+        Function *getFunction(std::string name);
 
-  // PropertySuite
-  std::shared_ptr<PropertySuite> getPropertySuite() const;
+        //Accept
+        void accept(AbstractVisitor &visitor);
 
-  void setPropertySuite(std::shared_ptr<PropertySuite> propertySuite);
+        // PropertySuite
+        std::shared_ptr<PropertySuite> getPropertySuite() const;
 
-  std::map<int, DESCAM::CfgNode *> getCFG() const;
+        void setPropertySuite(std::shared_ptr<PropertySuite> propertySuite);
 
-  std::multimap<std::string, std::vector<DESCAM::CfgNode *>> getcommGroups() const; //TODO: delete
-  void setCFG(std::map<int, DESCAM::CfgNode *> cfg);
-  void setCFG(std::map<int, DESCAM::CfgNode *> cfg,
-              std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups);
+        std::map<int, DESCAM::CfgNode *> getCFG() const;
 
- private:
+        std::multimap<std::string, std::vector<DESCAM::CfgNode *>> getcommGroups() const; //TODO: delete
+        void setCFG(std::map<int, DESCAM::CfgNode *> cfg);
+        void setCFG(std::map<int, DESCAM::CfgNode *> cfg, std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups);
 
-  std::map<std::string, Port *> ports; //! sc_in, sc_port<Interface>, ...
-  std::map<std::string, Variable *> variableMap; //! <memberName,ptrToMember>
-  std::map<std::string, Function *> function_map_;
 
-  FSM *fsm;
+    private:
 
-  std::map<int, DESCAM::CfgNode *> cfg;
-  std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups;
+        std::map<std::string, Port *> ports; //! sc_in, sc_port<Interface>, ...
+        std::map<std::string, Variable *> variableMap; //! <memberName,ptrToMember>
+        std::map<std::string, Function *> function_map_;
 
-  std::shared_ptr<PropertySuite> propertySuite;
-};
+        FSM *fsm;
+
+        std::map<int, DESCAM::CfgNode *> cfg;
+        std::multimap<std::string, std::vector<DESCAM::CfgNode *>> commGroups;
+
+        std::shared_ptr<PropertySuite> propertySuite;
+    };
 }
+
 
 #endif //SCAM_MODULES_H
