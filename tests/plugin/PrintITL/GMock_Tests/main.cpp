@@ -21,18 +21,18 @@
 
 //Tests
 using namespace ::testing;
-#include "GMock_Test/tests/NoMocks.h"
-#include "GMock_Test/tests/modelFactory/FindDataFlowMock.h"
-#include "GMock_Test/tests/modelFactory/FindFunctionsMock.h"
-#include "GMock_Test/tests/modelFactory/FindGlobalMock.h"
-#include "GMock_Test/tests/modelFactory/FindInitialValuesMock.h"
-#include "GMock_Test/tests/modelFactory/FindInstancesMocked.h"
-#include "GMock_Test/tests/modelFactory/FindModulesMock.h"
-#include "GMock_Test/tests/modelFactory/FindNewDatatypeMock.h"
-#include "GMock_Test/tests/modelFactory/FindPortsMock.h"
-#include "GMock_Test/tests/modelFactory/FindProcessMock.h"
-#include "GMock_Test/tests/modelFactory/FindStateNameMock.h"
-#include "GMock_Test/tests/modelFactory/FindVariablesMock.h"
+#include "tests/NoMocks.h"
+#include "tests/modelFactory/FindDataFlowMock.h"
+#include "tests/modelFactory/FindFunctionsMock.h"
+#include "tests/modelFactory/FindGlobalMock.h"
+#include "tests/modelFactory/FindInitialValuesMock.h"
+#include "tests/modelFactory/FindInstancesMocked.h"
+#include "tests/modelFactory/FindModulesMock.h"
+#include "tests/modelFactory/FindNewDatatypeMock.h"
+#include "tests/modelFactory/FindPortsMock.h"
+#include "tests/modelFactory/FindProcessMock.h"
+#include "tests/modelFactory/FindStateNameMock.h"
+#include "tests/modelFactory/FindVariablesMock.h"
 
 void setup(const std::string &path_to_file, const std::string &filename, IModelFactory *model_factory) {
 
@@ -65,9 +65,11 @@ void setup(const std::string &path_to_file, const std::string &filename, IModelF
   ASSERT_TRUE(module);
   print_itl.printModel(ModelGlobal::getModel());
 
+
+
   ASSERT_NO_THROW(print_itl.print());
   std::cout << "Instance: " << filename << std::endl;
-  std::ifstream ifs(SCAM_HOME + path_to_file + filename + ".vhi");
+  std::ifstream ifs(SCAM_HOME + std::string("/tests/plugin/PrintITL/GMock_Tests/vhi/") + filename + std::string(".vhi"));
   ASSERT_TRUE(bool(ifs)) << "Can't open file";
   std::stringstream buffer;
   std::string content((std::istreambuf_iterator<char>(ifs)),
