@@ -12,9 +12,7 @@ else ()
             # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
             GIT_REPOSITORY https://github.com/google/googletest.git
             GIT_TAG release-${GTEST_VERSION}
-            GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
-            GIT_CONFIG advice.detachedHead=false
 
             # Do not update the project, as we intentionally checked out a specific version.
             UPDATE_COMMAND ""

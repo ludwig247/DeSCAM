@@ -9,7 +9,7 @@
 #include "FindInitialValues.h"
 #include "FindNewDatatype.h"
 #include "IFindDataFlow.h"
-#include "FindDataFlowFactory.h"
+#include "StmtCastVisitor.h"
 
 DESCAM::FindInitialValues::FindInitialValues(IFindDataFlowFactory *find_data_flow_factory) :
     find_data_flow_factory_(find_data_flow_factory),
@@ -45,7 +45,7 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
        it++) {
     cnt++;
     if (cnt > 2) TERMINATE("The body of the constructor has to remain empty and is not analyzed."
-                           "\n Please use a section to initialize your systems instead of the constructor body\n");
+                           "\n Please use a section to initialize your systems instead of the constructor body\n")
   }
   //Only one Constructor allowed
   if (pass_ == 0) {
@@ -77,24 +77,24 @@ bool DESCAM::FindInitialValues::VisitCXXConstructorDecl(clang::CXXConstructorDec
             auto initExpr = findDataFlow->getExpr();
             if (initExpr != nullptr) {
               //Part start:
-              DataType *place_holder_type = const_cast<DataType *>(initExpr->getDataType());
+              auto *place_holder_type = const_cast<DataType *>(initExpr->getDataType());
               Variable place_holder_variable("foo", place_holder_type);
               VariableOperand variableOperand(&place_holder_variable);
               auto assignment = Assignment(&variableOperand, findDataFlow->getExpr());
               auto result = DESCAM::AssignmentOptimizer2::optimizeAssignment(&assignment, module_);
-              if (auto *valueT = dynamic_cast<ConstValue *>(result->getRhs())) {
+              if (auto valueT =  StmtCastVisitor<ConstValue>(result->getRhs()).Get()) {
                 this->init_value_ = valueT;
-              } else TERMINATE("All intializer are required to have a constant value");
+              } else TERMINATE("All initializer are required to have a constant value")
 
             } else std::cout << "-I- Default init value for variable " << varName << std::endl;
-          } catch (std::runtime_error error) {
+          } catch (std::runtime_error &error) {
             std::string msg = "Error for initialization of variable " + varName;
-            TERMINATE(msg + error.what());
+            TERMINATE(msg + error.what())
           }
         }
       }
     }
-  } else TERMINATE("Only one constructor allowed");
+  } else TERMINATE("Only one constructor allowed")
 
   return false;
 }

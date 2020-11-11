@@ -22,6 +22,9 @@ public:
 
     std::pair<std::string, std::string> printModule(SCAM::Module *module);
 
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintTopSkeleton");
+  }
 private:
     //std::stringstream ss;
     SCAM::Module *module;

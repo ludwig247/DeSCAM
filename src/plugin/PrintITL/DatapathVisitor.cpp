@@ -9,7 +9,7 @@
 
 
 DESCAM::DatapathVisitor::DatapathVisitor(std::string tp):
-    tp(tp){
+    tp(std::move(tp)){
 
 }
 
@@ -42,7 +42,7 @@ void DESCAM::DatapathVisitor::visit(class VariableOperand &node) {
 }
 
 std::string DESCAM::DatapathVisitor::toString(DESCAM::Stmt *stmt, unsigned int indentSize, unsigned int indentOffset, std::string tp) {
-    DatapathVisitor printer(tp);
+    DatapathVisitor printer(std::move(tp));
     return printer.createString(stmt, indentSize, indentOffset);
 }
 
@@ -83,7 +83,7 @@ void DESCAM::DatapathVisitor::visit(DESCAM::Bitwise &node) {
             this->ss << " or ";
         } else if (node.getOperation() == "^") {
             this->ss << " xor ";
-        } else TERMINATE("Should not get here");
+        } else TERMINATE("Should not get here")
         node.getRhs()->accept(*this);
         this->ss << ")";
     }
@@ -121,7 +121,7 @@ void DESCAM::DatapathVisitor::visit(DESCAM::Cast &node) {
         this->ss << "unsigned(";
     } else if (node.getDataType()->isInteger()) {
         this->ss << "signed(";
-    } else TERMINATE("Unsupported type for cast");
+    } else TERMINATE("Unsupported type for cast")
     node.getSubExpr()->accept(*this);
     this->ss << ")";
 }

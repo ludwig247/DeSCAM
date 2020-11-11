@@ -40,9 +40,6 @@ add_plugin(PrintHLS; "Print C++ Files, VHDL Wrapper and scripts for Vivado High 
 #UNDER MAINTANANCE
 add_plugin(PrintSystemC; "Regenerate model in SystemC" ; PrintSystemC)
 
-#test
-add_plugin(testPlugin; "This is a test" ; testPlugin)
-add_plugin(InstrumentPower; "test2" ; EstimatePower)
 
 #NOT WORKING ANYMORE
 #add_plugin(PrintAML; "Structure and FSM in AML")
@@ -84,7 +81,7 @@ target_link_libraries(PluginFactory Model)
 # get the list of all added plugins in order to link them to DESCAM
 get_directory_property(PLUGIN_NAMES DIRECTORY ${CMAKE_SOURCE_DIR}/src/plugin/ DEFINITION PLUGIN_NAMES)
 foreach (plugin_lib ${PLUGIN_NAMES})
-    #			MESSAGE(STATUS "linking ${plugin_lib}")
+    MESSAGE(STATUS "linking ${plugin_lib}")
     target_link_libraries(PluginFactory ${plugin_lib})
 endforeach ()
 

@@ -352,7 +352,7 @@ namespace CLI {
         Option *excludes(Option *opt) {
             excludes_.insert(opt);
 
-            // Help text should be symmetric - excluding a should exclude b
+            // Help text should be symmetric - excluding a should exclude b---__
             opt->excludes_.insert(this);
 
             // Ignoring the insert return value, excluding twice is now allowed.

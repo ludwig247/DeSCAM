@@ -3,6 +3,7 @@
 //
 
 #include "CfgBlock.h"
+#include "StmtCastVisitor.h"
 
 
 namespace DESCAM {
@@ -85,13 +86,11 @@ namespace DESCAM {
 
     bool CfgBlock::hasIf() {
         if (this->hasTerminator()) {
-            if (DESCAM::If *stmt = dynamic_cast<DESCAM::If *>(this->terminator)) {
+            if (DESCAM::If *stmt = StmtCastVisitor<DESCAM::If>(this->terminator).Get()) {
                 return true;
             }
-
         }
         return false;
-
     }
 
     //! Replaces a successor with a new value

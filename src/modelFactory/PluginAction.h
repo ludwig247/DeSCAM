@@ -83,7 +83,6 @@ class DESCAMFrontEndFactory : public FrontendActionFactory {
   explicit DESCAMFrontEndFactory(IModelFactory *model_factory) : model_factory_(model_factory){};
 
   std::unique_ptr<clang::FrontendAction> create() override {
-//    std::unique_ptr<clang::FrontendAction> action = std::make_unique<DeScamAction>(model_factory_);
     return std::make_unique<DeScamAction>(model_factory_);
   }
 };
