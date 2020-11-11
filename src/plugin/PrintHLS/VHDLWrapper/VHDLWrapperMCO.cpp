@@ -18,7 +18,7 @@ VHDLWrapperMCO::VHDLWrapperMCO(
     this->currentModule = module;
     this->moduleName = moduleName;
     this->optimizer = optimizer;
-    this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, false);
+    this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer);
 }
 
 /*
@@ -61,6 +61,7 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
         ss << SignalFactory::printSignalDefinition(signal, ".", "", "_sig", false, false);
     }
     ss << "\n\t-- Monitor Signals\n";
+    ss << "\tsignal wait_state: std_logic;\n";
     for (const auto &signal : signalFactory->getMonitorSignals()) {
         ss << SignalFactory::printSignalDefinition(signal, ".", "", "", false, false);
     }

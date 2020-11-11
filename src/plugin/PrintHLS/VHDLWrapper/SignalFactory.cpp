@@ -25,13 +25,11 @@ static const std::set<std::tuple<std::string, std::string, std::string>> CONTROL
 SignalFactory::SignalFactory(
         std::shared_ptr<PropertySuite>& propertySuite,
         Module* module,
-        std::shared_ptr<OptimizerHLS>& optimizer,
-        bool useWaitState
+        std::shared_ptr<OptimizerHLS>& optimizer
 ) :
         propertySuite(propertySuite),
         module(module),
-        optimizer(optimizer),
-        useWaitOp(useWaitState)
+        optimizer(optimizer)
 {
     generateTypes();
     setOperationSelector();
@@ -55,9 +53,6 @@ void SignalFactory::generateTypes() {
     operationType = new DataType(propertySuite->getName() + "_operation_t");
     for (const auto& operation : propertySuite->getOperationProperties()) {
         operationType->addEnumValue(operation->getName());
-    }
-    if (useWaitOp) {
-        operationType->addEnumValue("state_wait");
     }
 }
 
@@ -103,9 +98,6 @@ void SignalFactory::setMonitorSignals() {
     monitorSignals.insert(std::make_shared<Variable> ("active_state", stateType));
     monitorSignals.insert(std::make_shared<Variable> ("next_state", stateType));
     monitorSignals.insert(activeOperation);
-    if (!useWaitOp) {
-        monitorSignals.insert(std::make_shared<Variable> ("wait_state", DataTypes::getDataType("bool")));
-    }
 }
 
 /*

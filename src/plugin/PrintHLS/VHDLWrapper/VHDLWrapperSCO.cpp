@@ -18,7 +18,7 @@ VHDLWrapperSCO::VHDLWrapperSCO(
     this->currentModule = module;
     this->moduleName = moduleName;
     this->optimizer = optimizer;
-    this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer, false);
+    this->signalFactory = std::make_unique<SignalFactory>(this->propertySuite, currentModule, this->optimizer);
 }
 
 /*

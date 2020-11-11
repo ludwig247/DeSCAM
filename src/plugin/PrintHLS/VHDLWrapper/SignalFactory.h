@@ -25,8 +25,7 @@ namespace DESCAM {
                 SignalFactory(
                         std::shared_ptr<PropertySuite> &propertySuite,
                         Module *module,
-                        std::shared_ptr<OptimizerHLS> &optimizer,
-                        bool useWaitOp
+                        std::shared_ptr<OptimizerHLS> &optimizer
                 );
 
                 ~SignalFactory() = default;
@@ -91,7 +90,6 @@ namespace DESCAM {
                 std::shared_ptr<PropertySuite> propertySuite;
                 Module *module;
                 std::shared_ptr<OptimizerHLS> optimizer;
-                bool useWaitOp;
 
                 std::shared_ptr<Variable> activeOperation;
                 std::set<std::shared_ptr<Variable>> monitorSignals;
