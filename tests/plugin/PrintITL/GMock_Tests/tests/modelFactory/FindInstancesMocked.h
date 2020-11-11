@@ -5,7 +5,7 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDINSTANCESMOCKED_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDINSTANCESMOCKED_H_
 
-#include "MockIFindInstances.h"
+#include "modelFactory/MockIFindInstances.h"
 
 TEST(TestCase1, FindInstances_mocked) /* NOLINT */{
   DataTypes::reset();
@@ -40,7 +40,7 @@ TEST(TestCase1, FindInstances_mocked) /* NOLINT */{
                                         find_global.get(),
                                         &find_instances);
 
-  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase1", model_factory);
 }
 
 TEST(TestCase2, FindInstances_mocked) /* NOLINT */{
@@ -74,7 +74,7 @@ TEST(TestCase2, FindInstances_mocked) /* NOLINT */{
                                         find_global.get(),
                                         &find_instances);
 
-  setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase2", model_factory);
 }
 
 TEST(TestCase3, FindInstances_mocked) /* NOLINT */{
@@ -108,7 +108,7 @@ TEST(TestCase3, FindInstances_mocked) /* NOLINT */{
                                         find_global.get(),
                                         &find_instances);
 
-  setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase3", model_factory);
 }
 
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDINSTANCESMOCKED_H_

@@ -5,8 +5,8 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDDATAFLOWMOCK_H_
 
-#include "MockIFindDataFlow.h"
-#include "MockIFindDataFlowFactory.h"
+#include "modelFactory/MockIFindDataFlow.h"
+
 
 // Not testable atm
 

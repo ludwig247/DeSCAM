@@ -5,7 +5,7 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDMODULESMOCK_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDMODULESMOCK_H_
 
-#include "MockIFindModules.h"
+#include "modelFactory/MockIFindModules.h"
 
 //Not testable atm
 

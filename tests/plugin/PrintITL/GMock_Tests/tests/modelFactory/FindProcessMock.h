@@ -5,7 +5,7 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDPROCESSMOCK_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDPROCESSMOCK_H_
 
-#include "MockIFindProcess.h"
+#include "modelFactory/MockIFindProcess.h"
 
 TEST(TestCase1, FindProcess_mocked) /* NOLINT*/{
   using testing::Return;
@@ -78,7 +78,7 @@ TEST(TestCase1, FindProcess_mocked) /* NOLINT*/{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase1", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase1", model_factory);
 }
 
 TEST(TestCase2, FindProcess_mocked) /* NOLINT*/{
@@ -182,7 +182,7 @@ TEST(TestCase2, FindProcess_mocked) /* NOLINT*/{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase2", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase2", model_factory);
 }
 
 TEST(TestCase3, FindProcess_mocked) /* NOLINT*/{
@@ -335,7 +335,7 @@ TEST(TestCase3, FindProcess_mocked) /* NOLINT*/{
       find_global.get(),
       find_instances.get());
 
-  setup("/tests/GMock_Test/tests/", "TestCase3", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase3", model_factory);
 }
 
 #endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDPROCESSMOCK_H_

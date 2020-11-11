@@ -5,7 +5,7 @@
 #ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDGLOBALMOCK_H_
 #define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDGLOBALMOCK_H_
 
-#include "MockIFindGlobal.h"
+//#include "modelFactory/MockIFindGlobal.h"
 
 // Not testable atm
 
