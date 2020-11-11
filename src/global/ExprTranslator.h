@@ -89,13 +89,13 @@ class ExprTranslator : public StmtAbstractVisitor {
 
   void visit(class ITE &node) override {TERMINATE("ExprSCAMtoZ3 did not expect ITE")} //ITE operator exists in z3, figure out its use
 
-  static void visit(class CompoundPortOperand &node) override{TERMINATE("ExprSCAMtoZ3 did not expect CompoundPortOperand")}
+  static void visit(class CompoundPortOperand &node) {TERMINATE("ExprSCAMtoZ3 did not expect CompoundPortOperand")}
 
   void visit(class While &node) override {TERMINATE("ExprSCAMtoZ3 did not expect While")}
 
   void visit(class If &node) override {TERMINATE("ExprSCAMtoZ3 did not expect If")}
 
-  static void visit(class Branch &node) override{TERMINATE("ExprSCAMtoZ3 did not expect Branch")}
+  static void visit(class Branch &node) {TERMINATE("ExprSCAMtoZ3 did not expect Branch")}
 
   void visit(class CompoundExpr &node) override {TERMINATE("ExprSCAMtoZ3 did not expect CompoundExpr")};
 

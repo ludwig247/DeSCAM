@@ -20,7 +20,7 @@ target_link_libraries(parser pthread)
 #include LLVM,z3,SystemC CLANG
 include(DefineLibs.cmake)
 
-if(LLVM_FROM_SOURCE)
+if(TRUE)
     foreach (clang_lib ${CLANG_LIBS})
         target_link_libraries(parser ${LLVM_LIB_DIR}/${clang_lib})
     endforeach ()
