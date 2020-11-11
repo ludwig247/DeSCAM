@@ -39,12 +39,10 @@ class ModelGlobal {
     std::vector<std::string> result;
     std::vector<const char *> command_line_arguments_vector;
     //Analyzing Environmental Variables          -----Default Values for Reference
-//    std::string clang_dir = SCAM_HOME"/include/clang/3.4.2/include";//getenv("CLANG_DIR");
-//    std::string clang_dir = LLVM_BINARY_DIR;
     std::string clang_dir = LLVM_INCLUDE_DIR;
-    std::string systemc_dir = SYSTEMC_INCLUDE_DIR;//getenv("SYSTEMC_DIR");
-    std::string scam_dir = SCAM_HOME"/";//getenv("SCAM_HOME");
-    std::string root_dir = "/";//getenv("ROOT_DIR");
+    std::string systemc_dir = SYSTEMC_INCLUDE_DIR;
+    std::string scam_dir = SCAM_HOME"/";
+    std::string root_dir = "/";
     if (clang_dir.empty()) TERMINATE("Specify CLANG_DIR as environment variable")
     if (systemc_dir.empty()) TERMINATE("Specify SYSTEMC_DIR as environment variable")
     if (scam_dir.empty()) TERMINATE("Specify SCAM_DIR as environment variable")
@@ -67,7 +65,7 @@ class ModelGlobal {
     std::string interfaces = std::string("-I" + scam_dir + "example/Interfaces/");
     command_line_arguments_vector.push_back(interfaces.c_str());
     //Parameters for clang: may not be changed
-    std::vector<const char *> clangParameter = {"-std=c++11", "-x", "c++", "-w", "-c", "-v"};
+    std::vector<const char *> clangParameter = {"-std=c++11", "-x", "c++", "-w", "-c"}; // For debug add "-v"
     for (auto item: clangParameter) {
       command_line_arguments_vector.push_back(item);
     }
@@ -78,8 +76,7 @@ class ModelGlobal {
     }
 
     if (argc >= 1) {
-      PluginAction
-          pa2(command_line_arguments_vector.size(), commandLineArgumentsArray, model_factory);
+      PluginAction pa2(command_line_arguments_vector.size(), commandLineArgumentsArray, model_factory);
     } else TERMINATE("Wrong use of DeSCAM")
   };
 
