@@ -12,71 +12,54 @@ else ()
 
     #set(LLVM_ALL_PROJECTS "clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl")
     include(ExternalProject)
-    ExternalProject_add(LLVM
-            # Location for external project with standard folder structure. Distinct by version
-            PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}
-            # Download the project from git via versioned tag. Checkout only the tag. Be verbose.
-            GIT_REPOSITORY https://github.com/llvm/llvm-project.git
-            GIT_TAG llvmorg-${LLVM_VERSION}
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-            GIT_CONFIG advice.detachedHead=false
+    if (APPLE)
+        set(LLVM_FROM_SOURCE TRUE)
+        message(STATUS "Prebuild LLVM installation not configured for MacOS. Building from source.")
+        set(LLVM_FROM_SOURCE TRUE)
+        include(${PROJECT_SOURCE_DIR}/install/install_LLVM_git.cmake)
+        set(PATH_TO_LLVM ${CMAKE_SOURCE_DIR})
 
-            # LLVM CMakeList.txt is located in a subdirectory
-            SOURCE_SUBDIR llvm
-            # Do not update the project, as we intentionally checked out a specific version.
-            UPDATE_COMMAND ""
+    elseif (UNIX)
+        if (OS_VERSION VERSION_GREATER_EQUAL 20.04)
+            set(LLVM_GIT_URL https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz)
+            set(LLVM_GIT_HASH a620b940240e54f9f3634b15051dba1c471de19a3e7717d3efaf8474cd0102bbfcfe34fab5c543c9647958bfeb10fc270d95d11fca1d7efcdd1443356e2ae478)
+            set(LLVM_FROM_SOURCE FALSE)
 
-            # Install locally in the project
-            CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_SOURCE_DIR}
-            -DCMAKE_BUILD_TYPE=Release
-            -DLLVM_INCLUDE_TESTS=OFF
-            -DLLVM_ENABLE_PROJECTS=clang-tools-extra$<SEMICOLON>clang$<SEMICOLON>openmp#$<SEMICOLON>libcxx$<SEMICOLON>libcxxabi
-            -DLLVM_BUILD_LLVM_DYLIB=ON
-            ${PERF_TOGGLE}
-            -DLLVM_ENABLE_ZLIB=OFF
-            # MAC OS may also need libcxx;libcxxabi"
+        elseif (OS_VERSION VERSION_GREATER_EQUAL 16.04)
+            set(LLVM_GIT_URL https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz)
+            set(LLVM_GIT_HASH 9dee765efad248093dd1463b3a06a7e314043ed9ad80a6902a261695a2352a28f0d1e3d804a456739818ab76f7dec59b705d8973165cf1c093371472fb4aa906)
+            set(LLVM_FROM_SOURCE FALSE)
 
-            INSTALL_COMMAND make install
-            )
+        else ()
+            set(LLVM_FROM_SOURCE TRUE)
+            message(STATUS "Prebuild LLVM installation not available for Ubuntu < 16.04. Building from source.")
+            set(LLVM_FROM_SOURCE TRUE)
+            include(${PROJECT_SOURCE_DIR}/install/install_llvm_git.cmake)
+            set(PATH_TO_LLVM ${CMAKE_SOURCE_DIR})
+        endif ()
 
-    #    set(LLVM_INCLUDE_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/include)
-    #    set(LLVM_BINARY_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/bin)
-    #    set(LLVM_LIB_DIR ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/lib)
-    set(LLVM_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
-    set(LLVM_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
-    set(LLVM_LIB_DIR ${CMAKE_SOURCE_DIR}/lib)
+        if (NOT ${LLVM_FROM_SOURCE})
+            ExternalProject_Add(LLVM
+                    PREFIX ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM
+                    URL ${LLVM_GIT_URL}
+                    URL_HASH SHA512=${LLVM_GIT_HASH}
 
-    ExternalProject_Add_Step(LLVM RTTI
-            DEPENDEES download
-            DEPENDERS build
+                    CONFIGURE_COMMAND ""
+                    BUILD_COMMAND ""
+                    INSTALL_COMMAND ""
+                    )
+            set(PATH_TO_LLVM ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM/src/LLVM)
 
-            COMMENT "Enabling RTTI for 'LLVM' ${LLVM_VERSION}"
-            # Insert RTTI requirement into CMakeLists.txt
-            # FIXME This inserts the RTTI repeatedly. Check if it's already in the file.
-            COMMAND echo set (LLVM_REQUIRES_RTTI 1) | cat - ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM/llvm/CMakeLists.txt > tmp
-            COMMAND mv tmp ${CMAKE_EXTERNAL_PROJECT_DIR}/llvm/${LLVM_VERSION}/src/LLVM/llvm/CMakeLists.txt
-            ALWAYS TRUE
-            )
-    ExternaLProject_Add_StepTargets(LLVM RTTI)
-
-
-    ExternalProject_Add_Step(LLVM FORCED_INSTALL
-            DEPENDERS install
-            COMMAND ${CMAKE_COMMAND} -E echo "Installing LLVM-${LLVM_VERSION}"
-            COMMENT "Installing  LLVM-${LLVM_VERSION}"
-            ALWAYS TRUE
-            )
-
-    if (LLVM_VERSION VERSION_LESS 4.0.0)
-        ExternalProject_Add_Step(LLVM CLANG
-                DEPENDEES download
-                DEPENDERS build
-                COMMENT "Copying clang folder into 'LLVM' ${LLVM_VERSION} project [legacy install]"
-                # Create symbolic links for the chosen version. Change the link when switching versions.
-                COMMAND cp -r <SOURCE_DIR>/clang <SOURCE_DIR>/llvm/tools
-                )
-        #ExternalProject_Add_StepTargets(LLVM CLANG)
+            set(PATH_TO_LLVM ${CMAKE_EXTERNAL_PROJECT_DIR}/LLVM/src/LLVM)
+            ExternalProject_Add_Step(LLVM COPY
+                    DEPENDEES install
+                    COMMAND cp -r <SOURCE_DIR>/lib/clang ${CMAKE_SOURCE_DIR}/lib/
+                    )
+        endif ()
     endif ()
+
+    set(LLVM_LIB_DIR ${PATH_TO_LLVM}/lib)
+    set(LLVM_BINARY_DIR ${PATH_TO_LLVM}/bin)
+    set(LLVM_INCLUDE_DIR ${PATH_TO_LLVM}/include)
+
 endif ()

@@ -7,6 +7,7 @@
 #include <NodePeekVisitor.h>
 #include "ExprVisitor.h"
 #include <regex>
+#include <Stmts/StmtCastVisitor.h>
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
@@ -319,12 +320,12 @@ namespace DESCAM {
             //Case for write(value)
         } else {
             if (this->newExpr->getDataType()->isCompoundType()) {
-                if (auto *compoundExpr = dynamic_cast<CompoundExpr *>(this->newExpr)) {
+                if (auto *compoundExpr = StmtCastVisitor<CompoundExpr>(this->newExpr).Get()) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = compoundExpr->getValueMap().at(subSig->getName());
                     }
-                } else if (auto *compoundValue = dynamic_cast<CompoundValue *>(this->newExpr)) {
+                } else if (auto *compoundValue = StmtCastVisitor<CompoundValue>(this->newExpr).Get()) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(subSig->getName());
@@ -338,7 +339,7 @@ namespace DESCAM {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = value;
                     }
-                }else if (auto *compoundValue = dynamic_cast<CompoundValue *>(this->newExpr)) {
+                }else if (auto *compoundValue = StmtCastVisitor<CompoundValue>(this->newExpr).Get()) {
                     for (auto subSig: node.getPort()->getDataSignal()->getSubVarList()) {
                         find_or_add_variable(subSig->getFullName(), new DataSignalOperand(subSig,node.getStmtInfo()));
                         this->variableAssignmentMap[subSig->getFullName()] = compoundValue->getValues().at(subSig->getName());

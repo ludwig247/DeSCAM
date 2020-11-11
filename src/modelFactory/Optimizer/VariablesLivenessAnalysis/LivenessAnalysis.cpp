@@ -5,7 +5,7 @@
 #include "LivenessAnalysis.h"
 
 #include <utility>
-#include "Optimizer/Debug.h"
+#include <Stmts/StmtCastVisitor.h>
 
 
 namespace DESCAM {
@@ -32,7 +32,7 @@ namespace DESCAM {
             for (int i = 0; i < 2; i++) {
                 // if in info of any succ stmt = true  , current stmt out info = true
                 for (auto node = this->CFG.rbegin(); node != this->CFG.rend(); node++) {
-                    for (auto var: this->stmtInfoMap) {
+                    for (const auto& var: this->stmtInfoMap) {
                         for (auto succ : (*node).second->getSuccessorList()) {
                             if (this->stmtInfoMap.at(var.first).at(succ->getId()).first) {
                                 this->stmtInfoMap.at(var.first).at((*node).first).second = true;
@@ -58,7 +58,7 @@ namespace DESCAM {
             }
             int numToggledNodes = 0;
             for (auto node : this->toggledToTrueNodeVector) {
-                if (node == true) { numToggledNodes++; }
+                if (node) { numToggledNodes++; }
             }
             if (numToggledNodes == this->numToTrueToggles) { break; }
             this->numToTrueToggles = numToggledNodes;
@@ -75,12 +75,14 @@ namespace DESCAM {
 //        }
 #endif
         // Deleting dead assignments
-        for (auto element : this->allAssignments) {
+        for (const auto& element : this->allAssignments) {
+          //fixme 'continue' is not a nice thing to use
             if (this->stmtInfoMap.find(element.first) == this->stmtInfoMap.end()) {
                 continue;
             }
             for (auto nodeId : element.second) {
-                if(dynamic_cast<DESCAM::Read*>(this->CFG.at(nodeId)->getStmt())){continue;}
+              //fixme 'continue' is not a nice thing to use
+                if(StmtCastVisitor<DESCAM::Read>(this->CFG.at(nodeId)->getStmt()).Get()){continue;}
                 if (this->assignmentsToCompoundsVarsMap.find(nodeId) == this->assignmentsToCompoundsVarsMap.end()) {
                     if (!this->stmtInfoMap.at(element.first).at(nodeId).second) {
                         if (this->CFG.find(nodeId) != this->CFG.end()) {
@@ -115,7 +117,7 @@ namespace DESCAM {
         if (this->deadNodeDetected) {
             std::vector<int> pointlessIfStmtsNodeIdsVector;
             for (auto node : this->CFG) {
-                if (dynamic_cast<DESCAM::If *>(node.second->getStmt())) {
+                if (StmtCastVisitor<DESCAM::If>(node.second->getStmt()).Get()) {
                     if (node.second->getSuccessorList().size() != 2) {
                         pointlessIfStmtsNodeIdsVector.push_back(node.first);
                     }
@@ -135,7 +137,7 @@ namespace DESCAM {
     }
 
     void LivenessAnalysis::initLA(const std::map<std::string, DESCAM::Variable *> &ModuleVariables) {
-        for (auto var : ModuleVariables) {
+        for (const auto& var : ModuleVariables) {
             this->moduleVariablesMap.insert(std::make_pair(var.second->getFullName(), var.second));
             if (var.second->isCompoundType() || var.second->isArrayType()) {
                 for (auto subvar : var.second->getSubVarList()) {
@@ -147,7 +149,7 @@ namespace DESCAM {
         for (auto node : this->CFG) {
             id2boolmap.insert(std::make_pair(node.second->getId(), std::make_pair(false, false)));
         }
-        for (auto var: this->moduleVariablesMap) {
+        for (const auto& var: this->moduleVariablesMap) {
             std::map<int, std::pair<bool, bool>> idboolsMap = id2boolmap;
             this->stmtInfoMap.insert(std::make_pair(var.first, idboolsMap));
         }
@@ -220,8 +222,8 @@ namespace DESCAM {
     }
 
     void LivenessAnalysis::visit(class Assignment &node) {
-        // if the lhs of the assignment is a variableoperand set it inittialy to not used then check if there is a use of a variable in the rhs
-        if (auto lhs = dynamic_cast<DESCAM::VariableOperand *>(node.getLhs())) {
+        // if the lhs of the assignment is a variable operand set it initially to not used then check if there is a use of a variable in the rhs
+        if (auto lhs = StmtCastVisitor<DESCAM::VariableOperand>(node.getLhs()).Get()) {
             if (this->variablesInStmtMap.find(this->currentNodeID) != this->variablesInStmtMap.end()) {
                 this->variablesInStmtMap.at(this->currentNodeID).insert(lhs->getVariable()->getFullName());
             } else {

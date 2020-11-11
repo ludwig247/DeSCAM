@@ -2,8 +2,8 @@
 // Created by M.I.Alkoudsi on 14.08.19.
 //
 
+#include <Stmts/StmtCastVisitor.h>
 #include "LocalValuePropagation.h"
-#include "Optimizer/Debug.h"
 /* Idea:
  * Look for variables used in the CFG statements. For each found use:
  * If variable in the same statement was checked before and has entry in varValMap. get its value from varValMap
@@ -59,7 +59,7 @@ void DESCAM::LocalValuePropagation::visit(struct VariableOperand &node) {
     this->newExpr = nullptr;
 #ifdef DONT_PROPAGATE_COMPOUND_VARIABLE_VALUES_TO_WRITE_STATEMENTS
     if(node.getVariable()->isCompoundType() || node.getVariable()->isArrayType()){
-        if(dynamic_cast<DESCAM::Write*>(this->CFG.at(this->currentNodeID)->getStmt())){
+        if(StmtCastVisitor<DESCAM::Write>(this->CFG.at(this->currentNodeID)->getStmt()).Get()){
             return;
         }
     }
@@ -88,8 +88,8 @@ void DESCAM::LocalValuePropagation::visit(struct VariableOperand &node) {
 }
 
 void DESCAM::LocalValuePropagation::visit(struct Assignment &node) {
-    //if the lhs of it is a variableoperand check if there is a use of a variable in the rhs
-    if (dynamic_cast<DESCAM::VariableOperand *>(node.getLhs())) {
+    //if the lhs of it is a variable operand check if there is a use of a variable in the rhs
+    if (StmtCastVisitor<DESCAM::VariableOperand>(node.getLhs()).Get()) {
         node.getRhs()->accept(*this);
         if (this->newExpr != nullptr && propagationValid) {
             auto assignment = new Assignment(node.getLhs(), this->newExpr,node.getStmtInfo());
@@ -123,7 +123,7 @@ void DESCAM::LocalValuePropagation::visit(struct UnaryExpr &node) {
             if (node.getExpr()->getDataType()->isUnsigned()) {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1)),node.getStmtInfo();
             } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
-        } else TERMINATE("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation())
     }
 }
 

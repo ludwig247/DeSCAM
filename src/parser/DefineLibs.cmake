@@ -204,168 +204,161 @@ if (MACOSX)
             )
 else ()
     set(LLVM_LIBS
-            libLLVM.so
-            libLLVM-11.0.0.so
-            libLLVM-11.so
-            libLLVMAArch64AsmParser.a
-            libLLVMAArch64CodeGen.a
-            libLLVMAArch64Desc.a
-            libLLVMAArch64Disassembler.a
-            libLLVMAArch64Info.a
-            libLLVMAArch64Utils.a
-            libLLVMAggressiveInstCombine.a
-            libLLVMAMDGPUAsmParser.a
-            libLLVMAMDGPUCodeGen.a
-            libLLVMAMDGPUDesc.a
-            libLLVMAMDGPUDisassembler.a
-            libLLVMAMDGPUInfo.a
-            libLLVMAMDGPUUtils.a
-            libLLVMAnalysis.a
-            libLLVMARMAsmParser.a
-            libLLVMARMCodeGen.a
-            libLLVMARMDesc.a
-            libLLVMARMDisassembler.a
-            libLLVMARMInfo.a
-            libLLVMARMUtils.a
-            libLLVMAsmParser.a
-            libLLVMAsmPrinter.a
-            libLLVMAVRAsmParser.a
-            libLLVMAVRCodeGen.a
-            libLLVMAVRDesc.a
-            libLLVMAVRDisassembler.a
-            libLLVMAVRInfo.a
-            libLLVMBinaryFormat.a
-            libLLVMBitReader.a
-            libLLVMBitstreamReader.a
-            libLLVMBitWriter.a
-            libLLVMBPFAsmParser.a
-            libLLVMBPFCodeGen.a
-            libLLVMBPFDesc.a
-            libLLVMBPFDisassembler.a
-            libLLVMBPFInfo.a
-            libLLVMCFGuard.a
-            libLLVMCodeGen.a
-            libLLVMCore.a
-            libLLVMCoroutines.a
-            libLLVMCoverage.a
-            libLLVMDebugInfoCodeView.a
-            libLLVMDebugInfoDWARF.a
-            libLLVMDebugInfoGSYM.a
-            libLLVMDebugInfoMSF.a
-            libLLVMDebugInfoPDB.a
-            libLLVMDemangle.a
-            libLLVMDlltoolDriver.a
-            libLLVMDWARFLinker.a
-            libLLVMExecutionEngine.a
-            libLLVMExtensions.a
-            libLLVMFrontendOpenACC.a
-            libLLVMFrontendOpenMP.a
-            libLLVMFuzzMutate.a
-            libLLVMGlobalISel.a
-            libLLVMHexagonAsmParser.a
-            libLLVMHexagonCodeGen.a
-            libLLVMHexagonDesc.a
-            libLLVMHexagonDisassembler.a
-            libLLVMHexagonInfo.a
-            libLLVMInstCombine.a
-            libLLVMInstrumentation.a
-            libLLVMInterpreter.a
-            libLLVMipo.a
-            libLLVMIRReader.a
-            libLLVMJITLink.a
-            libLLVMLanaiAsmParser.a
-            libLLVMLanaiCodeGen.a
-            libLLVMLanaiDesc.a
-            libLLVMLanaiDisassembler.a
-            libLLVMLanaiInfo.a
-            libLLVMLibDriver.a
-            libLLVMLineEditor.a
-            libLLVMLinker.a
-            libLLVMLTO.a
-            libLLVMMC.a
-            libLLVMMCA.a
-            libLLVMMCDisassembler.a
-            libLLVMMCJIT.a
-            libLLVMMCParser.a
-            libLLVMMipsAsmParser.a
-            libLLVMMipsCodeGen.a
-            libLLVMMipsDesc.a
-            libLLVMMipsDisassembler.a
-            libLLVMMipsInfo.a
-            libLLVMMIRParser.a
-            libLLVMMSP430AsmParser.a
-            libLLVMMSP430CodeGen.a
-            libLLVMMSP430Desc.a
-            libLLVMMSP430Disassembler.a
-            libLLVMMSP430Info.a
-            libLLVMNVPTXCodeGen.a
-            libLLVMNVPTXDesc.a
-            libLLVMNVPTXInfo.a
-            libLLVMObjCARCOpts.a
-            libLLVMObject.a
-            libLLVMObjectYAML.a
-            libLLVMOption.a
-            libLLVMOrcError.a
-            libLLVMOrcJIT.a
-            libLLVMPasses.a
-            libLLVMPerfJITEvents.a
-            libLLVMPowerPCAsmParser.a
-            libLLVMPowerPCCodeGen.a
-            libLLVMPowerPCDesc.a
-            libLLVMPowerPCDisassembler.a
-            libLLVMPowerPCInfo.a
-            libLLVMProfileData.a
-            libLLVMRemarks.a
-            libLLVMRISCVAsmParser.a
-            libLLVMRISCVCodeGen.a
-            libLLVMRISCVDesc.a
-            libLLVMRISCVDisassembler.a
-            libLLVMRISCVInfo.a
-            libLLVMRISCVUtils.a
-            libLLVMRuntimeDyld.a
-            libLLVMScalarOpts.a
-            libLLVMSelectionDAG.a
-            libLLVMSparcAsmParser.a
-            libLLVMSparcCodeGen.a
-            libLLVMSparcDesc.a
-            libLLVMSparcDisassembler.a
-            libLLVMSparcInfo.a
-            libLLVMSupport.a
-            libLLVMSymbolize.a
-            libLLVMSystemZAsmParser.a
-            libLLVMSystemZCodeGen.a
-            libLLVMSystemZDesc.a
-            libLLVMSystemZDisassembler.a
-            libLLVMSystemZInfo.a
-            libLLVMTableGen.a
-            libLLVMTarget.a
-            libLLVMTextAPI.a
-            libLLVMTransformUtils.a
-            libLLVMVectorize.a
-            libLLVMWebAssemblyAsmParser.a
-            libLLVMWebAssemblyCodeGen.a
-            libLLVMWebAssemblyDesc.a
-            libLLVMWebAssemblyDisassembler.a
-            libLLVMWebAssemblyInfo.a
+            libLLVMXRay.a
             libLLVMWindowsManifest.a
+            libLLVMTableGen.a
+            libLLVMSymbolize.a
+            libLLVMDebugInfoPDB.a
+            libLLVMOrcJIT.a
+            libLLVMOrcError.a
+            libLLVMJITLink.a
+            libLLVMObjectYAML.a
+            libLLVMMCA.a
+            libLLVMLTO.a libLLVMObjCARCOpts.a
+            libLLVMExtensions.a
+            libPolly.a
+            libPollyISL.a
+            libLLVMPasses.a
+            libLLVMCoroutines.a
+            libLLVMLineEditor.a
+            libLLVMLibDriver.a
+            libLLVMInterpreter.a
+            libLLVMFuzzMutate.a
+            libLLVMMCJIT.a
+            libLLVMExecutionEngine.a
+            libLLVMRuntimeDyld.a
+            libLLVMDWARFLinker.a
+            libLLVMDlltoolDriver.a
+            libLLVMOption.a
+            libLLVMDebugInfoGSYM.a
+            libLLVMCoverage.a
+            libLLVMXCoreDisassembler.a
+            libLLVMXCoreCodeGen.a
+            libLLVMXCoreDesc.a
+            libLLVMXCoreInfo.a
+            libLLVMX86Disassembler.a
             libLLVMX86AsmParser.a
             libLLVMX86CodeGen.a
             libLLVMX86Desc.a
-            libLLVMX86Disassembler.a
             libLLVMX86Info.a
-            libLLVMXCoreCodeGen.a
-            libLLVMXCoreDesc.a
-            libLLVMXCoreDisassembler.a
-            libLLVMXCoreInfo.a
-            libLLVMXRay.a
-            libLTO.so
-            libLTO.so.11
-            libRemarks.so
-            libRemarks.so.11)
+            libLLVMWebAssemblyDisassembler.a
+            libLLVMWebAssemblyCodeGen.a
+            libLLVMWebAssemblyDesc.a
+            libLLVMWebAssemblyAsmParser.a
+            libLLVMWebAssemblyInfo.a
+            libLLVMSystemZDisassembler.a
+            libLLVMSystemZCodeGen.a
+            libLLVMSystemZAsmParser.a
+            libLLVMSystemZDesc.a
+            libLLVMSystemZInfo.a
+            libLLVMSparcDisassembler.a
+            libLLVMSparcCodeGen.a
+            libLLVMSparcAsmParser.a
+            libLLVMSparcDesc.a
+            libLLVMSparcInfo.a
+            libLLVMRISCVDisassembler.a
+            libLLVMRISCVCodeGen.a
+            libLLVMRISCVAsmParser.a
+            libLLVMRISCVDesc.a
+            libLLVMRISCVUtils.a
+            libLLVMRISCVInfo.a
+            libLLVMPowerPCDisassembler.a
+            libLLVMPowerPCCodeGen.a
+            libLLVMPowerPCAsmParser.a
+            libLLVMPowerPCDesc.a
+            libLLVMPowerPCInfo.a
+            libLLVMNVPTXCodeGen.a
+            libLLVMNVPTXDesc.a
+            libLLVMNVPTXInfo.a
+            libLLVMMSP430Disassembler.a
+            libLLVMMSP430CodeGen.a
+            libLLVMMSP430AsmParser.a
+            libLLVMMSP430Desc.a
+            libLLVMMSP430Info.a
+            libLLVMMipsDisassembler.a
+            libLLVMMipsCodeGen.a
+            libLLVMMipsAsmParser.a
+            libLLVMMipsDesc.a
+            libLLVMMipsInfo.a
+            libLLVMLanaiDisassembler.a
+            libLLVMLanaiCodeGen.a
+            libLLVMLanaiAsmParser.a
+            libLLVMLanaiDesc.a
+            libLLVMLanaiInfo.a
+            libLLVMHexagonDisassembler.a
+            libLLVMHexagonCodeGen.a
+            libLLVMHexagonAsmParser.a
+            libLLVMHexagonDesc.a
+            libLLVMHexagonInfo.a
+            libLLVMBPFDisassembler.a
+            libLLVMBPFCodeGen.a
+            libLLVMBPFAsmParser.a
+            libLLVMBPFDesc.a
+            libLLVMBPFInfo.a
+            libLLVMAVRDisassembler.a
+            libLLVMAVRCodeGen.a
+            libLLVMAVRAsmParser.a
+            libLLVMAVRDesc.a
+            libLLVMAVRInfo.a
+            libLLVMARMDisassembler.a
+            libLLVMARMCodeGen.a
+            libLLVMARMAsmParser.a
+            libLLVMARMDesc.a
+            libLLVMARMUtils.a
+            libLLVMARMInfo.a
+            libLLVMAMDGPUDisassembler.a
+            libLLVMAMDGPUCodeGen.a
+            libLLVMMIRParser.a
+            libLLVMipo.a
+            libLLVMInstrumentation.a
+            libLLVMVectorize.a
+            libLLVMLinker.a
+            libLLVMIRReader.a
+            libLLVMAsmParser.a
+            libLLVMFrontendOpenMP.a
+            libLLVMAMDGPUAsmParser.a
+            libLLVMAMDGPUDesc.a
+            libLLVMAMDGPUUtils.a
+            libLLVMAMDGPUInfo.a
+            libLLVMAArch64Disassembler.a
+            libLLVMMCDisassembler.a
+            libLLVMAArch64CodeGen.a
+            libLLVMCFGuard.a
+            libLLVMGlobalISel.a
+            libLLVMSelectionDAG.a
+            libLLVMAsmPrinter.a
+            libLLVMDebugInfoDWARF.a
+            libLLVMCodeGen.a
+            libLLVMTarget.a
+            libLLVMScalarOpts.a
+            libLLVMInstCombine.a
+            libLLVMAggressiveInstCombine.a
+            libLLVMTransformUtils.a
+            libLLVMBitWriter.a
+            libLLVMAnalysis.a
+            libLLVMProfileData.a
+            libLLVMObject.a
+            libLLVMTextAPI.a
+            libLLVMBitReader.a
+            libLLVMCore.a
+            libLLVMRemarks.a
+            libLLVMBitstreamReader.a
+            libLLVMAArch64AsmParser.a
+            libLLVMMCParser.a
+            libLLVMAArch64Desc.a
+            libLLVMMC.a
+            libLLVMDebugInfoCodeView.a
+            libLLVMDebugInfoMSF.a
+            libLLVMBinaryFormat.a
+            libLLVMAArch64Utils.a
+            libLLVMAArch64Info.a
+            libLLVMSupport.a
+            libLLVMDemangle.a
+            )
 
     set(OTHERS
-            #${CMAKE_SOURCE_DIR}/lib/libz3.so
             ${Z3_LIB_DIR}/libz3.so
+            ${ZLIB_LIB_DIR}/libz.so
             rt
             dl
             tinfo
@@ -373,20 +366,30 @@ else ()
             )
 
     set(CLANG_LIBS
+            libc++.a
+            #           libc++.so
+            libc++abi.a
+            #           libc++abi.so
+            #           libc++experimental.a
             libclang.so
-            libclang.so.11
             libclang-cpp.so
-            libclang-cpp.so.11
             libclangAnalysis.a
+            libclangApplyReplacements.a
             libclangARCMigrate.a
             libclangAST.a
             libclangASTMatchers.a
             libclangBasic.a
+            libclangChangeNamespace.a
             libclangCodeGen.a
             libclangCrossTU.a
+            libclangDaemon.a
+            libclangDaemonTweaks.a
             libclangDependencyScanning.a
             libclangDirectoryWatcher.a
+            libclangDoc.a
+            libclangdRemoteIndex.a
             libclangDriver.a
+            libclangdSupport.a
             libclangDynamicASTMatchers.a
             libclangEdit.a
             libclangFormat.a
@@ -394,9 +397,14 @@ else ()
             libclangFrontendTool.a
             libclangHandleCXX.a
             libclangHandleLLVM.a
+            libclangIncludeFixer.a
+            libclangIncludeFixerPlugin.a
             libclangIndex.a
             libclangLex.a
+            libclangMove.a
             libclangParse.a
+            libclangQuery.a
+            libclangReorderFields.a
             libclangRewrite.a
             libclangRewriteFrontend.a
             libclangSema.a
@@ -405,6 +413,32 @@ else ()
             libclangStaticAnalyzerCore.a
             libclangStaticAnalyzerFrontend.a
             libclangTesting.a
+            libclangTidy.a
+            libclangTidyAbseilModule.a
+            libclangTidyAndroidModule.a
+            libclangTidyBoostModule.a
+            libclangTidyBugproneModule.a
+            libclangTidyCERTModule.a
+            libclangTidyCppCoreGuidelinesModule.a
+            libclangTidyDarwinModule.a
+            libclangTidyFuchsiaModule.a
+            libclangTidyGoogleModule.a
+            libclangTidyHICPPModule.a
+            libclangTidyLinuxKernelModule.a
+            libclangTidyLLVMLibcModule.a
+            libclangTidyLLVMModule.a
+            libclangTidyMain.a
+            libclangTidyMiscModule.a
+            libclangTidyModernizeModule.a
+            libclangTidyMPIModule.a
+            libclangTidyObjCModule.a
+            libclangTidyOpenMPModule.a
+            libclangTidyPerformanceModule.a
+            libclangTidyPlugin.a
+            libclangTidyPortabilityModule.a
+            libclangTidyReadabilityModule.a
+            libclangTidyUtils.a
+            libclangTidyZirconModule.a
             libclangTooling.a
             libclangToolingASTDiff.a
             libclangToolingCore.a
@@ -412,5 +446,6 @@ else ()
             libclangToolingRefactoring.a
             libclangToolingSyntax.a
             libclangTransformer.a
+            libfindAllSymbols.a
             )
 endif ()

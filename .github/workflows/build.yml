@@ -22,6 +22,8 @@ jobs:
       # DEFAULT WORKFLOW
       - name: Build System Generation
         run: cd $GITHUB_WORKSPACE && mkdir build && cd build && $CMAKE_BIN ../
+      - name: Build ZLIB
+        run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target ZLIB -- -j8
       - name: Build GTEST
         run: $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GTEST -- -j8
       - name: Build Z3

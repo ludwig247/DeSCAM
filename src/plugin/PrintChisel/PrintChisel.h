@@ -24,6 +24,9 @@ public:
 
     std::string print();
 
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintChisel");
+  }
 private:
     std::stringstream ss;
 

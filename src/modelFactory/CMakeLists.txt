@@ -36,6 +36,7 @@ add_library (modelFactory SHARED
 		FindInstances.cpp
 		clangCastVisitor.cpp)
 
+target_compile_options(modelFactory PRIVATE -fno-rtti)
 
 target_link_libraries(modelFactory propertyFactory)
 target_link_libraries(modelFactory cfgFactory)

@@ -19,6 +19,7 @@
 #include <Stmts/Cast.h>
 #include <NodePeekVisitor.h>
 #include <ModelGlobal.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "PortOperand.h"
 #include "FindDataFlow.h"
 #include "FindStateName.h"
@@ -26,6 +27,7 @@
 #include "DescamException.h"
 
 #include "FindDataFlowFactory.h"
+#include "clangCastVisitor.h"
 
 bool DESCAM::FindDataFlow::isFunction = false;
 std::string DESCAM::FindDataFlow::functionName;
@@ -176,7 +178,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                                                  "master_write", "slave_read", "slave_write", "set", "get", "wait",
                                                  "peek", "poke"};
     auto functions = module_->getFunctionMap();
-    if (auto *memberExpr = llvm::dyn_cast<clang::MemberExpr>(memberCallExpr->getCallee())) {
+//    if (auto *memberExpr = clangCastVisitor<clang::MemberExpr>(memberCallExpr->getCallee()).Get()) {
+    if (auto *memberExpr = clangCastVisitor(memberCallExpr->getCallee()).GetMemberExpr()) {
       //Assign name of the method
       methodString = memberExpr->getMemberDecl()->getNameAsString();
       //Get location info of the method
@@ -236,7 +239,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
     if (this->lhs_expr_ != nullptr) {
       //Get location info of the member
       auto member_location_info = DESCAM::GlobalUtilities::getLocationInfo<clang::Stmt>(implicitObjArg, ci_);
-      if (auto *operand = dynamic_cast<PortOperand *>(this->lhs_expr_)) {
+      if (auto *operand = StmtCastVisitor<PortOperand>(this->lhs_expr_).Get()) {
         //Lambda for finding the stateName
         auto getStateName = [=]() -> std::string {
           if (memberCallExpr->getNumArgs() == 2) {
@@ -272,8 +275,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
             //Blocking read
             if (methodString == "read") {
               //add variable as parameter
-              if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
-                  memberCallExpr->getArg((0))))) {
+              if (auto variableOp = StmtCastVisitor<VariableOperand>(getArgument(
+                  memberCallExpr->getArg((0)))).Get()) {
                 DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
                                                    memberCallLocationInfo);
                                   read->setStateName(getStateName());
@@ -284,8 +287,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
               //non Blocking read
             } else if (methodString == "try_read" && memberCallExpr->getNumArgs() == 1) {
               //add variable as parameter
-              if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
-                  memberCallExpr->getArg((0))))) {
+              if (auto variableOp = StmtCastVisitor<VariableOperand>(getArgument(
+                  memberCallExpr->getArg((0)))).Get()) {
                 DESCAM_ASSERT(this->stmt_ = new Read(operand->getPort(), variableOp, true, nullptr,
                                                      memberCallLocationInfo))
               } else
@@ -293,11 +296,11 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                                    memberCallLocationInfo);
             } else if (methodString == "try_read" && memberCallExpr->getNumArgs() > 1) {
               //add variable as parameter
-              if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(
-                  memberCallExpr->getArg(0)))) {
+              if (auto *variableOp = StmtCastVisitor<VariableOperand>(getArgument(
+                  memberCallExpr->getArg(0))).Get()) {
                 if (hasValidArgument(memberCallExpr->getArg(1))) {
-                  if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(
-                      memberCallExpr->getArg(1)))) {
+                  if (auto statusOp = StmtCastVisitor<VariableOperand>(getArgument(
+                      memberCallExpr->getArg(1))).Get()) {
                     DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
                                                        memberCallLocationInfo);
                                       read->setStateName(getStateName());
@@ -326,8 +329,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
               //non Blocking write with status flag
             else if (methodString == "try_write" && memberCallExpr->getNumArgs() > 1) {
               if (hasValidArgument(memberCallExpr->getArg(1))) {
-                if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(
-                    memberCallExpr->getArg(1)))) {
+                if (auto statusOp = StmtCastVisitor<VariableOperand>(getArgument(
+                    memberCallExpr->getArg(1))).Get()) {
                   DESCAM_ASSERT(auto write = new Write(operand->getPort(),
                                                        getArgument(memberCallExpr->getArg(0)),
                                                        true, statusOp, memberCallLocationInfo);
@@ -349,7 +352,7 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                                                                     ci_,
                                                                     false);
             if (findArgument->getExpr() != nullptr) {
-              if (auto *variableOp = dynamic_cast<VariableOperand *>(findArgument->getExpr())) {
+              if (auto *variableOp = StmtCastVisitor<VariableOperand>(findArgument->getExpr()).Get()) {
                 DESCAM_ASSERT(this->stmt_ = new Read(operand->getPort(), variableOp, true, nullptr,
                                                      memberCallLocationInfo))
               } else
@@ -378,8 +381,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
           if (hasValidArgument(memberCallExpr->getArg((0)))) {
             // evaluate parameters
             if (methodString == "master_read") {
-              if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(
-                  memberCallExpr->getArg((0))))) {
+              if (auto *variableOp = StmtCastVisitor<VariableOperand>(getArgument(
+                  memberCallExpr->getArg((0)))).Get()) {
                 DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, false, nullptr,
                                                    memberCallLocationInfo);
                                   this->stmt_ = read;
@@ -406,8 +409,8 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
               "Wrong number of arguments arguments");
           if (hasValidArgument(memberCallExpr->getArg((0)))) {
             if (methodString == "slave_read" && memberCallExpr->getNumArgs() == 1) {
-              if (auto variableOp = dynamic_cast<VariableOperand *>(getArgument(
-                  memberCallExpr->getArg(0)))) {
+              if (auto variableOp = StmtCastVisitor<VariableOperand>(getArgument(
+                  memberCallExpr->getArg(0))).Get()) {
                 DESCAM_ASSERT(this->stmt_ = new Read(operand->getPort(), variableOp, true, nullptr,
                                                      memberCallLocationInfo))
               } else
@@ -415,11 +418,11 @@ bool DESCAM::FindDataFlow::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *memb
                                    memberCallLocationInfo);
             } else if (methodString == "slave_read" && memberCallExpr->getNumArgs() > 1) {
               //add variable as parameter
-              if (auto *variableOp = dynamic_cast<VariableOperand *>(getArgument(
-                  memberCallExpr->getArg(0)))) {
+              if (auto *variableOp = StmtCastVisitor<VariableOperand>(getArgument(
+                  memberCallExpr->getArg(0))).Get()) {
                 if (hasValidArgument(memberCallExpr->getArg(1))) {
-                  if (auto statusOp = dynamic_cast<VariableOperand *>(getArgument(
-                      memberCallExpr->getArg(1)))) {
+                  if (auto statusOp = StmtCastVisitor<VariableOperand>(getArgument(
+                      memberCallExpr->getArg(1))).Get()) {
                     DESCAM_ASSERT(auto read = new Read(operand->getPort(), variableOp, true, statusOp,
                                                        memberCallLocationInfo);
                                       read->setStateName(getStateName());
@@ -494,7 +497,7 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
                                                                 false);
   if (findParentOfSubVar->getExpr() != nullptr) {
     //FIXME: Get rid of sub variables by also using ArrayOperand on compound variables
-    if (auto parent = dynamic_cast<DESCAM::VariableOperand *>(findParentOfSubVar->getExpr())) {
+    if (auto parent = StmtCastVisitor<DESCAM::VariableOperand>(findParentOfSubVar->getExpr()).Get()) {
       if (memberMap.find(parent->getOperandName()) != memberMap.end()) {
         //Assign value
         DESCAM_ASSERT(this->switchPassExpr(new VariableOperand(memberMap.at(parent->getOperandName())->getSubVar(name),
@@ -509,13 +512,13 @@ bool DESCAM::FindDataFlow::VisitMemberExpr(clang::MemberExpr *memberExpr) {
         return false;
       } else
         return exitVisitor(parent->getOperandName() + " is not a parent of " + name, member_location_info);
-    } else if (auto parent = dynamic_cast<DESCAM::FunctionOperand *>(findParentOfSubVar->getExpr())) {
+    } else if (auto parent = StmtCastVisitor<DESCAM::FunctionOperand>(findParentOfSubVar->getExpr()).Get()) {
       if (functionMap.find(parent->getOperandName()) != functionMap.end()) {
         //Assign value
         TERMINATE("Dont remove ... if never flags ... remove!")
       } else
         return exitVisitor(parent->getOperandName() + " is not a parent of " + name, member_location_info);
-    } else if (auto parent = dynamic_cast<DESCAM::ParamOperand *>(findParentOfSubVar->getExpr())) {
+    } else if (auto parent = StmtCastVisitor<DESCAM::ParamOperand>(findParentOfSubVar->getExpr()).Get()) {
       auto paramMap = functionMap.find(FindDataFlow::functionName)->second->getParamMap();
       if (paramMap.find(parent->getOperandName()) != paramMap.end()) {
         //Assign value
@@ -612,7 +615,7 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
   }
 
   //Check for state values
-  if (auto enumDecl = llvm::dyn_cast<clang::EnumConstantDecl>(declRefExpr->getDecl())) {
+  if (auto enumDecl = clangCastVisitor(declRefExpr->getDecl()).GetEnumConstantDecl()) {
 
     //Regular enum-value
     std::string typeName = enumDecl->getType()->getAs<clang::EnumType>()->getDecl()->getName().str();
@@ -633,7 +636,8 @@ bool DESCAM::FindDataFlow::VisitDeclRefExpr(clang::DeclRefExpr *declRefExpr) {
     }
 
   }
-  if (auto parmVarDecl = dynamic_cast<clang::ParmVarDecl *>(declRefExpr->getDecl())) {
+
+  if (auto parmVarDecl = clangCastVisitor(declRefExpr->getDecl()).GetParmVarDecl()) {
     if (FindDataFlow::isFunction) {
       auto moduleFuncMap = this->module_->getFunctionMap();
       auto globalFunctionMap = ModelGlobal::getModel()->getGlobalFunctionMap();
