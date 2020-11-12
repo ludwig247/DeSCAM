@@ -48,7 +48,6 @@ class CFGFactory {
   //Methods
   void translateToScamCFG(); //! Top method: initiates generation of the suspensionCFG
   static bool exprContainedInIf(clang::CFGBlock *inner, clang::CFGBlock *outer);
-
   static std::vector<clang::Stmt *> getCleanStmtList(clang::CFGBlock *block); //! Returns a list without nested stmts
   CfgBlock *createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *parent); //! Iterates over each statement of a block
   void traverseBlocks(clang::CFGBlock *block, CfgBlock *parent); //! Traveres each block of the CFG

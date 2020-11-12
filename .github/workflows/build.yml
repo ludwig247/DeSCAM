@@ -37,8 +37,8 @@ jobs:
       - name: Build Tests
         run: |
           $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintITL_Tests -- -j8
-          $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Tests -- -j8
           $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target GMock_Tests -- -j8
+        # $CMAKE_BIN --build $GITHUB_WORKSPACE/build/ --target PrintSkeleton_Tests -- -j8 TODO: add back
       - name: Run Tests
         run: |
           $GITHUB_WORKSPACE/bin/PrintITL_Tests
