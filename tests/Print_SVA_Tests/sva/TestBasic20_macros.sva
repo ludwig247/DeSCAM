@@ -1,0 +1,49 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function b_out_sync;
+	b_out_sync = 1'b1 ;
+endfunction
+function b_out_notify;
+	b_out_notify = 1'b1 ;
+endfunction
+
+// DP SIGNALS //
+function CompoundType b_out_sig;
+//	b_out_sig = {READ, 0, 0};
+endfunction
+function Mode b_out_sig_mode;
+	b_out_sig_mode = READ;
+endfunction
+function int b_out_sig_x;
+	b_out_sig_x = 0;
+endfunction
+function bit b_out_sig_y;
+	b_out_sig_y = 0;
+endfunction
+function CompoundType m_in_sig;
+//	m_in_sig = {READ, 0, 0};
+endfunction
+function Mode m_in_sig_mode;
+	m_in_sig_mode = READ;
+endfunction
+function int m_in_sig_x;
+	m_in_sig_x = 0;
+endfunction
+function bit m_in_sig_y;
+	m_in_sig_y = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function Phases phase;
+	phase = SECTION_A;
+endfunction
+
+// STATES //
+function state_1;
+	state_1 = 1'b1;
+endfunction
+function state_2;
+	state_2 = 1'b1;
+endfunction
+
+

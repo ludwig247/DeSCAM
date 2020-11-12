@@ -1,0 +1,2 @@
+typedef enum { SECTION_A, SECTION_B } Phases;
+

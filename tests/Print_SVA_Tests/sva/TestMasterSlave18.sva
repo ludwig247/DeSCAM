@@ -1,0 +1,64 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestMasterSlave18_types.sva"
+`include "TestMasterSlave18_functions.sva"
+
+import top_level_types::*;
+
+module TestMasterSlave18_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestMasterSlave18.clk); endclocking
+`include "TestMasterSlave18_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 data1() == 0 and
+	t##0 data2() == 0 and
+	t##0 data3() == 0 and
+	t##0 s_out_1_sig() == 0 and
+	t##0 s_out_2_sig() == 0 and
+	t##0 s_out_3_sig() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] data1_f;
+ bit[31:0] data2_f;
+ bit[31:0] data3_f;
+	t ##0 hold(data1_f, data1()) and
+	t ##0 hold(data2_f, data2()) and
+	t ##0 hold(data3_f, data3()) and
+	t##0 state_1()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 data1() == data1_f and
+	t_end(o)##0 data2() == data2_f and
+	t_end(o)##0 data3() == data3_f and
+	t_end(o)##0 s_out_1_sig() == data1_f and
+	t_end(o)##0 s_out_2_sig() == data2_f and
+	t_end(o)##0 s_out_3_sig() == data3_f;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestMasterSlave18 TestMasterSlave18_verification inst (.*, .reset());

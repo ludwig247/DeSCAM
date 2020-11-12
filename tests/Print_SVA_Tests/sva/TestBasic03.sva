@@ -1,0 +1,91 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestBasic03_types.sva"
+`include "TestBasic03_functions.sva"
+
+import top_level_types::*;
+
+module TestBasic03_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestBasic03.clk); endclocking
+`include "TestBasic03_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 b_out_sig() == 10 and
+	t##0 b_out_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+	t##0 state_1() and
+	t##0 b_out_sync()
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 b_out_sig() == 11 and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_5_p(o);
+	t##0 state_1() and
+	t##0 !(b_out_sync())
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig() == 10 and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_5_a: assert property (disable iff (reset) state_1_5_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_3_p(o);
+	t##0 state_2() and
+	t##0 b_out_sync()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig() == 10 and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_2_3_a: assert property (disable iff (reset) state_2_3_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_6_p(o);
+	t##0 state_2() and
+	t##0 !(b_out_sync())
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig() == 10 and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_2_6_a: assert property (disable iff (reset) state_2_6_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestBasic03 TestBasic03_verification inst (.*, .reset());

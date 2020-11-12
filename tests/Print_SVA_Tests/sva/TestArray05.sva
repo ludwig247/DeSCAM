@@ -1,0 +1,121 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestArray05_types.sva"
+`include "TestArray05_functions.sva"
+
+import top_level_types::*;
+
+module TestArray05_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestArray05.clk); endclocking
+`include "TestArray05_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 myArray_1() == 0 and
+	t##0 test() == 0 and
+	t##0 b_in_notify() == 1 and
+	t##0 b_out_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] b_in_sig_f;
+ bit[31:0] myArray_1_f;
+	t ##0 hold(b_in_sig_f, b_in_sig()) and
+	t ##0 hold(myArray_1_f, myArray_1()) and
+	t##0 state_1() and
+	t##0 b_in_sync()
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 b_out_sig_0() == (b_in_sig_f + myArray_1_f) and
+	t_end(o)##0 b_out_sig_1() == b_in_sig_f and
+	t_end(o)##0 myArray_1() == b_in_sig_f and
+	t_end(o)##0 test() == b_in_sig_f and
+	during_o (t, 1, t_end(o), 0, b_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_4_p(o);
+ bit[31:0] myArray_1_f;
+ bit[31:0] test_f;
+	t ##0 hold(myArray_1_f, myArray_1()) and
+	t ##0 hold(test_f, test()) and
+	t##0 state_1() and
+	t##0 !(b_in_sync())
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 b_out_sig_0() == (test_f + myArray_1_f) and
+	t_end(o)##0 b_out_sig_1() == test_f and
+	t_end(o)##0 myArray_1() == test_f and
+	t_end(o)##0 test() == test_f and
+	during_o (t, 1, t_end(o), 0, b_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_4_a: assert property (disable iff (reset) state_1_4_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_2_p(o);
+ bit[31:0] myArray_1_f;
+ bit[31:0] test_f;
+	t ##0 hold(myArray_1_f, myArray_1()) and
+	t ##0 hold(test_f, test()) and
+	t##0 state_2() and
+	t##0 b_out_sync()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 myArray_1() == (1 + myArray_1_f) and
+	t_end(o)##0 test() == test_f and
+	during_o (t, 1, t_end(o), -1, b_in_notify() == 0) and
+	t_end(o)##0 b_in_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, b_out_notify() == 0);
+endproperty;
+state_2_2_a: assert property (disable iff (reset) state_2_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_6_p(o);
+ bit[31:0] myArray_1_f;
+ bit[31:0] test_f;
+	t ##0 hold(myArray_1_f, myArray_1()) and
+	t ##0 hold(test_f, test()) and
+	t##0 state_2() and
+	t##0 !(b_out_sync())
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 myArray_1() == myArray_1_f and
+	t_end(o)##0 test() == test_f and
+	during_o (t, 1, t_end(o), -1, b_in_notify() == 0) and
+	t_end(o)##0 b_in_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, b_out_notify() == 0);
+endproperty;
+state_2_6_a: assert property (disable iff (reset) state_2_6_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestArray05 TestArray05_verification inst (.*, .reset());

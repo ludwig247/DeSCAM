@@ -1,0 +1,67 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestBasic26_types.sva"
+`include "TestBasic26_functions.sva"
+
+import top_level_types::*;
+
+module TestBasic26_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestBasic26.clk); endclocking
+`include "TestBasic26_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 m_out_1_sig() == m_in_1_sig_f and
+	t##0 m_out_2_sig() == m_in_2_sig_f and
+	t##0 m_out_3_sig() == m_in_3_sig_f and
+	t##0 m_out_1_notify() == 1 and
+	t##0 m_out_2_notify() == 1 and
+	t##0 m_out_3_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] m_in_1_sig_f;
+ bit[31:0] m_in_2_sig_f;
+ bit[31:0] m_in_3_sig_f;
+	t ##0 hold(m_in_1_sig_f, m_in_1_sig()) and
+	t ##0 hold(m_in_2_sig_f, m_in_2_sig()) and
+	t ##0 hold(m_in_3_sig_f, m_in_3_sig()) and
+	t##0 state_1()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 m_out_1_sig() == m_in_1_sig_f and
+	t_end(o)##0 m_out_2_sig() == m_in_2_sig_f and
+	t_end(o)##0 m_out_3_sig() == m_in_3_sig_f and
+	during_o (t, 1, t_end(o), -1, m_out_1_notify() == 0) and
+	t_end(o)##0 m_out_1_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, m_out_2_notify() == 0) and
+	t_end(o)##0 m_out_2_notify() == 1 and
+	during_o (t, 1, t_end(o), -1, m_out_3_notify() == 0) and
+	t_end(o)##0 m_out_3_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestBasic26 TestBasic26_verification inst (.*, .reset());

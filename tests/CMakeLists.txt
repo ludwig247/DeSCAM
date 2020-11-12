@@ -1,4 +1,5 @@
 add_subdirectory(Print_ITL_Tests)
+add_subdirectory(Print_SVA_Tests)
 add_subdirectory(Compile_ESL_Tests)
 add_subdirectory(PrintSkeleton_Test)
 add_subdirectory(DataType_Test)

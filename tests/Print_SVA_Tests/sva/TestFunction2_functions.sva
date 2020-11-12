@@ -1,0 +1,8 @@
+
+
+// FUNCTIONS //
+function bit[31:0] foo (int record_var_x, bit[31:0] record_var_y);
+	if ((signed'(32'(record_var_y)) < 20)) begin return unsigned'(32'((signed'(32'(record_var_y))>>signed'(32'((y() & 31)))))); end
+	else if (!((signed'(32'(record_var_y)) < 20))) begin return 0; end
+endfunction
+
