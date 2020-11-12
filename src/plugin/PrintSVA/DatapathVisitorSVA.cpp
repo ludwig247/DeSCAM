@@ -147,9 +147,9 @@ void DESCAM::DatapathVisitorSVA::visit(DESCAM::DataSignalOperand &node) {
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
-        this->ss << "int unsigned(";
+        this->ss << "unsigned'(";
     } else if (node.getDataType()->isInteger()) {
-        this->ss << "int signed(";
+        this->ss << "signed'(";
     } else throw std::runtime_error("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";

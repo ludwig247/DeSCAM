@@ -92,8 +92,11 @@ std::string PrintSVA::properties() {
     result
             << "`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR\n\n"
             << "`include \"ipc.sva\"\n"
-            << "`include \"" << this->module->getName() << "_types.sva\"\n"
-            << "`include \"globalTypes.sva\"\n"
+            << "`include \"globalTypes.sva\"\n";
+    if (!this->model->getGlobalFunctionMap().empty()) {
+        result << "`include \"" << this->model->getName() << "_global_functions.sva\"\n";
+    }
+    result  << "`include \"" << this->module->getName() << "_types.sva\"\n"
             << "`include \"" << this->module->getName() << "_functions.sva\"\n\n"
             << "import top_level_types::*;\n\n"
             //<< "import " << tolower(this->module->getName()) << "_functions::*;\n\n"
@@ -423,7 +426,7 @@ std::string PrintSVA::globalFunctions() {
                 }
                 globss << ") begin return ";
                 //TODO: The following lines print statements like "regfile.reg_file_01", which should be changed to "regfile_reg_file_01"
-                globss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
+                globss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
             } else {
                 globss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
             }
