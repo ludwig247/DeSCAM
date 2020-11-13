@@ -3,8 +3,8 @@
 //
 
 
-#ifndef SCAM_OPTUTILITIES_H
-#define SCAM_OPTUTILITIES_H
+#ifndef SCAM_OPT_UTILITIES_H
+#define SCAM_OPT_UTILITIES_H
 
 #include <map>
 #include "z3++.h"
@@ -57,9 +57,9 @@ namespace DESCAM {
                     clang::CharSourceRange::getTokenRange(clangDataStructure->getSourceRange()),
                     ci->getSourceManager(), ci->getLangOpts()).str();
             auto locStartVec = DESCAM::GlobalUtilities::stringSplit(
-                    clangDataStructure->getLocStart().printToString(ci->getSourceManager()), ':');
+                    clangDataStructure->getBeginLoc().printToString(ci->getSourceManager()), ':');
             auto locEndVec = DESCAM::GlobalUtilities::stringSplit(
-                    clangDataStructure->getLocEnd().printToString(ci->getSourceManager()), ':');
+                    clangDataStructure->getEndLoc().printToString(ci->getSourceManager()), ':');
             auto fileDir = locStartVec[0];
             auto rowStartNum = std::stoi(locStartVec[1]);
             auto rowEndNum = std::stoi(locEndVec[1]);
@@ -73,4 +73,4 @@ namespace DESCAM {
     };
 }
 
-#endif //SCAM_OPTUTILITIES_H
+#endif //SCAM_OPT_UTILITIES_H

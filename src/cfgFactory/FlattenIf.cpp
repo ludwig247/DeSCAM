@@ -2,6 +2,7 @@
 // Created by ludwig on 21.01.16.
 //
 
+#include <Stmts/StmtCastVisitor.h>
 #include "FlattenIf.h"
 
 
@@ -14,7 +15,7 @@ DESCAM::FlattenIf::FlattenIf(DESCAM::CfgBlock *startNode, DESCAM::CfgBlock *endN
         startEndMap(startEndMap),
         pathNodeMap(pathNodeMap) {
 
-    DESCAM::If *stmt = dynamic_cast<DESCAM::If *>(startNode->getTerminator());
+    DESCAM::If *stmt = StmtCastVisitor<DESCAM::If>(startNode->getTerminator()).Get();
     this->ite = new ITE(stmt->getConditionStmt());
 
     //Find all elements on the true path

@@ -10,7 +10,6 @@
 #include "../Types.h"
 
 
-
 struct TestFunction0: public sc_module {
 
     int foo(int x) const{

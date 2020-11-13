@@ -22,51 +22,52 @@
  */
 
 class PrintSystemC : public PluginFactory, public AbstractVisitor {
-public:
-    PrintSystemC() = default;
+ public:
+  PrintSystemC() = default;
 
-    ~PrintSystemC() = default;
+  ~PrintSystemC() override = default;
 
-    std::map<std::string, std::string> printModel(Model *node);
+  std::map<std::string, std::string> printModel(Model *node) override;
 
-private:
-    void visit(Model &node);
+  std::map<std::string, bool> getOptionMap() override;
 
-    void visit(DESCAM::Module &node);
+ private:
+  void visit(Model &node) override;
 
-    void visit(ModuleInstance &node);
+  void visit(DESCAM::Module &node) override;
 
-    void visit(Port &node);
+  void visit(ModuleInstance &node) override;
 
-    void visit(DataSignal &node); //not used
-    void visit(Channel &node);
+  void visit(Port &node) override;
 
-    void visit(Interface &node); //not used
-    void visit(Variable &node);
+  void visit(DataSignal &node) override; //not used
+  void visit(Channel &node) override;
 
-    void visit(FSM &node);
+  void visit(Interface &node) override;
+  void visit(Variable &node) override;
 
-    void visit(DataType &node);
+  void visit(FSM &node) override;
 
-    void visit(Function &node);
+  void visit(DataType &node) override;
 
-    void visit(Parameter &node);
+  void visit(Function &node) override;
 
-    void visit(Timepoint &node);
+  void visit(Parameter &node) override;
 
+  void visit(Timepoint &node) override;
 
-    unsigned int indent = 0;
-    unsigned int indentSize = 2;
+ private:
+  unsigned int indent = 0;
+  unsigned int indentSize = 2;
 
-    ////////////////
-    std::string Text_CMake();
+  ////////////////
+  std::string Text_CMake();
 
-    void Text_DataTypes();
+  void Text_DataTypes();
 
-    void printSpace(unsigned int size);
+  void printSpace(unsigned int size);
 
-    std::stringstream ss;
+  std::stringstream ss;
 };
-
 
 #endif //PROJECT_PRINTSYSTEMC_H

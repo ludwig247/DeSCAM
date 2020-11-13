@@ -5,320 +5,317 @@
 #ifndef PROJECT_STMTNODEALLOC_H
 #define PROJECT_STMTNODEALLOC_H
 
-
 #include <Stmts/StmtAbstractVisitor.h>
 #include <Stmts/Stmts_all.h>
 
 namespace DESCAM {
 
-    class StmtNodeAlloc : public StmtAbstractVisitor {
+class StmtNodeAlloc : public StmtAbstractVisitor {
 
-    public:
-        StmtNodeAlloc(Stmt &node, bool simplifyNode = false);
+ public:
+  explicit StmtNodeAlloc(Stmt &node, bool simplifyNode = false);
 
-        Stmt *getAllocNode() const;
+  Stmt *getAllocNode() const;
 
-        static Stmt *allocNode(Stmt &node, bool simplifyNode = false);
+  static Stmt *allocNode(Stmt &node, bool simplifyNode = false);
 
-        static Expr *allocNode(Expr &node, bool simplifyNode = false);
+  static Expr *allocNode(Expr &node, bool simplifyNode = false);
 
-        static Branch *allocNode(Branch &node, bool simplifyNode = false);
+  static Branch *allocNode(Branch &node, bool simplifyNode = false);
 
-        static ConstValue *allocNode(ConstValue &node, bool simplifyNode = false);
+  static ConstValue *allocNode(ConstValue &node, bool simplifyNode = false);
 
-        static Operand *allocNode(Operand &node, bool simplifyNode = false);
+  static Operand *allocNode(Operand &node, bool simplifyNode = false);
 
-        static VariableOperand *allocNode(VariableOperand &node, bool simplifyNode = false);
+  static VariableOperand *allocNode(VariableOperand &node, bool simplifyNode = false);
 
-        static TimePointOperand *allocNode(TimePointOperand &node, bool simplifyNode = false);
+  static TimePointOperand *allocNode(TimePointOperand &node, bool simplifyNode = false);
 
-        static IntegerValue *allocNode(IntegerValue &node, bool simplifyNode = false);
+  static IntegerValue *allocNode(IntegerValue &node, bool simplifyNode = false);
 
-        static UnsignedValue *allocNode(UnsignedValue &node, bool simplifyNode = false);
+  static UnsignedValue *allocNode(UnsignedValue &node, bool simplifyNode = false);
 
-        static BoolValue *allocNode(BoolValue &node, bool simplifyNode = false);
+  static BoolValue *allocNode(BoolValue &node, bool simplifyNode = false);
 
-        static EnumValue *allocNode(EnumValue &node, bool simplifyNode = false);
+  static EnumValue *allocNode(EnumValue &node, bool simplifyNode = false);
 
-        static CompoundValue *allocNode(CompoundValue &node, bool simplifyNode = false);
+  static CompoundValue *allocNode(CompoundValue &node, bool simplifyNode = false);
 
-        static PortOperand *allocNode(PortOperand &node, bool simplifyNode = false);
+  static PortOperand *allocNode(PortOperand &node, bool simplifyNode = false);
 
-        static UnaryExpr *allocNode(UnaryExpr &node);
+  static UnaryExpr *allocNode(UnaryExpr &node);
 
-        static SectionOperand *allocNode(SectionOperand &node, bool simplifyNode = false);
+  static SectionOperand *allocNode(SectionOperand &node, bool simplifyNode = false);
 
-        static SectionValue *allocNode(SectionValue &node, bool simplifyNode = false);
+  static SectionValue *allocNode(SectionValue &node, bool simplifyNode = false);
 
-        static Arithmetic *allocNode(Arithmetic &node);
+  static Arithmetic *allocNode(Arithmetic &node);
 
-        static Logical *allocNode(Logical &node);
+  static Logical *allocNode(Logical &node);
 
-        static Relational *allocNode(Relational &node, bool simplifyNode = false);
+  static Relational *allocNode(Relational &node, bool simplifyNode = false);
 
-        static Bitwise *allocNode(Bitwise &node);
+  static Bitwise *allocNode(Bitwise &node);
 
-        static SyncSignal *allocNode(SyncSignal &node, bool simplifyNode = false);
+  static SyncSignal *allocNode(SyncSignal &node, bool simplifyNode = false);
 
-        static DataSignalOperand *allocNode(DataSignalOperand &node, bool simplifyNode = false);
+  static DataSignalOperand *allocNode(DataSignalOperand &node, bool simplifyNode = false);
 
-        static Cast *allocNode(Cast &node);
+  static Cast *allocNode(Cast &node);
 
-        static Read *allocNode(Read &node, bool simplifyNode = false);
+  static Read *allocNode(Read &node, bool simplifyNode = false);
 
-        static Wait *allocNode(Wait &node, bool simplifyNode = false);
+  static Wait *allocNode(Wait &node, bool simplifyNode = false);
 
-        static Peek *allocNode(Peek &node, bool simplifyNode = false);
+  static Peek *allocNode(Peek &node, bool simplifyNode = false);
 
-        static Write *allocNode(Write &node, bool simplifyNode = false);
+  static Write *allocNode(Write &node, bool simplifyNode = false);
 
-        static ITE *allocNode(ITE &node, bool simplifyNode = false);
+  static ITE *allocNode(ITE &node, bool simplifyNode = false);
 
-        static Assignment *allocNode(Assignment &node, bool simplifyNode = false);
+  static Assignment *allocNode(Assignment &node, bool simplifyNode = false);
 
-        static While *allocNode(While &node, bool simplifyNode = false);
+  static While *allocNode(While &node, bool simplifyNode = false);
 
-        static If *allocNode(If &node, bool simplifyNode = false);
+  static If *allocNode(If &node, bool simplifyNode = false);
 
-        static FunctionOperand *allocNode(FunctionOperand &node, bool simplifyNode = false);
+  static FunctionOperand *allocNode(FunctionOperand &node, bool simplifyNode = false);
 
-        static ArrayOperand *allocNode(ArrayOperand &node, bool simplifyNode = false);
+  static ArrayOperand *allocNode(ArrayOperand &node, bool simplifyNode = false);
 
-        static CompoundExpr *allocNode(CompoundExpr &node, bool simplifyNode = false);
+  static CompoundExpr *allocNode(CompoundExpr &node, bool simplifyNode = false);
 
-        static ArrayExpr *allocNode(ArrayExpr &node, bool simplifyNode = false);
+  static ArrayExpr *allocNode(ArrayExpr &node, bool simplifyNode = false);
 
-        static ParamOperand *allocNode(ParamOperand &node, bool simplifyNode = false);
+  static ParamOperand *allocNode(ParamOperand &node, bool simplifyNode = false);
 
-        static Return *allocNode(Return &node, bool simplifyNode = false);
+  static Return *allocNode(Return &node, bool simplifyNode = false);
 
-        static Ternary *allocNode(Ternary &node, bool simplifyNode = false);
+  static Ternary *allocNode(Ternary &node, bool simplifyNode = false);
 
-        static std::vector<VariableOperand *> &getAllocTableVariableOperand() {
-            return allocTableVariableOperand;
-        }
+  static std::vector<VariableOperand *> &getAllocTableVariableOperand() {
+    return allocTableVariableOperand;
+  }
 
-        static std::vector<TimePointOperand *> &getAllocTableTimeExprOperand() {
-            return allocTableTimeExprOperand;
-        }
+  static std::vector<TimePointOperand *> &getAllocTableTimeExprOperand() {
+    return allocTableTimeExprOperand;
+  }
 
-        static std::vector<IntegerValue *> &getAllocTableIntegerValue() {
-            return allocTableIntegerValue;
-        }
+  static std::vector<IntegerValue *> &getAllocTableIntegerValue() {
+    return allocTableIntegerValue;
+  }
 
-        static std::vector<UnsignedValue *> &getAllocTableUnsignedValue() {
-            return allocTableUnsignedValue;
-        }
+  static std::vector<UnsignedValue *> &getAllocTableUnsignedValue() {
+    return allocTableUnsignedValue;
+  }
 
-        static std::vector<BoolValue *> &getAllocTableBoolValue() {
-            return allocTableBoolValue;
-        }
+  static std::vector<BoolValue *> &getAllocTableBoolValue() {
+    return allocTableBoolValue;
+  }
 
-        static std::vector<EnumValue *> &getAllocTableEnumValue() {
-            return allocTableEnumValue;
-        }
-
-        static std::vector<CompoundValue *> &getAllocTableCompoundValue() {
-            return allocTableCompoundValue;
-        }
-
-        static std::vector<PortOperand *> &getAllocTablePortOperand() {
-            return allocTablePortOperand;
-        }
-
-        static std::vector<UnaryExpr *> &getAllocTableUnaryExpr() {
-            return allocTableUnaryExpr;
-        }
-
-        static std::vector<SectionOperand *> &getAllocTableSectionOperand() {
-            return allocTableSectionOperand;
-        }
-
-        static std::vector<SectionValue *> &getAllocTableSectionValue() {
-            return allocTableSectionValue;
-        }
-
-        static std::vector<Arithmetic *> &getAllocTableArithmetic() {
-            return allocTableArithmetic;
-        }
-
-        static std::vector<Logical *> &getAllocTableLogical() {
-            return allocTableLogical;
-        }
-
-        static std::vector<Relational *> &getAllocTableRelational() {
-            return allocTableRelational;
-        }
-
-        static std::vector<Bitwise *> &getAllocTableBitwise() {
-            return allocTableBitwise;
-        }
-
-        static std::vector<SyncSignal *> &getAllocTableSyncSignal() {
-            return allocTableSyncSignal;
-        }
-
-        static std::vector<DataSignalOperand *> &getAllocTableDataSignalOperand() {
-            return allocTableDataSignalOperand;
-        }
-
-        static std::vector<Cast *> &getAllocTableCast() {
-            return allocTableCast;
-        }
-
-        static std::vector<Read *> &getAllocTableRead() {
-            return allocTableRead;
-        }
+  static std::vector<EnumValue *> &getAllocTableEnumValue() {
+    return allocTableEnumValue;
+  }
+
+  static std::vector<CompoundValue *> &getAllocTableCompoundValue() {
+    return allocTableCompoundValue;
+  }
+
+  static std::vector<PortOperand *> &getAllocTablePortOperand() {
+    return allocTablePortOperand;
+  }
+
+  static std::vector<UnaryExpr *> &getAllocTableUnaryExpr() {
+    return allocTableUnaryExpr;
+  }
+
+  static std::vector<SectionOperand *> &getAllocTableSectionOperand() {
+    return allocTableSectionOperand;
+  }
+
+  static std::vector<SectionValue *> &getAllocTableSectionValue() {
+    return allocTableSectionValue;
+  }
+
+  static std::vector<Arithmetic *> &getAllocTableArithmetic() {
+    return allocTableArithmetic;
+  }
+
+  static std::vector<Logical *> &getAllocTableLogical() {
+    return allocTableLogical;
+  }
+
+  static std::vector<Relational *> &getAllocTableRelational() {
+    return allocTableRelational;
+  }
+
+  static std::vector<Bitwise *> &getAllocTableBitwise() {
+    return allocTableBitwise;
+  }
+
+  static std::vector<SyncSignal *> &getAllocTableSyncSignal() {
+    return allocTableSyncSignal;
+  }
+
+  static std::vector<DataSignalOperand *> &getAllocTableDataSignalOperand() {
+    return allocTableDataSignalOperand;
+  }
+
+  static std::vector<Cast *> &getAllocTableCast() {
+    return allocTableCast;
+  }
+
+  static std::vector<Read *> &getAllocTableRead() {
+    return allocTableRead;
+  }
+
+  static std::vector<Write *> &getAllocTableWrite() {
+    return allocTableWrite;
+  }
 
-        static std::vector<Write *> &getAllocTableWrite() {
-            return allocTableWrite;
-        }
+  static std::vector<ITE *> &getAllocTableITE() {
+    return allocTableITE;
+  }
 
-        static std::vector<ITE *> &getAllocTableITE() {
-            return allocTableITE;
-        }
+  static std::vector<Assignment *> &getAllocTableAssignment() {
+    return allocTableAssignment;
+  }
 
-        static std::vector<Assignment *> &getAllocTableAssignment() {
-            return allocTableAssignment;
-        }
+  static std::vector<While *> &getAllocTableWhile() {
+    return allocTableWhile;
+  }
 
-        static std::vector<While *> &getAllocTableWhile() {
-            return allocTableWhile;
-        }
+  static std::vector<If *> &getAllocTableIf() {
+    return allocTableIf;
+  }
 
-        static std::vector<If *> &getAllocTableIf() {
-            return allocTableIf;
-        }
+  static std::vector<FunctionOperand *> &getAllocTableFunctionOperand() {
+    return allocTableFunctionOperand;
+  }
 
-        static std::vector<FunctionOperand *> &getAllocTableFunctionOperand() {
-            return allocTableFunctionOperand;
-        }
+  static std::vector<ArrayOperand *> &getAllocTableSubSelect() {
+    return allocTableSubSelect;
+  }
 
-        static std::vector<ArrayOperand *> &getAllocTableSubSelect() {
-            return allocTableSubSelect;
-        }
+  static std::vector<CompoundExpr *> &getAllocTableCompoundExpr() {
+    return allocTableCompoundExpr;
+  }
 
-        static std::vector<CompoundExpr *> &getAllocTableCompoundExpr() {
-            return allocTableCompoundExpr;
-        }
+  static std::vector<ParamOperand *> &getAllocTableParamOperand() {
+    return allocTableParamOperand;
+  }
 
-        static std::vector<ParamOperand *> &getAllocTableParamOperand() {
-            return allocTableParamOperand;
-        }
+  static std::vector<Return *> &getAllocTableReturn() {
+    return allocTableReturn;
+  }
 
-        static std::vector<Return *> &getAllocTableReturn() {
-            return allocTableReturn;
-        }
+ private:
+  Stmt *allocNodeAddress = nullptr;
 
-    private:
-        Stmt *allocNodeAddress = nullptr;
+  // Expr node tables
+  static std::vector<VariableOperand *> allocTableVariableOperand;
+  static std::vector<TimePointOperand *> allocTableTimeExprOperand;
+  static std::vector<IntegerValue *> allocTableIntegerValue;
+  static std::vector<UnsignedValue *> allocTableUnsignedValue;
+  static std::vector<BoolValue *> allocTableBoolValue;
+  static std::vector<EnumValue *> allocTableEnumValue;
+  static std::vector<CompoundValue *> allocTableCompoundValue;
+  static std::vector<PortOperand *> allocTablePortOperand;
+  static std::vector<UnaryExpr *> allocTableUnaryExpr;
+  static std::vector<SectionOperand *> allocTableSectionOperand;
+  static std::vector<SectionValue *> allocTableSectionValue;
+  static std::vector<Arithmetic *> allocTableArithmetic;
+  static std::vector<Logical *> allocTableLogical;
+  static std::vector<Relational *> allocTableRelational;
+  static std::vector<Bitwise *> allocTableBitwise;
+  static std::vector<SyncSignal *> allocTableSyncSignal;
+  static std::vector<DataSignalOperand *> allocTableDataSignalOperand;
+  static std::vector<Cast *> allocTableCast;
 
-        // Expr node tables
-        static std::vector<VariableOperand *> allocTableVariableOperand;
-        static std::vector<TimePointOperand *> allocTableTimeExprOperand;
-        static std::vector<IntegerValue *> allocTableIntegerValue;
-        static std::vector<UnsignedValue *> allocTableUnsignedValue;
-        static std::vector<BoolValue *> allocTableBoolValue;
-        static std::vector<EnumValue *> allocTableEnumValue;
-        static std::vector<CompoundValue *> allocTableCompoundValue;
-        static std::vector<PortOperand *> allocTablePortOperand;
-        static std::vector<UnaryExpr *> allocTableUnaryExpr;
-        static std::vector<SectionOperand *> allocTableSectionOperand;
-        static std::vector<SectionValue *> allocTableSectionValue;
-        static std::vector<Arithmetic *> allocTableArithmetic;
-        static std::vector<Logical *> allocTableLogical;
-        static std::vector<Relational *> allocTableRelational;
-        static std::vector<Bitwise *> allocTableBitwise;
-        static std::vector<SyncSignal *> allocTableSyncSignal;
-        static std::vector<DataSignalOperand *> allocTableDataSignalOperand;
-        static std::vector<Cast *> allocTableCast;
+  // Stmt node tables
+  static std::vector<Read *> allocTableRead;
+  static std::vector<Write *> allocTableWrite;
+  static std::vector<ITE *> allocTableITE;
+  static std::vector<Assignment *> allocTableAssignment;
+  static std::vector<While *> allocTableWhile;
+  static std::vector<If *> allocTableIf;
+  static std::vector<FunctionOperand *> allocTableFunctionOperand;
+  static std::vector<ArrayOperand *> allocTableSubSelect;
+  static std::vector<CompoundExpr *> allocTableCompoundExpr;
+  static std::vector<ParamOperand *> allocTableParamOperand;
+  static std::vector<Return *> allocTableReturn;
 
-        // Stmt node tables
-        static std::vector<Read *> allocTableRead;
-        static std::vector<Write *> allocTableWrite;
-        static std::vector<ITE *> allocTableITE;
-        static std::vector<Assignment *> allocTableAssignment;
-        static std::vector<While *> allocTableWhile;
-        static std::vector<If *> allocTableIf;
-        static std::vector<FunctionOperand *> allocTableFunctionOperand;
-        static std::vector<ArrayOperand *> allocTableSubSelect;
-        static std::vector<CompoundExpr *> allocTableCompoundExpr;
-        static std::vector<ParamOperand *> allocTableParamOperand;
-        static std::vector<Return *> allocTableReturn;
+  static std::vector<ArrayExpr *> allocTableArrayExpr;
 
-        static std::vector<ArrayExpr *> allocTableArrayExpr;
+ protected:
+  void visit(class VariableOperand &node) override;
 
+  void visit(class TimePointOperand &node) override;
 
+  void visit(class IntegerValue &node) override;
 
-    protected:
-        virtual void visit(class VariableOperand &node);
+  void visit(class UnsignedValue &node) override;
 
-        virtual void visit(class TimePointOperand &node);
+  void visit(class BoolValue &node) override;
 
-        virtual void visit(class IntegerValue &node);
+  void visit(class EnumValue &node) override;
 
-        virtual void visit(class UnsignedValue &node);
+  void visit(class CompoundValue &node) override;
 
-        virtual void visit(class BoolValue &node);
+  void visit(class PortOperand &node) override;
 
-        virtual void visit(class EnumValue &node);
+  void visit(class Assignment &node) override;
 
-        virtual void visit(class CompoundValue &node);
+  void visit(class UnaryExpr &node) override;
 
-        virtual void visit(class PortOperand &node);
+  void visit(class While &node) override;
 
-        virtual void visit(class Assignment &node);
+  void visit(class If &node) override;
 
-        virtual void visit(class UnaryExpr &node);
+  void visit(class SectionOperand &node) override;
 
-        virtual void visit(class While &node);
+  void visit(class SectionValue &node) override;
 
-        virtual void visit(class If &node);
+  void visit(class ITE &node) override;
 
-        virtual void visit(class SectionOperand &node);
+  void visit(class Arithmetic &node) override;
 
-        virtual void visit(class SectionValue &node);
+  void visit(class Logical &node) override;
 
-        virtual void visit(class ITE &node);
+  void visit(class Relational &node) override;
 
-        virtual void visit(class Arithmetic &node);
+  void visit(class Bitwise &node) override;
 
-        virtual void visit(class Logical &node);
+  void visit(class Read &node) override;
 
-        virtual void visit(class Relational &node);
+  void visit(class Write &node) override;
 
-        virtual void visit(class Bitwise &node);
+  void visit(class SyncSignal &node) override;
 
-        virtual void visit(class Read &node);
+  void visit(class DataSignalOperand &node) override;
 
-        virtual void visit(class Write &node);
+  void visit(class Cast &node) override;
 
-        virtual void visit(class SyncSignal &node);
+  void visit(class FunctionOperand &node) override;
 
-        virtual void visit(class DataSignalOperand &node);
+  void visit(class ArrayOperand &node) override;
 
-        virtual void visit(class Cast &node);
+  void visit(class CompoundExpr &node) override;
 
-        virtual void visit(class FunctionOperand &node);
+  void visit(class ParamOperand &node) override;
 
-        virtual void visit(class ArrayOperand &node);
+  void visit(class Return &node) override;
 
-        virtual void visit(class CompoundExpr &node);
+  void visit(class Notify &node) override;
 
-        virtual void visit(class ParamOperand &node);
+  void visit(class Wait &node) override;
 
-        virtual void visit(class Return &node);
+  void visit(class Peek &node) override;
 
-        virtual void visit(class Notify &node);
+  void visit(class ArrayExpr &node) override;
+  void visit(class Ternary &node) override;
 
-        virtual void visit(class Wait &node);
-
-        virtual void visit(class Peek &node) override;
-
-        virtual void visit(class ArrayExpr &node) override;
-        virtual void visit(class Ternary &node) override;
-
-    };
+};
 }
 
 #endif //PROJECT_STMTNODEALLOC_H

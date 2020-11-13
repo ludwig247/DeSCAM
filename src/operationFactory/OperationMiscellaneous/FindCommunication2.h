@@ -66,10 +66,10 @@ namespace DESCAM {
         void visit(struct ArrayOperand &node) override;
         void visit(ParamOperand &node) override;
         void visit(Return &node) override;
-        virtual void visit(Wait &node) override;
-        virtual void visit(Peek &node) override;
-        virtual void visit(class Notify &node) override;
-        virtual void visit(class ArrayExpr &node);
+        void visit(Wait &node) override;
+        void visit(Peek &node) override;
+        void visit(class Notify &node) override;
+        void visit(class ArrayExpr &node) override;
         void visit(struct TimePointOperand &node) override;
 
     public:

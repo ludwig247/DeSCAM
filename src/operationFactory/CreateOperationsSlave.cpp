@@ -8,6 +8,7 @@
 #include "OperationMiscellaneous/FindCommunication2.h"
 #include <regex>
 #include <NodePeekVisitor.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "FatalError.h"
 #include "Logger/Logger.h"
 
@@ -97,7 +98,7 @@ namespace DESCAM {
                     auto readNode = new CfgNode(node->getStmt());
                     readNode->replaceId(syncNode->getId() + 1);
                     auto elseNode = new CfgNode();
-                    if (Read *readStmt = dynamic_cast<Read *>(node->getStmt())) {
+                    if (Read *readStmt = StmtCastVisitor<Read>(node->getStmt()).Get()) {
                         if(readStmt->getStatusOperand() != nullptr) {
                             elseNode->setStmt(new Assignment(readStmt->getStatusOperand(),readStmt->getPort()->getSynchSignal(),readStmt->getStmtInfo()));
                         }

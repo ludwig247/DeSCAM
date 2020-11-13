@@ -16,9 +16,9 @@ namespace DESCAM {
 
         virtual void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
-        virtual std::ostream &print(std::ostream &) const;
+        std::ostream &print(std::ostream &) const override;
 
         const std::string &getStateName() const;
 

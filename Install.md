@@ -34,10 +34,11 @@
 
 Package |   Version
 ------- |   --------
-gtest   |   1.8.0
+gtest   |   1.10.0
 systemc |   2.3.1
 z3      |   4.8.6
-llvm    |   3.5.4
+zlib    |   1.2.11
+llvm    |   11.0.0
 
 # Build DESCAM
    * `mkdir build`

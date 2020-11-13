@@ -5,6 +5,7 @@
 #include <memory>
 #include <iomanip>
 #include <cmath>
+#include <StmtCastVisitor.h>
 #include "FatalError.h"
 #include "Logger/Logger.h"
 #include "NodePeekVisitor.h"
@@ -295,14 +296,12 @@ void PrintFunction::visit(Arithmetic &node) {
 
 void PrintFunction::visit(Relational &node) {
     std::unique_ptr<PrintBitOperations> sliceOp;
-    if (NodePeekVisitor::nodePeekBitwise(node.getRhs())) {
-        auto rhs = dynamic_cast<Bitwise *>(node.getRhs());
+    if (auto rhs = StmtCastVisitor<Bitwise>(node.getRhs()).Get()) {
         sliceOp = std::make_unique<PrintBitOperations>(rhs);
         if (sliceOp->isSlicingOp()) {
             slice = true;
         }
-    } else if (NodePeekVisitor::nodePeekBitwise(node.getLhs())) {
-        auto lhs = dynamic_cast<Bitwise *>(node.getLhs());
+    } else if ( auto lhs = StmtCastVisitor<Bitwise>(node.getLhs()).Get()) {
         sliceOp = std::make_unique<PrintBitOperations>(lhs);
         if (sliceOp->isSlicingOp()) {
             slice = true;

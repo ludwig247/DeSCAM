@@ -31,16 +31,14 @@ configure_file (
 
 list(REMOVE_DUPLICATES  PLUGIN_DIRECTORIES)
 foreach (plugin_dir ${PLUGIN_DIRECTORIES})
-#        MESSAGE(STATUS "adding ${plugin_dir}")
     add_subdirectory(${CMAKE_SOURCE_DIR}/src/plugin/${plugin_dir})
 endforeach ()
 
-add_subdirectory(global)
 add_subdirectory(parser)
+add_subdirectory(global)
 add_subdirectory(model)
 add_subdirectory(operationFactory)
 add_subdirectory(propertyFactory)
 add_subdirectory(cfgFactory)
 add_subdirectory(functionFactory)
 add_subdirectory(modelFactory)
-add_subdirectory(descamCheck)

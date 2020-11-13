@@ -12,13 +12,12 @@
 //#include <Stmts/NBWrite.h>
 
 namespace DESCAM {
-    class CreateInitSection2 {
-    public:
-        CreateInitSection2() = default;
+class CreateInitSection2 {
+ public:
+  CreateInitSection2() = default;
 
-        static std::vector<Stmt *> createInitSection2(const DESCAM::Module *module);
-    };
+  static std::vector<Stmt *> createInitSection2(const DESCAM::Module *const module);
+};
 }
-
 
 #endif //PROJECT_CREATEINITSECTION_H
