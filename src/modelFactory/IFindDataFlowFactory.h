@@ -17,8 +17,7 @@ class IFindDataFlowFactory {
   virtual IFindDataFlow *create_new(clang::Stmt *stmt,
                                     Module *module,
                                     clang::CompilerInstance *ci,
-                                    IFindDataFlowFactory *find_data_flow_factory,
-                                    bool unsigned_flag = false) = 0;
+                                    bool unsigned_flag) = 0;
 };
 }
 

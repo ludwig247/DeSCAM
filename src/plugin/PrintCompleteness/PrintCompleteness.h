@@ -17,6 +17,9 @@ public:
 
     std::map<std::string, std::string> printModel(Model *node);
 
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintCompleteness");
+  }
 private:
     void visit(Model &node) {};
 

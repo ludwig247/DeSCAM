@@ -17,9 +17,9 @@ namespace DESCAM {
 
         Expr *getSubExpr() const;
 
-        virtual void accept(StmtAbstractVisitor &visitor) override;
+        void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
     private:
         Expr *expr;

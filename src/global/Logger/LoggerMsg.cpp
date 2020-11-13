@@ -1,96 +1,84 @@
 #include "LoggerMsg.h"
 
-
 DESCAM::LoggerMsg::LoggerMsg(const std::string &message, const DESCAM::LocationInfo &stmtInfo,
-                           SeverityLevel severityLevel, ViolationType violationType,
-                           ProcessedLocation violationLocation) {
-    setMessage(message);
-    setLocationInfo(stmtInfo);
-    setSeverityLevel(severityLevel);
-    setViolationType(violationType);
-    setProcessedLocation(violationLocation);
+                             SeverityLevel severityLevel, ViolationType violationType,
+                             ProcessedLocation violationLocation) {
+  setMessage(message);
+  setLocationInfo(stmtInfo);
+  setSeverityLevel(severityLevel);
+  setViolationType(violationType);
+  setProcessedLocation(violationLocation);
 }
 
 const std::string &DESCAM::LoggerMsg::getMessage() {
-    return this->message;
+  return message_;
 }
 
 const DESCAM::LocationInfo &DESCAM::LoggerMsg::getLocationInfo() {
-    return this->locationInfo;
+  return location_info_;
 }
 
 std::string DESCAM::LoggerMsg::getSeverityLevel() {
-    switch (this->severityLevel) {
-        case SeverityLevel::Info :
-            return "Info";
-        case SeverityLevel::Warning :
-            return "Warning";
-        case SeverityLevel::Error :
-            return "Error";
-        case SeverityLevel::Fatal :
-            return "Fatal Error";
-    }
+  switch (severity_level_) {
+    case SeverityLevel::Info :return "Info";
+    case SeverityLevel::Warning :return "Warning";
+    case SeverityLevel::Error :return "Error";
+    case SeverityLevel::Fatal :return "Fatal Error";
+    default:return "DESCAM::LoggerMsg::getSeverityLevel() - unknown severity level";
+  }
 }
 
 std::string DESCAM::LoggerMsg::getViolationType() {
-    switch (this->violationType) {
-        case ViolationType::Syntax :
-            return "Syntax";
-        case ViolationType::SystemC_PPA_compliance :
-            return "SystemC PPA Compliance";
-        case ViolationType::NA :
-            return "NA";
-    }
+  switch (violation_type_) {
+    case ViolationType::Syntax :return "Syntax";
+    case ViolationType::SystemC_PPA_compliance :return "SystemC PPA Compliance";
+    case ViolationType::NA :return "NA";
+    default:return "DESCAM::LoggerMsg::getViolationType() - unknown violation type";
+  }
 }
 
 DESCAM::LoggerMsg::ProcessedLocation DESCAM::LoggerMsg::getProcessedLocation() {
-    return this->processedLocation;
+  return processed_location_;
 }
-
 
 void DESCAM::LoggerMsg::setMessage(const std::string &message) {
-    this->message = message;
+  message_ = message;
 }
 
-void DESCAM::LoggerMsg::setViolationType(DESCAM::LoggerMsg::ViolationType violationType) {
-    this->violationType = violationType;
+void DESCAM::LoggerMsg::setViolationType(DESCAM::LoggerMsg::ViolationType violation_type) {
+  violation_type_ = violation_type;
 }
 
-void DESCAM::LoggerMsg::setSeverityLevel(DESCAM::LoggerMsg::SeverityLevel severityLevel) {
-    this->severityLevel = severityLevel;
+void DESCAM::LoggerMsg::setSeverityLevel(DESCAM::LoggerMsg::SeverityLevel severity_level) {
+  severity_level_ = severity_level;
 }
 
-void DESCAM::LoggerMsg::setLocationInfo(const DESCAM::LocationInfo &stmtInfo) {
-    this->locationInfo = stmtInfo;
+void DESCAM::LoggerMsg::setLocationInfo(const DESCAM::LocationInfo &stmt_info) {
+  location_info_ = stmt_info;
 }
 
 void DESCAM::LoggerMsg::setProcessedLocation(DESCAM::LoggerMsg::ProcessedLocation location) {
-    this->processedLocation = location;
+  processed_location_ = location;
 }
 
 std::string DESCAM::LoggerMsg::getProcessedLocationString() {
-    switch (this->processedLocation) {
-        case ProcessedLocation::GlobalConstants :
-            return "while adding global constants";
-        case ProcessedLocation::Ports :
-            return "while adding module ports";
-        case ProcessedLocation::Variables :
-            return "while adding module variables";
-        case ProcessedLocation::Behavior :
-            return "while extracting module behavior";
-        case ProcessedLocation::Functions :
-            return "while adding module functions";
-        case ProcessedLocation::Parsing :
-            return "while parsing";
-    }
+  switch (processed_location_) {
+    case ProcessedLocation::GlobalConstants :return "while adding global constants";
+    case ProcessedLocation::Ports :return "while adding module ports";
+    case ProcessedLocation::Variables :return "while adding module variables";
+    case ProcessedLocation::Behavior :return "while extracting module behavior";
+    case ProcessedLocation::Functions :return "while adding module functions";
+    case ProcessedLocation::Parsing :return "while parsing";
+    default: return "in unknown location";
+  }
 }
 
 bool DESCAM::LoggerMsg::operator==(const DESCAM::LoggerMsg &other) const {
-    if (this == &other) return true;
-    return this->message == other.message &&
-           this->processedLocation == other.processedLocation &&
-           this->severityLevel == other.severityLevel &&
-           this->violationType == other.violationType &&
-           this->locationInfo == other.locationInfo;
+  if (this == &other) return true;
+  return message_ == other.message_ &&
+      processed_location_ == other.processed_location_ &&
+      severity_level_ == other.severity_level_ &&
+      violation_type_ == other.violation_type_ &&
+      location_info_ == other.location_info_;
 }
 

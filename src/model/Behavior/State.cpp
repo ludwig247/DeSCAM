@@ -90,5 +90,11 @@ namespace DESCAM {
     std::string State::print() const {
         return this->name;
     }
+const LocationInfo &State::GetLocationInfo() const {
+  return location_info_;
+}
+void State::SetLocationInfo(const LocationInfo &location_info) {
+  location_info_ = location_info;
+}
 
 }

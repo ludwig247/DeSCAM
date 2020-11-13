@@ -16,23 +16,23 @@
 
 namespace DESCAM {
 
-    /**
-     * TODO Comment for DoD
-     */
-    class IFindGlobal {
-    public:
+/**
+ * TODO Comment for DoD
+ */
+class IFindGlobal {
+ public:
 
-        virtual ~IFindGlobal() = default;
+  virtual ~IFindGlobal() = default;
 
-        virtual bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci,IFindDataFlowFactory * find_data_flow_factory) = 0;
+  virtual bool setup(clang::TranslationUnitDecl *decl, clang::CompilerInstance *ci) = 0;
 
-        virtual const std::map<std::string, Variable *> &getVariableMap() const = 0;
+  virtual const std::map<std::string, Variable *> &getVariableMap() const = 0;
 
-        virtual const std::map<std::string, Function *> &getFunctionMap() const = 0;
+  virtual const std::map<std::string, Function *> &getFunctionMap() const = 0;
 
-        virtual const std::map<std::string, const clang::FunctionDecl *> &getFunctionDeclMap() const = 0;
-    };
+  virtual std::vector<DESCAM::Stmt *> getFunctionBody(std::string function_name,
+                                                      DESCAM::Function *function) const = 0;
+};
 }
-
 
 #endif //SCAM_IFINDGLOBAL_H

@@ -15,11 +15,11 @@ namespace DESCAM {
 
         int getValue();
 
-        virtual std::string getValueAsString() const override;
+        std::string getValueAsString() const override;
 
-        virtual void accept(StmtAbstractVisitor &visitor);
+        void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
     private:
         int value;

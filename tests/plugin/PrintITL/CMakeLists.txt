@@ -1,0 +1,2 @@
+add_subdirectory(GMock_Tests)
+add_subdirectory(PrintITL_Tests)

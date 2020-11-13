@@ -1,1 +1,5 @@
-add_subdirectory(Logger)
+add_subdirectory(Logger_Tests)
+add_subdirectory(ExprTranslator_Tests)
+add_subdirectory(SimplifyVisitor_Tests)
+add_subdirectory(StmtNodeAlloc_Tests)
+add_subdirectory(ExprVisitor_Tests)

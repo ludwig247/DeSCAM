@@ -10,23 +10,14 @@
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "enums.h"
 #include "LocationInfo.h"
+#include "Module.h"
+#include "Port.h"
 
 class IFindPorts {
  public:
-  virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci) = 0;
-  //GETTER
-  virtual const std::map<std::string, std::string> &getInPortMap() const = 0;
-  virtual const std::map<std::string, std::string> &getOutPortMap() const = 0;
+  virtual ~IFindPorts() = default;
+  virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci, DESCAM::Module *module) = 0;
 
-  virtual const std::map<std::string, std::string> &getInSharedPortMap() const = 0;
-  virtual const std::map<std::string, std::string> &getOutSharedPortMap() const = 0;
-
-  virtual const std::map<std::string, std::string> &getMasterInPortMap() const = 0;
-  virtual const std::map<std::string, std::string> &getMasterOutPortMap() const = 0;
-
-  virtual const std::map<std::string, std::string> &getSlaveInPortMap() const = 0;
-  virtual const std::map<std::string, std::string> &getSlaveOutPortMap() const = 0;
-
-  virtual const std::map<std::string, DESCAM::LocationInfo> &getLocationInfoMap() const = 0;
+  virtual std::map<std::string, DESCAM::Port *> getPortMap() const = 0;
 };
 #endif //SCAM_SRC_MODELFACTORY_IFINDPORTS_H_

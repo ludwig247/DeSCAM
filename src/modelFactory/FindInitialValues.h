@@ -15,7 +15,6 @@
 #include "IFindInitialValues.h"
 #include "IFindDataFlow.h"
 
-
 namespace DESCAM {
 /**
  * \brief Visits the constructors of a sc_module in order to find inital values for members
@@ -25,21 +24,19 @@ namespace DESCAM {
  */
 class FindInitialValues : public IFindInitialValues, public clang::RecursiveASTVisitor<FindInitialValues> {
  public:
-  virtual ~FindInitialValues() = default;
-  FindInitialValues();
+  ~FindInitialValues() override = default;
+  explicit FindInitialValues(IFindDataFlowFactory *find_data_flow_factory);
 
-  void setup(clang::CXXRecordDecl *recordDecl,
+  bool setup(clang::CXXRecordDecl *recordDecl,
              clang::FieldDecl *fieldDecl,
              DESCAM::Module *module,
-             clang::CompilerInstance *ci,
-             IFindDataFlowFactory * find_data_flow_factory);
+             clang::CompilerInstance *ci) override;
 
   ConstValue *getInitValue() override;
   //Visitor
   bool VisitCXXConstructorDecl(clang::CXXConstructorDecl *constructorDecl);
  private:
-  void clean();
-  IFindDataFlowFactory * find_data_flow_factory_;
+  IFindDataFlowFactory *find_data_flow_factory_;
   clang::FieldDecl *field_decl_;
   ConstValue *init_value_;
   int pass_;

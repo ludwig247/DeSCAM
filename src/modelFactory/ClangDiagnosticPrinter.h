@@ -25,7 +25,7 @@ namespace clang {
         unsigned OwnsOutputStream : 1;
 
     public:
-        ClangDiagnosticPrinter(raw_ostream &os, DiagnosticOptions *diags,
+        ClangDiagnosticPrinter(raw_ostream &os, DiagnosticOptions *diagnostic_options,
                               bool OwnsOutputStream = false);
         ~ClangDiagnosticPrinter() override;
 
@@ -39,7 +39,7 @@ namespace clang {
         void HandleDiagnostic(DiagnosticsEngine::Level Level,
                               const Diagnostic &Info) override;
 
-        void addDiagnosticsToLogger(std::string string);
+        static void addDiagnosticsToLogger(const std::string& string);
     };
 
 }

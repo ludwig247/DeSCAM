@@ -2,6 +2,7 @@
 // Created by M.I.Alkoudsi on 17.09.19.
 //
 #include <Optimizer/Utilities/FindReadVariables.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "RangeAndBitwidthAnalysis.h"
 
 /*   Idea:
@@ -90,9 +91,8 @@ DESCAM::RangeAndBitWidthAnalysis::RangeAndBitWidthAnalysis(DESCAM::Module *modul
 
     //now check the write ports
     for (auto node : this->CFG) {
-        auto stmt = node.second->getStmt();
-        if (stmt) {
-            if (dynamic_cast<DESCAM::Write *>(stmt)) {
+        if (auto stmt = node.second->getStmt()) {
+            if (StmtCastVisitor<DESCAM::Write>(stmt).Get()) {
                 this->propagatedBitWidth = 0;
                 stmt->accept(*this);
             }
@@ -204,7 +204,7 @@ void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::EnumValue &node) {
 
 void DESCAM::RangeAndBitWidthAnalysis::visit(DESCAM::CompoundValue &node) {
     int bitwidth = 0;
-    for (auto val : node.getValues()) {
+    for (const auto& val : node.getValues()) {
         bitwidth += this->variableBitWidthMap.at(this->nameFullNameMap.at(val.first));
     }
     this->propagatedBitWidth = bitwidth;
