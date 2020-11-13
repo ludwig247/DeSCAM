@@ -11,67 +11,70 @@
 
 namespace DESCAM {
 
-    class Operation;
+class Operation;
 
-    class State {
-    public:
-        State() = delete;
-        explicit State(std::string name);
+class State {
+ public:
+  State() = delete;
+  explicit State(std::string name);
 
-        ~State() = default;
+  ~State() = default;
 
-        //GETTERS
-        int getStateId() const;
+  //GETTERS
+  int getStateId() const;
 
-        std::string getName() const;
+  std::string getName() const;
 
-        bool isInit() const;
+  bool isInit() const;
 
-        bool isWait() const;
+  bool isWait() const;
 
-        DESCAM::Port *getCommunicationPort() const;
+  DESCAM::Port *getCommunicationPort() const;
 
-        const std::vector<DESCAM::Operation *> &getOutgoingOperationsList() const;
+  const std::vector<DESCAM::Operation *> &getOutgoingOperationsList() const;
 
-        const std::vector<DESCAM::Operation *> &getIncomingOperationsList() const;
+  const std::vector<DESCAM::Operation *> &getIncomingOperationsList() const;
 
+  //SETTERS
+  void setName(std::string name);
 
-        //SETTERS
-        void setName(std::string name);
+  void setInit();
 
-        void setInit();
+  void setWait();
 
-        void setWait();
+  const LocationInfo &GetLocationInfo() const;
+  void SetLocationInfo(const LocationInfo &location_info);
 
-        void setCommunicationStmt(DESCAM::Communication *commStmt);
+  void setCommunicationStmt(DESCAM::Communication *commStmt);
 
-        //ADDERS
-        void addIncomingOperation(DESCAM::Operation *incomingOperation);
+  //ADDERS
+  void addIncomingOperation(DESCAM::Operation *incomingOperation);
 
-        void addOutgoingOperation(DESCAM::Operation *outgoingOperation);
+  void addOutgoingOperation(DESCAM::Operation *outgoingOperation);
 
-        //REMOVE
-        void removeIncomingOperation(DESCAM::Operation *incomingOperation);
+  //REMOVE
+  void removeIncomingOperation(DESCAM::Operation *incomingOperation);
 
-        void removeOutgoingOperation(DESCAM::Operation *outgoingOperation);
+  void removeOutgoingOperation(DESCAM::Operation *outgoingOperation);
 
-        //WAIT STATE
+  //WAIT STATE
 
-        //Print
-        std::string print() const;
+  //Print
+  std::string print() const;
 
-        static int state_cnt;
-    private:
-        int stateId;
-        std::string name;
-        bool init;
-        bool wait;
-        DESCAM::Communication *commStmt;    //! Stmt that is communication in this state
-        std::vector<DESCAM::Operation *> incomingOperationsList;
-        std::vector<DESCAM::Operation *> outgoingOperationsList;
-        std::vector<std::vector<DESCAM::Stmt *> > incomingFreezeSignals;
-        std::vector<std::vector<DESCAM::Stmt *> > outgoingAssignSignals;
-    };
+  static int state_cnt;
+ private:
+  int stateId;
+  std::string name;
+  bool init;
+  bool wait;
+  LocationInfo location_info_;
+  DESCAM::Communication *commStmt;    //! Stmt that is communication in this state
+  std::vector<DESCAM::Operation *> incomingOperationsList;
+  std::vector<DESCAM::Operation *> outgoingOperationsList;
+  std::vector<std::vector<DESCAM::Stmt *> > incomingFreezeSignals;
+  std::vector<std::vector<DESCAM::Stmt *> > outgoingAssignSignals;
+};
 
 }
 
