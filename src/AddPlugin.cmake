@@ -15,7 +15,7 @@ macro (add_plugin)
         #            MESSAGE(STATUS "add_plugin ${first_arg}")
         list(APPEND PLUGIN_NAMES ${first_arg})
         list(APPEND PLUGIN_DESCRIPTIONS ${second_arg})
-        list(APPEND PLUGIN_DIRECTORIES ${first_arg}) # defualt will be same as plugin name
+        list(APPEND PLUGIN_DIRECTORIES ${first_arg}) # default will be same as plugin name
     elseif(${num_macro_args} EQUAL 3)
         list(GET macro_args 0 first_arg)
         list(GET macro_args 1 second_arg)

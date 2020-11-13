@@ -5,26 +5,32 @@
 #include <clang/Lex/Lexer.h>
 #include <Logger/Logger.h>
 #include <GlobalUtilities.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "CreateInitSection2.h"
 #include "FatalError.h"
-#include "Logger/Logger.h"
 #include "CFGFactory.h"
 #include "IFindDataFlow.h"
 #include "FindDataFlowFactory.h"
+//TODO clean
+//#include "Logger/Logger.h"
 
 namespace DESCAM {
-CFGFactory::CFGFactory(clang::CXXMethodDecl *decl, clang::CompilerInstance *ci, Module *module, IFindDataFlowFactory *find_data_flow_factory, bool sourceModule) :
-    sourceModule(sourceModule),
+CFGFactory::CFGFactory(clang::CXXMethodDecl *decl,
+                       clang::CompilerInstance *ci,
+                       Module *module,
+                       IFindDataFlowFactory *find_data_flow_factory,
+                       bool sourceModule) :
+    source_module_(sourceModule),
     methodDecl(decl),
-    ci(ci),
-    module(module),
-    find_data_flow_factory_(find_data_flow_factory){
+    ci_(ci),
+    module_(module),
+    find_data_flow_factory_(find_data_flow_factory) {
 
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-  clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci->getASTContext(),
-                                  b);
-  if (clangCFG == nullptr) {
+  clang_cfg_ =
+      clang::CFG::buildCFG(llvm::cast<clang::Decl>(methodDecl), methodDecl->getBody(), &ci->getASTContext(), b);
+  if (clang_cfg_ == nullptr) {
     llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
     return;
   }
@@ -37,11 +43,11 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
                        IFindDataFlowFactory *find_data_flow_factory,
                        bool sourceModule) :
 
-    sourceModule(sourceModule),
+    source_module_(sourceModule),
     methodDecl(nullptr),
-    ci(ci),
-    module(module),
-    find_data_flow_factory_(find_data_flow_factory){
+    ci_(ci),
+    module_(module),
+    find_data_flow_factory_(find_data_flow_factory) {
 
   clang::LangOptions LO;
   LO.CPlusPlus = true;
@@ -50,9 +56,9 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
   //TODO: remove ci and methodDecl from class
   //Create Control flow graph(blockCFG)
   clang::CFG::BuildOptions b = clang::CFG::BuildOptions();
-  clangCFG = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(),
-                                  &functionDecl->getASTContext(), b);
-  if (clangCFG == nullptr) {
+  clang_cfg_ = clang::CFG::buildCFG(llvm::cast<clang::Decl>(functionDecl), functionDecl->getBody(),
+                                    &functionDecl->getASTContext(), b);
+  if (clang_cfg_ == nullptr) {
     llvm::errs() << "-E- CFGFactory::translateToScamCFG():  clangCFG is null";
     return;
   }
@@ -66,26 +72,26 @@ CFGFactory::CFGFactory(const clang::FunctionDecl *functionDecl,
  * \brief Generates an simple blockCFG for a given clang::blockCFG
  *
  * 1)Find entry point in blockCFG(block w/o predecessors)
- * 2)Traverse every sucessor of current block
+ * 2)Traverse every successor of current block
  */
 void CFGFactory::translateToScamCFG() {
 
-  clang::CFGBlock *entryCFGBlock = &clangCFG->getEntry();
+  clang::CFGBlock *entryCFGBlock = &clang_cfg_->getEntry();
 
   //Translate entry node of block
   CfgBlock *entryNode = this->createCFGNode(entryCFGBlock, nullptr);
 
-  if (sourceModule) {
+  if (source_module_) {
     //Init Block
     auto initBlock = new DESCAM::CfgBlock();
-    initBlock->setBlockID(this->controlFlowMap.size());
-    std::vector<DESCAM::Stmt *> initList = DESCAM::CreateInitSection2::createInitSection2(module);
+    initBlock->setBlockID(this->control_flow_map_.size());
+    std::vector<DESCAM::Stmt *> initList = DESCAM::CreateInitSection2::createInitSection2(module_);
     for (auto stmt:initList) {
       initBlock->addStmt(stmt);
     }
     entryNode->addSuccessor(initBlock);
     initBlock->addPredecessor(entryNode);
-    this->controlFlowMap.insert(std::make_pair(initBlock->getBlockID(), initBlock));
+    this->control_flow_map_.insert(std::make_pair(initBlock->getBlockID(), initBlock));
 
     //Walk over each statement of the CFGBlock
     this->traverseBlocks(*entryCFGBlock->succ_begin(), initBlock);
@@ -100,37 +106,37 @@ void CFGFactory::translateToScamCFG() {
 
 //! Iterates over each statement of a block and create DESCAM::Stmts*
 CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *parent) {
-  if (entryMap.find(block->getBlockID()) != entryMap.end()) {
-    int scamBlockId = entryMap.find(block->getBlockID())->second;
+  if (entry_map_.find(block->getBlockID()) != entry_map_.end()) {
+    int scamBlockId = entry_map_.find(block->getBlockID())->second;
     for (auto succ : parent->getSuccessorList()) {
       if (succ->getBlockID() == scamBlockId) {
-        return this->controlFlowMap.at(entryMap.find(block->getBlockID())->second);
+        return this->control_flow_map_.at(entry_map_.find(block->getBlockID())->second);
       }
     }
-    parent->addSuccessor(this->controlFlowMap.at(scamBlockId));
-    return this->controlFlowMap.at(entryMap.find(block->getBlockID())->second);
+    parent->addSuccessor(this->control_flow_map_.at(scamBlockId));
+    return this->control_flow_map_.at(entry_map_.find(block->getBlockID())->second);
   }
-  //Get clean statementlist -> remove all nested statements
-  std::vector<clang::Stmt *> statementList = this->getCleanStmtList(block);
+  //Get clean statement_list -> remove all nested statements
+  std::vector<clang::Stmt *> statementList = DESCAM::CFGFactory::getCleanStmtList(block);
 
   //Create empty cfgNode
   auto cfgNode = new CfgBlock(-1, block->getBlockID());
-  //Translate CLANG::Stms to DESCAM:Stmts and add to node
+  //Translate CLANG::Stmts to DESCAM:Stmts and add to node
   for (auto clangStmt: statementList) {
-    DESCAM::Stmt *scamStmt = this->getScamStmt(clangStmt);
+    DESCAM::Stmt *scam_stmt = this->getScamStmt(clangStmt);
     //Check that the stmt is not null and the statement is not an Expr*
-    //In case of an Expr* skips the statement, because the statementlist should only contain Statements
-    if (scamStmt != nullptr && dynamic_cast<Expr *>(scamStmt) == nullptr) {
+    //In case of an Expr* skips the statement, because the statement_list should only contain Statements
+    if (scam_stmt != nullptr && StmtCastVisitor<Expr>(scam_stmt).Get() == nullptr) {
       cfgNode->addStmt(this->getScamStmt(clangStmt));
     }
   }
 
-  //Set terminator for codelbock
+  //Set terminator for code block
   //Check if Terminator is a branch or just a nested  boolean statement
   ////If CFGBlock has a terminator -> assign to last node in nodeList
   if (block->getTerminator().getStmt() != nullptr) {
-    if (block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::IfStmtClass ||
-        block->getTerminator()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass) {
+    if (block->getTerminatorStmt()->getStmtClass() == clang::Stmt::StmtClass::IfStmtClass ||
+        block->getTerminatorStmt()->getStmtClass() == clang::Stmt::StmtClass::WhileStmtClass) {
       //Translate clang::Stmts to DESCAM::Stmts
       DESCAM::Stmt *terminator = this->getScamStmt(block->getTerminator().getStmt());
 
@@ -142,7 +148,7 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
         //block->dump(clangCFG, LO, false);
         //block->getTerminator().getStmt()->dump();
         //std::string location = ci.getSourceManager().getFilename(block->getTerminator()->getLocStart());
-        std::string location = block->getTerminator()->getLocStart().printToString(ci->getSourceManager());
+        std::string location = block->getTerminatorStmt()->getBeginLoc().printToString(ci_->getSourceManager());
         std::string errorMsg = "Error: " + location + "\n";
         errorMsg += "\tProblem with an terminator (if,while, else if) statement.\n";
         errorMsg += "\tMake sure only SystemC-PPA valid statements are used.\n";
@@ -152,15 +158,15 @@ CfgBlock *CFGFactory::createCFGNode(clang::CFGBlock *block, DESCAM::CfgBlock *pa
   }
 
   //Assign unique ID for each node
-  int blockID = this->controlFlowMap.size();
+  int blockID = this->control_flow_map_.size();
   cfgNode->setBlockID(blockID);
   //
   //Initial case: do not add parent ->
   if (parent != nullptr) parent->addSuccessor(cfgNode);
 
-  //Defines a pair <CFGBlockID,SuspensionCFBlockID> connectig a cfgBlock to a supensionBlock. Neededv in case cfgBlock is split
-  this->entryMap.insert(std::make_pair(block->getBlockID(), cfgNode->getBlockID()));
-  this->controlFlowMap.insert(std::make_pair(blockID, cfgNode));
+  //Defines a pair <CFGBlockID,SuspensionCFBlockID> connecting a cfgBlock to a suspension Block. Needed in case cfgBlock is split
+  this->entry_map_.insert(std::make_pair(block->getBlockID(), cfgNode->getBlockID()));
+  this->control_flow_map_.insert(std::make_pair(blockID, cfgNode));
 
   return cfgNode;
 }
@@ -169,10 +175,10 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
   assert(block->succ_size() <= 2);
   assert(block != nullptr);
 
-  //Terminalcase: Block already visited over this path
-  if (entryMap.find(block->getBlockID()) != entryMap.end()) {
+  //Terminal case: Block already visited over this path
+  if (entry_map_.find(block->getBlockID()) != entry_map_.end()) {
     for (auto succ: parent->getSuccessorList()) {
-      if (entryMap.find(block->getBlockID())->second == succ->getBlockID()) {
+      if (entry_map_.find(block->getBlockID())->second == succ->getBlockID()) {
         return;
       }
     }
@@ -183,18 +189,19 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
   if (block->succ_size() == 1) {
     //Block not visited iterate statements and add suspensionNodes to graph
     CfgBlock *cfgNode = this->createCFGNode(block, parent);
-    //First node in List is succesor of parent
+    //TODO clean
+    //First node in List is successor of parent
     //Visit successorBlock -> no terminal exactly 1 successor
-    clang::CFGBlock *successorBlock = *block->succ_begin();
+//    clang::CFGBlock *successorBlock = *block->succ_begin();
     this->traverseBlocks(*block->succ_begin(), cfgNode);
   }
-  //Case: two succesors:
-  //1: while(trueSucc, null)
+  //Case: two successors:
+  //1: while(true_succ, null)
   //2: block.terminator is not an if -> multiple conditions in an IF
   //3. block.terminator is an if
   // Complexity is coming from the way LLVM represent the blockCFG. An IF(a&&b&&c) is represented with two blocks.
-  // The first block will have a terminator with only a&&b and the true succesor of that block
-  // is if(a&&b&&c) the false sucessors of that block points to whatever is after the if.
+  // The first block will have a terminator with only a&&b and the true successor of that block
+  // is if(a&&b&&c) the false successors of that block points to whatever is after the if.
   // This requires finding of the if in the tree.
   if (block->succ_size() == 2) {
     auto succ_it_true = block->succ_begin();
@@ -205,7 +212,7 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
       if (*succ_it_true != nullptr && *succ_it_false == nullptr) {
         CfgBlock *cfgNode = this->createCFGNode(block, parent);
         traverseBlocks(*succ_it_true, cfgNode);
-      } else TERMINATE("Only 1 while(true) for thread-loop allowed! No other while stmts");
+      } else TERMINATE("Only 1 while(true) for thread-loop allowed! No other while stmts")
 
     }
       //Case 2: Branching with complex if: e.g. (a&&b) -> terminator that is not an ifStmtClass
@@ -213,52 +220,52 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
     else if (block->getTerminator().getStmt()->getStmtClass() != clang::Stmt::IfStmtClass) {
       //True successor of block:
       if (*succ_it_true != nullptr && *succ_it_false != nullptr) {
-        clang::CFGBlock *trueSucc = *succ_it_true;
-        clang::CFGBlock *falseSucc = *succ_it_false;
+        clang::CFGBlock *true_succ = *succ_it_true;
+        clang::CFGBlock *false_succ = *succ_it_false;
         CfgBlock *cfgNode = this->createCFGNode(block, parent);
-        //If both successors are not null, search for the sucessor containing the hole "if" ignore others
-        if (trueSucc->getTerminator().getStmt() != nullptr &&
-            falseSucc->getTerminator().getStmt() != nullptr) {
-          clang::Stmt *trueStmt = trueSucc->getTerminator().getStmt();
-          clang::Stmt *falseStmt = falseSucc->getTerminator().getStmt();
+        //If both successors are not null, search for the successor containing the hole "if" ignore others
+        if (true_succ->getTerminator().getStmt() != nullptr &&
+            false_succ->getTerminator().getStmt() != nullptr) {
+          clang::Stmt *trueStmt = true_succ->getTerminator().getStmt();
+          clang::Stmt *falseStmt = false_succ->getTerminator().getStmt();
           if (trueStmt->getStmtClass() != clang::Stmt::IfStmtClass &&
               falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
-            traverseBlocks(trueSucc, cfgNode);
-          } else if (trueStmt->getStmtClass() == clang::Stmt::IfStmtClass &&
-              falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
-            if (this->exprContainedInIf(block, trueSucc)) traverseBlocks(trueSucc, cfgNode);
-            else traverseBlocks(falseSucc, cfgNode);
+            traverseBlocks(true_succ, cfgNode);
+          } else if (
+              trueStmt->getStmtClass() == clang::Stmt::IfStmtClass
+                  && falseStmt->getStmtClass() != clang::Stmt::IfStmtClass) {
+            if (DESCAM::CFGFactory::exprContainedInIf(block, true_succ)) traverseBlocks(true_succ, cfgNode);
+            else traverseBlocks(false_succ, cfgNode);
           } else if (trueStmt->getStmtClass() != clang::Stmt::IfStmtClass &&
               falseStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
-            if (this->exprContainedInIf(block, falseSucc)) traverseBlocks(falseSucc, cfgNode);
-            else traverseBlocks(trueSucc, cfgNode);
-          } else if (trueStmt->getStmtClass() == clang::Stmt::IfStmtClass &&
-              falseStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
-            if (this->exprContainedInIf(block, trueSucc)) traverseBlocks(trueSucc, cfgNode);
-            else traverseBlocks(falseSucc, cfgNode);
-          } else TERMINATE("Missed case here");
+            if (DESCAM::CFGFactory::exprContainedInIf(block, false_succ)) traverseBlocks(false_succ, cfgNode);
+            else traverseBlocks(true_succ, cfgNode);
+          } else if (trueStmt->getStmtClass() == clang::Stmt::IfStmtClass &&              falseStmt->getStmtClass() == clang::Stmt::IfStmtClass) {
+            if (DESCAM::CFGFactory::exprContainedInIf(block, true_succ)) traverseBlocks(true_succ, cfgNode);
+            else traverseBlocks(false_succ, cfgNode);
+          } else TERMINATE("Missed case here")
         }
-          // If one of the succesors is null visit the otherone
-        else if (trueSucc->getTerminator().getStmt() != nullptr &&
-            falseSucc->getTerminator().getStmt() == nullptr) {
-          traverseBlocks(trueSucc, cfgNode);
-        } else if (trueSucc->getTerminator().getStmt() == nullptr &&
-            falseSucc->getTerminator().getStmt() != nullptr) {
-          traverseBlocks(falseSucc, cfgNode);
-          //Both succeors have no terminators:
+          // If one of the successors is null visit the other one
+        else if (true_succ->getTerminator().getStmt() != nullptr &&
+            false_succ->getTerminator().getStmt() == nullptr) {
+          traverseBlocks(true_succ, cfgNode);
+        } else if (true_succ->getTerminator().getStmt() == nullptr &&
+            false_succ->getTerminator().getStmt() != nullptr) {
+          traverseBlocks(false_succ, cfgNode);
+          //Both successors have no terminators:
         } else {
           //ConditionalOperator x = cond ? trueVal : falseVal
           if (block->getTerminator().getStmt()->getStmtClass() == clang::Stmt::ConditionalOperatorClass) {
             //Jump over conditional expressions
-            traverseBlocks(trueSucc, cfgNode);
+            traverseBlocks(true_succ, cfgNode);
           } else {
-            std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this acutally valid?
-            //trueSucc->dump(clangCFG, {}, true);
+            std::cout << "-W- Please check AML for correct translation" << std::endl; //TODO: is this actually valid?
+            true_succ->dump(clang_cfg_.get(), {}, true);
           }
-          //TERMINATE(std::to_string(block->getBlockID()) + ": true & fals succesors have no terminator");
+          //TERMINATE(std::to_string(block->getBlockID()) + ": true & false successors have no terminator");
         }
 
-      } else TERMINATE("Succ true or false == null");
+      } else TERMINATE("Successor true or false == null")
     }
       //Case 3: Regular block with terminator if: e.g. (a&&b) -> terminator that is not an ifStmtClass
       //Is dealt with two blocks, only visit successor that contains the if
@@ -278,22 +285,28 @@ void CFGFactory::traverseBlocks(clang::CFGBlock *block, CfgBlock *parent) {
 /*!
  * \brief Returns a list without nested stmts
  *
- * * Clean statements from statementlist that are nested in other statements[-> HACKY]
+ * * Clean statements from statement_list that are nested in other statements[-> HACKY]
     * Compare SourceLocation of current Stmt with next Stmt in list -> if overlap: delete
     * E.g.:
     * this->set_port[delete]
-    * this->set_port->read()[delte]
+    * this->set_port->read()[delete]
     * this->reset = this->set_port->read()[keep]
  */
 std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) {
-  //Get orignal statement list from block
+  //Get original statement list from block
   std::vector<clang::Stmt *> stmtList;
-  for (clang::CFGBlock::const_iterator bit = block->begin(), bite = block->end(); bit != bite; bit++) {
-    if (clang::Optional<clang::CFGStmt> cs = bit->getAs<clang::CFGStmt>()) {
-      clang::CFGStmt *s = const_cast<clang::CFGStmt *>((clang::CFGStmt const *) &cs);
-      clang::Stmt *stmt = const_cast<clang::Stmt *>(s->getStmt());
+//  TODO clean
+//  for (clang::CFGBlock::const_iterator bit = block->begin(), bite = block->end(); bit != bite; bit++) {
+//    if (clang::Optional<clang::CFGStmt> cs = bit->getAs<clang::CFGStmt>()) {
+//      clang::CFGStmt *s = const_cast<clang::CFGStmt *>((clang::CFGStmt const *) &cs);
+//      clang::Stmt *stmt = const_cast<clang::Stmt *>(s->getStmt());
+//      stmtList.push_back(stmt);
+//    }
+  for (auto bit : *block) {
+    if (clang::Optional<clang::CFGStmt> cs = bit.getAs<clang::CFGStmt>()) {
+      auto *s = const_cast<clang::CFGStmt *>((clang::CFGStmt const *) &cs);
+      auto *stmt = const_cast<clang::Stmt *>(s->getStmt());
       stmtList.push_back(stmt);
-
     }
   }
   //Only add stmts that are not nested to new list
@@ -303,45 +316,45 @@ std::vector<clang::Stmt *> CFGFactory::getCleanStmtList(clang::CFGBlock *block) 
     //Out of bounds?
     if (i < stmtList.size() - 1) {
       clang::Stmt *stmtNext = stmtList.at(i + 1);
-      if (stmt->getLocStart().getRawEncoding() == stmt->getLocEnd().getRawEncoding()) {
+      if (stmt->getBeginLoc().getRawEncoding() == stmt->getEndLoc().getRawEncoding()) {
         continue;
       }
-      if (stmt->getLocStart().getRawEncoding() >= stmtNext->getLocStart().getRawEncoding()) {
+      if (stmt->getBeginLoc().getRawEncoding() >= stmtNext->getEndLoc().getRawEncoding()) {
         continue;
       }
     }
-    //IF: Terminator in block: Check last element of statementlist -> might belong to terminator
+    //IF: Terminator in block: Check last element of statement_list -> might belong to terminator
     if (i == stmtList.size() - 1) {
       if (block->getTerminator().getStmt() != nullptr) {
-        if (stmt->getLocStart().getRawEncoding() >=
-            block->getTerminator().getStmt()->getLocStart().getRawEncoding()) {
+        if (stmt->getBeginLoc().getRawEncoding() >=
+            block->getTerminator().getStmt()->getEndLoc().getRawEncoding()) {
           continue;
         }
       }
     }
-    //Incase statement is not a netsted statement add to statementlist
+    //In case statement is not a nested statement add to statement_list
     newStatementList.push_back(stmt);
 
   }
   return newStatementList;
-};
+}
 
 //! Methods that translates a Clang::Stmt into a DESCAM::Stmt
 DESCAM::Stmt *CFGFactory::getScamStmt(clang::Stmt *clangStmt) {
   // traverse clang stmt and create its equivalent descam stmt
-  auto dataFlow = find_data_flow_factory_->create_new(clangStmt, module, ci, find_data_flow_factory_, false);
+  auto dataFlow = find_data_flow_factory_->create_new(clangStmt, module_, ci_, false);
   return dataFlow->getStmt();
 }
 
 /*!
- * \brief Iterate over each block, if stmts-list && termintor is emtpy -> remove block  and adjust succ&preds
+ * \brief Iterate over each block, if stmts-list && terminator is emtpy -> remove block and adjust successors & predecessors
  *
  * This happens in case of a if(a&&b) or if(a||b) which is a block with an terminator that contains a as terminator but no if
  * That creates a block with no stmts, no terminator and 2 successors, which needs to be deleted
 
     */
 void CFGFactory::cleanEmptyBlocks() {
-  for (auto it = this->controlFlowMap.cbegin(); it != this->controlFlowMap.cend();) {
+  for (auto it = this->control_flow_map_.cbegin(); it != this->control_flow_map_.cend();) {
     auto currentBlock = (*it).second;
     bool terminator = currentBlock->hasTerminator();
     bool stmts = currentBlock->getStmtList().empty();
@@ -361,9 +374,9 @@ void CFGFactory::cleanEmptyBlocks() {
         succ = currentBlock->getSuccessorList()[1];
       } else {
         std::cout << currentBlock->print() << std::endl;
-        TERMINATE("Empty block with 2 successors, that can't be deleted");
+        TERMINATE("Empty block with 2 successors, that can't be deleted")
       }
-      //Replace currentBlock as succesor in predecessors with new successor
+      //Replace currentBlock as successor in predecessors with new successor
       for (auto pred: currentBlock->getPredecessorList()) {
         pred->replaceSuccessor(currentBlock, succ);
       }
@@ -378,7 +391,7 @@ void CFGFactory::cleanEmptyBlocks() {
       }
 
       // All connections to currentBlock redirected -> remove from susCFG
-      this->controlFlowMap.erase(it++);
+      this->control_flow_map_.erase(it++);
 
     } else ++it;
 
@@ -387,17 +400,17 @@ void CFGFactory::cleanEmptyBlocks() {
 }
 
 const std::map<int, CfgBlock *> &CFGFactory::getControlFlowMap() const {
-  return controlFlowMap;
+  return control_flow_map_;
 }
 
 std::string CFGFactory::print() {
 
   std::stringstream ss;
-  for (auto node: this->controlFlowMap) {
+  for (auto node: this->control_flow_map_) {
     CfgBlock *sus = node.second;
 
     ss << "[ID" << node.first << "] [B" << sus->getClangBlockID() << "]" << "\n";
-    ss << "\tStmntList: " << sus->getStmtList().size() << "\n";
+    ss << "\tStatementList: " << sus->getStmtList().size() << "\n";
 
     for (auto stmt: sus->getStmtList()) {
       ss << "\t\t" << PrintStmt::toString(stmt) << "\n";
@@ -409,12 +422,12 @@ std::string CFGFactory::print() {
       ss << PrintStmt::toString(node.second->getTerminator()) << "\n";
     }
 
-    ss << "\t\tPred: ";
+    ss << "\t\tPredecessor: ";
     for (auto pred: sus->getPredecessorList()) {
       ss << "[ID" << pred->getBlockID() << "], ";
     }
-    ss << "\n";;
-    ss << "\t\tSucc: ";
+    ss << "\n";
+    ss << "\t\tSuccessor: ";
     for (auto succ: sus->getSuccessorList()) {
       ss << "[ID" << succ->getBlockID() << "], ";
     }
@@ -423,7 +436,7 @@ std::string CFGFactory::print() {
   return ss.str();
 }
 
-//!Start and End of the inner statemtns must lie within the start end of the outer statements
+//!Start and End of the inner statements must lie within the start end of the outer statements
 bool CFGFactory::exprContainedInIf(clang::CFGBlock *inner, clang::CFGBlock *outer) {
 
   assert(inner != nullptr);

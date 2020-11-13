@@ -45,22 +45,22 @@ namespace DESCAM {
 
         inline void setMessage(const std::string &message);
 
-        inline void setLocationInfo(const DESCAM::LocationInfo &stmtInfo);
+        inline void setLocationInfo(const DESCAM::LocationInfo &stmt_info);
 
-        inline void setViolationType(ViolationType violationType);
+        inline void setViolationType(ViolationType violation_type);
 
-        inline void setSeverityLevel(SeverityLevel severityLevel);
+        inline void setSeverityLevel(SeverityLevel severity_level);
 
         inline void setProcessedLocation(ProcessedLocation location);
 
         bool operator==(const LoggerMsg &other) const;
 
     protected:
-        std::string message = "";
-        DESCAM::LocationInfo locationInfo;
-        ViolationType violationType = ViolationType::NA;
-        SeverityLevel severityLevel = SeverityLevel::Info;
-        ProcessedLocation processedLocation = ProcessedLocation::Behavior;
+        std::string message_ = "";
+        DESCAM::LocationInfo location_info_;
+        ViolationType violation_type_ = ViolationType::NA;
+        SeverityLevel severity_level_ = SeverityLevel::Info;
+        ProcessedLocation processed_location_ = ProcessedLocation::Behavior;
 
     };
 }

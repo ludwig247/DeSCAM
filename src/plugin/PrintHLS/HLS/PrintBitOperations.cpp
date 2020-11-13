@@ -5,6 +5,7 @@
 #include "PrintBitOperations.h"
 
 #include <set>
+#include <Stmts/StmtCastVisitor.h>
 
 #include "NodePeekVisitor.h"
 
@@ -154,7 +155,7 @@ bool PrintBitOperations::slicing(Node *node) {
     return sliceWithShift(node) || sliceWithoutShift(node) || shiftWithConstant(node);
 }
 
-uint32_t PrintBitOperations::getRangeAsValue() {
+uint32_t PrintBitOperations::getRangeAsValue() const {
     return rangeValue;
 }
 
@@ -360,18 +361,18 @@ bool BitConcatenation::evaluateOps(Bitwise* node) {
     }
 
     bool bitConcatenation = true;
-    if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
+    if (auto bitwise = StmtCastVisitor<Bitwise>(node->getRhs()).Get()) {
         auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs(), hlsOption, optimizer);
         if (!bitSlicingRHS->isSlicingOp()) {
-            bitConcatenation = evaluateOps(dynamic_cast<Bitwise* >(node->getRhs()));
+            bitConcatenation = evaluateOps(bitwise);
         }
     } else if (!isConstValue(node->getRhs())) {
         return false;
     }
-    if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
+    if (auto bitwise = StmtCastVisitor<Bitwise>(node->getLhs()).Get()) {
         auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs(), hlsOption, optimizer);
         if (!bitSlicingLHS->isSlicingOp()) {
-            bitConcatenation &= evaluateOps(dynamic_cast<Bitwise* >(node->getLhs()));
+            bitConcatenation &= evaluateOps(bitwise);
         }
     } else if (!isConstValue(node->getLhs())) {
         return false;
@@ -387,28 +388,27 @@ bool BitConcatenation::isConstValue(Expr *node) {
     if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
         return true;
     }
-    if (NodePeekVisitor::nodePeekCast(node)) {
-        auto castNode = dynamic_cast<Cast* >(node);
-        return isConstValue(castNode->getSubExpr());
+    if (auto cast = StmtCastVisitor<Cast>(node).Get()) {
+        return isConstValue(cast->getSubExpr());
     }
     return false;
 }
 
 void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
-    if (NodePeekVisitor::nodePeekBitwise(node->getRhs())) {
+    if (auto bitwise = StmtCastVisitor<Bitwise>(node->getRhs()).Get()) {
         auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs(), hlsOption, optimizer);
         if (!bitSlicingRHS->isSlicingOp()) {
-            getBitConcatenationOp(dynamic_cast<Bitwise * >(node->getRhs()));
+            getBitConcatenationOp(bitwise);
         } else {
             bitSlicingOps.emplace_back(std::move(bitSlicingRHS));
         }
     } else if (isConstValue(node->getRhs())) {
         constValue = constValue | getConstValue(node->getRhs());
     }
-    if (NodePeekVisitor::nodePeekBitwise(node->getLhs())) {
+    if (auto bitwise = StmtCastVisitor<Bitwise>(node->getLhs()).Get()) {
         auto bitSlicingLHS = std::make_unique<PrintBitOperations>(node->getLhs(), hlsOption, optimizer);
         if (!bitSlicingLHS->isSlicingOp()) {
-            getBitConcatenationOp(dynamic_cast<Bitwise* >(node->getLhs()));
+            getBitConcatenationOp(bitwise);
         } else {
             bitSlicingOps.emplace_back(std::move(bitSlicingLHS));
         }
@@ -418,14 +418,13 @@ void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
 }
 
 uint32_t BitConcatenation::getConstValue(Expr *node) {
-    if (NodePeekVisitor::nodePeekIntegerValue(node)) {
-        return (dynamic_cast<IntegerValue* >(node)->getValue());
+    if (auto value = StmtCastVisitor<IntegerValue>(node).Get()->getValue()) {
+        return value;
     }
-    if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
-        return (dynamic_cast<UnsignedValue* >(node)->getValue());
+    if (auto value = StmtCastVisitor<UnsignedValue>(node).Get()->getValue()) {
+        return value;
     }
-    auto castNode = dynamic_cast<Cast* >(node);
-    return getConstValue(castNode->getSubExpr());
+    return getConstValue(StmtCastVisitor<Cast>(node).Get()->getSubExpr());
 }
 
 void BitConcatenation::setOpAsString() {

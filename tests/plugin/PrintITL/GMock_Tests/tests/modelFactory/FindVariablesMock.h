@@ -1,0 +1,148 @@
+//
+// Created by burr on 21.10.20.
+//
+
+#ifndef SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDVARIABLESMOCK_H_
+#define SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDVARIABLESMOCK_H_
+
+#include "modelFactory/MockIFindVariables.h"
+
+TEST(TestCase1, FindVariables_mocked) /* NOLINT*/{
+  using testing::Return;
+  DataTypes::reset();
+
+  std::map<std::string, DESCAM::Variable *> find_variables_map;
+  DESCAM::IntegerValue integer_value(1337);
+  Variable var1("var", integer_value.getDataType(), &integer_value);
+  find_variables_map.insert(std::make_pair("var", &var1));
+
+  DESCAM::MOCK::MockIFindVariables find_variables;
+  EXPECT_CALL(find_variables, setup(_, _, _))
+      .Times(1);
+  EXPECT_CALL(find_variables, getVariableMap())
+      .Times(1)
+      .WillOnce(Return(find_variables_map));
+
+  //Compositional root
+  std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
+  std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
+  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+  std::unique_ptr<IFindDataFlowFactory>
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+  std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(find_data_flow_factory.get());
+  std::unique_ptr<IFindInitialValues>
+      find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
+  std::unique_ptr<IFindFunctions>
+      find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
+  std::unique_ptr<IFindModules> find_modules =
+      std::make_unique<FindModules>(&find_variables, find_ports.get(), find_functions.get(), find_process.get());
+  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>(find_data_flow_factory.get());
+
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_global.get(),
+      find_instances.get());
+
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase1", model_factory);
+}
+
+TEST(TestCase2, FindVariables_mocked) /* NOLINT*/{
+  using ::testing::Return;
+  DataTypes::reset();
+
+  std::map<std::string, DESCAM::Variable *> find_variables_map;
+  std::string name1 = "bar";
+  std::string name2 = "foo";
+  DESCAM::UnsignedValue val1(0);
+  DESCAM::IntegerValue val2(0);
+  Variable var1(name1, val1.getDataType(), &val1);
+  Variable var2(name2, val2.getDataType(), &val2);
+
+  find_variables_map.insert(std::make_pair(name1, &var1));
+  find_variables_map.insert(std::make_pair(name2, &var2));
+
+  DESCAM::MOCK::MockIFindVariables find_variables;
+  EXPECT_CALL(find_variables, setup(_, _, _))
+      .Times(1);
+  EXPECT_CALL(find_variables, getVariableMap())
+      .Times(1)
+      .WillOnce(Return(find_variables_map));
+
+  //Compositional root
+  std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
+  std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
+  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+  std::unique_ptr<IFindDataFlowFactory>
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+  std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(find_data_flow_factory.get());
+  std::unique_ptr<IFindInitialValues>
+      find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
+  std::unique_ptr<IFindFunctions>
+      find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
+  std::unique_ptr<IFindModules> find_modules =
+      std::make_unique<FindModules>(&find_variables, find_ports.get(), find_functions.get(), find_process.get());
+  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>(find_data_flow_factory.get());
+
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_global.get(),
+      find_instances.get());
+
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase2", model_factory);
+}
+
+TEST(TestCase3, FindVariables_mocked) /* NOLINT*/{
+  using ::testing::Return;
+  DataTypes::reset();
+
+  std::map<std::string, DESCAM::Variable *> find_variables_map;
+  std::string name1 = "bar";
+  std::string name2 = "foo";
+  std::string name3 = "list";
+  DESCAM::UnsignedValue val1(0);
+  DESCAM::IntegerValue val2(0);
+  DataType type3("unsigned_5");
+  type3.addArray(DataTypes::getDataType("unsigned"), 5);
+
+  Variable var1(name1, val1.getDataType(), &val1);
+  Variable var2(name2, val2.getDataType(), &val2);
+  Variable var3(name3, &type3);
+
+  find_variables_map.insert(std::make_pair(name1, &var1));
+  find_variables_map.insert(std::make_pair(name2, &var2));
+  find_variables_map.insert(std::make_pair(name3, &var3));
+
+  DESCAM::MOCK::MockIFindVariables find_variables;
+  EXPECT_CALL(find_variables, setup(_, _, _))
+      .Times(1);
+  EXPECT_CALL(find_variables, getVariableMap())
+      .Times(1)
+      .WillOnce(Return(find_variables_map));
+
+  //Compositional root
+  std::unique_ptr<IFindNewDatatype> find_new_datatype = std::make_unique<FindNewDatatype>();
+  std::unique_ptr<IFindPorts> find_ports = std::make_unique<FindPorts>(find_new_datatype.get());
+  std::unique_ptr<IFindInstances> find_instances = std::make_unique<FindInstances>();
+  std::unique_ptr<IFindStateName> find_state_name = std::make_unique<FindStateName>();
+  std::unique_ptr<IFindDataFlowFactory>
+      find_data_flow_factory = std::make_unique<FindDataFlowFactory>(find_state_name.get());
+  std::unique_ptr<IFindProcess> find_process = std::make_unique<FindProcess>(find_data_flow_factory.get());
+  std::unique_ptr<IFindInitialValues>
+      find_initial_values = std::make_unique<FindInitialValues>(find_data_flow_factory.get());
+  std::unique_ptr<IFindFunctions>
+      find_functions = std::make_unique<FindFunctions>(find_new_datatype.get(), find_data_flow_factory.get());
+  std::unique_ptr<IFindModules> find_modules =
+      std::make_unique<FindModules>(&find_variables, find_ports.get(), find_functions.get(), find_process.get());
+  std::unique_ptr<IFindGlobal> find_global = std::make_unique<FindGlobal>(find_data_flow_factory.get());
+
+  auto model_factory = new ModelFactory(
+      find_modules.get(),
+      find_global.get(),
+      find_instances.get());
+
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase3", model_factory);
+}
+
+#endif //SCAM_TESTS_GMOCK_TEST_TESTS_MODELFACTORY_FINDVARIABLESMOCK_H_

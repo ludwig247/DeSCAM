@@ -30,7 +30,7 @@ namespace DESCAM { namespace HLSPlugin { namespace HLS {
 
             bool isSlicingOp();
             std::string getOpAsString();
-            uint32_t getRangeAsValue();
+            uint32_t getRangeAsValue() const;
 
         private:
             std::shared_ptr<Node> actualNode;

@@ -35,7 +35,8 @@ DESCAM::DataType *FindNewDatatype::getDataType(const clang::QualType &type) {
   } else if (type->isStructureType()) {
     auto record_decl = type->getAsCXXRecordDecl();
 
-    GetClangVariables clang_variables(record_decl);
+    bool success = true;
+    GetClangVariables clang_variables(success, record_decl);
 
     //Create new dataType
     new_type = new DataType(record_decl->getName().str());
@@ -72,7 +73,7 @@ std::string FindNewDatatype::getTypeName(const clang::QualType &type) {
     else TERMINATE("Built-in type: " + type_name + " is not allowed!");
   } else if (type->isEnumeralType()) {
     const clang::EnumType *enumType = type->getAs<clang::EnumType>();
-    return enumType->getDecl()->getName();
+    return enumType->getDecl()->getName().str();
   } else if (type->isStructureType()) {
     return type->getAsCXXRecordDecl()->getName().str();
   } else if (type->isConstantArrayType()) {

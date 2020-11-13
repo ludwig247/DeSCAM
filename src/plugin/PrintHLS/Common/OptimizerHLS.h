@@ -49,7 +49,7 @@ namespace DESCAM { namespace HLSPlugin {
 
         std::vector<Assignment *> getResetStatements();
 
-        static std::string sliceBitwise(Bitwise& operation);
+        //static std::string sliceBitwise(Bitwise& operation);
 
         const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
 

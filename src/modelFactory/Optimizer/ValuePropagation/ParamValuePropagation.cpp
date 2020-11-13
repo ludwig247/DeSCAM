@@ -2,8 +2,8 @@
 // Created by M.I.Alkoudsi on 15.07.19.
 //
 
+#include <Stmts/StmtCastVisitor.h>
 #include "ParamValuePropagation.h"
-#include "Optimizer/Debug.h"
 
 /* Idea:
  * for each expression in the return value condition list, look for a parameter operand
@@ -67,7 +67,7 @@ void DESCAM::ParamValuePropagation::visit(DESCAM::VariableOperand &node) {
                 }
             }
         } else {
-            for (auto pair : this->globalVariableMap) {
+            for (const auto& pair : this->globalVariableMap) {
                 if (pair.second->isCompoundType() || pair.second->isArrayType()) {
                     for (auto subVar : pair.second->getSubVarList()) {
                         if (subVar->getName() == node.getOperandName()) {
@@ -87,7 +87,7 @@ void DESCAM::ParamValuePropagation::visit(DESCAM::VariableOperand &node) {
         if (node.getVariable()->getName() == param.first) {
             this->newExpr = param.second;
             return;
-        } else if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(param.second)) {
+        } else if (auto varOp = StmtCastVisitor<DESCAM::VariableOperand>(param.second).Get()) {
             auto var = varOp->getVariable();
             if (node.getVariable()->isSubVar() && (var->isCompoundType() || var->isArrayType())) {
                 for (auto subVar : var->getSubVarList()) {
@@ -114,7 +114,7 @@ void DESCAM::ParamValuePropagation::visit(DESCAM::UnaryExpr &node) {
             if (node.getExpr()->getDataType()->isUnsigned()) {
                 this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1));
             } else { this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1)); }
-        } else TERMINATE("Unknown unary operator " + node.getOperation());
+        } else TERMINATE("Unknown unary operator " + node.getOperation())
     }
 }
 
@@ -279,7 +279,7 @@ void DESCAM::ParamValuePropagation::visit(DESCAM::ParamOperand &node) {
                 }
             }
         } else {
-            for (auto pair : this->globalVariableMap) {
+            for (const auto& pair : this->globalVariableMap) {
                 if (pair.second->isCompoundType() || pair.second->isArrayType()) {
                     for (auto subVar : pair.second->getSubVarList()) {
                         if (subVar->getName() == node.getOperandName()) {
@@ -299,7 +299,7 @@ void DESCAM::ParamValuePropagation::visit(DESCAM::ParamOperand &node) {
         if (node.getOperandName() == param.first) {
             this->newExpr = param.second;
             return;
-        } else if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(param.second)) {
+        } else if (auto varOp = StmtCastVisitor<DESCAM::VariableOperand>(param.second).Get()) {
             auto var = varOp->getVariable();
             if (node.getParameter()->isSubVar() && (var->isCompoundType() || var->isArrayType())) {
                 for (auto subVar : var->getSubVarList()) {

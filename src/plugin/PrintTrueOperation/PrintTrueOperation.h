@@ -28,7 +28,11 @@ public:
 
     void findCylces(State * current, State * start, const std::vector<Operation*>& opList);
 
-private:
+  std::map<std::string, bool> getOptionMap() override {
+    return CommandLineParameter::getOptionMap("PrintTrueOperation");
+  }
+
+ private:
     std::stringstream ss;
 
     std::string functions();

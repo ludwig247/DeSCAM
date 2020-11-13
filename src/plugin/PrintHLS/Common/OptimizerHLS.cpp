@@ -4,7 +4,8 @@
 
 #include <algorithm>
 #include <PrintHLS/Common/Utilities.h>
-#include <PrintHLS/VHDLWrapper/PrintStmtVHDL.h>
+//#include <PrintHLS/VHDLWrapper/PrintStmtVHDL.h>
+#include <Stmts/StmtCastVisitor.h>
 
 #include "ExprVisitor.h"
 #include "NodePeekVisitor.h"
@@ -33,7 +34,7 @@ OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module
  */
 void OptimizerHLS::findUsedDataTypes() {
 
-    auto fillTypeSets = [this](const DataType* dataType) {
+    auto fillTypeSets = [this](const DataType *dataType) {
         if (dataType->isEnumType()) {
             enumTypes.insert(dataType);
         } else if (dataType->isCompoundType()) {
@@ -43,21 +44,21 @@ void OptimizerHLS::findUsedDataTypes() {
         }
     };
 
-    for (const auto& reg : propertySuite->getVisibleRegisters()) {
+    for (const auto &reg : propertySuite->getVisibleRegisters()) {
         fillTypeSets(reg->getDataType());
     }
-    for (const auto& func : propertySuite->getFunctions()) {
+    for (const auto &func : propertySuite->getFunctions()) {
         fillTypeSets(func->getReturnType());
     }
     for (const auto &port : module->getPorts()) {
         if (port.second->isCompoundType()) {
-            for (const auto& subVar : port.second->getDataSignal()->getSubVarList()) {
+            for (const auto &subVar : port.second->getDataSignal()->getSubVarList()) {
                 fillTypeSets(subVar->getDataType());
             }
         }
         fillTypeSets(port.second->getDataType());
     }
-    for (const auto& var : module->getVariableMap()) {
+    for (const auto &var : module->getVariableMap()) {
         fillTypeSets(var.second->getDataType());
     }
 }
@@ -94,7 +95,6 @@ void OptimizerHLS::removeRedundantConditions() {
                             }
 
                         }
-
                     }
                 }
 
@@ -117,7 +117,8 @@ void OptimizerHLS::findVariables() {
             for (const auto &subVar : var.second->getSubVarList()) {
                 variables.insert(subVar);
             }
-        } else if (!(var.second->isArrayType()) && !(var.second->isSubVar() && var.second->getParent()->isArrayType())) {
+        } else if (!(var.second->isArrayType()) &&
+                   !(var.second->isSubVar() && var.second->getParent()->isArrayType())) {
             variables.insert(var.second);
         }
     }
@@ -133,12 +134,12 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
         // Takes an operation property, expression and set of variables
         // Checks if there is a rhs in the commitments of the properties, that matches the given expression
         // If not, the lhs variable is removed from the given set
-        auto getOutputReg = [](const std::shared_ptr<Property>& operationProperty,
-                                   Expr *expr,
-                                   std::set<Variable *> &vars) {
+        auto getOutputReg = [](const std::shared_ptr<Property> &operationProperty,
+                               Expr *expr,
+                               std::set<Variable *> &vars) {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
-                    Variable *var = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
+                    auto var = StmtCastVisitor<VariableOperand>(commitment->getLhs()).Get()->getVariable();
                     if (!(*expr == *commitment->getRhs())) {
                         auto pos = vars.find(var);
                         if (pos != vars.end()) {
@@ -150,11 +151,11 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
         };
 
         // If the DataSignal under test maintains its value, the same has to be true for its variable counterpart
-        auto checkForSelfAssignments = [](const std::shared_ptr<Property>& operationProperty,
-                               std::set<Variable *> &vars) {
+        auto checkForSelfAssignments = [](const std::shared_ptr<Property> &operationProperty,
+                                          std::set<Variable *> &vars) {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
-                    Variable *var = (dynamic_cast<VariableOperand *>(commitment->getLhs()))->getVariable();
+                    auto var = StmtCastVisitor<VariableOperand>(commitment->getLhs()).Get()->getVariable();
                     if (!(*(commitment->getLhs()) == *(commitment->getRhs()))) {
                         auto pos = vars.find(var);
                         if (pos != vars.end()) {
@@ -175,7 +176,8 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 // Find the data signal inside the property
                 if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
-                    const auto &dataSignal = dynamic_cast<DataSignalOperand *>(commitment->getLhs())->getDataSignal();
+                    const auto &dataSignal = StmtCastVisitor<DataSignalOperand>(
+                            commitment->getLhs()).Get()->getDataSignal();
                     if (dataSignal == output) {
                         if (*(commitment->getLhs()) == *(commitment->getRhs())) {
                             // Iterate over candidates and remove every candidate that does not keep its value
@@ -191,7 +193,8 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
         // Do the same for the reset property
         for (const auto &commitment : propertySuite->getResetProperty()->getOperation()->getCommitmentsList()) {
             if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
-                const auto &dataSignal = dynamic_cast<DataSignalOperand *>(commitment->getLhs())->getDataSignal();
+                const auto &dataSignal = StmtCastVisitor<DataSignalOperand>(
+                        commitment->getLhs()).Get()->getDataSignal();
                 if (dataSignal == output) {
                     getOutputReg(propertySuite->getResetProperty(), commitment->getRhs(), candidates);
                 }
@@ -281,14 +284,13 @@ void OptimizerHLS::simplifyCommitments() {
     }
 }
 
-
 bool OptimizerHLS::isSelfAssignments(Assignment *assignment) {
     return (*assignment->getLhs() == *assignment->getRhs());
 }
 
 optional OptimizerHLS::replaceByOutputRegister(Assignment *assignment) {
-    if (NodePeekVisitor::nodePeekDataSignalOperand(assignment->getLhs())) {
-        auto dataSignal = dynamic_cast<DataSignalOperand *>(assignment->getLhs())->getDataSignal();
+    if (auto operand = StmtCastVisitor<DataSignalOperand>(assignment->getLhs()).Get()) {
+        auto dataSignal = operand->getDataSignal();
         for (const auto &subVar : getSubVarMap(registerToOutputMap)) {
             if (dataSignal == subVar.second) {
                 auto newAssigment = new Assignment(new VariableOperand(subVar.first), assignment->getRhs());
@@ -395,7 +397,7 @@ void OptimizerHLS::findOperationModuleSignals() {
 
     // Check for constants only used inside functions
     for (const auto &function : module->getFunctionMap()) {
-        std::set<Variable*> usedVariables;
+        std::set<Variable *> usedVariables;
         for (const auto &retVal : function.second->getReturnValueConditionList()) {
             for (const auto &cond : retVal.second) {
                 const auto &foundVariables = ExprVisitor::getUsedVariables(cond);
@@ -521,7 +523,7 @@ std::vector<DESCAM::Assignment *> OptimizerHLS::getNotifyStatements(std::shared_
             continue;
         }
         if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-            auto statement = dynamic_cast<Assignment *>(temporalExpr->getStatement());
+            auto statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get();
             if (NodePeekVisitor::nodePeekNotify(statement->getLhs())) {
                 assignmentList.push_back(statement);
             }
@@ -535,7 +537,7 @@ std::vector<DESCAM::Assignment *> OptimizerHLS::getResetStatements() {
     auto temporalExprs = propertySuite->getResetProperty()->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
         if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-            auto statement = dynamic_cast<Assignment *>(temporalExpr->getStatement());
+            auto statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get();
             assignmentList.push_back(statement);
         }
     }
@@ -551,7 +553,7 @@ std::vector<DESCAM::Assignment *> OptimizerHLS::getResetStatements() {
  *
  * If unsuccessful, an empty string is returned
  */
-std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
+/*std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
 
     if (operation.getOperation() == "&") {
 
@@ -641,7 +643,7 @@ std::string OptimizerHLS::sliceBitwise(Bitwise &operation) {
     }
 
     return "";
-}
+}*/
 
 
 

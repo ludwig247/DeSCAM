@@ -8,6 +8,7 @@
 #include "FatalError.h"
 #include "Logger/Logger.h"
 #include <PrintHLS/Common/Utilities.h>
+#include <Stmts/StmtCastVisitor.h>
 
 
 using namespace DESCAM::HLSPlugin::HLS;
@@ -505,7 +506,7 @@ optional HLS::getResetValue(T *signal) {
     auto temporalExprs = propertySuite->getResetProperty()->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
         if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-            auto statement = dynamic_cast<Assignment *>(temporalExpr->getStatement());
+            auto statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get();
             assignmentList.push_back(statement);
         }
     }

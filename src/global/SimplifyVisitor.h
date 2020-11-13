@@ -129,9 +129,9 @@ namespace DESCAM {
 
         void visit(class Write &node) override;
 
-        virtual void visit(class Notify &node);
+        void visit(class Notify &node) override;
 
-        virtual void visit(class Wait &node);
+        void visit(class Wait &node) override;
 
         void visit(class SyncSignal &node) override;
 

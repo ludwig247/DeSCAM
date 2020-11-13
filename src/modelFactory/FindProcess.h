@@ -11,6 +11,8 @@
 #include <string>
 #include <map>
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "GetClangProcess.h"
+#include "IFindDataFlowFactory.h"
 
 #include "enums.h"
 
@@ -24,33 +26,19 @@ namespace DESCAM {
  * //TODO: rethink finding of proccesses? Too complicated
  * //TODO: only allow threads
  */
-class FindProcess : public IFindProcess, public clang::RecursiveASTVisitor<FindProcess> {
+class FindProcess : public IFindProcess {
  public:
+  explicit FindProcess(IFindDataFlowFactory *find_data_flow_factory);
+  ~FindProcess() override = default;
 
-  virtual ~FindProcess() override = default;
-
-  /// Virtual methods from RecursiveASTVisitor
-  virtual bool VisitStringLiteral(clang::StringLiteral *s);
-  virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl *md);
-  virtual bool VisitMemberExpr(clang::MemberExpr *e);
-
-  //Getter
-  bool setup(clang::CXXRecordDecl *record_decl) override;
-  const std::map<std::string, std::pair<clang::CXXMethodDecl *, PROCESS_TYPE>> &getProcessMap() override;
-  bool isValidProcess() const override;
-  clang::CXXMethodDecl *getProcess() const override;
+  bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module, Model *model) override;
+  const std::map<int, CfgBlock *> &getCFG() const override;
 
  private:
   clang::CXXRecordDecl *record_decl_;
-  PROCESS_TYPE process_type_; //! Method, Thread, Process
-  clang::Stmt *constructor_stmt_;
+  IFindDataFlowFactory *find_data_flow_factory_;
 
-  std::map<std::string, std::pair<clang::CXXMethodDecl *, PROCESS_TYPE> > process_map_;
-  //! <processName, <MethodDecl, processType> >
-  std::vector<clang::CXXMethodDecl *> other_functions_;
-
-  int pass_;
-
+  std::map<int, CfgBlock *> cfg_;
 };
 }
 

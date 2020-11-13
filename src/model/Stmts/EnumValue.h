@@ -19,9 +19,9 @@ namespace DESCAM {
         std::string getValueAsString() const override;
 
         //VISITOR
-        virtual void accept(StmtAbstractVisitor &visitor);
+        void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+        bool operator==(const Stmt &other) const override;
 
     private:
         std::string enumValue;

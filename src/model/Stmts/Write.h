@@ -9,31 +9,30 @@
 #include "PortOperand.h"
 #include "Communication.h"
 
+
 namespace DESCAM {
-    class Write : public Communication, public Stmt {
-    public:
-        Write(Port *portOperand, Expr *value, bool is_non_blocking_access = false, VariableOperand *status = nullptr,
-              LocationInfo stmtLocationInfo = LocationInfo());
+class Write : public Communication, public Stmt {
+ public:
+  Write(Port *portOperand, Expr *value, bool is_non_blocking_access = false, VariableOperand *status = nullptr,
+        LocationInfo stmtLocationInfo = LocationInfo());
 
-        Expr *getValue() const;
+  Expr *getValue() const;
 
-        VariableOperand *getStatusOperand() const;
+  VariableOperand *getStatusOperand() const;
 
-        bool hasStatusOperand() const;
+  bool hasStatusOperand() const;
 
-        virtual void accept(StmtAbstractVisitor &visitor) override;
+  void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual std::ostream &print(std::ostream &ostream) const;
+  std::ostream &print(std::ostream &ostream) const override;
 
-        virtual bool operator==(const Stmt &other) const;
+  bool operator==(const Stmt &other) const override;
 
+ private:
+  Expr *value;
+  VariableOperand *status;
 
-    private:
-        Expr *value;
-        VariableOperand *status;
-
-
-    };
+};
 
 }
 #endif //SCAM_WRITE_H

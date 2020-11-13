@@ -3,6 +3,7 @@
 //
 
 
+#include <Stmts/StmtCastVisitor.h>
 #include "GlobalUtilities.h"
 
 std::string DESCAM::GlobalUtilities::printCFG(const std::map<int, DESCAM::CfgBlock *> &CFG) {
@@ -67,7 +68,7 @@ std::string DESCAM::GlobalUtilities::printCFG(const std::map<int, DESCAM::CfgNod
 int DESCAM::GlobalUtilities::findWhileNodeId(const std::map<int, DESCAM::CfgNode *> &CFG) {
     for (auto node : CFG) {
         if (node.second->getStmt()) {
-            if (dynamic_cast<DESCAM::While *>(node.second->getStmt())) {
+            if (StmtCastVisitor<DESCAM::While>(node.second->getStmt()).Get()) {
                 return node.second->getId();
             }
         }

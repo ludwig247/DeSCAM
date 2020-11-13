@@ -1,8 +1,8 @@
 add_compile_options(-D__STDC_CONSTANT_MACROS)
 add_compile_options(-D__STDC_LIMIT_MACROS)
-
 add_subdirectory(tinyxml)
 
+# todo don't glob
 file(GLOB LoggerSrc "Logger/*.cpp" "Logger/LoggerFilter.h")
 
 add_library(global SHARED
@@ -20,4 +20,5 @@ add_library(global SHARED
         RecursiveVisitor.cpp
         Completeness.cpp
         ${LoggerSrc}
-        FatalError.h GlobalUtilities.h)
+        FatalError.h
+        GlobalUtilities.h)
