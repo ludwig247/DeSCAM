@@ -5,7 +5,6 @@
 #ifndef PROJECT_ISEXPRCONSTVISITOR_H
 #define PROJECT_ISEXPRCONSTVISITOR_H
 
-
 #include <set>
 
 #include "StmtAbstractVisitor.h"
@@ -14,131 +13,127 @@
 
 namespace DESCAM {
 
-    class ExprVisitor : public StmtAbstractVisitor {
-    public:
+class ExprVisitor : public StmtAbstractVisitor {
+ public:
 
-        static bool isConstVal(DESCAM::Expr *expr);
+  static bool isConstVal(DESCAM::Expr *expr);
 
-        static bool isBitwise(DESCAM::Expr *expr);
+  static bool isBitwise(DESCAM::Expr *expr);
 
-        static bool isVar(DESCAM::Expr *expr);
+  static bool isVar(DESCAM::Expr *expr);
 
-        static bool isParameter(DESCAM::Expr *expr);
+  static bool isParameter(DESCAM::Expr *expr);
 
-        static bool isTernary(DESCAM::Expr *expr);
+  static bool isTernary(DESCAM::Expr *expr);
 
-        static std::set<Operand *> getUsedOperands(DESCAM::Expr *expr);
+  static std::set<Operand *> getUsedOperands(DESCAM::Expr *expr);
 
-        static std::set<Variable *> getUsedVariables(DESCAM::Expr *expr);
+  static std::set<Variable *> getUsedVariables(DESCAM::Expr *expr);
 
-        static std::set<Port *> getUsedPorts(DESCAM::Expr *expr);
+  static std::set<Port *> getUsedPorts(DESCAM::Expr *expr);
 
-        static std::set<SyncSignal *> getUsedSynchSignals(DESCAM::Expr *expr);
+  static std::set<SyncSignal *> getUsedSynchSignals(DESCAM::Expr *expr);
 
-        static std::set<Ternary*> getUsedTernaryOperators(DESCAM::Expr * expr);
+  static std::set<Ternary *> getUsedTernaryOperators(DESCAM::Expr *expr);
 
-        static std::set<DataSignal *> getUsedDataSignals(DESCAM::Expr *expr);
+  static std::set<DataSignal *> getUsedDataSignals(DESCAM::Expr *expr);
 
-        static std::set<ArrayOperand *> getUsedArrayOperands(DESCAM::Expr *expr);
+  static std::set<ArrayOperand *> getUsedArrayOperands(DESCAM::Expr *expr);
 
-        static std::set<DESCAM::Function *> getUsedFunction(DESCAM::Expr *expr);
+  static std::set<DESCAM::Function *> getUsedFunction(DESCAM::Expr *expr);
 
-        static Operand *getOperand(DESCAM::Expr *expr);
+  static Operand *getOperand(DESCAM::Expr *expr);
 
-        void visit(class ArrayExpr &node) override;
+  void visit(class ArrayExpr &node) override;
 
+ private:
+  ExprVisitor(DESCAM::Expr *expr);
 
+  bool bitwise;
+  bool constVal;
+  bool var;
+  bool parameter;
+  bool compare = false;
+  DESCAM::Expr *expr;
 
-    private:
-        ExprVisitor(DESCAM::Expr *expr);
+  std::set<Operand *> usedOperands;
+  std::set<SyncSignal *> usedSynchSignal;
+  std::set<DataSignal *> usedDataSignal;
+  std::set<Variable *> usedVar;
+  std::set<Port *> usedPorts;
+  std::set<ArrayOperand *> usedArrayOperands;
+  std::set<Function *> usedFunction;
+  CompoundValue *compoundValue;
+  std::set<Ternary *> usedTernary;
 
-        bool bitwise;
-        bool constVal;
-        bool var;
-        bool parameter;
-        bool compare = false;
-        DESCAM::Expr *expr;
+  void visit(struct VariableOperand &node) override;
 
-        std::set<Operand *> usedOperands;
-        std::set<SyncSignal *> usedSynchSignal;
-        std::set<DataSignal *> usedDataSignal;
-        std::set<Variable *> usedVar;
-        std::set<Port *> usedPorts;
-        std::set<ArrayOperand *> usedArrayOperands;
-        std::set<Function *> usedFunction;
-        CompoundValue *compoundValue;
-        std::set<Ternary*> usedTernary;
+  void visit(struct IntegerValue &node) override;
 
-        virtual void visit(struct VariableOperand &node);
+  void visit(struct UnsignedValue &node) override;
 
-        virtual void visit(struct IntegerValue &node);
+  void visit(struct BoolValue &node) override;
 
-        virtual void visit(struct UnsignedValue &node);
+  void visit(struct EnumValue &node) override;
 
-        virtual void visit(struct BoolValue &node);
+  void visit(struct CompoundValue &node) override;
 
-        virtual void visit(struct EnumValue &node);
+  void visit(struct PortOperand &node) override;
 
-        virtual void visit(struct CompoundValue &node);
+  void visit(struct Assignment &node) override;
 
-        virtual void visit(struct PortOperand &node);
+  void visit(struct UnaryExpr &node) override;
 
-        virtual void visit(struct Assignment &node);
+  void visit(struct While &node) override;
 
-        virtual void visit(struct UnaryExpr &node);
+  void visit(struct If &node) override;
 
-        virtual void visit(struct While &node);
+  void visit(struct SectionOperand &node) override;
 
-        virtual void visit(struct If &node);
+  void visit(struct SectionValue &node) override;
 
-        virtual void visit(struct SectionOperand &node);
+  void visit(struct ITE &node) override;
 
-        virtual void visit(struct SectionValue &node);
+  virtual void visit(struct Branch &node);
 
-        virtual void visit(struct ITE &node);
+  void visit(struct Arithmetic &node) override;
 
-        virtual void visit(struct Branch &node);
+  void visit(struct Logical &node) override;
 
-        virtual void visit(struct Arithmetic &node);
+  void visit(struct Relational &node) override;
 
-        virtual void visit(struct Logical &node);
+  void visit(struct Bitwise &node) override;
 
-        virtual void visit(struct Relational &node);
+  void visit(struct Read &node) override;
 
-        virtual void visit(struct Bitwise &node);
+  void visit(struct Write &node) override;
 
-        virtual void visit(struct Read &node);
+  void visit(struct SyncSignal &node) override;
 
-        virtual void visit(struct Write &node);
+  void visit(struct DataSignalOperand &node) override;
 
-        virtual void visit(struct SyncSignal &node);
+  void visit(struct Cast &node) override;
 
-        virtual void visit(struct DataSignalOperand &node);
+  void visit(DESCAM::FunctionOperand &node) override;
 
-        virtual void visit(struct Cast &node);
+  void visit(class ArrayOperand &node) override;
 
-        virtual void visit(DESCAM::FunctionOperand &node);
+  void visit(class CompoundExpr &node) override;
 
-        virtual void visit(class ArrayOperand &node);
+  void visit(Return &node) override;
 
-        virtual void visit(class CompoundExpr &node);
+  void visit(ParamOperand &node) override;
 
-        virtual void visit(Return &node);
+  void visit(Notify &node) override;
 
-        virtual void visit(ParamOperand &node);
+  void visit(Wait &node) override;
 
-        virtual void visit(Notify &node);
+  void visit(Peek &node) override;
 
-        virtual void visit(Wait &node);
+  void visit(struct TimePointOperand &node) override;
 
-        virtual void visit(Peek &node);
-
-        virtual void visit(struct TimePointOperand &node);
-
-        virtual void visit(struct Ternary &node);
-
-    };
+  void visit(struct Ternary &node) override;
+};
 }
-
 
 #endif //PROJECT_ISEXPRCONSTVISITOR_H

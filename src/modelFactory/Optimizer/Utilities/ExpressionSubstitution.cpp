@@ -2,6 +2,7 @@
 // Created by M.I.Alkoudsi on 11.09.19.
 //
 
+#include <Stmts/StmtCastVisitor.h>
 #include "ExpressionSubstitution.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
@@ -169,9 +170,9 @@ void DESCAM::ExpressionSubstitution::visit(struct If &node) {
 
 void DESCAM::ExpressionSubstitution::visit(struct Read &node) {
     if (node.getVariableOperand() == this->oldExpr) {
-        if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(this->newExpr)) {
+        if (auto varOp = StmtCastVisitor<DESCAM::VariableOperand>(this->newExpr).Get()) {
             this->newStmt = new Read(node.getPort(), varOp, node.isNonBlockingAccess(), node.getStatusOperand());
-        } else { TERMINATE("Expected a variable operand!"); }
+        } else { TERMINATE("Expected a variable operand!") }
     } else {
         this->newStmt = &node;
     }

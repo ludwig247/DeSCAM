@@ -4,8 +4,8 @@
 
 
 
+#include <Stmts/StmtCastVisitor.h>
 #include "GlobalConstantPropagation.h"
-#include "Optimizer/Debug.h"
 /* Idea:
  * Look for variables used in the CFG statements. For each found use:
  * If variable was checked before and has entry in varValMap. get its value from varValMap
@@ -77,9 +77,8 @@ namespace DESCAM {
     }
 
     void GlobalConstantPropagation::visit(class Assignment &node) {
-        // if the lhs is a variableoperand check if there is a use of a variable in the rhs
-        auto lhs = dynamic_cast<DESCAM::VariableOperand *>(node.getLhs());
-        if (lhs != nullptr) {
+        // if the lhs is a variable operand check if there is a use of a variable in the rhs
+        if (auto lhs = StmtCastVisitor<DESCAM::VariableOperand>(node.getLhs()).Get()) {
             node.getRhs()->accept(*this);
             if (this->newExpr != nullptr && propagationValid) {
                 auto assignment = new Assignment(lhs, this->newExpr,node.getStmtInfo());
@@ -113,7 +112,7 @@ namespace DESCAM {
                 if (node.getExpr()->getDataType()->isUnsigned()) {
                     this->newExpr = new Arithmetic(this->newExpr, "*", new UnsignedValue(-1),node.getStmtInfo());
                 } else this->newExpr = new Arithmetic(this->newExpr, "*", new IntegerValue(-1),node.getStmtInfo());
-            } else TERMINATE("Unknown unary operator " + node.getOperation());
+            } else TERMINATE("Unknown unary operator " + node.getOperation())
         }
     }
 

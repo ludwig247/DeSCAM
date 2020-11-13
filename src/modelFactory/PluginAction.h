@@ -65,9 +65,9 @@ class DeScamAction : public clang::ASTFrontendAction {
   IModelFactory *model_factory_;
 
  protected:
-  clang::ASTConsumer *CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) override {
+  std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &ci, clang::StringRef) override {
     model_factory_->setup(&ci);
-    return new Relay(model_factory_);
+    return std::make_unique<Relay>(model_factory_);
   };
 };
 
@@ -82,8 +82,8 @@ class DESCAMFrontEndFactory : public FrontendActionFactory {
  public:
   explicit DESCAMFrontEndFactory(IModelFactory *model_factory) : model_factory_(model_factory){};
 
-  clang::FrontendAction *create() override {
-    return new DeScamAction(model_factory_);
+  std::unique_ptr<clang::FrontendAction> create() override {
+    return std::make_unique<DeScamAction>(model_factory_);
   }
 };
 

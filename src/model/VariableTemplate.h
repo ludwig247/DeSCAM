@@ -30,7 +30,7 @@ class VariableTemplate : public TypeInterface, public AbstractNode {
 
   virtual std::vector<T *> getSubVarList() const final;
 
-  std::string getFullName(const std::string &delimiter = ".") const;
+  std::string getFullName() const;
 
   bool isConstant() const;
   void setConstant(bool isConstant);

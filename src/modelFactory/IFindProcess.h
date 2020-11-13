@@ -8,7 +8,10 @@
 #include <string>
 #include <map>
 #include "clang/AST/DeclCXX.h"
+#include "Module.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "enums.h"
+#include "CfgBlock.h"
 
 namespace DESCAM {
 
@@ -20,12 +23,8 @@ class IFindProcess {
 
   virtual ~IFindProcess() = default;
 
-  virtual bool setup(clang::CXXRecordDecl *recordDecl) = 0;
-  //Getter
-  virtual const std::map<std::string, std::pair<clang::CXXMethodDecl *, PROCESS_TYPE>> &getProcessMap() = 0;
-  virtual bool isValidProcess() const = 0;
-  virtual clang::CXXMethodDecl *getProcess() const = 0;
-
+  virtual bool setup(clang::CXXRecordDecl *recordDecl, clang::CompilerInstance *ci, Module *module, Model *model) = 0;
+  virtual const std::map<int, CfgBlock *> &getCFG() const = 0;
 };
 }
 

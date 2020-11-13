@@ -12,24 +12,24 @@
 
 namespace DESCAM {
 
-    class Expr : public Stmt {
-    public:
-        Expr() = delete;
-        explicit Expr(const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
-        ~Expr() = default;
+class Expr : public Stmt {
+ public:
+  Expr() = delete;
+  explicit Expr(const DataType *dataType, LocationInfo stmtLocationInfo = LocationInfo());
+  virtual ~Expr() = default;
 
-        const DataType *getDataType() const;
+  const DataType *getDataType() const;
 
-        std::ostream &print(std::ostream &ostream) const override;
+  std::ostream &print(std::ostream &ostream) const override;
 
-        bool isDataType(std::string n) const;
-        virtual void accept(StmtAbstractVisitor &visitor) = 0;
+  bool isDataType(std::string n) const;
 
-    private:
-        const DataType *dataType;
-    };
+  void accept(StmtAbstractVisitor &visitor) override = 0;
+
+ private:
+  const DataType *dataType;
+};
 
 }
-
 
 #endif //SCAM_EXPR_H

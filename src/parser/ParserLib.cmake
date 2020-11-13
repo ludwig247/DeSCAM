@@ -2,10 +2,11 @@
 add_library(parser SHARED
         CommandLineProcess.cpp
         CommandLineParameter.cpp
-        CommandLineParametersConfig.cpp)
+        CommandLineParametersConfig.cpp
+        )
 
 SET_TARGET_PROPERTIES(parser PROPERTIES LINKER_LANGUAGE CXX)
-
+add_dependencies(parser LLVM)
 
 target_link_libraries(parser PluginFactory)
 target_link_libraries(parser modelFactory)
@@ -18,13 +19,20 @@ target_link_libraries(parser pthread)
 
 #include LLVM,z3,SystemC CLANG
 include(DefineLibs.cmake)
-foreach (clang_lib ${CLANG_LIBS})
-    target_link_libraries(parser ${CMAKE_SOURCE_DIR}/lib/lib${clang_lib}.a)
-endforeach ()
 
-foreach (llvm_lib ${LLVM_LIBS})
-    target_link_libraries(parser ${CMAKE_SOURCE_DIR}/lib/lib${llvm_lib}.a)
-endforeach ()
+if(TRUE)
+    foreach (clang_lib ${CLANG_LIBS})
+        target_link_libraries(parser ${LLVM_LIB_DIR}/${clang_lib})
+    endforeach ()
+
+    foreach (llvm_lib ${LLVM_LIBS})
+        target_link_libraries(parser ${LLVM_LIB_DIR}/${llvm_lib})
+    endforeach ()
+else()
+    foreach (llvm_lib ${LLVM_ALL})
+        target_link_libraries(parser ${LLVM_LIB_DIR}/${llvm_lib})
+    endforeach ()
+endif()
 
 foreach (other ${OTHERS})
     target_link_libraries(parser ${other})

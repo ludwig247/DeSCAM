@@ -14,41 +14,41 @@ namespace DESCAM {
         static std::string toString(Stmt *stmt, unsigned int indentSize = 2, unsigned int indentOffset = 0);
 
     protected:
-        virtual void visit(class Relational &node);
+        void visit(class Relational &node) override;
 
-        virtual void visit(class SyncSignal &node);
+        void visit(class SyncSignal &node) override;
 
-        virtual void visit(class Arithmetic &node);
+        void visit(class Arithmetic &node) override;
 
-        virtual void visit(class Bitwise &node);
+        void visit(class Bitwise &node) override;
 
-        virtual void visit(class DataSignalOperand &node);
+        void visit(class DataSignalOperand &node) override;
 
-        virtual void visit(class VariableOperand &node);
+        void visit(class VariableOperand &node) override;
 
-        virtual void visit(class IntegerValue &node);
+        void visit(class IntegerValue &node) override;
 
-        virtual void visit(class UnsignedValue &node);
+        void visit(class UnsignedValue &node) override;
 
-        virtual void visit(class UnaryExpr & node);
+        void visit(class UnaryExpr & node) override;
 
-        virtual void visit(class Cast &node);
+        void visit(class Cast &node) override;
 
-        virtual void visit(class Return &node);
+        void visit(class Return &node) override;
 
-        virtual void visit(class ITE &node);
+        void visit(class ITE &node) override;
 
-        virtual void visit(class Assignment &node);
+        void visit(class Assignment &node) override;
 
-        virtual void visit(class ArrayOperand &node);
+        void visit(class ArrayOperand &node) override;
 
-        virtual void visit(class CompoundExpr &node);
+        void visit(class CompoundExpr &node) override;
 
-        virtual void visit(class ParamOperand &node);
+        void visit(class ParamOperand &node) override;
 
-        virtual void visit(class Notify &node);
+        void visit(class Notify &node) override;
 
-        virtual void visit(class ArrayExpr &node);
+        void visit(class ArrayExpr &node) override;
 
         virtual void visit(class Timepoint &node);
 

@@ -9,6 +9,15 @@
 #include <Stmt.h>
 #include <string>
 #include <sstream>
+#include <iostream>
+#include <If.h>
+#include <stdexcept>
+#include <PrintStmt.h>
+#include <iostream>
+#include <If.h>
+#include <stdexcept>
+#include <PrintStmt.h>
+#include <algorithm>
 
 namespace DESCAM {
     class CfgBlock {

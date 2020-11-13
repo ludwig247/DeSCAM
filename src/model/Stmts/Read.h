@@ -11,30 +11,31 @@
 
 namespace DESCAM {
 
+class Read : public Stmt, public Communication {
+ public:
+  Read(Port *port,
+       VariableOperand *variable,
+       bool is_non_blocking_access = false,
+       VariableOperand *status = nullptr,
+       LocationInfo stmtLocationInfo = LocationInfo());
 
-    class Read : public Stmt, public Communication {
-    public:
-        Read(Port *port, VariableOperand *variable, bool is_non_blocking_access = false, VariableOperand *status = nullptr, LocationInfo stmtLocationInfo = LocationInfo());
+  VariableOperand *getVariableOperand() const;
 
-        VariableOperand *getVariableOperand() const;
+  VariableOperand *getStatusOperand() const;
 
-        VariableOperand *getStatusOperand() const;
+  bool hasStatusOperand() const;
 
-        bool hasStatusOperand() const;
+  virtual void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual void accept(StmtAbstractVisitor &visitor) override;
+  std::ostream &print(std::ostream &ostream) const override;
 
-        virtual std::ostream &print(std::ostream &ostream) const;
+  bool operator==(const Stmt &other) const override;
 
-        virtual bool operator==(const Stmt &other) const;
+ private:
+  VariableOperand *variable;
+  VariableOperand *status;
 
-
-
-    private:
-        VariableOperand *variable;
-        VariableOperand *status;
-
-    };
+};
 
 }
 

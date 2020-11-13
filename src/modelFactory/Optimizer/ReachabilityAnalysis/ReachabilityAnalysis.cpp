@@ -3,8 +3,8 @@
 //
 
 #include <Optimizer/Utilities/ExpressionSubstitution.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "ReachabilityAnalysis.h"
-#include "Optimizer/Debug.h"
 
 
 namespace DESCAM {
@@ -35,7 +35,7 @@ namespace DESCAM {
         for (auto node : CFG) {
             auto statement = node.second->getStmt();
             if (statement != nullptr) {
-                if (auto ifStmt = dynamic_cast<DESCAM::If *>(statement)) {
+                if (auto ifStmt = StmtCastVisitor<DESCAM::If>(statement).Get()) {
 #ifdef DEBUG_REACHABILITY_ANALYSIS
 //                    std::cout << "Checking statement: " << DESCAM::PrintStmt::toString(statement)
 //                              << std::endl;
@@ -43,8 +43,8 @@ namespace DESCAM {
                     currentNodeID = node.second->getId();
                     if (auto insideIf = ifStmt->getConditionStmt()) {
                         //if section operand don't check for now
-                        if (auto relationalstmt = dynamic_cast<DESCAM::Relational *>(insideIf)) {
-                            if (dynamic_cast<DESCAM::SectionOperand *>(relationalstmt->getLhs())) {
+                        if (auto relationalstmt = StmtCastVisitor<DESCAM::Relational>(insideIf).Get()) {
+                            if (StmtCastVisitor<DESCAM::SectionOperand>(relationalstmt->getLhs()).Get()) {
                                 continue;
                             }
                         }
@@ -217,10 +217,8 @@ namespace DESCAM {
 
     void ReachabilityAnalysis::checkAndAddVariableToSubstitutionMap(DESCAM::VariableOperand *varOp) {
         auto varName = varOp->getVariable()->getFullName();
-        if (this->variablesThatHaveReadSet.find(varName) ==
-            this->variablesThatHaveReadSet.end()) {
-            this->substitutionMap.insert(
-                    std::make_pair(varName, varOp));
+        if (this->variablesThatHaveReadSet.find(varName) == this->variablesThatHaveReadSet.end()) {
+            this->substitutionMap.insert(std::make_pair(varName, varOp));
             if (this->assignmentsToIfValuesMap.find(varName) ==
                 this->assignmentsToIfValuesMap.end()) { // use only assignment values to the variable that can be used in the If statement
                 PropagateConstantValue propagator(this->pathsToIfMap, varOp->getVariable(), this->currentNodeID);
@@ -238,8 +236,8 @@ namespace DESCAM {
                     while (nodeId != whileNodeID) {
                         auto stmt = this->CFG.at(nodeId)->getStmt();
                         if (stmt != nullptr) {
-                            if (auto assignment = dynamic_cast<DESCAM::Assignment *>(stmt)) {
-                                if (auto varOp = dynamic_cast<DESCAM::VariableOperand *>(assignment->getLhs())) {
+                            if (auto assignment = StmtCastVisitor<DESCAM::Assignment>(stmt).Get()) {
+                                if (auto varOp = StmtCastVisitor<DESCAM::VariableOperand>(assignment->getLhs()).Get()) {
                                     if (varOp->getVariable()->getFullName() == varName) {
                                         values.insert(assignment->getRhs());
                                     }

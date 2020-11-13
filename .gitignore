@@ -89,7 +89,6 @@ example/FIR-Filter/SEQ/RTL/Simulation
 example/FIR-Filter/PIPELINE/DeSCAM_parse
 example/FIR-Filter/PIPELINE/RTL/Simulation
 
-
-
-
-
+/3rdParty/
+/tests/TestCases/functionality_tests.list
+/tests/TestCases/tests.list

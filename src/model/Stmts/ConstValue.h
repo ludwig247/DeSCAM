@@ -9,14 +9,15 @@
 
 namespace DESCAM {
 
-    class ConstValue : public Expr {
-    public:
-        ConstValue(const DataType *dataType);
+class ConstValue : public Expr {
+ public:
+  ConstValue(const DataType *dataType);
 
-        virtual std::string getValueAsString() const = 0;
+  virtual ~ConstValue() = default;
 
-    };
+  virtual std::string getValueAsString() const = 0;
+
+};
 }
-
 
 #endif //SCAM_CONSTVALUE_H

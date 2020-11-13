@@ -1,6 +1,5 @@
 //
 
-#include <assert.h>
 #include "DataSignal.h"
 
 
