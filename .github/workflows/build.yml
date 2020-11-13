@@ -42,8 +42,8 @@ jobs:
       - name: Run Tests
         run: |
           $GITHUB_WORKSPACE/bin/PrintITL_Tests
-          $GITHUB_WORKSPACE/bin/PrintSkeleton_Tests
           $GITHUB_WORKSPACE/bin/GMock_Tests
+#          $GITHUB_WORKSPACE/bin/PrintSkeleton_Tests
       - name: Clean up
         run: |
           rm -rf $GITHUB_WORKSPACE/3rdParty
