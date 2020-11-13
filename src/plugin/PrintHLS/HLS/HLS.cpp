@@ -3,7 +3,6 @@
 //
 
 #include "HLS.h"
-#include "NodePeekVisitor.h"
 #include "PrintStmtCPP.h"
 #include "FatalError.h"
 #include "Logger/Logger.h"
@@ -505,8 +504,7 @@ optional HLS::getResetValue(T *signal) {
     std::vector<DESCAM::Assignment *> assignmentList;
     auto temporalExprs = propertySuite->getResetProperty()->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
-        if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-            auto statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get();
+        if (const auto &statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get()) {
             assignmentList.push_back(statement);
         }
     }

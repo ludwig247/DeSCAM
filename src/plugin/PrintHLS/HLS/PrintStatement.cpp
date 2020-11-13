@@ -3,7 +3,7 @@
 //
 
 #include "PrintStatement.h"
-#include "NodePeekVisitor.h"
+#include <Stmts/StmtCastVisitor.h>
 #include <PrintHLS/Common/Utilities.h>
 
 using namespace DESCAM::HLSPlugin::HLS;
@@ -141,9 +141,8 @@ void PrintStatement::visit(UnsignedValue &node) {
 
 void PrintStatement::visit(CompoundExpr &node) {
     for (auto value = node.getValueMap().begin(); value != node.getValueMap().end(); ++value) {
-        NodePeekVisitor nodePeekVisitor(value->second);
-        if (nodePeekVisitor.nodePeekDataSignalOperand()) {
-            this->ss << nodePeekVisitor.nodePeekDataSignalOperand()->getDataSignal()->getParent()->getName();
+        if (const auto &dataSignalOp = StmtCastVisitor<DataSignalOperand>(value->second).Get()) {
+            this->ss << dataSignalOp->getDataSignal()->getParent()->getName();
             value = --node.getValueMap().end();
             break;
         } else {
@@ -188,8 +187,9 @@ void PrintStatement::visit(ITE &node) {
             for (std::size_t i = 0; i < indent; ++i) {
                 this->ss << " ";    //add indent
             }
-            if (NodePeekVisitor::nodePeekITE(stmt) != nullptr)
+            if (StmtCastVisitor<ITE>(stmt).Get()){
                 indent -= indentSize;
+            }
             stmt->accept(*this);
             this->ss << ";\n";
         }
@@ -279,19 +279,19 @@ void PrintStatement::visit(Bitwise &node) {
         } else {
             if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
                 this->ss << "(";
-                if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
+                if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
                     this->ss << "static_cast<" << node.getDataType()->getName() <<  ">(";
                 }
                 node.getLhs()->accept(*this);
-                if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
+                if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
                     this->ss << ")";
                 }
                 this->ss << " " + node.getOperation() << " ";
-                if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
+                if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
                     this->ss << "static_cast<" << node.getDataType()->getName() <<  ">(";
                 }
                 node.getRhs()->accept(*this);
-                if (!NodePeekVisitor::nodePeekCast(node.getLhs())) {
+                if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
                     this->ss << ")";
                 }
                 this->ss << ")";

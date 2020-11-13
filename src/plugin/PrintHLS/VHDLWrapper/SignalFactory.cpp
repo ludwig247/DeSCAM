@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <tuple>
+#include <Stmts/StmtCastVisitor.h>
 #include "Logger/Logger.h"
 #include "SignalFactory.h"
 #include "PrintStmtVHDL.h"
@@ -156,11 +157,11 @@ std::string SignalFactory::convertReturnType(const DataType &type) {
 std::string SignalFactory::findAssignedValue(const std::shared_ptr<Property> &property, const std::shared_ptr<PropertyMacro> &notify) {
     std::string assignedValue;
     for (const auto &commitment : property->getCommitmentList()) {
-        const auto &assignment = NodePeekVisitor::nodePeekAssignment(commitment->getStatement());
+        const auto &assignment = StmtCastVisitor<Assignment>(commitment->getStatement()).Get();
         if (assignment == nullptr) {
             continue;
         }
-        const auto &lhs = NodePeekVisitor::nodePeekNotify(assignment->getLhs());
+        const auto &lhs = StmtCastVisitor<Notify>(assignment->getLhs()).Get();
         if (lhs == nullptr) {
             continue;
         }

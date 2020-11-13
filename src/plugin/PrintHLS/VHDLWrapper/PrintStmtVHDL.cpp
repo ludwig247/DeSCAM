@@ -4,6 +4,7 @@
 
 #include <iomanip>
 #include <PrintHLS/Common/OptimizerHLS.h>
+#include <Stmts/StmtCastVisitor.h>
 #include "PrintStmtVHDL.h"
 #include "FatalError.h"
 
@@ -94,8 +95,8 @@ void PrintStmtVHDL::visit(DESCAM::BoolValue &node) {
 
 void PrintStmtVHDL::visit(DESCAM::Cast &node) {
 
-    if ((node.getDataType()->isUnsigned() && NodePeekVisitor::nodePeekIntegerValue(node.getSubExpr()))
-        || (node.getDataType()->isInteger() && NodePeekVisitor::nodePeekUnsignedValue(node.getSubExpr()))) {
+    if ((node.getDataType()->isUnsigned() && StmtCastVisitor<IntegerValue>(node.getSubExpr()).Get())
+        || (node.getDataType()->isInteger() && StmtCastVisitor<UnsignedValue>(node.getSubExpr()).Get())) {
         node.getSubExpr()->accept(*this);
     } else {
         if (node.getDataType()->isUnsigned()) {

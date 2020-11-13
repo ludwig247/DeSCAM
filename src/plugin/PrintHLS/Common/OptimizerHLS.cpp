@@ -3,16 +3,12 @@
 //
 
 #include <algorithm>
-#include <PrintHLS/Common/Utilities.h>
-//#include <PrintHLS/VHDLWrapper/PrintStmtVHDL.h>
 #include <Stmts/StmtCastVisitor.h>
 
 #include "ExprVisitor.h"
-#include "NodePeekVisitor.h"
 #include "OptimizerHLS.h"
 #include "PrintArrayStatements.h"
 #include "PropertySuite.h"
-#include "Utilities.h"
 
 using namespace DESCAM::HLSPlugin;
 
@@ -85,11 +81,10 @@ void OptimizerHLS::removeRedundantConditions() {
                     for (auto const &otherCond : otherConditionList) {
 
                         // Check, if the condition is negated
-                        if (NodePeekVisitor::nodePeekUnaryExpr(otherCond) != nullptr) {
-                            auto const otherCondExpr = NodePeekVisitor::nodePeekUnaryExpr(otherCond)->getExpr();
+                        if (auto const &otherCondExpr = StmtCastVisitor<UnaryExpr>(otherCond).Get()) {
 
                             // Remove condition, if it is already covered by previous branches
-                            if (*cond == *otherCondExpr) {
+                            if (*cond == *(otherCondExpr->getExpr())) {
                                 otherConditionList.erase(
                                         std::find(otherConditionList.begin(), otherConditionList.end(), otherCond));
                             }
@@ -138,10 +133,9 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
                                Expr *expr,
                                std::set<Variable *> &vars) {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
-                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
-                    auto var = StmtCastVisitor<VariableOperand>(commitment->getLhs()).Get()->getVariable();
+                if (const auto varOp = StmtCastVisitor<VariableOperand>(commitment->getLhs()).Get()) {
                     if (!(*expr == *commitment->getRhs())) {
-                        auto pos = vars.find(var);
+                        auto pos = vars.find(varOp->getVariable());
                         if (pos != vars.end()) {
                             vars.erase(pos);
                         }
@@ -154,10 +148,9 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
         auto checkForSelfAssignments = [](const std::shared_ptr<Property> &operationProperty,
                                           std::set<Variable *> &vars) {
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
-                if (NodePeekVisitor::nodePeekVariableOperand(commitment->getLhs())) {
-                    auto var = StmtCastVisitor<VariableOperand>(commitment->getLhs()).Get()->getVariable();
+                if (const auto varOp = StmtCastVisitor<VariableOperand>(commitment->getLhs()).Get()) {
                     if (!(*(commitment->getLhs()) == *(commitment->getRhs()))) {
-                        auto pos = vars.find(var);
+                        auto pos = vars.find(varOp->getVariable());
                         if (pos != vars.end()) {
                             vars.erase(pos);
                         }
@@ -175,10 +168,8 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
             }
             for (const auto &commitment : operationProperty->getOperation()->getCommitmentsList()) {
                 // Find the data signal inside the property
-                if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
-                    const auto &dataSignal = StmtCastVisitor<DataSignalOperand>(
-                            commitment->getLhs()).Get()->getDataSignal();
-                    if (dataSignal == output) {
+                if (const auto &dataSignalOp = StmtCastVisitor<DataSignalOperand>(commitment->getLhs()).Get()) {
+                    if (dataSignalOp->getDataSignal() == output) {
                         if (*(commitment->getLhs()) == *(commitment->getRhs())) {
                             // Iterate over candidates and remove every candidate that does not keep its value
                             checkForSelfAssignments(operationProperty, candidates);
@@ -192,10 +183,8 @@ void OptimizerHLS::mapOutputRegistersToOutput() {
 
         // Do the same for the reset property
         for (const auto &commitment : propertySuite->getResetProperty()->getOperation()->getCommitmentsList()) {
-            if (NodePeekVisitor::nodePeekDataSignalOperand(commitment->getLhs())) {
-                const auto &dataSignal = StmtCastVisitor<DataSignalOperand>(
-                        commitment->getLhs()).Get()->getDataSignal();
-                if (dataSignal == output) {
+            if (const auto &dataSignalOp = StmtCastVisitor<DataSignalOperand>(commitment->getLhs()).Get()) {
+                if (dataSignalOp->getDataSignal() == output) {
                     getOutputReg(propertySuite->getResetProperty(), commitment->getRhs(), candidates);
                 }
             }
@@ -522,9 +511,8 @@ std::vector<DESCAM::Assignment *> OptimizerHLS::getNotifyStatements(std::shared_
         if (timePoint != "t_end" && temporalExpr->isDuring()) {
             continue;
         }
-        if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-            auto statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get();
-            if (NodePeekVisitor::nodePeekNotify(statement->getLhs())) {
+        if (const auto &statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get()) {
+            if (StmtCastVisitor<Notify>(statement->getLhs()).Get()) {
                 assignmentList.push_back(statement);
             }
         }
@@ -536,8 +524,7 @@ std::vector<DESCAM::Assignment *> OptimizerHLS::getResetStatements() {
     std::vector<DESCAM::Assignment *> assignmentList;
     auto temporalExprs = propertySuite->getResetProperty()->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {
-        if (NodePeekVisitor::nodePeekAssignment(temporalExpr->getStatement())) {
-            auto statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get();
+        if (const auto &statement = StmtCastVisitor<Assignment>(temporalExpr->getStatement()).Get()) {
             assignmentList.push_back(statement);
         }
     }

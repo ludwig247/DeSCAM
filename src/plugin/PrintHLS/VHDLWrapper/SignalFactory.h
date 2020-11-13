@@ -13,7 +13,6 @@
 #include "DataSignal.h"
 #include "OptimizerHLS.h"
 #include "PluginFactory.h"
-#include "NodePeekVisitor.h"
 
 namespace DESCAM {
     namespace HLSPlugin {

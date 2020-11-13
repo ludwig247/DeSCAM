@@ -7,8 +7,6 @@
 #include <set>
 #include <Stmts/StmtCastVisitor.h>
 
-#include "NodePeekVisitor.h"
-
 #include <PrintHLS/Common/Utilities.h>
 
 
@@ -382,10 +380,10 @@ bool BitConcatenation::evaluateOps(Bitwise* node) {
 }
 
 bool BitConcatenation::isConstValue(Expr *node) {
-    if (NodePeekVisitor::nodePeekIntegerValue(node)) {
+    if (StmtCastVisitor<IntegerValue>(node).Get()) {
         return true;
     }
-    if (NodePeekVisitor::nodePeekUnsignedValue(node)) {
+    if (StmtCastVisitor<UnsignedValue>(node).Get()) {
         return true;
     }
     if (auto cast = StmtCastVisitor<Cast>(node).Get()) {
