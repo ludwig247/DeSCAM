@@ -48,13 +48,15 @@ DESCAM::FindOperations::FindOperations(std::map<int, DESCAM::CfgNode *> controlF
             if(findComm.hasStateName()) {
                 stateName = findComm.getStateName();
             }
-            auto *state = new DESCAM::State(stateName);
+            auto state = new DESCAM::State(stateName);
 
             if(findComm.isWaitComm()) {
                 state->setWait();
+                state->SetLocationInfo(node->getStmt()->getStmtInfo());
                 this->statesMap.insert(std::make_pair(node->getName(), state));
             } else {
                 state->setCommunicationStmt(findComm.getCommStmt());
+                state->SetLocationInfo(node->getStmt()->getStmtInfo());
                 this->statesMap.insert(std::make_pair(node->getName(), state));
             }
         }
