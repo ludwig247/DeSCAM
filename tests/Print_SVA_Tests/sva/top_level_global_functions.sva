@@ -1,0 +1,21 @@
+
+
+// GLOBAL FUNCTIONS //
+function bit[31:0] compute (bit[31:0] param, int param2);
+	if (((param > 10) && (param2 > 10))) begin return (param + 1); end
+	else if (!(((param > 10) && (param2 > 10)))) begin return (param + unsigned'(32'(param2))); end
+endfunction
+
+function int compute2 (int param, bit[31:0] param2);
+	return (((param + signed'(32'(param2))) + 3) + nested(param2)); 
+endfunction
+
+function bit compute3 (bit param, bit[31:0] val);
+	if (param) begin return (val + 2); end
+	else if (!(param)) begin return val; end
+endfunction
+
+function int nested (bit[31:0] param2);
+	return (signed'(32'(param2)) + 3); 
+endfunction
+

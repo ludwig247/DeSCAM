@@ -1,0 +1,51 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestMasterSlave01_types.sva"
+`include "TestMasterSlave01_functions.sva"
+
+import top_level_types::*;
+
+module TestMasterSlave01_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestMasterSlave01.clk); endclocking
+`include "TestMasterSlave01_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 phase() == SECTION_A and
+	t##0 s_out_sig() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+	t##0 state_1() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 phase() == SECTION_A and
+	t_end(o)##0 s_out_sig() == 1337;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestMasterSlave01 TestMasterSlave01_verification inst (.*, .reset());

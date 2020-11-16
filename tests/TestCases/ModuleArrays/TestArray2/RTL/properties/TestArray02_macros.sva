@@ -1,0 +1,53 @@
+typedef enum { IDLE, WRITEVALUE } state_t;
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function b_in_sync;
+	b_in_sync = TestArray02.b_in_sync_d;
+endfunction
+function b_out_sync;
+	b_out_sync = TestArray02.b_out_sync_d;
+endfunction
+function b_in_notify;
+	b_in_notify = TestArray02.b_in_notify_d;
+endfunction
+function b_out_notify;
+	b_out_notify = TestArray02.b_out_notify_d;
+endfunction
+
+// DP SIGNALS //
+function int b_in_sig;
+	b_in_sig = TestArray02.b_in;
+endfunction
+function int b_out_sig;
+	b_out_sig = TestArray02.b_out;
+endfunction
+
+// VISIBLE REGISTERS //
+function int_5 myArray;
+	myArray = TestArray02.myArray_signal;
+endfunction
+function int myArray_0;
+	myArray_0 = TestArray02.myArray_signal[0];
+endfunction
+function int myArray_1;
+	myArray_1 = TestArray02.myArray_signal[1];
+endfunction
+function int myArray_2;
+	myArray_2 = TestArray02.myArray_signal[2];
+endfunction
+function int myArray_3;
+	myArray_3 = TestArray02.myArray_signal[3];
+endfunction
+function int myArray_4;
+	myArray_4 = TestArray02.myArray_signal[4];
+endfunction
+
+// STATES //
+function state_1;
+	state_1 = (TestArray02.currentstate == IDLE);
+endfunction
+function state_2;
+	state_2 = (TestArray02.currentstate == WRITEVALUE);
+endfunction
+
+

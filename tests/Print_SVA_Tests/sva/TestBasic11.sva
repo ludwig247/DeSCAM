@@ -1,0 +1,130 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestBasic11_types.sva"
+`include "TestBasic11_functions.sva"
+
+import top_level_types::*;
+
+module TestBasic11_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestBasic11.clk); endclocking
+`include "TestBasic11_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 b_out_sig_mode() == READ and
+	t##0 b_out_sig_x() == 0 and
+	t##0 b_out_sig_y() == 0 and
+	t##0 compoundType_mode() == READ and
+	t##0 compoundType_x() == 0 and
+	t##0 compoundType_y() == 0 and
+	t##0 nextphase() == SECTION_A and
+	t##0 phase() == SECTION_A and
+	t##0 b_out_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] compoundType_x_f;
+	t ##0 hold(compoundType_x_f, compoundType_x()) and
+	t##0 state_1() and
+	t##0 b_out_sync() and
+	t##0 !((phase() == SECTION_B)) and
+	t##0 (compoundType_x() >= 11)
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig_mode() == WRITE and
+	t_end(o)##0 b_out_sig_x() == (-1 + compoundType_x_f) and
+	t_end(o)##0 b_out_sig_y() == 0 and
+	t_end(o)##0 compoundType_mode() == WRITE and
+	t_end(o)##0 compoundType_x() == (-1 + compoundType_x_f) and
+	t_end(o)##0 compoundType_y() == 0 and
+	t_end(o)##0 nextphase() == SECTION_A and
+	t_end(o)##0 phase() == SECTION_A and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_2_p(o);
+ bit[31:0] compoundType_mode_f;
+ bit[31:0] compoundType_x_f;
+ bit[31:0] compoundType_y_f;
+ bit[31:0] nextphase_f;
+	t ##0 hold(compoundType_mode_f, compoundType_mode()) and
+	t ##0 hold(compoundType_x_f, compoundType_x()) and
+	t ##0 hold(compoundType_y_f, compoundType_y()) and
+	t ##0 hold(nextphase_f, nextphase()) and
+	t##0 state_1() and
+	t##0 b_out_sync() and
+	t##0 !((phase() == SECTION_B)) and
+	t##0 (nextphase() == SECTION_A) and
+	t##0 (compoundType_x() <= 10)
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig_mode() == compoundType_mode_f and
+	t_end(o)##0 b_out_sig_x() == compoundType_x_f and
+	t_end(o)##0 b_out_sig_y() == compoundType_y_f and
+	t_end(o)##0 compoundType_mode() == compoundType_mode_f and
+	t_end(o)##0 compoundType_x() == compoundType_x_f and
+	t_end(o)##0 compoundType_y() == compoundType_y_f and
+	t_end(o)##0 nextphase() == nextphase_f and
+	t_end(o)##0 phase() == nextphase_f and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_2_a: assert property (disable iff (reset) state_1_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_1_p(o);
+ bit[31:0] b_out_sig_f;
+ bit[31:0] compoundType_mode_f;
+ bit[31:0] compoundType_x_f;
+ bit[31:0] compoundType_y_f;
+ bit[31:0] nextphase_f;
+ bit[31:0] phase_f;
+	t ##0 hold(b_out_sig_f, b_out_sig()) and
+	t ##0 hold(compoundType_mode_f, compoundType_mode()) and
+	t ##0 hold(compoundType_x_f, compoundType_x()) and
+	t ##0 hold(compoundType_y_f, compoundType_y()) and
+	t ##0 hold(nextphase_f, nextphase()) and
+	t ##0 hold(phase_f, phase()) and
+	t##0 state_1() and
+	t##0 !(b_out_sync())
+implies
+	t##1 state_1() and
+	t##1 b_out_sig() == b_out_sig_f and
+	t##1 compoundType_mode() == compoundType_mode_f and
+	t##1 compoundType_x() == compoundType_x_f and
+	t##1 compoundType_y() == compoundType_y_f and
+	t##1 nextphase() == nextphase_f and
+	t##1 phase() == phase_f and
+	t##1 b_out_notify() == 1;
+endproperty;
+wait_state_1_a: assert property (disable iff (reset) wait_state_1_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestBasic11 TestBasic11_verification inst (.*, .reset());

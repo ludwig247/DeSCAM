@@ -1,0 +1,2 @@
+typedef bit[31:0] unsigned_4 [0:3];
+

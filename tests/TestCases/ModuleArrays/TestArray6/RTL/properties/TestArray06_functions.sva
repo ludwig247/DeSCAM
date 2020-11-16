@@ -1,0 +1,7 @@
+
+
+// FUNCTIONS //
+function bit[31:0] foobar (bit[31:0] num);
+	return num; 
+endfunction
+

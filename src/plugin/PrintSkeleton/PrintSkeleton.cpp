@@ -134,7 +134,6 @@ std::string PrintSkeleton::generateGlobalTypes() {
     // Testcases
     if (language == VHDL) {
       typeStream << "subtype bool is Boolean;\n";
-      typeStream << "subtype int is signed(31 downto 0);\n";
     }
 
     // Global enums
@@ -158,10 +157,6 @@ std::string PrintSkeleton::generateGlobalTypes() {
 }
 
 std::string PrintSkeleton::generateHDLSkeleton() {
-
-  if (this->module->getName() == "TestBasic16") {
-    std::cout << "TestBasic16" << std::endl;
-  }
 
   std::stringstream skeletonStream;
 
@@ -231,7 +226,7 @@ void PrintSkeleton::printCompoundType(std::stringstream &ss, const DESCAM::DataT
 void PrintSkeleton::printArrayType(std::stringstream &ss, const DESCAM::DataType *arrayType) {
   if (language == VHDL) {
     ss << "type " + arrayType->getName() << " is array(" << arrayType->getArraySize() - 1 << " downto 0) of ";
-    ss << arrayType->getArrayType()->getName() << ";\n";
+    ss << getDataTypeWrapper(arrayType->getArrayType()) << ";\n";
   } else if (language == SV) {
     ss << "\ttypedef " << getDataTypeWrapper(arrayType->getArrayType()) << " " << arrayType->getName();
     ss << " [0:" << arrayType->getArraySize() - 1 << "];\n\n";
@@ -247,7 +242,7 @@ void PrintSkeleton::printPackageHeader(std::stringstream &ss, const std::string 
     ss << "package " + packageName << "_types is\n";
   } else if (language == SV) {
     ss << "package " + convertToLower(packageName) << "_types;\n\n";
-    ss << "\t import " << convertToLower(globalPackageName) << "_types::*;\n";
+    ss << "\timport " << convertToLower(globalPackageName) << "_types::*;\n";
 
   }
 }
@@ -364,10 +359,9 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
   }
 
   int nonblockingIndentationLevel = 3;
+  std::list<std::string> resetArraysList;
 
   for (auto variable: module->getVariableMap()) {
-    if (variable.second->isArrayElement() && variable.second->getName() != "0")
-      continue; //Skip all other array elements
     if (variable.second->getDataType()->isCompoundType()) {
       for (auto subVar: variable.second->getSubVarList()) {
         std::string resetValue;
@@ -400,10 +394,16 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
 
     } else if (variable.second->isArrayType()) {
 
-      if (variable.second->getDataType()->getArrayType()->isInteger()) {
+      if (arrayHasBeenReset(resetArraysList, variable.first))
+        continue;
+      if (variable.second->getDataType()->getArrayType()->isInteger() || variable.second->getDataType()->getArrayType()->isUnsigned()) {
         std::string arrayDefaultValue;
         if (language == VHDL) {
-          arrayDefaultValue = "(others => to_signed(0, 32))";
+          if (variable.second->getDataType()->getArrayType()->isInteger()) {
+            arrayDefaultValue = "(others => to_signed(0, 32))";
+          } else if (variable.second->getDataType()->getArrayType()->isUnsigned()) {
+            arrayDefaultValue = "(others => to_unsigned(0, 32))";
+          }
         } else if (language == SV) {
           arrayDefaultValue = "'{default:0}";
         }
@@ -411,14 +411,21 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                     variable.first + "_signal",
                                     arrayDefaultValue,
                                     nonblockingIndentationLevel);
+        resetArraysList.push_back(variable.first);
       } else TERMINATE("not implemented");
 
-    } else if (variable.second->isArrayElement() && variable.second->getName() == "0") {
+    } else if (variable.second->isArrayElement()) {
 
-      if (variable.second->getParent()->getDataType()->getArrayType()->isInteger()) {
+      if (arrayHasBeenReset(resetArraysList, variable.second->getParent()->getFullName()))
+        continue;
+      if (variable.second->getParent()->getDataType()->getArrayType()->isInteger() || variable.second->getParent()->getDataType()->getArrayType()->isUnsigned()) {
         std::string arrayDefaultValue;
         if (language == VHDL) {
-          arrayDefaultValue = "(others => to_signed(0, 32))";
+          if (variable.second->getParent()->getDataType()->getArrayType()->isInteger()) {
+            arrayDefaultValue = "(others => to_signed(0, 32))";
+          } else if (variable.second->getParent()->getDataType()->getArrayType()->isUnsigned()) {
+            arrayDefaultValue = "(others => to_unsigned(0, 32))";
+          }
         } else if (language == SV) {
           arrayDefaultValue = "'{default:0}";
         }
@@ -426,6 +433,7 @@ void PrintSkeleton::resetLogic(std::stringstream &ss) {
                                     variable.second->getParent()->getFullName() + "_signal",
                                     arrayDefaultValue,
                                     nonblockingIndentationLevel);
+        resetArraysList.push_back(variable.second->getParent()->getFullName());
       } else TERMINATE("not implemented");
 
     } else {
@@ -640,6 +648,15 @@ std::string PrintSkeleton::generateGlobalDefs() {
     }
   }
   return ss.str();
+}
+
+bool PrintSkeleton::arrayHasBeenReset(std::list<std::string> resetArrayList, std::string arrayName) {
+    for (std::list<std::string>::iterator it = resetArrayList.begin(); it != resetArrayList.end(); it++){
+        if (arrayName == *it) {
+            return true;
+        }
+    }
+    return false;
 }
 
 

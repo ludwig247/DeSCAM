@@ -12,9 +12,11 @@
 std::map<std::string, std::string> PrintSVA::printModel(Model *node) {
     this->model = node;
     pluginOutput.insert(std::make_pair("ipc.sva", Text_ipc()));
+    pluginOutput.insert(std::make_pair("globalTypes.sva", dataTypes(DataTypes::getDataTypeMap())));
     for (auto &module: node->getModules()) {
         this->module = module.second;
         pluginOutput.insert(std::make_pair(module.first + ".sva", properties()));
+        pluginOutput.insert(std::make_pair(module.first + "_types.sva", dataTypes(DataTypes::getLocalDataTypes(this->module->getName()))));
         pluginOutput.insert(std::make_pair(module.first + "_macros.sva", macros()));
         pluginOutput.insert(std::make_pair(module.first + "_functions.sva", functions()));
     }
@@ -34,6 +36,8 @@ std::map<std::string, std::string> PrintSVA::printModule(DESCAM::Module *node) {
         pluginOutput.insert(std::make_pair(node->getName() + "_functions.sva", funString));
     return pluginOutput;
 }
+
+const std::string PrintSVA::freezeSigSuffix = "_f";
 
 ////////////////
 std::string PrintSVA::Text_ipc() {
@@ -86,9 +90,13 @@ std::string PrintSVA::macros() {
 std::string PrintSVA::properties() {
     std::stringstream result;
     result
-            << dataTypes() << "\n"
             << "`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR\n\n"
             << "`include \"ipc.sva\"\n"
+            << "`include \"globalTypes.sva\"\n";
+    if (!this->model->getGlobalFunctionMap().empty()) {
+        result << "`include \"" << this->model->getName() << "_global_functions.sva\"\n";
+    }
+    result  << "`include \"" << this->module->getName() << "_types.sva\"\n"
             << "`include \"" << this->module->getName() << "_functions.sva\"\n\n"
             << "import top_level_types::*;\n\n"
             //<< "import " << tolower(this->module->getName()) << "_functions::*;\n\n"
@@ -152,7 +160,7 @@ std::string PrintSVA::functions() {
                 }
                 ss << ") begin return ";
                 //TODO: The following lines print statements like "regfile.reg_file_01", which should be changed to "regfile_reg_file_01"
-                ss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
+                ss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
             } else {
                 ss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
             }
@@ -163,22 +171,15 @@ std::string PrintSVA::functions() {
     return ss.str();
 }
 
-std::string PrintSVA::dataTypes() {
+std::string PrintSVA::dataTypes(std::map<std::basic_string<char>, DataType *> dataTypes) {
 
     std::stringstream ss;
 
-    ss << "// DATA TYPES //\n";
-    for (auto type: DataTypes::getDataTypeMap()) {
-        if (type.second->isEnumType()) {
-            ss << "typedef enum {";
-            for (auto it = type.second->getEnumValueMap().begin(); it != type.second->getEnumValueMap().end(); ++it) {
-                ss << it->first;
-                if (std::next(it) != type.second->getEnumValueMap().end())
-                    ss << ", ";
-            }
-            ss << "} " << type.second->getName() << ";\n";
-        }
-    }
+    ss << dataTypesEnum(dataTypes);
+
+    ss << dataTypesStruct(dataTypes);
+
+    ss << dataTypesArray(dataTypes);
 
     return ss.str();
 }
@@ -323,12 +324,15 @@ std::string PrintSVA::operations() {
         if (!op->getFreezeSignals().empty()) {
             for (auto f : op->getFreezeSignals()) {
                 std::cout << f.first->getFullName("_") << std::endl;
-                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << "_0;\n";
+                ss << " " << convertDataType(f.second->getDataType()) << " " << f.first->getFullName("_") << freezeSigSuffix;
+                if (f.first->getDataType()->isArrayType())
+                    ss << " [" << f.first->getDataType()->getArraySize() - 1 << ":0]";
+                ss << ";\n";
             }
             for (auto f : op->getFreezeSignals()) {
                 if(f.first->isSubVar() && f.first->getParentDataType()->isArrayType()){
-                    ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getParentName() << "("  << f.first->getSubVarName() <<")) and\n";
-                }else ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << "_0, " << f.first->getFullName("_") << "()) and\n";
+                    ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << freezeSigSuffix << ", " << f.first->getParentName() << "_"  << f.first->getSubVarName() <<"()) and\n";
+                }else ss << "\t" << f.second->getName() << " ##0 hold(" << f.first->getFullName("_") << freezeSigSuffix << ", " << f.first->getFullName("_") << "()) and\n";
             }
         }
 
@@ -422,7 +426,7 @@ std::string PrintSVA::globalFunctions() {
                 }
                 globss << ") begin return ";
                 //TODO: The following lines print statements like "regfile.reg_file_01", which should be changed to "regfile_reg_file_01"
-                globss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
+                globss << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; end\n";
             } else {
                 globss << "return " << ConditionVisitorSVA::toString(returnValue.first->getReturnValue()) << "; \n";
             }
@@ -431,4 +435,55 @@ std::string PrintSVA::globalFunctions() {
         globss << "endfunction\n\n";
     }
     return globss.str();
+}
+
+
+std::string PrintSVA::dataTypesEnum(std::map<std::basic_string<char>, DataType *> dataTypeMap) {
+    std::stringstream enumss;
+
+    for (auto type: dataTypeMap) {
+        if (type.second->isEnumType()) {
+            enumss << "typedef enum { ";
+            std::map<std::basic_string<char>, int> enumvaluemap = type.second->getEnumValueMap();
+            for (auto it = enumvaluemap.begin(); it != enumvaluemap.end(); ++it) {
+                enumss << it->first;
+
+                if (std::next(it) != enumvaluemap.end())
+                    enumss << ", ";
+            }
+            enumss << " } " << type.second->getName() << ";\n\n";
+        }
+    }
+
+    return enumss.str();
+}
+
+std::string PrintSVA::dataTypesStruct(std::map<std::basic_string<char>, DataType *> dataTypeMap) {
+    std::stringstream structss;
+
+    for (auto type: dataTypeMap) {
+        if (type.second->isCompoundType()) {
+            structss << "typedef struct {\n";
+            std::map<std::basic_string<char>, DataType *> subvarmap = type.second->getSubVarMap();
+            for (auto it = subvarmap.begin(); it != subvarmap.end(); it++) {
+                structss << "\t" << convertDataType(it->second) << " " << it->first << ";\n";
+            }
+            structss << "} " << type.second->getName() << ";\n\n";
+        }
+    }
+
+    return structss.str();
+}
+
+std::string PrintSVA::dataTypesArray(std::map<std::basic_string<char>, DataType *> dataTypeMap) {
+    std::stringstream  arrayss;
+
+    for (auto type: dataTypeMap) {
+        if (type.second->isArrayType()) {
+            arrayss << "typedef " << convertDataType(type.second->getArrayType()) << " " << type.first;
+            arrayss << " [0:" << (type.second->getArraySize() - 1) << "];\n\n";
+        }
+    }
+
+    return arrayss.str();
 }
