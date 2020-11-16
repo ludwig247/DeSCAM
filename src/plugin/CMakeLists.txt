@@ -15,7 +15,7 @@
 #Add new plugins by calling:
 
 add_plugin(PrintITL; "Complete set of properties in ITL")
-add_plugin(PrintSVA; "Complete set of properties in SVA")
+#add_plugin(PrintSVA; "Complete set of properties in SVA")
 
 
 #add_plugin(PrintTrueOperation; "Prints REAL operations ... ")
@@ -29,8 +29,9 @@ add_plugin(PrintSkeleton; "Structure and FSM in AML")
 #add_plugin(PrintCFGDot; "Present Control Flow Graph of every module as .dot file" ; PrintDot)
 #add_plugin(PrintCompleteness; "Completeness description in ITL")
 
-#add_plugin(PrintTemplate; "Example for a plugin")
+add_plugin(PrintTemplate; "Example for a plugin")
 
+#add_plugin(testPlugin; "Test Plugin" ; testPlugin)
 
 #add_plugin(PrintVHDL; "Print VHDL template")
 add_plugin(PrintHLS; "Print C++ Files, VHDL Wrapper and scripts for Vivado High Level Synthesis")

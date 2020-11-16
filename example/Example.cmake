@@ -14,6 +14,7 @@ add_example(Framer; Print_ITL_Tests)
 #add_example(RISCV_RI5CY; Print_ITL_Tests)
 #add_example(RISCV_MS; Print_ITL_Tests)
 #add_example(Whishbone; Print_ITL_Tests)
+#add_example(RISCV_Test_ELF)
 
 #add_example(example_test)
 #add_example(example_with_more_arg; A_Test; test_with_args)

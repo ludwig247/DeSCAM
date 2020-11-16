@@ -11,7 +11,7 @@
 
 std::map<std::string, std::string> testPlugin::printModel(Model *node) {
 
-    std::map<std::string, Module *> moduleMap = node->getModules();
+    /*std::map<std::string, Module *> moduleMap = node->getModules();
     for (auto module : node->getModules()) {
 
         findStateStmt(module.second->getFSM());
@@ -19,13 +19,13 @@ std::map<std::string, std::string> testPlugin::printModel(Model *node) {
         instrumentModule(module.second);
 
         for (auto v : vars){
-            //LocationInfo loc = v.second->getStmtInfo();
+            LocationInfo loc = v.second->getStmtInfo();
             std::cout << v << std::endl;
         }
 
-        //std::cout << ss.str();
-        //pluginOutput.insert(std::make_pair("inst_" + module.first + ".h",ss.str()));
-    }
+        std::cout << ss.str();
+        pluginOutput.insert(std::make_pair("inst_" + module.first + ".h",ss.str()));
+    }*/
 
 
     return pluginOutput;

@@ -1,2 +1,3 @@
-add_library(testPlugin SHARED
-        testPlugin.cpp)
+add_library(testPlugin
+            testPlugin.cpp
+            testPlugin.h)

@@ -13,4 +13,6 @@ add_subdirectory(FPI)
 #add_subdirectory(RISCV_RI5CY)
 #add_subdirectory(I2C)
 #add_subdirectory(Tobias_test)
+#add_subdirectory(RIS)
+#add_subdirectory(RISCV)
 

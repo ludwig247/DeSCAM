@@ -18,6 +18,13 @@ public:
     ~testPlugin() = default;
     std::map<std::string, std::string> printModel(Model *node);
 
+    std::map<std::string, bool> getOptionMap() {
+        //std::map<std::string, bool> m;
+        //return m;
+
+        return CommandLineParameter::getOptionMap("PrintSVA");
+    }
+
     std::stringstream ss;
 
 
