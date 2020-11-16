@@ -11,21 +11,44 @@
 
 std::map<std::string, std::string> testPlugin::printModel(Model *node) {
 
-    /*std::map<std::string, Module *> moduleMap = node->getModules();
+    std::map<std::string, Module *> moduleMap = node->getModules();
     for (auto module : node->getModules()) {
 
         findStateStmt(module.second->getFSM());
+        setVarStr(vars);
         findOpStmt(module.second->getFSM());
         instrumentModule(module.second);
 
-        for (auto v : vars){
-            LocationInfo loc = v.second->getStmtInfo();
-            std::cout << v << std::endl;
-        }
 
-        std::cout << ss.str();
+        /*for (auto v : module.second->getFSM()->getStateMap()){
+            if (v.second->isWait()){
+                for (auto w : v.second->getIncomingOperationsList()){
+                    std::cout << "St" << std::endl;
+                    for (auto x : w->getStatementsList()){
+                        auto l = x->getStmtInfo();
+                        std::cout << PrintStmt::toString(x) << l.getRowStartNumber() << std::endl;
+                    }
+                    std::cout << "As" << std::endl;
+                    for (auto x : w->getAssumptionsList()){
+                        std::cout << PrintStmt::toString(x) << std::endl;
+                    }
+                    std::cout << "Com" << std::endl;
+                    for (auto x : w->getCommitmentsList()){
+                        std::cout << PrintStmt::toString(x) << std::endl;
+                    }
+                    std::cout << "-------------" << w->print() << "-----------" << w->IsWait() << "----\n";
+                }
+            }
+        }*/
+
+        /*for (auto v : opStmt){
+            std::cout << v.first << " " << PrintStmt::toString(v.second) << std::endl;
+        }*/
+
+
+        //std::cout << ss.str();
         pluginOutput.insert(std::make_pair("inst_" + module.first + ".h",ss.str()));
-    }*/
+    }
 
 
     return pluginOutput;
@@ -56,9 +79,9 @@ void testPlugin::printPrefix(int val){
 
 void testPlugin::printMain(int val1, int val2, FSM *node) {
     std::string lineStr,fName;
-    for(int i = val1; i <= val2; i++){
-        std::getline(inFile,lineStr);
-        if (lineStr.find("SC_HAS_PROCESS(")!= std::string::npos) ss << "unsigned int originState;" << std::endl;
+    for(int i = val1;; i++){
+        if (!std::getline(inFile,lineStr)) break;
+        if (lineStr.find("SC_HAS_PROCESS(")!= std::string::npos) ss << "unsigned int originState, operation;" << std::endl;
 
         std::size_t startPosition = lineStr.find("SC_THREAD(");
         if (startPosition != std::string::npos) {
@@ -67,11 +90,14 @@ void testPlugin::printMain(int val1, int val2, FSM *node) {
             fName = lineStr.substr(startPosition, length);
         }
 
-        /*for(auto state : node->getStateMap()) {
-            if (state.second->isInit() | state.second->isWait()) continue;
+        for(auto state : node->getStateMap()) {
+            if (state.second->isInit()) continue;
             LocationInfo loc = stateStmt.at(state.first)->getStmtInfo();
-            if (i == loc.getRowStartNumber()){
-                for(auto op : state.second->getOutgoingOperationsList()){
+            int rowno;
+            if (state.second->isWait()) rowno = loc.getRowStartNumber() + 1;
+            else rowno = loc.getRowStartNumber();
+            if (i == rowno){
+                /*for(auto op : state.second->getOutgoingOperationsList()){
                     if ((op->getState() == op->getNextState()) | (op->getState()->isWait()) | (op->getState()->isInit())) continue;
                     ss << "if (originState == " << op->getState()->getStateId() << ") \n";
                     for(auto st: op->getStatementsList()){
@@ -83,24 +109,35 @@ void testPlugin::printMain(int val1, int val2, FSM *node) {
                         }
                     }
                     ss << "PowerEstimator::getInstance().countOperation(name(), " << op->getId() << ");" << std::endl;
-                }
+                }*/
+                ss << "PowerEstimator::getInstance().update(name(), operation, " << varStr << ");" << std::endl;
                 //ss << "-----------------" << state.first << "----------------" << std::endl;
                 break;
             }
-        }*/
+        }
 
         ss << lineStr << std::endl;
 
         if ((lineStr.find("void ") != std::string::npos) & (lineStr.find(fName) != std::string::npos) & (lineStr.find(";") == std::string::npos)) {
-                    ss << "PowerEstimator::getInstance().initializeOperations(name(), " << opNo << ");" << std::endl;
-                    ss << "PowerEstimator::getInstance().countOperation(name(), 0);" << std::endl;
+            ss << "PowerEstimator::getInstance().initialize(name(), " << opNo << ", "<< varStr << ");" << std::endl;
+            ss << "operation = 0;" << std::endl;
+            for (auto state : node->getStateMap()){
+                if (state.second->isInit()){
+                    for (size_t j = 0; j < vars.size(); ++j) {
+                        ss << PrintStmt::toString(state.second->getOutgoingOperationsList().at(0)->getStatementsList().at(j)) << "; ";
+                    }
+                }
+            }
         }
 
         bool flag = false;
         for(auto state : node->getStateMap()) {
-            if (state.second->isInit() | state.second->isWait()) continue;
+            if (state.second->isInit()) continue;
             LocationInfo locSt = stateStmt.at(state.first)->getStmtInfo();
-            if (i == locSt.getRowStartNumber()){
+            int rowno;
+            if (state.second->isWait()) rowno = locSt.getRowStartNumber() + 1;
+            else rowno = locSt.getRowStartNumber();
+            if (i == rowno){
                 ss << "originState = " << state.first << ";" << std::endl;
                 //ss << "-----------------" << state.first << "----------------" << std::endl;
                 flag = true;
@@ -118,7 +155,7 @@ void testPlugin::printMain(int val1, int val2, FSM *node) {
                             }
                         }
                     }
-                    ss << "PowerEstimator::getInstance().countOperation(name(), " << op->getId() << ");" << std::endl;
+                    ss << "operation = " << op->getId() << ";" << std::endl;
                 }
             }
             if (flag) break;
@@ -135,8 +172,8 @@ void testPlugin::printSuffix() {
 
 void testPlugin::findStateStmt(FSM *node) {
     for (auto state : node->getStateMap()) {
-        if (state.second->isWait() ) continue;
-        else if (state.second->isInit())  {
+        //if (state.second->isWait() ) continue;
+        if (state.second->isInit())  {
             for (auto op : state.second->getOutgoingOperationsList()){
                 for (auto st : op->getStatementsList()){
                     if (NodePeekVisitor::nodePeekAssignment(st) != nullptr){
@@ -145,6 +182,11 @@ void testPlugin::findStateStmt(FSM *node) {
                 }
                 break;
             }
+            continue;
+        }
+        if (state.second->isWait()) {
+            auto st = state.second->getIncomingOperationsList().at(0)->getStatementsList();
+            stateStmt.insert(std::make_pair(state.first, st.back()));
             continue;
         }
         bool flag = false;
@@ -165,8 +207,8 @@ void testPlugin::findStateStmt(FSM *node) {
 void testPlugin::findOpStmt(FSM *node) {
     for (auto state : node->getStateMap()){
         for (auto op : state.second->getOutgoingOperationsList()){
-            if (op->getState() == op->getNextState()) continue;
-            if (!(op->getState()->isInit() | op->getState()->isWait())){
+            if (op->IsWait()) continue;
+            if (!(op->getState()->isInit())){
                 bool flagif = false;
                 bool flagset = false;
                 for (auto it = op->getStatementsList().rbegin(); it != op->getStatementsList().rend();it++){
@@ -185,4 +227,17 @@ void testPlugin::findOpStmt(FSM *node) {
         }
     }
     //opNo;
+}
+
+void testPlugin::setVarStr(std::set<std::string> vars) {
+    bool flag = false;
+    varStr = "{";
+    for (auto var : vars){
+        if (flag) varStr += (", " + var);
+        else {
+            varStr += var;
+            flag = true;
+        }
+    }
+    varStr += "}";
 }

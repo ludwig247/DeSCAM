@@ -22,7 +22,7 @@ public:
         //std::map<std::string, bool> m;
         //return m;
 
-        return CommandLineParameter::getOptionMap("PrintSVA");
+        return CommandLineParameter::getOptionMap("testPlugin");
     }
 
     std::stringstream ss;
@@ -35,13 +35,16 @@ private:
     void printSuffix();
     void findStateStmt(FSM *node);
     void findOpStmt(FSM *node);
+    void setVarStr (std::set<std::string> vars);
 
     std::ifstream inFile;
     //unsigned int operationsCounter = 6;
     std::map <int, DESCAM::Stmt *> stateStmt;
     std::map <int, DESCAM::Stmt *> opStmt;
     std::set<std::string> vars;
+    std::string varStr;
     unsigned int opNo = 0;
+
 };
 
 
