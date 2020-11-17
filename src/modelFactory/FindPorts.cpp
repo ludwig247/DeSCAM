@@ -1,4 +1,3 @@
-#include <clang/AST/PrettyPrinter.h>
 #include <GlobalUtilities.h>
 #include "FindPorts.h"
 #include "FindNewDatatype.h"
@@ -27,150 +26,60 @@ bool FindPorts::setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance
 
     bool success = true;
     GetClangPorts get_clang_ports(success, find_new_datatype_, ci, record_decl);
-    if (!success)return success;
 
-    auto portsLocationMap = get_clang_ports.getLocationInfoMap();
-    //Add Ports -> requires Name, Interface and DataType
+    const auto &kLocationMap = get_clang_ports.getLocationInfoMap();
     //Rendezvous
     //Input ports
-    for (auto &port: get_clang_ports.getInPortMap()) {
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("blocking", "in"))
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Port *inPort = nullptr;
-      DESCAM_ASSERT (if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                       inPort = new Port(port.first, interface,
-                                         DataTypes::getDataType(
-                                             port.second),
-                                         portsLocationMap[port.first]);
-                     else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                         port_map.insert(std::make_pair(port.first, inPort)))
-    }
+    setPorts(get_clang_ports.getInPortMap(), "blocking", "in", module, kLocationMap);
     //Output ports
-    for (auto &port: get_clang_ports.getOutPortMap()) {
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("blocking", "out"))
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Port *outPort = nullptr;
-      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                      outPort = new Port(port.first, interface,
-                                         DataTypes::getDataType(
-                                             port.second),
-                                         portsLocationMap[port.first]);
-                    else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, outPort)))
-    }
+    setPorts(get_clang_ports.getOutPortMap(), "blocking", "out", module, kLocationMap);
 
     //AlwaysReady
-    //Input ports
-    for (auto &port: get_clang_ports.getMasterInPortMap()) {
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("master", "in"))
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Port *inPort = nullptr;
-      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                      inPort = new Port(port.first, interface,
-                                        DataTypes::getDataType(
-                                            port.second),
-                                        portsLocationMap[port.first]);
-                    else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, inPort)))
-
-    }
+    setPorts(get_clang_ports.getMasterInPortMap(), "master", "in", module, kLocationMap);
     //Output ports
-    for (auto &port: get_clang_ports.getMasterOutPortMap()) {
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("master", "out"))
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Port *outPort = nullptr;
-      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                      outPort = new Port(port.first, interface,
-                                         DataTypes::getDataType(
-                                             port.second),
-                                         portsLocationMap[port.first]);
-                    else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, outPort)))
-    }
+    setPorts(get_clang_ports.getMasterOutPortMap(), "master", "out", module, kLocationMap);
 
     //Input ports
-    for (auto &port: get_clang_ports.getSlaveInPortMap()) {
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("slave", "in"))
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Port *inPort = nullptr;
-      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                      inPort = new Port(port.first, interface,
-                                        DataTypes::getDataType(
-                                            port.second),
-                                        portsLocationMap[port.first]);
-                    else inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, inPort)))
-
-    }
+    setPorts(get_clang_ports.getSlaveInPortMap(), "slave", "in", module, kLocationMap);
     //Output ports
-    for (auto &port: get_clang_ports.getSlaveOutPortMap()) {
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("slave", "out"))
-      Port *outPort = nullptr;
-      DESCAM_ASSERT(if (portsLocationMap.find(port.first) != portsLocationMap.end())
-                      outPort = new Port(port.first, interface,
-                                         DataTypes::getDataType(
-                                             port.second),
-                                         portsLocationMap[port.first]);
-                    else outPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, outPort)))
-    }
+    setPorts(get_clang_ports.getSlaveOutPortMap(), "slave", "out", module, kLocationMap);
 
     //Shared ports
     //Input ports
-    for (auto &port: get_clang_ports.getInSharedPortMap()) {
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE("No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("shared", "in"))
-      Port *inPort = nullptr;
-      DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, inPort)))
-
-    }
+    setPorts(get_clang_ports.getInSharedPortMap(), "shared", "in", module, kLocationMap);
     //Output ports
-    for (auto &port: get_clang_ports.getOutSharedPortMap()) {
-      if (DataTypes::isLocalDataType(port.second, module->getName())) {
-        TERMINATE(
-            "No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second);
-      }
-      Interface *interface = nullptr;
-      DESCAM_ASSERT(interface = new Interface("shared", "out"))
-      Port *inPort = nullptr;
-      DESCAM_ASSERT(inPort = new Port(port.first, interface, DataTypes::getDataType(port.second));
-                        port_map.insert(std::make_pair(port.first, inPort)))
-    }
+    setPorts(get_clang_ports.getOutSharedPortMap(), "shared", "out", module, kLocationMap);
 
     return success;
   }
 }
 std::map<std::string, Port *> FindPorts::getPortMap() const {
   return this->port_map;
+}
+
+void FindPorts::setPorts(const std::map<std::string, std::string> &clangPorts,
+                         const std::string &type,
+                         const std::string &direction,
+                         Module *module,
+                         const std::map<std::string, LocationInfo> &LocInfo) {
+
+  for (auto &port: clangPorts) {
+    if (DataTypes::isLocalDataType(port.second, module->getName())) {
+      TERMINATE("No local datatypes for ports allowed!\n Port: " + port.first + "\nType: " + port.second)
+    }
+
+    DESCAM_ASSERT(
+        {
+          auto interface = new Interface(type, direction);
+          Port *p;
+          if (LocInfo.find(port.first) != LocInfo.end()) {
+            p = new Port(port.first, interface, DataTypes::getDataType(port.second), LocInfo.at(port.first));
+          } else {
+            p = new Port(port.first, interface, DataTypes::getDataType(port.second));
+          }
+          port_map.emplace(port.first, p);
+        })
+  }
 }
 
 }

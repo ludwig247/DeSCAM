@@ -10,31 +10,29 @@
 #include "Operand.h"
 
 namespace DESCAM {
-    class ArrayOperand : public Expr {
-    public:
-        ArrayOperand() = delete;
+class ArrayOperand : public Expr {
+ public:
+  ArrayOperand() = delete;
 
-        ArrayOperand(Variable *arrayVar, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
-        ArrayOperand(Operand * operand, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
+  ArrayOperand(Variable *arrayVar, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
+  ArrayOperand(Operand *operand, Expr *idx, LocationInfo stmtLocationInfo = LocationInfo());
 
+  ~ArrayOperand() override = default;
 
-        virtual ~ArrayOperand() = default;
+  Operand *getArrayOperand() const;
 
-        Operand * getArrayOperand() const;
+  Expr *getIdx() const;
 
+  bool operator==(const Stmt &other) const override;
 
-        Expr *getIdx() const;
+  void accept(StmtAbstractVisitor &visitor) override;
 
-        virtual bool operator==(const Stmt &other) const;
+ private:
+  DESCAM::Variable *array_var_{};
+  Operand *operand_;
 
-        virtual void accept(StmtAbstractVisitor &visitor);
-
-    private:
-        DESCAM::Variable *arrayVar;
-        Operand * operand;
-
-        DESCAM::Expr *idx;
-    };
+  DESCAM::Expr *idx_;
+};
 }
 
 #endif //PROJECT_SELECT_H

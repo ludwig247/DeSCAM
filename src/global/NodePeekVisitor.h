@@ -12,6 +12,7 @@ namespace DESCAM {
     class NodePeekVisitor : public StmtAbstractVisitor {
 
     public:
+        [[deprecated("Use StmtCastVisitor() instead.")]]
         explicit NodePeekVisitor(Stmt *node);
 
         bool isConstTypeNode() const;

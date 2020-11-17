@@ -16,7 +16,9 @@ class IFindNewDatatype {
   virtual ~IFindNewDatatype() = default;
 
   virtual DESCAM::DataType *getDataType(const clang::QualType &type) = 0;
+
   virtual std::string getTypeName(const clang::QualType &type) = 0;
+
   virtual bool isGlobal(const clang::QualType &type) = 0;
 };
 }

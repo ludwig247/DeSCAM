@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
-
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # TODO: project name and supported languages
 project(SCAM CXX)
 # project version

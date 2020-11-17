@@ -118,7 +118,7 @@ TEST(TestCase4, no_mock) /* NOLINT */{
       find_modules.get(),
       find_global.get(),
       find_instances.get());
-  setup("/tests/TestCases/TestCasesForMocking/", "TestCase3", model_factory);
+  setup("/tests/TestCases/TestCasesForMocking/", "TestCase4", model_factory);
 }
 
 #endif //SCAM_TESTS_GMOCK_TEST_NOMOCKS_H_

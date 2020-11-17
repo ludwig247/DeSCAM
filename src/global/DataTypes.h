@@ -48,17 +48,17 @@ namespace DESCAM {
 
     private:
         DataTypes() {
-            dataTypeMap.insert(std::make_pair("bool", new DataType("bool")));
-            dataTypeMap.insert(std::make_pair("int", new DataType("int")));
-            dataTypeMap.insert(std::make_pair("unsigned", new DataType("unsigned")));
+            dataTypeMap.emplace("bool",  new DataType("bool"));
+            dataTypeMap.emplace("int", new DataType("int"));
+            dataTypeMap.emplace("unsigned", new DataType("unsigned"));
             localDataTypeMap = {};
         };
 
-        ~ DataTypes() {};
-        //! Map containg an entry TypeName,TypePtr for each datatype
+        ~ DataTypes() = default;;
+        //! Map containing an entry TypeName,TypePtr for each datatype
         std::map<std::string, DataType *> dataTypeMap;
 
-        //! Map containg the local dataTypes for each module
+        //! Map containing the local dataTypes for each module
         std::map<std::string, std::map<std::string, DataType *>> localDataTypeMap;
 
 

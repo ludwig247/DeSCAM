@@ -1,4 +1,4 @@
-//===-- src/PluginAction.h - systec-clang class definition -------*- C++ -*-===//
+//===-- src/PluginAction.h - systemc-clang class definition -------*- C++ -*-===//
 //
 //                     modelFactory: SystemC Parser
 //
