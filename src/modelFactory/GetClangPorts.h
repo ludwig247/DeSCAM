@@ -17,7 +17,7 @@ class GetClangPorts : public clang::RecursiveASTVisitor<GetClangPorts> {
                 clang::CXXRecordDecl *record_decl);
 
   //Visitor
-  virtual bool VisitFieldDecl(clang::FieldDecl *fieldDecl);
+  virtual bool VisitFieldDecl(clang::FieldDecl *field_decl);
   //GETTER
   const std::map<std::string, std::string> &getInPortMap() const;
   const std::map<std::string, std::string> &getOutPortMap() const;

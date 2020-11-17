@@ -77,7 +77,7 @@ int main(int argc, const char **argv) {
     DESCAM::Logger::log();
   }
   //Printing options according to commandline styles chosen
-  if (cml.getActivePlugins().size() > 0) {
+  if (!cml.getActivePlugins().empty()) {
     std::cout << "==================================================================" << std::endl;
     std::cout << "......................... Printing model ........................." << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;

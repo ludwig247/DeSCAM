@@ -25,17 +25,17 @@ DESCAM::Assignment::Assignment(DESCAM::Expr *lhs, DESCAM::Expr *rhs, LocationInf
         std::stringstream ss;
         ss << "ERROR: " << lhs->getDataType()->getName() << " != " << rhs->getDataType()->getName();
         ss << " in assignment: " << PrintStmt::toString(lhs) << " = " << PrintStmt::toString(rhs) << std::endl;
-        ss << "Assignment: differnt DataTypes not allowed!";
+        ss << "Assignment: different DataTypes not allowed!";
         throw DESCAM::DescamException(ss.str(),this->stmtLocationInfo);
     }
 
     if (NodePeekVisitor::nodePeekArrayOperand(lhs)) {
-        std::string msg = "LHS of assignemnt: It is not allowed to assign a value to an array with non-const index";
+        std::string msg = "LHS of assignment: It is not allowed to assign a value to an array with non-const index";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
         throw DESCAM::DescamException(msg,this->stmtLocationInfo);
     }
     if (NodePeekVisitor::isConstTypeNode(lhs)) {
-        std::string msg = "LHS of assignemnt has to be a variable";
+        std::string msg = "LHS of assignment has to be a variable";
         msg += " in assignment: " + PrintStmt::toString(lhs) + " = " + PrintStmt::toString(rhs);
         throw DESCAM::DescamException(msg,this->stmtLocationInfo);
     }

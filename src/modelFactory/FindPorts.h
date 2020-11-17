@@ -14,8 +14,8 @@ namespace DESCAM {
  */
 class FindPorts : public IFindPorts {
  public:
-  FindPorts(IFindNewDatatype *find_new_datatype);
-  virtual ~FindPorts() = default;
+  explicit FindPorts(IFindNewDatatype *find_new_datatype);
+  ~FindPorts() override = default;
 
   bool setup(clang::CXXRecordDecl *record_decl, clang::CompilerInstance *ci, Module *module) override;
   std::map<std::string, Port *> getPortMap() const override;
@@ -24,7 +24,13 @@ class FindPorts : public IFindPorts {
   IFindNewDatatype *find_new_datatype_;
 
   std::map<std::string, Port *> port_map;
-  clang::CXXRecordDecl *record_decl_;
+  clang::CXXRecordDecl *record_decl_{};
+
+  void setPorts(const std::map<std::string, std::string> &clangPorts,
+                const std::string &type,
+                const std::string &direction,
+                Module *module,
+                const std::map<std::string, LocationInfo> &LocInfo);
 };
 
 }

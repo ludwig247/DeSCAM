@@ -7,6 +7,7 @@
 
 
 #include <cassert>
+#include <utility>
 #include "AbstractNode.h"
 
 namespace DESCAM {
@@ -27,12 +28,12 @@ namespace DESCAM {
  *  It is constructed in two steps:
  *  1) Create a type for the compound
  *  DataType * Complex = new DataType("compound-type name"); e.g. "Complex"
- *  2) Add all subvariables
+ *  2) Add all sub-variables
  *  Complex->addSubVar(x,DataTypeMap[int])
  *
  *  enum-type:
  *  Enum foo<A,B,C>
- *  Its constructed in two stesps
+ *  Its constructed in two steps
  *  1) Create a type for the enum
  *  DataType *  foo = new DataType("enum-type name"); e.g. "foo"
  *  2) Add all possible enum values
@@ -44,33 +45,33 @@ namespace DESCAM {
 
     class DataType : public AbstractNode {
     public:
-        DataType(std::string name, LocationInfo locationInfo = LocationInfo()) :
-                AbstractNode(name, locationInfo) {};
+        explicit DataType(std::string name, LocationInfo locationInfo = LocationInfo()) :
+                AbstractNode(std::move(name), std::move(locationInfo)) {};
 
         //Adder
-        void addSubVar(std::string subVarName, DataType *subVarType);
+        void addSubVar(const std::string& subVarName, DataType *subVarType);
 
-        void addEnumValue(std::string enumValue);
+        void addEnumValue(const std::string& enumValue);
 
         void addArray(DataType *arrayType, int arraySize);
 
         //Getter
         //TODO: make protected ... every object should implement typeInterface
-        const bool isCompoundType() const;
+        bool isCompoundType() const;
 
-        const bool isEnumType() const;
+        bool isEnumType() const;
 
-        const bool isUnsigned() const;
+        bool isUnsigned() const;
 
-        const bool isInteger() const;
+        bool isInteger() const;
 
-        const bool isBoolean() const;
+        bool isBoolean() const;
 
-        const bool isBuiltInType() const;
+        bool isBuiltInType() const;
 
-        const bool isVoid() const;
+        bool isVoid() const;
 
-        const bool isArrayType() const;
+        bool isArrayType() const;
 
         ConstValue *getDefaultVal() const;
 
@@ -83,13 +84,13 @@ namespace DESCAM {
         const std::map<std::string, int> &getEnumValueMap() const;
 
         //Visitor
-        virtual void accept(AbstractVisitor &visitor);
+        void accept(AbstractVisitor &visitor) override;
 
     private:
-        int arraySize = 0;
-        DataType *arrayType = nullptr;
-        std::map<std::string, DESCAM::DataType *> subVarMap; //! Contains an entry <subVarName,subVarType>
-        std::map<std::string, int> enumValueMap; //! Contains an entry <elementName,int> for every possible value
+        int array_size_ = 0;
+        DataType *array_type_ = nullptr;
+        std::map<std::string, DESCAM::DataType *> sub_var_map_; //! Contains an entry <subVarName,subVarType>
+        std::map<std::string, int> enum_value_map_; //! Contains an entry <elementName,int> for every possible value
     };
 
 
