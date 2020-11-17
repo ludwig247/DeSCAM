@@ -66,6 +66,7 @@ void Blocking<T>::read(T &out) {
 
     //memcpy(out, *shared_data, sizeof(T));
     out = *shared_data;
+
     available_data = false;
     reader_notify.notify();
 }
