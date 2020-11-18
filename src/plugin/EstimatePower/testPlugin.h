@@ -35,7 +35,7 @@ private:
     void printSuffix();
     void findStateStmt(FSM *node);
     void findOpStmt(FSM *node);
-    void setStr (std::set<std::string> vars);
+    void setVarStr (std::set<std::string> vars);
 
     std::ifstream inFile;
     //unsigned int operationsCounter = 6;
@@ -43,8 +43,7 @@ private:
     std::map <int, DESCAM::LocationInfo> opStmt;
     std::set<std::string> vars;
     std::string varStr;
-    std::vector<unsigned int> ops;
-    std::string opStr;
+    unsigned int opNo = 0;
 
 };
 

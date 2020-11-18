@@ -19,8 +19,8 @@
 //#include "../../../RISCV_interrupts/ESL/NoPLIC/Core.h"
 //#include "../../../RISCV_interrupts/ESL/NoPLIC_NOsysCall/Core.h"
 
-//#include "../../RISCV_ISA/ESL/Core_new.h" // Remark: Choose memory_complicated.
-#include "../../RISCV_RI5CY/ESL/Core_new.h" // Remark: Choose memory_complicated.
+#include "../../../RISCV_ISA/ESL/env/Core_i.h" // Remark: Choose memory_complicated.
+//#include "../../RISCV_RI5CY/ESL/Core_new.h" // Remark: Choose memory_complicated.
 //#include "../../RISCV_ISA/ESL/Core.h" // Remark: Choose memory_complicated.
                                         // FIXME: one test failed (BubbleSort)
 

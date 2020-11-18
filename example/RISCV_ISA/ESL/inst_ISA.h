@@ -19,13 +19,14 @@
 #define SCAM 0
 
 
-class ISA_new : public sc_module {
+//------------------------------------------------------------------------------------
+class ISA : public sc_module {
 public:
     //Constructor
-unsigned int originState;
-    SC_HAS_PROCESS(ISA_new);
+unsigned int originState, operation;
+    SC_HAS_PROCESS(ISA);
 
-    ISA_new(sc_module_name name) :
+    ISA(sc_module_name name) :
             fromMemoryPort("fromMemoryPort"),
             toMemoryPort("toMemoryPort"),
             toRegsPort("toRegsPort"),
@@ -94,94 +95,25 @@ unsigned int originState;
 };
 
 
-void ISA_new::run() {
-PowerEstimator::getInstance().initializeOperations(name(), 15);
-
-/*State 0*/
-PowerEstimator::getInstance().countOperation(name(), 0);
+void ISA::run() {
+PowerEstimator::getInstance().initialize(name(), 14, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+operation = 0;
+aluOp1 = 0; aluOp2 = 0; aluResult = 0; encodedInstr = 0; fromMemoryData.loadedData = 0; memoryAccess.addrIn = 0; memoryAccess.dataIn = 0; memoryAccess.mask = MT_X; memoryAccess.req = ME_X; nextphase = execute_PH; pcReg = 0; phase = execute_PH; regfile.reg_file_01 = 0; regfile.reg_file_02 = 0; regfile.reg_file_03 = 0; regfile.reg_file_04 = 0; regfile.reg_file_05 = 0; regfile.reg_file_06 = 0; regfile.reg_file_07 = 0; regfile.reg_file_08 = 0; regfile.reg_file_09 = 0; regfile.reg_file_10 = 0; regfile.reg_file_11 = 0; regfile.reg_file_12 = 0; regfile.reg_file_13 = 0; regfile.reg_file_14 = 0; regfile.reg_file_15 = 0; regfile.reg_file_16 = 0; regfile.reg_file_17 = 0; regfile.reg_file_18 = 0; regfile.reg_file_19 = 0; regfile.reg_file_20 = 0; regfile.reg_file_21 = 0; regfile.reg_file_22 = 0; regfile.reg_file_23 = 0; regfile.reg_file_24 = 0; regfile.reg_file_25 = 0; regfile.reg_file_26 = 0; regfile.reg_file_27 = 0; regfile.reg_file_28 = 0; regfile.reg_file_29 = 0; regfile.reg_file_30 = 0; regfile.reg_file_31 = 0; regfileWrite.dst = 0; regfileWrite.dstData = 0; 
     nextphase = Phases::fetch_PH;
     while (true) {
         phase = nextphase;
+if (originState == 2) if ((getEncType(encodedInstr) == ENC_R)) if ((phase == fetch_PH)) operation = 2;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if ((getEncType(encodedInstr) == ENC_B)) if ((phase == fetch_PH)) operation = 3;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if ((getEncType(encodedInstr) == ENC_S)) operation = 4;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if (not((getEncType(encodedInstr) == ENC_S))) if ((getEncType(encodedInstr) == ENC_U)) if ((phase == fetch_PH)) operation = 5;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if (not((getEncType(encodedInstr) == ENC_S))) if (not((getEncType(encodedInstr) == ENC_U))) if ((getEncType(encodedInstr) == ENC_J)) if ((phase == fetch_PH)) operation = 6;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if (not((getEncType(encodedInstr) == ENC_S))) if (not((getEncType(encodedInstr) == ENC_U))) if (not((getEncType(encodedInstr) == ENC_J))) if ((getEncType(encodedInstr) == ENC_I_I)) if ((phase == fetch_PH)) operation = 7;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if (not((getEncType(encodedInstr) == ENC_S))) if (not((getEncType(encodedInstr) == ENC_U))) if (not((getEncType(encodedInstr) == ENC_J))) if (not((getEncType(encodedInstr) == ENC_I_I))) if ((getEncType(encodedInstr) == ENC_I_L)) operation = 8;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if (not((getEncType(encodedInstr) == ENC_S))) if (not((getEncType(encodedInstr) == ENC_U))) if (not((getEncType(encodedInstr) == ENC_J))) if (not((getEncType(encodedInstr) == ENC_I_I))) if (not((getEncType(encodedInstr) == ENC_I_L))) if ((getEncType(encodedInstr) == ENC_I_J)) if ((phase == fetch_PH)) operation = 9;
+if (originState == 2) if (not((getEncType(encodedInstr) == ENC_R))) if (not((getEncType(encodedInstr) == ENC_B))) if (not((getEncType(encodedInstr) == ENC_S))) if (not((getEncType(encodedInstr) == ENC_U))) if (not((getEncType(encodedInstr) == ENC_J))) if (not((getEncType(encodedInstr) == ENC_I_I))) if (not((getEncType(encodedInstr) == ENC_I_L))) if (not((getEncType(encodedInstr) == ENC_I_J))) if ((phase == fetch_PH)) operation = 10;
+if (originState == 4) if ((phase == fetch_PH)) operation = 12;
+if (originState == 6) if ((phase == fetch_PH)) operation = 14;
         // fetch next instruc   tion
-if (originState == 6)
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 14);
-if (originState == 4)
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 12);
-if (originState == 2)
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if (not((getEncType(encodedInstr) == ENC_S)))
-if (not((getEncType(encodedInstr) == ENC_U)))
-if (not((getEncType(encodedInstr) == ENC_J)))
-if (not((getEncType(encodedInstr) == ENC_I_I)))
-if (not((getEncType(encodedInstr) == ENC_I_L)))
-if (not((getEncType(encodedInstr) == ENC_I_J)))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 10);
-if (originState == 2)
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if (not((getEncType(encodedInstr) == ENC_S)))
-if (not((getEncType(encodedInstr) == ENC_U)))
-if (not((getEncType(encodedInstr) == ENC_J)))
-if (not((getEncType(encodedInstr) == ENC_I_I)))
-if (not((getEncType(encodedInstr) == ENC_I_L)))
-if ((getEncType(encodedInstr) == ENC_I_J))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 9);
-if (originState == 2)
-if (not((phase == fetch_PH)))
-if ((phase == execute_PH))
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if (not((getEncType(encodedInstr) == ENC_S)))
-if (not((getEncType(encodedInstr) == ENC_U)))
-if (not((getEncType(encodedInstr) == ENC_J)))
-if (not((getEncType(encodedInstr) == ENC_I_I)))
-if ((getEncType(encodedInstr) == ENC_I_L))
-PowerEstimator::getInstance().countOperation(name(), 8);
-if (originState == 2)
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if (not((getEncType(encodedInstr) == ENC_S)))
-if (not((getEncType(encodedInstr) == ENC_U)))
-if (not((getEncType(encodedInstr) == ENC_J)))
-if ((getEncType(encodedInstr) == ENC_I_I))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 7);
-if (originState == 2)
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if (not((getEncType(encodedInstr) == ENC_S)))
-if (not((getEncType(encodedInstr) == ENC_U)))
-if ((getEncType(encodedInstr) == ENC_J))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 6);
-if (originState == 2)
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if (not((getEncType(encodedInstr) == ENC_S)))
-if ((getEncType(encodedInstr) == ENC_U))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 5);
-if (originState == 2)
-if (not((phase == fetch_PH)))
-if ((phase == execute_PH))
-if (not((getEncType(encodedInstr) == ENC_R)))
-if (not((getEncType(encodedInstr) == ENC_B)))
-if ((getEncType(encodedInstr) == ENC_S))
-PowerEstimator::getInstance().countOperation(name(), 4);
-if (originState == 2)
-if (not((getEncType(encodedInstr) == ENC_R)))
-if ((getEncType(encodedInstr) == ENC_B))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 3);
-if (originState == 2)
-if ((getEncType(encodedInstr) == ENC_R))
-if ((phase == fetch_PH))
-PowerEstimator::getInstance().countOperation(name(), 2);
         if (phase == Phases::fetch_PH) {
 
             // Set up memory access
@@ -190,11 +122,12 @@ PowerEstimator::getInstance().countOperation(name(), 2);
             memoryAccess.addrIn = pcReg;
             memoryAccess.dataIn = 0;    // not relevant
 
-/*State 1*/            toMemoryPort->write(memoryAccess); //Send request to memory
+PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+            toMemoryPort->write(memoryAccess); //Send request to memory
 originState = 1;
-if (originState == 1)
-PowerEstimator::getInstance().countOperation(name(), 1);
-/*State 2*/            fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
+if (originState == 1) operation = 1;
+PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+            fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
 originState = 2;
 
             encodedInstr = fromMemoryData.loadedData;
@@ -284,13 +217,14 @@ originState = 2;
                 memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for stores
                 memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
 
-/*State 3*/                toMemoryPort->write(memoryAccess); // Request store
+PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+                toMemoryPort->write(memoryAccess); // Request store
 originState = 3;
-if (originState == 3)
-PowerEstimator::getInstance().countOperation(name(), 11);
+if (originState == 3) operation = 11;
 
                 // Store done
-/*State 4*/                fromMemoryPort->read(fromMemoryData); //Fixme: Why do we need this read? For store a write should be sufficient
+PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+                fromMemoryPort->read(fromMemoryData); //Fixme: Why do we need this read? For store a write should be sufficient
 originState = 4;
 
                 //Set-up PC
@@ -342,6 +276,7 @@ originState = 4;
 #ifdef LOGTOFILE
                 cout << "S3: @AL: Result = 0x" << hex << aluResult << "(hex) = " << dec << aluResult << "(dec)" << endl;
 #endif
+
                 //Set up write back
                 regfileWrite.dst = getRdAddr(encodedInstr);
                 regfileWrite.dstData = aluResult; //Compute result
@@ -376,13 +311,14 @@ originState = 4;
                 regfileWrite.dst = getRdAddr(encodedInstr);
 
                 // Request load
-/*State 5*/                toMemoryPort->write(memoryAccess);
+PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+                toMemoryPort->write(memoryAccess);
 originState = 5;
-if (originState == 5)
-PowerEstimator::getInstance().countOperation(name(), 13);
+if (originState == 5) operation = 13;
 
                 // Load done
-/*State 6*/                fromMemoryPort->read(fromMemoryData);
+PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+                fromMemoryPort->read(fromMemoryData);
 originState = 6;
 
                 //Set up write back
@@ -429,7 +365,7 @@ originState = 6;
 }
 
 
-EncType ISA_new::getEncType(unsigned int encodedInstr) const {
+EncType ISA::getEncType(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R) {
         return ENC_R;
@@ -452,7 +388,7 @@ EncType ISA_new::getEncType(unsigned int encodedInstr) const {
     }
 }
 
-InstrType ISA_new::getInstrType(unsigned int encodedInstr) const {
+InstrType ISA::getInstrType(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R) {
         if (FUNCT3_FIELD(encodedInstr) == 0x00) {
@@ -565,7 +501,7 @@ InstrType ISA_new::getInstrType(unsigned int encodedInstr) const {
     }
 }
 
-unsigned int ISA_new::getRs1Addr(unsigned int encodedInstr) const {
+unsigned int ISA::getRs1Addr(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
         OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
@@ -577,7 +513,7 @@ unsigned int ISA_new::getRs1Addr(unsigned int encodedInstr) const {
     }
 }
 
-unsigned int ISA_new::getRs2Addr(unsigned int encodedInstr) const {
+unsigned int ISA::getRs2Addr(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R ||
         OPCODE_FIELD(encodedInstr) == OPCODE_S ||
@@ -588,7 +524,7 @@ unsigned int ISA_new::getRs2Addr(unsigned int encodedInstr) const {
     }
 }
 
-unsigned int ISA_new::getRdAddr(unsigned int encodedInstr) const {
+unsigned int ISA::getRdAddr(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_R   ||
         OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J ||
@@ -600,7 +536,7 @@ unsigned int ISA_new::getRdAddr(unsigned int encodedInstr) const {
     }
 }
 
-unsigned int ISA_new::getImmediate(unsigned int encodedInstr) const {
+unsigned int ISA::getImmediate(unsigned int encodedInstr) const {
 
     if (OPCODE_FIELD(encodedInstr) == OPCODE_I_I || OPCODE_FIELD(encodedInstr) == OPCODE_I_L || OPCODE_FIELD(encodedInstr) == OPCODE_I_J) {
         if (SIGN_FIELD(encodedInstr) == 0)
@@ -629,7 +565,7 @@ unsigned int ISA_new::getImmediate(unsigned int encodedInstr) const {
     }
 }
 
-ALUfuncType ISA_new::getALUfunc(InstrType instr) const {
+ALUfuncType ISA::getALUfunc(InstrType instr) const {
 
     if (instr == InstrType::INSTR_ADD  ||
         instr == InstrType::INSTR_ADDI ||
@@ -665,7 +601,7 @@ ALUfuncType ISA_new::getALUfunc(InstrType instr) const {
     } else return ALU_X;
 }
 
-ME_MaskType ISA_new::getMemoryMask(InstrType instr) const {
+ME_MaskType ISA::getMemoryMask(InstrType instr) const {
 
     if (instr == InstrType::INSTR_LB || instr == InstrType::INSTR_SB) {
         return MT_B;
@@ -680,7 +616,7 @@ ME_MaskType ISA_new::getMemoryMask(InstrType instr) const {
     } else return MT_X;
 }
 
-unsigned int ISA_new::readRegfile(unsigned int src, RegfileType regfile) const {
+unsigned int ISA::readRegfile(unsigned int src, RegfileType regfile) const {
 
     if (src == 0) {
         return 0;
@@ -749,7 +685,7 @@ unsigned int ISA_new::readRegfile(unsigned int src, RegfileType regfile) const {
     }
 }
 
-unsigned int ISA_new::getALUresult(ALUfuncType aluFunction, unsigned int operand1, unsigned int operand2) const {
+unsigned int ISA::getALUresult(ALUfuncType aluFunction, unsigned int operand1, unsigned int operand2) const {
 
 #ifdef LOGTOFILE
     cout << "S3: @AL: Operand1 = 0x" << hex << operand1 << "(hex) = " << dec << operand1 << "(dec), Operand2 = 0x" << hex << operand2
@@ -791,7 +727,7 @@ unsigned int ISA_new::getALUresult(ALUfuncType aluFunction, unsigned int operand
     }
 }
 
-unsigned int ISA_new::branchPCcalculation(unsigned int encodedInstr, unsigned int aluResult, unsigned int pcReg) const {
+unsigned int ISA::branchPCcalculation(unsigned int encodedInstr, unsigned int aluResult, unsigned int pcReg) const {
 
     if (getInstrType(encodedInstr) == InstrType::INSTR_BEQ && aluResult == 0) {
         return pcReg + getImmediate(encodedInstr);
@@ -810,7 +746,7 @@ unsigned int ISA_new::branchPCcalculation(unsigned int encodedInstr, unsigned in
     }
 }
 
-unsigned int ISA_new::getEncUALUresult(unsigned int encodedInstr, unsigned int pcReg) const {
+unsigned int ISA::getEncUALUresult(unsigned int encodedInstr, unsigned int pcReg) const {
 
     if (getInstrType(encodedInstr) == InstrType::INSTR_LUI) {
         return getALUresult(ALU_COPY1, getImmediate(encodedInstr), 0);
@@ -819,4 +755,6 @@ unsigned int ISA_new::getEncUALUresult(unsigned int encodedInstr, unsigned int p
     }
 }
 
+
 #endif //RISCV_ISA_H_
+//------------------------------------------------------------------------------------

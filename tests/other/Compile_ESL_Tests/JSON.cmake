@@ -1,4 +1,4 @@
-set(EXAMPLE_NAMES "")
+set(EXAMPLE_NAMES "FPI;Framer;RISCV_Test_ELF")
 set(CURRENT_DIR "/home/lanrez/Documents/Thesis/descamv4/tests/other/Compile_ESL_Tests")
 set(PROJECT "Compile_ESL_Tests")
 set(OUTPUT_FROM_EACH "")

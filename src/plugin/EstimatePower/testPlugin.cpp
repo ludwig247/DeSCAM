@@ -16,30 +16,26 @@ std::map<std::string, std::string> testPlugin::printModel(Model *node) {
 
         //findStateStmt(module.second->getFSM());
         findOpStmt(module.second->getFSM());
-        setStr(vars);
+        setVarStr(vars);
         instrumentModule(module.second);
 
 
-        /*for (auto v : module.second->getFSM()->getStateMap()){
-            for (auto w: v.second->getOutgoingOperationsList()) {
-                for (auto x: w->getStatementsList()){
-                    std::cout << "St" << std::endl;
-                    std::cout << PrintStmt::toString(x) << std::endl;
-                }
-                for (auto x: w->getAssumptionsList()){
-                    std::cout << "As" << std::endl;
-                    std::cout << PrintStmt::toString(x) << std::endl;
-                }
-                std::cout << std::endl << "Com " << w->print() << std::endl;
-                for (auto x: w->getCommitmentsList()) {
-                    auto datSig = NodePeekVisitor::nodePeekDataSignalOperand((x->getLhs()));
-                    if(datSig != nullptr) {
-                        std::cout << datSig->getDataSignal()->getDataType()->isEnumType() << ";\t\t" << datSig->getPort()->getDataSignal()->getName() << ";\t\t";
-                        std::cout << PrintStmt::toString(x) << std::endl;
-                    }
-                }
+        for (auto v : module.second->getFSM()->getStateMap()){
+            if (v.second->isInit()) continue;
+            auto w = v.second->getOutgoingOperationsList().at(32);
+            for (auto x: w->getStatementsList()){
+                std::cout << "St" << std::endl;
+                std::cout << PrintStmt::toString(x) << std::endl;
             }
-        }*/
+            for (auto x: w->getAssumptionsList()){
+                std::cout << "As" << std::endl;
+                std::cout << PrintStmt::toString(x) << std::endl;
+            }
+            for (auto x: w->getCommitmentsList()){
+                std::cout << "Com" << std::endl;
+                std::cout << PrintStmt::toString(x) << std::endl;
+            }
+        }
 
         /*for (auto v : stateStmt){
             auto loc = v.second->getStmtInfo();
@@ -52,7 +48,7 @@ std::map<std::string, std::string> testPlugin::printModel(Model *node) {
 
 
         //std::cout << ss.str();
-        pluginOutput.insert(std::make_pair("inst_" + module.first + ".h",ss.str()));
+        //pluginOutput.insert(std::make_pair("inst_" + module.first + ".h",ss.str()));
     }
 
 
@@ -122,7 +118,7 @@ void testPlugin::printMain(int val1, int val2, FSM *node) {
         ss << lineStr << std::endl;
 
         if ((lineStr.find("void ") != std::string::npos) & (lineStr.find(fName) != std::string::npos) & (lineStr.find(";") == std::string::npos)) {
-            ss << "PowerEstimator::getInstance().initialize(name(), " << opStr << ", "<< varStr << ");" << std::endl;
+            ss << "PowerEstimator::getInstance().initialize(name(), " << opNo << ", "<< varStr << ");" << std::endl;
             ss << "operation = 0;" << std::endl;
             for (auto state : node->getStateMap()){
                 if (state.second->isInit()){
@@ -205,15 +201,14 @@ void testPlugin::findOpStmt(FSM *node) {
                 }
                 if (!flagset) opStmt.insert(std::make_pair(op->getId(),state.second->GetLocationInfo()));
             }
-            ops.push_back(op->getId());
+            opNo++;
         }
     }
     //opNo;
 }
 
-void testPlugin::setStr(std::set<std::string> vars) {
+void testPlugin::setVarStr(std::set<std::string> vars) {
     bool flag = false;
-    opStr = "{";
     varStr = "{";
     for (auto var : vars){
         if (flag) varStr += (", " + var);
@@ -222,13 +217,5 @@ void testPlugin::setStr(std::set<std::string> vars) {
             flag = true;
         }
     }
-    for (auto var : ops){
-        if (flag) varStr += (", " + std::to_string(var));
-        else {
-            varStr += std::to_string(var);
-            flag = true;
-        }
-    }
     varStr += "}";
-    opStr += "}";
 }

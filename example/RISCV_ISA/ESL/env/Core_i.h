@@ -7,10 +7,10 @@
 
 
 #include "systemc.h"
-#include "../../Interfaces/Interfaces.h"
-//#include "CPU_Interfaces.h"
-#include "ISA_new_instrumented.h"
-#include "regs_new.h"
+//#include "Interfaces.h"
+#include "CPU_Interfaces.h"
+#include "../ISA.h"
+#include "inst_Regs.h"
 
 #define REGFILE(x) RF.reg_file_##x
 #define PCREG isa.pcReg
@@ -25,8 +25,8 @@ public:
     blocking_in<MEtoCU_IF> MEtoCO_port;
 
     // Components
-    ISA_new isa;
-    Regs_new RF;
+    ISA isa;
+    Regs RF;
 
     MasterSlave<RegfileWriteType> toRegsChannel;
     MasterSlave<RegfileType> fromRegsChannel;
