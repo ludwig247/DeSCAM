@@ -8,6 +8,9 @@ module ModuleStateName02 (
 	output integer m_out,
 	output logic m_out_notify
 	);
+
+
+
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
 			m_out_notify <= 1'b1;
