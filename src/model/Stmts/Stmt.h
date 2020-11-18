@@ -41,9 +41,9 @@ namespace DESCAM {
 
         virtual std::ostream &print(std::ostream &) const = 0;
 
-        const LocationInfo& getStmtInfo(){return this->stmtLocationInfo;};
+        const LocationInfo& getStmtInfo() const{ return this->stmtLocationInfo;} ;
 
-        void setStmtInfo(LocationInfo& info){ this->stmtLocationInfo = info;};
+        void setStmtInfo(LocationInfo& info) { this->stmtLocationInfo = info;} ;
 
     protected:
         LocationInfo stmtLocationInfo;
