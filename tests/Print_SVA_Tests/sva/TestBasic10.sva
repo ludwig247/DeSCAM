@@ -1,0 +1,113 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestBasic10_types.sva"
+`include "TestBasic10_functions.sva"
+
+import top_level_types::*;
+
+module TestBasic10_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestBasic10.clk); endclocking
+`include "TestBasic10_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 phase() == SECTION_A and
+	t##0 b_in_notify() == 1 and
+	t##0 b_out_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] b_in_sig_mode_f;
+ bit[31:0] b_in_sig_x_f;
+ bit[31:0] b_in_sig_y_f;
+ bit[31:0] phase_f;
+	t ##0 hold(b_in_sig_mode_f, b_in_sig_mode()) and
+	t ##0 hold(b_in_sig_x_f, b_in_sig_x()) and
+	t ##0 hold(b_in_sig_y_f, b_in_sig_y()) and
+	t ##0 hold(phase_f, phase()) and
+	t##0 state_1() and
+	t##0 b_in_sync()
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 b_out_sig_mode() == b_in_sig_mode_f and
+	t_end(o)##0 b_out_sig_x() == b_in_sig_x_f and
+	t_end(o)##0 b_out_sig_y() == b_in_sig_y_f and
+	t_end(o)##0 phase() == phase_f and
+	during_o (t, 1, t_end(o), 0, b_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_2_p(o);
+	t##0 state_2() and
+	t##0 b_out_sync() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 phase() == SECTION_A and
+	during_o (t, 1, t_end(o), -1, b_in_notify() == 0) and
+	t_end(o)##0 b_in_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, b_out_notify() == 0);
+endproperty;
+state_2_2_a: assert property (disable iff (reset) state_2_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_1_p(o);
+ bit[31:0] phase_f;
+	t ##0 hold(phase_f, phase()) and
+	t##0 state_1() and
+	t##0 !(b_in_sync())
+implies
+	t##1 state_1() and
+	t##1 phase() == phase_f and
+	t##1 b_in_notify() == 1 and
+	t##1 b_out_notify() == 0;
+endproperty;
+wait_state_1_a: assert property (disable iff (reset) wait_state_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_2_p(o);
+ bit[31:0] b_out_sig_f;
+ bit[31:0] phase_f;
+	t ##0 hold(b_out_sig_f, b_out_sig()) and
+	t ##0 hold(phase_f, phase()) and
+	t##0 state_2() and
+	t##0 !(b_out_sync())
+implies
+	t##1 state_2() and
+	t##1 b_out_sig() == b_out_sig_f and
+	t##1 phase() == phase_f and
+	t##1 b_in_notify() == 0 and
+	t##1 b_out_notify() == 1;
+endproperty;
+wait_state_2_a: assert property (disable iff (reset) wait_state_2_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestBasic10 TestBasic10_verification inst (.*, .reset());

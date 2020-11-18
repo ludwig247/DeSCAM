@@ -1,0 +1,67 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "ModuleStateName02_types.sva"
+`include "ModuleStateName02_functions.sva"
+
+import top_level_types::*;
+
+module ModuleStateName02_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge ModuleStateName02.clk); endclocking
+`include "ModuleStateName02_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 idle_1() and
+	t##0 m_out_sig() == m_in_sig_f and
+	t##0 m_out_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property idle_1_1_p(o);
+ bit[31:0] m_in_sig_f;
+	t ##0 hold(m_in_sig_f, m_in_sig()) and
+	t##0 idle_1()
+implies
+	t_end(o)##0 store_2() and
+	t_end(o)##0 m_out_sig() == m_in_sig_f and
+	during_o (t, 1, t_end(o), -1, m_out_notify() == 0) and
+	t_end(o)##0 m_out_notify() == 1;
+endproperty;
+idle_1_1_a: assert property (disable iff (reset) idle_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property store_2_2_p(o);
+ bit[31:0] m_in_sig_f;
+	t ##0 hold(m_in_sig_f, m_in_sig()) and
+	t##0 store_2()
+implies
+	t_end(o)##0 idle_1() and
+	t_end(o)##0 m_out_sig() == m_in_sig_f and
+	during_o (t, 1, t_end(o), -1, m_out_notify() == 0) and
+	t_end(o)##0 m_out_notify() == 1;
+endproperty;
+store_2_2_a: assert property (disable iff (reset) store_2_2_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind ModuleStateName02 ModuleStateName02_verification inst (.*, .reset());

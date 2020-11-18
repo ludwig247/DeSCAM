@@ -2,6 +2,7 @@
 // Created by deutschmann on 9/26/19.
 //
 
+#include "PrintSVA.h"
 #include "DatapathVisitorSVA.h"
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::VariableOperand &node) {
@@ -10,7 +11,7 @@ void DESCAM::DatapathVisitorSVA::visit(DESCAM::VariableOperand &node) {
     } else {
         this->ss << node.getVariable()->getName();
     }
-    if(!node.getVariable()->isConstant()) this->ss << "_0";
+    if(!node.getVariable()->isConstant()) this->ss << PrintSVA::freezeSigSuffix;
 }
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::IntegerValue &node) {
@@ -134,21 +135,21 @@ void DESCAM::DatapathVisitorSVA::visit(UnaryExpr &node) {
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::SyncSignal &node) {
     this->ss << node.getPort()->getName() << "_sync";
-    this->ss << "_0";
+    this->ss << PrintSVA::freezeSigSuffix;
 }
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::DataSignalOperand &node) {
     PrintStmt::toString(&node);
     this->ss << node.getDataSignal()->getPort()->getName() << "_sig";
     if (node.getDataSignal()->isSubVar()) this->ss << "_" + node.getDataSignal()->getName();
-    this->ss << "_0";
+    this->ss << PrintSVA::freezeSigSuffix;
 }
 
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::Cast &node) {
     if (node.getDataType()->isUnsigned()) {
-        this->ss << "int unsigned(";
+        this->ss << "unsigned'(";
     } else if (node.getDataType()->isInteger()) {
-        this->ss << "int signed(";
+        this->ss << "signed'(";
     } else throw std::runtime_error("Unsupported type for cast");
     node.getSubExpr()->accept(*this);
     this->ss << ")";
@@ -189,8 +190,8 @@ void DESCAM::DatapathVisitorSVA::visit(DESCAM::Ternary &node) {
 void DESCAM::DatapathVisitorSVA::visit(DESCAM::ArrayOperand &node) {
     useParenthesesFlag = true;
     this->ss << node.getArrayOperand()->getOperandName();
-    this->ss << "_0";
-    this->ss << "(";
+    this->ss << PrintSVA::freezeSigSuffix;
+    this->ss << "[";
     node.getIdx()->accept(*this);
-    this->ss << ")";
+    this->ss << "]";
 }

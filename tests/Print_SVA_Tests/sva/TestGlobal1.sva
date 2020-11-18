@@ -1,0 +1,77 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestGlobal1_types.sva"
+`include "TestGlobal1_functions.sva"
+
+import top_level_types::*;
+
+module TestGlobal1_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestGlobal1.clk); endclocking
+`include "TestGlobal1_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 bar() == ((((number + 0) + number2) + unsigned'(number3)) + test_var(number2)) and
+	t##0 test_out_sig() == ((((number + 0) + number2) + unsigned'(number3)) + test_var(number2)) and
+	t##0 test_in_notify() == 0 and
+	t##0 test_out_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] bar_f;
+	t ##0 hold(bar_f, bar()) and
+	t##0 state_1() and
+	t##0 test_out_sync() and
+	t##0 !(number4())
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 bar() == ((((number + bar_f) + number2) + unsigned'(number3)) + test_var(number2)) and
+	t_end(o)##0 test_out_sig() == ((((number + bar_f) + number2) + unsigned'(number3)) + test_var(number2)) and
+	during_o (t, 1, t_end(o), 0, test_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, test_out_notify() == 0) and
+	t_end(o)##0 test_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_1_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] test_out_sig_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(test_out_sig_f, test_out_sig()) and
+	t##0 state_1() and
+	t##0 !(test_out_sync())
+implies
+	t##1 state_1() and
+	t##1 bar() == bar_f and
+	t##1 test_out_sig() == test_out_sig_f and
+	t##1 test_in_notify() == 0 and
+	t##1 test_out_notify() == 1;
+endproperty;
+wait_state_1_a: assert property (disable iff (reset) wait_state_1_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestGlobal1 TestGlobal1_verification inst (.*, .reset());

@@ -1,0 +1,274 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "top_level_global_functions.sva"
+`include "TestGlobal2_types.sva"
+`include "TestGlobal2_functions.sva"
+
+import top_level_types::*;
+
+module TestGlobal2_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestGlobal2.clk); endclocking
+`include "TestGlobal2_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 bar() == 0 and
+	t##0 list_0() == 0 and
+	t##0 list_1() == 0 and
+	t##0 list_2() == 0 and
+	t##0 list_3() == 0 and
+	t##0 list_4() == 0 and
+	t##0 test_in_notify() == 1 and
+	t##0 test_out_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+ bit[31:0] test_in_sig_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t ##0 hold(test_in_sig_f, test_in_sig()) and
+	t##0 state_1() and
+	t##0 test_in_sync() and
+	t##0 compute3((test_in_sig() > 5),(((bar() + unsigned'(32'(compute2(test_in_sig(),bar())))) + compute(3,compute2(test_in_sig(),(bar() + unsigned'(32'(compute2(test_in_sig(),bar()))))))) + compute(list_0(),5)))
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 bar() == (((bar_f + unsigned'(compute2(test_in_sig_f,bar_f))) + compute(3,compute2(test_in_sig_f,(bar_f + unsigned'(compute2(test_in_sig_f,bar_f)))))) + compute(list_0_f,5)) and
+	t_end(o)##0 list_0() == list_0_f and
+	t_end(o)##0 list_1() == list_1_f and
+	t_end(o)##0 list_2() == list_2_f and
+	t_end(o)##0 list_3() == list_3_f and
+	t_end(o)##0 list_4() == list_4_f and
+	t_end(o)##0 test_out_sig() == (((bar_f + unsigned'(compute2(test_in_sig_f,bar_f))) + compute(3,compute2(test_in_sig_f,(bar_f + unsigned'(compute2(test_in_sig_f,bar_f)))))) + compute(list_0_f,5)) and
+	during_o (t, 1, t_end(o), 0, test_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, test_out_notify() == 0) and
+	t_end(o)##0 test_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_2_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+ bit[31:0] test_in_sig_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t ##0 hold(test_in_sig_f, test_in_sig()) and
+	t##0 state_1() and
+	t##0 test_in_sync() and
+	t##0 !(compute3((test_in_sig() > 5),(((bar() + unsigned'(32'(compute2(test_in_sig(),bar())))) + compute(3,compute2(test_in_sig(),(bar() + unsigned'(32'(compute2(test_in_sig(),bar()))))))) + compute(list_0(),5))))
+implies
+	t_end(o)##0 state_3() and
+	t_end(o)##0 bar() == (((bar_f + unsigned'(compute2(test_in_sig_f,bar_f))) + compute(3,compute2(test_in_sig_f,(bar_f + unsigned'(compute2(test_in_sig_f,bar_f)))))) + compute(list_0_f,5)) and
+	t_end(o)##0 list_0() == list_0_f and
+	t_end(o)##0 list_1() == list_1_f and
+	t_end(o)##0 list_2() == list_2_f and
+	t_end(o)##0 list_3() == list_3_f and
+	t_end(o)##0 list_4() == list_4_f and
+	t_end(o)##0 test_out_sig() == ((((bar_f + unsigned'(compute2(test_in_sig_f,bar_f))) + compute(3,compute2(test_in_sig_f,(bar_f + unsigned'(compute2(test_in_sig_f,bar_f)))))) + compute(list_0_f,5)) + 1) and
+	during_o (t, 1, t_end(o), 0, test_in_notify() == 0) and
+	during_o (t, 1, t_end(o), -1, test_out_notify() == 0) and
+	t_end(o)##0 test_out_notify() == 1;
+endproperty;
+state_1_2_a: assert property (disable iff (reset) state_1_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_3_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t##0 state_2() and
+	t##0 test_out_sync()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 bar() == bar_f and
+	t_end(o)##0 list_0() == list_0_f and
+	t_end(o)##0 list_1() == list_1_f and
+	t_end(o)##0 list_2() == list_2_f and
+	t_end(o)##0 list_3() == list_3_f and
+	t_end(o)##0 list_4() == list_4_f and
+	during_o (t, 1, t_end(o), -1, test_in_notify() == 0) and
+	t_end(o)##0 test_in_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, test_out_notify() == 0);
+endproperty;
+state_2_3_a: assert property (disable iff (reset) state_2_3_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_3_4_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t##0 state_3() and
+	t##0 test_out_sync()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 bar() == bar_f and
+	t_end(o)##0 list_0() == list_0_f and
+	t_end(o)##0 list_1() == list_1_f and
+	t_end(o)##0 list_2() == list_2_f and
+	t_end(o)##0 list_3() == list_3_f and
+	t_end(o)##0 list_4() == list_4_f and
+	during_o (t, 1, t_end(o), -1, test_in_notify() == 0) and
+	t_end(o)##0 test_in_notify() == 1 and
+	during_o (t, 1, t_end(o), 0, test_out_notify() == 0);
+endproperty;
+state_3_4_a: assert property (disable iff (reset) state_3_4_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_1_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t##0 state_1() and
+	t##0 !(test_in_sync())
+implies
+	t##1 state_1() and
+	t##1 bar() == bar_f and
+	t##1 list_0() == list_0_f and
+	t##1 list_1() == list_1_f and
+	t##1 list_2() == list_2_f and
+	t##1 list_3() == list_3_f and
+	t##1 list_4() == list_4_f and
+	t##1 test_in_notify() == 1 and
+	t##1 test_out_notify() == 0;
+endproperty;
+wait_state_1_a: assert property (disable iff (reset) wait_state_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_2_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+ bit[31:0] test_out_sig_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t ##0 hold(test_out_sig_f, test_out_sig()) and
+	t##0 state_2() and
+	t##0 !(test_out_sync())
+implies
+	t##1 state_2() and
+	t##1 bar() == bar_f and
+	t##1 list_0() == list_0_f and
+	t##1 list_1() == list_1_f and
+	t##1 list_2() == list_2_f and
+	t##1 list_3() == list_3_f and
+	t##1 list_4() == list_4_f and
+	t##1 test_out_sig() == test_out_sig_f and
+	t##1 test_in_notify() == 0 and
+	t##1 test_out_notify() == 1;
+endproperty;
+wait_state_2_a: assert property (disable iff (reset) wait_state_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property wait_state_3_p(o);
+ bit[31:0] bar_f;
+ bit[31:0] list_0_f;
+ bit[31:0] list_1_f;
+ bit[31:0] list_2_f;
+ bit[31:0] list_3_f;
+ bit[31:0] list_4_f;
+ bit[31:0] test_out_sig_f;
+	t ##0 hold(bar_f, bar()) and
+	t ##0 hold(list_0_f, list_0()) and
+	t ##0 hold(list_1_f, list_1()) and
+	t ##0 hold(list_2_f, list_2()) and
+	t ##0 hold(list_3_f, list_3()) and
+	t ##0 hold(list_4_f, list_4()) and
+	t ##0 hold(test_out_sig_f, test_out_sig()) and
+	t##0 state_3() and
+	t##0 !(test_out_sync())
+implies
+	t##1 state_3() and
+	t##1 bar() == bar_f and
+	t##1 list_0() == list_0_f and
+	t##1 list_1() == list_1_f and
+	t##1 list_2() == list_2_f and
+	t##1 list_3() == list_3_f and
+	t##1 list_4() == list_4_f and
+	t##1 test_out_sig() == test_out_sig_f and
+	t##1 test_in_notify() == 0 and
+	t##1 test_out_notify() == 1;
+endproperty;
+wait_state_3_a: assert property (disable iff (reset) wait_state_3_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestGlobal2 TestGlobal2_verification inst (.*, .reset());

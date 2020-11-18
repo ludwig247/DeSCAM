@@ -1,0 +1,25 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function b_in_sync;
+	b_in_sync = 1'b1 ;
+endfunction
+function b_in_notify;
+	b_in_notify = 1'b1 ;
+endfunction
+
+// DP SIGNALS //
+function int b_in_sig;
+	b_in_sig = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function Phases phase;
+	phase = SECTION_A;
+endfunction
+
+// STATES //
+function state_1;
+	state_1 = 1'b1;
+endfunction
+
+

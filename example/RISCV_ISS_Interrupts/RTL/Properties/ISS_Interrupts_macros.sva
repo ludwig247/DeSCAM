@@ -1,0 +1,143 @@
+import top_level_types::*;
+import iss_interrupts_types::*;
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function logic ecall_isa_Port_sync;
+	ecall_isa_Port_sync = ISS_Interrupts.ecall_isa_Port_sync;
+endfunction
+function logic fromMemoryPort_sync;
+	fromMemoryPort_sync = ISS_Interrupts.fromMemoryPort_sync;
+endfunction
+function logic isa_ecall_Port_sync;
+	isa_ecall_Port_sync = ISS_Interrupts.isa_ecall_Port_sync;
+endfunction
+function logic toMemoryPort_sync;
+	toMemoryPort_sync = ISS_Interrupts.toMemoryPort_sync;
+endfunction
+function logic ecall_isa_Port_notify;
+	ecall_isa_Port_notify = ISS_Interrupts.ecall_isa_Port_notify;
+endfunction
+function logic fromMemoryPort_notify;
+	fromMemoryPort_notify = ISS_Interrupts.fromMemoryPort_notify;
+endfunction
+function logic isa_ecall_Port_notify;
+	isa_ecall_Port_notify = ISS_Interrupts.isa_ecall_Port_notify ;
+endfunction
+function logic toMemoryPort_notify;
+	toMemoryPort_notify = ISS_Interrupts.toMemoryPort_notify ;
+endfunction
+function logic toRegsPort_notify;
+	toRegsPort_notify = ISS_Interrupts.toRegsPort_notify ;
+endfunction
+
+// DP SIGNALS //
+function bit ecall_isa_Port_sig;
+	ecall_isa_Port_sig = ISS_Interrupts.ecall_isa_Port;
+endfunction
+function fromMemoryPort_sig;
+	fromMemoryPort_sig = ISS_Interrupts.fromMemoryPort;
+endfunction
+function bit[31:0] fromMemoryPort_sig_loadedData;
+	fromMemoryPort_sig_loadedData = ISS_Interrupts.fromMemoryPort.loadeddata;
+endfunction
+function bit isa_ecall_Port_sig;
+	isa_ecall_Port_sig = ISS_Interrupts.isa_ecall_Port;
+endfunction
+function bit[31:0] mip_isa_Port_sig;
+	mip_isa_Port_sig = ISS_Interrupts.mip_isa_Port;
+endfunction
+function toMemoryPort_sig;
+	toMemoryPort_sig = ISS_Interrupts.toMemoryPort;
+endfunction
+function bit[31:0] toMemoryPort_sig_addrIn;
+	toMemoryPort_sig_addrIn = ISS_Interrupts.toMemoryPort.addrin;
+endfunction
+function bit[31:0] toMemoryPort_sig_dataIn;
+	toMemoryPort_sig_dataIn = ISS_Interrupts.toMemoryPort.datain;
+endfunction
+function ME_MaskType toMemoryPort_sig_mask;
+	toMemoryPort_sig_mask = ISS_Interrupts.toMemoryPort.mask;
+endfunction
+function ME_AccessType toMemoryPort_sig_req;
+	toMemoryPort_sig_req = ISS_Interrupts.toMemoryPort.req;
+endfunction
+function toRegsPort_sig;
+	toRegsPort_sig = ISS_Interrupts.toRegsPort;
+endfunction
+function bit[31:0] toRegsPort_sig_dst;
+	toRegsPort_sig_dst = ISS_Interrupts.toRegsPort.dst;
+endfunction
+function bit[31:0] toRegsPort_sig_dstData;
+	toRegsPort_sig_dstData = ISS_Interrupts.toRegsPort.dstdata;
+endfunction
+
+// VISIBLE REGISTERS //
+function bit[31:0] csrfile_mcause;
+	csrfile_mcause = ISS_Interrupts.csrfile.mcause;
+endfunction
+function bit[31:0] csrfile_mepc;
+	csrfile_mepc = ISS_Interrupts.csrfile.mepc;
+endfunction
+function bit[31:0] csrfile_mie;
+	csrfile_mie = ISS_Interrupts.csrfile.mie;
+endfunction
+function bit[31:0] csrfile_mip;
+	csrfile_mip = ISS_Interrupts.csrfile.mip;
+endfunction
+function bit[31:0] csrfile_mstatus;
+	csrfile_mstatus = ISS_Interrupts.csrfile.mstatus;
+endfunction
+function bit[31:0] csrfile_mtvec;
+	csrfile_mtvec = ISS_Interrupts.csrfile.mtvec;
+endfunction
+function bit[31:0] pcReg;
+	pcReg = ISS_Interrupts.pcReg_signal;
+endfunction
+function bit[31:0] regfileWrite_dst;
+	regfileWrite_dst = ISS_Interrupts.toRegsPort.dst;
+endfunction
+function bit[31:0] regfileWrite_dstData;
+	regfileWrite_dstData = ISS_Interrupts.toRegsPort.dstdata;
+endfunction
+function regfile;
+	regfile = ISS_Interrupts.fromRegsPort;
+endfunction
+
+// STATES //
+function FETCH_REQ_1;
+	if(ISS_Interrupts.phase == fetch)
+		FETCH_REQ_1 = 1'b1;
+	else FETCH_REQ_1 = 1'b0;
+endfunction
+function FETCH_DONE_2;
+	if(ISS_Interrupts.phase == execute)
+		FETCH_DONE_2 = 1'b1;
+	else FETCH_DONE_2 = 1'b0;
+endfunction
+function STORE_3;
+	if(ISS_Interrupts.phase == mem_req_ph && ISS_Interrupts.opcode == enc_s)
+		STORE_3 = 1'b1;
+	else STORE_3 = 1'b0;
+endfunction
+function LOAD_REQ_4;
+	if(ISS_Interrupts.phase == mem_req_ph && ISS_Interrupts.opcode == enc_i_l)
+		LOAD_REQ_4 = 1'b1;
+	else LOAD_REQ_4 = 1'b0;
+endfunction
+function LOAD_DONE_5;
+	if(ISS_Interrupts.phase == mem_done_ph && ISS_Interrupts.opcode == enc_i_l)
+		LOAD_DONE_5 = 1'b1;
+	else LOAD_DONE_5 = 1'b0;
+endfunction
+function ECALL_REQ_6;
+	if(ISS_Interrupts.phase == ecall_req)
+		ECALL_REQ_6 = 1'b1;
+	else ECALL_REQ_6 = 1'b0;
+endfunction
+function ECALL_DONE_7;
+	if(ISS_Interrupts.phase == ecall_done)
+		ECALL_DONE_7 = 1'b1;
+	else ECALL_DONE_7 = 1'b0;
+endfunction
+
+
+

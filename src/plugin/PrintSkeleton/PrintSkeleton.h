@@ -7,6 +7,7 @@
 
 #include <PluginFactory.h>
 #include <sstream>
+#include <list>
 #include "Model.h"
 
 /*
@@ -95,6 +96,8 @@ class PrintSkeleton : public PluginFactory {
                                    const std::string &name,
                                    const std::string &value,
                                    int indentation);
+
+  bool arrayHasBeenReset(std::list<std::string> resetArrayList, std::string arrayName);
 
 };
 

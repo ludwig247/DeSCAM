@@ -1,0 +1,99 @@
+import top_level_types::*;
+import iss_types::*;
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function logic fromMemoryPort_sync;
+	fromMemoryPort_sync = ISS.fromMemoryPort_sync;
+endfunction
+function logic toMemoryPort_sync;
+	toMemoryPort_sync = ISS.toMemoryPort_sync;
+endfunction
+function logic fromMemoryPort_notify;
+	fromMemoryPort_notify = ISS.fromMemoryPort_notify;
+endfunction
+function logic toMemoryPort_notify;
+	toMemoryPort_notify = ISS.toMemoryPort_notify ;
+endfunction
+function logic toRegsPort_notify;
+	toRegsPort_notify = ISS.toRegsPort_notify ;
+endfunction
+
+// DP SIGNALS //
+function MEtoCU_IF fromMemoryPort_sig;
+	fromMemoryPort_sig = ISS.fromMemoryPort;
+endfunction
+function bit[31:0] fromMemoryPort_sig_loadedData;
+	fromMemoryPort_sig_loadedData = ISS.fromMemoryPort.loadeddata;
+endfunction
+function unsigned_32 fromRegsPort_sig;
+	fromRegsPort_sig = ISS.fromRegsPort;
+endfunction
+function CUtoME_IF toMemoryPort_sig;
+	toMemoryPort_sig = ISS.toMemoryPort;
+endfunction
+function bit[31:0] toMemoryPort_sig_addrIn;
+	toMemoryPort_sig_addrIn = ISS.toMemoryPort.addrin;
+endfunction
+function bit[31:0] toMemoryPort_sig_dataIn;
+	toMemoryPort_sig_dataIn = ISS.toMemoryPort.datain;
+endfunction
+function ME_MaskType toMemoryPort_sig_mask;
+	toMemoryPort_sig_mask = ISS.toMemoryPort.mask;
+endfunction
+function ME_AccessType toMemoryPort_sig_req;
+	toMemoryPort_sig_req = ISS.toMemoryPort.req;
+endfunction
+function RegfileWriteType toRegsPort_sig;
+	toRegsPort_sig = ISS.toRegsPort;
+endfunction
+function bit[31:0] toRegsPort_sig_dst;
+	toRegsPort_sig_dst = ISS.toRegsPort.dst;
+endfunction
+function bit[31:0] toRegsPort_sig_dstData;
+	toRegsPort_sig_dstData = ISS.toRegsPort.dstdata;
+endfunction
+
+// VISIBLE REGISTERS //
+function bit[31:0] pcReg;
+	pcReg = ISS.pcReg_signal;
+endfunction
+function bit[31:0] regfileWrite_dst;
+	regfileWrite_dst = toRegsPort.dst;
+endfunction
+function bit[31:0] regfileWrite_dstData;
+	regfileWrite_dstData = toRegsPort.dstdata;
+endfunction
+
+// STATES //
+function Fetch_Req_1;
+	if(ISS.phase == fetch_ph)
+		Fetch_Req_1 = 1'b1;
+	else Fetch_Req_1 = 1'b0;
+endfunction
+function Fetch_Read_Instr_2;
+	if(ISS.phase == execute_ph)
+		Fetch_Read_Instr_2 = 1'b1;
+	else Fetch_Read_Instr_2 = 1'b0;
+endfunction
+function Store_1_3;
+	if(ISS.phase == mem_req_ph && ISS.opcode == enc_s)
+		Store_1_3 = 1'b1;
+	else Store_1_3 = 1'b0;
+endfunction
+function Store1_done_4;
+	if(ISS.phase == mem_done_ph && ISS.opcode == enc_s)
+		Store1_done_4 = 1'b1;
+	else Store1_done_4 = 1'b0;
+endfunction
+function Load_Req_5;
+	if(ISS.phase == mem_req_ph && ISS.opcode == enc_i_l)
+		Load_Req_5 = 1'b1;
+	else Load_Req_5 = 1'b0;
+endfunction
+function Load_done_6;
+	if(ISS.phase == mem_done_ph && ISS.opcode == enc_i_l)
+		Load_done_6 = 1'b1;
+	else Load_done_6 = 1'b0;
+endfunction
+
+
