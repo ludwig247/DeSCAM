@@ -17,6 +17,7 @@ module TestArray04 (
 
 	always_ff @(posedge clk, posedge rst) begin
 		if (rst) begin
+			myArray_signal <= '{default:0};
 			m_in_notify <= 1'b1;
 			m_out_notify <= 1'b0;
 		end else begin

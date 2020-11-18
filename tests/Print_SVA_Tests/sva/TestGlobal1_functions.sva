@@ -1,0 +1,7 @@
+
+
+// FUNCTIONS //
+function bit[31:0] test_var (bit[31:0] val);
+	return ((val + 3) + number()); 
+endfunction
+

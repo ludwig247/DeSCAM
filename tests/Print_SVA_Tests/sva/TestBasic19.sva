@@ -1,0 +1,88 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestBasic19_types.sva"
+`include "TestBasic19_functions.sva"
+
+import top_level_types::*;
+
+module TestBasic19_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestBasic19.clk); endclocking
+`include "TestBasic19_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 b_out_sig_mode() == READ and
+	t##0 b_out_sig_x() == 0 and
+	t##0 b_out_sig_y() == 0 and
+	t##0 phase() == SECTION_A and
+	t##0 b_out_notify() == 1;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] m_in_sig_mode_f;
+ bit[31:0] m_in_sig_x_f;
+ bit[31:0] m_in_sig_y_f;
+	t ##0 hold(m_in_sig_mode_f, m_in_sig_mode()) and
+	t ##0 hold(m_in_sig_x_f, m_in_sig_x()) and
+	t ##0 hold(m_in_sig_y_f, m_in_sig_y()) and
+	t##0 state_1() and
+	t##0 b_out_sync() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig_mode() == m_in_sig_mode_f and
+	t_end(o)##0 b_out_sig_x() == m_in_sig_x_f and
+	t_end(o)##0 b_out_sig_y() == m_in_sig_y_f and
+	t_end(o)##0 phase() == SECTION_A and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_2_p(o);
+ bit[31:0] m_in_sig_mode_f;
+ bit[31:0] m_in_sig_x_f;
+ bit[31:0] m_in_sig_y_f;
+	t ##0 hold(m_in_sig_mode_f, m_in_sig_mode()) and
+	t ##0 hold(m_in_sig_x_f, m_in_sig_x()) and
+	t ##0 hold(m_in_sig_y_f, m_in_sig_y()) and
+	t##0 state_1() and
+	t##0 !(b_out_sync()) and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 b_out_sig_mode() == m_in_sig_mode_f and
+	t_end(o)##0 b_out_sig_x() == m_in_sig_x_f and
+	t_end(o)##0 b_out_sig_y() == m_in_sig_y_f and
+	t_end(o)##0 phase() == SECTION_A and
+	during_o (t, 1, t_end(o), -1, b_out_notify() == 0) and
+	t_end(o)##0 b_out_notify() == 1;
+endproperty;
+state_1_2_a: assert property (disable iff (reset) state_1_2_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestBasic19 TestBasic19_verification inst (.*, .reset());

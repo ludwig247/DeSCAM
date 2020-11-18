@@ -1,0 +1,49 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function m_out_1_notify;
+	m_out_1_notify = 1'b1 ;
+endfunction
+function m_out_2_notify;
+	m_out_2_notify = 1'b1 ;
+endfunction
+function m_out_3_notify;
+	m_out_3_notify = 1'b1 ;
+endfunction
+
+// DP SIGNALS //
+function int m_in_1_sig;
+	m_in_1_sig = 0;
+endfunction
+function int m_in_2_sig;
+	m_in_2_sig = 0;
+endfunction
+function int m_in_3_sig;
+	m_in_3_sig = 0;
+endfunction
+function int m_out_1_sig;
+	m_out_1_sig = 0;
+endfunction
+function int m_out_2_sig;
+	m_out_2_sig = 0;
+endfunction
+function int m_out_3_sig;
+	m_out_3_sig = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function int data2;
+	data2 = 0;
+endfunction
+function int data3;
+	data3 = 0;
+endfunction
+
+// STATES //
+function state_1;
+	state_1 = 1'b1;
+endfunction
+function state_2;
+	state_2 = 1'b1;
+endfunction
+
+

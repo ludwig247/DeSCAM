@@ -1,0 +1,310 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "TestMasterSlave12_types.sva"
+`include "TestMasterSlave12_functions.sva"
+
+import top_level_types::*;
+
+module TestMasterSlave12_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge TestMasterSlave12.clk); endclocking
+`include "TestMasterSlave12_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 state_1() and
+	t##0 nextphase() == SECTION_A and
+	t##0 phase() == SECTION_A and
+	t##0 sh_out_sig() == 0 and
+	t##0 succ() == 0 and
+	t##0 val() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property state_1_1_p(o);
+ bit[31:0] s_in2_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(s_in2_sig_f, s_in2_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_1() and
+	t##0 s_in_sync() and
+	t##0 s_in2_sync() and
+	t##0 succ() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 nextphase() == SECTION_B and
+	t_end(o)##0 phase() == SECTION_B and
+	t_end(o)##0 sh_out_sig() == s_in2_sig_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == s_in2_sig_f;
+endproperty;
+state_1_1_a: assert property (disable iff (reset) state_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_2_p(o);
+ bit[31:0] s_in_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(s_in_sig_f, s_in_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_1() and
+	t##0 s_in_sync() and
+	t##0 !(s_in2_sync()) and
+	t##0 succ() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 nextphase() == SECTION_B and
+	t_end(o)##0 phase() == SECTION_B and
+	t_end(o)##0 sh_out_sig() == s_in_sig_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == s_in_sig_f;
+endproperty;
+state_1_2_a: assert property (disable iff (reset) state_1_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_3_p(o);
+ bit[31:0] s_in2_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(s_in2_sig_f, s_in2_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_1() and
+	t##0 !(s_in_sync()) and
+	t##0 s_in2_sync() and
+	t##0 succ() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 nextphase() == SECTION_B and
+	t_end(o)##0 phase() == SECTION_B and
+	t_end(o)##0 sh_out_sig() == s_in2_sig_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == s_in2_sig_f;
+endproperty;
+state_1_3_a: assert property (disable iff (reset) state_1_3_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_4_p(o);
+ bit[31:0] succ_f;
+ bit[31:0] val_f;
+	t ##0 hold(succ_f, succ()) and
+	t ##0 hold(val_f, val()) and
+	t##0 state_1() and
+	t##0 !(s_in_sync()) and
+	t##0 !(s_in2_sync()) and
+	t##0 succ() and
+	t##0 !((phase() == SECTION_B))
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 nextphase() == SECTION_B and
+	t_end(o)##0 phase() == SECTION_B and
+	t_end(o)##0 sh_out_sig() == val_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == val_f;
+endproperty;
+state_1_4_a: assert property (disable iff (reset) state_1_4_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_5_p(o);
+ bit[31:0] nextphase_f;
+ bit[31:0] s_in2_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(nextphase_f, nextphase()) and
+	t ##0 hold(s_in2_sig_f, s_in2_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_1() and
+	t##0 s_in_sync() and
+	t##0 s_in2_sync() and
+	t##0 !(succ()) and
+	t##0 !((phase() == SECTION_B)) and
+	t##0 (nextphase() == SECTION_A)
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == nextphase_f and
+	t_end(o)##0 phase() == nextphase_f and
+	t_end(o)##0 sh_out_sig() == s_in2_sig_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == s_in2_sig_f;
+endproperty;
+state_1_5_a: assert property (disable iff (reset) state_1_5_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_6_p(o);
+ bit[31:0] nextphase_f;
+ bit[31:0] s_in_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(nextphase_f, nextphase()) and
+	t ##0 hold(s_in_sig_f, s_in_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_1() and
+	t##0 s_in_sync() and
+	t##0 !(s_in2_sync()) and
+	t##0 !(succ()) and
+	t##0 !((phase() == SECTION_B)) and
+	t##0 (nextphase() == SECTION_A)
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == nextphase_f and
+	t_end(o)##0 phase() == nextphase_f and
+	t_end(o)##0 sh_out_sig() == s_in_sig_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == s_in_sig_f;
+endproperty;
+state_1_6_a: assert property (disable iff (reset) state_1_6_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_7_p(o);
+ bit[31:0] nextphase_f;
+ bit[31:0] s_in2_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(nextphase_f, nextphase()) and
+	t ##0 hold(s_in2_sig_f, s_in2_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_1() and
+	t##0 !(s_in_sync()) and
+	t##0 s_in2_sync() and
+	t##0 !(succ()) and
+	t##0 !((phase() == SECTION_B)) and
+	t##0 (nextphase() == SECTION_A)
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == nextphase_f and
+	t_end(o)##0 phase() == nextphase_f and
+	t_end(o)##0 sh_out_sig() == s_in2_sig_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == s_in2_sig_f;
+endproperty;
+state_1_7_a: assert property (disable iff (reset) state_1_7_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_1_8_p(o);
+ bit[31:0] nextphase_f;
+ bit[31:0] succ_f;
+ bit[31:0] val_f;
+	t ##0 hold(nextphase_f, nextphase()) and
+	t ##0 hold(succ_f, succ()) and
+	t ##0 hold(val_f, val()) and
+	t##0 state_1() and
+	t##0 !(s_in_sync()) and
+	t##0 !(s_in2_sync()) and
+	t##0 !(succ()) and
+	t##0 !((phase() == SECTION_B)) and
+	t##0 (nextphase() == SECTION_A)
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == nextphase_f and
+	t_end(o)##0 phase() == nextphase_f and
+	t_end(o)##0 sh_out_sig() == val_f and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == val_f;
+endproperty;
+state_1_8_a: assert property (disable iff (reset) state_1_8_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_10_p(o);
+ bit[31:0] s_in_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(s_in_sig_f, s_in_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_2() and
+	t##0 s_in_sync() and
+	t##0 !(s_in2_sync())
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == SECTION_A and
+	t_end(o)##0 phase() == SECTION_A and
+	t_end(o)##0 sh_out_sig() == (4 * s_in_sig_f) and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == (2 * s_in_sig_f);
+endproperty;
+state_2_10_a: assert property (disable iff (reset) state_2_10_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_11_p(o);
+ bit[31:0] s_in2_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(s_in2_sig_f, s_in2_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_2() and
+	t##0 !(s_in_sync()) and
+	t##0 s_in2_sync()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == SECTION_A and
+	t_end(o)##0 phase() == SECTION_A and
+	t_end(o)##0 sh_out_sig() == (4 * s_in2_sig_f) and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == (2 * s_in2_sig_f);
+endproperty;
+state_2_11_a: assert property (disable iff (reset) state_2_11_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_12_p(o);
+ bit[31:0] succ_f;
+ bit[31:0] val_f;
+	t ##0 hold(succ_f, succ()) and
+	t ##0 hold(val_f, val()) and
+	t##0 state_2() and
+	t##0 !(s_in_sync()) and
+	t##0 !(s_in2_sync())
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == SECTION_A and
+	t_end(o)##0 phase() == SECTION_A and
+	t_end(o)##0 sh_out_sig() == (4 * val_f) and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == (2 * val_f);
+endproperty;
+state_2_12_a: assert property (disable iff (reset) state_2_12_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_9_p(o);
+ bit[31:0] s_in2_sig_f;
+ bit[31:0] succ_f;
+	t ##0 hold(s_in2_sig_f, s_in2_sig()) and
+	t ##0 hold(succ_f, succ()) and
+	t##0 state_2() and
+	t##0 s_in_sync() and
+	t##0 s_in2_sync()
+implies
+	t_end(o)##0 state_1() and
+	t_end(o)##0 nextphase() == SECTION_A and
+	t_end(o)##0 phase() == SECTION_A and
+	t_end(o)##0 sh_out_sig() == (4 * s_in2_sig_f) and
+	t_end(o)##0 succ() == succ_f and
+	t_end(o)##0 val() == (2 * s_in2_sig_f);
+endproperty;
+state_2_9_a: assert property (disable iff (reset) state_2_9_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind TestMasterSlave12 TestMasterSlave12_verification inst (.*, .reset());

@@ -20,6 +20,8 @@ class PrintSVA : public PluginFactory {
 
   std::map<std::string, std::string> printModule(DESCAM::Module *node);
 
+  static const std::string freezeSigSuffix;
+
   std::map<std::string, bool> getOptionMap() override {
     return CommandLineParameter::getOptionMap("PrintSVA");
   }
@@ -37,7 +39,7 @@ class PrintSVA : public PluginFactory {
 
   std::string globalFunctions();
 
-  std::string dataTypes();
+  std::string dataTypes(std::map<std::basic_string<char>, DataType *> dataTypes);
 
   std::string signals();
 
@@ -60,6 +62,12 @@ class PrintSVA : public PluginFactory {
   std::string tolower(std::string str);
 
   std::string macros();
+
+  std::string dataTypesEnum(std::map<std::basic_string<char>, DataType *> dataTypeMap);
+
+  std::string dataTypesStruct(std::map<std::basic_string<char>, DataType *> dataTypeMap);
+
+  std::string dataTypesArray(std::map<std::basic_string<char>, DataType *> dataTypeMap);
 };
 
 #endif //DESCAM_PRINTSVA_H

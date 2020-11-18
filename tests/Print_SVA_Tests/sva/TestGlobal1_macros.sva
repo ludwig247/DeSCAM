@@ -1,0 +1,34 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+function test_in_sync;
+	test_in_sync = 1'b1 ;
+endfunction
+function test_out_sync;
+	test_out_sync = 1'b1 ;
+endfunction
+function test_in_notify;
+	test_in_notify = 1'b1 ;
+endfunction
+function test_out_notify;
+	test_out_notify = 1'b1 ;
+endfunction
+
+// DP SIGNALS //
+function int test_in_sig;
+	test_in_sig = 0;
+endfunction
+function bit[31:0] test_out_sig;
+	test_out_sig = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function bit[31:0] bar;
+	bar = 0;
+endfunction
+
+// STATES //
+function state_1;
+	state_1 = 1'b1;
+endfunction
+
+

@@ -1,0 +1,19 @@
+
+// SYNC AND NOTIFY SIGNALS (1-cycle macros) //
+
+// DP SIGNALS //
+function int s_out_sig;
+	s_out_sig = 0;
+endfunction
+
+// VISIBLE REGISTERS //
+function Phases phase;
+	phase = SECTION_A;
+endfunction
+
+// STATES //
+function state_1;
+	state_1 = 1'b1;
+endfunction
+
+

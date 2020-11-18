@@ -1,0 +1,99 @@
+`define next_shift_amount 0 //IN CASE OF REQUIRED SIGNALS VALUES IN THE FUTURE, SHIFT YOUR ENTIRE TIMING BY THIS FACTOR
+
+`include "ipc.sva"
+`include "globalTypes.sva"
+`include "ModuleStateName03_types.sva"
+`include "ModuleStateName03_functions.sva"
+
+import top_level_types::*;
+
+module ModuleStateName03_verification(reset);
+
+input reset;
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME TO REFER TO THE CLK SIGNAL USED IN IT
+default clocking default_clk @(posedge ModuleStateName03.clk); endclocking
+`include "ModuleStateName03_macros.sva"
+
+////////////////////////////////////
+//////////// Operations ////////////
+////////////////////////////////////
+
+sequence reset_sequence;
+reset ##1 !reset;  	//DESIGNER REFER TO MODEL RESET SIGNAL HERE
+endsequence
+
+property reset_p;
+	reset_sequence |->
+	t##0 idle_1() and
+	t##0 s_out_sig() == 0 and
+	t##0 m_out_notify() == 0;
+endproperty
+reset_a: assert property (reset_p);
+
+
+
+property idle_1_1_p(o);
+ bit[31:0] m_in_sig_f;
+	t ##0 hold(m_in_sig_f, m_in_sig()) and
+	t##0 idle_1() and
+	t##0 s_in_sync()
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 m_out_sig() == m_in_sig_f and
+	t_end(o)##0 s_out_sig() == m_in_sig_f and
+	t##1 m_out_notify() == 1;
+endproperty;
+idle_1_1_a: assert property (disable iff (reset) idle_1_1_p(1)); //ASSIGN t_end offset here
+
+
+
+property idle_1_2_p(o);
+ bit[31:0] m_in_sig_f;
+	t ##0 hold(m_in_sig_f, m_in_sig()) and
+	t##0 idle_1() and
+	t##0 !(s_in_sync())
+implies
+	t_end(o)##0 state_2() and
+	t_end(o)##0 m_out_sig() == m_in_sig_f and
+	t_end(o)##0 s_out_sig() == m_in_sig_f and
+	t##1 m_out_notify() == 1;
+endproperty;
+idle_1_2_a: assert property (disable iff (reset) idle_1_2_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_3_p(o);
+ bit[31:0] s_in_sig_f;
+	t ##0 hold(s_in_sig_f, s_in_sig()) and
+	t##0 state_2() and
+	t##0 s_in_sync()
+implies
+	t_end(o)##0 idle_1() and
+	t_end(o)##0 m_out_sig() == s_in_sig_f and
+	t_end(o)##0 s_out_sig() == s_in_sig_f and
+	t##1 m_out_notify() == 1;
+endproperty;
+state_2_3_a: assert property (disable iff (reset) state_2_3_p(1)); //ASSIGN t_end offset here
+
+
+
+property state_2_4_p(o);
+ bit[31:0] m_in_sig_f;
+	t ##0 hold(m_in_sig_f, m_in_sig()) and
+	t##0 state_2() and
+	t##0 !(s_in_sync())
+implies
+	t_end(o)##0 idle_1() and
+	t_end(o)##0 m_out_sig() == m_in_sig_f and
+	t_end(o)##0 s_out_sig() == m_in_sig_f and
+	t##1 m_out_notify() == 1;
+endproperty;
+state_2_4_a: assert property (disable iff (reset) state_2_4_p(1)); //ASSIGN t_end offset here
+
+
+
+endmodule
+
+//DESIGNER SHOULD PAY ATTENTION FOR USING THE MODEL CORRECT NAME FOR BINDING AND TO REFER TO THE RESET SIGNAL USED IN IT
+bind ModuleStateName03 ModuleStateName03_verification inst (.*, .reset());

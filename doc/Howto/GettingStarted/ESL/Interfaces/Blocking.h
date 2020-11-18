@@ -18,6 +18,8 @@ public:
     Blocking(const char *name);
 
     void read(T &out);
+
+
     void try_read(T & out);
     void try_read(T & out, bool & success);
 
