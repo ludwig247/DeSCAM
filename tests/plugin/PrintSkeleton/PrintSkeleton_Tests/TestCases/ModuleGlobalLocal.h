@@ -18,8 +18,6 @@ struct global_compound_type {
 enum global_enum{A,B};
 enum class global_enum_class{M,N};
 
-
-
 struct GlobalLocal : public sc_module {
     blocking_in<int> b_in;
     blocking_out<int> b_out;

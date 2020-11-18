@@ -25,6 +25,8 @@ class PrintSkeleton : public PluginFactory {
 
   std::pair<std::string, std::string> printGlobalTypes(Model *node);
 
+  std::pair<std::string, std::string> printGlobalDefines(Model *node);
+
   std::pair<std::string, std::string> printLocalTypes(DESCAM::Module *module);
 
   std::map<std::string, bool> getOptionMap() override {

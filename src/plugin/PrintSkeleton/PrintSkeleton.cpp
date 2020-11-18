@@ -658,5 +658,11 @@ bool PrintSkeleton::arrayHasBeenReset(std::list<std::string> resetArrayList, std
     }
     return false;
 }
+std::pair<std::string, std::string> PrintSkeleton::printGlobalDefines(Model * model) {
+  setLanguage();
+  globalPackageName = model->getName();
+
+  return std::make_pair("globalDefines" + getFilenameExtention(), generateGlobalDefs());
+}
 
 

@@ -328,6 +328,30 @@ TEST_F(PrintSkeletonGlobal, GlobalTypesSV) {
                                 << result.second;
     std::cout << "" << std::endl;
 }
+
+
+TEST_F(PrintSkeletonGlobal, GlobalDefinesVHDL) {
+  CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "vhdl", true);
+  CommandLineParameter::setPluginOptionParameter("PrintSkeleton", "sv", false);
+  std::cout << "Global types " << std::endl;
+  std::ifstream ifs(SCAM_HOME"/tests/plugin/PrintSkeleton/PrintSkeleton_Tests/TestCases/vhdl/globalDefines.vhdl");
+  ASSERT_TRUE(bool(ifs)) << "Can't open file";
+
+  std::stringstream buffer;
+  std::string content((std::istreambuf_iterator<char>(ifs)),
+                      (std::istreambuf_iterator<char>()));
+  while (content[content.length()-1] == '\n') {
+    content.erase(content.length()-1);
+  }
+
+  PrintSkeleton printSkeleton;
+  std::pair<std::string, std::string> result;
+  ASSERT_NO_THROW(result = printSkeleton.printGlobalDefines(DESCAM::ModelGlobal::getModel()));
+  //ASSERT_EQ(content, result.second) << "Test for types " << GetParam()->getName() << "_types failed\n\n" << result.second;
+  ASSERT_EQ(content, result.second) << "Test for types " << DESCAM::ModelGlobal::getModel()->getName() << " failed\n\n" << result.second;
+  std::cout << "" << std::endl;
+}
+
     
 TEST_P(PrintSkeletonParam, LocalTypesVHDL) {
 
