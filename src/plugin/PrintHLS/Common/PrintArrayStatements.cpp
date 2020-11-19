@@ -6,13 +6,12 @@
 
 using namespace DESCAM::HLSPlugin;
 
-PrintArrayStatements::PrintArrayStatements(Expr *expr, Port* port) :
-    port(port)
-{
+PrintArrayStatements::PrintArrayStatements(Expr *expr, Port *port) :
+        port(port) {
     expr->accept(*this);
 }
 
-std::list<DESCAM::Expr *> PrintArrayStatements::getArrayExprs(DESCAM::Expr *expr, Port* port) {
+std::list<DESCAM::Expr *> PrintArrayStatements::getArrayExprs(DESCAM::Expr *expr, Port *port) {
     PrintArrayStatements printArrayStatements(expr, port);
     return printArrayStatements.arrayExprs;
 }
@@ -57,14 +56,12 @@ void PrintArrayStatements::visit(ArrayOperand &node) {
     }
 }
 
-void PrintArrayStatements::visit(DESCAM::Assignment& node)
-{
+void PrintArrayStatements::visit(DESCAM::Assignment &node) {
     node.getLhs()->accept(*this);
     node.getRhs()->accept(*this);
 }
 
-void PrintArrayStatements::visit(DESCAM::DataSignalOperand& node)
-{
+void PrintArrayStatements::visit(DESCAM::DataSignalOperand &node) {
     if (node.getDataSignal()->isSubVar()) {
         if (node.getDataSignal()->getParent()->isArrayType()) {
             arrayExprs.push_back(&node);

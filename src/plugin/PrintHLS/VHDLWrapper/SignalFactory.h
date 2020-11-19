@@ -6,13 +6,8 @@
 #define DESCAM_SIGNALFACTORY_H
 
 #include <cmath>
-#include <memory>
-#include <string>
-#include <set>
 
-#include "DataSignal.h"
 #include "OptimizerHLS.h"
-#include "PluginFactory.h"
 
 namespace DESCAM {
     namespace HLSPlugin {
@@ -53,9 +48,10 @@ namespace DESCAM {
                 template<typename T>
                 static std::string convertDataTypeName(T *type, const bool &asVector = false);
 
-                static std::string findAssignedValue(const std::shared_ptr<Property> &property, const std::shared_ptr<PropertyMacro> &notify);
+                static std::string findAssignedValue(const std::shared_ptr<Property> &property,
+                                                     const std::shared_ptr<PropertyMacro> &notify);
 
-                static std::string convertReturnType (const DataType &type);
+                static std::string convertReturnType(const DataType &type);
 
                 std::set<Variable *> getInternalRegister() const;
 
@@ -143,7 +139,8 @@ namespace DESCAM {
                                                             const std::string &direction,
                                                             const bool &addVld) {
                 std::stringstream ss;
-                const std::string suffix = ((signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned()) ? "_V" : "");
+                const std::string suffix = ((signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned())
+                                            ? "_V" : "");
                 ss << "\t\t" << prefix << signal->getFullName("_") << suffix << ": "
                    << direction << " " << convertDataTypeName(signal->getDataType(), true) << ";\n";
                 if (addVld) {
@@ -159,7 +156,8 @@ namespace DESCAM {
                                                           const std::string &suffix,
                                                           const bool &addVld) {
                 std::stringstream ss;
-                const auto &varSuffix = (signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned() ? "_V" : "");
+                const auto &varSuffix = (signal->getDataType()->isInteger() || signal->getDataType()->isUnsigned()
+                                         ? "_V" : "");
                 ss << "\t\t" << prefix << signal->getFullName("_") << varSuffix
                    << " => " << (prefix != "ap_" ? prefix : "") << signal->getFullName(delimiter) << suffix << ",\n";
                 if (addVld) {

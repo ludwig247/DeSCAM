@@ -20,20 +20,21 @@
 #include "PluginFactory.h"
 
 class PrintHLS : public PluginFactory {
- public:
-  PrintHLS() = default;
-  ~PrintHLS() = default;
+public:
+    PrintHLS() = default;
 
-  std::map<std::string, std::string> printModel(Model *model) override;
+    ~PrintHLS() = default;
 
-  std::map<std::string, bool> getOptionMap() override {
-    return CommandLineParameter::getOptionMap("PrintHLS");
-  }
+    std::map<std::string, std::string> printModel(Model *model) override;
 
- private:
-  using hlsOptionEnum = DESCAM::HLSPlugin::HLSOption;
+    std::map<std::string, bool> getOptionMap() override {
+        return CommandLineParameter::getOptionMap("PrintHLS");
+    }
 
-  hlsOptionEnum hlsOption = hlsOptionEnum::MCO;;
+private:
+    using hlsOptionEnum = DESCAM::HLSPlugin::HLSOption;
+
+    hlsOptionEnum hlsOption = hlsOptionEnum::MCO;;
 };
 
 #endif //DESCAM_PRINTHLS_H

@@ -110,7 +110,8 @@ void VHDLWrapper::operationEnum(std::stringstream &ss) {
         i++;
     }
     if (waitPropertiesUsed) {
-        ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize) << "\";\n";
+        ss << "\tconstant op_state_wait : " << opTypeName << " := \"" << Utilities::intToBinary(i, vectorSize)
+           << "\";\n";
     }
     ss << "\n";
 }

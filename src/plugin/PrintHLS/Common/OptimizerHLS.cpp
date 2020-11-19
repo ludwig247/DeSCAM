@@ -3,6 +3,7 @@
 //
 
 #include <algorithm>
+#include <utility>
 #include <Stmts/StmtCastVisitor.h>
 
 #include "ExprVisitor.h"
@@ -13,7 +14,7 @@
 using namespace DESCAM::HLSPlugin;
 
 OptimizerHLS::OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module *module) :
-        propertySuite(propertyHelper),
+        propertySuite(std::move(propertyHelper)),
         module(module),
         registerToOutputMap(),
         outputToRegisterMap() {
@@ -503,7 +504,7 @@ const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &OptimizerH
     return simplifiedCommitments;
 }
 
-std::vector<DESCAM::Assignment *> OptimizerHLS::getNotifyStatements(std::shared_ptr<Property> property) const {
+std::vector<DESCAM::Assignment *> OptimizerHLS::getNotifyStatements(const std::shared_ptr<Property>& property) {
     std::vector<DESCAM::Assignment *> assignmentList;
     auto temporalExprs = property->getCommitmentList();
     for (auto temporalExpr : temporalExprs) {

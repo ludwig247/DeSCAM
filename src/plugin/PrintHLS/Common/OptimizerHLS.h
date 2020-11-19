@@ -6,136 +6,150 @@
 #define SCAM_UTILITIES_HLS_H
 
 #include <list>
-#include <memory>
-#include <set>
 
 #include "PluginFactory.h"
 #include "PropertySuite.h"
 
-namespace DESCAM { namespace HLSPlugin {
+namespace DESCAM {
+    namespace HLSPlugin {
 
-    struct optional {
-        bool valid = false;
-        Assignment* value = nullptr;
-    };
+        struct optional {
+            bool valid = false;
+            Assignment *value = nullptr;
+        };
 
-    class OptimizerHLS {
+        class OptimizerHLS {
 
-    public:
-        OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module* module);
-        ~OptimizerHLS() = default;
+        public:
+            OptimizerHLS(std::shared_ptr<PropertySuite> propertyHelper, Module *module);
 
-        bool hasOutputReg(DataSignal* dataSignal);
-        bool isConstant(Variable* variable) const;
+            ~OptimizerHLS() = default;
 
-        Variable* getCorrespondingRegister(DataSignal* dataSignal) ;
-        std::set<Variable *> getOutputRegister();
-        std::vector<DataSignal *> getConstantOutputs();
+            bool hasOutputReg(DataSignal *dataSignal);
 
-        inline std::set<const DataType *> getEnumTypes() const;
-        inline std::set<const DataType *> getCompoundTypes() const;
-        inline std::set<const DataType *> getArrayTypes() const;
+            bool isConstant(Variable *variable) const;
 
-        inline std::set<DataSignal *> getOutputs() const;
-        inline std::set<DataSignal *> getInputs() const;
-        inline std::set<Variable *> getInternalRegisterIn() const;
-        inline std::set<Variable *> getInternalRegisterOut() const;
-        inline std::set<Variable *> getConstantVariables() const;
+            Variable *getCorrespondingRegister(DataSignal *dataSignal);
 
-        inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
-        inline std::map<Variable *, DataSignal *> getOutputRegisterMap() const;
+            std::set<Variable *> getOutputRegister();
 
-        std::vector<Assignment *> getNotifyStatements(std::shared_ptr<Property> property) const;
+            std::vector<DataSignal *> getConstantOutputs();
 
-        std::vector<Assignment *> getResetStatements();
+            inline std::set<const DataType *> getEnumTypes() const;
 
-        //static std::string sliceBitwise(Bitwise& operation);
+            inline std::set<const DataType *> getCompoundTypes() const;
 
-        const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
+            inline std::set<const DataType *> getArrayTypes() const;
 
-    private:
-        std::shared_ptr<PropertySuite> propertySuite;
-        Module* module;
+            inline std::set<DataSignal *> getOutputs() const;
 
-        std::set<const DataType *> enumTypes;
-        std::set<const DataType *> compoundTypes;
-        std::set<const DataType *> arrayTypes;
+            inline std::set<DataSignal *> getInputs() const;
 
-        std::set<DataSignal *> outputs;
-        std::set<DataSignal *> inputs;
-        std::set<Variable *> variables;
-        std::set<Variable *> internalRegisterIn;
-        std::set<Variable *> internalRegisterOut;
-        std::set<Variable *> constantVariables;
+            inline std::set<Variable *> getInternalRegisterIn() const;
 
-        std::map<Variable *, DataSignal *> registerToOutputMap;
-        std::map<DataSignal *, Variable *> outputToRegisterMap;
+            inline std::set<Variable *> getInternalRegisterOut() const;
 
-        std::map<std::shared_ptr<Property>, std::vector<Assignment*>> simplifiedCommitments;
+            inline std::set<Variable *> getConstantVariables() const;
 
-        std::map<Port *, std::list<Expr *>> arrayPorts;
+            inline std::map<Port *, std::list<Expr *>> getArrayPorts() const;
 
-        void findUsedDataTypes();
+            inline std::map<Variable *, DataSignal *> getOutputRegisterMap() const;
 
-        void removeRedundantConditions();
+            static std::vector<Assignment *> getNotifyStatements(const std::shared_ptr<Property>& property) ;
 
-        void findVariables();
+            std::vector<Assignment *> getResetStatements();
 
-        void mapOutputRegistersToOutput();
+            //static std::string sliceBitwise(Bitwise& operation);
 
-        void findOperationModuleSignals();
+            const std::map<std::shared_ptr<Property>, std::vector<Assignment *>> &getSimplifiedCommitments() const;
 
-        void simplifyCommitments();
-        bool isSelfAssignments(Assignment *assignment);
-        bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const& assignmentList);
+        private:
+            std::shared_ptr<PropertySuite> propertySuite;
+            Module *module;
 
-        optional replaceByOutputRegister(Assignment *assignment);
-        void arraySlicing();
+            std::set<const DataType *> enumTypes;
+            std::set<const DataType *> compoundTypes;
+            std::set<const DataType *> arrayTypes;
 
-        template <typename Key, typename Value>
-        std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
-    };
+            std::set<DataSignal *> outputs;
+            std::set<DataSignal *> inputs;
+            std::set<Variable *> variables;
+            std::set<Variable *> internalRegisterIn;
+            std::set<Variable *> internalRegisterOut;
+            std::set<Variable *> constantVariables;
 
-    std::map<Port *, std::list<Expr *>> OptimizerHLS::getArrayPorts() const {
-        return arrayPorts;
+            std::map<Variable *, DataSignal *> registerToOutputMap;
+            std::map<DataSignal *, Variable *> outputToRegisterMap;
+
+            std::map<std::shared_ptr<Property>, std::vector<Assignment *>> simplifiedCommitments;
+
+            std::map<Port *, std::list<Expr *>> arrayPorts;
+
+            void findUsedDataTypes();
+
+            void removeRedundantConditions();
+
+            void findVariables();
+
+            void mapOutputRegistersToOutput();
+
+            void findOperationModuleSignals();
+
+            void simplifyCommitments();
+
+            static bool isSelfAssignments(Assignment *assignment);
+
+            static bool isDuplicate(Assignment *newAssignment, std::vector<Assignment *> const &assignmentList);
+
+            optional replaceByOutputRegister(Assignment *assignment);
+
+            void arraySlicing();
+
+            template<typename Key, typename Value>
+            std::map<Key *, Value *> getSubVarMap(std::map<Key *, Value *> map);
+        };
+
+        std::map<Port *, std::list<Expr *>> OptimizerHLS::getArrayPorts() const {
+            return arrayPorts;
+        }
+
+        std::set<const DataType *> OptimizerHLS::getEnumTypes() const {
+            return enumTypes;
+        }
+
+        std::set<const DataType *> OptimizerHLS::getCompoundTypes() const {
+            return compoundTypes;
+        }
+
+        std::set<const DataType *> OptimizerHLS::getArrayTypes() const {
+            return arrayTypes;
+        }
+
+        std::set<DataSignal *> OptimizerHLS::getOutputs() const {
+            return outputs;
+        }
+
+        std::set<DataSignal *> OptimizerHLS::getInputs() const {
+            return inputs;
+        }
+
+        std::set<Variable *> OptimizerHLS::getInternalRegisterIn() const {
+            return internalRegisterIn;
+        }
+
+        std::set<Variable *> OptimizerHLS::getInternalRegisterOut() const {
+            return internalRegisterOut;
+        }
+
+        std::set<Variable *> OptimizerHLS::getConstantVariables() const {
+            return constantVariables;
+        }
+
+        std::map<Variable *, DataSignal *> OptimizerHLS::getOutputRegisterMap() const {
+            return registerToOutputMap;
+        }
+
     }
-
-    std::set<const DataType *> OptimizerHLS::getEnumTypes() const {
-        return enumTypes;
-    }
-
-    std::set<const DataType *> OptimizerHLS::getCompoundTypes() const {
-        return compoundTypes;
-    }
-
-    std::set<const DataType *> OptimizerHLS::getArrayTypes() const {
-        return arrayTypes;
-    }
-
-    std::set<DataSignal *> OptimizerHLS::getOutputs() const {
-        return outputs;
-    }
-
-    std::set<DataSignal *> OptimizerHLS::getInputs() const {
-        return inputs;
-    }
-
-    std::set<Variable *> OptimizerHLS::getInternalRegisterIn() const {
-        return internalRegisterIn;
-    }
-
-    std::set<Variable *> OptimizerHLS::getInternalRegisterOut() const {
-        return internalRegisterOut;
-    }
-
-    std::set<Variable *> OptimizerHLS::getConstantVariables() const {
-        return constantVariables;
-    }
-
-    std::map<Variable *, DataSignal *> OptimizerHLS::getOutputRegisterMap() const {
-        return registerToOutputMap;
-    }
-
-}}
+}
 
 #endif //SCAM_UTILITIES_HLS_H

@@ -5,11 +5,6 @@
 #ifndef SCAM_VHDLWrapperMCO_H
 #define SCAM_VHDLWrapperMCO_H
 
-#include <memory>
-#include <string>
-
-#include "PluginFactory.h"
-#include "SignalFactory.h"
 #include "VHDLWrapper.h"
 
 namespace DESCAM {

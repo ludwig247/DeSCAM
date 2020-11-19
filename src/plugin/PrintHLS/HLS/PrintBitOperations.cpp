@@ -12,8 +12,7 @@
 
 using namespace DESCAM::HLSPlugin::HLS;
 
-PrintBitOperations::PrintBitOperations(Stmt *stmt, HLSOption hlsOption, std::shared_ptr<OptimizerHLS>& optimizer)
-{
+PrintBitOperations::PrintBitOperations(Stmt *stmt, HLSOption hlsOption, std::shared_ptr<OptimizerHLS> &optimizer) {
     this->actualNode = std::make_shared<Node>();
     this->hlsOption = hlsOption;
     this->optimizer = optimizer;
@@ -166,11 +165,12 @@ bool PrintBitOperations::sliceWithShift(Node *node) {
                 }
                 auto subChild = child->child;
                 for (auto &sub : subChild) {
-                    if (sub->type != StmtType::UNSIGNED_VALUE && sub->type != StmtType::VARIABLE_OPERAND && sub->type != StmtType::PARAM_OPERAND && sub->type != StmtType::DATA_SIGNAL_OPERAND) {
+                    if (sub->type != StmtType::UNSIGNED_VALUE && sub->type != StmtType::VARIABLE_OPERAND &&
+                        sub->type != StmtType::PARAM_OPERAND && sub->type != StmtType::DATA_SIGNAL_OPERAND) {
                         return false;
                     }
                 }
-            } else if(child->type != StmtType::UNSIGNED_VALUE) {
+            } else if (child->type != StmtType::UNSIGNED_VALUE) {
                 return false;
             }
             if (child->type == StmtType::UNSIGNED_VALUE) {
@@ -193,7 +193,7 @@ bool PrintBitOperations::sliceWithShift(Node *node) {
 
 bool PrintBitOperations::sliceWithoutShift(Node *node) {
     if (node->subType == SubTypeBitwise::BITWISE_AND) {
-        std::set<StmtType > types;
+        std::set<StmtType> types;
         for (auto &child : node->child) {
             if (child->type == StmtType::UNSIGNED_VALUE) {
                 uint32_t firstBit;
@@ -213,8 +213,7 @@ bool PrintBitOperations::sliceWithoutShift(Node *node) {
         }
         if (types.find(StmtType::VARIABLE_OPERAND) == types.end()
             && types.find(StmtType::PARAM_OPERAND) == types.end()
-            && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end())
-        {
+            && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end()) {
             return false;
         }
     } else {
@@ -229,7 +228,7 @@ bool PrintBitOperations::shiftWithConstant(Node *node) {
 
     if (node->type == StmtType::BITWISE) {
         if (node->subType == SubTypeBitwise::RIGHT_SHIFT || node->subType == SubTypeBitwise::LEFT_SHIFT) {
-            std::set<StmtType > types;
+            std::set<StmtType> types;
             for (auto &child : node->child) {
                 if (child->type == StmtType::UNSIGNED_VALUE) {
                     if (node->subType == SubTypeBitwise::RIGHT_SHIFT) {
@@ -243,8 +242,9 @@ bool PrintBitOperations::shiftWithConstant(Node *node) {
             if (types.find(StmtType::UNSIGNED_VALUE) == types.end()) {
                 return false;
             }
-            if (types.find(StmtType::VARIABLE_OPERAND) == types.end() && types.find(StmtType::PARAM_OPERAND) == types.end() && types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end())
-            {
+            if (types.find(StmtType::VARIABLE_OPERAND) == types.end() &&
+                types.find(StmtType::PARAM_OPERAND) == types.end() &&
+                types.find(StmtType::DATA_SIGNAL_OPERAND) == types.end()) {
                 return false;
             }
         } else {
@@ -265,23 +265,25 @@ std::string PrintBitOperations::getString(Node *node) {
         auto lhs = node->child[0];
         auto rhs = node->child[1];
 
-    //    for (auto &child : node->child) {
-            if (rhs->type == StmtType::UNSIGNED_VALUE) {
-                offset = (node->subType == SubTypeBitwise::RIGHT_SHIFT) ?
-                         static_cast<int>(rhs->value) :
-                         -static_cast<int>(rhs->value);
-            }
-     //   }
-    //    for (auto &child : node->child) {
-            if (lhs->type == StmtType::VARIABLE_OPERAND || lhs->type == StmtType::PARAM_OPERAND || lhs->type == StmtType::DATA_SIGNAL_OPERAND) {
-                ss << lhs->name << ".range(31, " << offset << ")";
-            }
-    //    }
+        //    for (auto &child : node->child) {
+        if (rhs->type == StmtType::UNSIGNED_VALUE) {
+            offset = (node->subType == SubTypeBitwise::RIGHT_SHIFT) ?
+                     static_cast<int>(rhs->value) :
+                     -static_cast<int>(rhs->value);
+        }
+        //   }
+        //    for (auto &child : node->child) {
+        if (lhs->type == StmtType::VARIABLE_OPERAND || lhs->type == StmtType::PARAM_OPERAND ||
+            lhs->type == StmtType::DATA_SIGNAL_OPERAND) {
+            ss << lhs->name << ".range(31, " << offset << ")";
+        }
+        //    }
     } else {
         for (auto &child : node->child) {
             if (child->type == StmtType::BITWISE) {
                 for (auto &childChild : child->child) {
-                    if (childChild->type == StmtType::VARIABLE_OPERAND || childChild->type == StmtType::PARAM_OPERAND || childChild->type == StmtType::DATA_SIGNAL_OPERAND) {
+                    if (childChild->type == StmtType::VARIABLE_OPERAND || childChild->type == StmtType::PARAM_OPERAND ||
+                        childChild->type == StmtType::DATA_SIGNAL_OPERAND) {
                         ss << childChild->name << ".range(";
                     }
                 }
@@ -292,7 +294,8 @@ std::string PrintBitOperations::getString(Node *node) {
                                  -static_cast<int>(childChild->value);
                     }
                 }
-            } else if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND || child->type == StmtType::DATA_SIGNAL_OPERAND) {
+            } else if (child->type == StmtType::VARIABLE_OPERAND || child->type == StmtType::PARAM_OPERAND ||
+                       child->type == StmtType::DATA_SIGNAL_OPERAND) {
                 ss << child->name << ".range(";
             }
         }
@@ -335,12 +338,11 @@ bool PrintBitOperations::getRange(uint32_t number, uint32_t &firstBit, uint32_t 
     return !((firstBit == -1) || (lastBit == -1));
 }
 
-BitConcatenation::BitConcatenation(Bitwise* node, HLSOption hlsOption, std::shared_ptr<OptimizerHLS>& optimizer) :
-    bitwiseNode(node),
-    constValue(0),
-    hlsOption(hlsOption),
-    optimizer(optimizer)
-{
+BitConcatenation::BitConcatenation(Bitwise *node, HLSOption hlsOption, std::shared_ptr<OptimizerHLS> &optimizer) :
+        bitwiseNode(node),
+        constValue(0),
+        hlsOption(hlsOption),
+        optimizer(optimizer) {
 }
 
 bool BitConcatenation::isBitConcatenationOp() {
@@ -353,7 +355,7 @@ bool BitConcatenation::isBitConcatenationOp() {
     return true;
 }
 
-bool BitConcatenation::evaluateOps(Bitwise* node) {
+bool BitConcatenation::evaluateOps(Bitwise *node) {
     if (Utilities::getSubTypeBitwise(node->getOperation()) != SubTypeBitwise::BITWISE_OR) {
         return false;
     }
@@ -392,7 +394,7 @@ bool BitConcatenation::isConstValue(Expr *node) {
     return false;
 }
 
-void BitConcatenation::getBitConcatenationOp(Bitwise* node) {
+void BitConcatenation::getBitConcatenationOp(Bitwise *node) {
     if (auto bitwise = StmtCastVisitor<Bitwise>(node->getRhs()).Get()) {
         auto bitSlicingRHS = std::make_unique<PrintBitOperations>(node->getRhs(), hlsOption, optimizer);
         if (!bitSlicingRHS->isSlicingOp()) {
@@ -431,25 +433,25 @@ void BitConcatenation::setOpAsString() {
     uint32_t i = 32;
     uint32_t value = 0;
     uint32_t bitCounter = 0;
-    PrintBitOperations* slicingOp = nullptr;
-    PrintBitOperations* lastSlicingOp = nullptr;
+    PrintBitOperations *slicingOp = nullptr;
+    PrintBitOperations *lastSlicingOp = nullptr;
     do {
         i--;
         slicingOp = nullptr;
         bool bitSet;
-        for (auto&& op : bitSlicingOps) {
-            bitSet = (1 << i) & op->getRangeAsValue();
+        for (auto &&op : bitSlicingOps) {
+            bitSet = (1u << i) & op->getRangeAsValue();
             if (bitSet) {
                 slicingOp = op.get();
             }
         }
 
-        bitSet = (1 << i) & constValue;
+        bitSet = (1u << i) & constValue;
         if (bitSet) {
-            value = (value << 1) + 1;
+            value = (value << 1u) + 1;
             bitCounter++;
         } else if (slicingOp == nullptr) {
-            value = (value << 1);
+            value = (value << 1u);
             bitCounter++;
         }
 

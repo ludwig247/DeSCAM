@@ -191,7 +191,7 @@ void HLS::operations() {
     ss << "\tswitch (active_operation) {\n";
 
     // operation properties
-    for (auto operationProperty : propertySuite->getOperationProperties()) {
+    for (const auto& operationProperty : propertySuite->getOperationProperties()) {
         const std::string &operationName = operationProperty->getName();
         ss << "\tcase " << operationName << ":\n";
         for (auto commitment : optimizer->getSimplifiedCommitments().at(operationProperty)) {
@@ -288,7 +288,7 @@ void HLS::interface() {
     }
 
     // Notify Signals
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\tbool &" << notifySignal->getName() << ",\n";
     }
 
@@ -302,7 +302,7 @@ void HLS::writeToOutput() {
     for (const auto reg : Utilities::getParents(optimizer->getInternalRegisterOut())) {
         ss << "\t" << reg->getName() << " = " << reg->getName() << "_reg;\n";
     }
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         ss << "\t" << notifySignal->getName() << " = " << notifySignal->getName() << "_reg;\n";
     }
 }
@@ -339,7 +339,7 @@ void HLS::registerVariables() {
         ss << " = " << getVariableReset(reg) << ";\n";
     }
 
-    for (auto notifySignal : propertySuite->getNotifySignals()) {
+    for (const auto& notifySignal : propertySuite->getNotifySignals()) {
         auto resetValue = getResetValue(notifySignal.get());
         ss << "\tstatic bool " << notifySignal->getName() << "_reg = "
            << (resetValue.valid ? resetValue.value : "false") << ";\n";

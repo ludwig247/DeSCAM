@@ -7,7 +7,9 @@
 
 #include "PrintStmt.h"
 
-namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
+namespace DESCAM {
+    namespace HLSPlugin {
+        namespace VHDLWrapper {
 
             class PrintStmtVHDL : public PrintStmt {
 
@@ -22,22 +24,38 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
             protected:
 
                 void visit(Arithmetic &node) override;
+
                 void visit(ArrayOperand &node) override;
+
                 void visit(Assignment &node) override;
+
                 void visit(Bitwise &node) override;
+
                 void visit(BoolValue &node) override;
+
                 void visit(Cast &node) override;
+
                 //void visit(CompoundExpr &node) override;
                 void visit(DataSignalOperand &node) override;
+
                 void visit(FunctionOperand &node) override;
+
                 void visit(IntegerValue &node) override;
+
                 void visit(Notify &node) override;
+
                 void visit(ParamOperand &node) override;
+
                 void visit(Relational &node) override;
+
                 void visit(Return &node) override;
+
                 void visit(SyncSignal &node) override;
+
                 void visit(UnaryExpr &node) override;
+
                 void visit(UnsignedValue &node) override;
+
                 void visit(VariableOperand &node) override;
 
                 std::string getString();
@@ -52,6 +70,8 @@ namespace DESCAM { namespace HLSPlugin { namespace VHDLWrapper {
 
             };
 
-        }}}
+        }
+    }
+}
 
 #endif //DESCAM_PRINTSTMTVHDL_H

@@ -17,7 +17,7 @@ namespace DESCAM { namespace HLSPlugin { namespace  HLS {
 
     struct optional {
         bool valid = false;
-        std::string value = "";
+        std::string value;
     };
 
     class HLS : public AbstractVisitor {

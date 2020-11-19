@@ -2,14 +2,9 @@
 // Created by johannes on 02.11.19.
 //
 
-#ifndef SCAM_PRINTVHDLFORHLS_H
-#define SCAM_PRINTVHDLFORHLS_H
+#ifndef SCAM_VHDLWrapperSCO_H
+#define SCAM_VHDLWrapperSCO_H
 
-#include <memory>
-#include <string>
-
-#include "PluginFactory.h"
-#include "SignalFactory.h"
 #include "VHDLWrapper.h"
 
 namespace DESCAM {
@@ -49,4 +44,4 @@ namespace DESCAM {
     }
 }
 
-#endif //SCAM_PRINTVHDLFORHLS_H
+#endif //SCAM_VHDLWrapperSCO_H

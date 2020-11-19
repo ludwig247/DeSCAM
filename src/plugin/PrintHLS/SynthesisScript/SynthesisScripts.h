@@ -12,7 +12,9 @@
 #include "Constants.h"
 #include "PluginFactory.h"
 
-namespace DESCAM { namespace HLSPlugin { namespace Script {
+namespace DESCAM {
+    namespace HLSPlugin {
+        namespace Script {
 
             class SynthesisScripts {
 
@@ -21,7 +23,7 @@ namespace DESCAM { namespace HLSPlugin { namespace Script {
 
                 ~SynthesisScripts() = default;
 
-                std::map<std::string, std::string> printModule(Module* module, const std::string &moduleName);
+                std::map<std::string, std::string> printModule(Module *module, const std::string &moduleName);
 
             private:
                 std::shared_ptr<PropertySuite> propertySuite;
@@ -31,12 +33,18 @@ namespace DESCAM { namespace HLSPlugin { namespace Script {
                 HLSOption hlsOption;
 
                 std::string synthesisScript();
+
                 std::string directivesScript();
+
                 std::string setDirectiveInterfaceNone();
+
                 std::string setDirectiveInterfaceHS();
+
                 std::string setDirectiveAllocation();
             };
 
-}}}
+        }
+    }
+}
 
 #endif //SCAM_PRINTSYNTHESISSCRIPTS_H

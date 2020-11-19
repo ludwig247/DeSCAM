@@ -10,7 +10,7 @@ using namespace DESCAM::HLSPlugin::HLS;
 
 PrintStatement::PrintStatement(
         Stmt *stmt,
-        std::shared_ptr<OptimizerHLS>& opt,
+        std::shared_ptr<OptimizerHLS> &opt,
         HLSOption hlsOption,
         unsigned int indentSize,
         unsigned int indentOffset
@@ -27,7 +27,8 @@ std::string PrintStatement::toString(Stmt *stmt, unsigned int indentSize, unsign
     return printer.getString();
 }
 
-std::string PrintStatement::toString(Stmt *stmt, std::shared_ptr<OptimizerHLS>& optimizer, HLSOption hlsOption, unsigned int indentSize, unsigned int indentOffset) {
+std::string PrintStatement::toString(Stmt *stmt, std::shared_ptr<OptimizerHLS> &optimizer, HLSOption hlsOption,
+                                     unsigned int indentSize, unsigned int indentOffset) {
     PrintStatement printer(stmt, optimizer, hlsOption, indentSize, indentOffset);
     return printer.getString();
 }
@@ -57,12 +58,12 @@ void PrintStatement::visit(VariableOperand &node) {
 
     std::string suffix;
     if (hlsOption == HLSOption::SCO) {
-         suffix = (side == Side::LHS ? "_reg" : "_tmp");
+        suffix = (side == Side::LHS ? "_reg" : "_tmp");
     }
 
     if (hlsOption == HLSOption::MCO) {
         if (optimizer) {
-            if(side == Side::LHS) {
+            if (side == Side::LHS) {
                 this->ss << "out_";
             } else if (side == Side::RHS) {
                 this->ss << "in_";
@@ -127,8 +128,7 @@ void PrintStatement::visit(UnaryExpr &node) {
     this->ss << "(";
     if (node.getOperation() == "not") {
         this->ss << "!(";
-    }
-    else {
+    } else {
         this->ss << node.getOperation() << "(";
     }
     node.getExpr()->accept(*this);
@@ -187,7 +187,7 @@ void PrintStatement::visit(ITE &node) {
             for (std::size_t i = 0; i < indent; ++i) {
                 this->ss << " ";    //add indent
             }
-            if (StmtCastVisitor<ITE>(stmt).Get()){
+            if (StmtCastVisitor<ITE>(stmt).Get()) {
                 indent -= indentSize;
             }
             stmt->accept(*this);
@@ -211,8 +211,7 @@ void PrintStatement::visit(Return &node) {
 void PrintStatement::visit(ParamOperand &node) {
     if (node.getParameter()->isSubVar()) {
         this->ss << node.getParameter()->getParent()->getName() << "." << node.getParameter()->getName();
-    }
-    else {
+    } else {
         this->ss << node.getOperandName();
     }
 }
@@ -222,7 +221,7 @@ void PrintStatement::visit(Logical &node) {
     node.getLhs()->accept(*this);
     if (node.getOperation() == "or") {
         this->ss << " || ";
-    } else if(node.getOperation() == "and") {
+    } else if (node.getOperation() == "and") {
         this->ss << " && ";
     }
     node.getRhs()->accept(*this);
@@ -280,7 +279,7 @@ void PrintStatement::visit(Bitwise &node) {
             if ((node.getOperation() == "<<") || (node.getOperation() == ">>")) {
                 this->ss << "(";
                 if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
-                    this->ss << "static_cast<" << node.getDataType()->getName() <<  ">(";
+                    this->ss << "static_cast<" << node.getDataType()->getName() << ">(";
                 }
                 node.getLhs()->accept(*this);
                 if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
@@ -288,7 +287,7 @@ void PrintStatement::visit(Bitwise &node) {
                 }
                 this->ss << " " + node.getOperation() << " ";
                 if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {
-                    this->ss << "static_cast<" << node.getDataType()->getName() <<  ">(";
+                    this->ss << "static_cast<" << node.getDataType()->getName() << ">(";
                 }
                 node.getRhs()->accept(*this);
                 if (!StmtCastVisitor<Cast>(node.getLhs()).Get()) {

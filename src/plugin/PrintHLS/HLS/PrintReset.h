@@ -8,30 +8,37 @@
 #include "PrintStatement.h"
 #include "PrintStmt.h"
 
-namespace DESCAM { namespace HLSPlugin { namespace HLS {
+namespace DESCAM {
+    namespace HLSPlugin {
+        namespace HLS {
 
-    class PrintReset : PrintStmt {
+            class PrintReset : PrintStmt {
 
-    public:
-        PrintReset(DESCAM::Stmt *stmt, const std::string& signalName, unsigned int indentSize = 2, unsigned int indentOffset = 0);
+            public:
+                PrintReset(DESCAM::Stmt *stmt, std::string signalName, unsigned int indentSize = 2,
+                           unsigned int indentOffset = 0);
 
-        bool hasReset();
+                bool hasReset();
 
-        std::string getString();
+                std::string getString();
 
-    protected:
-        void visit(DataSignalOperand &node) override ;
-        void visit(Notify &node) override ;
-        void visit(VariableOperand &node) override ;
+            protected:
+                void visit(DataSignalOperand &node) override;
 
-    private:
-        Stmt* stmt;
-        unsigned int indentSize;
-        unsigned int indentOffset;
-        std::string resetSignal;
-        bool signalFound;
-    };
+                void visit(Notify &node) override;
 
-}}}
+                void visit(VariableOperand &node) override;
+
+            private:
+                Stmt *stmt;
+                unsigned int indentSize;
+                unsigned int indentOffset;
+                std::string resetSignal;
+                bool signalFound;
+            };
+
+        }
+    }
+}
 
 #endif //DESCAM_PRINTRESET_H

@@ -2,8 +2,8 @@
 // Created by johannes on 28.07.19.
 //
 
-#ifndef SCAM_PRINTCOMMITMENTSHLS_H
-#define SCAM_PRINTCOMMITMENTSHLS_H
+#ifndef SCAM_PRINTSTATEMENT_H
+#define SCAM_PRINTSTATEMENT_H
 
 #include <memory>
 
@@ -11,63 +11,84 @@
 #include "PrintBitOperations.h"
 #include "PrintStmt.h"
 
-namespace DESCAM { namespace HLSPlugin { namespace HLS {
+namespace DESCAM {
+    namespace HLSPlugin {
+        namespace HLS {
 
-    class PrintStatement : public PrintStmt {
+            class PrintStatement : public PrintStmt {
 
-    public:
-        PrintStatement(
-                DESCAM::Stmt *stmt,
-                std::shared_ptr<OptimizerHLS>& optimizer,
-                HLSOption hlsOption,
-                unsigned int indentSize = 2,
-                unsigned int indentOffset = 0
-        );
+            public:
+                PrintStatement(
+                        DESCAM::Stmt *stmt,
+                        std::shared_ptr<OptimizerHLS> &optimizer,
+                        HLSOption hlsOption,
+                        unsigned int indentSize = 2,
+                        unsigned int indentOffset = 0
+                );
 
-        static std::string toString(
-                Stmt *stmt,
-                unsigned int indentSize = 2,
-                unsigned int indentOffset = 0
-        );
+                static std::string toString(
+                        Stmt *stmt,
+                        unsigned int indentSize = 2,
+                        unsigned int indentOffset = 0
+                );
 
-        static std::string toString(
-                Stmt *stmt,
-                std::shared_ptr<OptimizerHLS>& opt,
-                HLSOption hlsOption,
-                unsigned int indentSize = 2,
-                unsigned int indentOffset = 0
-        );
+                static std::string toString(
+                        Stmt *stmt,
+                        std::shared_ptr<OptimizerHLS> &opt,
+                        HLSOption hlsOption,
+                        unsigned int indentSize = 2,
+                        unsigned int indentOffset = 0
+                );
 
-        std::string getString();
+                std::string getString();
 
-    protected:
-        void visit(ArrayOperand &node) override;
-        void visit(Assignment &node) override;
-        void visit(Bitwise &node) override;
-        void visit(Cast &node) override;
-        void visit(CompoundExpr &node) override;
-        void visit(DataSignalOperand &node) override;
-        void visit(FunctionOperand &node) override;
-        void visit(IntegerValue &node) override;
-        void visit(ITE &node) override;
-        void visit(Logical &node) override;
-        void visit(Notify &node) override;
-        void visit(ParamOperand &node) override;
-        void visit(Return &node) override;
-        void visit(SyncSignal &node) override;
-        void visit(Ternary &node) override;
-        void visit(UnaryExpr &node) override;
-        void visit(UnsignedValue &node) override;
-        void visit(VariableOperand &node) override;
+            protected:
+                void visit(ArrayOperand &node) override;
 
-    private:
-        std::shared_ptr<OptimizerHLS> optimizer;
-        Side side;
-        HLSOption hlsOption;
+                void visit(Assignment &node) override;
 
-        void printIndent();
-    };
+                void visit(Bitwise &node) override;
 
-}}}
+                void visit(Cast &node) override;
 
-#endif //SCAM_PRINTCOMMITMENTSHLS_H
+                void visit(CompoundExpr &node) override;
+
+                void visit(DataSignalOperand &node) override;
+
+                void visit(FunctionOperand &node) override;
+
+                void visit(IntegerValue &node) override;
+
+                void visit(ITE &node) override;
+
+                void visit(Logical &node) override;
+
+                void visit(Notify &node) override;
+
+                void visit(ParamOperand &node) override;
+
+                void visit(Return &node) override;
+
+                void visit(SyncSignal &node) override;
+
+                void visit(Ternary &node) override;
+
+                void visit(UnaryExpr &node) override;
+
+                void visit(UnsignedValue &node) override;
+
+                void visit(VariableOperand &node) override;
+
+            private:
+                std::shared_ptr<OptimizerHLS> optimizer;
+                Side side;
+                HLSOption hlsOption;
+
+                void printIndent();
+            };
+
+        }
+    }
+}
+
+#endif //SCAM_PRINTSTATEMENT_H

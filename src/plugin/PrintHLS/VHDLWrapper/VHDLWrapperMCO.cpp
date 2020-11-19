@@ -45,7 +45,8 @@ void VHDLWrapperMCO::signals(std::stringstream &ss) {
 
     ss << "\n\t-- Module Outputs\n";
     for (const auto &output : signalFactory->getOutputs()) {
-        ss << "\tsignal " << output->getName() << "_reg : " << SignalFactory::convertDataTypeName(output->getDataType()) << ";\n";
+        ss << "\tsignal " << output->getName() << "_reg : " << SignalFactory::convertDataTypeName(output->getDataType())
+           << ";\n";
     }
     for (const auto &signal : Utilities::getSubVars(signalFactory->getOperationModuleOutputs())) {
         ss << SignalFactory::printSignalDefinition(signal, "_", "", "_out", true, true);

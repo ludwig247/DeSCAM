@@ -19,11 +19,12 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
     } else if (getOptionMap().at("mco")) {
         hlsOption = HLSOption::MCO;
     } else {
-        std::cout << "\x1B[31mNo HLS Option selected. Default Option is \"Multi Cycle Operation!\"\033[0m\t\t" << std::endl;
+        std::cout << "\x1B[31mNo HLS Option selected. Default Option is \"Multi Cycle Operation!\"\033[0m\t\t"
+                  << std::endl;
         hlsOption = HLSOption::MCO;
     }
 
-    for (auto& module: model->getModules()) {
+    for (auto &module: model->getModules()) {
         std::string moduleName = module.first;
         auto currentModule = module.second;
 
@@ -33,11 +34,13 @@ std::map<std::string, std::string> PrintHLS::printModel(Model *model) {
         auto optimizer = std::make_shared<OptimizerHLS>(propertySuite, module.second);
 
         if (hlsOption == HLSOption::SCO) {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperSCO>(currentModule, moduleName, propertySuite, optimizer);
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperSCO>(currentModule, moduleName, propertySuite,
+                                                                             optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         } else {
-            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMCO>(currentModule, moduleName, propertySuite, optimizer);
+            auto vhdlWrapper = std::make_unique<VHDLWrapper::VHDLWrapperMCO>(currentModule, moduleName, propertySuite,
+                                                                             optimizer);
             auto vhdlWrapperModel = vhdlWrapper->printModule();
             pluginOutput.insert(vhdlWrapperModel.begin(), vhdlWrapperModel.end());
         }

@@ -3,20 +3,21 @@
 //
 
 #include <Optimizer/Optimizer.h>
+
+#include <utility>
 #include "SynthesisScripts.h"
 #include "../Common/Utilities.h"
 
 using namespace DESCAM::HLSPlugin::Script;
 
 SynthesisScripts::SynthesisScripts(std::shared_ptr<OptimizerHLS> optimizer, HLSOption hlsOption) :
-    propertySuite(nullptr),
-    currentModule(nullptr),
-    optimizer(optimizer),
-    hlsOption(hlsOption)
-{
+        propertySuite(nullptr),
+        currentModule(nullptr),
+        optimizer(std::move(optimizer)),
+        hlsOption(hlsOption) {
 }
 
-std::map<std::string, std::string> SynthesisScripts::printModule(Module* module, const std::string &moduleName) {
+std::map<std::string, std::string> SynthesisScripts::printModule(Module *module, const std::string &moduleName) {
     std::map<std::string, std::string> pluginOutput;
 
     this->moduleName = moduleName;
@@ -80,10 +81,12 @@ std::string SynthesisScripts::setDirectiveInterfaceNone() {
         ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << out->getName() << "\n";
     }
     for (auto &notifySignal : propertySuite->getNotifySignals()) {
-        ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << notifySignal->getName() << "\n";
+        ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << notifySignal->getName()
+           << "\n";
     }
     for (auto &internalRegisterOut : Utilities::getParents(optimizer->getInternalRegisterOut())) {
-        ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << internalRegisterOut->getName() << "\n";
+        ss << "set_directive_interface -mode ap_none " << moduleName << "_operations " << internalRegisterOut->getName()
+           << "\n";
     }
     return ss.str();
 }
@@ -93,14 +96,17 @@ std::string SynthesisScripts::setDirectiveInterfaceHS() {
     ss << "set_directive_interface -mode ap_ctrl_hs operations\n";
     for (auto &port : currentModule->getPorts()) {
         if (port.second->getInterface()->isOutput()) {
-            ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations " << port.second->getName() << "_sig\n";
+            ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations " << port.second->getName()
+               << "_sig\n";
         }
     }
     for (auto &notifySignal : propertySuite->getNotifySignals()) {
-        ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations " << notifySignal->getName() << "\n";
+        ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations " << notifySignal->getName()
+           << "\n";
     }
     for (auto &internalRegisterOut : Utilities::getParents(optimizer->getInternalRegisterOut())) {
-        ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations out_" << internalRegisterOut->getName() << "\n";
+        ss << "set_directive_interface -mode ap_vld " << moduleName << "_operations out_"
+           << internalRegisterOut->getName() << "\n";
     }
     return ss.str();
 }
@@ -108,7 +114,8 @@ std::string SynthesisScripts::setDirectiveInterfaceHS() {
 std::string SynthesisScripts::setDirectiveAllocation() {
     std::stringstream ss;
     for (auto &function : currentModule->getFunctionMap()) {
-        ss << "set_directive_allocation -limit 1 -type function " << moduleName << "_operations " << function.second->getName() << "\n";
+        ss << "set_directive_allocation -limit 1 -type function " << moduleName << "_operations "
+           << function.second->getName() << "\n";
     }
     return ss.str();
 }

@@ -6,7 +6,6 @@
 #include <PrintHLS/Common/OptimizerHLS.h>
 #include <Stmts/StmtCastVisitor.h>
 #include "PrintStmtVHDL.h"
-#include "FatalError.h"
 
 using namespace DESCAM::HLSPlugin::VHDLWrapper;
 
@@ -159,7 +158,7 @@ void PrintStmtVHDL::visit(DESCAM::IntegerValue &node) {
     if (asNumber) {
         ss << node.getValue();
     } else {
-        ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+        ss << "x\"" << std::setfill('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
     }
 }
 
@@ -223,7 +222,7 @@ void PrintStmtVHDL::visit(DESCAM::UnsignedValue &node) {
     if (asNumber) {
         ss << node.getValue();
     } else {
-        ss << "x\"" << std::setfill ('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
+        ss << "x\"" << std::setfill('0') << std::setw(8) << std::hex << node.getValue() << std::dec << "\"";
     }
 }
 
@@ -248,7 +247,7 @@ void PrintStmtVHDL::visit(DESCAM::VariableOperand &node) {
         ss << node.getVariable()->getName();
     }
 
-   if (arithmeticOperation) {
+    if (arithmeticOperation) {
         ss << ")";
     }
 }

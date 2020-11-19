@@ -2,10 +2,8 @@
 // Created by johannes on 05.12.19.
 //
 
-#include <memory>
-#include <tuple>
 #include <Stmts/StmtCastVisitor.h>
-#include "Logger/Logger.h"
+
 #include "SignalFactory.h"
 #include "PrintStmtVHDL.h"
 
@@ -24,14 +22,13 @@ static const std::set<std::tuple<std::string, std::string, std::string>> CONTROL
 };
 
 SignalFactory::SignalFactory(
-        std::shared_ptr<PropertySuite>& propertySuite,
-        Module* module,
-        std::shared_ptr<OptimizerHLS>& optimizer
+        std::shared_ptr<PropertySuite> &propertySuite,
+        Module *module,
+        std::shared_ptr<OptimizerHLS> &optimizer
 ) :
         propertySuite(propertySuite),
         module(module),
-        optimizer(optimizer)
-{
+        optimizer(optimizer) {
     generateTypes();
     setOperationSelector();
     setControlSignals();
@@ -48,11 +45,11 @@ SignalFactory::SignalFactory(
  */
 void SignalFactory::generateTypes() {
     stateType = new DataType(propertySuite->getName() + "_state_t");
-    for (const auto& state : propertySuite->getStates()) {
+    for (const auto &state : propertySuite->getStates()) {
         stateType->addEnumValue(state->getName());
     }
     operationType = new DataType(propertySuite->getName() + "_operation_t");
-    for (const auto& operation : propertySuite->getOperationProperties()) {
+    for (const auto &operation : propertySuite->getOperationProperties()) {
         operationType->addEnumValue(operation->getName());
     }
 }
@@ -61,33 +58,33 @@ void SignalFactory::generateTypes() {
  * Generate the active_operation variable
  */
 void SignalFactory::setOperationSelector() {
-    activeOperation = std::make_shared<Variable> ("active_operation", operationType);
+    activeOperation = std::make_shared<Variable>("active_operation", operationType);
 }
 
 /*
  * Generate Vivado protocol and control signals
  */
 void SignalFactory::setControlSignals() {
-    for (const auto& signal : HANDSHAKING_PROTOCOL_SIGNALS) {
-        handshakingProtocolSignals.insert( new DataSignal(std::get<0>(signal),
-                DataTypes::getDataType(std::get<1>(signal)),
-                (DataTypes::getDataType(std::get<1>(signal)))->getDefaultVal(),
-                nullptr,
-                new Port(std::get<0>(signal),
-                        new Interface( "shared", std::get<2>(signal)),
-                        DataTypes::getDataType(std::get<1>(signal)))
-                )
+    for (const auto &signal : HANDSHAKING_PROTOCOL_SIGNALS) {
+        handshakingProtocolSignals.insert(new DataSignal(std::get<0>(signal),
+                                                         DataTypes::getDataType(std::get<1>(signal)),
+                                                         (DataTypes::getDataType(std::get<1>(signal)))->getDefaultVal(),
+                                                         nullptr,
+                                                         new Port(std::get<0>(signal),
+                                                                  new Interface("shared", std::get<2>(signal)),
+                                                                  DataTypes::getDataType(std::get<1>(signal)))
+                                          )
         );
     }
-    for (const auto& signal : CONTROL_SIGNALS) {
-        controlSignals.insert( new DataSignal(std::get<0>(signal),
-                DataTypes::getDataType(std::get<1>(signal)),
-                (DataTypes::getDataType(std::get<1>(signal)))->getDefaultVal(),
-                nullptr,
-                new Port(std::get<0>(signal),
-                        new Interface( "shared", std::get<2>(signal)),
-                        DataTypes::getDataType(std::get<1>(signal)))
-                )
+    for (const auto &signal : CONTROL_SIGNALS) {
+        controlSignals.insert(new DataSignal(std::get<0>(signal),
+                                             DataTypes::getDataType(std::get<1>(signal)),
+                                             (DataTypes::getDataType(std::get<1>(signal)))->getDefaultVal(),
+                                             nullptr,
+                                             new Port(std::get<0>(signal),
+                                                      new Interface("shared", std::get<2>(signal)),
+                                                      DataTypes::getDataType(std::get<1>(signal)))
+                              )
         );
     }
 }
@@ -96,8 +93,8 @@ void SignalFactory::setControlSignals() {
  * Generate control signals for the monitor
  */
 void SignalFactory::setMonitorSignals() {
-    monitorSignals.insert(std::make_shared<Variable> ("active_state", stateType));
-    monitorSignals.insert(std::make_shared<Variable> ("next_state", stateType));
+    monitorSignals.insert(std::make_shared<Variable>("active_state", stateType));
+    monitorSignals.insert(std::make_shared<Variable>("next_state", stateType));
     monitorSignals.insert(activeOperation);
 }
 
@@ -105,7 +102,7 @@ void SignalFactory::setMonitorSignals() {
  * Split DataSignals based on port direction
  */
 void SignalFactory::splitInputOutput() {
-    for (const auto& port : module->getPorts()) {
+    for (const auto &port : module->getPorts()) {
         if (port.second->getInterface()->isInput()) {
             inputs.insert(port.second->getDataSignal());
         } else if (port.second->getInterface()->isOutput()) {
@@ -154,7 +151,8 @@ std::string SignalFactory::convertReturnType(const DataType &type) {
 /*
  * Find the assigned value of a notify signal in the given properties' commitments
  */
-std::string SignalFactory::findAssignedValue(const std::shared_ptr<Property> &property, const std::shared_ptr<PropertyMacro> &notify) {
+std::string SignalFactory::findAssignedValue(const std::shared_ptr<Property> &property,
+                                             const std::shared_ptr<PropertyMacro> &notify) {
     std::string assignedValue;
     for (const auto &commitment : property->getCommitmentList()) {
         const auto &assignment = StmtCastVisitor<Assignment>(commitment->getStatement()).Get();

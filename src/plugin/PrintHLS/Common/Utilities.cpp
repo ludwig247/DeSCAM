@@ -32,7 +32,7 @@ unsigned int Utilities::firstSetBitIndex(unsigned int n) {
  * "0001 1100" -> (4, 2)
  * If no block is found, (0, 1) is returned
  */
-std::pair<const unsigned int, const unsigned int> Utilities::findBlockOfSetBits(unsigned int value){
+std::pair<const unsigned int, const unsigned int> Utilities::findBlockOfSetBits(unsigned int value) {
 
     if (value == 0) {
         return std::make_pair(0, 1);
@@ -70,7 +70,7 @@ std::string Utilities::intToBinary(unsigned int n, unsigned int size) {
     return res;
 }
 
-std::string Utilities::convertDataType(const std::string& type) {
+std::string Utilities::convertDataType(const std::string &type) {
     if (type == "int") {
         return "ap_int<32>";
     } else if (type == "unsigned") {
