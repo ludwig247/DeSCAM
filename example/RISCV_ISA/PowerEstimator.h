@@ -12,7 +12,7 @@
 
 class ModulePower{
 public:
-    ModulePower(const std::string& name, unsigned int operationsNumber, std::vector<unsigned int> values);
+    ModulePower(const std::string& name, std::vector<unsigned int> operations, std::vector<unsigned int> values);
     void update(unsigned int operation, std::vector<unsigned int> values);
     std::map<unsigned int, std::vector<unsigned int>> getOperationMap ();
 
@@ -49,7 +49,7 @@ public:
     void enterHierarchy(const std::string& name);
     void initializeOperations(const std::string& name, unsigned int operationsNumber);
 
-    void initialize(const std::string& name, unsigned int operationsNumber, std::vector<unsigned int> values);
+    void initialize(const std::string& name, std::vector<unsigned int> operationsNumber, std::vector<unsigned int> values);
     void initValues(const std::string &moduleName, std::vector<unsigned int> values);
     void updateValues(unsigned int operation, std::vector<unsigned int> values);
     void update(const std::string &moduleName, unsigned int operation, std::vector<unsigned int> values);

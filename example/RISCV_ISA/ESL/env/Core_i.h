@@ -9,7 +9,7 @@
 #include "systemc.h"
 //#include "Interfaces.h"
 #include "CPU_Interfaces.h"
-#include "../ISA.h"
+#include "../inst_ISA.h"
 #include "inst_Regs.h"
 
 #define REGFILE(x) RF.reg_file_##x

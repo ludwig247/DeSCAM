@@ -141,10 +141,10 @@ void PowerEstimator::updateValues(unsigned int operation, std::vector<unsigned i
     //std::cout << "----------------------------------------------------------------------------" << std::endl;
 }
 
-void PowerEstimator::initialize(const std::string &name, unsigned int operationsNumber, std::vector<unsigned int> values) {
+void PowerEstimator::initialize(const std::string &name, std::vector<unsigned int> operations, std::vector<unsigned int> values) {
     //initializeOperations(name, operationsNumber);
     //initValues(name, values);
-    moduleMap.insert(std::pair <std::string, ModulePower>(name,ModulePower(name,operationsNumber,values)));
+    moduleMap.insert(std::pair <std::string, ModulePower>(name,ModulePower(name,operations,values)));
 }
 
 void PowerEstimator::update(const std::string &moduleName, unsigned int operation, std::vector<unsigned int> values) {
@@ -153,10 +153,10 @@ void PowerEstimator::update(const std::string &moduleName, unsigned int operatio
     moduleMap.at(moduleName).update(operation,values);
 }
 
-ModulePower::ModulePower(const std::string &name, unsigned int operationsNumber, std::vector<unsigned int> values) {
+ModulePower::ModulePower(const std::string &name, std::vector<unsigned int> operations, std::vector<unsigned int> values) {
     values.insert(values.begin(),0);
     variables = values;
-    for (int i = 0; i < operationsNumber; i++){
+    for (auto i : operations){
         operationMap.insert(std::pair <unsigned int, std::vector<unsigned int>>(i,{}));
     }
     valueList.push_back(values);
@@ -164,7 +164,6 @@ ModulePower::ModulePower(const std::string &name, unsigned int operationsNumber,
 
 void ModulePower::update(unsigned int operation, std::vector<unsigned int> values) {
     values.insert(values.begin(),operation);
-    std::cout << operation << std::endl;
     unsigned int toggleTotal = 0;
     for (int i = 1; i < values.size(); i++){
         int toggle = countToggle(variables.at(i), values.at(i));

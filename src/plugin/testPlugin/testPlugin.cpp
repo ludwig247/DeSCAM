@@ -46,8 +46,8 @@ std::map<std::string, std::string> testPlugin::printModel(Model *node) {
             std::cout << loc.getObject() << v.first << std::endl;
         }*/
 
-        /*for (auto v : opStmt){
-            std::cout << v.first << " " << v.second.getObject() << " " << v.second.getRowStartNumber() << std::endl;
+        /*for (auto v : ops){
+            std::cout << v << std::endl;
         }*/
 
 
@@ -179,6 +179,7 @@ void testPlugin::findOpStmt(FSM *node) {
     for (auto state : node->getStateMap()){
         if (state.second->isInit())  {
             for (auto op : state.second->getOutgoingOperationsList()){
+                ops.push_back(op->getId());
                 for (auto st : op->getStatementsList()){
                     if (NodePeekVisitor::nodePeekAssignment(st) != nullptr){
                         vars.insert(PrintStmt::toString(NodePeekVisitor::nodePeekAssignment(st)->getLhs()));
@@ -190,20 +191,20 @@ void testPlugin::findOpStmt(FSM *node) {
         }
         for (auto op : state.second->getOutgoingOperationsList()){
             if (op->IsWait()) continue;
-            if (!(op->getState()->isInit())){
+            if (!(op->getState()->isInit())) {
                 bool flagif = false;
                 bool flagset = false;
-                for (auto it = op->getStatementsList().rbegin(); it != op->getStatementsList().rend();it++){
+                for (auto it = op->getStatementsList().rbegin(); it != op->getStatementsList().rend(); it++) {
                     auto st = *it;
-                    if (NodePeekVisitor::nodePeekIf(st)!= nullptr) {
+                    if (NodePeekVisitor::nodePeekIf(st) != nullptr) {
                         flagif = true;
-                    } else if (flagif){
-                        opStmt.insert(std::make_pair(op->getId(),st->getStmtInfo()));
+                    } else if (flagif) {
+                        opStmt.insert(std::make_pair(op->getId(), st->getStmtInfo()));
                         flagset = true;
                         break;
                     }
                 }
-                if (!flagset) opStmt.insert(std::make_pair(op->getId(),state.second->GetLocationInfo()));
+                if (!flagset) opStmt.insert(std::make_pair(op->getId(), state.second->GetLocationInfo()));
             }
             ops.push_back(op->getId());
         }
@@ -212,21 +213,22 @@ void testPlugin::findOpStmt(FSM *node) {
 }
 
 void testPlugin::setStr(std::set<std::string> vars) {
-    bool flag = false;
+    bool flag1 = false;
+    bool flag2 = false;
     opStr = "{";
     varStr = "{";
     for (auto var : vars){
-        if (flag) varStr += (", " + var);
+        if (flag1) varStr += (", " + var);
         else {
             varStr += var;
-            flag = true;
+            flag1 = true;
         }
     }
     for (auto var : ops){
-        if (flag) varStr += (", " + std::to_string(var));
+        if (flag2) opStr += (", " + std::to_string(var));
         else {
-            varStr += std::to_string(var);
-            flag = true;
+            opStr += std::to_string(var);
+            flag2 = true;
         }
     }
     varStr += "}";

@@ -96,7 +96,7 @@ unsigned int originState, operation;
 
 
 void ISA::run() {
-PowerEstimator::getInstance().initialize(name(), 14, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().initialize(name(), {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
 operation = 0;
 aluOp1 = 0; aluOp2 = 0; aluResult = 0; encodedInstr = 0; fromMemoryData.loadedData = 0; memoryAccess.addrIn = 0; memoryAccess.dataIn = 0; memoryAccess.mask = MT_X; memoryAccess.req = ME_X; nextphase = execute_PH; pcReg = 0; phase = execute_PH; regfile.reg_file_01 = 0; regfile.reg_file_02 = 0; regfile.reg_file_03 = 0; regfile.reg_file_04 = 0; regfile.reg_file_05 = 0; regfile.reg_file_06 = 0; regfile.reg_file_07 = 0; regfile.reg_file_08 = 0; regfile.reg_file_09 = 0; regfile.reg_file_10 = 0; regfile.reg_file_11 = 0; regfile.reg_file_12 = 0; regfile.reg_file_13 = 0; regfile.reg_file_14 = 0; regfile.reg_file_15 = 0; regfile.reg_file_16 = 0; regfile.reg_file_17 = 0; regfile.reg_file_18 = 0; regfile.reg_file_19 = 0; regfile.reg_file_20 = 0; regfile.reg_file_21 = 0; regfile.reg_file_22 = 0; regfile.reg_file_23 = 0; regfile.reg_file_24 = 0; regfile.reg_file_25 = 0; regfile.reg_file_26 = 0; regfile.reg_file_27 = 0; regfile.reg_file_28 = 0; regfile.reg_file_29 = 0; regfile.reg_file_30 = 0; regfile.reg_file_31 = 0; regfileWrite.dst = 0; regfileWrite.dstData = 0; 
     nextphase = Phases::fetch_PH;
@@ -122,11 +122,11 @@ if (originState == 6) if ((phase == fetch_PH)) operation = 14;
             memoryAccess.addrIn = pcReg;
             memoryAccess.dataIn = 0;    // not relevant
 
-PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().update(name(), operation, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
             toMemoryPort->write(memoryAccess); //Send request to memory
 originState = 1;
 if (originState == 1) operation = 1;
-PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().update(name(), operation, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
             fromMemoryPort->read(fromMemoryData); //Read encoded instruction from memory
 originState = 2;
 
@@ -217,13 +217,13 @@ originState = 2;
                 memoryAccess.addrIn = aluResult; // Set address (getALUresult result) for stores
                 memoryAccess.dataIn = readRegfile(getRs2Addr(encodedInstr), regfile); // Set data for stores, rs2 = source for store
 
-PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().update(name(), operation, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
                 toMemoryPort->write(memoryAccess); // Request store
 originState = 3;
 if (originState == 3) operation = 11;
 
                 // Store done
-PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().update(name(), operation, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
                 fromMemoryPort->read(fromMemoryData); //Fixme: Why do we need this read? For store a write should be sufficient
 originState = 4;
 
@@ -311,13 +311,13 @@ originState = 4;
                 regfileWrite.dst = getRdAddr(encodedInstr);
 
                 // Request load
-PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().update(name(), operation, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
                 toMemoryPort->write(memoryAccess);
 originState = 5;
 if (originState == 5) operation = 13;
 
                 // Load done
-PowerEstimator::getInstance().update(name(), operation, {aluOp1, aluOp2, aluResult, encodedInstr, fromMemoryData.loadedData, memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, nextphase, pcReg, phase, regfile.reg_file_01, regfile.reg_file_02, regfile.reg_file_03, regfile.reg_file_04, regfile.reg_file_05, regfile.reg_file_06, regfile.reg_file_07, regfile.reg_file_08, regfile.reg_file_09, regfile.reg_file_10, regfile.reg_file_11, regfile.reg_file_12, regfile.reg_file_13, regfile.reg_file_14, regfile.reg_file_15, regfile.reg_file_16, regfile.reg_file_17, regfile.reg_file_18, regfile.reg_file_19, regfile.reg_file_20, regfile.reg_file_21, regfile.reg_file_22, regfile.reg_file_23, regfile.reg_file_24, regfile.reg_file_25, regfile.reg_file_26, regfile.reg_file_27, regfile.reg_file_28, regfile.reg_file_29, regfile.reg_file_30, regfile.reg_file_31, regfileWrite.dst, regfileWrite.dstData});
+PowerEstimator::getInstance().update(name(), operation, {encodedInstr,  memoryAccess.addrIn, memoryAccess.dataIn, memoryAccess.mask, memoryAccess.req, pcReg, regfileWrite.dst, regfileWrite.dstData});
                 fromMemoryPort->read(fromMemoryData);
 originState = 6;
 
