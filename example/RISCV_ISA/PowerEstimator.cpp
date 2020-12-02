@@ -100,7 +100,8 @@ void PowerEstimator::displayResults2(const std::string &testName) {
     std::ofstream logFile;
 
     for (auto module: moduleMap){
-        ss << module.first << std::endl;
+        int totalOp = 0, totalTog = 0;
+        ss << "Module name: " << module.first << std::endl;
         ss << "Operation \tNumber \tToggle" << std::endl;
         for (auto op: module.second.getOperationMap()){
             int tot = 0;
@@ -109,12 +110,17 @@ void PowerEstimator::displayResults2(const std::string &testName) {
                 //std::cout << tog << " ";
                 tot += tog;
             }
-            //std::cout << std::endl;
-            ss << op.first << "\t\t\t" << op.second.size() << "\t\t" << tot << std::endl;
+            totalOp += op.second.size();
+            totalTog += tot;
+            ss << op.first << "\t\t" << op.second.size() << "\t" << tot << std::endl;
         }
+        ss << "Total \t\t" << totalOp << " \t" << totalTog << std::endl << std::endl;
     }
 
     std::cout << ss.str();
+    logFile.open("Log_files/" + testName + ".txt");
+    logFile << ss.str();
+    logFile.close();
 
 }
 
