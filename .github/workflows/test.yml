@@ -1,0 +1,36 @@
+name: DESCAM-BUILD
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu-18.04]
+    steps:
+    - uses: actions/checkout@v1
+    - name: unzip
+      run: sh install/github/install_unzip.sh
+    - name: systemc
+      run: sh install/github/install_systemc.sh
+    - name: gtest
+      run: sh install/github/install_gtest.sh
+    - name: z3
+      run: sh install/github/install_z3.sh
+    - name: clang
+      run: sh install/github/install_clang.sh
+    - name: move files
+      run: sh install/github/install_move.sh
+    - name: descam
+      run: sh install/github/install_descam.sh
+    - name: run_tests
+      run: sh install/github/install_run_tests.sh
+    - name: cleanup
+      run: sh install/github/install_cleanup.sh
+
+
+
+
+
